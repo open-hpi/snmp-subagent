@@ -6,4 +6,4 @@ saHpiHotSwapResetState - not sure if the fourht state - resetDeassert- is allowe
 Replace in set_action 'SNMP_ERR_GENERR' with SNMP_ERR_INCONSISTENTVALUE
 Check all Manufacture ID ('long') use 'htonl'
 The Event row might be shortnened? Perhaps have the OID to the resource, and some of the information?
-
+In the EVENT code - add DEBUGMSGTL for the SET mechanism
