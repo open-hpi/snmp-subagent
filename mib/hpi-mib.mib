@@ -1363,9 +1363,9 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
                
         saHpiDomainAlarmCondMid               Unsigned32,
         
-        saHpiDomainAlarmCondDomainAlarmaTextType      SaHpiTextType,
-        saHpiDomainAlarmCondDomainAlarmaTextLanguage  SaHpiTextLanguage,
-        saHpiDomainAlarmCondDomainAlarma              SaHpiText,
+        saHpiDomainAlarmCondTextType      SaHpiTextType,
+        saHpiDomainAlarmCondTextLanguage  SaHpiTextLanguage,
+        saHpiDomainAlarmCondText             SaHpiText,
         saHpiDomainAlarmDelete                        RowStatus
         }
         
@@ -1535,7 +1535,7 @@ saHpiDomainAlarmCondMid OBJECT-TYPE
         required when saHpiDomainAlarmCondStatusCondType is oem(3)."
         ::= {saHpiDomainAlarmEntry 10}
         
-saHpiDomainAlarmCondDomainAlarmaTextType OBJECT-TYPE 
+saHpiDomainAlarmCondTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-write
         STATUS          current
@@ -1543,7 +1543,7 @@ saHpiDomainAlarmCondDomainAlarmaTextType OBJECT-TYPE
         condition. For more details, see textual definition"
         ::= {saHpiDomainAlarmEntry 11}
 
-saHpiDomainAlarmCondDomainAlarmaTextLanguage OBJECT-TYPE
+saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
@@ -1552,7 +1552,7 @@ saHpiDomainAlarmCondDomainAlarmaTextLanguage OBJECT-TYPE
         condition. For more details, see textual definition"
         ::= {saHpiDomainAlarmEntry 12}
 
-saHpiDomainAlarmCondDomainAlarma      OBJECT-TYPE
+saHpiDomainAlarmCondText OBJECT-TYPE
         SYNTAX          SaHpiText
         MAX-ACCESS      read-write
         STATUS          current
@@ -7004,9 +7004,9 @@ saHpiDomainAlarmGroup OBJECT-GROUP
 		saHpiDomainAlarmCondEventState,
 		saHpiDomainAlarmCondNameValue,
 		saHpiDomainAlarmCondMid,
-		saHpiDomainAlarmCondDomainAlarmaTextType,
-		saHpiDomainAlarmCondDomainAlarmaTextLanguage,
-		saHpiDomainAlarmCondDomainAlarma,
+		saHpiDomainAlarmCondTextType,
+		saHpiDomainAlarmCondTextLanguage,
+		saHpiDomainAlarmCondText,
 		saHpiDomainAlarmDelete
 	}
 	STATUS	current
