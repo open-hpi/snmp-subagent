@@ -934,16 +934,14 @@ SaHpiEventEntry ::= SEQUENCE {
 
 	saHpiEventSensorOptionalData	Unsigned32,
 
-	saHpiEventSensorTriggerReadingType	      Unsigned32,
+	saHpiEventSensorTriggerReadingType	      INTEGER,
 	saHpiEventSensorTriggerReadingRaw	      Unsigned32,
-	saHpiEventSensorTriggerReadingInterpretedType INTEGER,
 	saHpiEventSensorTriggerReadingInterpreted   OCTET STRING,
 	saHpiEventSensorTriggerReadingEventStateFlag INTEGER,
 	saHpiEventSensorTriggerReadingEventState    OCTET STRING,
 
-	saHpiEventSensorTriggerThresholdType	      Unsigned32,
+	saHpiEventSensorTriggerThresholdType	      INTEGER,
 	saHpiEventSensorTriggerThresholdRaw	      Unsigned32,
-	saHpiEventSensorTriggerThresholdInterpretedType INTEGER,
 	saHpiEventSensorTriggerThresholdInterpreted OCTET STRING,
 	saHpiEventSensorTriggerThresholdEventStateFlag  INTEGER,
 	saHpiEventSensorTriggerThresholdEventState  OCTET STRING,
@@ -1243,7 +1241,19 @@ saHpiEventSensorOptionalData OBJECT-TYPE
 
 
 saHpiEventSensorTriggerReadingType OBJECT-TYPE
-        SYNTAX          Unsigned32(1..4)
+        SYNTAX          INTEGER {
+				undefined(0),
+
+				raw(2),
+				interpreted(3),
+				eventState(5),
+
+				rawAndInterpreted(4),
+				rawAndEventState(6),
+				rawAndInterpretedAndEventState(8),
+
+				interpretedAndEventState(7)
+			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -1254,14 +1264,7 @@ saHpiEventSensorTriggerReadingType OBJECT-TYPE
 	value is the raw value converted in to a usable format 
 	(such as RPM). The interpreted value can be calculated by 
 	the HPI implementation using the sensor factors or by 
-	another OEM means.
-
-	The bit-flag that determines which date is active is: 
-
-	RAW         0x01
- 	INTERPRETED 0x02
- 	EVENT_STATE 0x04
-	"
+	another OEM means.  "
         ::= {saHpiEventEntry 11}
 
 saHpiEventSensorTriggerReadingRaw OBJECT-TYPE
@@ -1273,23 +1276,6 @@ saHpiEventSensorTriggerReadingRaw OBJECT-TYPE
 	contains the raw value of the sensor as unsigned 32-bit integer"
 	::= {saHpiEventEntry 12}
 
-saHpiEventSensorTriggerReadingInterpretedType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				uint8(1),
-            			uint16(2),
-            			uint32(3),
-            			int8(4),
-            			int16(5),
-            			int32(6),
-            			float32(7),
-            			buffer(8) 
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiEventTriggerReadingType = interpreted(2) then this object
-	contains the type that saHpiEventTriggerReadingInterpreted is in."
-	::= {saHpiEventEntry 13}
 
 saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -1297,11 +1283,9 @@ saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
 	If saHpiEventTriggerReadingType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  
+	contains the Value of interpreted sensor reading.  "
 	
-	Note that interpreted value must be used within context 
-	of type of interpreted value."
-	::={saHpiEventEntry 14}
+	::={saHpiEventEntry 13}
 
 
 saHpiEventSensorTriggerReadingEventStateFlag OBJECT-TYPE
@@ -1320,7 +1304,7 @@ saHpiEventSensorTriggerReadingEventStateFlag OBJECT-TYPE
 	scanning is enabled and if events are enabled. If events 
 	are enabled, the structure will have valid data for the 
 	outstanding sensor event states.  "
-        ::= {saHpiEventEntry 15}
+        ::= {saHpiEventEntry 14}
 
 saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
 	SYNTAX		OCTET STRING
@@ -1402,10 +1386,22 @@ saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-        ::= {saHpiEventEntry 16}
+        ::= {saHpiEventEntry 15}
 
 saHpiEventSensorTriggerThresholdType OBJECT-TYPE
-        SYNTAX          Unsigned32(1..4)
+        SYNTAX          INTEGER {
+				undefined(0),
+
+				raw(2),
+				interpreted(3),
+				eventState(5),
+
+				rawAndInterpreted(4),
+				rawAndEventState(6),
+				rawAndInterpretedAndEventState(8),
+
+				interpretedAndEventState(7)
+			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -1416,15 +1412,8 @@ saHpiEventSensorTriggerThresholdType OBJECT-TYPE
 	value is the raw value converted in to a usable format 
 	(such as RPM). The interpreted value can be calculated by 
 	the HPI implementation using the sensor factors or by 
-	another OEM means.
-
-	The bit-flag that determines which date is active is: 
-
-	RAW         0x01
- 	INTERPRETED 0x02
- 	EVENT_STATE 0x04
-	"
-        ::= {saHpiEventEntry 17}
+	another OEM means.  "
+        ::= {saHpiEventEntry 16}
 
 saHpiEventSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -1433,25 +1422,7 @@ saHpiEventSensorTriggerThresholdRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiEventTriggerThresholdType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiEventEntry 18}
-
-saHpiEventSensorTriggerThresholdInterpretedType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				uint8(1),
-            			uint16(2),
-            			uint32(3),
-            			int8(4),
-            			int16(5),
-            			int32(6),
-            			float32(7),
-            			buffer(8) 
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiEventTriggerThresholdType = interpreted(2) then this object
-	contains the type that saHpiEventTriggerReadingInterpreted is in."
-	::= {saHpiEventEntry 19}
+	::= {saHpiEventEntry 17}
 
 saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -1459,11 +1430,8 @@ saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
 	If saHpiEventTriggerThresholdType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  
-	
-	Note that interpreted value must be used within context 
-	of type of interpreted value."
-	::={saHpiEventEntry 20}
+	contains the Value of interpreted sensor reading. " 
+	::={saHpiEventEntry 18}
 
 
 saHpiEventSensorTriggerThresholdEventStateFlag OBJECT-TYPE
@@ -1483,7 +1451,7 @@ saHpiEventSensorTriggerThresholdEventStateFlag OBJECT-TYPE
 	scanning is enabled and if events are enabled. If events 
 	are enabled, the structure will have valid data for the 
 	outstanding sensor event states.  "
-        ::= {saHpiEventEntry 21}
+        ::= {saHpiEventEntry 19}
 
 saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
         SYNTAX          OCTET STRING
@@ -1566,7 +1534,7 @@ saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-	::= {saHpiEventEntry 22}
+	::= {saHpiEventEntry 20}
 
 saHpiEventSensorPreviousState OBJECT-TYPE
 	SYNTAX		OCTET STRING
@@ -1648,21 +1616,21 @@ saHpiEventSensorPreviousState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-	::= {saHpiEventEntry 23}
+	::= {saHpiEventEntry 21}
 
 saHpiEventSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor OEM event information "
-        ::= {saHpiEventEntry 24}
+        ::= {saHpiEventEntry 22}
 
 saHpiEventSensorSpecific OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor specific information "
-        ::= {saHpiEventEntry 25}
+        ::= {saHpiEventEntry 23}
 
 
 saHpiEventHotSwapState OBJECT-TYPE
@@ -1678,7 +1646,7 @@ saHpiEventHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Current state of the hot-swap device."
-        ::= {saHpiEventEntry 26}
+        ::= {saHpiEventEntry 24}
 
 saHpiEventPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
@@ -1693,14 +1661,14 @@ saHpiEventPreviousHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Previous state of the hot-swap device. "
-        ::= {saHpiEventEntry 27}
+        ::= {saHpiEventEntry 25}
 
 saHpiEventWatchdogNum OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The Watchdog number. "
-        ::= {saHpiEventEntry 28}
+        ::= {saHpiEventEntry 26}
 
 saHpiEventWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
@@ -1716,7 +1684,7 @@ saHpiEventWatchdogAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-        ::= {saHpiEventEntry 29}
+        ::= {saHpiEventEntry 27}
 
 saHpiEventWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -1732,7 +1700,7 @@ saHpiEventWatchdogPreTimerAction OBJECT-TYPE
         DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
  			triggered by a watchdog pre-timer event. The actual meaning of these
  			operations may differ depending on the hardware architecture. "
-        ::= {saHpiEventEntry 30}
+        ::= {saHpiEventEntry 28}
 
 saHpiEventWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -1756,7 +1724,7 @@ saHpiEventWatchdogUse OBJECT-TYPE
 			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-        ::= {saHpiEventEntry 31}
+        ::= {saHpiEventEntry 29}
 
 saHpiEventOemManufacturerIdT OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -1778,14 +1746,14 @@ saHpiEventOemManufacturerIdT OBJECT-TYPE
 			     http:www.iana.orgcgi-binenterprise.pl
 			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
-        ::= {saHpiEventEntry 32}
+        ::= {saHpiEventEntry 30}
 
 saHpiEventOemEventData OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
-        ::= {saHpiEventEntry 33}
+        ::= {saHpiEventEntry 31}
 
 
 saHpiEventUserEventData OBJECT-TYPE
@@ -1795,7 +1763,7 @@ saHpiEventUserEventData OBJECT-TYPE
         DESCRIPTION     "User events may be used for storing custom events 
 			created by the application  middleware;
 			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
-        ::= {saHpiEventEntry 34}
+        ::= {saHpiEventEntry 32}
 
 saHpiEventDelete OBJECT-TYPE
 	SYNTAX		RowStatus
@@ -1803,7 +1771,7 @@ saHpiEventDelete OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiEventEntry 35}
+	::= {saHpiEventEntry 33}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -1961,16 +1929,14 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 
 	saHpiSystemEventLogSensorOptionalData	Unsigned32,
 
-	saHpiSystemEventLogSensorTriggerReadingType	      Unsigned32,
+	saHpiSystemEventLogSensorTriggerReadingType	      INTEGER,
 	saHpiSystemEventLogSensorTriggerReadingRaw	      Unsigned32,
-	saHpiSystemEventLogSensorTriggerReadingInterpretedType INTEGER,
 	saHpiSystemEventLogSensorTriggerReadingInterpreted   OCTET STRING,
 	saHpiSystemEventLogSensorTriggerReadingEventStateFlag   INTEGER, 
 	saHpiSystemEventLogSensorTriggerReadingEventState    OCTET STRING,
 
-	saHpiSystemEventLogSensorTriggerThresholdType	      Unsigned32,
+	saHpiSystemEventLogSensorTriggerThresholdType	      INTEGER,
 	saHpiSystemEventLogSensorTriggerThresholdRaw	      Unsigned32,
-	saHpiSystemEventLogSensorTriggerThresholdInterpretedType INTEGER,
 	saHpiSystemEventLogSensorTriggerThresholdInterpreted OCTET STRING,
 	saHpiSystemEventLogSensorTriggerThresholdEventStateFlag  INTEGER,
 	saHpiSystemEventLogSensorTriggerThresholdEventState  OCTET STRING,
@@ -2300,7 +2266,18 @@ saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
 	::= {saHpiSystemEventLogEntry 11}
 
 saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
-        SYNTAX          Unsigned32(1..7)
+        SYNTAX          INTEGER {
+				undefined(0),
+				enabledEvents(129),
+				enabledScan(65),
+				busy(33),
+			
+				busyEnabledScan(97),
+				busyEnabledEvent(257),
+				busyEnabledScanEvent(225),
+
+				enabledEventsScan(289)
+			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -2311,14 +2288,7 @@ saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
 	value is the raw value converted in to a usable format 
 	(such as RPM). The interpreted value can be calculated by 
 	the HPI implementation using the sensor factors or by 
-	another OEM means.
-
-	The bit-flag that determines which date is active is: 
-
-	RAW         0x01
- 	INTERPRETED 0x02
- 	EVENT_STATE 0x04
-	"
+	another OEM means.  "
 	::= {saHpiSystemEventLogEntry 12}
 
 saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
@@ -2330,23 +2300,6 @@ saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
 	contains the raw value of the sensor as unsigned 32-bit integer"
 	::= {saHpiSystemEventLogEntry 13}
 
-saHpiSystemEventLogSensorTriggerReadingInterpretedType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				uint8(1),
-            			uint16(2),
-            			uint32(3),
-            			int8(4),
-            			int16(5),
-            			int32(6),
-            			float32(7),
-            			buffer(8) 
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerReadingType = interpreted(2) then this object
-	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	::= {saHpiSystemEventLogEntry 14}
 
 saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -2354,11 +2307,8 @@ saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerReadingType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  
-	
-	Note that interpreted value must be used within context 
-	of type of interpreted value."
-	::= {saHpiSystemEventLogEntry 15}
+	contains the Value of interpreted sensor reading.  "
+	::= {saHpiSystemEventLogEntry 14}
 
 saHpiSystemEventLogSensorTriggerReadingEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2376,7 +2326,7 @@ saHpiSystemEventLogSensorTriggerReadingEventStateFlag OBJECT-TYPE
 	scanning is enabled and if events are enabled. If events 
 	are enabled, the structure will have valid data for the 
 	outstanding sensor event states.  "
-	 ::= {saHpiSystemEventLogEntry 16}
+	 ::= {saHpiSystemEventLogEntry 15}
 
 saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
 	SYNTAX		OCTET STRING
@@ -2458,10 +2408,21 @@ saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 17}
+	 ::= {saHpiSystemEventLogEntry 16}
 
 saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
-        SYNTAX          Unsigned32(1..7)
+        SYNTAX         INTEGER {
+				undefined(0),
+				enabledEvents(129),
+				enabledScan(65),
+				busy(33),
+			
+				busyEnabledScan(97),
+				busyEnabledEvent(257),
+				busyEnabledScanEvent(225),
+
+				enabledEventsScan(289)
+			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -2472,15 +2433,8 @@ saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
 	value is the raw value converted in to a usable format 
 	(such as RPM). The interpreted value can be calculated by 
 	the HPI implementation using the sensor factors or by 
-	another OEM means.
-
-	The bit-flag that determines which date is active is: 
-
-	RAW         0x01
- 	INTERPRETED 0x02
- 	EVENT_STATE 0x04
-	"
-	 ::= {saHpiSystemEventLogEntry 18}
+	another OEM means.  "
+	 ::= {saHpiSystemEventLogEntry 17}
 
 saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -2489,25 +2443,7 @@ saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	 ::= {saHpiSystemEventLogEntry 19}
-
-saHpiSystemEventLogSensorTriggerThresholdInterpretedType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				uint8(1),
-            			uint16(2),
-            			uint32(3),
-            			int8(4),
-            			int16(5),
-            			int32(6),
-            			float32(7),
-            			buffer(8) 
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerThresholdType = interpreted(2) then this object
-	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	 ::= {saHpiSystemEventLogEntry 20}
+	 ::= {saHpiSystemEventLogEntry 18}
 
 saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -2515,11 +2451,8 @@ saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  
-	
-	Note that interpreted value must be used within context 
-	of type of interpreted value."
-	 ::={saHpiSystemEventLogEntry 21}
+	contains the Value of interpreted sensor reading.  "
+	 ::={saHpiSystemEventLogEntry 19}
 
 
 saHpiSystemEventLogSensorTriggerThresholdEventStateFlag OBJECT-TYPE
@@ -2539,7 +2472,7 @@ saHpiSystemEventLogSensorTriggerThresholdEventStateFlag OBJECT-TYPE
 	scanning is enabled and if events are enabled. If events 
 	are enabled, the structure will have valid data for the 
 	outstanding sensor event states.  "
-	 ::= {saHpiSystemEventLogEntry 22}
+	 ::= {saHpiSystemEventLogEntry 20}
 saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
@@ -2621,7 +2554,7 @@ saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 23}
+	 ::= {saHpiSystemEventLogEntry 21}
 
 saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
 	SYNTAX		OCTET STRING
@@ -2703,21 +2636,21 @@ saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
 		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 24}
+	 ::= {saHpiSystemEventLogEntry 22}
 
 saHpiSystemEventLogSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor OEM event information "
-	 ::= {saHpiSystemEventLogEntry 25}
+	 ::= {saHpiSystemEventLogEntry 23}
 
 saHpiSystemEventLogSensorSpecific OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor specific information "
-	 ::= {saHpiSystemEventLogEntry 26}
+	 ::= {saHpiSystemEventLogEntry 24}
 
 
 saHpiSystemEventLogHotSwapState OBJECT-TYPE
@@ -2733,7 +2666,7 @@ saHpiSystemEventLogHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Current state of the hot-swap device."
-	 ::= {saHpiSystemEventLogEntry 27}
+	 ::= {saHpiSystemEventLogEntry 25}
 
 saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
@@ -2748,14 +2681,14 @@ saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Previous state of the hot-swap device. "
-	 ::= {saHpiSystemEventLogEntry 28}
+	 ::= {saHpiSystemEventLogEntry 26}
 
 saHpiSystemEventLogWatchdogNum OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The Watchdog number. "
-	 ::= {saHpiSystemEventLogEntry 29}
+	 ::= {saHpiSystemEventLogEntry 27}
 
 saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
@@ -2771,7 +2704,7 @@ saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-	 ::= {saHpiSystemEventLogEntry 30}
+	 ::= {saHpiSystemEventLogEntry 28}
 
 saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2787,7 +2720,7 @@ saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
  			triggered by a watchdog pre-timer event. The actual meaning of these
  			operations may differ depending on the hardware architecture. "
-	 ::= {saHpiSystemEventLogEntry 31}
+	 ::= {saHpiSystemEventLogEntry 29}
 
 saHpiSystemEventLogWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2811,7 +2744,7 @@ saHpiSystemEventLogWatchdogUse OBJECT-TYPE
 			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-	 ::= {saHpiSystemEventLogEntry 32}
+	 ::= {saHpiSystemEventLogEntry 30}
 
 saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -2833,14 +2766,14 @@ saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
 			     http:www.iana.orgcgi-binenterprise.pl
 			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
-	 ::= {saHpiSystemEventLogEntry 33}
+	 ::= {saHpiSystemEventLogEntry 31}
 
 saHpiSystemEventLogOemEventData OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
-	 ::= {saHpiSystemEventLogEntry 34}
+	 ::= {saHpiSystemEventLogEntry 32}
 
 
 saHpiSystemEventLogUserEventData OBJECT-TYPE
@@ -2850,7 +2783,7 @@ saHpiSystemEventLogUserEventData OBJECT-TYPE
         DESCRIPTION     "User events may be used for storing custom events 
 			created by the application  middleware;
 			eg. when injecting events into the event log using SaHpiSystemEventLogLogEntryAdd().  "
-	 ::= {saHpiSystemEventLogEntry 35}
+	 ::= {saHpiSystemEventLogEntry 33}
 
 saHpiSystemEventLogDelete OBJECT-TYPE
 	SYNTAX		RowStatus
@@ -2858,7 +2791,7 @@ saHpiSystemEventLogDelete OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiSystemEventLogEntry 36}
+	::= {saHpiSystemEventLogEntry 34}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -7563,13 +7496,11 @@ saHpiEventGroup OBJECT-GROUP
 		saHpiEventSensorOptionalData,
 		saHpiEventSensorTriggerReadingType,
 		saHpiEventSensorTriggerReadingRaw,
-		saHpiEventSensorTriggerReadingInterpretedType,
 		saHpiEventSensorTriggerReadingInterpreted,
 		saHpiEventSensorTriggerReadingEventStateFlag,
 		saHpiEventSensorTriggerReadingEventState,
 		saHpiEventSensorTriggerThresholdType,
 		saHpiEventSensorTriggerThresholdRaw,
-		saHpiEventSensorTriggerThresholdInterpretedType,
 		saHpiEventSensorTriggerThresholdInterpreted,
 		saHpiEventSensorTriggerThresholdEventStateFlag,
 		saHpiEventSensorTriggerThresholdEventState,
@@ -7615,13 +7546,10 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogSensorOptionalData,
 		saHpiSystemEventLogSensorTriggerReadingType,
 		saHpiSystemEventLogSensorTriggerReadingRaw,
-		saHpiSystemEventLogSensorTriggerReadingInterpretedType,
 		saHpiSystemEventLogSensorTriggerReadingInterpreted,
 		saHpiSystemEventLogSensorTriggerReadingEventStateFlag,
 		saHpiSystemEventLogSensorTriggerReadingEventState,
-		saHpiSystemEventLogSensorTriggerThresholdType,
 		saHpiSystemEventLogSensorTriggerThresholdRaw,
-		saHpiSystemEventLogSensorTriggerThresholdInterpretedType,
 		saHpiSystemEventLogSensorTriggerThresholdInterpreted,
 		saHpiSystemEventLogSensorTriggerThresholdEventStateFlag,
 		saHpiSystemEventLogSensorTriggerThresholdEventState,
