@@ -7149,8 +7149,8 @@ saHpiSensorThdPosHysteresisTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdPosHysteresisEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining hysteresis status at the
-        positive upper bound for a given sensor"
+        DESCRIPTION     "A table definining the positive going hysteresis 
+	upper bound."
         ::= {hpiSensor 13}
 
 saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
@@ -7230,8 +7230,8 @@ saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdNegHysteresisEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining hysteresis values at the
-        negative lower bound for a given sensor."
+        DESCRIPTION     "A table definining the negative going hysteresis
+	lower bound."
         ::= {hpiSensor 14}
 
 saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
