@@ -1088,7 +1088,7 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
         REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 163."
+        "Derived from SAI-HPI-B.01.01 section 8.4."
         SYNTAX          INTEGER {
                                 undefined(0),  
                                 int64(1),
@@ -1109,7 +1109,7 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 	evaluated in the context of SaHpiSensorReadingType textual convention."
 
         REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 173."
+        "Derived from SAI-HPI-B.01.01 section 8.4."
         SYNTAX          OCTET STRING(SIZE(0..255))
         
 SaHpiGuid ::= TEXTUAL-CONVENTION
@@ -7775,11 +7775,19 @@ saHpiSensorRangeFlags   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines which range flags the sensor supports. They
-        can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
-        nothing if the sensor does not support any ranges.
-	If more than one range is supported then the strings
-	tokens are comma (',') or semicolon (';') delimited"
+        "Defines which range flags the sensor supports. The 
+	string tokens are 
+		MIN, 
+		MAX, 
+		NOMINAL, 
+		NORMAL_MAX, 
+		NORMAL_MIN, 
+	or nothing (NULL) if the sensor does not support any 
+	ranges. If more than one range is supported then the 
+	strings tokens are comma (',') or semicolon (';') 
+	delimited"
+	REFERENCE
+	"SAI-HPI-B.01.01 section 8.5."
         ::= {saHpiSensorEntry 13}
         
 saHpiSensorAccuracyFactor     OBJECT-TYPE
