@@ -627,7 +627,39 @@ SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 				uncorrectableErrors(91)
 			} 
 
---
+SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION	
+	"These definitions list the available data types that can be
+	used for sensor readings. "
+	SYNTAX		INTEGER	{
+			      undefined(0),  
+			      int64(1),
+			      uint64(2),
+			      float64(3),
+			      buffer(4)    
+			}
+			
+SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     
+	"Sensor Reading Type
+
+	These definitions list the available data types that can be
+	used for sensor readings. 
+
+	SAHPI_SENSOR_READING_TYPE_INT64
+		Represented as a string.
+	SAHPI_SENSOR_READING_TYPE_UINT64,
+		Represented as a string.
+	SAHPI_SENSOR_READING_TYPE_FLOAT64,
+		Represented as a string.
+	SAHPI_SENSOR_READING_TYPE_BUFFER  
+		Represented as a 32 byte array. The format of the buffer is 
+		implementation-specific. Sensors that use this reading type
+		may not have thresholds that are settable or readable."
+        SYNTAX	OCTET STRING(SIZE(0..255))
+	
 -- DomainInfo, DRT, DAT, and RPT Entry
 --
 
@@ -4326,8 +4358,8 @@ SaHpiSensorEntry ::= SEQUENCE {
 --	saHpiSensorReadingNominal		OCTET STRING,
 --	saHpiSensorReadingNormalMax		OCTET STRING,
 --	saHpiSensorReadingNormalMn		OCTET STRING,
-
---	saHpiAccuracyFactor
+	
+	saHpiAccuracyFactor			OCTET STRING,
 	
 	saHpiSensorRDR				RowPointer
 	}
@@ -4637,7 +4669,7 @@ saHpiSensorPercentage OBJECT-TYPE
         ::= {saHpiSensorEntry 12}
 
 saHpiSensorRangeFlags 	OBJECT-TYPE
-        SYNTAX          OCTET STRING
+        SYNTAX          OCTET STRING(SIZE(0..255))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
@@ -4645,14 +4677,21 @@ saHpiSensorRangeFlags 	OBJECT-TYPE
         can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
         nothing if the sensor does not support any ranges."
         ::= {saHpiSensorEntry 13}
-
+	
+saHpiAccuracyFactor	OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+        ""
+        ::= {saHpiSensorEntry 14}
 
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 14}
+	::= {saHpiSensorEntry 15}
 
 --
 -- /*******************************************************************************
@@ -4683,179 +4722,36 @@ saHpiSensorReadingCurrentEntry OBJECT-TYPE
         ::= {saHpiSensorReadingCurrentTable 1}
 
 SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
-	saHpiSensorReadingCurrentValuesPresent	INTEGER,
-	saHpiSensorReadingCurrentRaw		Unsigned32,
-	saHpiSensorReadingCurrentInterpreted	OCTET STRING,
-	saHpiSensorReadingCurrentStatus		INTEGER,
-	saHpiSensorReadingCurrentEventStatus	OCTET STRING	
+	saHpiReadingCurrentIsSupported		TruthValue,
+	saHpiSensorReadingCurrentType		SaHpiSensorReadingType,	
+	saHpiSensorReadingCurrentValue	        SaHpiSensorReadingValue
 	}
 
-saHpiSensorReadingCurrentValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-
-				raw(2),
-				interpreted(3),
-				eventState(5),
-
-				rawAndInterpreted(4),
-				rawAndEventState(6),
-				rawAndInterpretedAndEventState(8),
-
-				interpretedAndEventState(7)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data."
-	REFERENCE
-	"Type derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingCurrentEntry 1}
-
-saHpiSensorReadingCurrentRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
+saHpiReadingCurrentIsSupported	OBJECT-TYPE
+        SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Raw sensor reading. For example, analog sensos  raw value is 
-	the raw value from the sensor (such as ticks per fan blade).
-	
-	This value to be completly understood, has to be read in the 
-	context of:
-	
-	 - saHpiSensorSignFormat (which defines the sign format of this 
-		value - 1's complement, unsigned ,etc),
-	 - saHpiSensorBaseUnits (which defines the base units - meters, etc),
-	 - saHpiSensorModifierUnits (modified units - seconds, etc),
-	 - saHpiSensorModifierUse (defines how modifier value is used),
-	 - saHpiSensorFactors and,
-	 - saHpiSensorFactorsLinearization.
+	"IsSupported is set when a sensor reading/threshold value is available.  
+	Otherwise, if no reading or threshold is supported, this flag is set to
+	False."
+        ::= {saHpiSensorReadingCurrentEntry 1}
 
-	"
+saHpiSensorReadingCurrentType	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingCurrentEntry 2}
 
-saHpiSensorReadingCurrentInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Interpreted reading of the sensor value. For example
-	this value can be:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingCurrentEntry 3}
-
-saHpiSensorReadingCurrentStatus OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)	
-			}
+saHpiSensorReadingCurrentValue	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION
-	"
-	The sensor status  is used to determine if sensor scanning is 
-	enabled and if events are enabled. If events are enabled, the 
-	objects will have valid data for the outstanding sensor event states.
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingCurrentEntry 4}
-	
-saHpiSensorReadingCurrentEventStatus OBJECT-TYPE
-	SYNTAX		OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event states for the sensor.
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-        ::= {saHpiSensorReadingCurrentEntry 5}
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorReadingCurrentEntry 3}
 
 saHpiSensorReadingMaxTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMaxEntry
@@ -4875,180 +4771,36 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
         ::= {saHpiSensorReadingMaxTable 1}
 
 SaHpiSensorReadingMaxEntry ::= SEQUENCE {
-	saHpiSensorReadingMaxValuesPresent	INTEGER,
-	saHpiSensorReadingMaxRaw		Unsigned32,
-	saHpiSensorReadingMaxInterpreted	OCTET STRING,
-	saHpiSensorReadingMaxStatus		INTEGER,
-	saHpiSensorReadingMaxEventStatus	OCTET STRING	
+	saHpiReadingMaxIsSupported		TruthValue,
+	saHpiSensorReadingMaxType		SaHpiSensorReadingType,	
+	saHpiSensorReadingMaxValue	        SaHpiSensorReadingValue
 	}
-
-saHpiSensorReadingMaxValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-
-				raw(2),
-				interpreted(3),
-				eventState(5),
-
-				rawAndInterpreted(4),
-				rawAndEventState(6),
-				rawAndInterpretedAndEventState(8),
-
-				interpretedAndEventState(7)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data."
-	REFERENCE
-	"Type derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMaxEntry 1}
-
-saHpiSensorReadingMaxRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
+	
+saHpiReadingMaxIsSupported	OBJECT-TYPE
+        SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Raw sensor reading. For example, analog sensos  raw value is 
-	the raw value from the sensor (such as ticks per fan blade).
-	
-	This value to be completly understood, has to be read in the 
-	context of:
-	
-	 - saHpiSensorSignFormat (which defines the sign format of this 
-		value - 1's complement, unsigned ,etc),
-	 - saHpiSensorBaseUnits (which defines the base units - meters, etc),
-	 - saHpiSensorModifierUnits (modified units - seconds, etc),
-	 - saHpiSensorModifierUse (defines how modifier value is used),
-	 - saHpiSensorFactors and,
-	 - saHpiSensorFactorsLinearization.
+	"IsSupported is set when a sensor reading/threshold value is available.  
+	Otherwise, if no reading or threshold is supported, this flag is set to
+	False."
+        ::= {saHpiSensorReadingMaxEntry 1}
 
-	"
+saHpiSensorReadingMaxType	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingMaxEntry 2}
 
-saHpiSensorReadingMaxInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Interpreted reading of the sensor value. For example
-	this value can be:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMaxEntry 3}
-
-saHpiSensorReadingMaxStatus OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)	
-			}
+saHpiSensorReadingMaxValue	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION
-	"
-	The sensor status  is used to determine if sensor scanning is 
-	enabled and if events are enabled. If events are enabled, the 
-	objects will have valid data for the outstanding sensor event states.
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMaxEntry 4}
-	
-saHpiSensorReadingMaxEventStatus OBJECT-TYPE
-	SYNTAX		OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event states for the sensor.
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-        ::= {saHpiSensorReadingMaxEntry 5}
-
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorReadingMaxEntry 3}
 
 saHpiSensorReadingMinTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMinEntry
@@ -5068,181 +4820,36 @@ saHpiSensorReadingMinEntry OBJECT-TYPE
         ::= {saHpiSensorReadingMinTable 1}
 
 SaHpiSensorReadingMinEntry ::= SEQUENCE {
-	saHpiSensorReadingMinValuesPresent	INTEGER,
-	saHpiSensorReadingMinRaw		Unsigned32,
-	saHpiSensorReadingMinInterpreted	OCTET STRING,
-	saHpiSensorReadingMinStatus		INTEGER,
-	saHpiSensorReadingMinEventStatus	OCTET STRING
+	saHpiReadingMinIsSupported		TruthValue,
+	saHpiSensorReadingMinType		SaHpiSensorReadingType,	
+	saHpiSensorReadingMinValue	        SaHpiSensorReadingValue
 	}
 
-saHpiSensorReadingMinValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-
-				raw(2),
-				interpreted(3),
-				eventState(5),
-
-				rawAndInterpreted(4),
-				rawAndEventState(6),
-				rawAndInterpretedAndEventState(8),
-
-				interpretedAndEventState(7)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data."
-	REFERENCE
-	"Type derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMinEntry 1}
-
-saHpiSensorReadingMinRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
+saHpiReadingMinIsSupported	OBJECT-TYPE
+        SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Raw sensor reading. For example, analog sensos  raw value is 
-	the raw value from the sensor (such as ticks per fan blade).
-	
-	This value to be completly understood, has to be read in the 
-	context of:
-	
-	 - saHpiSensorSignFormat (which defines the sign format of this 
-		value - 1's complement, unsigned ,etc),
-	 - saHpiSensorBaseUnits (which defines the base units - meters, etc),
-	 - saHpiSensorModifierUnits (modified units - seconds, etc),
-	 - saHpiSensorModifierUse (defines how modifier value is used),
-	 - saHpiSensorFactors and,
-	 - saHpiSensorFactorsLinearization.
+	"IsSupported is set when a sensor reading/threshold value is available.  
+	Otherwise, if no reading or threshold is supported, this flag is set to
+	False."
+        ::= {saHpiSensorReadingMinEntry 1}
 
-	"
+saHpiSensorReadingMinType	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingMinEntry 2}
 
-saHpiSensorReadingMinInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Interpreted reading of the sensor value. For example
-	this value can be:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMinEntry 3}
-
-saHpiSensorReadingMinStatus OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)			       
-			}
+saHpiSensorReadingMinValue	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION
-	"
-	The sensor status  is used to determine if sensor scanning is 
-	enabled and if events are enabled. If events are enabled, the 
-	objects will have valid data for the outstanding sensor event states.
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingMinEntry 4}
-	
-saHpiSensorReadingMinEventStatus OBJECT-TYPE
-	SYNTAX		OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event states for the sensor.
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-        ::= {saHpiSensorReadingMinEntry 5}
-
-
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorReadingMinEntry 3}
 
 saHpiSensorReadingNominalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNominalEntry
@@ -5262,179 +4869,39 @@ saHpiSensorReadingNominalEntry OBJECT-TYPE
         ::= {saHpiSensorReadingNominalTable 1}
 
 SaHpiSensorReadingNominalEntry ::= SEQUENCE {
-	saHpiSensorReadingNominalValuesPresent	INTEGER,
-	saHpiSensorReadingNominalRaw		Unsigned32,
-	saHpiSensorReadingNominalInterpreted	OCTET STRING,
-	saHpiSensorReadingNominalStatus		INTEGER,
-	saHpiSensorReadingNominalEventStatus	OCTET STRING
+	saHpiReadingNominalIsSupported		TruthValue,
+	saHpiSensorReadingNominalType		SaHpiSensorReadingType,	
+	saHpiSensorReadingNominalValue	        SaHpiSensorReadingValue
 	}
-
-saHpiSensorReadingNominalValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-
-				raw(2),
-				interpreted(3),
-				eventState(5),
-
-				rawAndInterpreted(4),
-				rawAndEventState(6),
-				rawAndInterpretedAndEventState(8),
-
-				interpretedAndEventState(7)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data."
-	REFERENCE
-	"Type derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingNominalEntry 1}
-
-saHpiSensorReadingNominalRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
+	
+saHpiReadingNominalIsSupported	OBJECT-TYPE
+        SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Raw sensor reading. For example, analog sensos  raw value is 
-	the raw value from the sensor (such as ticks per fan blade).
-	
-	This value to be completly understood, has to be read in the 
-	context of:
-	
-	 - saHpiSensorSignFormat (which defines the sign format of this 
-		value - 1's complement, unsigned ,etc),
-	 - saHpiSensorBaseUnits (which defines the base units - meters, etc),
-	 - saHpiSensorModifierUnits (modified units - seconds, etc),
-	 - saHpiSensorModifierUse (defines how modifier value is used),
-	 - saHpiSensorFactors and,
-	 - saHpiSensorFactorsLinearization.
+	"IsSupported is set when a sensor reading/threshold value is available.  
+	Otherwise, if no reading or threshold is supported, this flag is set to
+	False."
+        ::= {saHpiSensorReadingNominalEntry 1}
 
-	"
+saHpiSensorReadingNominalType	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingNominalEntry 2}
 
-saHpiSensorReadingNominalInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Interpreted reading of the sensor value. For example
-	this value can be:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingNominalEntry 3}
-
-saHpiSensorReadingNominalStatus OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)				
-			}
+saHpiSensorReadingNominalValue	OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION
-	"
-	The sensor status  is used to determine if sensor scanning is 
-	enabled and if events are enabled. If events are enabled, the 
-	objects will have valid data for the outstanding sensor event states.
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorReadingNominalEntry 4}
-	
-saHpiSensorReadingNominalEventStatus OBJECT-TYPE
-	SYNTAX		OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event states for the sensor.
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorReadingNominalEntry 3}
 
-	A NULL value indicates not set/used.
 
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
 
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-        ::= {saHpiSensorReadingNominalEntry 5}
 
 
 
@@ -7843,11 +7310,9 @@ saHpiSensorGroup	OBJECT-GROUP
 
 saHpiSensorReadingCurrentGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorReadingCurrentValuesPresent,
-		saHpiSensorReadingCurrentRaw,
-		saHpiSensorReadingCurrentInterpreted,
-		saHpiSensorReadingCurrentStatus,
-		saHpiSensorReadingCurrentEventStatus
+		saHpiReadingCurrentIsSupported,
+		saHpiSensorReadingCurrentType, 
+		saHpiSensorReadingCurrentValue  
 	}
 	STATUS current
 	DESCRIPTION
@@ -7856,11 +7321,9 @@ saHpiSensorReadingCurrentGroup OBJECT-GROUP
 
 saHpiSensorReadingMaxGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorReadingMaxValuesPresent,
-		saHpiSensorReadingMaxRaw,
-		saHpiSensorReadingMaxInterpreted,
-		saHpiSensorReadingMaxStatus,
-		saHpiSensorReadingMaxEventStatus
+		saHpiReadingMaxIsSupported,
+		saHpiSensorReadingMaxType, 
+		saHpiSensorReadingMaxValue 	
 	}
 	STATUS current
 	DESCRIPTION
@@ -7869,11 +7332,9 @@ saHpiSensorReadingMaxGroup OBJECT-GROUP
 
 saHpiSensorReadingMinGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorReadingMinValuesPresent,
-		saHpiSensorReadingMinRaw,
-		saHpiSensorReadingMinInterpreted,
-		saHpiSensorReadingMinStatus,
-		saHpiSensorReadingMinEventStatus
+		saHpiReadingMinIsSupported,  	
+		saHpiSensorReadingMinType,
+		saHpiSensorReadingMinValue  
 	}
 	STATUS current
 	DESCRIPTION
@@ -7882,11 +7343,9 @@ saHpiSensorReadingMinGroup OBJECT-GROUP
 
 saHpiSensorReadingNominalGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorReadingNominalValuesPresent,
-		saHpiSensorReadingNominalRaw,
-		saHpiSensorReadingNominalInterpreted,
-		saHpiSensorReadingNominalStatus,
-		saHpiSensorReadingNominalEventStatus
+		saHpiReadingNominalIsSupported,    	
+		saHpiSensorReadingNominalType,     
+		saHpiSensorReadingNominalValue
 	}
 	STATUS current
 	DESCRIPTION
