@@ -188,16 +188,483 @@ The following fragment converts between SaHpiTimeT and a struct timeval:
 -- RPT Entry
 --
 
-saHpiTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF SaHpiEntry
+saHpiDomainInfoCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of DomainInfo entries present in the system. 
+	This field is used to determine if new domains have been added
+	or existing removed. The same functionality is available using
+	notifications."
+	::= {hpiEntity 1}
+
+
+saHpiDomainInfoTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiDomainInfoEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION	
-	"This table represents the management attributes common to all entities
+	"This table represents the management attributes common to all Domains
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-	::= {hpiEntity 4}
+	::= {hpiEntity 2}
 	
+saHpiDomainInfoEntry OBJECT-TYPE
+	SYNTAX		SaHpiDomainInfoEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"Domain Info:
+
+	This structure is used to store the information regarding the domain 
+	including information regarding the domain reference table (DRT) and 
+	the resource presence table (RPT).
+
+	The DomainTag field is an informational value that supplies an HPI User  
+	with naming information for the domain.
+
+	NOTE: Regarding timestamps - If the implementation cannot supply an absolute
+	timestamp, then it may supply a timestamp relative to some system-defined 
+	epoch, such as system boot. The value SAHPI_TIME_UNSPECIFIED indicates that
+	the time of the update cannot be determined. Otherwise, If the value is less
+	than or equal to SAHPI_TIME_MAX_RELATIVE, then it is relative; if it is
+	greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute. 
+	
+	The GUID is used to uniquely identify a domain. A GUID value of zero is not
+	valid and indicates that the domain does not have an associated GUID."
+	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiDomainInfoEntryID }
+	::= {saHpiDomainInfoTable 1}
+	
+saHpiDomainInfoEntry ::= SEQUENCE {
+
+	saHpiDomainID		Unsigned32,				      
+	SaHpiDomainCapabilities Unsigned32,
+	SaHpiIsPeer		TruthValue,         
+				      				      
+	saHpiDomainTagTextType		INTEGER,	
+	saHpiDomainTagTextLanguage	INTEGER,
+	saHpiDomainTag			OCTET STRING,         
+				      
+	SaHpiDrtUpdateCount	Unsigned32, 				      			      
+	SaHpiDrtUpdateTimestamp	HpiTimeStamp,				      
+	SaHpiRptUpdateCount 	Unsigned32,     		      				      
+	SaHpiRptUpdateTimestamp	HpiTimeStamp,						      
+	SaHpiDatUpdateCount	Unsigned32,			     	      				     				      
+	SaHpiDatUpdateTimestamp	HpiTimeStamp,				      
+	SaHpiActiveAlarms	Unsigned32,    
+	SaHpiCriticalAlarms	Unsigned32,				      
+	SaHpiMajorAlarms	Unsigned32,				      
+	SaHpiMinorAlarms	Unsigned32,				      
+	SaHpiDatUserAlarmLimit 	Unsigned32,				      
+	SaHpiDatOverflow	TruthValue,				  			      
+	SaHpiDomainGuid		OCTET STRING,            
+	}
+	
+saHpiDomainID OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Unique Domain Id associated with domain."
+
+	Note:
+ 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+	::= {saHpiDomainInfoEntry 1}
+
+SaHpiDomainCapabilities OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This section defines the types associated with the domain controller. */
+
+	Domain Capabilities
+	
+	This definition defines the capabilities of a given domain. A domain 
+	may support any number of capabilities using the bit mask. 
+	
+	SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY	(SaHpiDomainCapabilitiesT)0X00000001
+	  Indicates that the domain auto insert timeout value is read-only
+	  and may not be modified using the saHpiHotSwapAutoInsertTimeoutSet()
+	  function."
+
+	Note:
+ 		SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY  (SaHpiDomainCapabilitiesT)0X00000001 0xFFFFFFFF(4294967295) " 
+	::= {saHpiDomainInfoEntry 2}
+
+SaHpiIsPeer OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates that this domain participates in a peer relationship.
+	TRUE = Domain is peer.  FALSE = Domain is not peer "
+        ::= {saHpiDomainInfoEntry 3}
+
+saHpiDomainTagTextType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				undefined(0),
+				bcdplus(1), 
+				ascii6(2), 
+				text(3),
+				binary(4)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Text Buffers
+
+       These structures are used for defining the type of data in the text buffer 
+       and the length of the buffer. Text buffers are used in the inventory data,
+       RDR, RPT, etc. for variable length strings of data.
+        
+       The encoding of the Data field in the SaHpiTextBufferT structure is defined
+       by the value of the DataType field in the buffer.  The following table
+       describes the various encodings:
+        
+          DataType                     Encoding
+          --------                     --------
+        
+         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
+      				 Buffer must contain even number of bytes.
+        
+         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
+      				 colon, comma, or underscore only.
+        
+         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
+        
+         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
+        
+         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
+        
+       Note: "ASCII+Latin 1" is derived from the first 256 characters of 
+      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
+      	and ISO 8859/1 (Latin 1). The Unicode "C0 Controls and Basic Latin"
+      	set defines the first 128 8-bit characters (00h-7Fh) and the 
+      	"C1 Controls and Latin 1 Supplement" defines the second 128 (80h-FFh).
+        
+       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
+      	use normal ASCII character encodings, but restrict the allowed
+      	characters to a subset of the entire ASCII character set. These
+      	encodings are used when the target device contains restrictions
+      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
+      	data may be stored externally as 4-bit values, and 
+      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
+      	But, regardless of how the data is stored externally, it is 
+      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
+		across the HPI."
+	::= {saHpiDomainInfoEntry 4}
+
+saHpiDomainTagTextLanguage OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined (0),
+				unknown (1),
+				afar (2),
+				abkhazian (3),
+				afrikaans (4),
+				amharic (5),
+				arabic (6),
+				assamese (7),
+				aymara (8),
+				azerbaijani (9),
+				bashkir (10),
+				byelorussian (11),
+				bulgarian (12),
+				bihari (13),
+				bislama (14),
+				bengali (15),
+				tibetan (16),
+				breton (17),
+				catalan (18),
+				corsican (19),
+				czech (20),
+				welsh (21),
+				danish (22),
+				german (23),
+				bhutani (24),
+				greek (25),
+				english (26),
+				esperanto (27),
+				spanish (28),
+				estonian (29),
+				basque (30),
+				persian (31),
+				finnish (32),
+				fiji (33),
+				faeroese (34),
+				french (35),
+				frisian (36),
+				irish (37),
+				scotsgaelic (38),
+				galician (39),
+				guarani (40),
+				gujarati (41),
+				hausa (42),
+				hindi (43),
+				croatian (44),
+				hungarian (45),
+				armenian (46),
+				interlingua (47),
+				interlingue (48),
+				inupiak (49),
+				indonesian (50),
+				icelandic (51),
+				italian (52),
+				hebrew (53),
+				japanese (54),
+				yiddish (55),
+				javanese (56),
+				georgian (57),
+				kazakh (58),
+				greenlandic (59),
+				cambodian (60),
+				kannada (61),
+				korean (62),
+				kashmiri (63),
+				kurdish (64),
+				kirghiz (65),
+				latin (66),
+				lingala (67),
+				laothian (68),
+				lithuanian (69),
+				latvianlettish (70),
+				malagasy (71),
+				maori (72),
+				macedonian (73),
+				malayalam (74),
+				mongolian (75),
+				moldavian (76),
+				marathi (77),
+				malay (78),
+				maltese (79),
+				burmese (80),
+				nauru (81),
+				nepali (82),
+				dutch (83),
+				norwegian (84),
+				occitan (85),
+				afanoromo (86),
+				oriya (87),
+				punjabi (88),
+				polish (89),
+				pashtopushto (90),
+				portuguese (91),
+				quechua (92),
+				rhaetoromance (93),
+				kirundi (94),
+				romanian (95),
+				russian (96),
+				kinyarwanda (97),
+				sanskrit (98),
+				sindhi (99),
+				sangro (100),
+				serbocroatian (101),
+				singhalese (102),
+				slovak (103),
+				slovenian (104),
+				samoan (105),
+				shona (106),
+				somali (107),
+				albanian (108),
+				serbian (109),
+				siswati (110),
+				sesotho (111),
+				sudanese (112),
+				swedish (113),
+				swahili (114),
+				tamil (115),
+				telugu (116),
+				tajik (117),
+				thai (118),
+				tigrinya (119),
+				turkmen (120),
+				tagalog (121),
+				setswana (122),
+				tonga (123),
+				turkish (124),
+				tsonga (125),
+				tatar (126),
+				twi (127),
+				ukrainian (128),
+				urdu (129),
+				uzbek (130),
+				vietnamese (131),
+				volapuk (132),
+				wolof (133),
+				xhosa (134),
+				yoruba (135),
+				chinese (136),
+				zulu (137)
+			}
+        MAX-ACCESS      read-write
+	STATUS          current
+	DESCRIPTION     "
+	This enumeration lists all of the languages that can be 
+	associated with text.  undefined (0) indicates that 
+	the language is unspecified or unknown.  "
+	::= {saHpiDomainInfoEntry 5}
+
+saHpiDomainTag	OBJECT-TYPE
+	SYNTAX		OCTET STRING(SIZE(0..255))
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Resource tag. The type of date is specified
+	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+	::= {saHpiDomainInfoEntry 6}
+      
+SaHpiDrtUpdateCount OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"" 
+	::= {saHpiDomainInfoEntry 7}
+
+SaHpiDrtUpdateTimestamp OBJECT-TYPE
+	SYNTAX		HpiTimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This timestamp is set any time the DRT table is changed.
+	If the implementation cannot supply an absolute timestamp, then it may
+	supply a timestamp relative to some system-defined epoch, such as 
+	system boot. The value SAHPI_TIME_UNSPECIFIED indicates that the 
+	time of the update cannot be determined.
+
+	Otherwise, If the value is less than or equal to 
+	SAHPI_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute.
+
+	Unspecified or unknown time  is:
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
+			
+	Maximum time that can be specified as relative:
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 
+	Note: The same functionality - when the table is changed - is available
+	via notifications."
+	::= {saHpiDomainInfoEntry 8}	
+
+SaHpiRptUpdateCount OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This count is incremented any time the RPT is changed.
+	 It rolls over to zero when the maximum value is reached " 
+	::= {saHpiDomainInfoEntry 9}
+
+SaHpiRptUpdateTimestamp OBJECT-TYPE
+	SYNTAX		HpiTimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This timestamp is set any time the RPT table is changed.
+	
+	If the implementation cannot supply an absolute timestamp, then it may
+	supply a timestamp relative to some system-defined epoch, such as 
+	system boot. The value SAHPI_TIME_UNSPECIFIED indicates that the 
+	time of the update cannot be determined.
+
+	Otherwise, If the value is less than or equal to 
+	SAHPI_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute.
+
+	Unspecified or unknown time  is:
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
+			
+	Maximum time that can be specified as relative:
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 
+	Note: The same functionality - when the table is changed - is available
+	via notifications."
+	::= {saHpiDomainInfoEntry 10}
+
+SaHpiDatUpdateCount OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This count is incremented any time the DAT is changed.
+	It rolls over to zero when the maximum value is reached " 
+	::= {saHpiDomainInfoEntry 11}
+
+SaHpiDatUpdateTimestamp OBJECT-TYPE
+	SYNTAX		HpiTimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This timestamp is set any time the DAT is changed.
+	
+	If the implementation cannot supply an absolute timestamp, then it may
+	supply a timestamp relative to some system-defined epoch, such as 
+	system boot. The value SAHPI_TIME_UNSPECIFIED indicates that the 
+	time of the update cannot be determined.
+
+	Otherwise, If the value is less than or equal to 
+	SAHPI_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute.
+
+	Unspecified or unknown time  is:
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
+			
+	Maximum time that can be specified as relative:
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 
+	Note: The same functionality - when the table is changed - is available
+	via notifications."
+	::= {saHpiDomainInfoEntry 12}
+		
+SaHpiActiveAlarms OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Count of active alarms in the DAT." 
+	::= {saHpiDomainInfoEntry 13}
+	
+SaHpiCriticalAlarms OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Count of active critical alarms in the DAT." 
+	::= {saHpiDomainInfoEntry 14}
+	
+SaHpiMajorAlarms OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Count of active major alarms in the DAT." 
+	::= {saHpiDomainInfoEntry 15}
+	
+SaHpiMinorAlarms OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Count of active minor alarms in the DAT." 
+	::= {saHpiDomainInfoEntry 16}
+	
+SaHpiDatUserAlarmLimit OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Maximum User Alarms that can be added to DAT.  
+	0=no fixed limit." 
+	::= {saHpiDomainInfoEntry 17}
+	
+SaHpiDatOverflow OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Set to True if there are one or more non-User Alarms 
+	that are missing from the DAT because of space limitations."
+        ::= {saHpiDomainInfoEntry 18}
+	
+SaHpiDomainGuid 	OBJECT-TYPE 
+	SYNTAX		OCTET STRING(SIZE(0..15))
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The GUID is used to uniquely identify a domain. A GUID value of zero is not
+	valid and indicates that the domain does not have an associated GUID.
+ 
+	GUID - Globally Unique Identifier
+
+	The format if the ID follows that specified by the Wired for Management 
+	Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
+	format, with a 3-bit variant field of 10x (where x indicates 'don't care')"
+
+	::= {saHpiDomainInfoEntry 19}
+
+       
 saHpiEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
@@ -206,7 +673,7 @@ saHpiEntryCount OBJECT-TYPE
 	This field is used to determine if new resources have been added
 	or existing removed. The same functionality is available using
 	notifications."
-	::= {hpiEntity 1}
+	::= {hpiEntity 3}
 
 saHpiEntryUpdateCount OBJECT-TYPE
 	SYNTAX		Unsigned32
@@ -215,7 +682,7 @@ saHpiEntryUpdateCount OBJECT-TYPE
 	DESCRIPTION	"This count is incremented any time the table
 	is changed. It rolls over to zero when the maximum value is reached.
 	The same functionality is available using notifications."
-	::= {hpiEntity 2}
+	::= {hpiEntity 4}
 
 saHpiEntryUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
@@ -239,7 +706,17 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 			 
 	Note: The same functionality - when the table is changed - is available
 	via notifications."
-	::= {hpiEntity 3}
+	::= {hpiEntity 5}
+
+saHpiTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	
+	"This table represents the management attributes common to all entities
+         within the managed platform.  The logical domain ID and the entity ID
+         are used to address an entity."
+	::= {hpiEntity 6}
 
 saHpiEntry OBJECT-TYPE
 	SYNTAX		SaHpiEntry
@@ -262,18 +739,18 @@ saHpiEntry OBJECT-TYPE
 
 SaHpiEntry ::= SEQUENCE {
 
-	saHpiDomainID		Unsigned32,
+	saHpiDomainID				Unsigned32,
 
-	saHpiEntryID		Unsigned32,
-	saHpiResourceID		Unsigned32,
-	saHpiResourceEntityPath		OCTET STRING,
-	saHpiResourceCapabilities	Unsigned32,
+	saHpiEntryID				Unsigned32,
+	saHpiResourceID				Unsigned32,
+	saHpiResourceEntityPath			OCTET STRING,
+	saHpiResourceCapabilities 		Unsigned32,
 	
-	saHpiResourceHotSwapCapabilities	Unsigned32,	
+	saHpiResourceHotSwapCapabilities 	Unsigned32,	
 
-	saHpiResourceSeverity		INTEGER,
+	saHpiResourceSeverity			INTEGER,
 	
-	saHpiResourceFailed		TruthValue,
+	saHpiResourceFailed			TruthValue,
 
 	saHpiResourceInfoResourceRev		Unsigned32,
 	saHpiResourceInfoSpecificVer		Unsigned32,
@@ -286,13 +763,13 @@ SaHpiEntry ::= SEQUENCE {
 	
 	saHpiResourceInfoGuid			OCTET STRING,
 	
-	saHpiResourceTagTextType	INTEGER,	
-	saHpiResourceTagTextLanguage	INTEGER,
-	saHpiResourceTag		OCTET STRING,
-	saHpiParamControl		INTEGER,
-	saHpiClearEvents		RowStatus,
-	saHpiEventLogTime		HpiTimeStamp,
-	saHpiEventLogState		INTEGER
+	saHpiResourceTagTextType		INTEGER,	
+	saHpiResourceTagTextLanguage		INTEGER,
+	saHpiResourceTag			OCTET STRING,
+	saHpiParamControl			INTEGER,
+	saHpiClearEvents			RowStatus,
+	saHpiEventLogTime			HpiTimeStamp,
+	saHpiEventLogState			INTEGER
 	}
 
 saHpiDomainID OBJECT-TYPE 
@@ -357,48 +834,49 @@ saHpiResourceCapabilities OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	" 
 	Resource Capabilities
-			
-	This definition defines the capabilities of a given resource. 
-	One resource may support any number of capabilities using 
-	the bit mask. Every resource must set at least one of 
-	these capabilities; ie. zero is not a valid value for a 
-	resource's capabilities.
-			
-	SAHPI_CAPABILITY_DOMAIN           (0x80000000)
-	SAHPI_CAPABILITY_RESOURCE         (0X40000000) 
-	SAHPI_CAPABILITY_EVT_DEASSERTS	  (0x00008000)
-	Indicates that all sensors on the resource have the property 
-	that their Assertion and Deassertion event enable flags are 
-	the same. That is, for all event states whose assertion 
-	triggers an event, it is guaranteed that the deassertion of 
-	that event will also trigger an event. Thus, the user may 
-	track the state of sensors on the resource by monitoring 
-	events rather than polling for state changes.
-
-	SAHPI_CAPABILITY_AGGREGATE_STATUS  (0x00002000) 
-	SAHPI_CAPABILITY_CONFIGURATION	   (0x00001000)
-	SAHPI_CAPABILITY_MANAGED_HOTSWAP   (0x00000800) 
-	Indicates that the resource supports managed hotswap. 
-	Since hotswap only makes sense for field-replaceable units, 
-	the SAHPI_CAPABILITY_FRU capability bit must also be set 
-	for this resource.
-
-	SAHPI_CAPABILITY_WATCHDOG          (0x00000400)
-	SAHPI_CAPABILITY_CONTROL           (0x00000200) 
-	SAHPI_CAPABILITY_FRU		   (0x00000100)
-	Indicates that the resource is a field-replaceable unit; 
-	i.e., it is capable of being removed and replaced in a 
-	live system. This does not necessarily imply that the 
-	resource supports managed hotswap.
-
-	SAHPI_CAPABILITY_INVENTORY_DATA     (0x00000008) 
-	SAHPI_CAPABILITY_SEL                (0x00000004) 
-	SAHPI_CAPABILITY_RDR		    (0x00000002) 
-	Indicates that a resource data record (RDR) repository is 
-	supplied by the resource. Since the existence of an RDR is 
-	mandatory, this capability must be asserted.         
-
-	SAHPI_CAPABILITY_SENSOR             (0x00000001)"
+	
+	This definition defines the capabilities of a given resource. One resource 
+	may support any number of capabilities using the bit mask. Because each entry
+	in an RPT will have the SAHPI_CAPABILITY_RESOURCE bit set, zero is not a
+	valid value for the capability flag, and is thus used to indicate "no RPT
+	entry present" in some function calls.
+	
+	SAHPI_CAPABILITY_RESOURCE   	(SaHpiCapabilitiesT)0X40000000       
+	SAHPI_CAPABILITY_EVT_DEASSERTS  (SaHpiCapabilitiesT)0x00008000 
+	  Indicates that all sensors on the resource have the property that their
+	  Assertion and Deassertion event enable flags are the same. That is,
+	  for all event states whose assertion triggers an event, it is
+	  guaranteed that the deassertion of that event will also
+	  trigger an event. Thus, an HPI User may track the state of sensors on the
+	  resource by monitoring events rather than polling for state changes.
+	SAHPI_CAPABILITY_AGGREGATE_STATUS	(SaHpiCapabilitiesT)0x00002000  
+	SAHPI_CAPABILITY_CONFIGURATION          (SaHpiCapabilitiesT)0x00001000 
+	SAHPI_CAPABILITY_MANAGED_HOTSWAP        (SaHpiCapabilitiesT)0x00000800 
+	  Indicates that the resource supports the full managed hot swap model. 
+	  Since hot swap only makes sense for field-replaceable units, the 
+	  SAHPI_CAPABILITY_FRU capability bit must also be set for this resource.
+	SAHPI_CAPABILITY_WATCHDOG 	(SaHpiCapabilitiesT)0x00000400         
+	SAHPI_CAPABILITY_CONTROL        (SaHpiCapabilitiesT)0x00000200   
+	SAHPI_CAPABILITY_FRU            (SaHpiCapabilitiesT)0x00000100 
+	  Indicates that the resource is a field-replaceable unit; i.e., it is
+	  capable of being removed and replaced in a live system. If
+	  SAHPI_CAPABILITY_MANAGED_HOTSWAP is also set, the resource supports
+	  the full hot swap model.  If SAHPI_CAPABILITY_MANAGED_HOTSWAP is not
+	  set, the resource supports the simplified hot swap model.
+	SAHPI_CAPABILITY_ANNUNCIATOR	(SaHpiCapabilitiesT)0x00000040 
+	SAHPI_CAPABILITY_POWER          (SaHpiCapabilitiesT)0x00000020 
+	SAHPI_CAPABILITY_RESET          (SaHpiCapabilitiesT)0x00000010 
+	SAHPI_CAPABILITY_INVENTORY_DATA (SaHpiCapabilitiesT)0x00000008   
+	SAHPI_CAPABILITY_EVENT_LOG      (SaHpiCapabilitiesT)0x00000004         
+	SAHPI_CAPABILITY_RDR            (SaHpiCapabilitiesT)0x00000002 
+	  Indicates that a resource data record (RDR) repository is supplied
+	  by the resource. Since the existence of an RDR is mandatory for all
+	  management instruments, this
+	  capability must be asserted if the resource
+	  contains any sensors, controls, watchdog timers, or inventory
+	  data repositories.         
+	SAHPI_CAPABILITY_SENSOR 	(SaHpiCapabilitiesT)0x00000001	
+	"
 	::= {saHpiEntry 5}
 	
 saHpiResourceHotSwapCapabilities OBJECT-TYPE 
@@ -631,8 +1109,8 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
 	may not be used by a given resource."
 	::= {saHpiEntry 16}
 
-saHpiResourceInfoGuid OBJECT-TYPE 
-	SYNTAX		OCTET STRING
+saHpiResourceInfoGuid 	OBJECT-TYPE 
+	SYNTAX		OCTET STRING(SIZE(0..15))
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	" 
@@ -648,27 +1126,54 @@ saHpiResourceInfoGuid OBJECT-TYPE
 saHpiResourceTagTextType OBJECT-TYPE 
 	SYNTAX		INTEGER {
 				undefined(0),
-				binary(1), 
-				bcdplus(2), 
-				ascii6(3),
-				language(4)
+				bcdplus(1), 
+				ascii6(2), 
+				text(3),
+				binary(4)
 			}
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
-	encoded as:
-	 binary(1):
-		  String of bytes, any values legal
+	DESCRIPTION	"Text Buffers
 
-         bcdplus(2)
-		String of 0-9, space, dash, period ONLY
-
-         ascii6(3)
-		Reduced ASCII character set: 0x20-0x5F ONLY
-
-         language(4)
-		ASCII or UNICODE depending on language
-	"
+       These structures are used for defining the type of data in the text buffer 
+       and the length of the buffer. Text buffers are used in the inventory data,
+       RDR, RPT, etc. for variable length strings of data.
+        
+       The encoding of the Data field in the SaHpiTextBufferT structure is defined
+       by the value of the DataType field in the buffer.  The following table
+       describes the various encodings:
+        
+          DataType                     Encoding
+          --------                     --------
+        
+         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
+      				 Buffer must contain even number of bytes.
+        
+         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
+      				 colon, comma, or underscore only.
+        
+         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
+        
+         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
+        
+         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
+        
+       Note: "ASCII+Latin 1" is derived from the first 256 characters of 
+      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
+      	and ISO 8859/1 (Latin 1). The Unicode "C0 Controls and Basic Latin"
+      	set defines the first 128 8-bit characters (00h-7Fh) and the 
+      	"C1 Controls and Latin 1 Supplement" defines the second 128 (80h-FFh).
+        
+       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
+      	use normal ASCII character encodings, but restrict the allowed
+      	characters to a subset of the entire ASCII character set. These
+      	encodings are used when the target device contains restrictions
+      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
+      	data may be stored externally as 4-bit values, and 
+      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
+      	But, regardless of how the data is stored externally, it is 
+      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
+		across the HPI."
 	::= {saHpiEntry 18}
 
 saHpiResourceTagTextLanguage OBJECT-TYPE
