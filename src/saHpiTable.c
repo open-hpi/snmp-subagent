@@ -159,6 +159,7 @@ populate_rpt ()
 		  err = saHpiEventLogTimeGet (session,
 					      rpt_entry.ResourceId, &time);
 		  err = SA_OK;
+		  state = SAHPI_FALSE;
 		  if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL)
 		  {
 		    err = saHpiEventLogStateGet (session,
