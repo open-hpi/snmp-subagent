@@ -1,5 +1,5 @@
 <!-- ...................................................................... -->
-<!-- $Id$ ................................................ -->
+<!-- $Id$  -->
 <!-- 
         This material may be distributed only subject to the terms and 
         conditions set forth in the Open Publication License, v1.0 or later 
@@ -25,7 +25,7 @@
 			</para>
 		</listitem>
 		<listitem>
-			<para>Understanding of Management Information Base (MIB) syntaxM. I recommend 
+			<para>Understanding of Management Information Base (MIB) syntax. I recommend 
 			<literal>Understanding SNMP MIBs</literal> by  David T. Perkins and Evan McGinnis, published by Prentice Hall. ISBN 0-13-437708-7.
 			</para>
 		</listitem>
@@ -289,6 +289,10 @@ mib2c.column_enums.conf
 you didn't give me a valid OID to start with at /usr/bin/mib2c line 115.
 		</programlisting>
 		do define the environment variable MIBS to be ALL or the name of your MIB.
+		<programlisting role='C'>
+$export MIBS=ALL
+		</programlisting>
+
 		</para>
 	</warning>
 	<para>

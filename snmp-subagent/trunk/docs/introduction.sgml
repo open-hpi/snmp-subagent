@@ -22,7 +22,7 @@
       <title>Purpose of this Document</title>
       <para>
         This document is intended to serve as the developer
-        manual for writting SNMP sub-agents using NetSNMP 5.0.x API. 
+        manual for writing SNMP sub-agents using NetSNMP 5.0.x API. 
       </para>
     </sect2>
     <sect2>
