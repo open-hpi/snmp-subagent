@@ -1,4 +1,4 @@
-#                                               -*- Autoconf -*-
+ s#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
@@ -36,6 +36,15 @@ AC_CHECK_PROG([found_pkg_config],[pkg-config],[yes])
 
 if test "x$found_pkg_config" != "xyes"; then
     OH_CHECK_FAIL(pkg-config,pkg-config)
+fi
+
+HPI_LIBS=`pkg-config --libs openhpi`
+if test "x$HPI_LIBS" = "x"; then
+    AC_MSG_ERROR([
+*** OpenHPI pkgconfig file wasn't found
+*** we can't determine proper build flags without it
+*** please check your installation
+])
 fi
 
 # Checks for libraries
