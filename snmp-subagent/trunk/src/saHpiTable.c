@@ -151,9 +151,13 @@ populate_rpt ()
 	      current = next;
 
 	      err = saHpiRptEntryGet (session, current, &next, &rpt_entry);
-
+	      DEBUGMSGTL((AGENT,"Current: %d, Next: %d\n",
+			current, next));
 	      if (SA_OK == err)
 		{
+		  DEBUGMSGTL((AGENT,"ResourceID: %d, EntryId: %d\n",
+				rpt_entry.ResourceId,
+				rpt_entry.EntryId));
 		  // Get more information
 		  err = saHpiEventLogTimeGet (session,
 					      rpt_entry.ResourceId, &time);
