@@ -647,7 +647,10 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 			      float64(3),
 			      buffer(4)    
 			}
-			
+
+--IBMKR: Does the description need to have those types?
+-- Perhaps it just should say. "All types of data
+-- represented as string. for example ... "?			
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
@@ -1433,10 +1436,15 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
 	DESCRIPTION	" 
 	This definition defines the managed hot swap capabilities of a given
 	resource. 
-	SAHPI_HS_CAPABILITY_AUTOEXTRACT_READ_ONLY
-	This capability indicates if the hot swap autoextract timer is read-only.
-	SAHPI_HS_CAPABILITY_INDICATOR_SUPPORTED
-	Indicates whether or not the resource has a hot swap indicator."
+
+	AUTOEXTRACT_READ_ONLY
+		This capability indicates if the hot swap autoextract
+		timer is read-only.
+
+	INDICATOR_SUPPORTED
+	
+		Indicates whether or not the resource has a hot swap indicator.
+	"
 	::= {saHpiEntry 6}
 
 
@@ -1769,7 +1777,7 @@ saHpiEventLogState OBJECT-TYPE
 -- /*******************************************************************************
 -- ********************************************************************************
 -- **********                                                            **********
--- **********                        Events, Part 2                      **********
+-- **********                        Events                              **********
 -- **********                                                            **********
 -- ********************************************************************************
 -- *******************************************************************************/
@@ -1797,16 +1805,8 @@ saHpiEventEntry OBJECT-TYPE
 	SYNTAX		SaHpiEventEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
-	DESCRIPTION "
- Sensor events may contain optional data items passed and stored with the
- event. If these optional data items are present, they will be included with
- the event data returned in response to a SaHpiEventGet() or
- SaHpiEventLogEntryGet() function call. Also, the optional data items may be
- included with the event data passed to the SaHpiEventLogEntryAdd() function.
-
- Specific implementations of HPI may have restrictions on how much data may
- be passed to SaHpiEventLogEntryAdd(). These restrictions should be documented
- by the provider of the HPI interface."
+--IBMKR: Add more in description.
+	DESCRIPTION "Get events."
 	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiEventIndex}
 	::= {saHpiEventTable 1}
 
