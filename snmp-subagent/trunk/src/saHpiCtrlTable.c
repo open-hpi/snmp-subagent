@@ -681,7 +681,7 @@ saHpiCtrlTable_row_copy (saHpiCtrlTable_context * dst,
   memcpy (dst->saHpiCtrlText, src->saHpiCtrlText, src->saHpiCtrlText_len);
   dst->saHpiCtrlText_len = src->saHpiCtrlText_len;
 
-  memcpy (src->saHpiCtrlRDR, dst->saHpiCtrlRDR, src->saHpiCtrlRDR_len);
+  memcpy (dst->saHpiCtrlRDR, src->saHpiCtrlRDR, src->saHpiCtrlRDR_len);
   dst->saHpiCtrlRDR_len = src->saHpiCtrlRDR_len;
 
   dst->hash = src->hash;
