@@ -197,6 +197,16 @@ saHpiDomainInfoTable_context * saHpiDomainInfoTable_create_row( netsnmp_index* )
 saHpiDomainInfoTable_context * saHpiDomainInfoTable_get( const char *name, int len );
 #endif
 
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainInfoTable support functions	 
+//*******************************************************
+//*******************************************************
+#define DOMAIN_INFO_INDEX_LEN 1
+int populate_domain_info( void );
+
+
 #ifdef __cplusplus
 };
 #endif
