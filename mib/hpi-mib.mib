@@ -87,7 +87,9 @@ hpi MODULE-IDENTITY
 		  associated with an entitry.
 
 	The inventory control defines variables for reading inventory
-		resources.  "
+		resources.  
+
+	This is version 1.3 of this MIB"
     ::= { experimental 90 }
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
@@ -165,7 +167,7 @@ saHpiEntry OBJECT-TYPE
 		match a physical printed label attached to the primary  entity
 		which the resource manages. See section 5.2.6,
 		SaHpiResourceTagSet(), on page 33."
-	INDEX	{ saHpiDomainID, saHpiEntryID, saHpiResourceID }
+	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiEntryID }
 	::= {saHpiTable 1}
 
 SaHpiEntry ::= SEQUENCE {
@@ -729,7 +731,7 @@ saHpiEventEntry OBJECT-TYPE
  Specific implementations of HPI may have restrictions on how much data may
  be passed to SaHpiEventLogEntryAdd(). These restrictions should be documented
  by the provider of the HPI interface."
-	INDEX	{ saHpiEventIndex, saHpiEventTimestamp  }
+	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiEntryID}
 	::= {saHpiEventTable 1}
 
 SaHpiEventEntry ::= SEQUENCE {
@@ -2135,7 +2137,7 @@ saHpiSystemEventLogEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 	"This section defines the types associated with the SEL."
-        INDEX   { saHpiSystemEventLogEntryId }
+        INDEX   { saHpiDomainID, saHpiResourceID  ,saHpiSystemEventLogEntryId }
 
         ::= {saHpiSystemEventLogTable 1}
                                                  
