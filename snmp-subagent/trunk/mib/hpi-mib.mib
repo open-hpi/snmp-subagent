@@ -1851,10 +1851,13 @@ saHpiResourceId OBJECT-TYPE
 
 saHpiResourceEntryId OBJECT-TYPE 
         SYNTAX          SaHpiEntryId
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Entry ID for record. See textual-convention for further details."
+	"This index is here to help facilitate browsing a known 
+	resources RDR's.  For examlpe to find the first RDR's 
+	specify a value of SAHPI_FIRST_ENTRY. 
+	See textual-convention for further details."
 	::=   {saHpiResourceEntry 2}
 
 saHpiResourceEntityPath OBJECT-TYPE 
