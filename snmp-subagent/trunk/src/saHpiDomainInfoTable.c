@@ -47,10 +47,11 @@ size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
 populate_saHpiDomainInfoTable() 
 {
-	dbg("WARNING: populate_saHpiDomainInfoTable: not implemented!");
+	DEBUGMSGTL ((AGENT, 
+		"WARNING: populate_saHpiDomainInfoTable: not implemented!"));
 }
 
-#ifdef saHpiDomainInfoTable_IDX2
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -134,7 +135,6 @@ saHpiDomainInfoTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
@@ -242,15 +242,13 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
      *
      * extract index uses varbinds (netsnmp_variable_list) to parse
      * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
+     */   
+	netsnmp_variable_list var_saHpiDomainId;
     int err;
 
     /*
      * copy index, if provided
-     */
-    if(hdr) {
+     */    if(hdr) {
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
@@ -266,15 +264,8 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
      */
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainInfoTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
-
+       var_saHpiDomainId.type = ASN_UNSIGNED; 
+       var_saHpiDomainId.next_variable = NULL;
 
     /*
      * parse the oid into the individual index components
@@ -284,16 +275,13 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
        /*
         * copy index components into the context structure
         */
-                ctx->saHpiDomainId = *var_saHpiDomainId.val.integer;
+ 		ctx->saHpiDomainId = *var_saHpiDomainId.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+      	/*
+   		 *Check Index 
+         */
+    	err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer)
+         
     }
 
     /*
