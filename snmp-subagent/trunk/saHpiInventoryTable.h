@@ -50,7 +50,8 @@ extern          "C" {
                    
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiInventoryEirId;
-
+      /** UNSIGNED32 */
+      unsigned long saHpiInventoryIndex;
         /** INTEGER = ASN_INTEGER */
         long            saHpiInventoryRecordType;
 
@@ -109,6 +110,8 @@ extern          "C" {
       long domain_id;
       long resource_id;
       long hash;
+
+      long count_of_subitems;
     } saHpiInventoryTable_context;
 
 /*************************************************************
@@ -134,7 +137,8 @@ int  populate_inventory(
 
 int  
 saHpiInventoryTable_modify_context(SaHpiInventoryRecT *entry,SaHpiResourceIdT resource_id,
-                             SaHpiInventoryDataT *inv_data, SaHpiUint32T inv_data_size,
+				   long count,
+				   SaHpiInventoryDataT *inv_data, SaHpiUint32T inv_data_size,
                              oid *rdr_entry, size_t rdr_entry_oid_len,
                              saHpiInventoryTable_context *ctx);
 
@@ -149,7 +153,7 @@ int
 
 
 int
-delete_inventory_row(SaHpiDomainIdT domain_id,
+delete_inventory_rows(SaHpiDomainIdT domain_id,
 		     SaHpiResourceIdT resource_id,
 		     SaHpiEirIdT num);
 int set_inventory(saHpiInventoryTable_context *ctx);
@@ -166,24 +170,26 @@ int set_inventory(saHpiInventoryTable_context *ctx);
 /*************************************************************
  * column number definitions for table saHpiInventoryTable
  */
+
 #define COLUMN_SAHPIINVENTORYEIRID 1
-#define COLUMN_SAHPIINVENTORYRECORDTYPE 2
-#define COLUMN_SAHPIINVENTORYVALIDITY 3
-#define COLUMN_SAHPIINVENTORYATTRIBUTES 4
-#define COLUMN_SAHPIINVENTORYTEXTTYPE 5
-#define COLUMN_SAHPIINVENTORYTEXTLANGUAGE 6
-#define COLUMN_SAHPIINVENTORYMANUFACTURER 7
-#define COLUMN_SAHPIINVENTORYPRODUCTNAME 8
-#define COLUMN_SAHPIINVENTORYPRODUCTVERSION 9
-#define COLUMN_SAHPIINVENTORYMODELNUMBER 10
-#define COLUMN_SAHPIINVENTORYSERIALNUMBER 11
-#define COLUMN_SAHPIINVENTORYPARTNUMBER 12
-#define COLUMN_SAHPIINVENTORYFILEID 13
-#define COLUMN_SAHPIINVENTORYASSETTAG 14
-#define COLUMN_SAHPIINVENTORYCUSTOMFIELD 15
-#define COLUMN_SAHPIINVENTORYRDR 16
+#define COLUMN_SAHPIINVENTORYINDEX 2
+#define COLUMN_SAHPIINVENTORYRECORDTYPE 3
+#define COLUMN_SAHPIINVENTORYVALIDITY 4
+#define COLUMN_SAHPIINVENTORYATTRIBUTES 5
+#define COLUMN_SAHPIINVENTORYTEXTTYPE 6
+#define COLUMN_SAHPIINVENTORYTEXTLANGUAGE 7
+#define COLUMN_SAHPIINVENTORYMANUFACTURER 8
+#define COLUMN_SAHPIINVENTORYPRODUCTNAME 9
+#define COLUMN_SAHPIINVENTORYPRODUCTVERSION 10
+#define COLUMN_SAHPIINVENTORYMODELNUMBER 11
+#define COLUMN_SAHPIINVENTORYSERIALNUMBER 12
+#define COLUMN_SAHPIINVENTORYPARTNUMBER 13
+#define COLUMN_SAHPIINVENTORYFILEID 14
+#define COLUMN_SAHPIINVENTORYASSETTAG 15
+#define COLUMN_SAHPIINVENTORYCUSTOMFIELD 16
+#define COLUMN_SAHPIINVENTORYRDR 17
 #define saHpiInventoryTable_COL_MIN 1
-#define saHpiInventoryTable_COL_MAX 16
+#define saHpiInventoryTable_COL_MAX 17
 
  
 
