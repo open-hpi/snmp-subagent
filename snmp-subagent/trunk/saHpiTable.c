@@ -18,9 +18,10 @@
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
-
+#include <net-snmp/library/check_varbind.h>
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 #include <epath_utils.h>
@@ -78,7 +79,7 @@ saHpiTable_cmp(const void *lhs, const void *rhs)
     rc = (context_l->saHpiDomainID == context_r->saHpiDomainID) ? 0: 1;
     
     if (rc != 0) 
-	return rc;
+	return 1;
 
     if (context_l->saHpiResourceID < context_r->saHpiResourceID)
 	return -1;
@@ -86,7 +87,7 @@ saHpiTable_cmp(const void *lhs, const void *rhs)
     rc =(context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0: 1;
 
     if (rc != 0)
-      return rc;
+      return 1;
 
     if (context_l->saHpiEntryID < context_r->saHpiEntryID)
 	return -1;
@@ -250,7 +251,9 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
 	return AGENT_ENTRY_EXIST;
       }
     }   
-
+    
+    if (hash == 0)
+      hash = 1;
     ctx->hash = hash;
     ctx->resource_id = entry->ResourceId;
     DEBUGMSGTL((AGENT,"Creating columns for resourceid: %d\n", entry->ResourceId));
@@ -324,6 +327,36 @@ int set_table_tag(saHpiTable_context *ctx) {
   return AGENT_ERR_NULL_DATA;
   
 }
+
+int
+delete_rpt_row(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id,
+	       SaHpiEntryIdT num) {
+
+  saHpiTable_context *ctx;
+  oid rpt_oid[3];
+  netsnmp_index	rpt_index;
+
+  rpt_oid[0]=domain_id;
+  rpt_oid[1]=resource_id;	
+  rpt_oid[2]=num;
+
+  // Possible more indexs?
+  rpt_index.oids = (oid *)&rpt_oid;
+  rpt_index.len = 3;
+
+  ctx = CONTAINER_FIND(cb.container, &rpt_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    entry_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
+}
+
+
 int set_table_severity(saHpiTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
@@ -473,8 +506,6 @@ saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
     }
     dst->index.len = src->index.len;
 
-
-
     dst->saHpiDomainID = src->saHpiDomainID;
 
     dst->saHpiEntryID = src->saHpiEntryID;
@@ -571,7 +602,6 @@ saHpiTable_extract_index(saHpiTable_context * ctx, netsnmp_index * hdr)
 
     err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
 
-    DEBUGMSGTL((AGENT," parse_oid_indexes: %d\n", err));
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
@@ -717,18 +747,11 @@ void
 saHpiTable_set_reserve1(netsnmp_request_group * rg)
 {
    saHpiTable_context *row_ctx = (saHpiTable_context *) rg->existing_row;
-    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int             rc;
-
-
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
+   
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -759,12 +782,14 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 
         case COLUMN_SAHPIRESOURCETAG:
             /** OCTETSTR = ASN_OCTET_STR */
-	/*
-	  rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
-	  if (rc == SNMP_ERR_NOERROR)
-	    rc = netsnmp_check_vb_size_range(var, 0, SAHPI_RESOURCE_TAG_MAX);
-	*/
-            break;
+	  if (var->type != ASN_OCTET_STR) {
+	    rc = SNMP_ERR_WRONGTYPE;
+	  } else if (var->val_len > SAHPI_RESOURCE_TAG_MAX) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  } else if (var->val_len < 0) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  }
+	  break;
 	case COLUMN_SAHPIDOMAINID:
 	case COLUMN_SAHPIENTRYID:
 	case COLUMN_SAHPIRESOURCEID:
@@ -792,19 +817,31 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
 
+    for (current = rg->list; current; current = current->next) {
+       
+      // The nice thing about this API is that _row_copy() is called
+      // for this row - if the API has matched the index with an
+      // already existing entry. We check the 'hash' value. If its
+      // 0 the API couldn't find the right context.
+
+      if ( row_ctx->hash == 0) {
+	rc = SNMP_ERR_NOSUCHNAME;
+	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+				       rc);
+      } 
+    }
    
 }
 
 void
 saHpiTable_set_reserve2(netsnmp_request_group * rg)
 {
-saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
 
     rg->rg_void = rg->list->ri;
-
    
     for (current = rg->list; current; current = current->next) {
 
@@ -865,7 +902,7 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 {
       netsnmp_variable_list *var;
     saHpiTable_context *row_ctx = (saHpiTable_context *) rg->existing_row;
-    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+    //    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
 
 
@@ -1263,17 +1300,6 @@ saHpiTable_get_value(netsnmp_request_info *request,
     return SNMP_ERR_NOERROR;
 }
 
-/************************************************************
- * saHpiTable_get_by_idx
- */
-/*
-const saHpiTable_context *
-saHpiTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
-*/
 
 int
 update_timestamp_handler(netsnmp_mib_handler *handler,
@@ -1281,20 +1307,12 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests) {
 
-  DEBUGMSGTL((AGENT,"--- update_timestamp_handler: Entry\n"));  
-  DEBUGMSGTL((AGENT," TimeStamp is %d ", update_timestamp));
-  if (reqinfo->mode == MODE_GETNEXT) {
-	DEBUGMSGTL((AGENT," GETNEXT "));
-  }
+ 
 
-  switch (reqinfo->mode) {
-  case MODE_GET:
+  if  (reqinfo->mode == MODE_GET)
     snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
 			     (u_char *) &update_timestamp,
 			     sizeof(update_timestamp));
     
-  }
-  
-  DEBUGMSGTL((AGENT,"--- update_timestamp_handler: Exit\n"));
   return SNMP_ERR_NOERROR;
 }
