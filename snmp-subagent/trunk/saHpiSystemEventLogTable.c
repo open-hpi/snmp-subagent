@@ -1072,7 +1072,7 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
     snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
 			     (u_char *) &event_log_current_timestamp,
 			     sizeof(event_log_current_timestamp));
-  }
+  
 
   return SNMP_ERR_NOERROR;
 }
