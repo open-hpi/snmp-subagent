@@ -8,9 +8,9 @@ bin_PROGRAMS		= hpiSubagent
 
 SUBDIRS                 = 
 
+
 hpiSubagent_SOURCES	= alarm.c \
 			hpiB0101.c \
-			hpiSubagent.c \
 			hpiCheckIndice.c \
 			hpiSubagent.c \
 			saHpiDomainInfoTable.c			
