@@ -178,6 +178,7 @@ typedef  struct sensor_threshold_to_mib_s {
           oid             saHpiSensorRDR[MAX_OID_LEN];
       long            saHpiSensorRDR_len;
       long resource_id;
+      long domain_id;
       long hash;
       
     } saHpiSensorTable_context;
