@@ -9081,7 +9081,7 @@ saHpiInventoryTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiInventoryEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table defining static data associated with Inventory RDR's."
+        DESCRIPTION     "Table defining static data associated with Inventory Repository Data Repository."
         ::= {hpiInventory 2}
         
 saHpiInventoryEntry OBJECT-TYPE
@@ -9090,7 +9090,7 @@ saHpiInventoryEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "These structures are used to read and write inventory data to 
-	Inventoryentity Data Repository (IDR).  
+	Inventory entity Data Repository (IDR).  
 	
 	Each table row represents an IDR.  All inventory data contained 
 	in an inventory data repository (IDR) must be represented in the 
@@ -9572,10 +9572,10 @@ saHpiWatchdogEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "When the 'Watchdog' capability is set in a resource, a watchdog with 
-        an identifier of SAHPI_DEFAULT_WATCHDOG_NUM, that is defined as 0,  
+        an identifier of SAHPI_DEFAULT_WATCHDOG_NUM(0), that is defined as 0,  
 	is required. All watchdogs shall be represented with an entry in in 
 	saHpiWatchdogTable, including the initial watchdog with an identifier of 
-        SAHPI_DEFAULT_WATCHDOG_NUM."
+        SAHPI_DEFAULT_WATCHDOG_NUM(0)."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
@@ -9809,7 +9809,7 @@ saHpiWatchdogRDR 	OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Forward pointer to the RDR OID."
+        DESCRIPTION     "Forward pointer to the Resource Data Repository OID."
         ::= {saHpiWatchdogEntry 13}
 
         
@@ -9946,7 +9946,7 @@ saHpiAnnunciatorMaxConditions   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "maximum number of conditions that can be held in current 
+        "Maximum number of conditions that can be held in current 
         set.  0 means no fixed limit.  "
         ::= {saHpiAnnunciatorEntry 4}
         
@@ -9993,7 +9993,7 @@ saHpiAnnunciatorOem     OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "maximum number of conditions that can be held in current 
+        "Maximum number of conditions that can be held in current 
         set.  0 means no fixed limit.  if True, Mode may not be 
         changed by HPI SNMP Manager."
         ::= {saHpiAnnunciatorEntry 6}
@@ -10002,7 +10002,7 @@ saHpiAnnunciatorRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Forward pointer to the RDR OID."
+        DESCRIPTION     "Forward pointer to the Resource Data Repository OID."
         ::= {saHpiAnnunciatorEntry 7}
 
 --
