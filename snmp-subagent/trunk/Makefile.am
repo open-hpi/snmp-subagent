@@ -62,11 +62,13 @@ includedir=$(base_includedir)/openhpi
 # note, strictly speaking we don't need the spec file here, but it makes
 # it nicer to rebuild
 EXTRA_DIST	= $(shell find include -name '*.h') \
-	hpiSubagent.conf mib/hpi-mib.mib openhpi-subagent.spec
+	hpiSubagent.conf mib/hpi-mib.mib openhpi-subagent.spec hpisnmpd.rc
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/snmp
 	$(INSTALL_DATA) hpiSubagent.conf $(DESTDIR)$(sysconfdir)/snmp
+	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/rc.d/init.d/
+	$(INSTALL_PROGRAM) -m 755 hpisnmpd.rc $(DESTDIR)$(sysconfdir)/rc.d/init.d/hpisnmpd
 
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
