@@ -6451,9 +6451,8 @@ saHpiInventoryIsReadOnly OBJECT-TYPE
         "Describes if the IDR is read-only. If such, all area
         headers and fields are flagged as well."
     REFERENCE
-        " "
+    "See SAI-HPI-B.01.01 section 8.9 "
     ::= {saHpiInventoryEntry 5}
-
 
 saHpiInventoryNumAreas OBJECT-TYPE
     SYNTAX      Unsigned32
@@ -6462,7 +6461,7 @@ saHpiInventoryNumAreas OBJECT-TYPE
     DESCRIPTION
         "Number of Area contained in IDR"
     REFERENCE
-        " "
+    "See SAI-HPI-B.01.01 section 8.9 "
     ::= {saHpiInventoryEntry 6}
 
 
