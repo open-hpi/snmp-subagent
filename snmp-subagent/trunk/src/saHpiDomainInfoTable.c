@@ -36,8 +36,10 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include "oh_error.h"
 #include "saHpiDomainInfoTable.h"
 #include "hpiCheckIndice.h"
+#include "SaHpi.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -1109,5 +1111,144 @@ saHpiDomainInfoTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiDomainInfoTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainInfoTable support functions	 
+//*******************************************************
+//*******************************************************
+int populate_domain_info( void ) {
+
+	oid domain_info_oids[DOMAIN_INFO_INDEX_LEN];
+	netsnmp_index domain_info_index;
+
+	saHpiDomainInfoTable_context  *domain_info_ctx;
+	int rval = 0;
+	SaHpiSessionIdT sid;
+
+	SaHpiDomainInfoT DomainInfo;
+	memset(&DomainInfo, 0, sizeof(SaHpiDomainInfoT));
+
+	/* get the info of the one and only domain */
+	if (SA_OK != saHpiDomainInfoGet(
+		get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID), 
+		&DomainInfo) ) {
+		dbg("ERROR: populate_drt, saHpiDomainInfoGet Failed!"); 
+		rval = -1;
+	} else {
+
+	/* create domain tuple/ index */
+	domain_info_oids[1] = DomainInfo.DomainId; 
+	domain_info_index.len =  DOMAIN_INFO_INDEX_LEN;
+	domain_info_index.oids = (oid *) & domain_info_index;  
+
+	/* See if it exists. */
+	domain_info_ctx = NULL;
+	domain_info_ctx = CONTAINER_FIND (cb.container, &domain_info_index);
+	// If we don't find it - we create it.
+
+	if (!domain_info_ctx) 
+		/* New entry. Add it */
+		domain_info_ctx = saHpiDomainInfoTable_create_row (&domain_info_index);
+
+	/* fill in values in ctx*/
+	/* DomainId */
+	domain_info_ctx->saHpiDomainId = DomainInfo.DomainId;
+	
+	/* DomainCapabilities */
+	if (DomainInfo.DomainCapabilities == 
+	    SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY) {
+		strncpy(domain_info_ctx->saHpiDomainCapabilities,
+			"SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY",
+			strlen("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY"));
+		domain_info_ctx->saHpiDomainCapabilities_len =
+			 strlen("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");
+	} else {
+		strncpy(domain_info_ctx->saHpiDomainCapabilities,
+			"BAD TYPE",
+			strlen("BAD TYPE"));
+		domain_info_ctx->saHpiDomainCapabilities_len =
+			 strlen("BAD TYPE");
+	}
+	
+	/* IsPeer */
+	domain_info_ctx->saHpiDomainIsPeer = 
+		(DomainInfo.IsPeer == 0) ? 1 : 2;
+
+	/* DomainTag */ 
+	memcpy(domain_info_ctx->saHpiDomainTag, 
+	       DomainInfo.DomainTag.Data,
+	       DomainInfo.DomainTag.DataLength);
+	domain_info_ctx->saHpiDomainTag_len = 
+		DomainInfo.DomainTag.DataLength;
+	domain_info_ctx->saHpiDomainTagTextLanguage = 
+		DomainInfo.DomainTag.Language + 1;
+	domain_info_ctx->saHpiDomainTagTextType = 
+		DomainInfo.DomainTag.DataType + 1;
+
+	/* DrtUpdateCount */
+	domain_info_ctx->saHpiDomainReferenceUpdateCount = 
+		DomainInfo.DrtUpdateCount;
+
+	/* DrtUpdateTimestamp */
+	domain_info_ctx->saHpiDomainReferenceUpdateTimestamp =
+		DomainInfo.DrtUpdateTimestamp;
+
+	/* RptUpdateCount */
+	domain_info_ctx->saHpiDomainResourcePresenceUpdateCount =
+		DomainInfo.RptUpdateCount;
+
+	/* RptUpdateTimestamp */
+	domain_info_ctx->saHpiDomainResourcePresenceUpdateTimestamp =
+		DomainInfo.RptUpdateTimestamp;
+
+	/* DatUpdateCount */ 
+	domain_info_ctx->saHpiDomainAlarmUpdateCount =
+		DomainInfo.DatUpdateCount;
+
+	/* DatUpdateTimestamp */ 
+	domain_info_ctx->saHpiDomainAlarmUpdateTimestamp =
+		DomainInfo.DatUpdateTimestamp;
+
+	/* ActiveAlarms */
+	domain_info_ctx->saHpiDomainActiveAlarms = 
+		DomainInfo.ActiveAlarms;
+
+	/* CriticalAlarms */
+	domain_info_ctx->saHpiDomainCriticalAlarms =
+		DomainInfo.CriticalAlarms;
+
+	/* MajorAlarms */
+	domain_info_ctx->saHpiDomainMajorAlarms = 
+		DomainInfo.MajorAlarms;
+
+	/* MinorAlarms */
+	domain_info_ctx->saHpiDomainMinorAlarms =
+		DomainInfo.MinorAlarms;
+
+	/* DatUserAlarmLimit */
+	domain_info_ctx->saHpiDomainAlarmUserLimit =
+		DomainInfo.DatUserAlarmLimit;
+
+	/* DatOverflow */
+	domain_info_ctx->saHpiDomainAlarmOverflow = 
+		(DomainInfo.DatOverflow == 0) ? 1 : 2;
+
+	/* GUID */
+	memcpy(domain_info_ctx->saHpiDomainGuid,
+	       DomainInfo.Guid,
+	       16);
+	domain_info_ctx->saHpiDomainGuid_len = 16;
+
+	/* commit/add */
+	CONTAINER_INSERT(cb.container, domain_info_ctx);
+
+	}
+
+	return rval;
+
+}
+
 
 
