@@ -1378,7 +1378,11 @@ int populate_rpt(void) {
 		/* commit/add */
 		CONTAINER_INSERT(cb.container, rpt_ctx);
 
-		populate_hot_swap(&rpt_entry);
+		/* populate hotswap tables if this resource has */
+		/* hotswap capability */
+		if (rpt_entry.ResourceCapabilities & 
+			SAHPI_CAPABILITY_MANAGED_HOTSWAP) 
+			populate_hot_swap(&rpt_entry);
 
 	}
 

@@ -36,6 +36,7 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include "hpiSubagent.h"
 #include "saHpiHotSwapTable.h"
 #include "hpiCheckIndice.h"
 
@@ -1265,5 +1266,109 @@ saHpiHotSwapTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiHotSwapTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+//*******************************************************
+//*******************************************************
+// saHpiHotsSwapTable support functions	 
+//*******************************************************
+//*******************************************************
+int populate_hot_swap(SaHpiRptEntryT *rpt_entry)
+{
+	oid hot_swap_oids[HOT_SWAP_INDEX_LEN];
+	netsnmp_index hot_swap_index;
+
+	saHpiHotSwapTable_context  *hot_swap_ctx;
+	int rc = 0;
+	SaHpiSessionIdT sid;
+
+	SaHpiHsIndicatorStateT indicator_state;
+	SaHpiHsStateT hs_state;
+	SaHpiTimeoutT extract_timeout;
+	SaHpiResetActionT reset_action;
+	SaHpiPowerStateT power_state;
+
+	/* create hotswap tuple/ index */ 
+	/* INDEX { saHpiDomainId, saHpiResourceId } */
+	hot_swap_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID; 
+	hot_swap_oids[1] = rpt_entry->ResourceId; 
+	hot_swap_index.len =  HOT_SWAP_INDEX_LEN;
+	hot_swap_index.oids = (oid *) & hot_swap_oids;     
+	/* See if it exists. */
+	hot_swap_ctx = NULL;
+	hot_swap_ctx = CONTAINER_FIND (cb.container, &hot_swap_index);
+	// If we don't find it - we create it.
+
+	if (!hot_swap_ctx) 
+		/* New entry. Add it */
+		hot_swap_ctx = saHpiHotSwapTable_create_row (&hot_swap_index);
+
+	/* fill in values in ctx*/
+	/* saHpiHotSwapIndicator */ 
+	if ( SA_OK == saHpiHotSwapIndicatorStateGet (sid, 
+						     rpt_entry->ResourceId, 
+						     &indicator_state) ) {
+		hot_swap_ctx->saHpiHotSwapIndicator = 
+			( indicator_state == 0 ) ? 1 : 2;
+	}
+
+	/* saHpiHotSwapState */
+	if (SA_OK == saHpiHotSwapStateGet(sid,
+					  rpt_entry->ResourceId,
+					  &hs_state
+					  ) ){
+		hot_swap_ctx->saHpiHotSwapState = hs_state + 1; 
+	}
+
+
+	/* saHpiHotSwapExtractTimeout */
+	if ( SA_OK == saHpiAutoExtractTimeoutGet(sid,
+						 rpt_entry->ResourceId,
+						 &extract_timeout) ) {
+		hot_swap_ctx->saHpiHotSwapExtractTimeout =
+			extract_timeout;
+	}
+
+	/* saHpiHotSwapActionRequest */
+	/* write only */
+
+	/* saHpiHotSwapPolicyCancel */
+	/* write only */
+
+	/* saHpiHotSwapResourceRequest */
+	/* write only */
+
+	/* saHpiHotSwapResetAction */
+	if ( SA_OK == saHpiResourceResetStateGet(sid,
+						 rpt_entry->ResourceId,
+						 &reset_action) ) {
+		hot_swap_ctx->saHpiHotSwapResetAction =
+			reset_action+1;
+	}
+
+	/* saHpiHotSwapPowerAction */
+	if ( SA_OK == saHpiResourcePowerStateGet(sid,
+						 rpt_entry->ResourceId,
+						 &power_state) ) {
+		hot_swap_ctx->saHpiHotSwapPowerAction =
+			power_state+1;
+	}
+
+	/* saHpiHotSwapRTP */
+	/* saHpiHotSwapRTP_len */
+	//hot_swap_ctx->saHpiHotSwapRTP
+	//hot_swap_ctx->saHpiHotSwapRTP_len
+
+
+	/* commit/add */
+	CONTAINER_INSERT(cb.container, &hot_swap_index);
+
+	DEBUGMSGTL ((AGENT, "populate_hot_swap. Exit (rc: %d).\n", rc));
+
+	return rc;
+
+
+}
+
+
 
 
