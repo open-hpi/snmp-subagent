@@ -4358,21 +4358,6 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsSupported		OCTET STRING,
 	
-
---    SaHpiSensorDataFormatT  DataFormat;    /* Format of the data */
---typedef struct {
---    SaHpiBoolT                 IsSupported;    /* Indicates if sensor data 
---                                                   readings are supported.*/
---    SaHpiSensorReadingTypeT    ReadingType;    /* Type of value for sensor 
---                                                   reading. */
---    SaHpiSensorUnitsT          BaseUnits;      /* Base units (meters, etc.)  */
---    SaHpiSensorUnitsT          ModifierUnits;  /* Modifier unit (second, etc.)*/
---    SaHpiSensorModUnitUseT     ModifierUse;    /* Modifier use(m/sec, etc.)  */
---    SaHpiBoolT                 Percentage;     /* Is value a percentage */
---    SaHpiSensorRangeT          Range;          /* Valid range of sensor */
---    SaHpiFloat64T              AccuracyFactor; /* Accuracy */
---} SaHpiSensorDataFormatT;
-
 	saHpiSensorIsSupported		        TruthValue, 
 	saHpiSensorReadingType			INTEGER,
 	saHpiSensorBaseUnits			SaHpiSensorUnits,
@@ -4381,13 +4366,12 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorPercentage 			TruthValue,
 	        
 	saHpiSensorRangeFlags  			OCTET STRING,      					
---	saHpiSensorReadingMax			OCTET STRING,
---	saHpiSensorReadingMin			OCTET STRING,
---	saHpiSensorReadingNominal		OCTET STRING,
---	saHpiSensorReadingNormalMax		OCTET STRING,
---	saHpiSensorReadingNormalMn		OCTET STRING,
 	
 	saHpiAccuracyFactor			OCTET STRING,
+    	
+	saHpiNonlinear 				TruthValue,
+	
+	saHpiOem				Unsigned32,
 	
 	saHpiSensorRDR				RowPointer
 	}
@@ -4711,15 +4695,33 @@ saHpiAccuracyFactor	OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        ""
+        "The Accuracy Factor is expressed as a floating point percentage
+	(e.g. 0.05 = 5%) and represents statistically how close the measured 
+	reading is to the actual value. It is an interpreted value that 
+	figures in all sensor accuracies, resolutions, and tolerances."
         ::= {saHpiSensorEntry 14}
-
+	
+saHpiNonlinear 		OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " If this flag is set, hysteresis values are calculated
+	at the nominal sensor value."
+        ::= {saHpiSensorEntry 15}
+	
+saHpiOem 		OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Reserved for OEM use."
+        ::= {saHpiSensorEntry 16}
+	    
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 15}
+	::= {saHpiSensorEntry 17}
 
 --
 -- /*******************************************************************************
@@ -5027,10 +5029,6 @@ saHpiSensorReadingNormalMinValue	OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingNormalMinEntry 3}
 
-
-
-
-
 --
 -- Threshold values
 --
@@ -5056,12 +5054,10 @@ saHpiSensorThdLowCriticalEntry OBJECT-TYPE
         ::= {saHpiSensorThdLowCriticalTable 1}
 
 SaHpiSensorThdLowCriticalEntry ::= SEQUENCE {
-	saHpiSensorThdLowCriticalIsReadable		TruthValue,
+   	saHpiSensorThdLowCriticalIsReadable		TruthValue,
 	saHpiSensorThdLowCriticalIsWritable		TruthValue,
-	saHpiSensorThdLowCriticalIsFixed		TruthValue,
-	saHpiSensorThdLowCriticalValuesPresent		INTEGER,
-	saHpiSensorThdLowCriticalRaw			Unsigned32,
-	saHpiSensorThdLowCriticalInterpreted		OCTET STRING
+	saHpiSensorThdLowCriticalType			SaHpiSensorReadingType,	
+	saHpiSensorThdLowCriticalValue			SaHpiSensorReadingValue
 	}
 
 saHpiSensorThdLowCriticalIsReadable	OBJECT-TYPE
@@ -5090,79 +5086,22 @@ saHpiSensorThdLowCriticalIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdLowCriticalEntry 2}
-
-saHpiSensorThdLowCriticalIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdLowCriticalRaw 
-	and saHpiSensorThdLowCriticalInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowCriticalEntry 3}
-
-saHpiSensorThdLowCriticalValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowCriticalEntry 4}
-
-saHpiSensorThdLowCriticalRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdLowCriticalType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the catastrophic lower 
-	end of the range that impacts the functional status of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowCriticalEntry 3}
 
-	Note:
-	If 'saHpiSensorThdLowCriticalIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdLowCriticalisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdLowCriticalIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdLowCriticalEntry 5}
-
-saHpiSensorThdLowCriticalInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the catastrophic lower
-	end of the range that impacts the functional status of the sensor.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdLowCriticalEntry 6}
-
-
+saHpiSensorThdLowCriticalValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowCriticalEntry 4}
 
 saHpiSensorThdLowMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMajorEntry
@@ -5185,12 +5124,10 @@ saHpiSensorThdLowMajorEntry OBJECT-TYPE
         ::= {saHpiSensorThdLowMajorTable 1}
 
 SaHpiSensorThdLowMajorEntry ::= SEQUENCE {
-	saHpiSensorThdLowMajorIsReadable		TruthValue,
+   	saHpiSensorThdLowMajorIsReadable		TruthValue,
 	saHpiSensorThdLowMajorIsWritable		TruthValue,
-	saHpiSensorThdLowMajorIsFixed			TruthValue,
-	saHpiSensorThdLowMajorValuesPresent		INTEGER,
-	saHpiSensorThdLowMajorRaw			Unsigned32,
-	saHpiSensorThdLowMajorInterpreted		OCTET STRING
+	saHpiSensorThdLowMajorType			SaHpiSensorReadingType,	
+	saHpiSensorThdLowMajorValue			SaHpiSensorReadingValue
 	}
 
 saHpiSensorThdLowMajorIsReadable	OBJECT-TYPE
@@ -5220,78 +5157,21 @@ saHpiSensorThdLowMajorIsWritable	OBJECT-TYPE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdLowMajorEntry 2}
 
-saHpiSensorThdLowMajorIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdLowMajorRaw 
-	and saHpiSensorThdLowMajorInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowMajorEntry 3}
-
-saHpiSensorThdLowMajorValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowMajorEntry 4}
-
-saHpiSensorThdLowMajorRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+saHpiSensorThdLowMajorType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the severely
-	degraded status at lower end of the range that impacts the functional 
-	status of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowMajorEntry 3}
 
-	Note:
-	If 'saHpiSensorThdLowMajorIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdLowMajorisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdLowMajorIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdLowMajorEntry 5}
-
-saHpiSensorThdLowMajorInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the severely degraded
-	status at the end of the range that impacts the functional status 
-	of the sensor.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdLowMajorEntry 6}
+saHpiSensorThdLowMajorValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowMajorEntry 4}
 
 saHpiSensorThdLowMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMinorEntry
@@ -5313,12 +5193,10 @@ saHpiSensorThdLowMinorEntry OBJECT-TYPE
         ::= {saHpiSensorThdLowMinorTable 1}
 
 SaHpiSensorThdLowMinorEntry ::= SEQUENCE {
-	saHpiSensorThdLowMinorIsReadable	TruthValue,
+   	saHpiSensorThdLowMinorIsReadable	TruthValue,
 	saHpiSensorThdLowMinorIsWritable	TruthValue,
-	saHpiSensorThdLowMinorIsFixed		TruthValue,
-	saHpiSensorThdLowMinorValuesPresent	INTEGER,
-	saHpiSensorThdLowMinorRaw		Unsigned32,
-	saHpiSensorThdLowMinorInterpreted	OCTET STRING
+	saHpiSensorThdLowMinorType		SaHpiSensorReadingType,	
+	saHpiSensorThdLowMinorValue		SaHpiSensorReadingValue
 	}
 
 
@@ -5348,81 +5226,22 @@ saHpiSensorThdLowMinorIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdLowMinorEntry 2}
-
-saHpiSensorThdLowMinorIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdLowMinorRaw 
-	and saHpiSensorThdLowMinorInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowMinorEntry 3}
-
-saHpiSensorThdLowMinorValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdLowMinorEntry 4}
-
-saHpiSensorThdLowMinorRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdLowMinorType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which is the degraded status
-	at the lower end of range that does not impact the functional status 
-	of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowMinorEntry 3}
 
-	Note:
-	If 'saHpiSensorThdLowMinorIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdLowMinorisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdLowMinorIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdLowMinorEntry 5}
-
-saHpiSensorThdLowMinorInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which is the degraded status at the lower 
-	end that does not impact the functional status of the sensor. 
-	
-	Example of this value:	
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdLowMinorEntry 6}
-
-
-
+saHpiSensorThdLowMinorValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdLowMinorEntry 4}
 
 saHpiSensorThdUpCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpCriticalEntry
@@ -5445,14 +5264,11 @@ saHpiSensorThdUpCriticalEntry OBJECT-TYPE
         ::= {saHpiSensorThdUpCriticalTable 1}
 
 SaHpiSensorThdUpCriticalEntry ::= SEQUENCE {
-	saHpiSensorThdUpCriticalIsReadable		TruthValue,
-	saHpiSensorThdUpCriticalIsWritable		TruthValue,
-	saHpiSensorThdUpCriticalIsFixed			TruthValue,
-	saHpiSensorThdUpCriticalValuesPresent		INTEGER,
-	saHpiSensorThdUpCriticalRaw			Unsigned32,
-	saHpiSensorThdUpCriticalInterpreted		OCTET STRING
+   	saHpiSensorThdUpCriticalIsReadable	TruthValue,
+	saHpiSensorThdUpCriticalIsWritable	TruthValue,
+	saHpiSensorThdUpCriticalType		SaHpiSensorReadingType,	
+	saHpiSensorThdUpCriticalValue		SaHpiSensorReadingValue
 	}
-
 
 saHpiSensorThdUpCriticalIsReadable	OBJECT-TYPE
 	SYNTAX		TruthValue
@@ -5480,80 +5296,22 @@ saHpiSensorThdUpCriticalIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdUpCriticalEntry 2}
-
-saHpiSensorThdUpCriticalIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdUpCriticalRaw 
-	and saHpiSensorThdUpCriticalInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpCriticalEntry 3}
-
-saHpiSensorThdUpCriticalValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpCriticalEntry 4}
-
-saHpiSensorThdUpCriticalRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdUpCriticalType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the 
-	catastrophic status at upper end of the range that impacts the functional 
-	status of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpCriticalEntry 3}
 
-	Note:
-	If 'saHpiSensorThdUpCriticalIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdUpCriticalisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdUpCriticalIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdUpCriticalEntry 5}
-
-saHpiSensorThdUpCriticalInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the  catastrophic
-	status at the upper end of the range that impacts the functional status 
-	of the sensor.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdUpCriticalEntry 6}
-
+saHpiSensorThdUpCriticalValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpCriticalEntry 4}
 
 saHpiSensorThdUpMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMajorEntry
@@ -5576,14 +5334,11 @@ saHpiSensorThdUpMajorEntry OBJECT-TYPE
         ::= {saHpiSensorThdUpMajorTable 1}
 
 SaHpiSensorThdUpMajorEntry ::= SEQUENCE {
-	saHpiSensorThdUpMajorIsReadable		TruthValue,
+   	saHpiSensorThdUpMajorIsReadable		TruthValue,
 	saHpiSensorThdUpMajorIsWritable		TruthValue,
-	saHpiSensorThdUpMajorIsFixed		TruthValue,
-	saHpiSensorThdUpMajorValuesPresent	INTEGER,
-	saHpiSensorThdUpMajorRaw		Unsigned32,
-	saHpiSensorThdUpMajorInterpreted	OCTET STRING
+	saHpiSensorThdUpMajorType		SaHpiSensorReadingType,	
+	saHpiSensorThdUpMajorValue		SaHpiSensorReadingValue
 	}
-
 
 saHpiSensorThdUpMajorIsReadable	OBJECT-TYPE
 	SYNTAX		TruthValue
@@ -5611,80 +5366,22 @@ saHpiSensorThdUpMajorIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdUpMajorEntry 2}
-
-saHpiSensorThdUpMajorIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdUpMajorRaw 
-	and saHpiSensorThdUpMajorInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpMajorEntry 3}
-
-saHpiSensorThdUpMajorValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpMajorEntry 4}
-
-saHpiSensorThdUpMajorRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdUpMajorType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the severely
-	degraded status at upper end of the range that impacts the functional 
-	status of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpMajorEntry 3}
 
-	Note:
-	If 'saHpiSensorThdUpMajorIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdUpMajorisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdUpMajorIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdUpMajorEntry 5}
-
-saHpiSensorThdUpMajorInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the severely degraded
-	status at the upper end of the range that impacts the functional status 
-	of the sensor.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdUpMajorEntry 6}
-
+saHpiSensorThdUpMajorValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpMajorEntry 4}
 
 saHpiSensorThdUpMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMinorEntry
@@ -5707,14 +5404,11 @@ saHpiSensorThdUpMinorEntry OBJECT-TYPE
         ::= {saHpiSensorThdUpMinorTable 1}
 
 SaHpiSensorThdUpMinorEntry ::= SEQUENCE {
-	saHpiSensorThdUpMinorIsReadable		TruthValue,
+   	saHpiSensorThdUpMinorIsReadable		TruthValue,
 	saHpiSensorThdUpMinorIsWritable		TruthValue,
-	saHpiSensorThdUpMinorIsFixed			TruthValue,
-	saHpiSensorThdUpMinorValuesPresent		INTEGER,
-	saHpiSensorThdUpMinorRaw			Unsigned32,
-	saHpiSensorThdUpMinorInterpreted		OCTET STRING
+	saHpiSensorThdUpMinorType		SaHpiSensorReadingType,	
+	saHpiSensorThdUpMinorValue		SaHpiSensorReadingValue
 	}
-
 
 saHpiSensorThdUpMinorIsReadable	OBJECT-TYPE
 	SYNTAX		TruthValue
@@ -5742,82 +5436,22 @@ saHpiSensorThdUpMinorIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdUpMinorEntry 2}
-
-saHpiSensorThdUpMinorIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdUpMinorRaw 
-	and saHpiSensorThdUpMinorInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpMinorEntry 3}
-
-saHpiSensorThdUpMinorValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdUpMinorEntry 4}
-
-saHpiSensorThdUpMinorRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdUpMinorType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the 
-	degraded status at upper end of the range that impacts the functional 
-	status of the sensor.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpMinorEntry 3}
 
-	Note:
-	If 'saHpiSensorThdUpMinorIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdUpMinorisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdUpMinorIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdUpMinorEntry 5}
-
-saHpiSensorThdUpMinorInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the  degraded
-	status at the upper end of the range that impacts the functional status 
-	of the sensor.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdUpMinorEntry 6}
-
-
-
+saHpiSensorThdUpMinorValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdUpMinorEntry 4}
 
 
 saHpiSensorThdPosHysteresisTable OBJECT-TYPE
@@ -5841,14 +5475,11 @@ saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
         ::= {saHpiSensorThdPosHysteresisTable 1}
 
 SaHpiSensorThdPosHysteresisEntry ::= SEQUENCE {
-	saHpiSensorThdPosHysteresisIsReadable		TruthValue,
+   	saHpiSensorThdPosHysteresisIsReadable		TruthValue,
 	saHpiSensorThdPosHysteresisIsWritable		TruthValue,
-	saHpiSensorThdPosHysteresisIsFixed		TruthValue,
-	saHpiSensorThdPosHysteresisValuesPresent	INTEGER,
-	saHpiSensorThdPosHysteresisRaw			Unsigned32,
-	saHpiSensorThdPosHysteresisInterpreted		OCTET STRING
+	saHpiSensorThdPosHysteresisType			SaHpiSensorReadingType,	
+	saHpiSensorThdPosHysteresisValue		SaHpiSensorReadingValue
 	}
-
 
 saHpiSensorThdPosHysteresisIsReadable	OBJECT-TYPE
 	SYNTAX		TruthValue
@@ -5876,78 +5507,22 @@ saHpiSensorThdPosHysteresisIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdPosHysteresisEntry 2}
-
-saHpiSensorThdPosHysteresisIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdPosHysteresisRaw 
-	and saHpiSensorThdPosHysteresisInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdPosHysteresisEntry 3}
-
-saHpiSensorThdPosHysteresisValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdPosHysteresisEntry 4}
-
-saHpiSensorThdPosHysteresisRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdPosHysteresisType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the 
-	positive hysteresis over the range in which a change is accepted.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdPosHysteresisEntry 3}
 
-	Note:
-	If 'saHpiSensorThdPosHysteresisIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdPosHysteresisisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdPosHysteresisIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdPosHysteresisEntry 5}
-
-saHpiSensorThdPosHysteresisInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the 
-	positive hysteresis over the range in which a change is accepted.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdPosHysteresisEntry 6}
-
+saHpiSensorThdPosHysteresisValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdPosHysteresisEntry 4}
 
 saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdNegHysteresisEntry
@@ -5970,12 +5545,10 @@ saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
         ::= {saHpiSensorThdNegHysteresisTable 1}
 
 SaHpiSensorThdNegHysteresisEntry ::= SEQUENCE {
-	saHpiSensorThdNegHysteresisIsReadable		TruthValue,
+   	saHpiSensorThdNegHysteresisIsReadable		TruthValue,
 	saHpiSensorThdNegHysteresisIsWritable		TruthValue,
-	saHpiSensorThdNegHysteresisIsFixed		TruthValue,
-	saHpiSensorThdNegHysteresisValuesPresent	INTEGER,
-	saHpiSensorThdNegHysteresisRaw			Unsigned32,
-	saHpiSensorThdNegHysteresisInterpreted		OCTET STRING
+	saHpiSensorThdNegHysteresisType			SaHpiSensorReadingType,	
+	saHpiSensorThdNegHysteresisValue		SaHpiSensorReadingValue
 	}
 
 
@@ -6005,77 +5578,22 @@ saHpiSensorThdNegHysteresisIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdNegHysteresisEntry 2}
-
-saHpiSensorThdNegHysteresisIsFixed	OBJECT-TYPE
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Defines if sensor threshold information is fixed - cannot be changed.
-
-	If set to 'false(2)' writting to saHpiSensorThdNegHysteresisRaw 
-	and saHpiSensorThdNegHysteresisInterpreted will not change the
-	threshold values."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdNegHysteresisEntry 3}
-
-saHpiSensorThdNegHysteresisValuesPresent OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Each sensor may support threshold information in
-	raw or interpreted representations of the sensor."
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
-	::= {saHpiSensorThdNegHysteresisEntry 4}
-
-saHpiSensorThdNegHysteresisRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-write
+	
+saHpiSensorThdNegHysteresisType		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingType
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The raw (as unsigned 32 bit value) value which defines the
-	negative hysteresis over the range in which a change is accepted.
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdNegHysteresisEntry 3}
 
-	Note:
-	If 'saHpiSensorThdNegHysteresisIsReadable' is set to 'true(1)', this value
-	can be read. Otherwise the value is set to '-1'.
-
-	If 'saHpiSensorThdNegHysteresisisWriteable' is set to 'true(1)', this value
-	can be changed. Otherwise this value can not be modified.
-	After the write operation the value of interpreted object will change
-	accordingly.
-	
-	Finally, if 'saHpiSensorThdNegHysteresisIsFixed' objects is set to 'true(1)',
-	this value can not be changed.
-	"
-        ::= {saHpiSensorThdNegHysteresisEntry 5}
-
-saHpiSensorThdNegHysteresisInterpreted OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Interpreted threshold value which defines the negative hysteresis
-	over the range in which a change is accepted.
-
-	Example of this is:
-
-		'32.6F'
-		'1900.33 rpm'
-		'39 newton over cuM'
-		'23123198918392.239998 gram over cuCm'
-	"
-	REFERENCE
-	"Object derieved from SAF SAI-HPI-A.01.01 spec page 87."
-	::= {saHpiSensorThdNegHysteresisEntry 6}
+saHpiSensorThdNegHysteresisValue		OBJECT-TYPE
+        SYNTAX          SaHpiSensorReadingValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"See Definition in TEXTUAL-CONVENTOIN."
+        ::= {saHpiSensorThdNegHysteresisEntry 4}
 
 --
 -- /*******************************************************************************
@@ -7116,12 +6634,10 @@ saHpiSensorReadingNormalMinGroup OBJECT-GROUP
 	
 saHpiSensorThdLowCriticalGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdLowCriticalValuesPresent,
-		saHpiSensorThdLowCriticalIsReadable,
-		saHpiSensorThdLowCriticalIsWritable,
-		saHpiSensorThdLowCriticalIsFixed,
-		saHpiSensorThdLowCriticalRaw,
-		saHpiSensorThdLowCriticalInterpreted
+		saHpiSensorThdLowCriticalIsReadable,   	
+		saHpiSensorThdLowCriticalIsWritable,   
+		saHpiSensorThdLowCriticalType,         
+		saHpiSensorThdLowCriticalValue        
 	}
 	STATUS current
 	DESCRIPTION
@@ -7132,12 +6648,10 @@ saHpiSensorThdLowCriticalGroup OBJECT-GROUP
 
 saHpiSensorThdLowMajorGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdLowMajorValuesPresent,
-		saHpiSensorThdLowMajorIsReadable,
-		saHpiSensorThdLowMajorIsWritable,
-		saHpiSensorThdLowMajorIsFixed,
-		saHpiSensorThdLowMajorRaw,
-		saHpiSensorThdLowMajorInterpreted
+		saHpiSensorThdLowMajorIsReadable,           
+		saHpiSensorThdLowMajorIsWritable,    
+		saHpiSensorThdLowMajorType,          
+		saHpiSensorThdLowMajorValue         
 	}
 	STATUS current
 	DESCRIPTION
@@ -7148,12 +6662,10 @@ saHpiSensorThdLowMajorGroup OBJECT-GROUP
 
 saHpiSensorThdLowMinorGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdLowMinorValuesPresent,
-		saHpiSensorThdLowMinorIsReadable,
-		saHpiSensorThdLowMinorIsWritable,
-		saHpiSensorThdLowMinorIsFixed,
-		saHpiSensorThdLowMinorRaw,
-		saHpiSensorThdLowMinorInterpreted
+		saHpiSensorThdLowMinorIsReadable,  	
+		saHpiSensorThdLowMinorIsWritable,  
+		saHpiSensorThdLowMinorType,        
+		saHpiSensorThdLowMinorValue       
 	}
 	STATUS current
 	DESCRIPTION
@@ -7165,12 +6677,10 @@ saHpiSensorThdLowMinorGroup OBJECT-GROUP
 
 saHpiSensorThdUpCriticalGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdUpCriticalValuesPresent,
 		saHpiSensorThdUpCriticalIsReadable,
-		saHpiSensorThdUpCriticalIsWritable,
-		saHpiSensorThdUpCriticalIsFixed,
-		saHpiSensorThdUpCriticalRaw,
-		saHpiSensorThdUpCriticalInterpreted
+		saHpiSensorThdUpCriticalIsWritable,  
+		saHpiSensorThdUpCriticalType,         
+		saHpiSensorThdUpCriticalValue        
 	}
 	STATUS current
 	DESCRIPTION
@@ -7181,12 +6691,10 @@ saHpiSensorThdUpCriticalGroup OBJECT-GROUP
 
 saHpiSensorThdUpMajorGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdUpMajorValuesPresent,
-		saHpiSensorThdUpMajorIsReadable,
-		saHpiSensorThdUpMajorIsWritable,
-		saHpiSensorThdUpMajorIsFixed,
-		saHpiSensorThdUpMajorRaw,
-		saHpiSensorThdUpMajorInterpreted
+		saHpiSensorThdUpMajorIsReadable,     	
+		saHpiSensorThdUpMajorIsWritable,     
+		saHpiSensorThdUpMajorType,           
+		saHpiSensorThdUpMajorValue          
 	}
 	STATUS current
 	DESCRIPTION
@@ -7198,12 +6706,10 @@ saHpiSensorThdUpMajorGroup OBJECT-GROUP
 
 saHpiSensorThdUpMinorGroup OBJECT-GROUP 
 	OBJECTS {
-		saHpiSensorThdUpMinorValuesPresent,
-		saHpiSensorThdUpMinorIsReadable,
-		saHpiSensorThdUpMinorIsWritable,
-		saHpiSensorThdUpMinorIsFixed,
-		saHpiSensorThdUpMinorRaw,
-		saHpiSensorThdUpMinorInterpreted
+		saHpiSensorThdUpMinorIsReadable,   
+		saHpiSensorThdUpMinorIsWritable,   
+		saHpiSensorThdUpMinorType,         
+		saHpiSensorThdUpMinorValue        	
 	}
 	STATUS current
 	DESCRIPTION
@@ -7215,12 +6721,10 @@ saHpiSensorThdUpMinorGroup OBJECT-GROUP
 
 saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdPosHysteresisValuesPresent,
-		saHpiSensorThdPosHysteresisIsReadable,
-		saHpiSensorThdPosHysteresisIsWritable,
-		saHpiSensorThdPosHysteresisIsFixed,
-		saHpiSensorThdPosHysteresisRaw,
-		saHpiSensorThdPosHysteresisInterpreted
+		saHpiSensorThdPosHysteresisIsReadable,   
+		saHpiSensorThdPosHysteresisIsWritable,   	
+		saHpiSensorThdPosHysteresisType,         
+		saHpiSensorThdPosHysteresisValue    
 	}
 	STATUS current
 	DESCRIPTION
@@ -7231,12 +6735,10 @@ saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
 
 saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorThdNegHysteresisValuesPresent,
-		saHpiSensorThdNegHysteresisIsReadable,
-		saHpiSensorThdNegHysteresisIsWritable,
-		saHpiSensorThdNegHysteresisIsFixed,
-		saHpiSensorThdNegHysteresisRaw,
-		saHpiSensorThdNegHysteresisInterpreted
+		saHpiSensorThdNegHysteresisIsReadable,   	
+		saHpiSensorThdNegHysteresisIsWritable,   
+		saHpiSensorThdNegHysteresisType,         
+		saHpiSensorThdNegHysteresisValue        
 	}
 	STATUS current
 	DESCRIPTION
