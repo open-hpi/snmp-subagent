@@ -1125,7 +1125,7 @@ saHpiDomainReferenceUpdateTimestamp OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the
-        DRT table is changed. Refer to SaSaHpiTime for full describption."
+        DRT table is changed. Refer to SaHpiTime for full describption."
 	::=   {saHpiDomainEntry 8 }
 
 
@@ -1146,7 +1146,7 @@ saHpiDomainResourcePresenceUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "This timestamp is set any time the RPT table is changed.
-        Refer to SaSaHpiTime for full describption."
+        Refer to SaHpiTime for full describption."
 	::=   {saHpiDomainEntry 10 }
 
 
@@ -1166,7 +1166,7 @@ saHpiDomainAlarmUpdateTimestamp OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the DAT is changed.
-        Refer to SaSaHpiTime for full describption."
+        Refer to SaHpiTime for full describption."
 	::=   {saHpiDomainEntry 12 }
 
 
@@ -1380,7 +1380,7 @@ saHpiDomainAlarmTimestamp OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Time when alarm was added to the DAT table.
-        Refer to SaSaHpiTime for full describption."
+        Refer to SaHpiTime for full describption."
         ::= {saHpiDomainAlarmEntry 2}
 
 saHpiDomainAlarmSeverity OBJECT-TYPE 
@@ -1599,7 +1599,7 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Refer to SaSaHpiTime for full describption."
+        DESCRIPTION     "Refer to SaHpiTime for full describption."
         ::= {hpiEntity 9}
 
 saHpiResourceTable OBJECT-TYPE
