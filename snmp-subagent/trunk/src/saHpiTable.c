@@ -533,7 +533,7 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       ctx->saHpiResourceInfoAuxFirmwareRev =
 	entry->ResourceInfo.AuxFirmwareRev;
       ctx->saHpiResourceTagTextType = entry->ResourceTag.DataType + 1;
-      ctx->saHpiResourceTagTextLanguage = entry->ResourceTag.Language;
+      ctx->saHpiResourceTagTextLanguage = entry->ResourceTag.Language + 1;
       len = entry->ResourceTag.DataLength;
       //(entry->ResourceTag.DataLength > SAHPI_RESOURCE_TAG_MAX) ? 
       //SAHPI_RESOURCE_TAG_MAX : entry->ResourceTag.DataLength;
@@ -637,7 +637,7 @@ set_table_tag (saHpiTable_context * ctx)
 
       memset (&tag, 0x00, sizeof (SaHpiTextBufferT));
       tag.DataType = ctx->saHpiResourceTagTextType - 1;
-      tag.Language = ctx->saHpiResourceTagTextLanguage;
+      tag.Language = ctx->saHpiResourceTagTextLanguage - 1;
       tag.DataLength = ctx->saHpiResourceTag_len;
 
       memcpy (tag.Data, ctx->saHpiResourceTag, ctx->saHpiResourceTag_len);
@@ -760,7 +760,7 @@ set_table_param_control (saHpiTable_context * ctx)
   if (ctx)
     {
 
-      action = ctx->saHpiParamControl;
+      action = ctx->saHpiParamControl-1;
 
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);
@@ -1337,7 +1337,7 @@ saHpiTable_set_reserve2 (netsnmp_request_group * rg)
 
 	case COLUMN_SAHPIRESOURCESEVERITY:
 	  if (((*var->val.integer < 1) ||
-	       (*var->val.integer > 5)) && (*var->val.integer != 80))
+	       (*var->val.integer > 5)) && (*var->val.integer != 81))
 	    {
 	      rc = SNMP_ERR_BADVALUE;
 	    }
@@ -1352,7 +1352,7 @@ saHpiTable_set_reserve2 (netsnmp_request_group * rg)
 	  break;
 
 	case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-	  if (((*var->val.integer < 0) || (*var->val.integer > 136)))
+	  if (((*var->val.integer < 1) || (*var->val.integer > 137)))
 	    {
 	      rc = SNMP_ERR_BADVALUE;
 	    }
