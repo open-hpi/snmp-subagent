@@ -31,6 +31,7 @@
 <!ENTITY chapter1 SYSTEM "bookinfo.sgml">
 <!ENTITY chapter2 SYSTEM "introduction.sgml">
 <!ENTITY chapter3 SYSTEM "basics.sgml">
+<!ENTITY chapter4 SYSTEM "understanding.sgml">
 ]>
 
 <!--
@@ -41,17 +42,8 @@
 <book>
         &chapter1;
 	&chapter2;
-	&chapter3; <!--
-<chapter>
-  <title>End</title>
-    <sect1>
-        <title>Unfinished</title>
-	    <para>
-	This documentation is unfinshed.
-	        </para>
-	</sect1>
-</chapter>
--->
+	&chapter3;
+	&chapter4; 
 </book>
       
 
