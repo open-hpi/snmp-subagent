@@ -6469,7 +6469,8 @@ saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
+        DESCRIPTION     
+	"Pointer to resource data record for this particular inventory resource data record"
         ::= {saHpiInventoryEntry 7}
         
 -- **************************************
