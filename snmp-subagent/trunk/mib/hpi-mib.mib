@@ -2419,7 +2419,7 @@ saHpiHotSwapTable OBJECT-TYPE
     STATUS current
     DESCRIPTION
         "This table represents management attributes common to all hot swappable 
-         entities in the managed platform.  The entries in this table are 
+         resources in the managed platform.  The entries in this table are 
          straight from the HPI spec.  This table builds upon information present 
          in the Entity Table."
     ::= { hpiHotSwap 3 }
