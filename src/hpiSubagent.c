@@ -85,6 +85,80 @@ int build_full_oid(oid *prefix, size_t prefix_len,
   return AGENT_ERR_NOERROR;
 }
 
+
+netsnmp_variable_list *build_notification(
+		      const netsnmp_index *index,
+		      const trap_vars *var, const size_t var_len,
+		      const oid *notification_oid, const size_t notification_oid_len,
+		      const oid *root_table_oid, const size_t root_table_oid_len,
+		      const SaHpiDomainIdT domain_id, 
+		      const oid *domain_id_oid, const size_t domain_id_oid_len,
+		      const SaHpiResourceIdT resource_id, 
+		      const oid *resource_id_oid, const size_t resource_id_oid_len) {
+
+  int i,j;
+  netsnmp_variable_list *notification_vars = NULL;
+  oid snmptrap[] = { snmptrap_oid };
+  oid full_oid[MAX_OID_LEN];
+  size_t full_oid_len;
+
+
+
+  DEBUGMSGTL((AGENT,"--- build_notification: Entry.\n"));  
+
+
+  if ((root_table_oid_len + 2 + index-> len) > MAX_OID_LEN) {
+    DEBUGMSGTL((AGENT,"The length of the OID exceeds MAX_OID_LEN!\n"));
+    return NULL;
+  }
+
+  // First is the Notification_OID
+  snmp_varlist_add_variable(&notification_vars,
+			    snmptrap, OID_LENGTH(snmptrap),
+			    ASN_OBJECT_ID,
+			    (u_char *)notification_oid,
+			    notification_oid_len* sizeof(oid));
+  
+  // Next the DomainID
+  snmp_varlist_add_variable(&notification_vars,
+			    domain_id_oid, domain_id_oid_len,
+			    ASN_UNSIGNED,
+			    (u_char *)&domain_id,
+			    sizeof(SaHpiDomainIdT));
+  // The ResourceID
+  snmp_varlist_add_variable(&notification_vars,
+			    resource_id_oid, resource_id_oid_len,
+			    ASN_UNSIGNED,
+			    (u_char *)&resource_id,
+			    sizeof(SaHpiResourceIdT));
+  
+  // Attach the rest of information
+  for (i = 0; i < var_len; i++ ) {
+
+    // Generate the full OID.	
+    memcpy(full_oid, root_table_oid, root_table_oid_len * sizeof(oid));
+    full_oid_len = root_table_oid_len;
+    // Get the column number.
+    full_oid[full_oid_len++] = 1;
+    full_oid[full_oid_len++] = var[i].column;
+    // Put the index value in
+    for (j = 0; j< index->len; j++) {
+      full_oid[full_oid_len+j] = index->oids[j];
+    }
+    full_oid_len += index->len;
+    
+    snmp_varlist_add_variable(&notification_vars,
+			      full_oid,
+			      full_oid_len,
+			      var[i].type,
+			      var[i].value,
+			      var[i].value_len);
+    
+  }
+  DEBUGMSGTL((AGENT,"--- build_notification: Exit.\n"));    
+  return notification_vars;
+
+}  
 long
 calculate_hash_value(void *data, int len) {
 

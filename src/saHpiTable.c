@@ -59,11 +59,29 @@ static oid      saHpiEntryCount_oid[] =
 //    { 1, 3, 6, 1, 3, 90, 4, 6, 0 };
 //static oid saHpiResourceNotification[] = { hpiNotifications_OID, 6, 0 };
 
+static oid saHpiResourceNotification_oid[] = { hpiNotifications_OID, 6, 0 };
+
+#define RPT_NOTIF_COUNT 4
+#define RPT_NOTIF_ENTRY_ID 0
+#define RPT_NOTIF_ENTITY_PATH 1
+#define RPT_NOTIF_CAPABILITIES 2
+#define RPT_NOTIF_SEVERITY 3
+
+static trap_vars saHpiResourceNotification[]  = {
+  {COLUMN_SAHPIENTRYID, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIRESOURCEENTITYPATH, ASN_OCTET_STR, NULL, 0},
+  {COLUMN_SAHPIRESOURCECAPABILITIES, ASN_UNSIGNED, NULL ,0},
+  {COLUMN_SAHPIRESOURCESEVERITY, ASN_INTEGER, NULL, 0}};
+
+
 static int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
 			  saHpiTable_context *ctx,
 			  SaHpiTimeT *time,
-			  SaHpiBoolT *state);
+			  SaHpiBoolT *state,
+			  trap_vars **var,
+			  size_t *var_len,
+			  oid **var_oid);
 
 /*
 static void
@@ -96,13 +114,21 @@ populate_rpt() {
    long backup_count = entry_count;
 
    oid			rpt_oid[RPT_INDEX_NR];
-   oid                  full_oid[MAX_OID_LEN];
+   oid                  DomainID_oid[MAX_OID_LEN];
+   oid                  ResourceID_oid[MAX_OID_LEN];
    oid                  column[2];
-   int                  column_len = 2;
-   int                  full_oid_len;
+   //   int                  column_len = 2;
+   size_t              DomainID_oid_len;
+   size_t              ResourceID_oid_len;
+
    netsnmp_index	rpt_index;
    saHpiTable_context	*rpt_context; 
 
+   // Events:
+  oid *trap_oid;
+  trap_vars *trap = NULL;
+  size_t trap_len;
+  netsnmp_variable_list *trap_var;
 
    DEBUGMSGTL((AGENT,"--- populate_rpt: Entry.\n")); 
 
@@ -170,6 +196,23 @@ populate_rpt() {
 	     }
 	   }
 
+	   // Generate our full OID for the DomainID
+	   column[0] = 1;
+	   // Point to first object.
+	   column[1] = COLUMN_SAHPIDOMAINID;
+	   
+	   build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
+			  column, 2,
+			  &rpt_index,
+			  DomainID_oid, MAX_OID_LEN, &DomainID_oid_len);
+
+	   column[1] = COLUMN_SAHPIRESOURCEID;
+	   
+	   build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
+			  column, 2,
+			  &rpt_index,
+			  ResourceID_oid, MAX_OID_LEN, &ResourceID_oid_len);
+	   
 	   // By this stage, rpt_context surely has something in it.
 	   // '<table>_modify_context(..)' does a checksum check to see if 
 	   // the record needs to be altered.
@@ -177,41 +220,64 @@ populate_rpt() {
 	   if (saHpiTable_modify_context(&rpt_entry, 
 					 rpt_context,
 					 &time,
-					 &state) 
+					 &state,
+					 &trap, &trap_len, &trap_oid)
 		   == AGENT_NEW_ENTRY) {
 
 	     CONTAINER_INSERT(cb.container, rpt_context);
 
 	     entry_count = CONTAINER_SIZE(cb.container);
-	     /* IBM-KR: TODO
+	     /* IBM-KR: TODO */
 	     if (send_traps_on_startup == AGENT_TRUE) {
-	       send_saHpiTable_notification(rpt_context);
+	       if (trap != NULL) {
+		 trap_var = build_notification(&rpt_index,
+					       trap, trap_len,
+					       saHpiResourceNotification_oid, 
+					       OID_LENGTH(saHpiResourceNotification_oid),
+					       saHpiTable_oid, saHpiTable_oid_len,
+					       rpt_entry.DomainId,
+					       DomainID_oid, DomainID_oid_len,
+					       rpt_entry.ResourceId,
+					       ResourceID_oid, ResourceID_oid_len);
+		 if (trap_var != NULL) {
+		   // Add some more (entryCount, and entryUpdate)
+		   snmp_varlist_add_variable(&trap_var,
+					     saHpiEntryCount_oid, 
+					     OID_LENGTH(saHpiEntryCount_oid),
+					     ASN_COUNTER,
+					     (u_char *)&entry_count,
+					     sizeof(entry_count));
+		   snmp_varlist_add_variable(&trap_var,
+					     saHpiEntryUpdateCount_oid, 
+					     OID_LENGTH(saHpiEntryUpdateCount_oid),
+					     ASN_UNSIGNED,
+					     (u_char *)&update_entry_count,
+					     sizeof(update_entry_count));
+		   DEBUGMSGTL((AGENT,"Sending the TRAP\n"));
+		   send_v2trap(trap_var);
+		   snmp_free_varbind(trap_var);
+		 } else {
+		   DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+		 }
+
 	       }
-	     */
+	     }
 	   }
 
-	   // Now we have to see if this RTP record has any
-	   // RDRs. If so, need to populate RDR
-	   // Generate our full OID for the first object.
-	   column[0] = 1;
-	   // Point to first object.
-	   column[1] = COLUMN_SAHPIDOMAINID;
-	   
-	   build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
-			  column, column_len,
-			  &rpt_index,
-			  full_oid, MAX_OID_LEN, &full_oid_len);
+	 
 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
 	     populate_rdr(&rpt_entry,  
-			  full_oid, full_oid_len);
+			  DomainID_oid, DomainID_oid_len,
+			  ResourceID_oid, ResourceID_oid_len);
 	   }
 	   // if (rpt... blah
 	 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
 	     
 	     populate_hotswap(&rpt_entry, 
-			      full_oid, full_oid_len);
+			      DomainID_oid, DomainID_oid_len);
+	     //			      ResourceID_oid, ResourceID_oid_len);
 	     
 	     }
 	   // SEL and EVENTs MUST be the last to be populated. The reason
@@ -221,7 +287,9 @@ populate_rpt() {
 	     if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
-	     populate_sel(&rpt_entry);
+	       populate_sel(&rpt_entry,
+			    DomainID_oid, DomainID_oid_len,
+			    ResourceID_oid, ResourceID_oid_len);
 	   }
 	 } // rc != SA_OK
 	 // Try next one ?
@@ -250,7 +318,11 @@ int
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
 			  saHpiTable_context *ctx,
 			  SaHpiTimeT *time,
-			  SaHpiBoolT *state) {
+			  SaHpiBoolT *state,
+			   trap_vars **var,
+			  size_t *var_len,
+			  oid **var_trap_oid) {
+
 
   long hash;
   int len;
@@ -324,6 +396,33 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
     ctx->saHpiEventLogTime.low = htonl(ctx->saHpiEventLogTime.low);
 
     ctx->saHpiEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
+
+    // Fix the trap messages
+    saHpiResourceNotification[RPT_NOTIF_ENTRY_ID].value = 
+      (u_char *) &ctx->saHpiEntryID;
+    saHpiResourceNotification[RPT_NOTIF_ENTRY_ID].value_len = 
+      sizeof(ctx->saHpiEntryID);
+
+    saHpiResourceNotification[RPT_NOTIF_ENTITY_PATH].value = 
+      (u_char *) &ctx->saHpiResourceEntityPath;
+    saHpiResourceNotification[RPT_NOTIF_ENTITY_PATH].value_len = 
+      ctx->saHpiResourceEntityPath_len;
+
+    saHpiResourceNotification[RPT_NOTIF_CAPABILITIES].value = 
+      (u_char *) &ctx->saHpiResourceCapabilities;
+    saHpiResourceNotification[RPT_NOTIF_CAPABILITIES].value_len = 
+      sizeof(ctx->saHpiResourceCapabilities);
+
+    saHpiResourceNotification[RPT_NOTIF_SEVERITY].value = 
+      (u_char *) &ctx->saHpiResourceSeverity;
+    saHpiResourceNotification[RPT_NOTIF_SEVERITY].value_len = 
+      sizeof(ctx->saHpiResourceSeverity);
+    
+      // Point *var to this trap_vars. 
+    *var = (trap_vars *)&saHpiResourceNotification;
+      *var_len = RPT_NOTIF_COUNT;
+      *var_trap_oid = (oid *)&saHpiResourceNotification_oid;
+
 
     return AGENT_NEW_ENTRY;
   }
