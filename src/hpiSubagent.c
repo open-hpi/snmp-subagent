@@ -1066,39 +1066,37 @@ main (int argc, char **argv)
 	/* 
 	 * Initialize HPI library
 	 */
-	if (fdebug) 
-		printf("saHpiVersionGet\n");
+	DEBUGMSGTL ((AGENT, "saHpiVersionGet\n"));
 	hpiVer = saHpiVersionGet();
-	printf("Hpi Version %d Implemented.\n", hpiVer);
+	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));
 
-	if (fdebug) 
-		printf("saHpiSessionOpen\n");
+	DEBUGMSGTL ((AGENT, "saHpiSessionOpen\n"));
 	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
 	
 	if (rv != SA_OK) {
-		printf("saHpiSessionOpen returns %s\n",oh_lookup_error(rv));
+		DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns %s\n",
+			oh_lookup_error(rv)));
 		exit(-1);
 	}
-	if (fdebug)
-	       	printf("saHpiSessionOpen returns with SessionId %d\n", sessionid);
+   	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
+   		sessionid));
 
 	/*
 	 * Resource discovery
 	 */
-	if (fdebug) 
-		printf("saHpiDiscover\n");	
+	DEBUGMSGTL ((AGENT, "saHpiDiscover\n"));	
 	rv = saHpiDiscover(sessionid);
 	
 	if (rv != SA_OK) {
-		printf("saHpiDiscover returns %s\n",oh_lookup_error(rv));
+		DEBUGMSGTL ((AGENT, "saHpiDiscover returns %s\n",oh_lookup_error(rv)));
 		exit(-1);
 	}
 
 	init_snmp (AGENT);
 
 	/* Initialize subagent tables */
-	init_saHpiDomainInfoTable();
-	init_saHpiDomainAlarmTable();
+	init_saHpiDomainInfoTable(); 
+/*	init_saHpiDomainAlarmTable();
 	init_saHpiDomainReferenceTable();
 	
 	init_saHpiResourceTable();
@@ -1161,18 +1159,18 @@ main (int argc, char **argv)
 	init_saHpiOEMEventLogTable();
 	init_saHpiUserEventLogTable();
 	init_saHpiAnnouncementEventLogTable();	
-
+*/
 
 		if (send_traps_on_startup == AGENT_TRUE)
 			send_traps = AGENT_TRUE;
 
 		/* after initialization populate tables */
 		populate_saHpiDomainInfoTable();
-		populate_saHpiDomainAlarmTable();
+/*		populate_saHpiDomainAlarmTable();
 		poplulate_saHpiDomainReferenceTable();	
 		populate_saHpiResourceTable();
 		populate_saHpiRdrTable();		
-
+*/
 
 
 		dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
