@@ -19,8 +19,9 @@ extern          "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiEventIndex is internal */
-        /** Index saHpiEventTimestamp is internal */
+        /** Index saHpiDomainID is external */
+        /** Index saHpiResourceID is external */
+        /** Index saHpiEntryID is external */
 
     typedef struct saHpiEventTable_context_s {
         netsnmp_index   index;
@@ -31,6 +32,7 @@ extern          "C" {
      *
      * TODO: You will probably have to fix a few types here...
      */
+    /** TODO: add storage for external index(s)! */
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiEventIndex;
 

@@ -26,6 +26,7 @@
 #include <saHpiCtrlTable.h>
 #include <saHpiInventoryTable.h>
 #include <saHpiWatchdogTable.h>
+#include <saHpiSystemEventLogTable.h>
 #include <hpiSubagent.h>
 #include <alarm.h>
 #include <stdio.h>
@@ -238,6 +239,8 @@ main (int argc, char **argv) {
   initialize_table_saHpiCtrlTable();
   initialize_table_saHpiInventoryTable();
   initialize_table_saHpiWatchdogTable();
+
+  initialize_table_saHpiSystemEventLogTable();
 
   if (populate_rpt() != AGENT_ERR_NOERROR) {
     //goto stop;

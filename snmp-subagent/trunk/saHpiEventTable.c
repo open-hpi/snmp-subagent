@@ -310,8 +310,9 @@ saHpiEventTable_extract_index(saHpiEventTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
-    netsnmp_variable_list var_saHpiEventIndex;
-    netsnmp_variable_list var_saHpiEventTimestamp;
+    netsnmp_variable_list var_saHpiDomainID;
+    netsnmp_variable_list var_saHpiResourceID;
+    netsnmp_variable_list var_saHpiEntryID;
     int             err;
 
     /*
@@ -329,54 +330,73 @@ saHpiEventTable_extract_index(saHpiEventTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
-    memset(&var_saHpiEventIndex, 0x00, sizeof(var_saHpiEventIndex));
-    var_saHpiEventIndex.type = ASN_UNSIGNED;
+    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
+    var_saHpiDomainID.type = ASN_UNSIGNED;
        /** TODO: link this index to the next, or NULL for the last one */
 #ifdef TABLE_CONTAINER_TODO
     snmp_log(LOG_ERR,
              "saHpiEventTable_extract_index index list not implemented!\n");
     return 0;
 #else
-    var_saHpiEventIndex.next_variable = &var_XX;
+    var_saHpiDomainID.next_variable = &var_XX;
 #endif
 
-    memset(&var_saHpiEventTimestamp, 0x00,
-           sizeof(var_saHpiEventTimestamp));
-    var_saHpiEventTimestamp.type = ASN_TIMETICKS;
+    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
+    var_saHpiResourceID.type = ASN_UNSIGNED;
        /** TODO: link this index to the next, or NULL for the last one */
 #ifdef TABLE_CONTAINER_TODO
     snmp_log(LOG_ERR,
              "saHpiEventTable_extract_index index list not implemented!\n");
     return 0;
 #else
-    var_saHpiEventTimestamp.next_variable = &var_XX;
+    var_saHpiResourceID.next_variable = &var_XX;
+#endif
+
+    memset(&var_saHpiEntryID, 0x00, sizeof(var_saHpiEntryID));
+    var_saHpiEntryID.type = ASN_UNSIGNED;
+       /** TODO: link this index to the next, or NULL for the last one */
+#ifdef TABLE_CONTAINER_TODO
+    snmp_log(LOG_ERR,
+             "saHpiEventTable_extract_index index list not implemented!\n");
+    return 0;
+#else
+    var_saHpiEntryID.next_variable = &var_XX;
 #endif
 
 
     /*
      * parse the oid into the individual components
      */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiEventIndex);
+    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
          */
-        ctx->saHpiEventIndex = *var_saHpiEventIndex.val.integer;
+              /** skipping external index saHpiDomainID */
 
-        ctx->saHpiEventTimestamp = *var_saHpiEventTimestamp.val.integer;
+              /** skipping external index saHpiResourceID */
+
+              /** skipping external index saHpiEntryID */
 
 
         /*
          * TODO: check index for valid values. For EXAMPLE:
          *
-         * if ( *var_saHpiEventIndex.val.integer != XXX ) {
+         * if ( *var_saHpiDomainID.val.integer != XXX ) {
          *    err = -1;
          * }
          */
         /*
          * TODO: check index for valid values. For EXAMPLE:
          *
-         * if ( *var_saHpiEventTimestamp.val.integer != XXX ) {
+         * if ( *var_saHpiResourceID.val.integer != XXX ) {
+         *    err = -1;
+         * }
+         */
+        /*
+         * TODO: check index for valid values. For EXAMPLE:
+         *
+         * if ( *var_saHpiEntryID.val.integer != XXX ) {
          *    err = -1;
          * }
          */
@@ -385,7 +405,7 @@ saHpiEventTable_extract_index(saHpiEventTable_context * ctx,
     /*
      * parsing may have allocated memory. free it.
      */
-    snmp_reset_var_buffers(&var_saHpiEventIndex);
+    snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }
@@ -834,10 +854,12 @@ initialize_table_saHpiEventTable(void)
     /*
      * internal indexes
      */
-        /** index: saHpiEventIndex */
+        /** index: saHpiDomainID */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiEventTimestamp */
-    netsnmp_table_helper_add_index(table_info, ASN_TIMETICKS);
+        /** index: saHpiResourceID */
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+        /** index: saHpiEntryID */
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiEventTable_COL_MIN;
     table_info->max_column = saHpiEventTable_COL_MAX;

@@ -99,6 +99,9 @@
 #define hpiResources_OID hpi_OID,3
 #define hpiNotifications_OID hpi_OID,4
 
+#define systemEvents_OID hpiEvents_OID,2
+#define events_OID hpiEvents_OID,1
+
 // SnmpTrapOID.0
 #define snmptrap_oid 1,3,6,1,6,3,1,1,4,1,0
 
