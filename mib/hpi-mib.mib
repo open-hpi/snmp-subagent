@@ -91,10 +91,14 @@ hpi MODULE-IDENTITY
 	The inventory control defines variables for reading inventory
 		resources.  
     
-	This is version 1.3 of this MIB"
+	This MIB is version 1.3.1"
+
     REVISION	"200311240000Z" 
     DESCRIPTION 
 	"Changed HotSwap table column names."
+    REVISION	"200401190000Z"
+    DESCRIPTION
+	"Changed saHpiCtrlAttributes to be less confusing."
 	::= { experimental 90 }
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
@@ -4165,11 +4169,27 @@ saHpiCtrlAttributes	OBJECT-TYPE
 	text	- Text control attributes are represented as follows:
 		  octet 1	- max characters	
 		  octet 2	- max lines.
-		  octet 3	- Language. Consult saHpiCtrlTextLangauge for
-				  values.
+		  octet 3	- Language.  The possible values are from
+				  0 to 136. Each values stands for a different
+				  language. The enumerations are:
+				  undef(0), afar(1), abkhazian(2),afrikaans(3),
+				  amharic(4),arabic(5), etc ...
 
-		  octet 4 	- encoding. Consult saHpiCtrlTextType for
-				  values.
+				  Look in saHpiCtrlTextLanguage object for
+				  all possible language enumerations.
+
+		  octet 4 	- encoding.  The possible values are:
+				binary(1):
+				  String of bytes, any values legal
+
+				bcdplus(2)
+				  String of 0-9, space, dash, period ONLY
+
+				ascii6(3)
+				  Reduced ASCII character set: 0x20-0x5F ONLY
+
+				language(4)
+				  ASCII or UNICODE depending on language 
 
 		  octet 5	- line number.
 		  octet 6	- length of data.
