@@ -19,8 +19,8 @@
       There are two ways of explaining the details of the generated
       sub-agent code. The first is to explain in detail every piece of the code
       and let the reader make the connection. The other (which we will use) is
-      to comb through the code explaining what it does with and provide 
-      working examples for every usage.
+      to comb through the code explaining what it does and provide 
+      working examples and explanation.
     </para>
     
     <sect2>
@@ -56,7 +56,7 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	    </para>
 	  </listitem>
 	  <listitem>
-	    <para>The daemon which will use the generated sub-agent code. The daemon code here referenced here is from 
+	    <para>The daemon which will use the generated sub-agent code. This example daemon code has been taken from 
 	      <ulink url="http://www.net-snmp.org/tutorial-5/toolkit/demon/example-demon.c">NET-SNMP Tutorial</ulink> 
 	      <programlisting role="C">
      1	#include &lt;net-snmp/net-snmp-config.h&gt;
@@ -137,14 +137,14 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	The sub-agent is initialized by the call
 </para>
 	<programlisting role="C">
-    33	  /* mib code: nit_netSnmpIETFWGTable from netSnmpIETFWGTable.c */
+   33	  /* mib code: nit_netSnmpIETFWGTable from netSnmpIETFWGTable.c */
    34	  init_netSnmpIETFWGTable();  
 	</programlisting>
 	<para>
-	Which in the generated code calls the function which sets up the skeleton of the table. It does <emphasis>not</emphasis>add any actual values in the columns.
+	Which in the generated code calls the function which sets up the skeleton of the table. It does <emphasis>not</emphasis> add any actual values in the columns.
 	</para>
 	<programlisting role="C">
-   717	/************************************************************
+  717	/************************************************************
   718	 *
   719	 * Initialize the netSnmpIETFWGTable table by defining its contents and how it's structured
   720	 */
@@ -251,6 +251,18 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	whether it can be written to, and which (if any) if the
 	NET-SNMP API helper functions to use.
 		</para>
+<note>
+	<para>An OID - Object IDentifier is a an array of <emphasis>longs</emphasis>.
+	The <emphasis>netSnmpIETFWGTable_oid</emphasis> is defined as:</para>
+<programlisting role="C">
+	oid netSnmpIETFWGTable_oid[] = { 1,3,6,1,4,1,8072,2,2,1 };
+</programlisting>
+</note>
+	<note>
+	<para>The <emphasis>netsnmp_table_array_helper_handler</emphasis> is one of many
+	helper functions available. Consult the manpage - <emphasis>man netsnmp_table</emphasis>
+	</para>
+	</note>
 	</sect3>
 	<sect3><title>Notify the helper function</title>
 
@@ -264,7 +276,14 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 		<para>Notify the helper how many indexes tuples to have
 		and which type they are.
 		</para>
-
+	<note>
+	<para>The netSnmpIETFWGTable_COL_MIN are defined in the automaticly generated header file.
+	</para>
+	</note>
+	<note>
+	<para>The <emphasis>ASN_OCTET_STR </emphasis> and other types are located in
+	the net-snmp/library/asn1.h</para>
+	</note>
 	</sect3>
 	<sect3>
 		<title>Register the GET operation</title>
@@ -298,7 +317,7 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 		</para>
 		<note>
 			<para>The compare routine is <emphasis>ONLY</emphasis>
-			used during removal of rows. Not adding.
+			used during removal of rows. Not when rows are added.
 			</para>
 		</note>
 		<para>	
@@ -314,20 +333,20 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	<para>
 	Without this routine being injected in the call-back mechanism,
 	no row creation is possible. The row creation process is
-	user-agnostic - it can be the sub-agent internal routines which
-	add rows or the SNMP-user who wants to create a row.
+	user-agnostic - the sub-agent code using internal routines or the SNMP-user using SET operation can create new rows.
 	</para>
 	<para>
-	However, the SNMP-user row creation has to go through a set
+	However, the SNMP SET operation has to go through a set
 	of other routines to determine if it has the valid syntax,
-	the right type and length, and other user-defined tests. 
+	the right type and length, and other user-defined tests. Those tests are not
+	exercised when the sub-agent code uses the internal routines.
 	</para>
 	<para>
-	The process which the NetSNMP API decides if the data is OK 
-	is a four state based. The data is writen to a new row or
+	The process which the NetSNMP API uses to decide if the data is OK 
+	is a four state system. The data is writen to a new row or
 	an existing one, if it has passed the RESERVE1, RESERVE2, and ACTION
 	phase. The ACTION phase does the modification and if anything goes wrong
-	the process moves to UNO phase. Otherwise a COMMIT is perfomed.
+	the process moves to UNDO phase. Otherwise a COMMIT is perfomed.
 	</para>
 	<note>
 		<para>This two-phase commit system is unique. Many other
@@ -346,10 +365,11 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
           <imagedata fileref="images/set-actions.jpg">
         </imageobject>
       </mediaobject>
-	<para>And they are are also part of the call-back mechanism:
+	<para>And they are are also part of the call-back mechanism. The internals of those
+functions is the responsibilty of the user (more on this in later sections):
 	</para>
 	<programlisting role="C">
-   793       cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;
+  793       cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;
   794       cb.set_reserve2 = netSnmpIETFWGTable_set_reserve2;
   795       cb.set_action = netSnmpIETFWGTable_set_action;
   796       cb.set_commit = netSnmpIETFWGTable_set_commit;
@@ -361,21 +381,20 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	<sect3>
 		<title>Miscellaneous</title>
 	<para>
-	The write operation also need small little tool functions
-	for the usage of RESERVE1, RESERVE2, ACTION, COMMIT and UNDO.
+	The write operation also needs a couple of  utility functions
+	for the RESERVE1 (defined as netSnmpIETFWGTable_set_reserve1), RESERVE2 (defined as netSnmpIETFWGTable_set_reserve2), ACTION (defined as netSnmpIETFWGTable_set_action), COMMIT (defined as netSnmpIETFWGTable_set_commit) and UNDO (defined as .. well you can guess that one) routines.
 	They are part of the call-back mechanism and should be defined.
 	Usually you don't need to modify them as the mib2c tool
-	does a great job of implementing them. They routines in question are:
+	does a great job of implementing them. The routines in question are:
 	</para>
 	<programlisting role="C">
-   785       cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
+  785       cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
   786       cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
   787       cb.row_copy = (Netsnmp_User_Row_Operation *)netSnmpIETFWGTable_row_copy;
   788   
   789       cb.can_activate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_activate;
   790       cb.can_deactivate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_deactivate;
   791       cb.can_delete = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_delete;
-  792   
 	</programlisting>
 	</sect3>
 	<sect3>
@@ -383,14 +402,14 @@ netSnmpIETFWGTable.o: netSnmpIETFWGTable.c Makefile
 	<para>
 		The last thing that must be done is to register
 		the handler, table information (how many rows, columns, etc),
-		the call-back mechansim with the <emphasis>container</emphasis>
+		and the call-back mechansim with the <emphasis>container</emphasis>
 	</para>
 	<para>
 		The container is the Net-SNMP part of code that will
-		keep our rows. It will take care of sorting it (when
+		keep our rows in memory. It will take care of sorting it (when
 		new rows are added or removed), providing a specific
-		row for a GET/SET request (so you don't have to extract the OID
-		and find the row by yourself), and more. This container
+		row for a GET/SET request (so you don't have to extract from the OID
+		the index/column values and find the row by yourself), and more. This container
 		mechanism provides a seperation of the sub-agent programmer
 		to have to deal with SNMP GET/SET details and concentrate
 		on operating the data.
