@@ -130,7 +130,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
     DESCRIPTION 
 	"unsigned 16-bit data, 2-byte alignment"
     REFERENCE
-    	"Derived from SAI-HPI-B.00.90 spec, pg 170.
+    	"Derived from SAI-HPI-B.00.90 spec, pg 160.
      see typedef unsigned short    SaHpiUint16T;"
     SYNTAX       INTEGER (0..65535)
 
@@ -139,7 +139,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
     DESCRIPTION
 	    "unsigned 8-bit data."
     REFERENCE
-	"Derived from SAI-HPI-B.00.90 spec, pg 170.
+	"Derived from SAI-HPI-B.00.90 spec, pg 160.
 	see typedef unsigned char SaHpiUint8T;"
     SYNTAX	INTEGER(0..255)
 
@@ -148,7 +148,7 @@ Float64	::= TEXTUAL-CONVENTION
     DESCRIPTION
 	"a 64 bit float number, 8 byte alignment"
     REFERENCE
-    	"Derived from SAI-HPI-B.00.90 spec, pg 170."
+    	"Derived from SAI-HPI-B.00.90 spec, pg 160."
     SYNTAX	Opaque (SIZE(0..255))
 --IBMKR: Figure out the right length of the Float64
 
@@ -176,7 +176,7 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
 	http://www.iana.org/cgi-bin/enterprise.pl"
     REFERENCE
-    	"Derived from SAI-HPI-B.00.90 spec, pg 170."
+    	"Derived from SAI-HPI-B.00.90 spec, pg 160."
     SYNTAX Unsigned32
 
 
@@ -866,7 +866,7 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 	"These definitions list the available data types that can be
     used for sensor readings. "
     REFERENCE
-    	"Derived from SAI-HPI-B.00.90 spec, pg 181."
+    	"Derived from SAI-HPI-B.00.90 spec, pg 171."
     SYNTAX	INTEGER	{
     			undefined(0),  
 			int64(1),
@@ -877,7 +877,8 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 
 --IBMKR: Does the description need to have those types?
 -- Perhaps it just should say. "All types of data
--- represented as string. for example ... "?			
+-- represented as string. for example ... "?   
+ 		
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
     STATUS          current
     DESCRIPTION     
@@ -1192,41 +1193,15 @@ saHpiDrtEntry OBJECT-TYPE
 	DESCRIPTION
 	""
 	INDEX	{ 
-				saHpiDomainId, 
-				saHpiDomainId, 
-				saHpiEntryId 
-			}
+		saHpiDomainId, 
+		saHpiEntryId 
+	}
 	::= {saHpiDrtTable 1}
 	
 SaHpiDrtEntry ::= SEQUENCE {
-
-	--saHpiDrtEntryId		Unsigned32,
-	--saHpiDrtDomainId        Unsigned32,
 	saHpiDrtIsPeer		TruthValue
 	           
 	}
--- Add this object to the index values or delte it.
---saHpiDrtEntryId OBJECT-TYPE 
---	SYNTAX		Unsigned32 
---	MAX-ACCESS	read-only
---	STATUS		current
---	DESCRIPTION	
---	"EntryId - Identifier of the DRT entry to retrieve. Reserved EntryId
---		values:
---		SAHPI_FIRST_ENTRY  Get first entry
---		SAHPI_LAST_ENTRY   Reserved as delimiter for end of list. Not avalid entry identifier.
-	
---	::= {saHpiDrtEntry 1}
-
--- IBMKR: Delete this object
---saHpiDrtDomainId OBJECT-TYPE 
---	SYNTAX		Unsigned32 
---	MAX-ACCESS	read-only
---	STATUS		current
---	DESCRIPTION	"Unique Domain Id associated with domain.
---	Note:
---		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
---	::= {saHpiDrtEntry 2}
 
 saHpiDrtIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
@@ -1278,7 +1253,7 @@ SaHpiDatEntry ::= SEQUENCE {
 	
 	saHpiAlarmCondStatusCondType	INTEGER,
 	saHpiAlarmCondEntityPath      	OCTET STRING,
-	saHpiAlarmCondSensorNum         INTEGER, 
+	saHpiAlarmCondSensorNum         Unsigned32, 
 	saHpiAlarmCondEventState	SaHpiEventState,
 	  
 	saHpiAlarmCondNameValue	        OCTET STRING,
@@ -1332,11 +1307,46 @@ saHpiAcknowledged OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "
-    	Acknowledged flag, Alarms are acknowledged by one of two ways: 
-	a single alarm entry by AlarmId regardless of severity 
-	or as a group of alarm entries by Severity regardless of
+	An HPI User acknowledges an alarm to indicate that it is aware of the alarm 
+	and to influence platform-specific alarm annunciation that may be provided  
+	by the implementation.  Typically, an implementation ignores acknowledged   
+	alarms when announcing an alarm on annunciation devices such as audible     
+	sirens and dry contact closures.  However, alarm annunciation is            
+	implementation-specific.                                                    
+										    
+	An acknowledged alarm will have the Acknowledged field in the alarm entry   
+	set to True.                                                                
+										    
+	Alarms are acknowledged by one of two ways: a single alarm entry by AlarmId 
+	regardless of severity or as a group of alarm entries by Severity           
+	regardless of AlarmId.                                                      
+										    
+	To acknowledge all alarms contained within the DAT, set the Severity        
+	parameter to SAHPI_ALL_SEVERITIES, and set the AlarmId parameter to         
+	SAHPI_ENTRY_UNSPECIFIED.                                                    
+										    
+	To acknowledge all alarms of a specific severity contained within the DAT,  
+	set the Severity parameter to the appropriate value, and set the AlarmId    
+	parameter to SAHPI_ENTRY_UNSPECIFIED.                                       
+										    
+	To acknowledge a single alarm entry, set the AlarmId parameter to a value   
+	other than SAHPI_ENTRY_UNSPECIFIED.  The AlarmId must be a valid identifier 
+	for an alarm entry present in the DAT at the time of the function call.     
+										    
+	If an alarm has been previously acknowledged, acknowledging it again has no 
+	effect.  However, this is not an error.                                     
+										    
+	If the AlarmId parameter has a value other than SAHPI_ENTRY_UNSPECIFIED,    
+	the Severity parameter is ignored.                                          
+										    
+	If the AlarmId parameter is passed as SAHPI_ENTRY_UNSPECIFIED, and no       
+	alarms are present that meet the requested Severity, this function will     
+	have no effect.  However, this is not an error.                             
+										    
+	SAHPI_ENTRY_UNSPECIFIED is defined as the same value as SAHPI_FIRST_ENTRY,  
+	so using either symbol will have the same effect.  However,                 
+	SAHPI_ENTRY_UNSPECIFIED should be used with this function for clarity.      
 	"
--- IBMKR: seems to be missing the rest of the description.
         ::= {saHpiDatEntry 4}
 	
 saHpiAlarmCondStatusCondType OBJECT-TYPE 
@@ -1381,23 +1391,14 @@ saHpiAlarmCondEntityPath OBJECT-TYPE
  	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
 	::= {saHpiDatEntry 6}
---IBMKR: This should not be an enumeration?
+
 saHpiAlarmCondSensorNum OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				sensor(0),
-				resource(1),
-				oem(2),
-				user(3)
-			}
+	SYNTAX		Unsigned32
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
 	"Sensor associated with status Only valid if Type is
-         SAHPI_STATUS_COND_TYPE_SENSOR
-	
-	 The following specifies the named range for standard sensor numbers. 
-	 SAHPI_STANDARD_SENSOR_MIN   (SaHpiSensorNumT)0x00000100
-	 SAHPI_STANDARD_SENSOR_MAX   (SaHpiSensorNumT)0x000001FF"
+         SAHPI_STATUS_COND_TYPE_SENSOR"
 	::= {saHpiDatEntry 7}
 	
 saHpiAlarmCondEventState OBJECT-TYPE
@@ -1462,7 +1463,13 @@ saHpiAlarmDelete OBJECT-TYPE
 	" "
 	::= {saHpiDatEntry 14}
 
--- IBMKR: A big nice seperator here would be nice.
+--/*******************************************************************************
+-- * *****************************************************************************
+-- * ********** 							**********
+-- * ********** 		Resource Data Records 			**********
+-- * ********** 							**********
+-- * *****************************************************************************
+-- * ******************************************************************************/
 
 saHpiEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
