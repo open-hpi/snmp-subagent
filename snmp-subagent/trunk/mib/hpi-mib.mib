@@ -5695,8 +5695,8 @@ saHpiInventoryValidity OBJECT-TYPE
         SYNTAX          INTEGER{
 				undefined (0),
 				valid(1),
-				invalid(0),
-				dataOverflow(2)
+				invalid(2),
+				dataOverflow(3)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -5704,31 +5704,32 @@ saHpiInventoryValidity OBJECT-TYPE
         ::= {saHpiInventoryEntry 4}
 
 saHpiInventoryAttributes OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(1|4|5))
+	SYNTAX		OCTET STRING (SIZE(1|4|9|1004))
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
   	"This attribute represents the current setting of the inventory.  It must
          be interpreted in the context of saHpiInventoryRecordType.
 
-        internalUse  - The first octet will be variable length
-		opaque data.
+        internalUse  - The first four octets will define tbe variable length 
+		       of the opaque data. The rest represents the data. Max length
+		       of data is 1000 octets. 
 
         chassisInfo  - Chassis informations are represented as follows:
-		octet 1		- determines the type of chassis:
+		octet 1-4		- determines the type of chassis:
 
-				other (1), unknown (2), desktop (3),
-				lowProfileDesktop (4), pizzaBox (5),
-				miniTower (6), tower (7), portable (8),
-				laptop (9), notebook (10), handheld (11),
-				dockingStation (12), allinone (13),
-				subnotebook (14), spaceSaving (15),
-				lunchBox (16), mainServer (17),
-				expansion (18), subchassis (19),
-				busExpansionChassis (20),
-				peripheralChassis (21), raidChassis (22),
-				rackmount (23)
-		octet 2-5	- manufacturing date/time represented
+				other (2), unknown (3), desktop (4),
+				lowProfileDesktop (5), pizzaBox (6),
+				miniTower (7), tower (8), portable (9),
+				laptop (10), notebook (11), handheld (12),
+				dockingStation (13), allinone (14),
+				subnotebook (15), spaceSaving (16),
+				lunchBox (17), mainServer (18),
+				expansion (19), subchassis (20),
+				busExpansionChassis (21),
+				peripheralChassis (22), raidChassis (23),
+				rackmount (24)
+		octet 4-9	- manufacturing date/time represented
 			as 64-bit signed integer from 00:00:00, 
 			January 1, 1970, in a 64-bit signed integer. This format
 			is sufficient to represent times with nano-second resolution from the
