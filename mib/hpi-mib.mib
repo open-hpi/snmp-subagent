@@ -130,8 +130,6 @@ eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
 
 hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
 hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
-hpiAnnunciator  OBJECT IDENTIFIER ::= { hpiResources 12 }
-
 
 
 -- ************************************************
@@ -6714,14 +6712,14 @@ saHpiAnnunciatorCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of annunciators present on this system."
-        ::= {hpiAnnunciator 1}
+        ::= {hpiResources 11}
 
 saHpiAnnunciatorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnunciatorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Table of Annunciator resource data records."
-        ::= {hpiAnnunciator 2}
+        ::= {hpiResources 12}
 
 saHpiAnnunciatorEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnunciatorEntry
