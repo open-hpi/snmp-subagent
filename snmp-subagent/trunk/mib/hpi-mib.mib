@@ -2192,14 +2192,19 @@ saHpiEventEntry OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION ""
 	INDEX	{ 
-		saHpiDomainId
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEvent,
+		saHpiEventSeverity,
+		saHpiEventHistorical,
+		saHpiEventQueueStatus,
+		saHpiEventSaHpiTime
 	}
 	::= {saHpiEventTable 1}
 
 SaHpiEventEntry ::= SEQUENCE {
 
 	saHpiEvent		RowPointer,
-	saHpiResourceIdx	Unsigned32,
 	saHpiEventSeverity	INTEGER,
 	saHpiEventHistorical	TruthValue,
 	saHpiEventQueueStatus	Unsigned32,
@@ -2213,14 +2218,6 @@ saHpiEvent OBJECT-TYPE
     DESCRIPTION
 	"Pointer to the event."
     ::= {saHpiEventEntry 1}
-
-saHpiResourceIdx OBJECT-TYPE
-    SYNTAX	Unsigned32
-    MAX-ACCESS	read-only
-    STATUS	current
-    DESCRIPTION
-	"Resource ID owning the event"
-    ::= {saHpiEventEntry 2}
 
 saHpiEventSeverity OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2237,7 +2234,7 @@ saHpiEventSeverity OBJECT-TYPE
         DESCRIPTION     "Severity of event. 
 	Note: The enumerated named have +1 added as opposed to the 
 	SA HPI spec for the same constants.  "
-        ::= {saHpiEventEntry 3}
+        ::= {saHpiEventEntry 2}
 
 
 saHpiEventHistorical OBJECT-TYPE
@@ -2246,7 +2243,7 @@ saHpiEventHistorical OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"True is event log."
-    ::= {saHpiEventEntry 4}
+    ::= {saHpiEventEntry 3}
 
 
 saHpiEventQueueStatus OBJECT-TYPE
@@ -2256,7 +2253,7 @@ saHpiEventQueueStatus OBJECT-TYPE
     DESCRIPTION
 	"  This status word is returned to HPI Users that request it
 	when saHpiEventGet() is called."
-    ::= {saHpiEventEntry 5}
+    ::= {saHpiEventEntry 4}
     
 saHpiEventSaHpiTime	OBJECT-TYPE
     SYNTAX	SaHpiTime
@@ -2267,7 +2264,7 @@ saHpiEventSaHpiTime	OBJECT-TYPE
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiEventEntry 6}
+    ::= {saHpiEventEntry 5}
 
 
 --IBMKR: Add more in description.
