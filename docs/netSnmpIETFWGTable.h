@@ -38,7 +38,7 @@ typedef struct netSnmpIETFWGTable_context_s {
             long nsIETFWGChair1_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            char nsIETFWGChair2[65535];
+            char nsIETFWGChair2[255];
             long nsIETFWGChair2_len;
 
 
@@ -80,6 +80,7 @@ extern size_t netSnmpIETFWGTable_oid_len;
 #define COLUMN_NSIETFWGNAME 1
 #define COLUMN_NSIETFWGCHAIR1 2
 #define COLUMN_NSIETFWGCHAIR2 3
+#define COLUMN_NSIETFWGPROGRESS 4
 #define netSnmpIETFWGTable_COL_MIN 2
 #define netSnmpIETFWGTable_COL_MAX 3
 
