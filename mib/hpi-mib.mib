@@ -19,7 +19,7 @@ IMPORTS
         enterprises             FROM RFC1155-SMI;
 
 hpiB MODULE-IDENTITY
-    LAST-UPDATED "200311111800Z"
+    LAST-UPDATED "200410180000Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
                 Sean Dague
@@ -69,12 +69,12 @@ hpiB MODULE-IDENTITY
         (SA-HPI-B.01.01).
 
         This MIB module defines a set of objects that allow the 
-         management of entities on a variety of hardware platforms.  The  
-         abstractions presented in this MIB are derived from the 
-                  Service Availability Forum Hardware Platform Interface 
-                  specification version 01.01.
+        management of entities on a variety of hardware platforms.  The  
+        abstractions presented in this MIB are derived from the 
+        Service Availability Forum Hardware Platform Interface 
+        specification version 01.01.
            
-         The MIB views a hardware platform as a collection of physical 
+        The MIB views a hardware platform as a collection of physical 
                   entities that can be managed individually.  A logical 
                   collection of entities comprises a management domain.
 
@@ -101,17 +101,10 @@ hpiB MODULE-IDENTITY
         The inventory control defines variables for reading inventory
                 resources.  
     
-        This MIB is version 1.3.1"
-
-    REVISION    "200311240000Z" 
-    DESCRIPTION 
-        "Changed HotSwap table column names."
-    REVISION    "200401190000Z"
+	"
+    REVISION    "200410180000Z"
     DESCRIPTION
-        "Changed saHpiCtrlAttributes to be less confusing."
-    REVISION    "200402080000Z"
-    DESCRIPTION
-        "Changed HPI MIB OID to the one SAF ratified."
+        "HPI MIB for SAF-HPI B."
         ::= { enterprises 18568 1 1 1 6}
 
 hpiEntity       OBJECT IDENTIFIER ::= { hpiB 1 }
@@ -143,27 +136,29 @@ hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
 Unsigned16 ::= TEXTUAL-CONVENTION
     STATUS       current 
     DESCRIPTION 
-        "unsigned 16-bit data, 2-byte alignment"
+        "Textual convention for an unsigned 16-bit data, 
+    2-byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, pg 152.
      see typedef unsigned short    SaHpiUint16T;"
     SYNTAX       INTEGER (0..65535)
 
 Unsigned8 ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-            "unsigned 8-bit data."
+        "Textual convention for an unsigned 8-bit data type."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, pg 152.
         see typedef unsigned char SaHpiUint8T;"
     SYNTAX      INTEGER(0..255)
 
 Float64 ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-        "a 64 bit float number, 8 byte alignment"
+        "Textual convention for an 64 bit float number, 
+    8 byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, pg 152.
         The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
         sign(1)exponent(11)mantissa(52)."
     SYNTAX      Opaque (SIZE(0..65))
@@ -171,14 +166,28 @@ Float64 ::= TEXTUAL-CONVENTION
 SaHpiInstrumentId ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-        "The following data type is used for all management instrument 
-    identifiers - sensor numbers, control numbers, watchdog timer numbers, etc."
+        "Textual convention for all HPI MIB management instrument 
+    identifiers - sensor numbers, control numbers, watchdog timer 
+    numbers, etc."
     SYNTAX      Unsigned32
+
+SaHpiEntryId ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     
+             "Textual convention for the entry ID of an record. This
+     value is used to enumerate the indexes of records. There three
+     different unique values to denote the first, last, and
+     unspecified entry:
+
+                SAHPI_FIRST_ENTRY 0x00000000
+                SAHPI_LAST_ENTRY  0xFFFFFFFF
+                SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
+        SYNTAX          Unsigned32
 
 SaHpiManufacturerId ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-        " Identifier for the manufacturer 
+        "Textual convention for the identifier of the manufacturer.
 
         This is the IANA-assigned private enterprise number for the
         manufacturer of the resource or FRU, or of the manufacturer
@@ -192,29 +201,44 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
         http://www.iana.org/cgi-bin/enterprise.pl"
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 152"
+        "Derived from SAI-HPI-B.01.01 spec, pg 152"
     SYNTAX Unsigned32
 
+SaHpiCapabilities ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     " 
+        This texual definition defines the capabilities of a given 
+        resource.
+        One resource may support any number of capabilities using this
+        string (each capability is seperated by a delimeter). 
+
+	There are some additional capabilties that are unique
+	to the table. They explained in more details in the columnar
+	node. "
+        SYNTAX          OCTET STRING(SIZE(0..255))
 
 SaHpiTime ::= TEXTUAL-CONVENTION
 	STATUS       current
 	DESCRIPTION
-	"An HPI time value represents the local time as the number of nanoseconds
-	from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
-	is sufficient to represent times with nano-second resolution from the
-	year 1678 to 2262. Every API which deals with time values must define
-	the timezone used.
+	"This textual convention defines the HPI time value as 
+an 64-bit value.
+
+An HPI time value represents the local time as the number of nanoseconds
+from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
+is sufficient to represent times with nano-second resolution from the
+year 1678 to 2262. Every API which deals with time values must define
+the timezone used.
 	
-	It should be noted that although nano-second resolution is supported
-	in the data type, the actual resolution provided by an implementation
-	may be more limited than this.
+It should be noted that although nano-second resolution is supported
+in the data type, the actual resolution provided by an implementation
+may be more limited than this.
 	
-	The value -263, which is 0x8000000000000000, is used to indicate
-	'unknown/unspecified time'.
+The value -2^63, which is 0x8000000000000000, is used to indicate
+'unknown/unspecified time'.
 	
-	Conversion to/from POSIX and other common time representations is
-	relatively straightforward. The following code framgment converts
-	between SaHpiTimeT and time_t:
+Conversion to/from POSIX and other common time representations is
+relatively straightforward. The following code framgment converts
+between SaHpiTimeT and time_t:
 
 	time_t tt1, tt2;
 	SaHpiTimeT saHpiTime;
@@ -223,7 +247,7 @@ SaHpiTime ::= TEXTUAL-CONVENTION
 	saHpiTime = (SaHpiTimeT) tt1  1000000000;
 	tt2 = saHpiTime / 1000000000;
 
-	The following fragment converts between SaHpiTimeT and a struct timeval:
+The following fragment converts between SaHpiTimeT and a struct timeval:
 
 	struct timeval tv1, tv2;
 	SaHpiTimeT saHpiTime;
@@ -233,7 +257,7 @@ SaHpiTime ::= TEXTUAL-CONVENTION
 	tv2.tv_sec = saHpiTime / 1000000000;
 	tv2.tv_usec = saHpiTime % 1000000000 / 1000;
 
-	The following fragment converts between SaHpiTimeT and a struct timespec:
+The following fragment converts between SaHpiTimeT and a struct timespec:
 
 	struct timespec ts1, ts2;
 	SaHpiTimeT saHpiTime;
@@ -243,45 +267,42 @@ SaHpiTime ::= TEXTUAL-CONVENTION
 	ts2.tv_sec = saHpiTime / 1000000000;
 	ts2.tv_nsec = saHpiTime % 1000000000;
 
-	Note, however, that since time_t is (effectively) universally 32 bits,
-	all of these conversions will cease to work on January 18, 2038.
+Note, however, that since time_t is (effectively) universally 32 bits,
+all of these conversions will cease to work on January 18, 2038.
 
-	Some subsystems may need the flexibility to report either absolute or
-	relative (eg. to system boot) times. This will typically be in the
-	case of a board which may or may not, depending on the system setup,
-	have an idea of absolute time. For example, some boards may have
-	'time of day' clocks which start at zero, and never get set to the
-	time of day.
+Some subsystems may need the flexibility to report either absolute or
+relative (eg. to system boot) times. This will typically be in the
+case of a board which may or may not, depending on the system setup,
+have an idea of absolute time. For example, some boards may have
+'time of day' clocks which start at zero, and never get set to the
+time of day.
 
-	In these cases, times which represent 'current' time (in events, for
-	example) can be reported based on the clock value, whether it has been
-	set to the actual date/time, or whether it represents the elapsed time
-	since boot. If it is the time since boot, the value will be (for 27
-	years) less than 0x0C00000000000000, which is Mon May 26 16:58:48 1997.
-	If the value is greater than this, then it can be assumed to be an
-	absolute time.
+In these cases, times which represent 'current' time (in events, for
+example) can be reported based on the clock value, whether it has been
+set to the actual date/time, or whether it represents the elapsed time
+since boot. If it is the time since boot, the value will be (for 27
+years) less than 0x0C00000000000000, which is Mon May 26 16:58:48 1997.
+If the value is greater than this, then it can be assumed to be an
+absolute time.
 
-	Every API which can report either absolute or relative times must
-	state this rule clearly in its interface specification.
-
-	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
-
-	Maximum time that can be specified as relative :
-	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL
+Every API which can report either absolute or relative times must
+state this rule clearly in its interface specification.
 
 	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
 
-	Maximum time that can be specified as relative :
+Maximum time that can be specified as relative :
 	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL"
 
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 164-165."
+        "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
     SYNTAX      Counter64
     
 SaHpiTimeString ::= TEXTUAL-CONVENTION
     STATUS       current
     DESCRIPTION
-        "
+        "This textual convention defines the HPI time represented
+as a string value.
+
  An HPI time value represents the local time as the number of nanoseconds
  from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
  is sufficient to represent times with nano-second resolution from the
@@ -292,7 +313,7 @@ SaHpiTimeString ::= TEXTUAL-CONVENTION
  in the data type, the actual resolution provided by an implementation
  may be more limited than this.
 
- The value -263, which is 0x8000000000000000, is used to indicate
+ The value -2^63, which is 0x8000000000000000, is used to indicate
  'unknown/unspecified time'.
 
  Conversion to/from POSIX and other common time representations is
@@ -354,22 +375,27 @@ The following fragment converts between SaHpiTimeT and a struct timeval:
 "
 
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 164-165."
+        "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
     SYNTAX      OCTET STRING(SIZE(0..255))
 
 
 SaHpiEventCategory ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-        "Sensor events contain an event category and event state. 
+        "This textual convention defines the enumeration
+    of event categories. 
+    Sensor events contain an event category and event state. 
     Depending on the event category, the event states take on 
     different meanings for events generated by specific sensors.
             
     The generic(128) category can be used for discrete sensors 
     which have state meanings other than those identified
-    with other event categories."
+    with other event categories.
+
+    Note: Enumerated values are increased by one value compared to
+    SAI-HPI-B spec."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 170."
+        "Derived from SAI-HPI-B.01.01 spec, pg 167. "
     SYNTAX      INTEGER {
                         unspecified (0),
                         threshold (2),
@@ -383,39 +409,35 @@ SaHpiEventCategory ::= TEXTUAL-CONVENTION
                         enable (10),
                         availability (11),
                         redundancy (12),
-                        user (127),
+                        sensorSpecific (127),
                         generic (128)
                 }
 
 SaHpiEventState ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "255a"
     STATUS       current 
-    DESCRIPTION 
-        "Event States
-        
-        The following event states are specified relative to the respective categories.
-        The event types are only valid for their given category. Each set of 
-        events is labeled as to which category it belongs to. 
-        Each event will have one or more event states seperated by
-        a common delimiter (, ;)  associated with it. When retrieving
-        the event status all applicable event states are used. 
-        Similarly, when setting the event enabled status a set 
-        of all applicable event states is used.
-
-        For example, for the type threshold(2), the retrieved states can
+    DESCRIPTION "
+ The following event states are available for variables using the saHpiEventCategory 
+            textual convention to provide event origin information.
+ 
+        Each set of events is uniquely identified with a label which easily refers back to the 
+        corresponding category. Only events from the same category should be 
+        coalesced in a variable of this type.
+ 
+        Each event will have one or more event states seperated by a common delimiter (, or ;)
+        associated with it. When retrieving the event status, all applicable event states 
+        can be used.  Similarly, when setting the event enabled status a set 
+        of all applicable event states can be used.
+     For example, for the type threshold(2), the retrieved states can
         be:
-
+ 
         LOWER_MINOR, UPPER_CRIT, UPPER_MAJOR
         
-        When the event category is any type, the event can be:
-
+        When the event category is the unspecified(0) type, the event can be:
+ 
         UNSPECIFIED 
-
-
-        Event category of type threshold(2):
-
-        When using these event states, the event state should match
-        the event severity (for example LOWER_MINOR should have an 
-        event severity of SAHPI_MINOR).
+ 
+        Event category of type threshold(2), can have the following values :
         
         LOWER_MINOR 
         LOWER_MAJOR
@@ -423,38 +445,35 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         UPPER_MINOR
         UPPER_MAJOR
         UPPER_CRIT
-
-        Event category of type usage(3)
+ 
+        Event category of type usage(3), can have :
         
         IDLE
         ACTIVE
         BUSY
-
-        Event category of type state(4)
-
+ 
+        Event category of type state(4), can have :
+ 
         STATE_DEASSERTED
         STATE_ASSERTED
         
-        Event category of type predFail(5)
-
+        Event category of type predFail(5), can have :
+ 
         PRED_FAILURE_DEASSERT
         PRED_FAILURE_ASSERT
         
-        Event category of type limit(6)
+        Event category of type limit(6), can have :
         
         LIMIT_NOT_EXCEEDED
         LIMIT_EXCEEDED
-
-        Event category of type performance(7)
-
+ 
+        Event category of type performance(7), can have :
+ 
         PERFORMANCE_MET
         PERFORMANCE_LAGS
         
-        Event category of type severity(8)
-
-        When using these event states, the event state should match
-        the event severity 
-        
+        Event category of type severity(8), can have :
+ 
         OK
         MINOR_FROM_OK
         MAJOR_FROM_LESS
@@ -464,19 +483,19 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         CRITICAL
         MONITOR
         INFORMATIONAL
-
-        Event category of type presence(9)
-
+ 
+        Event category of type presence(9), can be:
+ 
         ABSENT
         PRESENT
-
-        Event category of type enable(10)
-
+ 
+        Event category of type enable(10), can be:
+ 
         DISABLED
         ENABLED
-
-        Event category of type availability(11)
-
+ 
+        Event category of type availability(11), can have the following values :
+ 
         RUNNING
         TEST
         POWER_OFF
@@ -487,8 +506,8 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         POWER_SAVE
         INSTALL_ERROR
         
-        Event category of type redundancy(12)
-
+        Event category of type redundancy(12), can have:
+ 
         FULLY_REDUNDANT
         REDUNDANCY_LOST
         REDUNDANCY_DEGRADED
@@ -498,9 +517,8 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         REDUNDANCY_DEGRADED_FROM_FULL
         REDUNDANCY_DEGRADED_FROM_NON
         
-        Event category of type generic(128) or sensorSpecific(127)
-
-        These event states are implementation-specific.
+        For the event category of generic(128) or sensor-specific(127), permitted strings
+        are implementation-specific but can be from :
         
         STATE_00
         STATE_01
@@ -516,15 +534,20 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         STATE_11
         STATE_12
         STATE_13
-        STATE_14"
+        STATE_14
+ 
+        When using these event states, the event state should match
+        the event severity (for example LOWER_MINOR should have an 
+        event severity of SAHPI_MINOR)."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 170-172."
+        "Derived from SAI-HPI-B.01.01 spec, pg 170-172."
     SYNTAX              OCTET STRING(SIZE(0..255))
 
 SaHpiHotSwapState ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
-        "Hot Swap states.
+        "This textual convention defines the enumeration of states
+    specific to Hot Swap records.
 
         inactive(1):
 
@@ -552,10 +575,12 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
          The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
 
          The event can indicate a normal transition from INACTIVE to the NOT PRESENT state or a surprise extraction from any other state.  Normal transition events are issued with a severity of SAHPI_INFORMATIONAL. A resource following the simplified hot swap model always indicates the transition to the NOT PRESENT state as a surprise extraction.
-         When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
+         When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry.
 
+    Note: Enumerated values are increased by one value compared to
+    SAI-HPI-B spec."
     REFERENCE 
-        "Derived from states described in the SAI-HPI-B.00.90 pages 136,137."
+        "Derived from states described in the SAI-HPI-B.01.01 pages 136,137."
 
     SYNTAX      INTEGER {
                     undefined(0),
@@ -569,9 +594,11 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
 SaHpiWatchdogPreTimerAction ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-        "These enumerations represent the possible types of interrupts that may be
-        triggered by a watchdog pre-timer event. The actual meaning of these
-        operations may differ depending on the hardware architecture. "
+        "This textual convention defines the enumerations which 
+ represent the possible types of interrupts that may be triggered by 
+a watchdog pre-timer event. 
+The actual meaning of these operations may differ depending on the 
+hardware architecture. "
         SYNTAX          INTEGER{
                                 undefined(0),
                                 none (1),
@@ -584,13 +611,18 @@ SaHpiWatchdogPreTimerAction ::= TEXTUAL-CONVENTION
 SaHpiWatchdogTimerUse ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-        "Watchdog Timer Use                     
-        These enumerations represent the possible watchdog users that may have caused 
-        the watchdog to expire. For instance, if watchdog is being used during power 
-        on self test (POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
-        will be set. Most specific uses for Watchdog timer by users of HPI should 
-        indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
-        or SAHPI_WTU_OEM if it is used for some other purpose."
+        "The textual convention of this columnar node are the 
+enumerations which represent the possible watchdog uses that may 
+have caused the watchdog to expire. 
+
+For instance, if watchdog is being used during power on self test 
+(POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
+will be set. Most specific uses for Watchdog timer by users of HPI 
+should indicate SAHPI_WTU_SMS_OS  if the use is to provide an 
+OS-healthy heartbeat, or SAHPI_WTU_OEM if it is used for some other 
+purpose.
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         SYNTAX          INTEGER {
                                 undefined(0),
                                 none (1),
@@ -602,14 +634,13 @@ SaHpiWatchdogTimerUse ::= TEXTUAL-CONVENTION
                                 unspecified (16)
                         }
 
+
 SaHpiTextType ::= TEXTUAL-CONVENTION 
         STATUS          current
-        DESCRIPTION     "Text type
+        DESCRIPTION     
+        "This textual convention defines the enumeration
+type of text value. 
 
-        This columnar node is  used for defining the type of data in the 
-        text buffer. Text buffers are used RDR, RPT, etc. for variable
-        length strings of data.
-        
         The encoding of the SaHpiText type is defined by this enumeration.
         The following table describes the various encodings:
         
@@ -643,9 +674,12 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
         ASCII6 may be stored externally as 6-bit values. 
         But, regardless of how the data is stored externally, it is 
         encoded as 8-bit ASCII in the SaHpiText structure passed 
-        across the HPI."
+        across the HPI.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 166-167."
+        "Derived from SAI-HPI-B.01.01 spec, pg 166-167."
         SYNTAX          INTEGER {
                                 undefined(0),
                                 unicode(1),
@@ -658,11 +692,14 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
 SaHpiTextLanguage ::= TEXTUAL-CONVENTION
     STATUS          current
     DESCRIPTION     
-        "This enumeration lists all of the languages that can be 
-        associated with text.  undefined (0) indicates that 
-        the language is unspecified or unknown.  "
+        "This textual convention defines these enumeration of all of 
+the languages that can be associated with text.  
+undefined (0) indicates that the language is unspecified or unknown.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 165-166."
+        "Derived from SAI-HPI-B.01.01 spec, pg 165-166."
     SYNTAX              INTEGER {
                                 undefined (0),
                                 unknown (1),
@@ -807,19 +844,77 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 SaHpiText ::= TEXTUAL-CONVENTION
         STATUS  current
         DESCRIPTION
-        "Text data. The data can be in different languages
-        (represented by SaHpiTextLanguage) and in different
-        encodings (saHpiTextType)."
+        "This textual convention defines the Text data. 
+The data can be in different languages (represented by 
+SaHpiTextLanguage textual convention) and in different
+encodings (represented by saHpiTextType textual convention)."
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 166."
+        "Derived from SAI-HPI-B.01.01 spec, pg 166."
         SYNTAX  OCTET STRING(SIZE(0..255))
 
+SaHpiSensorType ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     "This textual convention describes
+the general sensor types. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
+        SYNTAX          INTEGER {
+                                undefined (0),
+                                temperature (2),
+                                voltage (3),
+                                current (4),
+                                fan (5),
+                                physicalSecurity (6),
+                                platformViolation (7),
+                                processor (8),
+                                powerSupply (9),
+                                powerUnit (10),
+                                coolingDevice (11),
+                                otherUnitsBasedSensor (12),
+                                memory (13),
+                                driveSlot (14),
+                                postMemoryResize (15),
+                                systemFwProgress (16),
+                                eventLoggingDisabled (17),
+                                reserved1 (18),
+                                systemEvent (19),
+                                criticalInterrupt (20),
+                                button (21),
+                                moduleBoard (22),
+                                microcontrollerCoProcessor (23),
+                                addinCard (24),
+                                chassis (25),
+                                chipSet (26),
+                                otherFru (27),
+                                cableInterconnect (28),
+                                terminator (29),
+                                systemBootInitiated (30),
+                                bootError (31),
+                                osBoot (32),
+                                osCriticalStop (33),
+                                slotConnector (34),
+                                systemACPIPowerState (35),
+                                reserved2 (36),
+                                platformAlert (37),
+                                entityPresence (38),
+                                monitorAsicIC (39),
+                                lan (40),
+                                managementSubsystemHealth (41),
+                                battery (42),
+                                operational (161),
+                                oemSensor (193)
+                        }
 SaHpiSensorUnits ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-            "This is a list of all the sensor units supported by HPI."
+            "This textual convention enumerates the all of the 
+sensor units supported by HPI.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         REFERENCE
-            "Derived from SAI-HPI-B.00.90 spec, pg 172."
+            "Derived from SAI-HPI-B.01.01 spec, pg 172."
         SYNTAX          INTEGER {
                                 undefined(0),
                                 unspecified(1), 
@@ -918,11 +1013,13 @@ SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-        "These definitions list the available data types that can be
-        used for sensor readings. "
+        "This textual convention defines the enumeration of
+the available data types that can be used for sensor readings. 
 
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 163."
+        "Derived from SAI-HPI-B.01.01 spec, pg 163."
         SYNTAX          INTEGER {
                                 undefined(0),  
                                 int64(1),
@@ -934,16 +1031,34 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-        "The sensor reading value is represented as one of the 
-        enumerated types listed in SaHpiSensorReadingType.
+        "This textual convention defines the sensor reading value 
+as represented as one of the enumerated types listed in 
+SaHpiSensorReadingType textual convention..
 
-        This value by itself is of string type and needs to be 
-        evaluated in the context of SaHpiSensorReadingType."
+This value by itself is of string type and needs to be 
+evaluated in the context of SaHpiSensorReadingType textual convention."
 
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 173."
+        "Derived from SAI-HPI-B.01.01 spec, pg 173."
         SYNTAX          OCTET STRING(SIZE(0..255))
         
+SaHpiGuid ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     
+	"This textual convention defines the Globally Unique
+Identifier (GUID) which is used to uniquely identify a domain.
+
+A GUID value of zero is not valid and indicates that the domain 
+does not have an associated GUID.
+ 
+The format if the ID follows that specified by the Wired for
+Management Baseline, Version 2.0 specification.  HPI uses
+version 1 of the GUID format, with a 3-bit variant field of 
+10x (where x indicates 'don't care')"
+	REFERENCE
+	"Derieved from SAI-HPI-B.01.01 spec, pg 186."
+        SYNTAX          OCTET STRING(SIZE(0..15))
+
 
 -- *************************************
 -- **
@@ -958,8 +1073,7 @@ saHpiDomainInfoEntryCount OBJECT-TYPE
         DESCRIPTION     
         "The number of Domain entries present in the system. 
         This field is used to determine if new domains have been added
-        or existing removed. The same functionality is available using
-        notifications."
+        or existing removed. "
         ::= {hpiEntity 1}
 
 
@@ -1004,7 +1118,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
 	saHpiDomainId				Unsigned32,
-        saHpiDomainCapabilities         	OCTET STRING,
+        saHpiDomainCapabilities         	SaHpiCapabilities,
         saHpiDomainIsPeer                	TruthValue,         
                                                                       
         saHpiDomainTagTextType          	SaHpiTextType,  
@@ -1028,13 +1142,13 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
         saHpiDomainAlarmUserLimit          	Unsigned32,
         saHpiDomainAlarmOverflow                TruthValue,
 
-        saHpiDomainGuid                 	OCTET STRING            
+        saHpiDomainGuid                 	SaHpiGuid
         }
 
 
 saHpiDomainId OBJECT-TYPE
         SYNTAX          Unsigned32
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
 	    "The SAHPI_UNSPECIFIED_DOMAIN_ID value is used to specify the default 
@@ -1046,20 +1160,20 @@ saHpiDomainId OBJECT-TYPE
 
         
 saHpiDomainCapabilities OBJECT-TYPE 
-        SYNTAX          OCTET STRING(SIZE(0..255))
+        SYNTAX          SaHpiCapabilities
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
         Domain Capabilities
         
-        This definition defines the capabilities of a given domain. A domain 
-        may support any number of capabilities, each capability seperated
-        by a delimeter (,)
+        This definition defines the capabilities of a given domain. 
+	A domain may support any number of capabilities , each 
+	capability seperated by a delimeter (,).
         
         AUTOINSERT_READ_ONLY
-          Indicates that the domain auto insert timeout value is read-only
-          and may not be modified using the saHpiHotSwapAutoInsertTimeoutSet
-          columnar object.
+          Indicates that the domain auto insert timeout value is 
+	  read-only and may not be modified using the 
+	  saHpiHotSwapAutoInsertTimeoutSet columnar object.
 
           "
 	::=   {saHpiDomainInfoEntry 2 }
@@ -1125,7 +1239,7 @@ saHpiDomainReferenceUpdateTimestamp OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the
-        DRT table is changed. Refer to SaHpiTime for full describption."
+        DRT table is changed. Refer to SaHpiTime for full description."
 	::=   {saHpiDomainInfoEntry 8 }
 
 
@@ -1146,7 +1260,7 @@ saHpiDomainResourcePresenceUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "This timestamp is set any time the RPT table is changed.
-        Refer to SaHpiTime for full describption."
+        Refer to SaHpiTime for full description."
 	::=   {saHpiDomainInfoEntry 10 }
 
 
@@ -1166,7 +1280,7 @@ saHpiDomainAlarmUpdateTimestamp OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the DAT is changed.
-        Refer to SaHpiTime for full describption."
+        Refer to SaHpiTime for full description."
 	::=   {saHpiDomainInfoEntry 12 }
 
 
@@ -1228,7 +1342,7 @@ saHpiDomainAlarmOverflow OBJECT-TYPE
 
         
 saHpiDomainGuid         OBJECT-TYPE 
-        SYNTAX          OCTET STRING(SIZE(0..15))
+        SYNTAX          SaHpiGuid
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The GUID is used to uniquely identify a domain.
@@ -1258,8 +1372,7 @@ saHpiDomainReferenceEntryCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "The number of DRT entries present in the system. 
         This field is used to determine if new resources have been added
-        or existing removed. The same functionality is available using
-        notifications."
+        or existing removed. "
         ::= {hpiEntity 3}
         
 saHpiDomainReferenceTable OBJECT-TYPE
@@ -1286,7 +1399,36 @@ saHpiDomainReferenceEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        ""
+        "
+The Domain Reference Table (DRT) which provides information about other domains associated with the domain. The two saHpiDomainId are used to uniquely identify
+a domain and a corresponding domain which can be off peer or tiered domain 
+architecture.
+
+The DRT contains an entry for each associated domain, and HPI MIB Users 
+may read these entries to discover the presence of additional domains within 
+a 'System'. The discovered domains can, in turn, be used to discover additional 
+resources and domains. The DRT is automatically built and maintained by the HPI 
+implementation.  Domain entries in the DRT may change over time if the 'System'
+ configuration changes.  
+
+There are two types of domain references:
+
+- A peer domain architecture, which consists of two or more domains that are 
+expected to contain the same resources and domain references.  Each domain 
+in a peer relationship contains an RPT listing all resources present in each 
+domain. 
+
+ - A tiered (child) domain architecture is used when all the resources in a 
+'system' cannot be accessed in a single domain.  A 'parent' domain references 
+one or more 'child' domains in its DRT.  The 'child' domains may be simple 
+domains containing only resources, or they may themselves be a 'parent' to 
+other 'child' domains.  Domains in a tiered relationship are disjointed and 
+do not contain the same resources.
+
+Note:
+When a domain is added to the DRT (SAHPI_DOMAIN_REF_ADDED) and when a domain 
+is removed from the DRT (SAHPI_DOMAIN_REF_REMOVED) an event is generated.
+"
         INDEX   { 
                 saHpiDomainId, 
                 saHpiDomainId
@@ -1321,8 +1463,7 @@ saHpiDomainAlarmEntryCount OBJECT-TYPE
         DESCRIPTION     
         "The number of DomainInfo entries present in the system. 
         This field is used to determine if new domains have been added
-        or existing removed. The same functionality is available using
-        notifications."
+        or existing removed."
         ::= {hpiEntity 5}
 
 
@@ -1364,7 +1505,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
         saHpiDomainAlarmCondTextType      SaHpiTextType,
         saHpiDomainAlarmCondTextLanguage  SaHpiTextLanguage,
         saHpiDomainAlarmCondText             SaHpiText,
-        saHpiDomainAlarmDelete                        RowStatus
+        saHpiDomainAlarmRowStatus                        RowStatus
         }
         
 saHpiDomainAlarmId OBJECT-TYPE 
@@ -1380,7 +1521,7 @@ saHpiDomainAlarmTimestamp OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Time when alarm was added to the DAT table.
-        Refer to SaHpiTime for full describption."
+        Refer to SaHpiTime for full description."
         ::= {saHpiDomainAlarmEntry 2}
 
 saHpiDomainAlarmSeverity OBJECT-TYPE 
@@ -1398,9 +1539,11 @@ saHpiDomainAlarmSeverity OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Severity of alarm.
-        (Only used with DAT and Annunciator
-        functions.  This is not a valid
-        severity for events or alarms)" 
+(Only used with DAT and Annunciator functions.  This is not a valid
+severity for events or alarms) 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiDomainAlarmEntry 3}
         
 saHpiDomainAlarmAcknowledged OBJECT-TYPE
@@ -1461,7 +1604,10 @@ saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Enumeration of status condition type." 
+        "Enumeration of status condition type. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiDomainAlarmEntry 5}   
 
 saHpiDomainAlarmCondEntityPath OBJECT-TYPE 
@@ -1535,7 +1681,7 @@ saHpiDomainAlarmCondMid OBJECT-TYPE
         
 saHpiDomainAlarmCondTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Optional data associated with status 
         condition. For more details, see textual definition"
@@ -1543,7 +1689,7 @@ saHpiDomainAlarmCondTextType OBJECT-TYPE
 
 saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status 
@@ -1552,7 +1698,7 @@ saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
 
 saHpiDomainAlarmCondText OBJECT-TYPE
         SYNTAX          SaHpiText
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status condition.
@@ -1560,30 +1706,65 @@ saHpiDomainAlarmCondText OBJECT-TYPE
         saHpiDomainAlarmCondDomainAlarmaTextLanguage."
         ::= {saHpiDomainAlarmEntry 13}
 
-saHpiDomainAlarmDelete OBJECT-TYPE
+saHpiDomainAlarmRowStatus OBJECT-TYPE
         SYNTAX          RowStatus
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION
-        " "
+  "This columnar node contains the status of the row and also
+   perform add and delete operations.
+
+   The status column uses four defined values:
+
+    - `active(1)', which indicates that the conceptual row is
+       available for use by the managed device;
+
+    - `notInService(2)', which indicates that the conceptual
+    	row exists in the agent, but is unavailable for use by
+	the managed device (see NOTE below); 'notInService' has
+	no implication regarding the internal consistency of
+	the row, availability of resources, or consistency with
+	the current state of the managed device.
+
+    - `createAndWait(5)', which is supplied by a management
+      station wishing to create a new instance of a
+      conceptual row (but not make it available for use by
+      the managed device). This function is used to add a User 
+      Alarm to the Domain Alarm Table and User Even Table.
+      The row is created (and changes state to 'active' when 
+      the saHpiDomainAlarmSeverity has been set on) to a 
+      new instance of the conceptual row. The dis-allowed 
+      saHpiDomainAlarmSeverity values are minor(3), major(2), and
+      critical(3). When a row is created in the DAT it is also
+      duplicated in the User Event Table.
+
+    - `destroy(6)', which is supplied by a management station
+      wishing to delete all of the instances associated with
+      an existing conceptual row. This function allows the 
+      HPI MIB User to delete a single User Alarm from the 
+      Domain Alarm Table and User Event Table. 
+      Only User Alarms added to the DAT and User Event Table 
+      can be deleted. To delete a single, specific alarm, set the 
+      saHpiDomainAlarmId parameter to a value representing an 
+      actual User Alarm in the DAT.
+	"
         ::= {saHpiDomainAlarmEntry 14}
 
 --/*******************************************************************************
 -- * *****************************************************************************
 -- * **********                                                         **********
--- * **********                 Resource Data Records                   **********
+-- * **********                 Resource Presence Table                   **********
 -- * **********                                                         **********
 -- * *****************************************************************************
 -- * ******************************************************************************/
 
-saHpiResourceCount OBJECT-TYPE
+saHpiResourceEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of RPT entries present in the system. 
         This field is used to determine if new resources have been added
-        or existing removed. The same functionality is available using
-        notifications."
+        or existing removed. "
         ::= {hpiEntity 7}
 
 saHpiResourceTable OBJECT-TYPE
@@ -1612,18 +1793,21 @@ saHpiResourceEntry OBJECT-TYPE
                 match a physical printed label attached to the primary  entity
                 which the resource manages. See section 5.2.6,
                 SaHpiResourceTagSet(), on page 33."
-        INDEX   { saHpiDomainId, saHpiResourceId ,saHpiEntryId }
+        INDEX   { saHpiDomainId, 
+		saHpiResourceId ,
+		saHpiResourceEntryId 
+		}
         ::= {saHpiResourceTable 1}
 
 SaHpiResourceEntry ::= SEQUENCE {
 
 
         saHpiResourceId                         Unsigned32,
-        saHpiEntryId                            Unsigned32,
+        saHpiResourceEntryId                    SaHpiEntryId,
         saHpiResourceEntityPath                 OCTET STRING,
-        saHpiResourceCapabilities               OCTET STRING,
+        saHpiResourceCapabilities               SaHpiCapabilities,
         
-        saHpiResourceHotSwapCapabilities        Unsigned32,     
+        saHpiResourceHotSwapCapabilities        SaHpiCapabilities,     
 
         saHpiResourceSeverity                   INTEGER,
         
@@ -1632,13 +1816,13 @@ SaHpiResourceEntry ::= SEQUENCE {
         saHpiResourceInfoResourceRev            Unsigned32,
         saHpiResourceInfoSpecificVer            Unsigned32,
         saHpiResourceInfoDeviceSupport          Unsigned32,
-        saHpiResourceInfoManufacturerId         Unsigned32,
+        saHpiResourceInfoManufacturerId         SaHpiManufacturerId,
         saHpiResourceInfoProductId              Unsigned32,
         saHpiResourceInfoFirmwareMajorRev       Unsigned32,
         saHpiResourceInfoFirmwareMinorRev       Unsigned32,
         saHpiResourceInfoAuxFirmwareRev         Unsigned32,
         
-        saHpiResourceInfoGuid                   OCTET STRING,
+        saHpiResourceInfoGuid                   SaHpiGuid,
         
         saHpiResourceTagTextType                SaHpiTextType,  
         saHpiResourceTagTextLanguage            SaHpiTextLanguage,
@@ -1652,7 +1836,7 @@ SaHpiResourceEntry ::= SEQUENCE {
 
 saHpiResourceId OBJECT-TYPE 
         SYNTAX          Unsigned32
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Resource identifier.
 
@@ -1666,14 +1850,14 @@ saHpiResourceId OBJECT-TYPE
 
 	::=   {saHpiResourceEntry 1}
 
-saHpiEntryId OBJECT-TYPE 
-        SYNTAX          Unsigned32      
+saHpiResourceEntryId OBJECT-TYPE 
+        SYNTAX          SaHpiEntryId
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Entry ID for record
                 Table Related Type Definitions  
-                SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
-                SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
+                SAHPI_FIRST_ENTRY 0x00000000
+                SAHPI_LAST_ENTRY  0xFFFFFFFF
                 SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
 	::=   {saHpiResourceEntry 2}
 
@@ -1707,7 +1891,7 @@ saHpiResourceEntityPath OBJECT-TYPE
 
 
 saHpiResourceCapabilities OBJECT-TYPE 
-        SYNTAX          OCTET STRING(SIZE(0..255))
+        SYNTAX          SaHpiCapabilities
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " 
@@ -1715,7 +1899,7 @@ saHpiResourceCapabilities OBJECT-TYPE
         
         This definition defines the capabilities of a given resource.
         One resource may support any number of capabilities using this
-        string (each capability has to be seperated by a delimeter). 
+        string (each capability is seperated by a delimeter). 
 
         Because each entry in an RPT will have the 
         RESOURCE string, no value  is not a valid value for the 
@@ -1771,19 +1955,20 @@ saHpiResourceCapabilities OBJECT-TYPE
 
         
 saHpiResourceHotSwapCapabilities OBJECT-TYPE 
-        SYNTAX          Unsigned32 
+        SYNTAX          SaHpiCapabilities
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " 
-        This definition defines the managed hot swap capabilities of a given
-        resource. 
+        This definition defines the managed hot swap capabilities of 
+	a given resource. 
 
         AUTOEXTRACT_READ_ONLY
                 This capability indicates if the hot swap autoextract
                 timer is read-only.
 
         INDICATOR_SUPPORTED
-                Indicates whether or not the resource has a hot swap indicator."
+                Indicates whether or not the resource has a hot swap 
+		indicator."
 	::=   {saHpiResourceEntry 5 }
 
 
@@ -1892,7 +2077,7 @@ saHpiResourceInfoDeviceSupport OBJECT-TYPE
 
 
 saHpiResourceInfoManufacturerId OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          SaHpiManufacturerId
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -2015,7 +2200,7 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
 
 
 saHpiResourceInfoGuid   OBJECT-TYPE 
-        SYNTAX          OCTET STRING(SIZE(0..15))
+        SYNTAX          SaHpiGuid
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " 
@@ -2082,7 +2267,10 @@ saHpiResourceParamControl OBJECT-TYPE
                         from non-volatile storage. Resource
                         configuration parameters include sensor 
                         thresholds and sensor configurations, as well 
-                        as resource-specific."
+                        as resource-specific.
+
+    Note: Enumerated values are increased by one value compared to
+    SAI-HPI-B spec."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 162."
 	::= {saHpiResourceEntry   20} 
@@ -2099,7 +2287,7 @@ saHpiResourceParamControl OBJECT-TYPE
 
 
 
-saHpiAutoTimeOutTable OBJECT-TYPE
+saHpiAutoTimeoutTable OBJECT-TYPE
     SYNTAX SEQUENCE OF SaHpiAutoTimeoutEntry
     MAX-ACCESS not-accessible
     STATUS current
@@ -2115,9 +2303,11 @@ saHpiAutoTimeoutEntry OBJECT-TYPE
 	MAX-ACCESS 	not-accessible
 	STATUS 		current
 	DESCRIPTION
-	""
+	"Table of domains with a timeout for how long to wait before 
+the default auto-insertion policy is invoked on a resource within 
+a specific domain."
 	INDEX { saHpiDomainId }
-	::= { saHpiAutoTimeOutTable 1 }
+	::= { saHpiAutoTimeoutTable 1 }
 
 SaHpiAutoTimeoutEntry ::= SEQUENCE {
 	saHpiAutoTimeoutForInsert   SaHpiTime
@@ -2128,38 +2318,40 @@ saHpiAutoTimeoutForInsert OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how 
-        long to wait before the default auto-insertion policy is invoked 
-        on a resource within a specific domain.  This function accepts a 
-        parameter instructing each resource to impose a delay before 
-        performing its default hot swap policy for auto-insertion.  The 
-        parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
-        to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
-        to prevent auto-insertion from ever occurring. If the parameter is
-        set to another value, then it defines the number of nanoseconds 
-        between the time a hot swap event with saHpiHotSwapState == 
-        INSERTION_PENDING is generated, and the time that the auto-insertion 
-        policy will be invoked for that resource.  If, during this time period,
-        a saHpiHotSwapPolicyCancel function call is processed, the timer will 
-        be stopped, and the auto-insertion policy will not be invoked.  Each 
-        domain maintains a single auto-insert timeout value and it is applied 
-        to all contained resources upon insertion, which support managed hot 
-        swap. Once the auto-insertion process begins, the HPI User will not be 
-        allowed to take control of the insertion process; hence, the timeout 
-        should be set appropriately to allow for this condition.  Note that the 
-        timeout period begins when the hot swap event with saHpiHotSwapState 
-        == INSERTION_PENDING is initially generated."
+        "This function allows the HPI User to configure a timeout for 
+how long to wait before the default auto-insertion policy is invoked 
+on a resource within a specific domain.  
 
+This function accepts a parameter instructing each resource to impose 
+a delay before performing its default hot swap policy for 
+auto-insertion.  The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE 
+to direct resources to proceed immediately to auto-insertion, 
+or to SAHPI_TIMEOUT_BLOCK to prevent auto-insertion from ever occurring.
+If the parameter is set to another value, then it defines the number 
+of nanoseconds between the time a hot swap event with 
+saHpiHotSwapState == INSERTION_PENDING is generated, and the time 
+that the auto-insertion policy will be invoked for that resource.  
+If, during this time period, a saHpiHotSwapPolicyCancel function 
+call is processed, the timer will be stopped, and the auto-insertion 
+policy will not be invoked.  Each domain maintains a single 
+auto-insert timeout value and it is applied to all contained resources 
+upon insertion, which support managed hot swap. Once the auto-insertion 
+process begins, the HPI User will not be allowed to take control of 
+the insertion process; hence, the timeout should be set appropriately 
+to allow for this condition.  Note that the timeout period begins 
+when the hot swap event with saHpiHotSwapState == INSERTION_PENDING 
+is initially generated." 
     REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 141-142"
+        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 141-142"
 
     ::= { saHpiAutoTimeoutEntry 1 }
 
-saHpiHotSwapCount OBJECT-TYPE
+saHpiHotSwapEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of HotSwap entries present in the system." 
+        DESCRIPTION     
+	"The number of HotSwap entries present in the system." 
         ::= {hpiHotSwap 2}
 
 saHpiHotSwapTable OBJECT-TYPE
@@ -2200,7 +2392,7 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 
 	saHpiHotSwapResetAction     	INTEGER,
 	saHpiHotSwapPowerAction     	INTEGER,
-	saHpiHotSwapRTP            	RowPointer
+	saHpiHotSwapRowPointer          RowPointer
 	}
 
 
@@ -2210,7 +2402,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
                     off(1),
                     on(2)
                 }
-    MAX-ACCESS  read-create
+    MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
         "A FRU associated with a hot-swappable resource may include
@@ -2222,8 +2414,8 @@ saHpiHotSwapIndicator OBJECT-TYPE
 
         When retrieving the values, the valid states are either 
         SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
-        This columnar node will return information, regardless of what hot
-        swap state the resource is in.
+        This columnar node will return information, regardless of 
+	what hot swap state the resource is in.
 
         When setting the values,  valid states include
         SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
@@ -2233,24 +2425,25 @@ saHpiHotSwapIndicator OBJECT-TYPE
         the appropriate hot swap state."
 
     REFERENCE 
-        "Derived from typedef in the SAI-HPI-B.00.90 page 150-151."
+        "Derived from typedef in the SAI-HPI-B.01.01 page 150-151."
     ::= {saHpiHotSwapEntry 1}
 
 
 saHpiHotSwapState 	OBJECT-TYPE
         SYNTAX          SaHpiHotSwapState
-	MAX-ACCESS  read-create
+	MAX-ACCESS  read-write
         STATUS      current
         DESCRIPTION
-	""
+	"Refer to the textual convention for full details."
         ::= { saHpiHotSwapEntry 2 }
 
 saHpiHotSwapPreviousState	OBJECT-TYPE
         SYNTAX         	SaHpiHotSwapState        
-	MAX-ACCESS  read-create
+	MAX-ACCESS  	read-write
         STATUS      	current
         DESCRIPTION
-	""
+	"The previous hot swap state. Refer to the textual convention
+for full details."
         ::= { saHpiHotSwapEntry 3 }
 	
 saHpiHotSwapExtractTimeout OBJECT-TYPE
@@ -2282,7 +2475,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         "
 
         REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
+        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 145,146"
     
         ::= {saHpiHotSwapEntry 4}
 
@@ -2292,7 +2485,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
                                 insertion(1),
                                 extraction(2)
                         }
-        MAX-ACCESS  read-create
+        MAX-ACCESS  read-write
         STATUS      current
         DESCRIPTION
         "A resource supporting hot swap typically requires a physical
@@ -2302,10 +2495,13 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         pressing a button invokes the extraction process. 
 
         This columnar node allows the HPI User to invoke an insertion or 
-        extraction process via software."
+        extraction process via software.
+
+    Note: Enumerated values are increased by one value compared to
+    SAI-HPI-B spec."
 
         REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.00.90 page 149."
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 149."
         ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
@@ -2314,7 +2510,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
                             cancel(1)
 
                         }
-        MAX-ACCESS  read-create
+        MAX-ACCESS  read-write
         STATUS      current
         DESCRIPTION
         "A resource supporting hot swap typically supports default policies for 
@@ -2334,10 +2530,13 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 
         Because a resource that supports the simplified hot swap model will 
         never transition into INSERTION PENDING or EXTRACTION PENDING states, 
-        this function is not applicable to those resources."
+        this function is not applicable to those resources.
+
+    Note: Enumerated values are increased by one value compared to
+    SAI-HPI-B spec."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.00.90 page 139."
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 139."
     ::= { saHpiHotSwapEntry 6 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
@@ -2346,7 +2545,7 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
                     setActive(1),
                     setInActive(2)
                 }
-    MAX-ACCESS  read-create
+    MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
         "Depending on the values, the user can:
@@ -2355,10 +2554,13 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
 Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources.
 
  - use this function to request a resource to return to the INACTIVE state from the INSERTION PENDING state to abort a hot-swap insertion action.
-Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
+Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.00.90 page 140-141."
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 140-141."
     ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapResetAction OBJECT-TYPE
@@ -2376,7 +2578,10 @@ saHpiHotSwapResetAction OBJECT-TYPE
 
 coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be returned in saHpiResetAction. 
 
-        If the entity is not being held in reset (using resetAssert(3)), the appropriate value is resetDeAssert(4)."
+        If the entity is not being held in reset (using resetAssert(3)), the appropriate value is resetDeAssert(4).
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
@@ -2398,16 +2603,21 @@ cycle(3) is a pulsed power operation and is not a valid return for the power sta
 
 This function controls the hardware power on a FRU entity regardless of what hot-swap state the resource is in. For example, it is legal (and may be desirable) to cycle power on the FRU even while it is in ACTIVE state in order to attempt to clear a fault condition. Similarly, a resource could be instructed to power on a FRU even while it is in INACTIVE state, for example, in order to run off-line diagnostics.
 Not all resources supporting hot swap will necessarily support this function. In particular, resources that use the simplified hot swap model may not have the ability to control FRU power. 
-This function may also be supported for non-FRU entities if power control is available for those entities."
+This function may also be supported for non-FRU entities if power control is available for those entities.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 168-169."
         ::= { saHpiHotSwapEntry 9 }
 	
-saHpiHotSwapRTP OBJECT-TYPE
+saHpiHotSwapRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "OID for RTP"
+        DESCRIPTION     
+	"OID value points the Entity Entry row, which represents 
+	this hot-swap row."
         ::= { saHpiHotSwapEntry 10 }
 
 
@@ -2422,11 +2632,12 @@ saHpiHotSwapRTP OBJECT-TYPE
 --
 
 
-saHpiEventCount OBJECT-TYPE
+saHpiEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of events present on this system. 
+        DESCRIPTION     "The number of events present in this table.
+
 	saHpiEventCount represents the total of types currently in the 
 	system.  saHpiDomainEventCount represents the subset of events 
 	that are Domain events.  The same relationship exists for 
@@ -2445,33 +2656,47 @@ saHpiEventEntry OBJECT-TYPE
         SYNTAX          SaHpiEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION ""
+        DESCRIPTION "
+   This table presents the list of all events which are present in the
+HPI system. The implementation decides how to manipulate the events
+as they reach a large number. This table is used as a master event
+table which an index that points to the specific sub-table which has
+more details on the event.
+
+Each time a new event is surfaced in the HPI system this table 
+increases by a new row and its respective sub-event table too 
+(saHpiResourceEventTable, saHpiOEMEventTable, etc). Futhermore
+based on the type of event, an notification is generated as well.
+	"
         INDEX   { 
-                saHpiDomainId,
-                saHpiResourceId,
-                saHpiEvent,
-                saHpiEventSeverity,
-                saHpiEventHistorical,
-                saHpiEventQueueStatus,
-                saHpiEventSaHpiTime
+                saHpiEventRowPointer
         }
         ::= {saHpiEventTable 1}
 
 SaHpiEventEntry ::= SEQUENCE {
-        saHpiEvent              RowPointer,
+        saHpiEventRowPointer    RowPointer,
         saHpiEventSeverity      INTEGER,
         saHpiEventHistorical    TruthValue,
         saHpiEventQueueStatus   Unsigned32,
-        saHpiEventSaHpiTime     SaHpiTimeString,
+        saHpiEventSaHpiTime     SaHpiTime,
         saHpiEventType          INTEGER
         }
 	
-saHpiEvent OBJECT-TYPE
+saHpiEventRowPointer OBJECT-TYPE
     SYNTAX      RowPointer
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-    "Pointer to the event. Identifies the applicable event table."
+    "OID value points to any of the other nine tables: 
+	saHpiResourceEventTable, 
+	saHpiDomainEventTable, 
+	saHpiSensorEventTable, 
+	saHpiSensorEnableChangeTable, 
+	saHpiHotSwapEventTable, 
+	saHpiWatchdogTable, 
+	saHpiSwEventTable, 
+	saHpiOemEventTable, 
+	and saHpiUserEventTable."
     ::= {saHpiEventEntry 1}
 
 saHpiEventSeverity OBJECT-TYPE
@@ -2484,11 +2709,12 @@ saHpiEventSeverity OBJECT-TYPE
                                 ok(5),
                                 debug(241)
                         }
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Severity of event. 
-        Note: The enumerated named have +1 added as opposed to the 
-        SA HPI spec for the same constants.  "
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiEventEntry 3}
 
 
@@ -2515,12 +2741,12 @@ saHpiEventQueueStatus OBJECT-TYPE
     ::= { saHpiEventEntry 5 }
     
 saHpiEventSaHpiTime     OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= { saHpiEventEntry 6 }
@@ -2551,11 +2777,13 @@ saHpiEventType          OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiResourceEventCount OBJECT-TYPE
+saHpiResourceEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that
+	are Resource Events."
         ::= {events 3}
 
 saHpiResourceEventTable OBJECT-TYPE
@@ -2569,7 +2797,7 @@ saHpiResourceEventEntry OBJECT-TYPE
         SYNTAX          SaHpiResourceEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION "Resource Get events."
+        DESCRIPTION "Resource events."
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
@@ -2582,8 +2810,7 @@ saHpiResourceEventEntry OBJECT-TYPE
 SaHpiResourceEventEntry ::= SEQUENCE {
 
         saHpiResourceEventTimestamp             SaHpiTimeString,
-        saHpiResourceEventType                  INTEGER,
-        saHpiResourceEventDelete                RowStatus
+        saHpiResourceEventType                  INTEGER
 
         }
 
@@ -2593,7 +2820,7 @@ saHpiResourceEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiResourceEventEntry 1}
@@ -2608,18 +2835,15 @@ saHpiResourceEventType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
---IBM-KR: add more
-        " "
+        "Resource events are sent to indicate the failure or 
+subsequent restoration of a resource.  Resource events can also be 
+used to announce the addition of a non-FRU resource to the RPT table.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
+     REFERENCE
+	"Refer to HPI B.01.01 section 3.8 for more information on Resource Failures."
     ::= {saHpiResourceEventEntry 2}
-
-saHpiResourceEventDelete OBJECT-TYPE
-    SYNTAX              RowStatus
-    MAX-ACCESS          read-write
-    STATUS              current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiResourceEventEntry 3}
 
 
 -- *********************************
@@ -2628,11 +2852,13 @@ saHpiResourceEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiDomainEventCount OBJECT-TYPE
+saHpiDomainEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of domain events present on this system."
+        DESCRIPTION     
+	"saHpiDomainEventEntryCount represents the subset of events 
+	that are Domain events."
         ::= {events 5}
 
 saHpiDomainEventTable OBJECT-TYPE
@@ -2661,8 +2887,7 @@ saHpiDomainEventEntry OBJECT-TYPE
 SaHpiDomainEventEntry ::= SEQUENCE {
 
         saHpiDomainEventTimestamp               SaHpiTimeString,
-        saHpiDomainEventType                    INTEGER,
-        saHpiDomainEventDelete                  RowStatus
+        saHpiDomainEventType                    INTEGER
         }
 
 saHpiDomainEventTimestamp OBJECT-TYPE
@@ -2671,7 +2896,7 @@ saHpiDomainEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiDomainEventEntry 1}
@@ -2679,8 +2904,8 @@ saHpiDomainEventTimestamp OBJECT-TYPE
 saHpiDomainEventType OBJECT-TYPE
     SYNTAX      INTEGER {
                         undefined(0),
-                        refAdded(1),
-                        refRemoved(2)
+                        domainRefAdded(1),
+                        domainRefRemoved(2)
                 }
     MAX-ACCESS  read-only
     STATUS      current
@@ -2691,15 +2916,6 @@ saHpiDomainEventType OBJECT-TYPE
 
     ::= {saHpiDomainEventEntry 2}
 
-saHpiDomainEventDelete OBJECT-TYPE
-    SYNTAX              RowStatus
-    MAX-ACCESS  read-write
-    STATUS              current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiDomainEventEntry 3}
-
 
 -- *********************************
 -- **
@@ -2707,11 +2923,13 @@ saHpiDomainEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEventCount OBJECT-TYPE
+saHpiSensorEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of sensor events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Sensor Events."
         ::= {events 7}
 
 saHpiSensorEventTable OBJECT-TYPE
@@ -2740,7 +2958,7 @@ saHpiSensorEventEntry OBJECT-TYPE
 SaHpiSensorEventEntry ::= SEQUENCE {
 
         saHpiSensorEventTimestamp               SaHpiTimeString,
-        saHpiSensorEventType                    INTEGER,
+        saHpiSensorEventType                    SaHpiSensorType,
         saHpiSensorEventCategory                SaHpiEventCategory,
         saHpiSensorEventAssertion               TruthValue,
 
@@ -2758,8 +2976,7 @@ SaHpiSensorEventEntry ::= SEQUENCE {
         saHpiSensorEventCurrentState            SaHpiEventState,
 
         saHpiSensorEventOem                     Unsigned32,
-        saHpiSensorEventSpecific                Unsigned32,
-        saHpiSensorEventDelete                  RowStatus
+        saHpiSensorEventSpecific                Unsigned32
         }
         
 
@@ -2769,62 +2986,17 @@ saHpiSensorEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiSensorEventEntry 1}
 
 saHpiSensorEventType OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                temperature (2),
-                                voltage (3),
-                                current (4),
-                                fan (5),
-                                physicalSecurity (6),
-                                platformViolation (7),
-                                processor (8),
-                                powerSupply (9),
-                                powerUnit (10),
-                                coolingDevice (11),
-                                otherUnitsBasedSensor (12),
-                                memory (13),
-                                driveSlot (14),
-                                postMemoryResize (15),
-                                systemFwProgress (16),
-                                eventLoggingDisabled (17),
-                                reserved1 (18),
-                                systemEvent (19),
-                                criticalInterrupt (20),
-                                button (21),
-                                moduleBoard (22),
-                                microcontrollerCoprocessor (23),
-                                addinCard (24),
-                                chassis (25),
-                                chipSet (26),
-                                otherFru (27),
-                                cableInterconnect (28),
-                                terminator (29),
-                                systemBootInitiated (30),
-                                bootError (31),
-                                osBoot (32),
-                                osCriticalStop (33),
-                                slotConnector (34),
-                                systemAcpiPowerState (35),
-                                reserved2 (36),
-                                platformAlert (37),
-                                entityPresence (38),
-                                monitorAsicIc (39),
-                                lan (40),
-                                managementSubsystemHealth (41),
-                                battery (42),
-                                operational (161),
-                                oemSensor (193)
-                        }
+	SYNTAX		SaHpiSensorType
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "General Sensor Type"
-
+        DESCRIPTION     "Refer to the textual convention for more
+details."
         ::= {saHpiSensorEventEntry 2}
 
 saHpiSensorEventCategory OBJECT-TYPE
@@ -2882,7 +3054,7 @@ saHpiSensorEventState OBJECT-TYPE
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION
-        ""
+        "Refer to the textual convention for more details."
         ::= {saHpiSensorEventEntry 5}
 
 saHpiSensorEventOptionalData OBJECT-TYPE
@@ -2899,7 +3071,7 @@ saHpiSensorEventTriggerReadingType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 7}
 
 saHpiSensorEventTriggerReading OBJECT-TYPE
@@ -2907,7 +3079,7 @@ saHpiSensorEventTriggerReading OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 8}
 
 
@@ -2916,7 +3088,7 @@ saHpiSensorEventTriggerThresholdType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 9}
 
 saHpiSensorEventTriggerThreshold OBJECT-TYPE
@@ -2924,7 +3096,7 @@ saHpiSensorEventTriggerThreshold OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 10}
 
 
@@ -2933,7 +3105,7 @@ saHpiSensorEventPreviousState OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 11}
 
 saHpiSensorEventCurrentState OBJECT-TYPE
@@ -2941,7 +3113,7 @@ saHpiSensorEventCurrentState OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    "Refer to SaHpiEventState for more details."
+    "Refer to SaHpiEventState textual convention for more details."
     ::= {saHpiSensorEventEntry 12}
 
 
@@ -2950,7 +3122,7 @@ saHpiSensorEventOem OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+    "Reserved for OEM use."
     ::= {saHpiSensorEventEntry 13}
 
 saHpiSensorEventSpecific OBJECT-TYPE
@@ -2961,15 +3133,6 @@ saHpiSensorEventSpecific OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 14}
 
-saHpiSensorEventDelete OBJECT-TYPE
-    SYNTAX      RowStatus
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiSensorEventEntry 15}
-
 
 -- *********************************
 -- **
@@ -2977,11 +3140,13 @@ saHpiSensorEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEnableChangeEventCount OBJECT-TYPE
+saHpiSensorEnableChangeEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of sensor enable events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Sensor Enable ChangeEvents."
         ::= {events 9}
 
 saHpiSensorEnableChangeEventTable OBJECT-TYPE
@@ -2996,7 +3161,7 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "Sensor Enable Change events."
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
@@ -3010,17 +3175,16 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
         
         saHpiSensorEnableChangeEventTimestamp   SaHpiTimeString,
-        saHpiSensorEnableChangeEventType        INTEGER,
+        saHpiSensorEnableChangeEventType        SaHpiSensorType,
         saHpiSensorEnableChangeEventCategory    SaHpiEventCategory,
         
-        saHpiSensorEnableChangeEnabled          TruthValue,
-        saHpiSensorEnableChangeEventsEnabled    TruthValue,
-        saHpiSensorEnableChangeAssertEvents     SaHpiEventState,
-        saHpiSensorEnableChangeDeassertEvents   SaHpiEventState,
-        saHpiSensorEnableChangeOptionalData     Unsigned8,
+        saHpiSensorEnableChangeEventEnabled          TruthValue,
+        saHpiSensorEnableChangeEventEventsEnabled    TruthValue,
+        saHpiSensorEnableChangeEventAssertEvents     SaHpiEventState,
+        saHpiSensorEnableChangeEventDeassertEvents   SaHpiEventState,
+        saHpiSensorEnableChangeEventOptionalData     Unsigned8,
 
-        saHpiSensorEnableChangeEventState       SaHpiEventState,
-        saHpiSensorEnableChangeDelete           RowStatus
+        saHpiSensorEnableChangeEventState       SaHpiEventState
         }
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
@@ -3029,61 +3193,17 @@ saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiSensorEnableChangeEventEntry 1}
 
 saHpiSensorEnableChangeEventType OBJECT-TYPE
-    SYNTAX      INTEGER {
-                                undefined(0),
-                                temperature (2),
-                                voltage (3),
-                                current (4),
-                                fan (5),
-                                physicalSecurity (6),
-                                platformViolation (7),
-                                processor (8),
-                                powerSupply (9),
-                                powerUnit (10),
-                                coolingDevice (11),
-                                otherUnitsBasedSensor (12),
-                                memory (13),
-                                driveSlot (14),
-                                postMemoryResize (15),
-                                systemFwProgress (16),
-                                eventLoggingDisabled (17),
-                                reserved1 (18),
-                                systemEvent (19),
-                                criticalInterrupt (20),
-                                button (21),
-                                moduleBoard (22),
-                                microcontrollerCoprocessor (23),
-                                addinCard (24),
-                                chassis (25),
-                                chipSet (26),
-                                otherFru (27),
-                                cableInterconnect (28),
-                                terminator (29),
-                                systemBootInitiated (30),
-                                bootError (31),
-                                osBoot (32),
-                                osCriticalStop (33),
-                                slotConnector (34),
-                                systemAcpiPowerState (35),
-                                reserved2 (36),
-                                platformAlert (37),
-                                entityPresence (38),
-                                monitorAsicIc (39),
-                                lan (40),
-                                managementSubsystemHealth (41),
-                                battery (42),
-                                operational (161),
-                                oemSensor (193)
-                        }
+    SYNTAX      SaHpiSensorType
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "General Sensor Type"
+        DESCRIPTION     "Refer to the textual convention for more
+details."
     ::= {saHpiSensorEnableChangeEventEntry 2}
 
 saHpiSensorEnableChangeEventCategory OBJECT-TYPE
@@ -3091,54 +3211,53 @@ saHpiSensorEnableChangeEventCategory OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEnableChangeEventEntry 3}
 
         
-saHpiSensorEnableChangeEnabled OBJECT-TYPE
+saHpiSensorEnableChangeEventEnabled OBJECT-TYPE
     SYNTAX      TruthValue
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        ""
+	"Current sensor enable status."
     ::= {saHpiSensorEnableChangeEventEntry 4}
 
 
-saHpiSensorEnableChangeEventsEnabled OBJECT-TYPE
+saHpiSensorEnableChangeEventEventsEnabled OBJECT-TYPE
     SYNTAX TruthValue
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        ""
+        "Current event enable status."
     ::= {saHpiSensorEnableChangeEventEntry 5}
 
 
-saHpiSensorEnableChangeAssertEvents OBJECT-TYPE
+saHpiSensorEnableChangeEventAssertEvents OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEnableChangeEventEntry 6}
 
 
-saHpiSensorEnableChangeDeassertEvents OBJECT-TYPE
+saHpiSensorEnableChangeEventDeassertEvents OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        ""
+        "Refer to the textual convention for more details."
     ::= {saHpiSensorEnableChangeEventEntry 7}
 
 
-saHpiSensorEnableChangeOptionalData OBJECT-TYPE
+saHpiSensorEnableChangeEventOptionalData OBJECT-TYPE
     SYNTAX      Unsigned8
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
         ""
     ::= {saHpiSensorEnableChangeEventEntry 8}
-
 saHpiSensorEnableChangeEventState OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
@@ -3147,14 +3266,6 @@ saHpiSensorEnableChangeEventState OBJECT-TYPE
         "Current set of asserted Event states."
     ::= {saHpiSensorEnableChangeEventEntry 9}
 
-saHpiSensorEnableChangeDelete OBJECT-TYPE
-    SYNTAX      RowStatus
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiSensorEnableChangeEventEntry 10}
 
 -- *********************************
 -- **
@@ -3162,11 +3273,13 @@ saHpiSensorEnableChangeDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiHotSwapEventCount OBJECT-TYPE
+saHpiHotSwapEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of hot swap events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are HotSwap Events."
         ::= {events 11}
 
 saHpiHotSwapEventTable OBJECT-TYPE
@@ -3181,7 +3294,7 @@ saHpiHotSwapEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "Hot Swap events."
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
@@ -3195,8 +3308,7 @@ SaHpiHotSwapEventEntry ::= SEQUENCE {
 
         saHpiHotSwapEventTimestamp              SaHpiTimeString,
         saHpiHotSwapEventState                  SaHpiHotSwapState,
-        saHpiHotSwapEventPreviousState          SaHpiHotSwapState,
-        saHpiHotSwapEventDelete                 RowStatus
+        saHpiHotSwapEventPreviousState          SaHpiHotSwapState
         }
 
 saHpiHotSwapEventTimestamp OBJECT-TYPE
@@ -3205,7 +3317,7 @@ saHpiHotSwapEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiHotSwapEventEntry 1}
@@ -3215,7 +3327,7 @@ saHpiHotSwapEventState OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION 
-        ""
+        "Refer to the textual convention for full details."
     ::= {saHpiHotSwapEventEntry 2}
 
 saHpiHotSwapEventPreviousState OBJECT-TYPE
@@ -3223,17 +3335,8 @@ saHpiHotSwapEventPreviousState OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION 
-        ""
+        "Refer to the textual convention for full details."
     ::= {saHpiHotSwapEventEntry 3}
-
-saHpiHotSwapEventDelete OBJECT-TYPE
-    SYNTAX              RowStatus
-    MAX-ACCESS  read-write
-    STATUS              current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiHotSwapEventEntry 4}
 
 
 -- *********************************
@@ -3242,11 +3345,13 @@ saHpiHotSwapEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiWatchdogEventCount OBJECT-TYPE
+saHpiWatchdogEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of watchdog events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Watchdog Events."
         ::= {events 13}
 
 saHpiWatchdogEventTable OBJECT-TYPE
@@ -3261,7 +3366,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "Watchdog events."
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
@@ -3276,8 +3381,7 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
         saHpiWatchdogEventTimestamp             SaHpiTimeString,
         saHpiWatchdogEventAction                INTEGER,
         saHpiWatchdogEventPreTimerAction        SaHpiWatchdogPreTimerAction,
-        saHpiWatchdogEventUse                   SaHpiWatchdogTimerUse, 
-        saHpiWatchdogEventDelete                RowStatus
+        saHpiWatchdogEventUse                   SaHpiWatchdogTimerUse 
         }
         
 
@@ -3287,7 +3391,7 @@ saHpiWatchdogEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiWatchdogEventEntry 1}
@@ -3334,16 +3438,6 @@ saHpiWatchdogEventUse OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 4}
 
 
-saHpiWatchdogEventDelete OBJECT-TYPE
-    SYNTAX      RowStatus
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiWatchdogEventEntry 5}
-
-
 
 -- *********************************
 -- **
@@ -3351,11 +3445,13 @@ saHpiWatchdogEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSoftwareEventCount OBJECT-TYPE
+saHpiSoftwareEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of software events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Software Events."
         ::= {events 15}
 
 saHpiSoftwareEventTable OBJECT-TYPE
@@ -3370,7 +3466,7 @@ saHpiSoftwareEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "Software events."
         INDEX   { 
                 saHpiDomainId,
 		--IBMKR: Do you need ResourceId for a software event?
@@ -3385,12 +3481,11 @@ SaHpiSoftwareEventEntry ::= SEQUENCE {
 
         saHpiSoftwareEventTimestamp             SaHpiTimeString,
 
-        saHpiSoftwareEventManufacturerIdT       Unsigned32,
+        saHpiSoftwareEventManufacturerIdT       SaHpiManufacturerId,
         saHpiSoftwareEventType                  INTEGER,
         saHpiSoftwareEventTextType              SaHpiTextType,
         saHpiSoftwareEventTextLanguage          SaHpiTextLanguage,
-        saHpiSoftwareEventText                  SaHpiText,
-        saHpiSoftwareEventDelete                RowStatus
+        saHpiSoftwareEventText                  SaHpiText
         }
 
 saHpiSoftwareEventTimestamp OBJECT-TYPE
@@ -3399,18 +3494,18 @@ saHpiSoftwareEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiSoftwareEventEntry 1}
 
 
 saHpiSoftwareEventManufacturerIdT OBJECT-TYPE
-    SYNTAX      Unsigned32
+    SYNTAX      SaHpiManufacturerId
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiSoftwareEventEntry 2}
 
 
@@ -3424,7 +3519,19 @@ saHpiSoftwareEventType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "The following type defines the types of events that can be 
+reported  by the HPI software implementation. 
+
+Audit events report a discrepancy in the audit process.  
+Audits are typically performed by HA software to detect problems.  
+Audits may look for such things as corrupted data stores, 
+inconsistent RPT information, or improperly managed queues.
+
+Startup events report a failure to start-up properly, or 
+inconsistencies in persisted data. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
     ::= {saHpiSoftwareEventEntry 3}
         
 saHpiSoftwareEventTextType OBJECT-TYPE
@@ -3432,7 +3539,7 @@ saHpiSoftwareEventTextType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiSoftwareEventEntry 4}
 
 
@@ -3441,7 +3548,7 @@ saHpiSoftwareEventTextLanguage OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiSoftwareEventEntry 6}
 
 
@@ -3451,18 +3558,8 @@ saHpiSoftwareEventText OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiSoftwareEventEntry 7}
-
-saHpiSoftwareEventDelete OBJECT-TYPE
-    SYNTAX              RowStatus
-    MAX-ACCESS  read-write
-    STATUS              current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiSoftwareEventEntry 8}
-
 
 
 -- *********************************
@@ -3471,11 +3568,13 @@ saHpiSoftwareEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiOEMEventCount OBJECT-TYPE
+saHpiOEMEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of OEM events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are OEM Events."
         ::= {events 17}
 
 saHpiOEMEventTable OBJECT-TYPE
@@ -3490,7 +3589,7 @@ saHpiOEMEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "OEM events."
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
@@ -3505,11 +3604,10 @@ SaHpiOEMEventEntry ::= SEQUENCE {
 
         saHpiOEMEventTimestamp          SaHpiTimeString,
 
-        saHpiOEMEventManufacturerIdT    Unsigned32,
+        saHpiOEMEventManufacturerIdT    SaHpiManufacturerId,
         saHpiOEMEventTextType           SaHpiTextType,
         saHpiOEMEventTextLanguage       SaHpiTextLanguage,
-        saHpiOEMEventText               SaHpiText,
-        saHpiOEMEventDelete             RowStatus
+        saHpiOEMEventText               SaHpiText
         }
 
 saHpiOEMEventTimestamp OBJECT-TYPE
@@ -3518,17 +3616,17 @@ saHpiOEMEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiOEMEventEntry 1}
 
 saHpiOEMEventManufacturerIdT OBJECT-TYPE
-    SYNTAX      Unsigned32
+    SYNTAX      SaHpiManufacturerId
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiOEMEventEntry 2}
 
 saHpiOEMEventTextType   OBJECT-TYPE
@@ -3536,7 +3634,7 @@ saHpiOEMEventTextType   OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiOEMEventEntry 3}
 
 saHpiOEMEventTextLanguage OBJECT-TYPE
@@ -3544,7 +3642,7 @@ saHpiOEMEventTextLanguage OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiOEMEventEntry 4}
 
 saHpiOEMEventText       OBJECT-TYPE
@@ -3552,17 +3650,8 @@ saHpiOEMEventText       OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to the textual convention for more details."
     ::= {saHpiOEMEventEntry 5}
-
-saHpiOEMEventDelete OBJECT-TYPE
-    SYNTAX              RowStatus
-    MAX-ACCESS  read-write
-    STATUS              current
-    DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
-
-    ::= {saHpiOEMEventEntry 6}
 
 
 -- *********************************
@@ -3571,11 +3660,13 @@ saHpiOEMEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiUserEventCount OBJECT-TYPE
+saHpiUserEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of user events present on this system."
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are User Events."
         ::= {events 19}
 
 saHpiUserEventTable OBJECT-TYPE
@@ -3590,7 +3681,7 @@ saHpiUserEventEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 
-            "Sensor events."
+            "User events."
         INDEX   { 
                 saHpiDomainId,
 		-- IBMKR: What is the ResourceId set to?
@@ -3607,7 +3698,7 @@ SaHpiUserEventEntry ::= SEQUENCE {
         saHpiUserEventTextType          SaHpiTextType,
         saHpiUserEventTextLanguage      SaHpiTextLanguage,
         saHpiUserEventText              SaHpiText,
-        saHpiUserEventDelete            RowStatus
+        saHpiUserEventRowStatus		RowStatus
         }
 
 saHpiUserEventTimestamp OBJECT-TYPE
@@ -3616,7 +3707,7 @@ saHpiUserEventTimestamp OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiUserEventEntry 1}
@@ -3646,12 +3737,39 @@ saHpiUserEventText OBJECT-TYPE
         "Refer to saHpiText for more details. "
     ::= {saHpiUserEventEntry 4}
 
-saHpiUserEventDelete OBJECT-TYPE
+saHpiUserEventRowStatus OBJECT-TYPE
     SYNTAX      RowStatus
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION 
-        "Set this to destory(6) or notInService(2) to delete this entry."
+        "This columnar node contains the status of the row and also
+	perform add and delete operations.
+
+	The status column uses four defined values:
+
+        - `active(1)', which indicates that the conceptual row is
+          available for use by the managed device;
+
+        - `createAndGo(4)', which is supplied by a management
+          station wishing to create a new instance of a
+          conceptual row (but not make it available for use by
+          the managed device). This function is used to add a 
+          User Alarm  to this User Event Table and also to the
+          to the Domain Alarm Table; When creating this row,
+          the value of saHpiEventSeverity indice must not be one of
+          these minor(3), major(2), and critical(3). The effect of
+          creating a new row will also be reflected in the DAT - with
+          a new row there.
+
+        - `destroy(6)', which is supplied by a management station
+          wishing to delete all of the instances associated with
+          an existing conceptual row. This function allows the 
+          HPI MIB User to delete a single User Alarm from the 
+          User Event Table and Domain Alarm Table. 
+          Only User Alarms added to the DAT and User Event Table can 
+	  be deleted. To delete a single, specific alarm, set the 
+          saHpiDomainAlarmId parameter to a value representing an 
+          actual User Alarm in the User Event Table."
 
     ::= {saHpiUserEventEntry 5}
 
@@ -3661,11 +3779,11 @@ saHpiUserEventDelete OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiAnnouncementCount OBJECT-TYPE
+saHpiAnnouncementEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of Announcements present on this system."
+        DESCRIPTION     "The number of announcements present on this system."
         ::= { events 21 }
 
 saHpiAnnouncementTable OBJECT-TYPE
@@ -3679,19 +3797,33 @@ saHpiAnnouncementEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnouncementEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     " "
+        DESCRIPTION     "The table of announcements is used to provide
+a common interface to varied mechanisms for announcing conditions.
+
+Each announcement in an Annunciator's current set contains a severity level, details describing the specific condition that is being reported, an Acknowledged flag, a timestamp indicating when the announcement was added to the set, and an EntryId that uniquely identifies the particular status item within the set.
+
+EntryIds are assigned to announcements as they are added to the set as well as a Timestamp.  After an announcement is deleted from the current set, its EntryId may be reused for a newly added announcement as long as the new announcement will have a different timestamp than any previously deleted announcement using the same EntryId.  Thus, the EntryId and Timestamp together will uniquely identify any announcement, which was ever present in the Annunciator's set.
+
+The actual meaning of the Acknowledged flag is arbitrary, and the actions taken by the platform when announcements are flagged as 'acknowledged' or 'unacknowledged' are implementation-specific.  The intended use of the flag is to indicate whether a particular announcement in the current set has been recognized by whomever or whatever is inspecting the LEDs, displays, etc., that are being driven by the Annunciator management instrument.  Thus, when announcements are added to the current set, generally the flag should be set to indicate that the condition is 'unacknowledged'.  Later, either as the result of an HPI User function call, or due to some implementation-dependent action (such as pressing an 'acknowledge' button on a front-panel display), the flag can be changed to indicate that the announcement is now 'acknowledged.'
+
+The ability to acknowledge announcements is not controlled by the Annunciator 'mode' setting (Auto, User, or Shared).  Any announcement may be acknowledged by the HPI implementation, or via the saHpiAnnunciatorAcknowledge() function call, regardless of the current mode setting for the Annunciator.
+
+Over time, announcements are added to and deleted from an Annunciator`s current set of announcements. This may be done automatically by the HPI implementation to reflect platform fault conditions, or by the HPI User via the HPI interface.  When announcements are added or deleted automatically by the HPI implementation, it is implementation-specific which announcements are added or removed.
+"
         INDEX   {       saHpiDomainId, 
                         saHpiResourceId, 
                         saHpiDomainAlarmId, 
-                        saHpiEntryId }
+                        saHpiAnnouncementEntryId 
+		}
         ::= {saHpiAnnouncementTable 1}
 
 SaHpiAnnouncementEntry ::= SEQUENCE {
 
-        saHpiAnnuoncementTimestamp      SaHpiTime,
-        saHpiAnnuoncementAddedByUser    TruthValue,
+	saHpiAnnouncementEntryId	SaHpiEntryId,
+        saHpiAnnouncementTimestamp      SaHpiTime,
+        saHpiAnnouncementAddedByUser    TruthValue,
         saHpiAnnouncementSeverity       INTEGER,
-        saHpiAnnuoncementAcknowledged   TruthValue,
+        saHpiAnnouncementAcknowledged   TruthValue,
         
         saHpiAnnouncementStatusCondType INTEGER,
         saHpiAnnouncementEntityPath     OCTET STRING,
@@ -3706,21 +3838,31 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
 
       }
       
-saHpiAnnuoncementTimestamp      OBJECT-TYPE
+saHpiAnnouncementEntryId OBJECT-TYPE
+	SYNTAX		SaHpiEntryId
+        MAX-ACCESS      not-accessible 
+        STATUS          current
+        DESCRIPTION     "Entry ID for record
+                Table Related Type Definitions  
+                SAHPI_FIRST_ENTRY 0x00000000
+                SAHPI_LAST_ENTRY  0xFFFFFFFF"
+	::=   {saHpiAnnouncementEntry 1 }
+	
+saHpiAnnouncementTimestamp      OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Time when announcement added to set."
-	::=   {saHpiAnnouncementEntry 1 }
+	::=   {saHpiAnnouncementEntry 2 }
 
         
-saHpiAnnuoncementAddedByUser    OBJECT-TYPE
+saHpiAnnouncementAddedByUser    OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "True if added to set by HPI User, False if added 
         automatically by HPI implementation."
-	::=   {saHpiAnnouncementEntry 2 }
+	::=   {saHpiAnnouncementEntry 3 }
 
 
 saHpiAnnouncementSeverity       OBJECT-TYPE
@@ -3738,15 +3880,15 @@ saHpiAnnouncementSeverity       OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Only used with DAT and Annunciator functions.  
         This is not a valid severity for events or alarms."
-	::=   {saHpiAnnouncementEntry 3 }
+	::=   {saHpiAnnouncementEntry 4 }
 
         
-saHpiAnnuoncementAcknowledged   OBJECT-TYPE
+saHpiAnnouncementAcknowledged   OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Acknowledged flag."
-	::=   {saHpiAnnouncementEntry 4 }
+	::=   {saHpiAnnouncementEntry 5 }
 
         
 saHpiAnnouncementStatusCondType OBJECT-TYPE
@@ -3760,7 +3902,7 @@ saHpiAnnouncementStatusCondType OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Status Condition Type."
-	::=   {saHpiAnnouncementEntry 5 }
+	::=   {saHpiAnnouncementEntry 6 }
 
 
 saHpiAnnouncementEntityPath     OBJECT-TYPE
@@ -3781,7 +3923,7 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-	::=   {saHpiAnnouncementEntry 6 }
+	::=   {saHpiAnnouncementEntry 7 }
         
 saHpiAnnouncementSensorNum      OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3789,7 +3931,7 @@ saHpiAnnouncementSensorNum      OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor associated with status Only valid 
         if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
-	::=   {saHpiAnnouncementEntry 7 }
+	::=   {saHpiAnnouncementEntry 8 }
 
         
 saHpiAnnouncementEventState     OBJECT-TYPE
@@ -3798,7 +3940,7 @@ saHpiAnnouncementEventState     OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor event state. Only valid if Type is 
         SAHPI_STATUS_COND_TYPE_SENSOR.."
-	::=   {saHpiAnnouncementEntry 8 }
+	::=   {saHpiAnnouncementEntry 9 }
 
             
 saHpiAnnouncementName   OBJECT-TYPE
@@ -3807,7 +3949,7 @@ saHpiAnnouncementName   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "AIS compatible identifier associated with Status condition."
-	::=   {saHpiAnnouncementEntry 9 }
+	::=   {saHpiAnnouncementEntry 10 }
 
 
 saHpiAnnouncementMid    OBJECT-TYPE
@@ -3816,7 +3958,7 @@ saHpiAnnouncementMid    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Manufacturer Id associated with status condition, 
         required when type is SAHPI_STATUS_COND_TYPE_OEM."
-	::=   {saHpiAnnouncementEntry 10 }
+	::=   {saHpiAnnouncementEntry 11 }
 
 
 saHpiAnnouncementTextType OBJECT-TYPE 
@@ -3825,7 +3967,7 @@ saHpiAnnouncementTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data. 
         See Definition for SaHpiTextType for more details."
-	::=   {saHpiAnnouncementEntry 11 }
+	::=   {saHpiAnnouncementEntry 12 }
 
         
 saHpiAnnouncementTextLanguage   OBJECT-TYPE
@@ -3834,7 +3976,7 @@ saHpiAnnouncementTextLanguage   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data.
         See Definition for SaHpiTextLanguage for more details."
-	::=   {saHpiAnnouncementEntry 12 }
+	::=   {saHpiAnnouncementEntry 13 }
 
 
 saHpiAnnouncementText   OBJECT-TYPE
@@ -3844,7 +3986,7 @@ saHpiAnnouncementText   OBJECT-TYPE
         DESCRIPTION     "Field Data.
         The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-	::=   {saHpiAnnouncementEntry 13 }
+	::=   {saHpiAnnouncementEntry 14 }
 
 
 saHpiAnnouncementDelete OBJECT-TYPE
@@ -3852,8 +3994,11 @@ saHpiAnnouncementDelete OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION
-                " "
-	::=   {saHpiAnnouncementEntry 14 }
+        "This function allows the HPI User to delete a single 
+announcement. Announcements may be deleted individually by specifying 
+a specific index and setting this columnar node to destroy(6).
+"
+	::=   {saHpiAnnouncementEntry 15 }
 
 
 --/*******************************************************************************
@@ -3892,28 +4037,28 @@ saHpiEventLogInfoEntry OBJECT-TYPE
                                                  
 SaHpiEventLogInfoEntry ::= SEQUENCE {
 
-        saHpiEventLogEntries            Unsigned32,
-        saHpiEventLogSize               Unsigned32,
-        saHpiEventLogUserEventMaxSize   Unsigned32,
-        saHpiEventLogUpdateTimestamp    SaHpiTime,
-        saHpiEventLogCurrentTime        SaHpiTime,
+        saHpiEventLogInfoEntries            Unsigned32,
+        saHpiEventLogInfoSize               Unsigned32,
+        saHpiEventLogInfoUserEventMaxSize   Unsigned32,
+        saHpiEventLogInfoUpdateTimestamp    SaHpiTime,
+        saHpiEventLogInfoTime        SaHpiTime,
 
-        saHpiEventLogIsEnabled          TruthValue,
+        saHpiEventLogInfoIsEnabled          TruthValue,
         
-        saHpiEventLogOverflowFlag       TruthValue,
-        saHpiEventLogOverflowResetable  TruthValue,
-        saHpiEventLogOverflowAction     INTEGER,
+        saHpiEventLogInfoOverflowFlag       TruthValue,
+        saHpiEventLogInfoOverflowResetable  TruthValue,
+        saHpiEventLogInfoOverflowAction     INTEGER,
 
-        saHpiEventLogOverflowReset      INTEGER,
+        saHpiEventLogInfoOverflowReset      INTEGER,
 
 -- Event Log operations:
-        saHpiEventLogDelete             RowStatus,
+        saHpiEventLogInfoDelete             RowStatus,
 
-        saHpiEventLogState              TruthValue
+        saHpiEventLogInfoState              TruthValue
 
         }
 
-saHpiEventLogEntries OBJECT-TYPE
+saHpiEventLogInfoEntries OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -3921,7 +4066,7 @@ saHpiEventLogEntries OBJECT-TYPE
             "The number of active entries contained in the log."
         ::= {saHpiEventLogInfoEntry 1}
 
-saHpiEventLogSize OBJECT-TYPE
+saHpiEventLogInfoSize OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -3929,7 +4074,7 @@ saHpiEventLogSize OBJECT-TYPE
             "The total number of entries the log is able to hold."
         ::= {saHpiEventLogInfoEntry 2}
 
-saHpiEventLogUserEventMaxSize OBJECT-TYPE
+saHpiEventLogInfoUserEventMaxSize OBJECT-TYPE
     SYNTAX      Unsigned32(0..255)
     MAX-ACCESS  read-only
     STATUS      current
@@ -3941,7 +4086,7 @@ saHpiEventLogUserEventMaxSize OBJECT-TYPE
         to SAHPI_MAX_TEXT_BUFFER_LENGTH (255)."
     ::= {saHpiEventLogInfoEntry 3}
 
-saHpiEventLogUpdateTimestamp OBJECT-TYPE
+saHpiEventLogInfoUpdateTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
@@ -3949,15 +4094,15 @@ saHpiEventLogUpdateTimestamp OBJECT-TYPE
             "The UpdateTimestamp entry denotes the time of the last
         update to the Event Log. 
 
-        Refer to SaHpiTime for full describption."
+        Refer to SaHpiTime for full description."
         ::= {saHpiEventLogInfoEntry 4}
 
-saHpiEventLogCurrentTime OBJECT-TYPE
+saHpiEventLogInfoTime OBJECT-TYPE
     SYNTAX      SaHpiTime
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION 
-        "The CurrentTime entry denotes the Event Log's idea of the 
+        "The Time entry denotes the Event Log's idea of the 
     current time; i.e the timestamp that would be placed on an
     entry if it was added now. 
 
@@ -3969,13 +4114,13 @@ saHpiEventLogCurrentTime OBJECT-TYPE
 
     Some underlying implementations may not be able to handle the same relative and absolute time ranges, as those defined in HPI.  Such limitations will be documented in implementation-specific documentation.  When a time value is set in a region that is not supported by the implementation, an error code of SNMP_GENERROR  will be returned.
 
-    Refer to SaHpiTime for full describption."
+    Refer to SaHpiTime for full description."
 
     REFERENCE
-        "Derived from typedefs in SAI-HPI-B.00.90 page 51."
+        "Derived from typedefs in SAI-HPI-B.01.01 page 51."
         ::= {saHpiEventLogInfoEntry 5}
 
-saHpiEventLogIsEnabled OBJECT-TYPE
+saHpiEventLogInfoIsEnabled OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -3992,7 +4137,7 @@ saHpiEventLogIsEnabled OBJECT-TYPE
         events are automatically added to any event log.  "
         ::= {saHpiEventLogInfoEntry 6}
 
-saHpiEventLogOverflowFlag OBJECT-TYPE
+saHpiEventLogInfoOverflowFlag OBJECT-TYPE
         SYNTAX          TruthValue      
         MAX-ACCESS      read-only
         STATUS          current
@@ -4001,17 +4146,17 @@ saHpiEventLogOverflowFlag OBJECT-TYPE
         Events have been dropped or overwritten due to a table overflow. "
         ::= {saHpiEventLogInfoEntry 7}
 
-saHpiEventLogOverflowResetable OBJECT-TYPE
+saHpiEventLogInfoOverflowResetable OBJECT-TYPE
     SYNTAX      TruthValue
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
         "Indicates if the the overflow falg can be cleared 
-        by calling saHpiEventLogOverflowReset."
+        by calling saHpiEventLogInfoOverflowReset."
     ::= {saHpiEventLogInfoEntry 8}
 
 
-saHpiEventLogOverflowAction OBJECT-TYPE
+saHpiEventLogInfoOverflowAction OBJECT-TYPE
         SYNTAX          INTEGER{
                                 undefined(0),
                                 drop(1),
@@ -4033,7 +4178,7 @@ saHpiEventLogOverflowAction OBJECT-TYPE
         ::= {saHpiEventLogInfoEntry 9}
 
 
-saHpiEventLogOverflowReset OBJECT-TYPE
+saHpiEventLogInfoOverflowReset OBJECT-TYPE
         SYNTAX          INTEGER {
                               undefined(0),
                               resetOverflowFlag(1)
@@ -4045,15 +4190,15 @@ saHpiEventLogOverflowReset OBJECT-TYPE
 
         ::= {saHpiEventLogInfoEntry 10}
 
-saHpiEventLogDelete OBJECT-TYPE
+saHpiEventLogInfoDelete OBJECT-TYPE
         SYNTAX          RowStatus
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION
         "This function erases the contents of the specified Event Log.
 
-        Set this to destory(6) or notInService(2) to delete the event log for
-        this resource.
+        Set this to destroy(6) or notInService(2) to delete the event 
+log for this resource.
 
         NOTE: The OverflowFlag field in the Event Log info record will be 
         reset when this function is called."
@@ -4063,7 +4208,7 @@ saHpiEventLogDelete OBJECT-TYPE
 
     ::= {saHpiEventLogInfoEntry 11}
 
-saHpiEventLogState OBJECT-TYPE
+saHpiEventLogInfoState OBJECT-TYPE
     SYNTAX      TruthValue
     MAX-ACCESS  read-write
     STATUS      current
@@ -4104,20 +4249,20 @@ saHpiEventLogEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId,
-                saHpiEntryId
+                saHpiEventLogIndex
         }
         ::= {saHpiEventLogTable 1}
                                                  
 SaHpiEventLogEntry ::= SEQUENCE {
-        saHpiEventLogIndex              Unsigned32,
+        saHpiEventLogIndex            SaHpiEntryId,
         saHpiEventLogType               INTEGER,
         saHpiEventLogAddedTimestamp     SaHpiTime,
 
-        saHpiEventLog                   RowPointer
+        saHpiEventLogRowPointer                   RowPointer
         }
 
 saHpiEventLogIndex OBJECT-TYPE
-        SYNTAX          Unsigned32
+        SYNTAX          SaHpiEntryId
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
@@ -4158,11 +4303,11 @@ saHpiEventLogAddedTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Refer to SaHpiTime for full describption."
+        DESCRIPTION     "Refer to SaHpiTime for full description."
         ::= {saHpiEventLogEntry 3}
 
 
-saHpiEventLog OBJECT-TYPE
+saHpiEventLogRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
@@ -4181,7 +4326,7 @@ saHpiEventLog OBJECT-TYPE
 
 
 
-saHpiRdrCount OBJECT-TYPE
+saHpiRdrEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -4205,7 +4350,7 @@ saHpiRdrEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiEntryId, 
+                saHpiResourceEntryId, 
                 saHpiRdrType 
         }
 
@@ -4218,7 +4363,7 @@ SaHpiRdrEntry ::= SEQUENCE {
         
         saHpiRdrIsFru	        TruthValue,     
 
-        saHpiRdr                RowPointer,
+        saHpiRdrRowPointer                RowPointer,
         saHpiRdrId              Counter32,
         saHpiRdrRTP             RowPointer,
         
@@ -4239,7 +4384,10 @@ saHpiRdrType OBJECT-TYPE
                         }
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Type of RDR entry."
+        DESCRIPTION     "Type of RDR entry.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
 	::=   {saHpiRdrEntry 1 }
 
 
@@ -4281,7 +4429,7 @@ saHpiRdrIsFru OBJECT-TYPE
 	::=   {saHpiRdrEntry 3 }
 
 
-saHpiRdr OBJECT-TYPE
+saHpiRdrRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
@@ -4344,7 +4492,7 @@ saHpiRdrIdString OBJECT-TYPE
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-saHpiCtrlCount OBJECT-TYPE
+saHpiCtrlEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -4394,7 +4542,7 @@ SaHpiCtrlEntry ::= SEQUENCE {
 
 saHpiCtrlNum OBJECT-TYPE 
         SYNTAX          SaHpiInstrumentId
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "The control number "
         ::= {saHpiCtrlEntry 1}
@@ -4419,7 +4567,10 @@ saHpiCtrlOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
-        This enumeration defines the what the control's output will be.  "
+This enumeration defines the what the control's output will be. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiCtrlEntry 2}
 
 saHpiCtrlType OBJECT-TYPE 
@@ -4434,8 +4585,11 @@ saHpiCtrlType OBJECT-TYPE
                         }
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "This enumerated type defines the different types of
-        generic controls. "
+        DESCRIPTION     "
+This enumerated type defines the different types of generic controls. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiCtrlEntry 3}
 
 saHpiCtrlMode OBJECT-TYPE 
@@ -4448,7 +4602,9 @@ saHpiCtrlMode OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"This object describes how the control is managed.  The control may be managed automatically by the implementation (auto mode).  Or it may be managed by the HPI User (manual mode).  Some controls allow their modes to be changed, allowing the HPI User to determine if they will manage the control, or relinquish the management to the implementation.  But, other controls do not allow the mode to be changed.  These static-mode controls are indicated with the saHpiCtrlReadOnly flag set as part of the default control mode.
-	"
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiCtrlEntry 4}
         
 saHpiCtrlReadOnly OBJECT-TYPE 
@@ -4650,7 +4806,7 @@ saHpiCtrlText OBJECT-TYPE
         "
         REFERENCE
         "Derieved from typedef and function calls described in
-        SAI-HPI-B.00.90 pages 84...89."
+        SAI-HPI-B.01.01 pages 84...89."
         ::= {saHpiCtrlEntry 12}
 
 saHpiCtrlRDR OBJECT-TYPE
@@ -4670,7 +4826,7 @@ saHpiCtrlRDR OBJECT-TYPE
 -- * *****************************************************************************/
 
 
-saHpiSensorCount OBJECT-TYPE
+saHpiSensorEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -4695,8 +4851,8 @@ saHpiSensorEntry OBJECT-TYPE
         ::= {saHpiSensorTable 1}
 
 SaHpiSensorEntry ::= SEQUENCE {
-        saHpiSensorNum                        SaHpiInstrumentId,
-        saHpiSensorType                         INTEGER,
+        saHpiSensorNum                          SaHpiInstrumentId,
+        saHpiSensorType                         SaHpiSensorType,
         saHpiSensorCategory                     SaHpiEventCategory,
         
         saHpiSensorEnableCtrl                   TruthValue,
@@ -4737,61 +4893,17 @@ saHpiSensorNum OBJECT-TYPE
 
         The following specifies the named range for standard sensor numbers.
 
-        SAHPI_STANDARD_SENSOR_MIN   0x00000100
+        SAHPI_STANDARD_SENSOR_MIN   0x0001.010
         SAHPI_STANDARD_SENSOR_MAX   0x000001FF"
         ::= {saHpiSensorEntry 1}
 
 
 saHpiSensorType OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined (0),
-                                temperature (2),
-                                voltage (3),
-                                current (4),
-                                fan (5),
-                                physicalSecurity (6),
-                                platformViolation (7),
-                                processor (8),
-                                powerSupply (9),
-                                powerUnit (10),
-                                coolingDevice (11),
-                                otherUnitsBasedSensor (12),
-                                memory (13),
-                                driveSlot (14),
-                                postMemoryResize (15),
-                                systemFwProgress (16),
-                                eventLoggingDisabled (17),
-                                reserved1 (18),
-                                systemEvent (19),
-                                criticalInterrupt (20),
-                                button (21),
-                                moduleBoard (22),
-                                microcontrollerCoProcessor (23),
-                                addinCard (24),
-                                chassis (25),
-                                chipSet (26),
-                                otherFru (27),
-                                cableInterconnect (28),
-                                terminator (29),
-                                systemBootInitiated (30),
-                                bootError (31),
-                                osBoot (32),
-                                osCriticalStop (33),
-                                slotConnector (34),
-                                systemACPIPowerState (35),
-                                reserved2 (36),
-                                platformAlert (37),
-                                entityPresence (38),
-                                monitorAsicIC (39),
-                                lan (40),
-                                managementSubsystemHealth (41),
-                                battery (42),
-                                operational (161),
-                                oemSensor (193)
-                        }
+        SYNTAX          SaHpiSensorType
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "General sensor type. "
+        DESCRIPTION     "Refer to the textual convention
+for more details."
 
         ::= {saHpiSensorEntry 2}
 
@@ -4812,7 +4924,7 @@ saHpiSensorEnable       OBJECT-TYPE
 
 	When writing this object sets the sensor enable status for an addressed sensor.  If a sensor is disabled, the rows in saHpiSensorReadingCurrent for that sensor will not be present, and no events will be generated for the sensor."
 	REFERENCE
-	"Derieved from SAI-HPI-B.00.90 spec, page 85,86."
+	"Derieved from SAI-HPI-B.01.01 spec, page 85,86."
         ::= {saHpiSensorEntry 4}
 
 saHpiSensorEventEnable  OBJECT-TYPE
@@ -4824,7 +4936,7 @@ saHpiSensorEventEnable  OBJECT-TYPE
 
 	When writing this object sets the sensor event enable status for an addressed sensor.  If event generation for a sensor is disabled, no events will be generated as a result of the assertion or deassertion of any event state, regardless of the setting of the assert or deassert event masks for the sensor.  If event generation for a sensor is enabled, events will be generated when event states are asserted or deasserted, according to the settings of the assert and deassert event masks for the sensor.  Event states may still be read for a sensor even if event generation is disabled, by reading the saHpiSensorReadingCurrent table."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 spec, page 87,88."
+	"Derived from SAI-HPI-B.01.01 spec, page 87,88."
         ::= {saHpiSensorEntry 5}
 
 saHpiSensorEventCtrl    OBJECT-TYPE
@@ -4849,7 +4961,10 @@ saHpiSensorEventCtrl    OBJECT-TYPE
                                         
         readOnly(3):	             Event control not supported; sensor event
                                         enable status cannot be changed and
-                                        assert/deassert masks cannot be changed."
+                                        assert/deassert masks cannot be changed.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiSensorEntry 6}
 
 saHpiSensorSupportedStates         OBJECT-TYPE
@@ -4890,7 +5005,7 @@ saHpiSensorAssertEventMask    OBJECT-TYPE
 	If the sensor assert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 page 89,90"
+	"Derived from SAI-HPI-B.01.01 page 89,90"
 
         ::= {saHpiSensorEntry 8}
 
@@ -4923,7 +5038,7 @@ saHpiSensorDeassertEventMask  OBJECT-TYPE
 	If the sensor assert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 page 89,90"
+	"Derived from SAI-HPI-B.01.01 page 89,90"
         ::= {saHpiSensorEntry 9}
 
 saHpiSensorCategory OBJECT-TYPE
@@ -4952,16 +5067,22 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "perEvent - Event message control per event,             
+        "This columnar node represents the sensor category
+control of events. The possible states are:
+
+perEvent - Event message control per event,             
            or by entire sensor; sensor event enable     
            status can be changed, and assert/deassert   
            masks can be changed      
-        readOnlyMasks - Control for entire sensor only; sensor       
+readOnlyMasks - Control for entire sensor only; sensor       
            event enable status can be changed, but      
            assert/deassert masks cannot be changed 
-        readOnly - Event control not supported; sensor event    
+readOnly - Event control not supported; sensor event    
            enable status cannot be changed and          
-           assert/deassert masks cannot be changed"
+           assert/deassert masks cannot be changed.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiSensorEntry 11}
 
 saHpiSensorEventsSupported OBJECT-TYPE
@@ -4969,7 +5090,7 @@ saHpiSensorEventsSupported OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        ""
+        "Refer to the textual convention for full details"
         ::= {saHpiSensorEntry 12}
 
 
@@ -5016,10 +5137,14 @@ saHpiSensorModifierUse OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Modifier Unit Use (msec, etc.).
                          
-        This type defines how the modifier unit is used. For example: 
-        base unit == meter, modifier unit == seconds, and
-         modifier unit use == basicOverModifier(1). 
-        The resulting unit would be meters per second."                 
+This type defines how the modifier unit is used. For example: 
+base unit == meter, modifier unit == seconds, and
+modifier unit use == basicOverModifier(1). 
+
+The resulting unit would be meters per second.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiSensorEntry 17}
 
 saHpiSensorPercentage OBJECT-TYPE
@@ -5054,7 +5179,7 @@ saHpiSensorOem                OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " "
+        DESCRIPTION     "Reserved for OEM use."
 
         ::= {saHpiSensorEntry 21}
         
@@ -6029,7 +6154,7 @@ saHpiSensorThdNegHysteresisValue                OBJECT-TYPE
 
 
 
-saHpiInventoryCount OBJECT-TYPE
+saHpiInventoryEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6147,7 +6272,7 @@ saHpiInventoryRDR OBJECT-TYPE
 -- **
 -- **************************************
 
-saHpiAreaCount OBJECT-TYPE
+saHpiAreaEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6192,7 +6317,7 @@ SaHpiAreaEntry ::= SEQUENCE {
 	saHpiAreaId			SaHpiInstrumentId,
         saHpiAreaType                	INTEGER,
         saHpiAreaIsReadOnly      	TruthValue,
-        saHpiAreaDelete          	RowStatus,
+        saHpiAreaRowStatus		RowStatus,
         saHpiAreaNumDataFields           Unsigned32
         }
         
@@ -6217,11 +6342,10 @@ saHpiAreaType        OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "
-        The type of Area.
+The type of Area.
 
-        Note: The enumerated named have +1 added as opposed to the 
-        SA HPI  spec for the same constants.  Inventory Data Area 
-        type definitions."
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiAreaEntry 2}
 
 saHpiAreaIsReadOnly OBJECT-TYPE 
@@ -6233,21 +6357,48 @@ saHpiAreaIsReadOnly OBJECT-TYPE
         read-only IDR are flagged as read-only as well."
         ::= {saHpiAreaEntry 3}
 
-saHpiAreaDelete OBJECT-TYPE 
+saHpiAreaRowStatus OBJECT-TYPE 
         SYNTAX          RowStatus
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-	"This function is used to delete an Inventory Data Area, including the 
-	Area header and all fields contained with the area, from a particular 
-	Inventory Data Repository.
+        "This columnar node contains the status of the row and also
+	perform add and delete operations.
 
-	Deleting an Inventory Data Area also deletes all fields contained within 
-	the area.  In some implementations, certain Areas are intrinsically 
-	read-only.  The ReadOnly flag, in the area header, indicates if the Area
-	is read-only. If the Inventory Data Area is not read-only, but contains 
-	a Field that is read-only, the Area cannot be deleted.  An attempt to 
-	delete an Area that contains a read-only Field will return an error."
+	The status column uses three defined values:
+
+        - `active(1)', which indicates that the conceptual row is
+          available for use by the managed device;
+
+        - `notInService(2)', which indicates that the conceptual
+    	  row exists in the agent, but is unavailable for use by
+	  the managed device (see NOTE below); 'notInService' has
+	  no implication regarding the internal consistency of
+	  the row, availability of resources, or consistency with
+	  the current state of the managed device.
+
+        - `createAndWait(5)', which is supplied by a management
+          station wishing to create a new instance of a
+          conceptual row (but not make it available for use by
+          the managed device). This function is used to add
+          an Area to the specified Inventory Data Repository.
+          The row is created (and changes state to 'active' when 
+          the saHpiAreaType has been correctly set) to a 
+          new instance of the conceptual row. The dis-allowed 
+          saHpiAreaType value is undefined(0) and unspecified(256)
+
+        - `destroy(6)', which is supplied by a management station
+          wishing to delete all of the instances associated with
+          an existing conceptual row. This function allows the 
+          HPI MIB User to delete an Inventory Data Area, including 
+          the Area header and all fields contained with the area, 
+          from a particular Inventory Data Repository.
+	  In some implementations, certain Areas are intrinsically 
+	  read-only.  The saHpiAreaIsReadOnly flag, indicates if the 
+          Area is read-only. If the Inventory Data Area is not 
+          read-only, but contains a Field that is read-only, the Area 
+          cannot be deleted.  An attempt to delete an Area that 
+          contains a read-only Field will return an error."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 114."
         ::= {saHpiAreaEntry 4}
@@ -6266,7 +6417,7 @@ saHpiAreaNumDataFields OBJECT-TYPE
 -- **
 -- **************************************
 
-saHpiFieldCount OBJECT-TYPE
+saHpiFieldEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6333,14 +6484,13 @@ saHpiFieldType OBJECT-TYPE
                                 custom(10),
                                 unspecified(256)
                         }
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
         "Inventory Data Field type definitions.
         
-        Note: The enumerated named have +1 added as opposed to the 
-        SA HPI  spec for the same constants.  Inventory Data Area 
-        type definitions."
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiFieldEntry 2}
 
 saHpiFieldIsReadOnly OBJECT-TYPE 
@@ -6354,7 +6504,7 @@ saHpiFieldIsReadOnly OBJECT-TYPE
         
 saHpiFieldTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Field Data. 
         See Definition for SaHpiTextType for more details."
@@ -6362,7 +6512,7 @@ saHpiFieldTextType OBJECT-TYPE
         
 saHpiFieldTextLanguage  OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Field Data.
         See Definition for SaHpiTextLanguage for more details."
@@ -6370,7 +6520,7 @@ saHpiFieldTextLanguage  OBJECT-TYPE
 
 saHpiFieldText  OBJECT-TYPE
         SYNTAX          SaHpiText
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Field Data.
         The type of date is specified
@@ -6379,12 +6529,11 @@ saHpiFieldText  OBJECT-TYPE
         
 saHpiFieldStatus        OBJECT-TYPE
         SYNTAX          RowStatus
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "This object provides a method to create and delete a Data Inventory Field.
-	For more details on the operations, please refer to SMIv2-SM.
-
+        "This object provides a method to create and delete a 
+        Data Inventory Field.
 
 	Supported states are:
                      active(1),
@@ -6398,20 +6547,20 @@ saHpiFieldStatus        OBJECT-TYPE
 
     The status column has four defined values:
 
-    - `active', which indicates that the conceptual row is
+    - `active(1)', which indicates that the conceptual row is
     	available for use by the managed device. For it to in such 
-	state, the columnar objects: saHpiFieldIsReadOnly, saHpiFieldType, 
-	saHpiFieldTextType, saHpiTextLanguage, and saHpiFieldText have to 
-	valid values.
+	state, the columnar objects: saHpiFieldType, 
+	saHpiFieldTextType, saHpiTextLanguage, and saHpiFieldText 
+       must have valid values.
 
-    - `notInService', which indicates that the conceptual
+    - `notInService(2)', which indicates that the conceptual
     	row exists in the agent, but is unavailable for use by
 	the managed device (see NOTE below); 'notInService' has
 	no implication regarding the internal consistency of
 	the row, availability of resources, or consistency with
 	the current state of the managed device.
 
-    - `createAndWait', which is supplied by a management
+    - `createAndWait(5)', which is supplied by a management
     	station wishing to create a new instance of a
 	conceptual row. After setting this value, the management
 	station is responsible of providing valid values to the
@@ -6419,7 +6568,7 @@ saHpiFieldStatus        OBJECT-TYPE
 	saHpiFieldTextType, saHpiTextLanguage and saHpiFieldText.
 
 
-    - `destroy', which is supplied by a management station
+    - `destroy(6)', which is supplied by a management station
     	wishing to delete all of the instances associated with
 	an existing conceptual row."
         ::= {saHpiFieldEntry 8}
@@ -6435,7 +6584,7 @@ saHpiFieldStatus        OBJECT-TYPE
 -- *******************************************************************************/
 --
 
-saHpiWatchdogCount OBJECT-TYPE
+saHpiWatchdogEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6562,7 +6711,10 @@ saHpiWatchdogTimerAction OBJECT-TYPE
         "Indicates what action will be taken when the Watchdog times out.
 
          Setting this object will NOT take effect on the Watchdog until the
-        object SaHpiWatchdogRunning is set to true(1)."
+        object SaHpiWatchdogRunning is set to true(1).
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiWatchdogEntry 5}
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
@@ -6697,7 +6849,7 @@ saHpiWatchdogRDR 	OBJECT-TYPE
 --
 
 
-saHpiAnnunciatorCount OBJECT-TYPE
+saHpiAnnunciatorEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6715,7 +6867,16 @@ saHpiAnnunciatorEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnunciatorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     " "
+        DESCRIPTION     "
+The Annunciator table is used to control the set of annunciators associated with a resource.
+
+An Annunciator management instrument holds a set of individual announcements.  The function of the Annunciator is to communicate the contents of its current set via whatever platform-specific mechanism is associated with that particular Annunciator management instrument.  For example, if announcements are to be communicated via lighting a set of LEDs on a front-panel display, the Annunciator management instrument may analyze its current set of announcements and turn on a single LED reflecting the most severe condition found, or turn on a 'System Ok' LED if there are currently no items in the set.  A different Annunciator may continuously scroll each announcement in its set on a text display, as well as turning on LEDs and setting dry-contact relays to reflect the severity of conditions present.  A third Annunciator may announce items in its set by sending messages to a proprietary management system, or by sending emails or pages to a system technician.
+
+The Annunciator provides a common interface to these varied mechanisms for announcing conditions, so the HPI User is not burdened by platform-to-platform differences.  However, the current content of any annunciator management instrument is not defined by the HPI standard in the same way that the contents of the DAT are defined.  Thus, the HPI implementation and HPI Users can exert more control over what conditions should be announced.  Further, a platform can contain multiple Annunciator management instruments, each reflecting a different physical announcement device in the platform.  By exposing each separately, HPI Users and the HPI implementation can control which conditions are handled by each announcement device.
+An Annunciator management instrument may be implemented using other HPI controls that are in 'auto' mode; for example, digital controls to turn LEDs on and off, stream controls to sound audible alerts, and/or text controls to display detailed information.  However, Annunciators may also operate directly to report conditions using mechanisms that are not themselves visible directly in the HPI interface.
+
+Over time, announcements are added to and deleted from an Annunciator`s current set of announcements. This may be done automatically by the HPI implementation to reflect platform fault conditions, or by the HPI User via the HPI interface.  When announcements are added or deleted automatically by the HPI implementation, it is implementation-specific which announcements are added or removed.
+"
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiAnnunciatorNum }
         ::= {saHpiAnnunciatorTable 1}
 
@@ -6751,7 +6912,9 @@ saHpiAnnunciatorType    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "The following enumerated type defines the possible output types 
-        which can be associated with an Annunciator Management Instrument."
+        which can be associated with an Annunciator Management Instrument.
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
         ::= {saHpiAnnunciatorEntry 2}
         
 saHpiAnnunciatorModeReadOnly    OBJECT-TYPE
@@ -6789,7 +6952,10 @@ The Annunciator management instrument has a current mode that indicates whether 
   	 
  The initial mode of each Annunciator is implementation-specific.  The HPI User may change the mode of Annunciators with the saHpiAnnunciatorMode object.  However, the mode may be configured to be Read-only, in which case the HPI User will not be able to change the mode. 	 
   	 
- When the mode is user(2) or shared(3), HPI Users may add or delete any types of announcements in the Annunciator's current set - not just HPI User announcements.  This is allowed so that the HPI User can exert complete control over what conditions are being announced, if that is required.  Note that this is less restrictive than the similar operations on the DAT.  To distinguish between announcements added to an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser field in the announcement indicates the source of the announcement in the set."
+ When the mode is user(2) or shared(3), HPI Users may add or delete any types of announcements in the Annunciator's current set - not just HPI User announcements.  This is allowed so that the HPI User can exert complete control over what conditions are being announced, if that is required.  Note that this is less restrictive than the similar operations on the DAT.  To distinguish between announcements added to an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser field in the announcement indicates the source of the announcement in the set.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
        ::= {saHpiAnnunciatorEntry 5}
 
 saHpiAnnunciatorOem     OBJECT-TYPE
@@ -6821,6 +6987,9 @@ saHpiAnnunciatorRDR OBJECT-TYPE
 
 saHpiSensorNotification NOTIFICATION-TYPE
         OBJECTS {       
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiSensorEventType,
                 saHpiSensorEventCategory,
                 saHpiSensorEventState,
@@ -6838,6 +7007,9 @@ saHpiSensorNotification NOTIFICATION-TYPE
 
 saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         OBJECTS {       
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiSensorEnableChangeEventType,
                 saHpiSensorEnableChangeEventCategory,
                 saHpiSensorEnableChangeEventState
@@ -6846,11 +7018,14 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         DESCRIPTION
         "Sensor event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-B.00.90 pages 77..78."
+        "Derived from typedefs in SAI-HPI-B.01.01 pages 77..78."
         ::= { hpiNotifications 2 }
 
 saHpiResourceNotifications NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiResourceEventType
         }
         STATUS current
@@ -6860,6 +7035,9 @@ saHpiResourceNotifications NOTIFICATION-TYPE
         
 saHpiDomainNotifications NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiDomainEventType
         }
         STATUS current
@@ -6870,6 +7048,9 @@ saHpiDomainNotifications NOTIFICATION-TYPE
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiWatchdogEventAction,
                 saHpiWatchdogEventPreTimerAction,
                 saHpiWatchdogEventUse
@@ -6882,6 +7063,9 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiHotSwapEventState,
                 saHpiHotSwapEventPreviousState
         }
@@ -6893,6 +7077,9 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 
 saHpiSoftwareNotifications NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiSoftwareEventType,
                 saHpiSoftwareEventTextType,
                 saHpiSoftwareEventTextLanguage,
@@ -6909,6 +7096,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiOEMEventTextType,
                 saHpiOEMEventTextLanguage,
                 saHpiOEMEventText
@@ -6920,10 +7110,12 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 
 saHpiUserNotifications NOTIFICATION-TYPE
         OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId,
+		saHpiEventSeverity,
                 saHpiUserEventTextType,
                 saHpiUserEventTextLanguage,
-                saHpiUserEventText,
-                saHpiUserEventTimestamp
+                saHpiUserEventText
         }
         STATUS current
         DESCRIPTION
@@ -6995,7 +7187,7 @@ saHpiDomainAlarmGroup OBJECT-GROUP
 		saHpiDomainAlarmCondTextType,
 		saHpiDomainAlarmCondTextLanguage,
 		saHpiDomainAlarmCondText,
-		saHpiDomainAlarmDelete
+		saHpiDomainAlarmRowStatus
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7048,7 +7240,7 @@ saHpiHotSwapGroup OBJECT-GROUP
 		saHpiHotSwapResourceRequest,
 		saHpiHotSwapResetAction,
 		saHpiHotSwapPowerAction,
-		saHpiHotSwapRTP
+		saHpiHotSwapRowPointer
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7068,8 +7260,7 @@ saHpiEventGroup OBJECT-GROUP
 saHpiResourceEventGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiResourceEventTimestamp,
-		saHpiResourceEventType,
-		saHpiResourceEventDelete
+		saHpiResourceEventType
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7079,8 +7270,7 @@ saHpiResourceEventGroup OBJECT-GROUP
 saHpiDomainEventGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiDomainEventTimestamp,
-		saHpiDomainEventType,
-		saHpiDomainEventDelete
+		saHpiDomainEventType
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7102,8 +7292,7 @@ saHpiSensorEventGroup OBJECT-GROUP
 		saHpiSensorEventPreviousState,
 		saHpiSensorEventCurrentState,
 		saHpiSensorEventOem,
-		saHpiSensorEventSpecific,
-		saHpiSensorEventDelete
+		saHpiSensorEventSpecific
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7115,13 +7304,12 @@ saHpiSensorEnableChangeEventGroup OBJECT-GROUP
 		saHpiSensorEnableChangeEventTimestamp,
 		saHpiSensorEnableChangeEventType,
 		saHpiSensorEnableChangeEventCategory,
-		saHpiSensorEnableChangeEnabled,
-		saHpiSensorEnableChangeEventsEnabled,
-		saHpiSensorEnableChangeAssertEvents,
-		saHpiSensorEnableChangeDeassertEvents,
-		saHpiSensorEnableChangeOptionalData,
-		saHpiSensorEnableChangeEventState,
-		saHpiSensorEnableChangeDelete
+		saHpiSensorEnableChangeEventEnabled,
+		saHpiSensorEnableChangeEventEventsEnabled,
+		saHpiSensorEnableChangeEventAssertEvents,
+		saHpiSensorEnableChangeEventDeassertEvents,
+		saHpiSensorEnableChangeEventOptionalData,
+		saHpiSensorEnableChangeEventState
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7132,8 +7320,7 @@ saHpiHotSwapEventGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiHotSwapEventTimestamp,
 		saHpiHotSwapEventState,
-		saHpiHotSwapEventPreviousState,
-		saHpiHotSwapEventDelete
+		saHpiHotSwapEventPreviousState
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7145,8 +7332,7 @@ saHpiWatchdogEventGroup OBJECT-GROUP
 		saHpiWatchdogEventTimestamp,
 		saHpiWatchdogEventAction,
 		saHpiWatchdogEventPreTimerAction,
-		saHpiWatchdogEventUse,
-		saHpiWatchdogEventDelete
+		saHpiWatchdogEventUse
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7160,8 +7346,7 @@ saHpiSoftwareEventGroup OBJECT-GROUP
 		saHpiSoftwareEventType,
 		saHpiSoftwareEventTextType,
 		saHpiSoftwareEventTextLanguage,
-		saHpiSoftwareEventText,
-		saHpiSoftwareEventDelete
+		saHpiSoftwareEventText
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7174,8 +7359,7 @@ saHpiOEMEventGroup OBJECT-GROUP
 		saHpiOEMEventManufacturerIdT,
 		saHpiOEMEventTextType,
 		saHpiOEMEventTextLanguage,
-		saHpiOEMEventText,
-		saHpiOEMEventDelete
+		saHpiOEMEventText
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7188,7 +7372,7 @@ saHpiUserEventGroup OBJECT-GROUP
 		saHpiUserEventTextType,
 		saHpiUserEventTextLanguage,
 		saHpiUserEventText,
-		saHpiUserEventDelete
+		saHpiUserEventRowStatus
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7197,10 +7381,10 @@ saHpiUserEventGroup OBJECT-GROUP
 
 saHpiAnnouncementGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiAnnuoncementTimestamp,
-		saHpiAnnuoncementAddedByUser,
+		saHpiAnnouncementTimestamp,
+		saHpiAnnouncementAddedByUser,
 		saHpiAnnouncementSeverity,
-		saHpiAnnuoncementAcknowledged,
+		saHpiAnnouncementAcknowledged,
 		saHpiAnnouncementStatusCondType,
 		saHpiAnnouncementEntityPath,
 		saHpiAnnouncementSensorNum,
@@ -7219,18 +7403,18 @@ saHpiAnnouncementGroup OBJECT-GROUP
 
 saHpiEventLogInfoGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiEventLogEntries,
-		saHpiEventLogSize,
-		saHpiEventLogUserEventMaxSize,
-		saHpiEventLogUpdateTimestamp,
-		saHpiEventLogCurrentTime,
-		saHpiEventLogIsEnabled,
-		saHpiEventLogOverflowFlag,
-		saHpiEventLogOverflowResetable,
-		saHpiEventLogOverflowAction,
-		saHpiEventLogOverflowReset,
-		saHpiEventLogDelete,
-		saHpiEventLogState
+		saHpiEventLogInfoEntries,
+		saHpiEventLogInfoSize,
+		saHpiEventLogInfoUserEventMaxSize,
+		saHpiEventLogInfoUpdateTimestamp,
+		saHpiEventLogInfoTime,
+		saHpiEventLogInfoIsEnabled,
+		saHpiEventLogInfoOverflowFlag,
+		saHpiEventLogInfoOverflowResetable,
+		saHpiEventLogInfoOverflowAction,
+		saHpiEventLogInfoOverflowReset,
+		saHpiEventLogInfoDelete,
+		saHpiEventLogInfoState
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7241,7 +7425,7 @@ saHpiEventLogGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiEventLogType,
 		saHpiEventLogAddedTimestamp,
-		saHpiEventLog
+		saHpiEventLogRowPointer
 	}
 	STATUS	current
 	DESCRIPTION
@@ -7252,7 +7436,7 @@ saHpiRdrGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiRdrEntityPath,
 		saHpiRdrIsFru,
-		saHpiRdr,
+		saHpiRdrRowPointer,
 		saHpiRdrId,
 		saHpiRdrRTP,
 		saHpiRdrTextType,
@@ -7266,7 +7450,6 @@ saHpiRdrGroup OBJECT-GROUP
 
 saHpiCtrlGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiCtrlNum,
 		saHpiCtrlOutputType,
 		saHpiCtrlType,
 		saHpiCtrlState,
@@ -7495,7 +7678,7 @@ saHpiAreaGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiAreaType,
 		saHpiAreaIsReadOnly,
-		saHpiAreaDelete,
+		saHpiAreaRowStatus,
 		saHpiAreaNumDataFields
 	}
 	STATUS	current
