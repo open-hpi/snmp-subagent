@@ -73,6 +73,7 @@ static trap_vars saHpiResourceNotification[]  = {
   {COLUMN_SAHPIRESOURCECAPABILITIES, ASN_UNSIGNED, NULL ,0},
   {COLUMN_SAHPIRESOURCESEVERITY, ASN_INTEGER, NULL, 0}};
 
+static unsigned int rpt_mutex = AGENT_FALSE;
 
 static int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
@@ -103,7 +104,7 @@ populate_rpt() {
    SaHpiEntryIdT	current;
    SaHpiTimeT           time;
    SaHpiBoolT state;
-   int new_entries;
+
   
    int rc;
    long backup_count = entry_count;
@@ -133,9 +134,9 @@ populate_rpt() {
 
      // Check to see if there are any new entries.
 
-     err = didSaHpiChanged(&new_entries,&rpt_info);
+     err = didSaHpiChanged(&rpt_mutex,&rpt_info);
 
-     if (new_entries == TRUE) {
+     if (rpt_mutex == AGENT_TRUE) {
 
        memcpy(&update_timestamp,
 	      &rpt_info.UpdateTimestamp,
@@ -185,6 +186,7 @@ populate_rpt() {
 	     
 	     if (!rpt_context) {
 	       // New entry. Add it
+
 	       rpt_context = saHpiTable_create_row(&rpt_index);
 	     } 
 	     if (!rpt_context) {
@@ -211,12 +213,17 @@ populate_rpt() {
 			  ResourceID_oid, MAX_OID_LEN, &ResourceID_oid_len);
 
 	   // Mark this row as clean.
+	   DEBUGMSGTL((AGENT,"RPT (%d, %d, %d) entry cleaned.\n",
+		       rpt_entry.DomainId, 
+		       rpt_entry.ResourceId,
+		       rpt_entry.EntryId));
+
 	   rpt_context->dirty_bit = AGENT_FALSE;	
    
 	   // By this stage, rpt_context surely has something in it.
 	   // '<table>_modify_context(..)' does a checksum check to see if 
 	   // the record needs to be altered.
-
+	   
 	   if (saHpiTable_modify_context(&rpt_entry, 
 					 rpt_context,
 					 &time,
@@ -257,9 +264,8 @@ populate_rpt() {
 		   send_v2trap(trap_var);
 		   snmp_free_varbind(trap_var);
 		 } else {
-		   // IBM-KR: TODO
-		   // Should use 'snmp_log' perhaps?
-		   DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+		   snmp_log(LOG_WARNING,"Could not build a RPT TRAP/EVENT message.\n");
+		   rc = AGENT_ERR_BUILD_TRAP;
 		 }
 
 	       }
@@ -337,51 +343,59 @@ unsigned long  purge_rpt ( void ) {
   unsigned int deleted;
   int rc;
 
-  rpt_context = CONTAINER_FIRST(cb.container);       
+
   DEBUGMSGTL((AGENT,"purge_rpt: Entry\n"));
-  while (rpt_context != NULL) {
+
+  // Mutex. Only do the work when we have recently 
+  // received fresh information.
+  if (rpt_mutex == AGENT_TRUE) {
+ 
+    rpt_context = CONTAINER_FIRST(cb.container);       
+    while (rpt_context != NULL) {
 	 
-    deleted = AGENT_FALSE;
-    DEBUGMSGTL((AGENT,"Found %d.%d.%d purge: %s\n", 
+      deleted = AGENT_FALSE;
+      DEBUGMSGTL((AGENT,"Found %d.%d.%d purge: %s\n", 
 		rpt_context->saHpiDomainID,
 		rpt_context->saHpiResourceID,
 		rpt_context->saHpiEntryID,
 		(rpt_context->dirty_bit == AGENT_TRUE)? "Yes" : "No"));
 	 
-    if (rpt_context != NULL) {
-      if (rpt_context->dirty_bit == AGENT_FALSE) {
-	// Making it dirty again.
-	rpt_context->dirty_bit = AGENT_TRUE;
-      } else {
-	domain_id = rpt_context->saHpiDomainID;
-	resource_id = rpt_context->saHpiResourceID;
-	num = rpt_context->saHpiEntryID;
-	capabilities = rpt_context->saHpiResourceCapabilities;
-	// We are getting the next item here b/c effectivly the the rpt_context
-	// will be set to NULL in the 'delete_rpt_row' 
-	rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
-	deleted = AGENT_TRUE;
-	count++;
-	// Delete the RPT row
-	rc = delete_rpt_row(domain_id,
-			    resource_id,
-			    num);
-	if (rc != AGENT_ERR_NOERROR)
-	  DEBUGMSGTL((AGENT,"delete_rpt_row failed. return code: %d\n", rc));
-	     
-
-	if (capabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
-	  rc = delete_hotswap_row(domain_id, resource_id);
+      if (rpt_context != NULL) {
+	if (rpt_context->dirty_bit == AGENT_FALSE) {
+	  // Making it dirty again.
+	  rpt_context->dirty_bit = AGENT_TRUE;
+	} else {
+	  domain_id = rpt_context->saHpiDomainID;
+	  resource_id = rpt_context->saHpiResourceID;
+	  num = rpt_context->saHpiEntryID;
+	  capabilities = rpt_context->saHpiResourceCapabilities;
+	  // We are getting the next item here b/c effectivly the the rpt_context
+	  // will be set to NULL in the 'delete_rpt_row' 
+	  rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
+	  deleted = AGENT_TRUE;
+	  count++;
+	  // Delete the RPT row
+	  rc = delete_rpt_row(domain_id,
+			      resource_id,
+			      num);
 	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL((AGENT,"delete_hotswap_row failed. Return code: %d\n", rc));
+	    DEBUGMSGTL((AGENT,"delete_rpt_row failed. return code: %d\n", rc));
+	  
+	  
+	  if (capabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
+	    rc = delete_hotswap_row(domain_id, resource_id);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL((AGENT,"delete_hotswap_row failed. Return code: %d\n", rc));
+	  }
+	  
 	}
-	
-      }
-    }        
+      }        
     // Only get the next item if no deletion has happend.
     if (deleted == AGENT_FALSE)
 	   rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
-       
+    
+    }
+    rpt_mutex = AGENT_FALSE;
   }
   DEBUGMSGTL((AGENT,"purge_rpt. Exit (count: %d).\n", count));
   return count;

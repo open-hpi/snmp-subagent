@@ -234,13 +234,14 @@ populate_event(SaHpiSelEntryIdT,
   unsigned long 
   purge_event ( void );
 
-  int delete_event_entry(saHpiEventTable_context *ctx);
+  //int delete_event_entry(saHpiEventTable_context *ctx);
 
 
+  
 int
 delete_event_row(SaHpiDomainIdT domain_id,
 		 SaHpiResourceIdT resource_id,
-		 SaHpiSelEntryIdT num);
+		 unsigned long num);
   
 				
   int

@@ -67,7 +67,7 @@ static trap_vars saHpiResourceDataRecordNotification[]  = {
 
 static u_long rdr_count = 0;
 
-
+static unsigned int rdr_mutex = AGENT_FALSE;
 
 static int  
 saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
@@ -136,6 +136,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 			current_rdr, &next_rdr, &rdr_entry);
       
       if (err == SA_OK)   {
+	rdr_mutex = AGENT_TRUE;
 	// Look at the MIB to find out what the indexs are
 	rdr_oid[0]=rpt_entry->DomainId;
 	rdr_oid[1]=rpt_entry->ResourceId;
@@ -251,11 +252,14 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 					     (u_char *)&rdr_count,
 					     sizeof(rdr_count));
 
-		   DEBUGMSGTL((AGENT,"Sending the TRAP\n"));
+		   DEBUGMSGTL((AGENT,"Sending RDR TRAP/EVENT\n"));
 		   send_v2trap(trap_var);
 		   snmp_free_varbind(trap_var);
 		 } else {
-		   DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+
+		   snmp_log(LOG_WARNING,"Could not build a RDR TRAP/EVENT message.\n");
+
+		   rc = AGENT_ERR_BUILD_TRAP;
 		 }
 
 	       }
@@ -308,67 +312,74 @@ unsigned long purge_rdr() {
    //    dirty ones are removed.
 
    DEBUGMSGTL((AGENT,"purge_rdr. Entry.\n"));
-   rdr_context = CONTAINER_FIRST(cb.container);
-   while (rdr_context != NULL) {
-      deleted = AGENT_FALSE;
-      DEBUGMSGTL((AGENT,"Found %d.%d.%d (%X) (child: %d) purge: %s\n",
-		  rdr_context->domain_id,
-		  rdr_context->saHpiResourceID, 
-		  rdr_context->saHpiRdrRecordId,
-		  rdr_context->saHpiRdrRecordId,
-		  rdr_context->saHpiRdrId,
-		  (rdr_context->dirty_bit == AGENT_TRUE)? "Yes" : "No"));
-      
-      if (rdr_context != NULL) {
-	// Dirty bit hasn't been cleaned. Purge the record.
-	if (rdr_context->dirty_bit == AGENT_TRUE) {
-	  // Copy the values (we are going to remove 'rdr_context' and
-	  // we need the domain_id, resource_id, etc values for 
+
+   if (rdr_mutex == AGENT_TRUE) {
+     rdr_context = CONTAINER_FIRST(cb.container);
+     while (rdr_context != NULL) {
+       deleted = AGENT_FALSE;
+       DEBUGMSGTL((AGENT,"Found %d.%d.%d (%X) (child: %d) purge: %s\n",
+		   rdr_context->domain_id,
+		   rdr_context->saHpiResourceID, 
+		   rdr_context->saHpiRdrRecordId,
+		   rdr_context->saHpiRdrRecordId,
+		   rdr_context->saHpiRdrId,
+		   (rdr_context->dirty_bit == AGENT_TRUE)? "Yes" : "No"));
+       
+       if (rdr_context != NULL) {
+	 if (rdr_context->dirty_bit == AGENT_FALSE) {
+	   // Its ok.
+	   rdr_context->dirty_bit = AGENT_TRUE;
+	 } else {
+	   // Dirty bit hasn't been cleaned. Purge the record.
+	   // Copy the values (we are going to remove 'rdr_context' and
+	   // we need the domain_id, resource_id, etc values for 
 	  // deleteing sub-RDR records.
-	  domain_id = rdr_context->domain_id;
-	  resource_id = rdr_context->saHpiResourceID;
-	  num = rdr_context->saHpiRdrRecordId;
-	  type = rdr_context->saHpiRdrType;
-	  child_id = rdr_context->saHpiRdrId;
-	  // We are getting the next item here b/c effectivly  the rpt_context
+	   domain_id = rdr_context->domain_id;
+	   resource_id = rdr_context->saHpiResourceID;
+	   num = rdr_context->saHpiRdrRecordId;
+	   type = rdr_context->saHpiRdrType;
+	   child_id = rdr_context->saHpiRdrId;
+	   // We are getting the next item here b/c effectivly  the rpt_context
 	  // will be set to NULL in the 'delete_rpt_row' 
-	  rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
-	  deleted = AGENT_TRUE;
-	  count++;
-	  // Delete the RDR row
-	  rc = delete_rdr_row(domain_id, resource_id, num, type);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL((AGENT,"delete_rdr_row failed. Return code: %d.\n", rc));
-	  // Delete the other sub-type. Keep in mind that this will delete
-	  // _only_ the specific subtypes. Therfore other records
-	  // with the same resource_id, domain_id, and num can still
-	  // exist.
-	  switch (type) {
-	  case SAHPI_NO_RECORD:
+	   rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
+	   deleted = AGENT_TRUE;
+	   count++;
+	   // Delete the RDR row
+	   rc = delete_rdr_row(domain_id, resource_id, num, type);
+	   if (rc != AGENT_ERR_NOERROR)
+	     DEBUGMSGTL((AGENT,"delete_rdr_row failed. Return code: %d.\n", rc));
+	   // Delete the other sub-type. Keep in mind that this will delete
+	   // _only_ the specific subtypes. Therfore other records
+	   // with the same resource_id, domain_id, and num can still
+	   // exist.
+	   switch (type) {
+	   case SAHPI_NO_RECORD:
+	     break;
+	   case SAHPI_CTRL_RDR:
+	     rc = delete_ctrl_row(domain_id, resource_id, child_id);
+	     break;
+	   case SAHPI_SENSOR_RDR:
+	     rc = delete_sensor_row(domain_id,resource_id, child_id);
 	    break;
-	  case SAHPI_CTRL_RDR:
-	    rc = delete_ctrl_row(domain_id, resource_id, child_id);
+	   case SAHPI_INVENTORY_RDR:
+	     rc = delete_inventory_rows(domain_id,resource_id, child_id);
+	     break;
+	   case SAHPI_WATCHDOG_RDR:
+	     rc = delete_watchdog_row(domain_id, resource_id, child_id);
+	     break;
+	   default:
 	    break;
-	  case SAHPI_SENSOR_RDR:
-	    rc = delete_sensor_row(domain_id,resource_id, child_id);
-	    break;
-	  case SAHPI_INVENTORY_RDR:
-	    rc = delete_inventory_rows(domain_id,resource_id, child_id);
-	    break;
-	  case SAHPI_WATCHDOG_RDR:
-	    rc = delete_watchdog_row(domain_id, resource_id, child_id);
-	    break;
-	  default:
-	    break;
-	  }
-	  if (rc != AGENT_ERR_NOERROR) 
-	    DEBUGMSGTL((AGENT,"Couldn't delete sub-RDR entry (rc: %d)\n",rc));
+	   }
+	   if (rc != AGENT_ERR_NOERROR) 
+	     DEBUGMSGTL((AGENT,"Couldn't delete sub-RDR entry (rc: %d)\n",rc));
 	  
-	}
-      }
-      // Only get the next item if no deletion has happend.
-      if (deleted == AGENT_FALSE)
-	rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
+	 }
+       }
+       // Only get the next item if no deletion has happend.
+       if (deleted == AGENT_FALSE)
+	 rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
+     }
+     rdr_mutex = AGENT_FALSE;
    }
    DEBUGMSGTL((AGENT,"purge_rdr: Exit (delete: %d).\n", count));
    return count;
