@@ -129,6 +129,7 @@ extern "C"
 
   saHpiRdrTable_context *saHpiRdrTable_create_row (netsnmp_index *);
 
+  netsnmp_index *saHpiRdrTable_delete_row (saHpiRdrTable_context *);
 
 
 #ifdef __cplusplus

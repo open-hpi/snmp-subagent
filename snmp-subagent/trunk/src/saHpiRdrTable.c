@@ -673,6 +673,23 @@ saHpiRdrTable_extract_index (saHpiRdrTable_context * ctx, netsnmp_index * hdr)
 }
 
 
+/************************************************************
+ * the *_delete_row method is called to delete a row.
+ */
+netsnmp_index *
+saHpiRdrTable_delete_row (saHpiRdrTable_context * ctx)
+{
+
+
+  if (ctx->index.oids)
+    free (ctx->index.oids);
+
+
+  free (ctx);
+
+  return NULL;
+}
+
 
 /************************************************************
  * the *_create_row routine is called by the table handler
