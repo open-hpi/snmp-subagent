@@ -30,7 +30,7 @@
 
 
 extern int send_traps;
-
+extern int MAX_EVENT_ENTRIES;
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
@@ -308,6 +308,27 @@ int populate_event() {
   return rc;
 }
   
+unsigned long purge_event( void ) {
+  
+  unsigned long count = CONTAINER_SIZE(cb.container);
+  unsigned long i;
+  saHpiEventTable_context *event_context;
+  
+  DEBUGMSGTL((AGENT,"purge_event. Entry.\n"));
+  if (count > MAX_EVENT_ENTRIES) {
+    // Delete 'count' entries.
+    count = count - MAX_EVENT_ENTRIES;
+    DEBUGMSGTL((AGENT,"Deleting %d EVENT rows.\n", count));
+    i = count;
+    while (i == 0) {
+      event_context = CONTAINER_FIRST(cb.container);
+      CONTAINER_REMOVE(cb.container, event_context);
+      i--;      
+    }
+  }
+  DEBUGMSGTL((AGENT,"purge_event. Exit. (purged: %d)\n",count));
+  return count;
+}
 
 int
 saHpiEventTable_modify_context(unsigned long  entry_id,

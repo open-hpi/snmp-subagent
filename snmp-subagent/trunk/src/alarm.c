@@ -65,7 +65,7 @@ do_alarm(unsigned int clientreg, void *clientarg) {
   rc = populate_event();
   DEBUGMSGTL((AGENT,"Call to populate_event() returns: %d.\n", rc));
 
-  //rc = purge_event();
+  rc = purge_event();
   DEBUGMSGTL((AGENT,"Call to purge_event(). Purged: %d EVENT rows.\n", rc));
 
   DEBUGMSGTL((AGENT,"--- do_alarm: Exit\n"));

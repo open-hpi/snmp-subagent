@@ -141,7 +141,7 @@ extern          "C" {
 
   int populate_rpt( void );
 
-  int purge_rpt( void );
+  unsigned long purge_rpt( void );
   /* 
    * The various SET operations. 
    */

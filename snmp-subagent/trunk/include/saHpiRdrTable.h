@@ -90,7 +90,7 @@ extern          "C" {
 		  oid *rpt_oid, size_t rpt_oid_len,
 		  oid *resource_oid, size_t resource_oid_len);
 
-  int purge_rdr( void );
+  unsigned long  purge_rdr( void );
 int
 delete_rdr_row(SaHpiDomainIdT domain_id,
 	       SaHpiResourceIdT resource_id,

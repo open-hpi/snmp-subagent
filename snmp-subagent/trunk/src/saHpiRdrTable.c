@@ -286,7 +286,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
  *  - Watchdog
  */
 
-int purge_rdr() {
+unsigned long purge_rdr() {
 
    SaHpiDomainIdT domain_id;
    SaHpiResourceIdT resource_id;
@@ -298,7 +298,7 @@ int purge_rdr() {
    //   SaHpiRdrT rdr_entry;
    
    int rc;
-   int count = 0;
+   unsigned long count = 0;
    unsigned int deleted;
 
 
@@ -370,7 +370,7 @@ int purge_rdr() {
       if (deleted == AGENT_FALSE)
 	rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
    }
-   DEBUGMSGTL((AGENT,"purge_rdr: Exit (delete: %d).\n"));
+   DEBUGMSGTL((AGENT,"purge_rdr: Exit (delete: %d).\n", count));
    return count;
 }
 
