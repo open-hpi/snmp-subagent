@@ -1,4 +1,3 @@
-/usr/bin/snmpwalk -v2c -c public localhost:8374 hpi
 HPI-MIB::saHpiEntryCount.0 = Counter32: 3
 HPI-MIB::saHpiEntryUpdateCount.0 = Gauge32: 3
 HPI-MIB::saHpiDomainID.0.1.1 = Gauge32: 0
