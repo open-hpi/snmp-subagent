@@ -3911,7 +3911,7 @@ saHpiInventoryValidity OBJECT-TYPE
 
 saHpiInventoryAttributes OBJECT-TYPE
 	SYNTAX		OCTET STRING (SIZE(1|4|12|9|261|275))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
   	"This attribute represents the current setting of the inventory.  It must
@@ -4014,7 +4014,7 @@ saHpiInventoryTextType OBJECT-TYPE
 				ascii6(3),
 				language(4)
 			}
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
 	encoded as:
@@ -4172,7 +4172,7 @@ saHpiInventoryTextLanguage OBJECT-TYPE
 				chinese(135),
 				zulu(136)
 			}
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     "
 	This enumeration lists all of the languages that can be 
