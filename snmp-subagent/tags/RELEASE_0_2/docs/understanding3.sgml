@@ -1,0 +1,1273 @@
+<!-- ...................................................................... -->
+<!-- $Id$ ................................................ -->
+<!-- 
+        This material may be distributed only subject to the terms and 
+        conditions set forth in the Open Publication License, v1.0 or later 
+        (the latest version is currently available at 
+        http://www.opencontent.org/openpub/).  Distribution of substantively 
+        modified version of this document is prohibited without the explicit 
+        permission of the copyright holder.
+
+        Other company, product, or service names may be trademarks or service 
+        marks of others.
+-->
+<chapter>
+    <title>C code</title>
+    <para>
+      Reading this chapter from top to bottom is the best approach. 
+    </para>
+  <sect1 id="initialize_table">
+      <title>Initializiation process of sub-agent</title>
+      <para>
+	The sub-agent is initialized by the call
+</para>
+	<programlisting role="C">
+   33	  /* mib code: nit_netSnmpIETFWGTable from netSnmpIETFWGTable.c */
+   34	  init_netSnmpIETFWGTable();  
+	</programlisting>
+	<para>
+	from the sub-agent daemon code.  This call in the generated code 
+	calls the function which sets up the skeleton of the table. 
+	It does <emphasis>not</emphasis> add any actual values in the columns.
+	</para>
+	<programlisting role="C">
+/************************************************************
+ *
+ * Initialize the netSnmpIETFWGTable table by defining its contents 
+	and how it's structured
+ */
+void
+initialize_table_netSnmpIETFWGTable(void)
+{
+    netsnmp_table_registration_info *table_info;
+
+    if(my_handler) {
+        snmp_log(LOG_ERR, 
+	"initialize_table_netSnmpIETFWGTable_handler called again\n");
+        return;
+    }
+
+    memset(&amp cb, 0x00, sizeof(cb));
+
+    /** create the table structure itself */
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+
+    /* if your table is read only, it's easiest to change the
+       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+    my_handler = netsnmp_create_handler_registration(
+				 "netSnmpIETFWGTable",
+                                 netsnmp_table_array_helper_handler,
+                                 netSnmpIETFWGTable_oid,
+                                 netSnmpIETFWGTable_oid_len,
+                                 HANDLER_CAN_RWRITE);
+            
+    if (!my_handler || !table_info) {
+        snmp_log(LOG_ERR, "malloc failed in "
+                 "initialize_table_netSnmpIETFWGTable_handler\n");
+        return; /** mallocs failed */
+    }
+
+    /***************************************************
+     * Setting up the table's definition
+     */
+    /*
+     * TODO: add any external indexes here.
+     */
+
+    /*
+     * internal indexes
+     */
+        /** index: nsIETFWGName */
+        netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR);
+
+    table_info->min_column = netSnmpIETFWGTable_COL_MIN;
+    table_info->max_column = netSnmpIETFWGTable_COL_MAX;
+
+    /***************************************************
+     * registering the table with the master agent
+     */
+    cb.get_value = netSnmpIETFWGTable_get_value;
+    cb.container = netsnmp_container_find("netSnmpIETFWGTable_primary:"
+                                          "netSnmpIETFWGTable:"
+                                          "table_container");
+#ifdef netSnmpIETFWGTable_IDX2
+    netsnmp_container_add_index(cb.container,
+     netsnmp_container_find("netSnmpIETFWGTable_secondary:"
+                            "netSnmpIETFWGTable:"
+                            "table_container"));
+    cb.container->next->compare = netSnmpIETFWGTable_cmp;
+#endif
+#ifdef netSnmpIETFWGTable_SET_HANDLING
+    cb.can_set = 1;
+#ifdef netSnmpIETFWGTable_ROW_CREATION
+    cb.create_row = (UserRowMethod*)netSnmpIETFWGTable_create_row;
+#endif
+    cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
+    cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
+    cb.row_copy = (Netsnmp_User_Row_Operation *)
+			netSnmpIETFWGTable_row_copy;
+/*
+    cb.can_activate = (Netsnmp_User_Row_Action *)
+			netSnmpIETFWGTable_can_activate;
+    cb.can_deactivate = (Netsnmp_User_Row_Action *)
+			netSnmpIETFWGTable_can_deactivate;
+*/
+    cb.can_delete = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_delete;
+
+    cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;
+    cb.set_reserve2 = netSnmpIETFWGTable_set_reserve2;
+    cb.set_action = netSnmpIETFWGTable_set_action;
+    cb.set_commit = netSnmpIETFWGTable_set_commit;
+    cb.set_free = netSnmpIETFWGTable_set_free;
+    cb.set_undo = netSnmpIETFWGTable_set_undo;
+#endif
+    DEBUGMSGTL(("initialize_table_netSnmpIETFWGTable",
+                "Registering table netSnmpIETFWGTable "
+                "as a table array\n"));
+    netsnmp_table_container_register(my_handler, table_info, &amp cb,
+                                     cb.container, 1);
+}
+
+</programlisting>
+	<para>
+	The init routines performs a couple of basic steps.
+	</para>
+	<sect2><title>Handler</title>
+<programlisting role="C">
+    /* if your table is read only, it's easiest to change the
+       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+    my_handler = netsnmp_create_handler_registration("netSnmpIETFWGTable",
+                             netsnmp_table_array_helper_handler,
+                             netSnmpIETFWGTable_oid,
+                             netSnmpIETFWGTable_oid_len,
+                             HANDLER_CAN_RWRITE);
+</programlisting>
+	    <para>Create a handler which contains the OID of the table,
+	make it writeable, and which (if any) if the
+	NET-SNMP library helper functions to use.
+		</para>
+<note>
+	<para>An OID - Object IDentifier is a an array of <emphasis>longs</emphasis>.
+	The <emphasis>netSnmpIETFWGTable_oid</emphasis> is defined as:</para>
+<programlisting role="C">
+	oid netSnmpIETFWGTable_oid[] = { 1,3,6,1,4,1,8072,2,2,1 };
+</programlisting>
+</note>
+	<note>
+	<para>The <emphasis>netsnmp_table_array_helper_handler</emphasis> is one of many
+	helper functions available. Consult the manpage - <emphasis>man netsnmp_table</emphasis>
+	</para>
+	</note>
+	<sect2><title>Notify the helper function</title>
+
+<programlisting role="C">
+        /** index: nsIETFWGName */
+        netsnmp_table_helper_add_index(table_info, ASN_OCTET_STR);
+
+    table_info->min_column = netSnmpIETFWGTable_COL_MIN;
+    table_info->max_column = netSnmpIETFWGTable_COL_MAX;
+</programlisting>
+		<para>Notify the helper how many indexes tuples to have
+		and which type they are.
+		</para>
+	<note>
+	<para>The netSnmpIETFWGTable_COL_MIN is defined in the automaticly generated header file.
+	</para>
+	</note>
+	<note>
+	<para>The <emphasis>ASN_OCTET_STR </emphasis> and other types are defined in
+	the net-snmp/library/asn1.h file</para>
+	</note>
+	</sect2>
+
+	<sect2 id="register_get_operation">
+		<title>Register the GET operation</title>
+<programlisting role="C">
+    /***************************************************
+     * registering the table with the master agent
+     */
+    cb.get_value = netSnmpIETFWGTable_get_value;
+</programlisting>
+		<para>
+		This  registers the GET routine which will be responsible
+		for providing the Net-SNMP library with the correct data
+		for appropiate columnar nodes. Consult <xref linkend="getting_values">.
+		</para>
+	</sect2>
+
+	<sect2 id="register_compare_function">
+	 <title>Register compare function</title>
+<programlisting role="C">
+#ifdef netSnmpIETFWGTable_IDX2
+    netsnmp_container_add_index(cb.container,
+            netsnmp_container_find("netSnmpIETFWGTable_secondary:"
+                                   "netSnmpIETFWGTable:"
+                                   "table_container"));
+    cb.container->next->compare = netSnmpIETFWGTable_cmp;
+#endif
+</programlisting>
+
+		<para>Register with the main NetSNMP code (by injecting
+		the address of a user-written routine in the callback mechanism) 
+		the OID compare routine. This
+		routine is <emphasis>NOT</emphasis> needed if your table rows
+		only have one index value. If you do have more
+		than one index value, and you do <emphasis>need</emphasis> 
+		to sort the rows based on a custom sorting algorithm, then
+		make sure that <emphasis>netSnmpIETFWGTable_cmp</emphasis>
+		is properly implemented.
+		</para>
+		<para>
+		If you do not need to use a custom sorting algorithm, and have
+		more than one index value comment out 
+		<emphasis>netSnmpIETFWGTable_IDX2</emphasis> 
+		and let the NetSNMP library do the sorting.
+		</para>
+		<note>
+			<para>The compare routine should <emphasis>ONLY</emphasis>
+			be used during adding and removal of rows that have more than
+			one index value. For more reasons why, consult this
+			<ulink url="http://www.net-snmp.org/faqs/rstory/array-user.html">array-user Frequently Asked Questions Page</ulink>.  
+			</para>
+		</note>
+		<para>	
+		More on the compare function in <xref linkend="netSnmpIETFWGTable_IDX2">.
+		</para>
+	</sect2>
+	<sect2 id="alternation_and_creation_of_row_support"><title>Alternation and creation of row support</title>
+	<programlisting role="C">
+#ifdef netSnmpIETFWGTable_ROW_CREATION
+    cb.create_row = (UserRowMethod*)netSnmpIETFWGTable_create_row;
+#endif
+	</programlisting>
+	<para>
+	Without this routine being injected in the call-back mechanism,
+	no row creation is possible. The row creation process is
+	user-agnostic - the sub-agent code using internal routines or the SNMP-user using SET operation can create new rows.
+	</para>
+	<para>
+	However, the SNMP SET operation has to go throughout a set
+	of routines to determine if it has the valid syntax,
+	the right type and length, and other user-defined tests. Those tests are not
+	exercised when the sub-agent code uses the internal routines.
+	</para>
+	<para>
+	The process by which the NetSNMP library uses to decide if the data is OK 
+	is a four state based machine. The data is writen to a new row or
+	an existing one, if it has passed the RESERVE1, RESERVE2, and ACTION
+	phase. The ACTION phase does the modification and if anything goes wrong
+	the process moves to UNDO phase - which restores the original data. 
+	Otherwise a COMMIT is perfomed - which modifies the data.
+	</para>
+	<note>
+		<para>This two-phase commit system is unique. Many other
+		SNMP sub-agent librarys do not implement such technique and
+		have only one SET operation which has to take care of 
+		checking the type, size, limitation, perform the write, and
+		undo if needed.
+		</para>
+	</note>
+	<para>
+	The following picture, from the Net-SNMP Tutorial webpage 
+	clearly explains the states.
+	</para>
+	<mediaobject>
+        <imageobject>
+          <imagedata fileref="images/set-actions.jpg">
+        </imageobject>
+      </mediaobject>
+	<para>They are also part of the call-back mechanism. It is 
+	the developer responsibility to make sure that those
+functions are properly implemented (more on this in <xref linkend="snmp_set_write_to_a_row">).
+	</para>
+	<programlisting role="C">
+    cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;
+    cb.set_reserve2 = netSnmpIETFWGTable_set_reserve2;
+    cb.set_action = netSnmpIETFWGTable_set_action;
+    cb.set_commit = netSnmpIETFWGTable_set_commit;
+    cb.set_free = netSnmpIETFWGTable_set_free;
+    cb.set_undo = netSnmpIETFWGTable_set_undo;
+	</programlisting>
+	<para>
+	Consult <xref linkend="RESERVE1">, 
+	<xref linkend="RESERVE2">, 
+	<xref linkend="ACTION">, 
+	<xref linkend="COMMIT"> and 
+	<xref linkend="FREE_and_UNDO"> for more details on what these functions do.
+	</sect2>
+
+	<sect2>
+		<title>Miscellaneous</title>
+	<para>
+	The above mentioned functions also require a couple of helper functions.
+	Usually you don't need to modify them as the mib2c tool
+	does a great job of implementing them. The routines in question are:
+	</para>
+	<programlisting role="C">
+    cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
+    cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
+    cb.row_copy = (Netsnmp_User_Row_Operation *)
+		netSnmpIETFWGTable_row_copy;
+    cb.can_activate = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_activate;
+    cb.can_deactivate = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_deactivate;
+    cb.can_delete = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_delete;
+	</programlisting>
+	</sect2>
+	<sect2>
+		<title>Registering handler with container</title>
+	<para>
+		The last thing that must be done is to register
+		the handler, table information (how many rows, columns, etc),
+		and the call-back mechansim with the <emphasis>container</emphasis>.
+	</para>
+	<para>
+		The container is the Net-SNMP library part of code that will
+		keep our rows in memory. It will take care of sorting it (when
+		rows are added or removed), providing a specific
+		row for a GET/SET request (so you don't have to extract from the OID
+		the index/column values and find the row by yourself), and more. This container
+		mechanism provides a seperation of the sub-agent developer
+		to have to deal with SNMP GET/SET details and instead concentrate
+		on operating the data.
+	</para>
+	<note>
+		<para>Look in <emphasis>net-snmp/library/container.h</emphasis>
+		for more details. The macro calls which are defined in there 
+		(CONTAINER_FIRST, CONTAINER_GET_SUBSET, etc) will be explained
+		in more details in <xref linkend="developer_row_creation">.
+		</para>
+	</note>
+
+ <sect3 id="n_tuple_indexes">
+  <title>Helper functions to handle n-tuple indexes</title>
+
+  <para>
+   Usually tables only require one index value (for example the enumeration of
+   network driver). But in some cases there is a need for a second index, or third,
+   or an index value coded as a string.
+  </para>
+  <para>
+   The index values are used in determining the order of rows. If the  
+   index value is a string in UNICODE of a foreign language - the ascending
+   order the user expects might be completly different from ASCII sort order. Therefore
+   the NetSNMP library provides a mechanism to register the developer's own sorting
+   routine. More on this topic in the section below and in <xref linkend="compare_function_explanation">.
+  </para>   
+ <sect2 id="netSnmpIETFWGTable_IDX2">
+  <title>Generic compare function</title>
+
+	<para>
+	The secondary compare function is only used if <emphasis>netSnmpIETFWGTable_IDX2</emphasis> 
+	is defined. This compare function is used by NetSNMP library
+	when rows are being added or deleted that have more than one index value. 
+	If this function is not enabled, the
+	NetSNMP library will use its own generic compare function - which compares
+	index tuples and returns an response based on ASCII ascending order.
+	</para>
+	<para>
+	The goal of this compare function is to return an integer less than, 
+	equal to, or greater than zero if lhs (first argument) is found, 
+	respectively, to be less than, to match, or be greater than rhs (second argument).
+	</para>
+	<para>
+	The implementation of this function is quite straightforward. You use
+	your own method of figuring out which of passed <emphasis>context</emphasis>
+	structures is less, matches or greater.
+	</para>
+	<para>
+	Consult <ulink url="http://www.net-snmp.org/faqs/rstory/array-user.html">
+	array-user Frequently Asked Questions Page</ulink> for more advanced information.
+ </sect2>
+ <sect2>
+   <title>Tree searching function</title>
+    	<para>
+    	The tree searching function purpose is to find a <emphasis>context</emphasis>
+	structure based on the custom arguments (defined by developer). 
+	This function is not used by NetSNMP library - it is a helper function for 
+	the developer if needed.
+	</para>
+	<para>
+	It returns a matched <emphasis>context</emphasis> structure based on the
+	arguments. 
+    	</para> 
+  </sect2>
+ </sect1>
+ 
+ <sect1 id="creating_writing">
+  <title>Creating and Writing (SNMP SET or user) to rows (and columns)</title>
+
+   <para>
+     As mentioned in <xref linkend="alternation_and_creation_of_row_support">, there are three different
+     write-states (RESERVE1, RESERVE2, ACTION) through which a write request to a column, or 
+	creation of a row, must
+     pass before it is considered safe to change. If there is any failure during these
+     write-states, it is automaticly free-ed and the request is discarded. If there
+     are no problems, the new request will replace the original (if a column is being
+     modified), or added (if the row did not exist beforehand).
+    </para>
+    <para>
+     There are also helper functions that are required for this to work, such as
+     making a copy of the row (to keep the original in case the write is unsucessful), extracting
+     the index tuple, creating the index tuple, free-ing the row and checking to
+     see if a row can be safely deleted.
+    </para>
+    <para>
+     Most of these functions (and the helper ones) generated by the 'mib2c' tool have all of its
+     basic functionality writen. However, some of them require special attention.
+    </para>
+    <para>
+     The functions are geared towards using SNMP SET and changing the columns of a row. As such
+     their implementation is geared towards such goal, and at first it might be unclear
+     how a sub-agent would create a row by itself. This will be explained in details
+     in <xref linkend="developer_row_creation">.
+    </para>
+    <para>
+     To have a better grasp of how the sub-agent would handle request, it is important to
+     first explain some of the helper functions.
+    </para>
+
+     <sect2> <title>Row copy</title>
+
+       <para>
+         <emphasis>netSnmpIETFWGTable_row_copy</emphasis>. As the name implies - this
+	 function purpose is to copy rows.  The generated implementation takes care
+	 of copying all of the <emphasis>context</emphasis> structure records.
+	 Of interest might be the function <emphasis>snmp_clone_mem</emphasis> which
+	 copies the index tuple based on the length of the oid. The reason why
+	 a normal memcpy function is not used is due to the neccessity of error checking.
+	 If the function cannot determing the correct length of the index tuple 
+	 (for example the index tuple length might be defined as zero) the copying of
+	 the row is stopped. Of course having rows with no index values should 
+	 never have happened in the first place, but you never known.
+	</para>
+     </sect2>
+
+     <sect2 id="extract_index">
+ 	<title>Extracting index</title>
+
+	<para>
+	 The <emphasis>netSnmpIETFWGTable_extract_index</emphasis> is a very
+	important function and needs tweaking to work. Its purpose is
+	to extract the index tuple in an appropiate format for NetSNMP library 
+	to understand. 
+	</para>
+	<para>
+	 The function purpose is to extract from a linked list of indexes (passed 
+	in as  netsnmp_index * hdr) its values and store
+	 them in the corresponding <emphasis>context</emphasis> structure.
+	</para>
+	<para>
+	 The snippets of code generated by the 'mib2c' tool do most of 
+	 the work. However the linking of the linked list entries must
+	 be done by the developer.
+	</para>
+	<programlisting role='C'>
+     netsnmp_variable_list var_nsIETFWGName;
+...
+     /**
+      * Create variable to hold each component of the index
+      */
+    memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
+    var_nsIETFWGName.type = ASN_OCTET_STR;
+    /** TODO: link this index to the next, or NULL for the last one */
+ #ifdef TABLE_CONTAINER_TODO
+    snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index 
+		list not implemented        !\n" );
+    return 0;
+ #else
+    var_nsIETFWGName.next_variable = &amp var_XX;
+ #endif
+	</programlisting>
+	<para>
+	  The <emphasis>var_nsIETFWGName</emphasis> is the first index of 
+	the row. If there were more index values they would be defined as 
+	<emphasis>var_&lt;name of columnar node&gt;</emphasis>.
+	</para>
+	<para>In this snippet of code the linked list of the index values is built. This
+	linked list will be used by <emphasis>parse_oid_indexes</emphasis> to figure
+	out where each index value is suppose to go.
+	</para>
+	<para>
+	Each of the var_&lt;named values&gt; (there would be more than just one in the
+	example if the index tuple had more than one object defined)
+	type is set to its type (ASN_OCTET_STR, ASN_INTEGER, etc - look in the 
+	net-snmp/library/asn1.h) and linked to the next index value. The last index value is set to NULL.
+	</para>
+	<para>
+	For example, if this table had two extra index values: an enumerated integer
+	value (nsIETFWGProgress) and TruthValue (nsIETFWGIsWorking) with the following ASN.1 definition: 
+<programlisting role='C'>
+nsIETFWGProgress OBJECT-TYPE
+    SYNTAX      INTEGER {
+			undefined(0),
+			proposed(1),
+			debated(2),
+			rewritting(3),
+			draft(4),
+			standard(50)					
+		}	
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Progress of a work-group"
+    ::= { netSnmpIETFWGEntry 4 }
+
+nsIETFWGIsWorking OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Is the work group still working?"
+    ::= { netSnmpIETFWGEntry 5 }
+</programlisting>
+	<para>
+	netSnmpIETFWGEntry would have these two objects as extra index nodes:
+	</para>
+<programlisting role='C'>
+       INDEX   { nsIETFWGName, nsIETFWGProgress, nsIETFWGIsWorking }
+</programlisting>
+	<para>
+	These two extra ASN.1 entries would add two extra variables in the <emphasis>
+	context</emphasis> structure:
+	</para>
+<programlisting role='C'>
+        /** INTEGER = ASN_INTEGER */
+    long nsIETFWGProgress;
+
+	/** TruthValue = ASN_INTEGER */
+    long nsIETFWGIsWorking;
+</programlisting>
+	<para>
+	As such, the <emphasis>_extract_index</emphasis> code snippet would 
+	look like:
+	</para>
+<programlisting role='C'>
+    netsnmp_variable_list var_nsIETFWGName;
+    netsnmp_variable_list var_nsIETFWGProgress;
+    netsnmp_variable_list var_nsIETFWGIsWorking;
+
+    memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
+    var_nsIETFWGName.type = ASN_OCTET_STR;
+    var_nsIETFWGName.next_variable = &amp var_nsIETFWGProgress;
+
+    memset( &amp var_nsIETFWGProgress, 0x00, sizeof(var_nsIETFWGProgress) );
+    var_nsIETFWGProgress.type = ASN_INTEGER;
+    var_nsIETFWGProgress.next_variable = &amp var_nsIETFWGIsWorking;
+
+    memset( &amp var_nsIETFWGIsWorking, 0x00, sizeof(var_nsIETFWGIsWorking));
+    var_nsIETFWGIsWorking.type = ASN_INTEGER;
+    var_nsIETFWGIsWorking.next_variable = NULL;
+</programlisting>
+	<para>
+	The <emphasis>parse_oid_indexes</emphasis> parses the linked
+	list of index value against the <emphasis>hdr</emphasis>, 
+	checks to make sure it is right type, and correct length. If everything
+	is correct, each item of the linked list is populated with the index value
+	taken from the <emphasis>hdr</emphasis>.
+	</para>
+	<para>However, that does not fill the values of <emphasis>context</emphasis>
+	structure. That is the job of the next part of the
+	code segment in which the return code of <emphasis>parse_oid_indexes</emphasis>
+	is checked, and if found to be OK, the values from linked list are
+	copied to the corresponding <emphasis>context</emphasis> structure entries.
+	</para>
+<programlisting role='C'>
+    err = parse_oid_indexes( hdr->oids, hdr->len, &amp var_nsIETFWGName );
+    if (err == SNMP_ERR_NOERROR) {
+       /*
+        * copy components into the context structure
+        */
+              /** skipping external index nsIETFWGName */
+                if(var_nsIETFWGName.val_len > sizeof(ctx->nsIETFWGName))
+                   err = -1;
+                else
+                    memcpy( ctx->nsIETFWGName, 
+			   var_nsIETFWGName.val.string, 
+			   var_nsIETFWGName.val_len );
+                ctx->nsIETFWGName_len = var_nsIETFWGName.val_len;
+    } 
+</programlisting>
+	<para>
+	Lastly the linked list is cleaned up (during the parsing it might have
+	allocated memory) using:
+	</para>
+<programlisting role='C'>
+     snmp_reset_var_buffers( &amp var_nsIETFWGName );
+</programlisting>
+	<note>
+		<para>If you add more index values and change the order in which
+		they appear, make sure that it is always the first
+		index tuple, defined as one of <emphasis>var_&lt;name of columnar node&gt;</emphasis>
+		is being free-ed using <emphasis>snmp_reset_var_buffers</emphasis>.
+		</para>
+	</note>
+     </sect2>
+   <sect2>
+	<title>Row deletion checking </title>
+
+	<para>
+	<emphasis>netSnmpIETFWGTable_can_delete</emphasis> does a small
+	check on the passed <emphasis>context</emphasis> structure to see if
+	it can be deleted.
+	</para>
+	<para>
+	If there are any specific conditions under which a row can not be
+	deleted these should be implemented here.
+	</para>
+	<para>
+	By default the function returns a positive number, which 
+	implies that the row can be safely deleted.
+	</para>
+	<para>
+	Returning zero means that the row cannot be deleted.
+	</para>
+
+   </sect2>
+
+   <sect2>
+	<title>Duplicating rows</title>
+
+	<para>
+	<emphasis>netSnmpIETFWGTable_duplicate_row</emphasis> is pretty
+	self-explanatory. Duplicate a row.
+	</para>
+   </sect2>
+
+   <sect2 id="delete_rows">
+	<title>Deleting rows</title>
+	
+	<para>
+	<emphasis>netSnmpIETFWGTable_delete_row</emphasis> purpose is
+	to delete a row. This is function that frees the index tuple, 
+	and any other memory that the user might have allocated using
+	</para>
+<programlisting role='C'>
+     void * data;
+</programlisting>
+	<para>
+	defined in the <emphasis>context</emphasis> structure in the header file.
+	</para>
+	<para>
+	This function is only used when the 
+	NetSNMP library is trying to write to a row and finds out 
+	that something is wrong. Then it
+	deletes the temporary row (a copy of the original).
+	</para>
+	<para>
+	To delete a row from the sub-agent, you need to use the CONTAINER_REMOVE 
+	macro. Look in <xref linkend="developer_row_delete"> for more information.
+	</para>
+   </sect2>
+   <sect2 id="create_rows">
+	<title>Creating rows</title>
+	<para>
+	The <emphasis>netSnmpIETFWGTable_create_row</emphasis> purpose is
+	to create a newly allocated <emphasis>context</emphasis> structure.
+	</para>	
+<programlisting role='C'>
+netSnmpIETFWGTable_context *
+netSnmpIETFWGTable_create_row( netsnmp_index* hdr)
+{
+    netSnmpIETFWGTable_context * ctx =
+        SNMP_MALLOC_TYPEDEF(netSnmpIETFWGTable_context);
+    if(!ctx)
+        return NULL;
+        
+    /*
+     * TODO: check indexes, if necessary.
+     */
+    if(netSnmpIETFWGTable_extract_index( ctx, hdr )) {
+        free(ctx->index.oids);
+        free(ctx);
+        return NULL;
+    }
+
+    /* netsnmp_mutex_init(ctx->lock);
+       netsnmp_mutex_lock(ctx->lock); */
+
+    /*
+     * TODO: initialize any default values here. This is also
+     * first place you really should allocate any memory for
+     * yourself to use.  If you allocated memory earlier,
+     * make sure you free it for earlier error cases!
+     */
+    ctx->nsIETFWGChair1_len = 0;
+    ctx->nsIETFWGChair2_len = 0;
+
+    return ctx;
+}
+</programlisting>
+	<para>
+	The passed in argument <emphasis>netsnmp_index* hdr</emphasis> defines
+	the index of the row. This <emphasis>hdr</emphasis> value is checked
+	using <emphasis>netSnmpIETFWGTable_extract_index</emphasis> routine which extracts 
+	the index values from <emphasis>hdr</emphasis> and populates the
+	correct entries in the <emphasis>context</emphasis> structure. 
+	If this call fails, the newly allocated <emphasis>context</emphasis>
+	structure is free-ed and the function returns a NULL.
+	</para>
+	<note>
+		<para>
+		In case you do not know how <emphasis>netSnmpIETFWGTable_extract_index</emphasis> knows
+		which entries to populate, refer to <xref linkend="extract_index">, for details.
+		</para>
+	</note>
+	<note>
+		<para>
+		The <emphasis>netsnmp_mutex_init(ctx->lock);</emphasis> 
+		purpose is to create a locking mutex mechanism in case your application is
+		multi-threaded. 
+		</para>
+	</note>
+		<para>Otherwise the <emphasis>context</emphasis> is filled with default values - specified
+		by the developer in the last lines of this routine.
+	</para>
+
+	<sect3>
+	  <title>What calls netSnmpIETFWGTable_create_row></title>
+
+	<para>
+	 Looking back at <xref linkend="alternation_and_creation_of_row_support">, 
+	which described part of the initialization process for a table,
+	the <emphasis>netSnmpIETFWGTable_create_row</emphasis> is initialized in call-back mechansim:
+	</para>
+<programlisting role='C'>
+     #ifdef netSnmpIETFWGTable_ROW_CREATION
+         cb.create_row = (UserRowMethod*)netSnmpIETFWGTable_create_row;
+     #endif
+</programlisting>
+	<para>
+	The NetSNMP library uses this information to call the create_row function
+	whenever a SET request is issued against a non-existing row. 
+	The NetSNMP library first searches through the rows - if it
+	cannot find a row with the matching index value, it calls
+	<emphasis>netSnmpIETFWGTable_create_row</emphasis>. If this call returns a NULL value
+	the SET request is dropped. Otherwise the next call the NetSNMP library makes is 
+	the <emphasis>netSnmpIETFWGTable_set_reserve1</emphasis> routine, explained later in this chapter.
+	</para>
+	<para>
+	The create_row function is also the vehicle by which the sub-agent internally can create fully populated rows. 
+	</para>
+	</sect3>
+	<sect3 id="developer_row_creation">
+	  <title>Developer row creation</title>
+	
+	<para>
+	The source code has a perfect spot for user creation - it is right
+	after the call to <emphasis>initialize_table_netSnmpIETFWGTable</emphasis>.
+	</para>
+<programlisting role='C'>
+    void
+    init_netSnmpIETFWGTable(void)
+    {
+         initialize_table_netSnmpIETFWGTable();
+    
+         /*
+          * TODO: perform any startup stuff here
+          */
+    }
+</programlisting>		
+	<para>
+	After the initialize call, the table is ready to populated with rows. The rows are 
+	the <emphasis>context</emphasis> structures, explained in the previous sections.
+	</para>
+	<para>
+	Consult <xref linkend="context_structure"> for more in depth explanation of the 
+	<emphasis>context</emphasis> structure.
+	</para>
+	<para>
+	The big question is what magic will make NetSNMP library aware of the 
+	<emphasis>container</emphasis> structures? By the usage of <emphasis>CONTAINER</emphasis>
+	macros.
+	Look in net-snmp/library/container.h. In it, there are a couple of macro calls:
+	</para>
+<programlisting role='C'>
+   /*
+     * useful macros
+     */
+#define CONTAINER_FIRST(x)          (x)->find_next(x,NULL)
+#define CONTAINER_FIND(x,k)         (x)->find(x,k)
+#define CONTAINER_NEXT(x,k)         (x)->find_next(x,k)
+#define CONTAINER_GET_SUBSET(x,k)   (x)->get_subset(x,k)
+#define CONTAINER_SIZE(x)           (x)->get_size(x)
+#define CONTAINER_ITERATOR(x)       (x)->get_iterator(x)
+#define CONTAINER_COMPARE(x,l,r)    (x)->compare(l,r)
+#define CONTAINER_FOR_EACH(x,f,c)   (x)->for_each(x,f,c)
+</programlisting>
+	<para>
+	These macros provide a <emphasis>wrapper</emphasis> around the row-data 
+	(<emphasis>context</emphasis> structure) and make its manipulation possible.
+	</para>
+	<sect4 id="example_container">
+	 <title>Example of CONTAINER usage</title>
+	<para>
+	A good comprehensive example of how to use CONTAINER_ macros is
+	available in NetSNMP source tarball - in the snmplib/test_binary_array.c
+,
+	or the following example in this tutorial (these lines of code were 
+	inserted after initialize_table_netSnmpIETFWGTable().
+	</para>
+	<note>
+		<para>It is assumed that create_row function is fully implemented 
+		for this example to work properly.
+		</para>
+	</note>
+<programlisting role='C'>
+static void
+print_string(netsnmp_index *i, void *v)
+{
+    int a;
+    printf("item %p = [",i);
+    for (a = 1; a <= i->oids[0]; a++)
+	printf("%c", (char) i->oids[a]);
+    printf("]\n");
+}
+
+/************************************************************
+ * Initializes the netSnmpIETFWGTable module
+ */
+void
+init_netSnmpIETFWGTable(void)
+{
+   netsnmp_index index;
+   oid index_oid[MAX_OID_LEN];
+   char *index_char[] = {"hickory","joe","hickory",
+			 "bob","new orleans","help"};
+   int i,j;
+   netSnmpIETFWGTable_context *ctx;
+
+   initialize_table_netSnmpIETFWGTable();
+
+   for (i = 0; i< 6; i++) {
+     /*
+       First value of an index that is ASN_OCTET_STR is 
+       the length of the string.
+     */
+	index_oid[0] = strlen(index_char[i]);
+	/* The rest is the data copied. */
+	for (j = 0; j < index_oid[0];j++) {
+		index_oid[j+1] = *(index_char[i]+j);	
+
+	}
+        index.oids = (oid *) &amp index_oid;
+        index.len = index_oid[0]+1;
+	ctx = NULL;
+	/* Search for it first. */
+	ctx = CONTAINER_FIND (cb.container, &amp index);
+	if (!ctx) {
+	  /* No dice. We add the new row */
+		ctx = netSnmpIETFWGTable_create_row( &amp index);
+		printf("inserting %s\n", ctx->	 nsIETFWGName);
+		CONTAINER_INSERT (cb.container, ctx);
+	}
+
+   } 
+   /*
+    Since we are done adding the rows, let us display them for the fun.
+    The easy way:
+   */
+
+   CONTAINER_FOR_EACH(cb.container, print_string, NULL);
+
+   /*     
+   We do not like 'joe', so we remove him.
+   */
+   index_oid[0] = 3;
+   index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        CONTAINER_REMOVE( cb.container, &amp index);
+        netSnmpIETFWGTable_delete_row ( ctx );
+        printf("Removed joe\n");
+   }
+   /*
+     Print the hard way:
+   */
+   
+   ctx = CONTAINER_FIRST(cb.container);
+   printf("Find first = %p %s\n",ctx, ctx->nsIETFWGName);
+    while( ctx ) {
+        ctx = CONTAINER_NEXT(cb.container,ctx);
+        if(ctx)
+            printf("Find next = %p %s\n",ctx, ctx->nsIETFWGName);
+        else
+            printf("Find next = %p\n",ctx);
+    }
+
+  
+}
+</programlisting>
+	<para>
+	The output of this daemon should look like this:
+	</para>
+<programlisting role='C'>
+inserting hickory
+inserting joe
+inserting bob
+inserting new orleans
+inserting help
+item 0x4036d008 = [bob]
+item 0x4033c008 = [joe]
+item 0x4030b008 = [hickory]
+item 0x4039e008 = [new orleans]
+item 0x403cf008 = [help]
+Removed joe
+Find first = 0x4036d008 bob
+Find next = 0x403cf008 help
+Find next = 0x4030b008 hickory
+Find next = 0x4039e008 new orleans
+Find next = (nil)
+</programlisting>
+	</sect4>
+	<sect4 id="compare_function_explanation">
+	  <title>Sorted</title>
+	<para>
+	You might wonder why the rows are alphabethicly sorted? The reason is that the
+	NetSNMP library uses its own sorting method when adding/deleting rows.
+	It is set by default to be the function <emphasis>netsnmp_compare_netsnmp_index</emphasis> which has the exact same function prototype as the <emphasis>
+static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis>.
+	If you would like to use your own sorting method, add in 
+	initialize_table_netSnmpIETFWGTable function the following line:
+	</para>
+<programlisting role='C'>
+	    cb.container->compare = netSnmpIETFWGTable_cmp;
+</programlisting>
+	<para>
+	And make sure that your compare function works properly. Consult
+	<xref linkend="netSnmpIETFWGTable_IDX2"> and <xref linkend="register_compare_function"> for
+	more details.
+	</para>
+	</sect4>
+	</sect3>
+
+	<sect3 id="developer_row_delete">
+	 <title>Developer row deletion.</title>
+	
+	<para>
+	Removing rows requires four steps. You have
+	know which row you want (by the index value), find it,  remove from the 
+	container, and then finally free it.	
+	</para>
+<programlisting role='C'>
+   /*     
+   We do not like 'joe', so we remove him.
+   */
+   index_oid[0] = 3;
+   index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        CONTAINER_REMOVE( cb.container, &amp index);
+        netSnmpIETFWGTable_delete_row ( ctx );
+        printf("Removed joe\n");
+   }
+</programlisting>
+	</sect3>
+	</sect2>
+    <sect2 id="write_row">
+	<title>Writing to a row</title>
+	<para>
+	There are two ways to write to a row. From the perspective 
+	of a SNMP SET command and sub-agent (developer). 
+
+	<sect3 id="developer_writing">
+	<title>Developer writing to a row</title>
+	<para>
+	The process of writing to a row from a sub-agent perspective (developer) is
+	simplistic. It requires the task of retrieving the row and
+	modifying it. No need to re-insert it using CONTAINER_INSERT, since it is
+	already in there.
+	</para> 
+<programlisting role='C'>
+   char chair* = "John Block";
+   /*
+    * Modify 'bob'
+    */
+   index_oid[0] = 3;
+   index_oid[1] = 'b'; index_oid[2] = 'o'; index_oid[3] = 'b';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        /* Modify the context to our content. */
+	ctx->nsIETFWGChair1_len = strlen(chair);
+	memcpy(ctx->nsIETFWGChair1, chair, ctx->nsIETFWGChair1_len);
+   }
+</programlisting>
+
+	</sect3>
+	
+	<sect3 id="snmp_set_write_to_a_row">
+		<title>SNMP SET writing to a row</title>
+
+		<para>
+		This process is more complex due to the neccessity of
+		checking that the SNMP SET request is 
+		the correct type, length, and other checks that the developer
+		might deem neccesary.
+		</para>
+	<para>
+	The process by which the NetSNMP library uses to decide if the data is OK 
+	is by a state machine. If the SET request  passes succesfully through 
+	the RESERVE1, RESERVE2, and ACTION phase it is committed to memory.  
+	</para>
+	<para>
+	The following picture, borrowed from NetSNMP webpage, demonstrates
+	these steps. A more detailed explanation of what happens during these
+	steps is explained in this <ulink url="http://www.net-snmp.org/faqs/rstory/#steps">rstory's NET-SNMP Developers Frequently Asked Questions Page: Baby Steps Flow</ulink>.
+	<mediaobject>
+        <imageobject>
+          <imagedata fileref="images/set-actions.jpg">
+        </imageobject>
+      </mediaobject>
+	</sect3>
+	
+	<sect2 id="RESERVE1">
+	  <title>RESERVE1 function</title>
+
+	   <para>
+	   The <emphasis>netSnmpIETFWGTable_set_reserve1</emphasis> job is
+	   to make sure that the SET request is of right type.
+	   </para>
+<programlisting role='C'>
+ for( current = rg->list; current; current = current->next ) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch(current->tri->colnum) {
+
+        case COLUMN_NSIETFWGCHAIR1:
+            /** OCTETSTR = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
+                                    sizeof(row_ctx->nsIETFWGChair1));
+        break;
+</programlisting>
+	<para>
+	 The <emphasis>for</emphasis> loop goes through all of the SNMP SET requests.
+	The <emphasis>netsnmp_request_group *rg</emphasis> keeps a list of 
+	aggregated SNMP SET request for this particular table.
+	</para>
+	<note>
+		<para>This can mean that this function is called with more than
+		one SNMP SET request for different columns. 
+		</para>
+	</note>
+	<note>
+		<para>
+	This list of SNMP SET request can also be for non-existent rows, because
+	the index values do not match what the NetSNMP library has in memory. For 
+	rows that do not exist in the container (as in, they have not
+	been inserted using CONTAINER_INSERT), the NetSNMP creates a
+	<emphasis>context</emphasis> structure using the 
+	<emphasis>netSnmpIETFWGTable_create_row</emphasis>. For those that do
+	exist, it grabs them from the container. 
+		</para>
+	</note>
+	<para>
+	The <emphasis>netsnmp_check_vb_type_and_size</emphasis> checks the
+	type of the SNMP SET request and also the size of the payload.
+	</para>
+	<para>
+	If checking process fails, the <emphasis>rc</emphasis>
+	is set to an appropiate error code (consult net-snmp/library/snmp.h 
+	for the list) and <emphasis>netsnmp_set_mode_request_error</emphasis> 
+	is notified. This will result in removal of this SNMP SET request 
+	and the end-user will be notified of the appropiate error code.
+	</para>
+	<note>
+		<para>If the end-user is using SNMP v1, only a selective
+		set of error codes is available. This might give the user
+		a different error code than what the developer had set.
+		</para>
+	</note>
+	</sect2>
+
+	<sect2 id="RESERVE2">
+	  <title>RESERVE2 function</title>
+	<para>
+	The second stage is checking for appropiate values of the SNMP SET request.
+	This is where the developer checks for the correct length and values
+	of the columnar nodes. 
+	</para>
+	<para>
+	This check is necessary for enumerated integers - it is important to 
+	check for the right 
+	enumeration values. If you refer back to <xref linkend="extract_index">, you
+	will notice the extra defined ASN.1 columnar node called 
+	<emphasis>nsIETFWGProgress</emphasis>. This object defines six enumerations: undefined(0),
+	proposed(1), debated(2), rewritting(3), draft(4) and standard(50).
+	The check for the proper enumerations can be carried out in 
+	this function, such as:
+	</para>
+<programlisting role='C'>
+        case COLUMN_NSIETFWGPROGRESS:
+	    if (((*var->val.integer < 0) ||
+               (*var->val.integer > 4)) &amp&amp (*var->val.integer != 50))
+            {
+              rc = SNMP_ERR_BADVALUE;
+            }
+          break;
+</programlisting>
+	<para>
+	For string variables, it important to check the
+	length of the string - to make sure it is not more (or less) to what is defined in the MIB.
+	</para>
+<programlisting role='C'>
+nsIETFWGChair1 OBJECT-TYPE
+    SYNTAX      OCTET STRING
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+	"One of the names of the chairs for the IETF working group."
+    ::= { netSnmpIETFWGEntry 2 }
+</programlisting>
+	<note>
+		<para>
+	And our check for strings of length more than 255. In truth, this check might
+	be inappropriate because an OCTET STRING can have a length of 65536. However most
+	SNMP implementations cannot carry such large payloads.
+		</para>
+	</note>
+<programlisting role='C'>
+        case COLUMN_NSIETFWGCHAIR2:
+            /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->val_len > 255)
+                rc = SNMP_ERR_WRONGLENGTH;
+        break;
+</programlisting>
+	</sect2>
+
+
+	<sect2 id="ACTION">
+	  <title>ACTION</title>
+
+	<para>
+	The <emphasis>netSnmpIETFWGTable_set_action</emphasis> is the function
+	where the new value is writen in the appropiate <emphasis>context</emphasis>
+	structure and where the developer would perform the write to his/her datastore.
+	</para>
+	<para>The changes are being writen to row_ctx. A copy of the original row 
+	is in undo_ctx. If this function calls 
+	<emphasis>netsnmp_set_mode_request_error</emphasis> the newly modified row 
+	is discarded and the user is notified of the error state.
+	</para>
+	<para>
+	It is in this function that the developer can decide if the row has to
+	be removed or created. For deleting, the variable <emphasis>row_deleted</emphasis>
+	in the <emphasis>netsnmp_request_group</emphasis> has to be set:
+	</para>
+<programlisting role='C'>
+	rg->row_deleted = 1;
+</programlisting>
+	<para>
+	For creating:
+	</para>
+<programlisting role='C'>
+	rg->row_created = 1;
+</programlisting>
+	</sect2>
+
+	<sect2 id="COMMIT">
+	  <title>COMMIT function</title>
+
+	<para>
+	This routine is used to commit the changes to the row. 
+	The intent of the ACTION/COMMIT division is that all of the 
+	fallible code should be done in the ACTION phase, 
+	so that it can be backed out if necessary.
+	</para>
+	</sect2>
+	<sect2 id="FREE_and_UNDO">
+	  <title>FREE and UNDO function</title>
+	
+	<para>
+	This explanation is taken from the generated C code.
+	</para>	
+	
+	<sect3><title>FREE function</title>
+
+	<para> 
+	 If either of the RESERVE calls fail, the write routines
+are called again with the FREE action, to release any resources
+that have been allocated. The agent will then return a failure
+response to the requesting application.</para>
+<para>
+ AFTER calling this routine, the agent will delete undo_info.
+</para>
+
+	</sect3>
+	<sect3>
+	  <title>UNDO function</title>
+	<para>
+	 If the ACTION phase does fail (for example due to an apparently
+ 	valid, but unacceptable value, or an unforeseen problem), then
+ 	the list of write routines are called again, with the UNDO
+ 	action. This requires the routine to reset the value that was
+ 	changed to its previous value (assuming it was actually changed),
+ 	and then to release any resources that had been allocated. As
+ 	with the FREE phase, the agent will then return an indication
+ 	of the error to the requesting application.
+	</para>
+ 
+	<para>
+	BEFORE calling this routine, the agent will update the container
+	(remove any newly inserted row, re-insert any removed row).
+	</para>
+	</sect3>
+	</sect2>
+
+
+  </sect1>
+  <sect1 id="getting_values">
+	<title>Getting values</title>
+
+	<para>
+	The mechanism by which the NetSNMP library retrieves the correct
+	row is by calling the function defined in the callback mechanism.
+	Please refer to <xref linkend="register_get_operation"> for more details.
+	</para>
+<programlisting role='C'>
+   cb.get_value = netSnmpIETFWGTable_get_value;
+</programlisting>
+	<para>
+	The <emphasis>netSnmpIETFWGTable_get_value</emphasis> is similar to
+	the ACTION, RESERVE1, and RESERVE2 routines by the mechanism of 
+	looping through the 
+	requests for columns and performing some operation on the correct column.
+	In this case, instead of checking the value, or writing, it 
+	is setting a pointer to the appropiate data and the data's length (in bytes).
+<programlisting role='C'>
+  switch(table_info->colnum) {
+
+        case COLUMN_NSIETFWGNAME:
+            /** OCTETSTR = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&amp context->nsIETFWGName,
+                         context->nsIETFWGName_len );
+        break;
+	...
+</programlisting>
+
+	<note>
+	<para>
+	If one of your columnar nodes is of type <emphasis>write-only</emphasis>. 
+	Then just return NULL for that specified column.	
+	</para>
+	</note>
+	<para>
+	The <emphasis>snmp_set_var_typed_value</emphasis> function sets the
+	correct type of the data, a pointer to the location of the data,
+	and the length of the data in bytes. There is no need for host to network
+	byte swapping - the NetSNMP library performs these functions internally if needed.
+	</para>
+  </sect1>
+</chapter>

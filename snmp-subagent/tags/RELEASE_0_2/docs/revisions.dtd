@@ -1,0 +1,36 @@
+<!-- ...................................................................... -->
+<!-- $Id$ ................................................... -->
+<!-- 
+        This material may be distributed only subject to the terms and 
+        conditions set forth in the Open Publication License, v1.0 or later 
+        (the latest version is currently available at 
+        http://www.opencontent.org/openpub/).  Distribution of substantively 
+        modified version of this document is prohibited without the explicit 
+        permission of the copyright holder.
+
+        Other company, product, or service names may be trademarks or service 
+        marks of others.
+-->
+
+<!ENTITY subagent-rev-1_0 "
+<revision>
+  <revnumber>1.0</revnumber>
+  <date>2004-2-3</date>
+  <authorinitials>kr</authorinitials>
+  <revremark>First version</revremark>
+</revision>
+">
+<!ENTITY subagent-rev-0_1 "
+<revision>
+  <revnumber>0.1</revnumber>
+  <date>2003-12-15</date>
+  <authorinitials>kr</authorinitials>
+  <revremark>Initial outline revision</revremark>
+</revision>
+">
+<!ENTITY subagent-revisions "
+<revhistory>
+  &subagent-rev-0_1;
+  &subagent-rev-1_0;
+</revhistory>
+">
