@@ -9,6 +9,7 @@ IMPORTS
 	DateAndTime,
 	TimeStamp,
 	RowPointer,
+	RowStatus,
 	TruthValue		FROM SNMPv2-TC
 	MODULE-COMPLIANCE, 
 	OBJECT-GROUP,
@@ -792,7 +793,7 @@ SaHpiEventEntry ::= SEQUENCE {
 
 	saHpiEventUserEventData		OCTET STRING,
 
-	saHpiEventDelete		TruthValue
+	saHpiEventDelete		RowStatus
 	}
 
 saHpiEventIndex OBJECT-TYPE
@@ -2011,10 +2012,11 @@ saHpiEventUserEventData OBJECT-TYPE
         ::= {saHpiEventEntry 45}
 
 saHpiEventDelete OBJECT-TYPE
-	SYNTAX		TruthValue
+	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Set this to 'true(1)' to delete this entry."
+	DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
 	::= {saHpiEventEntry 46}
 
 --/*******************************************************************************
