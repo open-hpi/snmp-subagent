@@ -1816,14 +1816,14 @@ SaHpiResourceEntry ::= SEQUENCE {
         
         saHpiResourceFailed                     TruthValue,
 
-        saHpiResourceInfoResourceRev            Unsigned32,
-        saHpiResourceInfoSpecificVer            Unsigned32,
-        saHpiResourceInfoDeviceSupport          Unsigned32,
+        saHpiResourceInfoResourceRev            Unsigned8,
+        saHpiResourceInfoSpecificVer            Unsigned8,
+        saHpiResourceInfoDeviceSupport          Unsigned8,
         saHpiResourceInfoManufacturerId         SaHpiManufacturerId,
-        saHpiResourceInfoProductId              Unsigned32,
-        saHpiResourceInfoFirmwareMajorRev       Unsigned32,
-        saHpiResourceInfoFirmwareMinorRev       Unsigned32,
-        saHpiResourceInfoAuxFirmwareRev         Unsigned32,
+        saHpiResourceInfoProductId              Unsigned16,
+        saHpiResourceInfoFirmwareMajorRev       Unsigned8,
+        saHpiResourceInfoFirmwareMinorRev       Unsigned8,
+        saHpiResourceInfoAuxFirmwareRev         Unsigned8,
         
         saHpiResourceInfoGuid                   SaHpiGuid,
         
