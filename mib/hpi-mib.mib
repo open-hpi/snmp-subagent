@@ -6380,7 +6380,7 @@ saHpiSensorThdUpMajorIsReadable OBJECT-TYPE
         DESCRIPTION
         "Defines if sensor threshold information can be read". 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6. "
         ::= {saHpiSensorThdUpMajorEntry 1}
 
 saHpiSensorThdUpMajorIsWritable OBJECT-TYPE
