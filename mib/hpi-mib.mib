@@ -551,7 +551,7 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
                     notPresent (5)
                 }
                 
-SaHpiWatchdogPreTimerAction ::= TEXTUAL-CONVENTION
+SaHpiEventPreTimerAction ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
         "These enumerations represent the possible types of interrupts that may be
@@ -2037,12 +2037,106 @@ saHpiParamControl OBJECT-TYPE
 -- * *****************************************************************************
 -- * ******************************************************************************/
 
+hpiHotSwap	OBJECT IDENTIFIER ::= { hpiEntity 11 }
+
+saHpiAutoTimeOutTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF SaHpiAutoTimeoutEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+    "In support of saHpiAutoInsertTimeoutGet(), saHpiAutoInsertTimeoutSet()
+    saHpiAutoExtractTimeoutGet(), and saHpiAutoExtractTimeoutGet()"
+    REFERENCE
+	"Derieved from SA-HPI-B.01.01 page 141...146."
+    ::= { hpiHotSwap 1 }
+
+saHpiAutoTimeoutEntry OBJECT-TYPE
+	SYNTAX 		SaHpiAutoTimeoutEntry
+	MAX-ACCESS 	not-accessible
+	STATUS 		current
+	DESCRIPTION
+	""
+	INDEX { saHpiDomainId }
+	::= { saHpiAutoTimeOutTable 1 }
+
+SaHpiAutoTimeoutEntry ::= SEQUENCE {
+	saHpiHotSwapInsertTimeout   SaHpiTime,
+	saHpiHotSwapExtractTimeout  SaHpiTime
+    }
+    
+saHpiHotSwapInsertTimeout OBJECT-TYPE
+    SYNTAX      SaHpiTime
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+        "This function allows the HPI User to configure a timeout for how 
+        long to wait before the default auto-insertion policy is invoked 
+        on a resource within a specific domain.  This function accepts a 
+        parameter instructing each resource to impose a delay before 
+        performing its default hot swap policy for auto-insertion.  The 
+        parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
+        to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
+        to prevent auto-insertion from ever occurring. If the parameter is
+        set to another value, then it defines the number of nanoseconds 
+        between the time a hot swap event with saHpiHotSwapState == 
+        INSERTION_PENDING is generated, and the time that the auto-insertion 
+        policy will be invoked for that resource.  If, during this time period,
+        a saHpiHotSwapPolicyCancel function call is processed, the timer will 
+        be stopped, and the auto-insertion policy will not be invoked.  Each 
+        domain maintains a single auto-insert timeout value and it is applied 
+        to all contained resources upon insertion, which support managed hot 
+        swap. Once the auto-insertion process begins, the HPI User will not be 
+        allowed to take control of the insertion process; hence, the timeout 
+        should be set appropriately to allow for this condition.  Note that the 
+        timeout period begins when the hot swap event with saHpiHotSwapState 
+        == INSERTION_PENDING is initially generated."
+
+    REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 141-142"
+
+    ::= { saHpiAutoTimeoutEntry 1 }
+
+
+saHpiHotSwapExtractTimeout OBJECT-TYPE
+        SYNTAX      SaHpiTime
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
+        "This function allows the HPI User to configure a timeout for how 
+        long to wait before the default auto-extraction policy is invoked. 
+        This function accepts a parameter instructing the resource to impose
+        a delay before performing its default hot swap policy for 
+        auto-extraction. The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE
+        to direct the resource to proceed immediately to auto-extraction, or
+        to SAHPI_TIMEOUT_BLOCK to prevent auto-extraction from ever occurring
+        on a resource. If the parameter is set to another value, then it
+        defines the number of nanoseconds between the time a hot swap event 
+        with saHpiHotSwapState = extractionPending(5) is generated and the 
+        time that the auto-extraction policy will be invoked for the
+        resource. If, during this time period, a saHpiHotSwapPolicyCancel 
+        function call is processed, the timer will be stopped, and the 
+        auto-extraction policy will not be invoked. 
+
+        Once the auto-extraction process begins, the HPI User will not be 
+        allowed to take control of the extraction process; hence, the 
+        timeout should be set appropriately to allow for this condition. 
+
+        Note that the timeout period begins when the hot swap event with 
+        saHpiHotSwapState = extractionPending(4) is initially generated.
+        "
+
+        REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
+    
+        ::= {saHpiAutoTimeoutEntry 2}
+
+
 saHpiHotSwapCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of HotSwap entries present in the system." 
-        ::= {hpiEntity 11}
+        ::= {hpiHotSwap 2}
 
 saHpiHotSwapTable OBJECT-TYPE
     SYNTAX SEQUENCE OF SaHpiHotSwapEntry
@@ -2053,7 +2147,7 @@ saHpiHotSwapTable OBJECT-TYPE
          entities in the managed platform.  The entries in this table are 
          straight from the HPI spec.  This table builds upon information present 
          in the Entity Table."
-    ::= { hpiEntity 12 }
+    ::= { hpiHotSwap 3 }
 
 
 saHpiHotSwapEntry OBJECT-TYPE
@@ -2070,15 +2164,8 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 
     saHpiHotSwapIndicator      INTEGER,
 
-
     saHpiHotSwapState          INTEGER,
     saHpiHotSwapPreviousState  INTEGER,
-
-
-    saHpiHotSwapInsertTimeout   SaHpiTime,
-
-    saHpiHotSwapExtractTimeout  SaHpiTime,
-
 
     saHpiHotSwapActionRequest  	INTEGER,
     saHpiHotSwapPolicyCancel    INTEGER,
@@ -2152,73 +2239,6 @@ saHpiHotSwapPreviousState	OBJECT-TYPE
 	""
         ::= { saHpiHotSwapEntry 3 }
 
-saHpiHotSwapInsertTimeout OBJECT-TYPE
-    SYNTAX      SaHpiTime
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how 
-        long to wait before the default auto-insertion policy is invoked 
-        on a resource within a specific domain.  This function accepts a 
-        parameter instructing each resource to impose a delay before 
-        performing its default hot swap policy for auto-insertion.  The 
-        parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
-        to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
-        to prevent auto-insertion from ever occurring. If the parameter is
-        set to another value, then it defines the number of nanoseconds 
-        between the time a hot swap event with saHpiHotSwapState == 
-        INSERTION_PENDING is generated, and the time that the auto-insertion 
-        policy will be invoked for that resource.  If, during this time period,
-        a saHpiHotSwapPolicyCancel function call is processed, the timer will 
-        be stopped, and the auto-insertion policy will not be invoked.  Each 
-        domain maintains a single auto-insert timeout value and it is applied 
-        to all contained resources upon insertion, which support managed hot 
-        swap. Once the auto-insertion process begins, the HPI User will not be 
-        allowed to take control of the insertion process; hence, the timeout 
-        should be set appropriately to allow for this condition.  Note that the 
-        timeout period begins when the hot swap event with saHpiHotSwapState 
-        == INSERTION_PENDING is initially generated."
-
-    REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 141-142"
-
-    ::= { saHpiHotSwapEntry 4 }
-
-
-saHpiHotSwapExtractTimeout OBJECT-TYPE
-        SYNTAX      SaHpiTime
-        MAX-ACCESS  read-create
-        STATUS      current
-        DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how 
-        long to wait before the default auto-extraction policy is invoked. 
-        This function accepts a parameter instructing the resource to impose
-        a delay before performing its default hot swap policy for 
-        auto-extraction. The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE
-        to direct the resource to proceed immediately to auto-extraction, or
-        to SAHPI_TIMEOUT_BLOCK to prevent auto-extraction from ever occurring
-        on a resource. If the parameter is set to another value, then it
-        defines the number of nanoseconds between the time a hot swap event 
-        with saHpiHotSwapState = extractionPending(5) is generated and the 
-        time that the auto-extraction policy will be invoked for the
-        resource. If, during this time period, a saHpiHotSwapPolicyCancel 
-        function call is processed, the timer will be stopped, and the 
-        auto-extraction policy will not be invoked. 
-
-        Once the auto-extraction process begins, the HPI User will not be 
-        allowed to take control of the extraction process; hence, the 
-        timeout should be set appropriately to allow for this condition. 
-
-        Note that the timeout period begins when the hot swap event with 
-        saHpiHotSwapState = extractionPending(4) is initially generated.
-        "
-
-        REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
-    
-        ::= {saHpiHotSwapEntry 5}
-
-
 saHpiHotSwapActionRequest OBJECT-TYPE
         SYNTAX          INTEGER {
                                 undefined(0),
@@ -2239,7 +2259,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
 
         REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 149."
-        ::= {saHpiHotSwapEntry 6}
+        ::= { saHpiHotSwapEntry 4 }
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
         SYNTAX      INTEGER {
@@ -2271,7 +2291,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 139."
-    ::= {saHpiHotSwapEntry 7}
+    ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2292,7 +2312,7 @@ Because a resource that supports the simplified hot swap model will never transi
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 140-141."
-    ::= {saHpiHotSwapEntry 8}
+    ::= { saHpiHotSwapEntry 6 }
 
 saHpiHotSwapResetAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2313,7 +2333,7 @@ coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be 
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
-    ::= {saHpiHotSwapEntry 9}
+    ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapPowerAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2334,13 +2354,13 @@ Not all resources supporting hot swap will necessarily support this function. In
 This function may also be supported for non-FRU entities if power control is available for those entities."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 168-169."
-        ::= {saHpiHotSwapEntry 10}
+        ::= { saHpiHotSwapEntry 8 }
 saHpiHotSwapRTP OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "OID for RTP"
-        ::= {saHpiHotSwapEntry 11}
+        ::= { saHpiHotSwapEntry 9 }
 
 
         
@@ -3213,7 +3233,7 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
         saHpiEventWatchdogNum                   SaHpiInstrumentId,
         saHpiWatchdogEventTimestamp             SaHpiTimeString,
         saHpiWatchdogEventAction                INTEGER,
-        saHpiWatchdogEventPreTimerAction        SaHpiWatchdogPreTimerAction,
+        saHpiWatchdogEventPreTimerAction        SaHpiEventPreTimerAction,
         saHpiWatchdogEventUse                   SaHpiWatchdogTimerUse, 
         saHpiWatchdogEventDelete                RowStatus
         }
@@ -3255,7 +3275,7 @@ saHpiWatchdogEventAction OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 3}
 
 saHpiWatchdogEventPreTimerAction OBJECT-TYPE
-        SYNTAX          SaHpiWatchdogPreTimerAction
+        SYNTAX          SaHpiEventPreTimerAction
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -3449,9 +3469,9 @@ SaHpiOEMEventEntry ::= SEQUENCE {
         saHpiOEMEventTimestamp          SaHpiTime,
 
         saHpiOEMEventManufacturerIdT    Unsigned32,
-        saHpiOEMEventTextType           SaHpiTextType,
-        saHpiOEMEventTextLanguage       SaHpiTextLanguage,
-        saHpiOEMEventText               SaHpiText,
+        saHpiOemEventTextType           SaHpiTextType,
+        saHpiOemEventTextLanguage       SaHpiTextLanguage,
+        saHpiOemEventText               SaHpiText,
         saHpiOEMEventDelete             RowStatus
         }
 
@@ -3474,7 +3494,7 @@ saHpiOEMEventManufacturerIdT OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 2}
 
-saHpiOEMEventTextType   OBJECT-TYPE
+saHpiOemEventTextType   OBJECT-TYPE
     SYNTAX      SaHpiTextType
     MAX-ACCESS  read-only
     STATUS      current
@@ -3482,7 +3502,7 @@ saHpiOEMEventTextType   OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 3}
 
-saHpiOEMEventTextLanguage OBJECT-TYPE
+saHpiOemEventTextLanguage OBJECT-TYPE
     SYNTAX      SaHpiTextLanguage
     MAX-ACCESS  read-only
     STATUS      current
@@ -3490,7 +3510,7 @@ saHpiOEMEventTextLanguage OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 4}
 
-saHpiOEMEventText       OBJECT-TYPE
+saHpiOemEventText       OBJECT-TYPE
     SYNTAX      SaHpiText
     MAX-ACCESS  read-only
     STATUS      current
@@ -3630,6 +3650,7 @@ saHpiAnnouncementEntry OBJECT-TYPE
 
 SaHpiAnnouncementEntry ::= SEQUENCE {
 
+        --saHpiAnnuoncementEntryId      Unsigned32,
         saHpiAnnuoncementTimestamp      SaHpiTime,
         saHpiAnnuoncementAddedByUser    TruthValue,
         saHpiAnnouncementSeverity       INTEGER,
@@ -3644,16 +3665,24 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
         saHpiAnnouncementTextType       SaHpiTextType,
         saHpiAnnouncementTextLanguage   SaHpiTextLanguage,
         saHpiAnnouncementText           SaHpiText,
+        saHpiAnnouncementMode           INTEGER,
         saHpiAnnouncementDelete         RowStatus
 
       }
       
+--saHpiAnnuoncementEntryId      OBJECT-TYPE
+--      SYNTAX          Unsigned32
+--      MAX-ACCESS      read-only
+--      STATUS          current
+--      DESCRIPTION     "Announcment Entry Id."
+--      ::= {saHpiAnnouncementEntry 1}
+
 saHpiAnnuoncementTimestamp      OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Time when announcement added to set."
-        ::= {saHpiAnnouncementEntry 1}
+        ::= {saHpiAnnouncementEntry 2}
         
 saHpiAnnuoncementAddedByUser    OBJECT-TYPE
         SYNTAX          TruthValue
@@ -3661,7 +3690,7 @@ saHpiAnnuoncementAddedByUser    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "True if added to set by HPI User, False if added 
         automatically by HPI implementation."
-        ::= {saHpiAnnouncementEntry 2}
+        ::= {saHpiAnnouncementEntry 3}
 
 saHpiAnnouncementSeverity       OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3678,14 +3707,14 @@ saHpiAnnouncementSeverity       OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Only used with DAT and Annunciator functions.  
         This is not a valid severity for events or alarms."
-        ::= {saHpiAnnouncementEntry 3}
+        ::= {saHpiAnnouncementEntry 4}
         
 saHpiAnnuoncementAcknowledged   OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Acknowledged flag."
-        ::= {saHpiAnnouncementEntry 4}
+        ::= {saHpiAnnouncementEntry 5}
         
 saHpiAnnouncementStatusCondType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3698,7 +3727,7 @@ saHpiAnnouncementStatusCondType OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Status Condition Type."
-        ::= {saHpiAnnouncementEntry 5}
+        ::= {saHpiAnnouncementEntry 6}
 
 saHpiAnnouncementEntityPath     OBJECT-TYPE
         SYNTAX          OCTET STRING
@@ -3718,7 +3747,7 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-        ::= {saHpiAnnouncementEntry 6}  
+        ::= {saHpiAnnouncementEntry 7}  
         
 saHpiAnnouncementSensorNum      OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3726,7 +3755,7 @@ saHpiAnnouncementSensorNum      OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor associated with status Only valid 
         if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
-        ::= {saHpiAnnouncementEntry 7}
+        ::= {saHpiAnnouncementEntry 8}
         
 saHpiAnnouncementEventState     OBJECT-TYPE
         SYNTAX          SaHpiEventState
@@ -3734,7 +3763,7 @@ saHpiAnnouncementEventState     OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor event state. Only valid if Type is 
         SAHPI_STATUS_COND_TYPE_SENSOR.."
-        ::= {saHpiAnnouncementEntry 8}
+        ::= {saHpiAnnouncementEntry 9}
             
 saHpiAnnouncementName   OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -3742,7 +3771,7 @@ saHpiAnnouncementName   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "AIS compatible identifier associated with Status condition."
-        ::= {saHpiAnnouncementEntry 9}
+        ::= {saHpiAnnouncementEntry 10}
 
 saHpiAnnouncementMid    OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
@@ -3750,7 +3779,7 @@ saHpiAnnouncementMid    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Manufacturer Id associated with status condition, 
         required when type is SAHPI_STATUS_COND_TYPE_OEM."
-        ::= {saHpiAnnouncementEntry 10}
+        ::= {saHpiAnnouncementEntry 11}
 
 saHpiAnnouncementTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
@@ -3758,7 +3787,7 @@ saHpiAnnouncementTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data. 
         See Definition for SaHpiTextType for more details."
-        ::= {saHpiAnnouncementEntry 11}
+        ::= {saHpiAnnouncementEntry 12}
         
 saHpiAnnouncementTextLanguage   OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
@@ -3766,7 +3795,7 @@ saHpiAnnouncementTextLanguage   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data.
         See Definition for SaHpiTextLanguage for more details."
-        ::= {saHpiAnnouncementEntry 12}
+        ::= {saHpiAnnouncementEntry 13}
 
 saHpiAnnouncementText   OBJECT-TYPE
         SYNTAX          SaHpiText
@@ -3775,8 +3804,20 @@ saHpiAnnouncementText   OBJECT-TYPE
         DESCRIPTION     "Field Data.
         The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-        ::= {saHpiAnnouncementEntry 13}
+        ::= {saHpiAnnouncementEntry 14}
 
+saHpiAnnouncementMode   OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                        undefined(0),
+                                        auto(1),
+                                        user(2),
+                                        shared(3)
+                                }
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION
+                " "
+        ::= {saHpiAnnouncementEntry 15}
 
 saHpiAnnouncementDelete OBJECT-TYPE
         SYNTAX          RowStatus
@@ -3784,7 +3825,7 @@ saHpiAnnouncementDelete OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 " "
-        ::= {saHpiAnnouncementEntry 14}
+        ::= {saHpiAnnouncementEntry 16}
 
 
 --/*******************************************************************************
@@ -4296,8 +4337,8 @@ SaHpiCtrlEntry ::= SEQUENCE {
         saHpiCtrlOutputType     INTEGER,
         saHpiCtrlType           INTEGER,
  
-        saHpiCtrlState        OCTET STRING,
-        saHpiCtrlData          OCTET STRING,
+        saHpiCtrlMutable        OCTET STRING,
+        saHpiCtrlState          OCTET STRING,
         
         saHpiCtrlMode           INTEGER,        
         saHpiCtrlReadOnly       TruthValue,      
@@ -4368,33 +4409,32 @@ saHpiCtrlMode OBJECT-TYPE
                         }
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "
-This object describes how the control is managed.  The control may be managed automatically by the implementation (auto mode).  Or it may be managed by the HPI User (manual mode).  Some controls allow their modes to be changed, allowing the HPI User to determine if they will manage the control, or relinquish the management to the implementation.  But, other controls do not allow the mode to be changed.  These static-mode controls are indicated with the saHpiCtrlReadOnly flag set as part of the default control mode.
-	"
+        DESCRIPTION     "Indicates if the control comes up in Auto or Manual mode. 
+        TRUE = AUTO. FALSE = MANUAL"
         ::= {saHpiCtrlEntry 4}
         
 saHpiCtrlReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Indicates if mode is read-only"
         ::= {saHpiCtrlEntry 5}
         
 saHpiCtrlWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Indicates if mode is write-only"
         ::= {saHpiCtrlEntry 6}
 
-saHpiCtrlState OBJECT-TYPE
+saHpiCtrlMutable OBJECT-TYPE
         SYNTAX          OCTET STRING (SIZE(1|4|9))
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
         This attribute represents the current setting of the control.  It must
          be interpreted in the context of saHpiCtrlType.
-        If you wish to change the values of the data, this is the object
+        if you wish to change the values of the data, this is the object
         to use.
 
         digital  - Unsigned 32bit integer (4 octets) defined as:
@@ -4449,13 +4489,13 @@ saHpiCtrlState OBJECT-TYPE
          
         ::= {saHpiCtrlEntry 7}
 
-saHpiCtrlData          OBJECT-TYPE
+saHpiCtrlState          OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(4|9|12|262|270))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
 
-        This object represents resource data records  of the control.
+        This object represents certain attributes of the control.
         It must be interpreted in the context of saHpiCtrlType.
         This object augments the data in saHpiCtrlState.
 
@@ -4797,7 +4837,7 @@ saHpiAssertEventMask    OBJECT-TYPE
         to asserted.  
 
         Events will only be generated by the sensor if the appropriate 
-        saHpiAssertEventMask or saHpiDeassertEventMask events are set, 
+        saHpiAssertEventMask or saHpiDeassertEventMask bit is set, 
 	sensor events are enabled, and the sensor is enabled.
         
         Remarks
@@ -4830,7 +4870,7 @@ saHpiDeassertEventMask  OBJECT-TYPE
         to deasserted.  
 
         Events will only be generated by the sensor if the appropriate 
-        saHpiAssertEventMask or saHpiDeassertEventMask events are set, 
+        saHpiAssertEventMask or saHpiDeassertEventMask bit is set, 
 	sensor events are enabled, and the sensor is enabled.
         
         Remarks
@@ -5020,7 +5060,7 @@ SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
         saHpiReadingCurrentIsSupported          TruthValue,
         saHpiSensorReadingCurrentType           SaHpiSensorReadingType, 
         saHpiSensorReadingCurrentValue          SaHpiSensorReadingValue,
-        saHpiSensorReadingCurrentEventState            SaHpiEventState
+        saHpiSensorReadingEventState            SaHpiEventState
         }
 
 saHpiReadingCurrentIsSupported  OBJECT-TYPE
@@ -5049,7 +5089,7 @@ saHpiSensorReadingCurrentValue  OBJECT-TYPE
         "See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingCurrentEntry 3}
         
-saHpiSensorReadingCurrentEventState OBJECT-TYPE
+saHpiSensorReadingEventState OBJECT-TYPE
         SYNTAX  SaHpiEventState
         MAX-ACCESS      read-only
         STATUS  current
@@ -6328,9 +6368,9 @@ SaHpiWatchdogEntry ::= SEQUENCE {
         saHpiWatchdogRunning            TruthValue,
         saHpiWatchdogTimerUse           SaHpiWatchdogTimerUse,
         saHpiWatchdogTimerAction        INTEGER,
-        saHpiWatchdogPretimerInterrupt  SaHpiWatchdogPreTimerAction,
+        saHpiWatchdogPretimerInterrupt  SaHpiEventPreTimerAction,
         saHpiWatchdogPreTimeoutInterval Unsigned32,
-        saHpiWatchdogTimerUseExpFlags   OCTET STRING,
+        saHpiWatchdogTimerUseExpFlags   Unsigned32,
         saHpiWatchdogTimerInitialCount  Unsigned32,
         saHpiWatchdogTimerPresentCount  Unsigned32,
         saHpiWatchdogTimerReset         TruthValue,
@@ -6426,7 +6466,7 @@ saHpiWatchdogTimerAction OBJECT-TYPE
         ::= {saHpiWatchdogEntry 5}
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
-        SYNTAX          SaHpiWatchdogPreTimerAction
+        SYNTAX          SaHpiEventPreTimerAction
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
@@ -6457,25 +6497,25 @@ saHpiWatchdogPreTimeoutInterval OBJECT-TYPE
         ::= {saHpiWatchdogEntry 7}
 
 saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..56))
+        SYNTAX          Unsigned32 (0..62)
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION    
-	 "Set of values seperated by a delimiter.
-	For each value set, the corresponding Timer Use Expiration Flag will 
-	be CLEARED. Generally, a program should only clear the Timer Use 
-	Expiration Flag corresponding to its own TimerUse, so that other 
-	software, which may have used the timer for another purpose in the 
-	past can still read its TimerUseExpFlag to determine whether or not 
-	the timer expired during that use.
+        DESCRIPTION     "set of five bit flags which indicate that a Watchdog
+                        timer timeout has occurred while the corresponding
+                        TimerUse value was set. Once set, these flags stay
+                        set until specifically cleared with a
+                        SET on this object, or by some other
+                        implementation-dependent means.
         
-        The values are:
+        Bit flags are:
+        SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
+        SAHPI_WATCHDOG_EXP_BIOS_POST   0x04
+        SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
+        SAHPI_WATCHDOG_EXP_SMS_OS      0x10
+        SAHPI_WATCHDOG_EXP_OEM         0x20
 
-        EXP_BIOS_FRB2  
-        EXP_BIOS_POST
-        EXP_OS_LOAD
-        EXP_SMS_OS
-        EXP_OEM
+        The bit flag 0x00 indicates that this watchdog does not support
+        any of the flags.
 
         Setting this object will NOT take effect on the Watchdog until the
         object SaHpiWatchdogRunning is set to true(1)."
@@ -6583,7 +6623,7 @@ SaHpiAnnunciatorEntry ::= SEQUENCE {
         saHpiAnnunciatorType            INTEGER,
         saHpiAnnunciatorModeReadOnly    TruthValue,
         saHpiAnnunciatorMaxConditions   Unsigned32,
-        saHpiAnnunciatorMode		INTEGER,
+        --saHpiAnnunciatorMode          INTEGER,
         saHpiAnnunciatorOem             Unsigned32
       }
       
@@ -6629,27 +6669,18 @@ saHpiAnnunciatorMaxConditions   OBJECT-TYPE
         set.  0 means no fixed limit.  "
         ::= {saHpiAnnunciatorEntry 4}
         
-saHpiAnnunciatorMode  OBJECT-TYPE
-       SYNTAX          INTEGER {
-                              undefined(0),
-                              auto(1),
-                              user(2),
-                              shared(3)
-                      }
-       MAX-ACCESS      read-write
-	STATUS          current
-        DESCRIPTION     
-
- "The Annunciator management instrument has a current mode that indicates whether announcements are added and removed automatically by the HPI implementation, by the HPI User, or both.  The mode may be set to one of three values, with the following meanings:
-
-auto(1) - the HPI implementation automatically adds and deletes announcements; the HPI User is not permitted to add or delete announcements.
-user(2) - the HPI User may add and delete announcements; the HPI implementation will not automatically add or delete announcements.
-shared(3) -  the HPI implementation automatically adds and deletes announcements, and the HPI User may also add and delete announcements.
-
-The initial mode of each Annunciator is implementation-specific.  The HPI User may change the mode of Annunciators with the saHpiAnnunciatorMode object.  However, the mode may be configured to be Read-only, in which case the HPI User will not be able to change the mode.
-
-When the mode is user(2) or shared(3), HPI Users may add or delete any types of announcements in the Annunciator's current set - not just HPI User announcements.  This is allowed so that the HPI User can exert complete control over what conditions are being announced, if that is required.  Note that this is less restrictive than the similar operations on the DAT.  To distinguish between announcements added to an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser field in the announcement indicates the source of the announcement in the set."
-       ::= {saHpiAnnunciatorEntry 5}
+--saHpiAnnunciatorMode  OBJECT-TYPE
+--       SYNTAX          INTEGER {
+--                              undefined(0),
+--                              auto(1),
+--                              user(2),
+--                              shared(3)
+--                      }
+--       MAX-ACCESS      read-write
+--      STATUS          current
+--        DESCRIPTION     
+--      ""
+--       ::= {saHpiAnnunciatorEntry 5}
 
 saHpiAnnunciatorOem     OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6659,7 +6690,7 @@ saHpiAnnunciatorOem     OBJECT-TYPE
         "maximum number of conditions that can be held in current 
         set.  0 means no fixed limit.  if True, Mode may not be 
         changed by HPI User."
-       ::= {saHpiAnnunciatorEntry 6}
+        ::= {saHpiAnnunciatorEntry 5}
         
 
 --
@@ -6763,9 +6794,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
         OBJECTS {
-                saHpiOEMEventTextType,
-                saHpiOEMEventTextLanguage,
-                saHpiOEMEventText
+                saHpiOemEventTextType,
+                saHpiOemEventTextLanguage,
+                saHpiOemEventText
         }
         STATUS current
         DESCRIPTION
@@ -6801,349 +6832,82 @@ saHpiUserNotifications NOTIFICATION-TYPE
 
 hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
 
-saHpiDomainGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiDomainCapabilities,
-		saHpiIsPeer,
-		saHpiDomainTagTextType,
-		saHpiDomainTagTextLanguage,
-		saHpiDomainTag,
-		saHpiDrtUpdateCount,
-		saHpiDrtUpdateTimestamp,
-		saHpiRptUpdateCount,
-		saHpiRptUpdateTimestamp,
-		saHpiDatUpdateCount,
-		saHpiDatUpdateTimestamp,
-		saHpiActiveAlarms,
-		saHpiCriticalAlarms,
-		saHpiMajorAlarms,
-		saHpiMinorAlarms,
-		saHpiDatUserAlarmLimit,
-		saHpiDatOverflow,
-		saHpiDomainGuid
-	}
-	STATUS current
-	DESCRIPTION
-		"Domain Table"
-	::= { hpiMIBCompliances 1}
+saHpiEntityGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiEntryCount,
+                saHpiEntryUpdateCount,
+                saHpiEntryUpdateTimestamp,
+                saHpiDomainId ,
+                saHpiEntryId ,
+                saHpiResourceId ,
+                saHpiResourceEntityPath ,
+                saHpiResourceCapabilities ,
+                saHpiResourceSeverity ,
+                saHpiResourceInfoResourceRev ,
+                saHpiResourceInfoSpecificVer ,
+                saHpiResourceInfoDeviceSupport ,
+                saHpiResourceInfoManufacturerId ,
+                saHpiResourceInfoProductId ,
+                saHpiResourceInfoFirmwareMajorRev ,
+                saHpiResourceInfoFirmwareMinorRev ,
+                saHpiResourceInfoAuxFirmwareRev ,
+                saHpiResourceTagTextType ,
+                saHpiResourceTagTextLanguage,
+                saHpiResourceTag,
+                saHpiParamControl
+                --saHpiClearEvents,
+                --saHpiEventLogTime,
+                --saHpiEventLogState
+        }
+        STATUS current
+        DESCRIPTION
+                "Entity group"
+        ::=  { hpiMIBCompliances 1}
 
-saHpiDrtGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiDrtIsPeer
-	}
-	STATUS current
-	DESCRIPTION
-		"Domain Resource Table."
-	::= { hpiMIBCompliances 2}
-
-saHpiDatGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiAlarmId,
-		saHpiTimestamp,
-		saHpiSeverity,
-		saHpiAcknowledged,
-		saHpiAlarmCondStatusCondType,
-		saHpiAlarmCondEntityPath,
-		saHpiAlarmCondSensorNum,
-		saHpiAlarmCondEventState,
-		saHpiAlarmCondNameValue,
-		saHpiAlarmCondMid,
-		saHpiAlarmCondDataTextType,
-		saHpiAlarmCondDataTextLanguage,
-		saHpiAlarmCondData,
-		saHpiAlarmDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Domain Alarm Table."
-	::= { hpiMIBCompliances 3}
-
-
-saHpiResourceGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiDomainId,
-		saHpiEntryId,
-		saHpiResourceId,
-		saHpiResourceEntityPath,
-		saHpiResourceCapabilities,
-		saHpiResourceHotSwapCapabilities,
-		saHpiResourceSeverity,
-		saHpiResourceFailed,
-		saHpiResourceInfoResourceRev,
-		saHpiResourceInfoSpecificVer,
-		saHpiResourceInfoDeviceSupport,
-		saHpiResourceInfoManufacturerId,
-		saHpiResourceInfoProductId,
-		saHpiResourceInfoFirmwareMajorRev,
-		saHpiResourceInfoFirmwareMinorRev,
-		saHpiResourceInfoAuxFirmwareRev,
-		saHpiResourceInfoGuid,
-		saHpiResourceTagTextType,
-		saHpiResourceTagTextLanguage,
-		saHpiResourceTag,
-		saHpiParamControl
-	}
-	STATUS	current
-	DESCRIPTION
-		"Resource table - RPT"
-	::= { hpiMIBCompliances 4}
-
-saHpiHotSwapGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiHotSwapIndicator,
-		saHpiHotSwapInsertTimeout,
-		saHpiHotSwapExtractTimeout,
-		saHpiHotSwapActionRequest,
-		saHpiHotSwapPolicyCancel,
-		saHpiHotSwapResourceRequest,
-		saHpiHotSwapResetAction,
-		saHpiHotSwapPowerAction,
-		saHpiHotSwapRTP
-	}
-	STATUS	current
-	DESCRIPTION
-		"Hot swap table."
-	::= { hpiMIBCompliances 5}
 
 saHpiEventGroup OBJECT-GROUP
-	OBJECTS {
---		saHpiEvent,
-		saHpiEventType,
-		saHpiEventSeverity,
-		saHpiEventHistorical,
-		saHpiEventQueueStatus,
-		saHpiEventSaHpiTime
-	}
-	STATUS	current
-	DESCRIPTION
-		"Event table."
-	::= {hpiMIBCompliances 6}
+        OBJECTS {
+                saHpiEventLogEntries
+        }
+        STATUS current
+        DESCRIPTION 
+                "System event group"
+        ::=  { hpiMIBCompliances 3}
 
-saHpiResourceEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiResourceEventTimestamp,
-		saHpiResourceEventType,
-		saHpiResourceEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Resource event table"
-	::= {hpiMIBCompliances 7}
+saHpiHotSwapGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHotSwapIndicator,
+--              saHpiHotSwapState,
+--              saHpiHotSwapPreviousState,
+                saHpiHotSwapInsertTimeout,
+                saHpiHotSwapExtractTimeout,
+                saHpiHotSwapActionRequest,
+                saHpiHotSwapRTP
+        }
+        STATUS current
+        DESCRIPTION
+                "Hotswap group"
+        ::=  { hpiMIBCompliances 4}
 
-saHpiResourceDomainEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiDomainEventTimestamp,
-		saHpiDomainEventType,
-		saHpiDomainEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Domain event table."
-	::= {hpiMIBCompliances 8}	
-
-saHpiSensorEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiSensorNum,
-		saHpiSensorEventTimestamp,
-		saHpiSensorEventType,
-		saHpiSensorEventCategory,
-		saHpiSensorEventAssertion,
-		saHpiSensorEventState,
-		saHpiEventSensorOptionalData,
-		saHpiEventSensorTriggerReadingType,
-		saHpiEventSensorTriggerReading,
-		saHpiEventSensorTriggerThresholdType,
-		saHpiEventSensorTriggerThreshold,
-		saHpiEventSensorPreviousState,
-		saHpiEventSensorCurrentState,
-		saHpiEventSensorOem,
-		saHpiEventSensorSpecific,
-		saHpiEventSensorDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Sensor event table."
-	::= {hpiMIBCompliances 9}
-
-saHpiSensorEnableChangeEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiSensorEnableChangeEventTimestamp,
-		saHpiSensorEnableChangeEventType,
-		saHpiSensorEnableChangeEventCategory,
-		saHpiSensorEnableChangeEnabled,
-		saHpiSensorEnableChangeEventsEnabled,
-		saHpiSensorEnableChangeAssertEvents,
-		saHpiSensorEnableChangeDeassertEvents,
-		saHpiSensorEnableChangeOptionalData,
-		saHpiSensorEnableChangeEventState,
-		saHpiSensorEnableChangeDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Sensor Enable change table."
-	::= {hpiMIBCompliances 10}
-
-saHpiHotSwapEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiHotSwapEventTimestamp,
-		saHpiHotSwapEventState,
-		saHpiHotSwapEventPreviousState,
-		saHpiHotSwapEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"HotSwap event table."
-	::= {hpiMIBCompliances 11}
-
-saHpiWatchdogEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiEventWatchdogNum,
-		saHpiWatchdogEventTimestamp,
-		saHpiWatchdogEventAction,
-		saHpiWatchdogEventPreTimerAction,
-		saHpiWatchdogEventUse,
-		saHpiWatchdogEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Watchdog event table."
-	::= {hpiMIBCompliances 12}
-
-saHpiSoftwareEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiSoftwareEventTimestamp,
-		saHpiSoftwareEventManufacturerIdT,
-		saHpiSoftwareEventType,
-		saHpiSoftwareEventTextType,
-		saHpiSoftwareEventTextLanguage,
-		saHpiSoftwareEventText,
-		saHpiSoftwareEventDelete
-	}
-	STATUS current
-	DESCRIPTION
-		"Software event group."
-	::= {hpiMIBCompliances 13}
-
-saHpiOEMEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiOEMEventTimestamp,
-		saHpiOEMEventManufacturerIdT,
-		saHpiOEMEventTextType,
-		saHpiOEMEventTextLanguage,
-		saHpiOEMEventText,
-		saHpiOEMEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"OEM event group."
-	::= {hpiMIBCompliances 14}
-
-saHpiUserEventGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiUserEventTimestamp,
-		saHpiUserEventTextType,
-		saHpiUserEventTextLanguage,
-		saHpiUserEventText,
-		saHpiUserEventDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"User Event group."
-	::= {hpiMIBCompliances 15}
-
-saHpiAnnouncementGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiAnnuoncementTimestamp,
-		saHpiAnnuoncementAddedByUser,
-		saHpiAnnouncementSeverity,
-		saHpiAnnuoncementAcknowledged,
-		saHpiAnnouncementStatusCondType,
-		saHpiAnnouncementEntityPath,
-		saHpiAnnouncementSensorNum,
-		saHpiAnnouncementEventState,
-		saHpiAnnouncementName,
-		saHpiAnnouncementMid,
-		saHpiAnnouncementTextType,
-		saHpiAnnouncementTextLanguage,
-		saHpiAnnouncementText,
-		saHpiAnnouncementDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Announcement table."
-	::= {hpiMIBCompliances 16}
-
-saHpiEventLogInfoGroup OBJECT-GROUP
-	OBJECTS {	
-		saHpiEventLogEntries,
-		saHpiEventLogSize,
-		saHpiEventLogUserEventMaxSize,
-		saHpiEventLogUpdateTimestamp,
-		saHpiEventLogCurrentTime,
-		saHpiEventLogIsEnabled,
-		saHpiEventLogOverflowFlag,
-		saHpiEventLogOverflowAction,
-		saHpiEventLogOverflowReset,
-		saHpiEventLogDelete,
-		saHpiEventLogState
-	}
-	STATUS	current
-	DESCRIPTION
-		"Event log information table."
-	::= {hpiMIBCompliances 17}
-
-saHpiEventLogGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiEventLogType,
-		saHpiEventLogAddedTimestamp,
-		saHpiEventLog
-	}
-	STATUS	current
-	DESCRIPTION
-		"Event log table."
-	::= {hpiMIBCompliances 18}
-
-saHpiRdrGroup OBJECT-GROUP
-	OBJECTS {
-	--	saHpiRdrType,
-		saHpiRdrEntityPath,
-		saHpiIsFru,
-		saHpiRdr,
-		saHpiRdrId,
-		saHpiRdrRTP,
-		saHpiRdrTextType,
-		saHpiRdrTextLanguage,
-		saHpiRdrIdString
-	}
-	STATUS	current
-	DESCRIPTION
-		"RDR table."
-	::= {hpiMIBCompliances 19}
-
-saHpiCtrlGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiCtrlNum,
-		saHpiCtrlOutputType,
-		saHpiCtrlType,
-		saHpiCtrlMode,
-		saHpiCtrlReadOnly,
-		saHpiCtrlWriteOnly,
-		saHpiCtrlState,
-		saHpiCtrlData,
-		saHpiCtrlOem,
-		saHpiCtrlTextType,
-		saHpiCtrlTextLanguage,
-		saHpiCtrlText,
-		saHpiCtrlRDR
-	}
-	STATUS	current
-	DESCRIPTION
-		"Control table."
-	::= {hpiMIBCompliances 20}
+saHpiResourceDataRecordGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiRdrCount,
+--              saHpiRdrRecordId,
+--              saHpiRdrType,
+                saHpiRdrEntityPath,
+                saHpiRdr,
+                saHpiRdrId,
+                saHpiRdrRTP
+        }
+        STATUS current
+        DESCRIPTION
+                "Resource Data Record group"
+        ::=  { hpiMIBCompliances 5}
 
 saHpiSensorGroup        OBJECT-GROUP
         OBJECTS {
                 saHpiSensorCount,
+--              saHpiSensorIndex,
                 saHpiSensorType,
                 saHpiSensorCategory,
                 saHpiSensorEventsCategoryControl,
@@ -7158,19 +6922,18 @@ saHpiSensorGroup        OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Sensors groups."
-        ::=  { hpiMIBCompliances 21}
+        ::=  { hpiMIBCompliances 6}
 
 saHpiSensorReadingCurrentGroup OBJECT-GROUP
         OBJECTS {
                 saHpiReadingCurrentIsSupported,
                 saHpiSensorReadingCurrentType, 
-                saHpiSensorReadingCurrentValue,
-		saHpiSensorReadingCurrentEventState
+                saHpiSensorReadingCurrentValue  
         }
         STATUS current
         DESCRIPTION
                 "Current (dynamic) sensor reading."
-        ::= { hpiMIBCompliances 22}
+        ::= { hpiMIBCompliances 7}
 
 saHpiSensorReadingMaxGroup OBJECT-GROUP
         OBJECTS {
@@ -7181,7 +6944,7 @@ saHpiSensorReadingMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer maximum sensor reading."
-        ::= { hpiMIBCompliances 23}
+        ::= { hpiMIBCompliances 8}
 
 saHpiSensorReadingMinGroup OBJECT-GROUP
         OBJECTS {
@@ -7192,7 +6955,7 @@ saHpiSensorReadingMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer minimum sensor reading."
-        ::= { hpiMIBCompliances 24}
+        ::= { hpiMIBCompliances 9}
 
 saHpiSensorReadingNominalGroup OBJECT-GROUP
         OBJECTS {
@@ -7203,7 +6966,7 @@ saHpiSensorReadingNominalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer nominal sensor reading."
-        ::= { hpiMIBCompliances 25}
+        ::= { hpiMIBCompliances 10}
 
 
 saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
@@ -7215,7 +6978,7 @@ saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer normal maximum sensor reading."
-        ::= { hpiMIBCompliances 26}
+        ::= { hpiMIBCompliances 11}
 
 saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         OBJECTS {
@@ -7226,7 +6989,7 @@ saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer normal minimum sensor reading."
-        ::= { hpiMIBCompliances 27}
+        ::= { hpiMIBCompliances 12}
         
 saHpiSensorThdLowCriticalGroup OBJECT-GROUP
         OBJECTS {
@@ -7234,14 +6997,13 @@ saHpiSensorThdLowCriticalGroup OBJECT-GROUP
                 saHpiSensorThdLowCriticalIsWritable,   
                 saHpiSensorThdLowCriticalType,         
                 saHpiSensorThdLowCriticalValue        
-
         }
         STATUS current
         DESCRIPTION
                 "Threshold values for catastrophic sensor reading at 
                 the lower end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 28}
+        ::= { hpiMIBCompliances 13}
 
 saHpiSensorThdLowMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -7255,7 +7017,7 @@ saHpiSensorThdLowMajorGroup OBJECT-GROUP
                 "Threshold values for severely degraded sensor reading
                 at the lower end of the range that does not impact
                 the functional status."
-        ::= { hpiMIBCompliances 29}
+        ::= { hpiMIBCompliances 14}
 
 saHpiSensorThdLowMinorGroup OBJECT-GROUP
         OBJECTS {
@@ -7269,7 +7031,7 @@ saHpiSensorThdLowMinorGroup OBJECT-GROUP
                 "Threshold values for degraded sensor reading at the 
                 lower end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 30}
+        ::= { hpiMIBCompliances 15}
 
 
 saHpiSensorThdUpCriticalGroup OBJECT-GROUP
@@ -7284,7 +7046,7 @@ saHpiSensorThdUpCriticalGroup OBJECT-GROUP
                 "Threshold values for catastrophic sensor reading at
                 the upper end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 31}
+        ::= { hpiMIBCompliances 16}
 
 saHpiSensorThdUpMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -7298,7 +7060,7 @@ saHpiSensorThdUpMajorGroup OBJECT-GROUP
                 "Threshold values for severely degraded sensor reading
                 at the upper end of the range that does not impact the
                 functional status of the sensor."
-        ::= { hpiMIBCompliances 32}
+        ::= { hpiMIBCompliances 17}
 
 
 saHpiSensorThdUpMinorGroup OBJECT-GROUP 
@@ -7313,7 +7075,7 @@ saHpiSensorThdUpMinorGroup OBJECT-GROUP
                 "Threshold values for degraded sensor reading at the
                 upper end of the range that does not impact the
                 functional status of the sensor."
-        ::= { hpiMIBCompliances 33}
+        ::= { hpiMIBCompliances 18}
 
 
 saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
@@ -7327,7 +7089,7 @@ saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
         DESCRIPTION
                 "Threshold values for hysteresis which is the positive
                 range over which a change is accepted."
-        ::= { hpiMIBCompliances 34}
+        ::= { hpiMIBCompliances 19}
 
 
 saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
@@ -7341,87 +7103,58 @@ saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
         DESCRIPTION
                 "Threshold values for hysteresis which is the negative
                 range over which a change is accepted."
-        ::= { hpiMIBCompliances 35}
+        ::= { hpiMIBCompliances 20}
 
+saHpiCtrlGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlCount,
+                saHpiCtrlNum,
+                saHpiCtrlOutputType,
+                saHpiCtrlType,
+                saHpiCtrlMutable,
+                saHpiCtrlState,
+                saHpiCtrlOem,
+                saHpiCtrlTextType,
+                saHpiCtrlTextLanguage,
+                saHpiCtrlText,
+                saHpiCtrlRDR
+        }
+        STATUS current
+        DESCRIPTION
+                "Control group."
+        ::=  { hpiMIBCompliances 21}
 
 saHpiInventoryGroup OBJECT-GROUP
         OBJECTS {
-		saHpiInstrumentId,
-		saHpiIdrPersistent,
-		saHpiInventoryOEM,
-		saHpiIdrUpdateCount,
-		saHpiIdrIsReadOnly,
-		saHpiIdrNumAreas,
-		saHpiInventoryRDR
+                saHpiInventoryCount,
+                saHpiInventoryRDR
         }
         STATUS current
         DESCRIPTION
                 "Inventory group."
-        ::=  { hpiMIBCompliances 37}
-
-saHpiInventoryDataAreaGroup OBJECT-GROUP
-	OBJECTS {
-		saHpiIdrAreaType,
-		saHpiIdrDataAreaIsReadOnly,
-		saHpiIdrDataAreaDelete,
-		saHpiIdrNumDataFields
-	}
-	STATUS	current
-	DESCRIPTION
-		"Inventory Data Record."
-	::= {hpiMIBCompliances 40}
-
-saHpiInventoryFieldGroup	OBJECT-GROUP
-	OBJECTS {
-		saHpiFieldType,
-		saHpiFieldIsReadOnly,
-		saHpiFieldTextType,
-		saHpiFieldTextLanguage,
-		saHpiFieldText,
-		saHpiFieldDelete
-	}
-	STATUS	current
-	DESCRIPTION
-		"Inventory field table."
-	::= {hpiMIBCompliances 41}
+        ::=  { hpiMIBCompliances 22}
 
 saHpiWatchdogGroup OBJECT-GROUP
         OBJECTS {
-		saHpiWatchdogCount,
-		saHpiWatchdogNum,
-		saHpiWatchdogLog,
-		saHpiWatchdogRunning,
-		saHpiWatchdogTimerUse,
-		saHpiWatchdogTimerAction,
-		saHpiWatchdogPretimerInterrupt,
-		saHpiWatchdogPreTimeoutInterval,
-		saHpiWatchdogTimerUseExpFlags,
-		saHpiWatchdogTimerInitialCount,
-		saHpiWatchdogTimerPresentCount,
-		saHpiWatchdogTimerReset,
-		saHpiWatchdogOem,
-		saHpiWatchdogRDR
-	}
-	STATUS	current
-	DESCRIPTION
-		"Watchdog table."
-	::= {hpiMIBCompliances 42}
-
-saHpiAnnunciatorGroup OBJECT-GROUP
-	OBJECTS {	
-		saHpiAnnunciatorCount,
-		saHpiAnnunciatorNum,
-		saHpiAnnunciatorType,
-		saHpiAnnunciatorModeReadOnly,
-		saHpiAnnunciatorMaxConditions,
-		saHpiAnnunciatorMode,
-		saHpiAnnunciatorOem
-	}
-	STATUS	current
-	DESCRIPTION
-		"Announicator table."
-	::= {hpiMIBCompliances 43}
-
+                saHpiWatchdogCount,
+                saHpiWatchdogNum,
+                saHpiWatchdogLog ,
+                saHpiWatchdogRunning ,
+                saHpiWatchdogTimerUse,
+                saHpiWatchdogTimerAction,
+                saHpiWatchdogPretimerInterrupt,
+                saHpiWatchdogPreTimeoutInterval,
+                saHpiWatchdogTimerUseExpFlags,
+                saHpiWatchdogTimerInitialCount,
+                saHpiWatchdogTimerPresentCount,
+                saHpiWatchdogTimerReset,
+                saHpiWatchdogOem,
+                saHpiWatchdogRDR
+        }
+        STATUS current
+        DESCRIPTION
+                "Watchdog group."
+        ::=  { hpiMIBCompliances 23}
 
 saHpiNotificationGroup NOTIFICATION-GROUP
         NOTIFICATIONS {
@@ -7438,7 +7171,7 @@ saHpiNotificationGroup NOTIFICATION-GROUP
         STATUS  current
         DESCRIPTION
         "Notification group"
-        ::=  { hpiMIBCompliances 50}
+        ::=  { hpiMIBCompliances 24}
         
 saHpiMIBCompliance MODULE-COMPLIANCE
         STATUS current
@@ -7446,9 +7179,11 @@ saHpiMIBCompliance MODULE-COMPLIANCE
         "The compliance statement for SMIv2 compliance of Platform MIB."
         MODULE
         MANDATORY-GROUPS {
+                saHpiEntityGroup,
 --              saHpiEventGroup,
                 saHpiEventGroup,
                 saHpiHotSwapGroup,
+                saHpiResourceDataRecordGroup,
                 saHpiSensorGroup,
                 saHpiSensorReadingCurrentGroup,
                 saHpiSensorReadingMaxGroup,
@@ -7469,5 +7204,5 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                 saHpiWatchdogGroup,
                 saHpiNotificationGroup
         }
-        ::=  { hpiMIBCompliances 60}
+        ::=  { hpiMIBCompliances 25}
 END
