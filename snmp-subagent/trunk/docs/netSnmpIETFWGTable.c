@@ -569,16 +569,8 @@ void netSnmpIETFWGTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_NSIETFWGCHAIR2:
             /** OCTETSTR = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+	  if (var->val_len > 255)
+                rc = SNMP_ERR_WRONGLENGTH;
         break;
 
         default: /** We shouldn't get here */
