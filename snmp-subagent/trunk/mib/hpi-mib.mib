@@ -5704,7 +5704,7 @@ saHpiInventoryValidity OBJECT-TYPE
         ::= {saHpiInventoryEntry 4}
 
 saHpiInventoryAttributes OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(1|4|9|1004))
+	SYNTAX		OCTET STRING (SIZE(4|9|260|1004))
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
@@ -5799,7 +5799,9 @@ saHpiInventoryAttributes OBJECT-TYPE
 			                 
 
 	oem	- OEM data represented as follows:
-		octet 1-4	-manufacturer ID in network byte order "
+		octet 1-4	- manufacturer ID in network byte order 
+		octet 5-n	- variable length data (defined by OEM).
+				  max(n) is 260."
         ::= {saHpiInventoryEntry 5}
 
 saHpiInventoryTextType OBJECT-TYPE 
