@@ -2844,6 +2844,9 @@ saHpiUserEventText OBJECT-TYPE
 -- IBMKR: Replicate amongs all of the rows?
 --	saHpiEventDelete		RowStatus
 
+
+-- IBMKR: These next four objects are here temporarily. They will
+-- be moved out.
 saHpiEventSeverity OBJECT-TYPE
         SYNTAX          INTEGER{
 				undefined (0),
@@ -2887,956 +2890,210 @@ saHpiEventHistorical OBJECT-TYPE
 
 --/*******************************************************************************
 -- * ********************************************************************************
--- * ********** ********** ********** System Event Log ********** **********
+-- * ********** ********** ********** Event Log ********** **********
 -- * **********
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-systemEvents	OBJECT IDENTIFIER ::= {events 4}
+eventLog	OBJECT IDENTIFIER ::= {events 4}
 
-saHpiSystemEventLogEntries OBJECT-TYPE
+saHpiEventLogEntries OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	" The Entries entry denotes the number of active entries contained in the log."
-	::= {systemEvents 1}
+	::= {eventLog 1}
 
-saHpiSystemEventLogSize OBJECT-TYPE
+saHpiEventLogSize OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	" The Size entry denotes the total number of entries the log is able to hold."
-	::= {systemEvents 2}
+	::= {eventLog 2}
 
-saHpiSystemEventLogUpdateTimestamp OBJECT-TYPE
+saHpiEventLogUserEventMaxSize OBJECT-TYPE
+    SYNTAX	Unsigned32(0..255)
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"The UserEventMaxSize entry indicates the maximum size of the 
+	text buffer data field in an HPI User event that is supported 
+	by the Event Log implementation.  If the implementation does 
+	not enforce a more restrictive data length, it should be set
+	to SAHPI_MAX_TEXT_BUFFER_LENGTH (255)."
+    ::= {eventLog 3}
+
+saHpiEventLogUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
-	::= {systemEvents 3}
+	DESCRIPTION	
+	    "The UpdateTimestamp entry denotes the time of the last
+	update to the Event Log. 
+	Refer to SaHpiTimeStamp for full describption."
+	::= {eventLog 4}
 
-saHpiSystemEventLogCurrentTime OBJECT-TYPE
+saHpiEventLogCurrentTime OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
-	::= {systemEvents 4}
+	DESCRIPTION	
+	    "The CurrentTime entry denotes the Event Log's idea of the 
+	current time; i.e the timestamp that would be placed on an
+	entry if it was added now. 
 
-saHpiSystemEventLogEnabled OBJECT-TYPE
+	Refer to SaHpiTimeStamp for full describption."
+	::= {eventLog 5}
+
+saHpiEventLogIsEnabled OBJECT-TYPE
 	SYNTAX		TruthValue
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The Enabled entry indicates whether the log is enabled. If the event log
-			   is 'disabled' no events generated within the HPI implementation will be
-			   added to the event log. Events may still be added to the event log with
-			   the SaHpiEventLogEntryAdd() function. When the event log is 'enabled'
-			   events may be automatically added to the event log as they are generated
-			   in a resource or a domain, however, it is implementation-specific which
-			   events are automatically added to any event log.  "
-	::= {systemEvents 5}
+	DESCRIPTION	
+	    "The Enabled entry indicates whether the log is enabled. 
+	If the event log is 'disabled' no events generated within the
+	HPI implementation will be added to the event log. 
 
-saHpiSystemEventLogOverflowFlag OBJECT-TYPE
+	User events may still be added to the event log.
+
+	When the event log is 'enabled' events may be automatically 
+	added to the event log as they are generated in a resource 
+	or a domain, however, it is implementation-specific which
+	events are automatically added to any event log.  "
+	::= {eventLog 6}
+
+saHpiEventLogOverflowFlag OBJECT-TYPE
 	SYNTAX		TruthValue 	
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	" The OverflowFlag entry indicates the log has overflowed. Events have been 
-			   dropped or overwritten due to a table overflow. "
-	::= {systemEvents 6}
+	DESCRIPTION	
+	    "The OverflowFlag entry indicates the log has overflowed. 
+	Events have been dropped or overwritten due to a table overflow. "
+	::= {eventLog 7}
 
-saHpiSystemEventLogOverflowAction OBJECT-TYPE
+saHpiEventLogOverflowAction OBJECT-TYPE
 	SYNTAX		INTEGER{
 				undefined(0),
 				drop(1),
-				wrap(2),
-				writeLast(3)
+				overwrite(2)
 			}
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The OverflowAction entry indicates the behavior of the SEL when an overflow 
-			   occurs. 
+	DESCRIPTION	
+	    "The OverflowAction entry indicates the behavior of the 
+	event log when an overflow occurs.
 
-			    SAHPI_SEL_OVERFLOW_DROP,         New entries are dropped when log is full
-			    SAHPI_SEL_OVERFLOW_WRAP,         Log wraps when log is full 
-			    SAHPI_SEL_OVERFLOW_WRITELAST     Last entry overwritten when log is full "
-	::= {systemEvents 7}
+        drop(1)
+		New entries are dropped when log is full
 
-saHpiSystemEventLogDeleteEntrySupported OBJECT-TYPE
-	SYNTAX		TruthValue
+	overwrite(2)
+
+		Event Log overwrites existing entries when Event Log
+		is full"
+	::= {eventLog 8}
+
+saHpiEventClearOverflowFlag OBJECT-TYPE
+	SYNTAX		RowStatus
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The DeleteEntrySupported indicates whether the delete command is supported for 
-			   event log entries. Note that clearing an entire log is valid even if this
-			   flag is not set."
-	::= {systemEvents 8}
+	DESCRIPTION	
+	    ""
 
-saHpiSystemEventLogTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiSystemEventLogEntry
+	::= {eventLog 9}
+
+saHpiEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiEventLogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining System Event Log records."
-        ::= {systemEvents 9}
+        DESCRIPTION     
+	    "A table definining Event Log records."
+        ::= {eventLog 10}
 
 
-saHpiSystemEventLogEntry OBJECT-TYPE
-        SYNTAX          SaHpiSystemEventLogEntry
+saHpiEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiEventLogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 	"This section defines the types associated with the SEL."
-        INDEX   { saHpiDomainId, saHpiResourceId  ,saHpiSystemEventLogIndex }
+        INDEX   { 
+	saHpiDomainId, 
+	saHpiResourceId,
+	saHpiEventLogIndex,
+	saHpiEventLogType}
 
-        ::= {saHpiSystemEventLogTable 1}
+        ::= {saHpiEventLogTable 1}
                                                  
-SaHpiSystemEventLogEntry ::= SEQUENCE {
-	saHpiSystemEventLogIndex	Unsigned32,
-	saHpiSystemEventLogAddedTimestamp	HpiTimeStamp,
-	saHpiSystemEventLogType		INTEGER,
-	saHpiSystemEventLogTimestamp	HpiTimeStamp,
+SaHpiEventLogEntry ::= SEQUENCE {
+	saHpiEventLogIndex		Unsigned32,
+	saHpiEventLogType		INTEGER,
+	saHpiEventLogAddedTimestamp	HpiTimeStamp,
 
-	saHpiSystemEventLogSeverity	INTEGER,
-	saHpiSystemEventLogSensorNum	Unsigned32,
-	saHpiSystemEventLogSensorType	INTEGER,
-	saHpiSystemEventLogSensorCategory	INTEGER,
-	saHpiSystemEventLogSensorAssertion	TruthValue,
-
-        saHpiSystemEventLogSensorState OCTET STRING,
-
-	saHpiSystemEventLogSensorOptionalData	Unsigned32,
-
-	saHpiSystemEventLogSensorTriggerReadingType	      INTEGER,
-	saHpiSystemEventLogSensorTriggerReadingRaw	      Unsigned32,
-	saHpiSystemEventLogSensorTriggerReadingInterpreted   OCTET STRING,
-	saHpiSystemEventLogSensorTriggerReadingEventStateFlag   INTEGER, 
-	saHpiSystemEventLogSensorTriggerReadingEventState    OCTET STRING,
-
-	saHpiSystemEventLogSensorTriggerThresholdType	      INTEGER,
-	saHpiSystemEventLogSensorTriggerThresholdRaw	      Unsigned32,
-	saHpiSystemEventLogSensorTriggerThresholdInterpreted OCTET STRING,
-	saHpiSystemEventLogSensorTriggerThresholdEventStateFlag  INTEGER,
-	saHpiSystemEventLogSensorTriggerThresholdEventState  OCTET STRING,
-
-	saHpiSystemEventLogSensorPreviousState		OCTET STRING,
-	saHpiSystemEventLogSensorOem			Unsigned32,
-	saHpiSystemEventLogSensorSpecific	Unsigned32,
-
-	saHpiSystemEventLogHotSwapState		INTEGER,
-	saHpiSystemEventLogPreviousHotSwapState	INTEGER,
-
-	saHpiSystemEventLogWatchdogNum		Unsigned32,
-	saHpiSystemEventLogWatchdogAction	INTEGER,
-	saHpiSystemEventLogWatchdogPreTimerAction INTEGER,
-	saHpiSystemEventLogWatchdogUse		INTEGER,
-
-	saHpiSystemEventLogOemManufacturerIdT	Unsigned32,
-	saHpiSystemEventLogOemEventData		OCTET STRING,
-
-	saHpiSystemEventLogUserEventData		OCTET STRING,
-
-	saHpiSystemEventLogDelete		RowStatus
+	saHpiEvent			RowPointer,
+	saHpiEventLogDelete		RowStatus
 	}
 
-saHpiSystemEventLogIndex OBJECT-TYPE
+saHpiEventLogIndex OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Entry ID for record
+        DESCRIPTION     
+	    "Entry ID for record
 
- 			Reserved values for event log entry IDs
+	Reserved values for event log entry IDs
 
- 			SAHPI_OLDEST_ENTRY    0x00000000
- 			SAHPI_NEWEST_ENTRY    0xFFFFFFFF
- 			SAHPI_NO_MORE_ENTRIES 0xFFFFFFFE
-			"
-        ::= {saHpiSystemEventLogEntry 1}
+	OLDEST_ENTRY    0x00000000
+	NEWEST_ENTRY    0xFFFFFFFF
+	NO_MORE_ENTRIES 0xFFFFFFFE
+	"
+        ::= {saHpiEventLogEntry 1}
 
-saHpiSystemEventLogAddedTimestamp OBJECT-TYPE
-        SYNTAX          HpiTimeStamp
-        MAX-ACCESS      read-only
-        STATUS          current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
-        ::= {saHpiSystemEventLogEntry 2}
 
-saHpiSystemEventLogType OBJECT-TYPE
+saHpiEventLogType OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined(0),
-				sensor(1),
-				hotswap(2),
-				watchdog(3),
-				oem(4),
-				user(5)
+				resource(1),
+				domain(2),
+				sensor(3),
+				sensorEnableChange(4),
+				hotswap(5),
+				watchdog(6),
+				hpiSoftware(7),
+				oem(8),
+				user(9)
 			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
 	The type of event.
 
-	Note:
-	User events may be used for storing custom events created by 
-	the application  middleware; eg. when injecting events into 
-	the event log using SaHpiEventLogEntryAdd(). 
-	
-	Note: The enumerated named have +1 added as opposed to the SA HPI 
-	spec for the same constants.  "
-	::= {saHpiSystemEventLogEntry 3}
+	Note: The enumerated named have +1 added as opposed to the 
+	SA HPI  spec for the same constants.  "
+	::= {saHpiEventLogEntry 2}
 
-saHpiSystemEventLogTimestamp OBJECT-TYPE
-        SYNTAX          HpiTimeStamp 
+saHpiEventLogAddedTimestamp OBJECT-TYPE
+        SYNTAX          HpiTimeStamp
         MAX-ACCESS      read-only
         STATUS          current
 	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
-	::= {saHpiSystemEventLogEntry 4}
-
-saHpiSystemEventLogSeverity OBJECT-TYPE
-        SYNTAX          INTEGER{
-				undefined (0),
-				critical(1),
-				major(2),
-				minor(3),
-				informational(4),
-				ok(5),
-				debug(241)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Severity of event. 
-	Note: The enumerated named have +1 added as opposed to the SA HPI 
-	spec for the same constants.  "
-	::= {saHpiSystemEventLogEntry 5}
+        ::= {saHpiEventLogEntry 3}
 
 
-saHpiSystemEventLogSensorNum OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "The sensor number-index. 
-
-	Note: This object is only valid if saHpiSystemEventLogType = sensor(1)"
-	::= {saHpiSystemEventLogEntry 6}
-
-saHpiSystemEventLogSensorType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				temperature (2),
-				voltage (3),
-				current (4),
-				fan (5),
-				physicalSecurity (6),
-				platformViolation (7),
-				processor (8),
-				powerSupply (9),
-				powerUnit (10),
-				coolingDevice (11),
-				otherUnitsBasedSensor (12),
-				memory (13),
-				driveSlot (14),
-				postMemoryResize (15),
-				systemFwProgress (16),
-				eventLoggingDisabled (17),
-				reserved1 (18),
-				systemEvent (19),
-				criticalInterrupt (20),
-				button (21),
-				moduleBoard (22),
-				microcontrollerCoprocessor (23),
-				addinCard (24),
-				chassis (25),
-				chipSet (26),
-				otherFru (27),
-				cableInterconnect (28),
-				terminator (29),
-				systemBootInitiated (30),
-				bootError (31),
-				osBoot (32),
-				osCriticalStop (33),
-				slotConnector (34),
-				systemAcpiPowerState (35),
-				reserved2 (36),
-				platformAlert (37),
-				entityPresence (38),
-				monitorAsicIc (39),
-				lan (40),
-				managementSubsystemHealth (41),
-				battery (42),
-				operational (161),
-				oemSensor (193)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "General Sensor Type
-
-	Note: This object is only valid if saHpiSystemEventLogType = sensor(1)"
-	::= {saHpiSystemEventLogEntry 7}
-
-saHpiSystemEventLogSensorCategory OBJECT-TYPE
-        SYNTAX          INTEGER {
-				unspecified (0),
-				threshold (2),
-				usage (3),
-				state (4),
-				predFail (5),
-				limit (6),
-				performance (7),
-				severity (8),
-				presence (9),
-				enable (10),
-				availability (11),
-				redundancy (12),
-				user (127),
-				generic (128)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " 
-	Sensor events contain an event category and event state. Depending on the
- 	event category, the event states take on different meanings for events
- 	generated by specific sensors.
-
- 	The generic(127) category can be used for discrete sensors which have
- 	state meanings other than those identified with other event categories."
-	::= {saHpiSystemEventLogEntry 8}
-
-saHpiSystemEventLogSensorAssertion OBJECT-TYPE
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
-	::= {saHpiSystemEventLogEntry 9}
-
-saHpiSystemEventLogSensorState OBJECT-TYPE
-        SYNTAX          OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-
-	Event states for the sensor.
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-	::= {saHpiSystemEventLogEntry 10}
-
-saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
-        SYNTAX          Unsigned32(1..16)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Sensor Optional Data
-			
-	Sensor events may contain optional data items passed and stored with the 
-	 event. If these optional data items are present, they will be included with 
-	 the event data.
-
-	The bit-flags for data is:
-
- 	TRIGGER_READING   0x01
- 	TRIGGER_THRESHOLD 0x02
- 	OEM               0x04
- 	PREVIOUS_STATE    0x08
- 	SENSOR_SPECIFIC   0x10 " 
-	::= {saHpiSystemEventLogEntry 11}
-
-saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)	
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data. 	
-	For analog sensors the raw value is the raw value from the 
-	sensor (such as ticks per fan blade) and the interpreted 
-	value is the raw value converted in to a usable format 
-	(such as RPM). The interpreted value can be calculated by 
-	the HPI implementation using the sensor factors or by 
-	another OEM means.  "
-	::= {saHpiSystemEventLogEntry 12}
-
-saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerReadingType = raw(1) then this object
-	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiSystemEventLogEntry 13}
-
-
-saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..32)) 
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerReadingType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  "
-	::= {saHpiSystemEventLogEntry 14}
-
-saHpiSystemEventLogSensorTriggerReadingEventStateFlag OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)				
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerReadingType = eventState(3) then this object
-	contains the outstanding sensor event states.
-	The sensor status structure is used to determine if sensor 
-	scanning is enabled and if events are enabled. If events 
-	are enabled, the structure will have valid data for the 
-	outstanding sensor event states.  "
-	 ::= {saHpiSystemEventLogEntry 15}
-
-saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
-	SYNTAX		OCTET STRING
-	MAX-ACCESS	read-only
+saHpiEvent OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"
-	If saHpiSystemEventLogTriggerReadingType = eventState(3) then this object
-	contains the outstanding sensor event states.
-	A NULL value indicates not set/used.
+	DESCRIPTION	
+	    "Pointer to the event."
+	::= {saHpiEventLogEntry 4}
 
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
 
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 16}
-
-saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
-        SYNTAX         INTEGER {
-				undefined(0),
-
-				raw(2),
-				interpreted(3),
-				eventState(5),
-
-				rawAndInterpreted(4),
-				rawAndEventState(6),
-				rawAndInterpretedAndEventState(8),
-
-				interpretedAndEventState(7)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Each sensor may support one or more of raw, 
-	interpreted, or event status representations of the sensor data. 	
-	For analog sensors the raw value is the raw value from the 
-	sensor (such as ticks per fan blade) and the interpreted 
-	value is the raw value converted in to a usable format 
-	(such as RPM). The interpreted value can be calculated by 
-	the HPI implementation using the sensor factors or by 
-	another OEM means.  "
-	 ::= {saHpiSystemEventLogEntry 17}
-
-saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerThresholdType = raw(1) then this object
-	contains the raw value of the sensor as unsigned 32-bit integer"
-	 ::= {saHpiSystemEventLogEntry 18}
-
-saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..32)) 
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerThresholdType = interpreted(2) then this object
-	contains the Value of interpreted sensor reading.  "
-	 ::={saHpiSystemEventLogEntry 19}
-
-
-saHpiSystemEventLogSensorTriggerThresholdEventStateFlag OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)	
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerThresholdType = eventState(3) then this object
-	contains the outstanding sensor event states. 
-
-	The sensor status structure is used to determine if sensor 
-	scanning is enabled and if events are enabled. If events 
-	are enabled, the structure will have valid data for the 
-	outstanding sensor event states.  "
-	 ::= {saHpiSystemEventLogEntry 20}
-saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
-        SYNTAX          OCTET STRING
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	If saHpiSystemEventLogTriggerThresholdType = eventState(3) then this object
-	contains the outstanding sensor event states. 
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 21}
-
-saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
-	SYNTAX		OCTET STRING
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"
-	Event states for the sensor.
-
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-	 ::= {saHpiSystemEventLogEntry 22}
-
-saHpiSystemEventLogSensorOem OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Sensor OEM event information "
-	 ::= {saHpiSystemEventLogEntry 23}
-
-saHpiSystemEventLogSensorSpecific OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Sensor specific information "
-	 ::= {saHpiSystemEventLogEntry 24}
-
-
-saHpiSystemEventLogHotSwapState OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				inactive (1),
-				insertionPending (2),
-				activeHealthy (3),
-				activeUnhealthy (4),
-				extractionPending (5),
-				notPresent (6)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Current state of the hot-swap device."
-	 ::= {saHpiSystemEventLogEntry 25}
-
-saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
-        SYNTAX           INTEGER{
-				undefined(0),
-				inactive (1),
-				insertionPending (2),
-				activeHealthy (3),
-				activeUnhealthy (4),
-				extractionPending (5),
-				notPresent (6)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Previous state of the hot-swap device. "
-	 ::= {saHpiSystemEventLogEntry 26}
-
-saHpiSystemEventLogWatchdogNum OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "The Watchdog number. "
-	 ::= {saHpiSystemEventLogEntry 27}
-
-saHpiSystemEventLogWatchdogAction OBJECT-TYPE
-        SYNTAX          INTEGER{ 
-				undefined(0),
-				noAction (1),
-				reset (2),
-				powerDown (3),
-				powerCycle (4),
-				timerInt (9)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	These enumerations represent the possible actions to be taken upon watchdog
- 	timer timeout and the events that are generated for watchdog actions. "
-	 ::= {saHpiSystemEventLogEntry 28}
-
-saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
-        SYNTAX          INTEGER{
-				undefined(0),
-				none (1),
-				smi (2),
-				nmi (3),
-				messageInterrupt (4),
-				oem (16)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
- 			triggered by a watchdog pre-timer event. The actual meaning of these
- 			operations may differ depending on the hardware architecture. "
-	 ::= {saHpiSystemEventLogEntry 29}
-
-saHpiSystemEventLogWatchdogUse OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				none (1),
-				biosFrb2 (2),
-				biosPost (3),
-				osLoad (4),
-				smsOs (5),
-				oem (6),
-				unspecified (16)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Watchdog Timer Use 
-			
-			 These enumerations represent the possible watchdog users that may have caused 
-			 the watchdog to expire. For instance, if watchdog is being used during power 
-			 on self test (POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
-			 will be set. Most specific uses for Watchdog timer by users of HPI should 
-			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
-			 or SAHPI_WTU_OEM if it is used for some other purpose."
-			
-	 ::= {saHpiSystemEventLogEntry 30}
-
-saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " 
-			 Identifier for the manufacturer 
-			
-			 This is the IANA-assigned private enterprise number for the
-			 manufacturer of the resource or FRU, or of the manufacturer
-			 defining an OEM control or event type. A list of current
-			 IANA-assigned private enterprise numbers may be obtained at
-			
-			     http:www.iana.orgassignmentsenterprise-numbers
-			
-			 If a manufacturer does not currently have an assigned number, one
-			 may be obtained by following the instructions located at
-			
-			     http:www.iana.orgcgi-binenterprise.pl
-			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
-			"
-	 ::= {saHpiSystemEventLogEntry 31}
-
-saHpiSystemEventLogOemEventData OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..32))
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Events provided by OEM."
-	 ::= {saHpiSystemEventLogEntry 32}
-
-
-saHpiSystemEventLogUserEventData OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..32))
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "User events may be used for storing custom events 
-			created by the application  middleware;
-			eg. when injecting events into the event log using SaHpiSystemEventLogLogEntryAdd().  "
-	 ::= {saHpiSystemEventLogEntry 33}
-
-saHpiSystemEventLogDelete OBJECT-TYPE
+saHpiEventLogDelete OBJECT-TYPE
 	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiSystemEventLogEntry 34}
+	::= {saHpiEventLogEntry 5}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -6653,49 +5910,9 @@ saHpiEntityGroup OBJECT-GROUP
 	::=  { hpiMIBCompliances 1}
 
 
-saHpiSystemEventGroup OBJECT-GROUP
+saHpiEventGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSystemEventLogEntries,
-		saHpiSystemEventLogSize,
-		saHpiSystemEventLogUpdateTimestamp,
-		saHpiSystemEventLogCurrentTime,
-		saHpiSystemEventLogEnabled,
-		saHpiSystemEventLogOverflowFlag,
-		saHpiSystemEventLogOverflowAction,
-		saHpiSystemEventLogDeleteEntrySupported,
-		saHpiSystemEventLogIndex,
-		saHpiSystemEventLogAddedTimestamp,
-		saHpiSystemEventLogType,
-		saHpiSystemEventLogTimestamp,
-		saHpiSystemEventLogSeverity,
-		saHpiSystemEventLogSensorNum,
-		saHpiSystemEventLogSensorType,
-		saHpiSystemEventLogSensorCategory,
-		saHpiSystemEventLogSensorAssertion,
-		saHpiSystemEventLogSensorState,
-		saHpiSystemEventLogSensorOptionalData,
-		saHpiSystemEventLogSensorTriggerReadingType,
-		saHpiSystemEventLogSensorTriggerReadingRaw,
-		saHpiSystemEventLogSensorTriggerReadingInterpreted,
-		saHpiSystemEventLogSensorTriggerReadingEventStateFlag,
-		saHpiSystemEventLogSensorTriggerReadingEventState,
-		saHpiSystemEventLogSensorTriggerThresholdRaw,
-		saHpiSystemEventLogSensorTriggerThresholdInterpreted,
-		saHpiSystemEventLogSensorTriggerThresholdEventStateFlag,
-		saHpiSystemEventLogSensorTriggerThresholdEventState,
-		saHpiSystemEventLogSensorPreviousState,
-		saHpiSystemEventLogSensorOem,
-		saHpiSystemEventLogSensorSpecific,
-		saHpiSystemEventLogHotSwapState,
-		saHpiSystemEventLogPreviousHotSwapState,
-		saHpiSystemEventLogWatchdogNum,
-		saHpiSystemEventLogWatchdogAction,
-		saHpiSystemEventLogWatchdogPreTimerAction,
-		saHpiSystemEventLogWatchdogUse,
-		saHpiSystemEventLogOemManufacturerIdT,
-		saHpiSystemEventLogOemEventData,
-		saHpiSystemEventLogUserEventData,
-		saHpiSystemEventLogDelete
+		saHpiEventLogEntries
 	}
 	STATUS current
 	DESCRIPTION 
@@ -7026,7 +6243,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 	MANDATORY-GROUPS {
 		saHpiEntityGroup,
 --		saHpiEventGroup,
-		saHpiSystemEventGroup,
+		saHpiEventGroup,
 		saHpiHotSwapGroup,
 		saHpiResourceDataRecordGroup,
 		saHpiSensorGroup,
