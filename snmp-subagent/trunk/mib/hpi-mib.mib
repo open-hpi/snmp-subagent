@@ -6183,8 +6183,8 @@ saHpiSensorThdLowMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMinorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining lower minor threshold values for a sensor 
-        that supports raw or interpreted values."
+        DESCRIPTION     "A table definining lower minor threshold values for 
+	a given sensor."
         ::= {hpiSensor 9}
 
 saHpiSensorThdLowMinorEntry OBJECT-TYPE
