@@ -9986,6 +9986,8 @@ saHpiDomainNotifications NOTIFICATION-TYPE
         DESCRIPTION
         "Domain events are used to announce the addition of domain 
         references and the removal of domain references to the DRT."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
         ::= { hpiNotifications 4 }
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
@@ -10000,6 +10002,8 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
         STATUS current
         DESCRIPTION
         "Watchdog notification."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
         ::= { hpiNotifications 5 }
 
 
@@ -10014,6 +10018,8 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
         STATUS current
         DESCRIPTION
         "Hot swap notification."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
         ::= { hpiNotifications 6 }
 
 
@@ -10034,6 +10040,8 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
         look for such things as corrupted data stores, inconsistent RPT 
         information, or improperly managed queues.  Startup events report a 
         failure to start-up properly, or inconsistencies in persisted data."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."	
         ::= { hpiNotifications 7 }
 
 saHpiOEMNotifications NOTIFICATION-TYPE
@@ -10048,6 +10056,8 @@ saHpiOEMNotifications NOTIFICATION-TYPE
         STATUS current
         DESCRIPTION
         "OEM event notifications."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."	
         ::= { hpiNotifications 8 }
 
 saHpiUserNotifications NOTIFICATION-TYPE
@@ -10064,6 +10074,8 @@ saHpiUserNotifications NOTIFICATION-TYPE
         "User events may be used for storing custom events created by an HPI 
         User when injecting events into the Event Log using 
         saHpiEventLogEntryAdd()."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."	
         ::= { hpiNotifications 9 }
         
 --
