@@ -130,7 +130,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
     DESCRIPTION 
         "unsigned 16-bit data, 2-byte alignment"
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 160.
+        "Derived from SAI-HPI-B.00.90 spec, pg 152.
      see typedef unsigned short    SaHpiUint16T;"
     SYNTAX       INTEGER (0..65535)
 
@@ -139,7 +139,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
     DESCRIPTION
             "unsigned 8-bit data."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 160.
+        "Derived from SAI-HPI-B.00.90 spec, pg 152.
         see typedef unsigned char SaHpiUint8T;"
     SYNTAX      INTEGER(0..255)
 
@@ -148,7 +148,7 @@ Float64 ::= TEXTUAL-CONVENTION
     DESCRIPTION
         "a 64 bit float number, 8 byte alignment"
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 160.
+        "Derived from SAI-HPI-B.00.90 spec, pg 152.
         The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
         sign(1)exponent(11)mantissa(52)."
     SYNTAX      Opaque (SIZE(0..65))
@@ -177,7 +177,7 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
         http://www.iana.org/cgi-bin/enterprise.pl"
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 160."
+        "Derived from SAI-HPI-B.00.90 spec, pg 152"
     SYNTAX Unsigned32
 
 
@@ -257,7 +257,7 @@ The following fragment converts between SaHpiTimeT and a struct timeval:
 "
 
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 172-173."
+        "Derived from SAI-HPI-B.00.90 spec, pg 164-165."
     SYNTAX      Counter64
     
 SaHpiTimeString ::= TEXTUAL-CONVENTION
@@ -336,7 +336,7 @@ The following fragment converts between SaHpiTimeT and a struct timeval:
 "
 
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 172-173."
+        "Derived from SAI-HPI-B.00.90 spec, pg 164-165."
     SYNTAX      OCTET STRING(SIZE(0..255))
 
 
@@ -351,7 +351,7 @@ SaHpiEventCategory ::= TEXTUAL-CONVENTION
     which have state meanings other than those identified
     with other event categories."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 178."
+        "Derived from SAI-HPI-B.00.90 spec, pg 170."
     SYNTAX      INTEGER {
                         unspecified (0),
                         threshold (2),
@@ -500,7 +500,7 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
         STATE_13
         STATE_14"
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 178-180."
+        "Derived from SAI-HPI-B.00.90 spec, pg 170-172."
     SYNTAX              OCTET STRING(SIZE(0..255))
 
 SaHpiHotSwapState ::= TEXTUAL-CONVENTION
@@ -537,7 +537,7 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
          When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
 
     REFERENCE 
-        "Derived from states described in the SAI-HPI-B.00.90 pages 143,144."
+        "Derived from states described in the SAI-HPI-B.00.90 pages 136,137."
 
     SYNTAX      INTEGER {
                     undefined(0),
@@ -627,7 +627,7 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
         encoded as 8-bit ASCII in the SaHpiText structure passed 
         across the HPI."
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 174-175."
+        "Derived from SAI-HPI-B.00.90 spec, pg 166-167."
         SYNTAX          INTEGER {
                                 undefined(0),
                                 unicode(1),
@@ -644,7 +644,7 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
         associated with text.  undefined (0) indicates that 
         the language is unspecified or unknown.  "
     REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 173-174."
+        "Derived from SAI-HPI-B.00.90 spec, pg 165-166."
     SYNTAX              INTEGER {
                                 undefined (0),
                                 unknown (1),
@@ -793,7 +793,7 @@ SaHpiText ::= TEXTUAL-CONVENTION
         (represented by SaHpiTextLanguage) and in different
         encodings (saHpiTextType)."
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 174."
+        "Derived from SAI-HPI-B.00.90 spec, pg 166."
         SYNTAX  OCTET STRING(SIZE(0..255))
 
 SaHpiSensorUnits ::= TEXTUAL-CONVENTION
@@ -801,7 +801,7 @@ SaHpiSensorUnits ::= TEXTUAL-CONVENTION
         DESCRIPTION     
             "This is a list of all the sensor units supported by HPI."
         REFERENCE
-            "Derived from SAI-HPI-B.00.90 spec, pg 180."
+            "Derived from SAI-HPI-B.00.90 spec, pg 172."
         SYNTAX          INTEGER {
                                 undefined(0),
                                 unspecified(1), 
@@ -904,7 +904,7 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
         used for sensor readings. "
 
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 171."
+        "Derived from SAI-HPI-B.00.90 spec, pg 163."
         SYNTAX          INTEGER {
                                 undefined(0),  
                                 int64(1),
@@ -923,7 +923,7 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
         evaluated in the context of SaHpiSensorReadingType."
 
         REFERENCE
-        "Derived from SAI-HPI-B.00.90 spec, pg 181."
+        "Derived from SAI-HPI-B.00.90 spec, pg 173."
         SYNTAX          OCTET STRING(SIZE(0..255))
         
 
@@ -2109,7 +2109,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
         the appropriate hot swap state."
 
     REFERENCE 
-        "Derived from typedef in the SAI-HPI-B.00.90 page 158-159."
+        "Derived from typedef in the SAI-HPI-B.00.90 page 150-151."
     ::= {saHpiHotSwapEntry 1}
 
 
@@ -2141,7 +2141,7 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
         == INSERTION_PENDING is initially generated."
 
     REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 149-150"
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 141-142"
 
     ::= {saHpiHotSwapEntry 2}
 
@@ -2175,7 +2175,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         "
 
         REFERENCE 
-                "Derived from function prototypes in the SAI-HPI-B.00.90 pages 153,154"
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
     
         ::= {saHpiHotSwapEntry 3}
 
@@ -2199,7 +2199,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         extraction process via software."
 
         REFERENCE 
-                "Derived from function prototype in the SAI-HPI-B.00.90 page 157."
+        "Derived from function prototype in the SAI-HPI-B.00.90 page 149."
         ::= {saHpiHotSwapEntry 4}
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
@@ -2231,7 +2231,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
         this function is not applicable to those resources."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.00.90 page 147."
+        "Derived from function prototype in the SAI-HPI-B.00.90 page 139."
     ::= {saHpiHotSwapEntry 5}
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
@@ -2252,7 +2252,7 @@ Because a resource that supports the simplified hot swap model will never transi
 Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.00.90 page 148-149."
+        "Derived from function prototype in the SAI-HPI-B.00.90 page 140-141."
     ::= {saHpiHotSwapEntry 6}
 
 saHpiHotSwapResetAction OBJECT-TYPE
@@ -3883,7 +3883,7 @@ saHpiEventLogCurrentTime OBJECT-TYPE
     Refer to SaHpiTime for full describption."
 
     REFERENCE
-        "Derived from typedefs in SAI-HPI-B.00.90 page 59."
+        "Derived from typedefs in SAI-HPI-B.00.90 page 51."
         ::= {saHpiEventLogInfoEntry 5}
 
 saHpiEventLogIsEnabled OBJECT-TYPE
@@ -4554,7 +4554,7 @@ saHpiCtrlText OBJECT-TYPE
         "
         REFERENCE
         "Derieved from typedef and function calls described in
-        SAI-HPI-B.00.90 pages 92...97."
+        SAI-HPI-B.00.90 pages 84...89."
         ::= {saHpiCtrlEntry 12}
 
 saHpiCtrlRDR OBJECT-TYPE
@@ -4704,7 +4704,7 @@ saHpiSensorEnableCtrl OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "True if HPI User can enable or disable sensor via 
-        saHpiSensorEnableSet()."
+        saHpiSensorEnableSet."
         ::= {saHpiSensorEntry 3}
         
 saHpiSensorEnable       OBJECT-TYPE
@@ -4716,7 +4716,7 @@ saHpiSensorEnable       OBJECT-TYPE
 
 	When writing this object sets the sensor enable status for an addressed sensor.  If a sensor is disabled, the rows in saHpiSensorReadingCurrent for that sensor will not be present, and no events will be generated for the sensor."
 	REFERENCE
-	"Derieved from SAI-HPI-B.00.90 spec, page 93,94."
+	"Derieved from SAI-HPI-B.00.90 spec, page 85,86."
         ::= {saHpiSensorEntry 4}
 
 saHpiSensorEventEnable  OBJECT-TYPE
@@ -4728,7 +4728,7 @@ saHpiSensorEventEnable  OBJECT-TYPE
 
 	When writing this object sets the sensor event enable status for an addressed sensor.  If event generation for a sensor is disabled, no events will be generated as a result of the assertion or deassertion of any event state, regardless of the setting of the assert or deassert event masks for the sensor.  If event generation for a sensor is enabled, events will be generated when event states are asserted or deasserted, according to the settings of the assert and deassert event masks for the sensor.  Event states may still be read for a sensor even if event generation is disabled, by reading the saHpiSensorReadingCurrent table."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 spec, page 95,96."
+	"Derived from SAI-HPI-B.00.90 spec, page 87,88."
         ::= {saHpiSensorEntry 5}
 
 saHpiSensorEventCtrl    OBJECT-TYPE
@@ -4794,7 +4794,7 @@ saHpiAssertEventMask    OBJECT-TYPE
 	If the sensor assert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 page 97,98"
+	"Derived from SAI-HPI-B.00.90 page 89,90"
 
         ::= {saHpiSensorEntry 8}
 
@@ -4827,7 +4827,7 @@ saHpiDeassertEventMask  OBJECT-TYPE
 	If the sensor assert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
-	"Derived from SAI-HPI-B.00.90 page 97,98"
+	"Derived from SAI-HPI-B.00.90 page 89,90"
         ::= {saHpiSensorEntry 9}
 
 saHpiSensorCategory OBJECT-TYPE
