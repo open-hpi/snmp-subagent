@@ -310,11 +310,24 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
 
     // IBM-KR: TODO , test this code. Make sure the time is right.
     memcpy(&ctx->saHpiEventLogTime, time, sizeof(SaHpiTimeT));
-    DEBUGMSGTL((AGENT,"TODO: Time is %d, or %d [%d]\n", time, ctx->saHpiEventLogTime.high,
+    DEBUGMSGTL((AGENT,"TODO: Time is %d, or high%d[%X];low:%d[%X]\n", 
+		time, 
+		ctx->saHpiEventLogTime.high,
+		ctx->saHpiEventLogTime.high,
+		ctx->saHpiEventLogTime.low,
 		ctx->saHpiEventLogTime.low));
     ctx->saHpiEventLogTime.high = htonl(ctx->saHpiEventLogTime.high);
     ctx->saHpiEventLogTime.low = htonl(ctx->saHpiEventLogTime.low);
    
+    DEBUGMSGTL((AGENT,"TODO: Time is %d, or %d [%X]; low: %d[%X]\n", time, 
+		ctx->saHpiEventLogTime.high,
+		ctx->saHpiEventLogTime.high,
+		ctx->saHpiEventLogTime.low,
+		ctx->saHpiEventLogTime.low));
+
+    ctx->saHpiEventLogTime.high = ntohl(ctx->saHpiEventLogTime.high);
+    ctx->saHpiEventLogTime.low = ntohl(ctx->saHpiEventLogTime.low);
+
     DEBUGMSGTL((AGENT,"TODO: Time is %d, or %d [%d]\n", time, ctx->saHpiEventLogTime.high,
 		ctx->saHpiEventLogTime.low));
     ctx->saHpiEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
