@@ -21,7 +21,8 @@
 #define SAHPIHOTSWAPTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -31,7 +32,7 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
-   /*
+  /*
    * Number of index values in this table.
    * Consult the HPI-MIB
    *
@@ -45,80 +46,71 @@ extern          "C" {
 #define MIB_OFF 2
 #define MIB_ON 1
 
-    typedef struct saHpiHotSwapTable_context_s {
-        netsnmp_index   index;
-   
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapIndicator;
+  typedef struct saHpiHotSwapTable_context_s
+  {
+    netsnmp_index index;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapPowerState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapIndicator;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapResetState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapPowerState;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapResetState;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapPreviousState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapState;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapEventSeverity;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapPreviousState;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiHotSwapInsertTimeout;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapEventSeverity;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiHotSwapExtractTimeout;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiHotSwapInsertTimeout;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiHotSwapActionRequest;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiHotSwapExtractTimeout;
 
-        /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiHotSwapRTP[MAX_OID_LEN];
-        long            saHpiHotSwapRTP_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiHotSwapActionRequest;
 
-      long hash;
-      long domain_id;
-      long resource_id;
-      
-    } saHpiHotSwapTable_context;
+	/** RowPointer = ASN_OBJECT_ID */
+    oid saHpiHotSwapRTP[MAX_OID_LEN];
+    long saHpiHotSwapRTP_len;
 
-    void            initialize_table_saHpiHotSwapTable(void);
+    long hash;
+    long domain_id;
+    long resource_id;
 
-    int             saHpiHotSwapTable_get_value(netsnmp_request_info *,
-                                                netsnmp_index *,
-                                                netsnmp_table_request_info
-                                                *);
+  } saHpiHotSwapTable_context;
 
-int
-populate_hotswap(SaHpiRptEntryT *rpt_entry,
-		 oid *rpt_oid, size_t rpt_oid_len);
+  void initialize_table_saHpiHotSwapTable (void);
+
+  int saHpiHotSwapTable_get_value (netsnmp_request_info *,
+				   netsnmp_index *,
+				   netsnmp_table_request_info *);
+
+  int
+    populate_hotswap (SaHpiRptEntryT * rpt_entry,
+		      oid * rpt_oid, size_t rpt_oid_len);
 
   /* Write methods
    */
-int 
-set_hotswap_indicator(saHpiHotSwapTable_context *ctx);
-int
-  set_hotswap_powerstate(saHpiHotSwapTable_context *ctx);
-int
- set_hotswap_reset_state(saHpiHotSwapTable_context *ctx);
-int
-  set_hotswap_insert_t(saHpiHotSwapTable_context *ctx);
-int
-  set_hotswap_extract_t(saHpiHotSwapTable_context *ctx);
-int
-  set_hotswap_action_request(saHpiHotSwapTable_context *ctx);
+  int set_hotswap_indicator (saHpiHotSwapTable_context * ctx);
+  int set_hotswap_powerstate (saHpiHotSwapTable_context * ctx);
+  int set_hotswap_reset_state (saHpiHotSwapTable_context * ctx);
+  int set_hotswap_insert_t (saHpiHotSwapTable_context * ctx);
+  int set_hotswap_extract_t (saHpiHotSwapTable_context * ctx);
+  int set_hotswap_action_request (saHpiHotSwapTable_context * ctx);
 
-int
-delete_hotswap_row(SaHpiDomainIdT ,
-		   SaHpiResourceIdT);
+  int delete_hotswap_row (SaHpiDomainIdT, SaHpiResourceIdT);
 
-int
-update_hotswap_event(SaHpiDomainIdT,
-		     SaHpiResourceIdT,
-		     SaHpiHotSwapEventT *);
+  int
+    update_hotswap_event (SaHpiDomainIdT,
+			  SaHpiResourceIdT, SaHpiHotSwapEventT *);
 /*************************************************************
  * oid declarations
  */
@@ -145,36 +137,30 @@ update_hotswap_event(SaHpiDomainIdT,
 #define saHpiHotSwapTable_COL_MAX 10
 
 
-    int            
-        saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
-                                        netsnmp_index * hdr);
+  int
+    saHpiHotSwapTable_extract_index (saHpiHotSwapTable_context * ctx,
+				     netsnmp_index * hdr);
 
-    void            saHpiHotSwapTable_set_reserve1(netsnmp_request_group
-                                                   *);
-    void            saHpiHotSwapTable_set_reserve2(netsnmp_request_group
-                                                   *);
-    void            saHpiHotSwapTable_set_action(netsnmp_request_group *);
-    void            saHpiHotSwapTable_set_commit(netsnmp_request_group *);
-    void            saHpiHotSwapTable_set_free(netsnmp_request_group *);
-    void            saHpiHotSwapTable_set_undo(netsnmp_request_group *);
+  void saHpiHotSwapTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiHotSwapTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiHotSwapTable_set_action (netsnmp_request_group *);
+  void saHpiHotSwapTable_set_commit (netsnmp_request_group *);
+  void saHpiHotSwapTable_set_free (netsnmp_request_group *);
+  void saHpiHotSwapTable_set_undo (netsnmp_request_group *);
 
     saHpiHotSwapTable_context
-        *saHpiHotSwapTable_duplicate_row(saHpiHotSwapTable_context *);
-    netsnmp_index  *saHpiHotSwapTable_delete_row(saHpiHotSwapTable_context
-                                                 *);
+    * saHpiHotSwapTable_duplicate_row (saHpiHotSwapTable_context *);
+  netsnmp_index *saHpiHotSwapTable_delete_row (saHpiHotSwapTable_context *);
 
-  
-    int             saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context
-                                                 * undo_ctx,
-                                                 saHpiHotSwapTable_context
-                                                 * row_ctx,
-                                                 netsnmp_request_group *
-                                                 rg);
+
+  int saHpiHotSwapTable_can_delete (saHpiHotSwapTable_context
+				    * undo_ctx,
+				    saHpiHotSwapTable_context
+				    * row_ctx, netsnmp_request_group * rg);
 
 
 
-    saHpiHotSwapTable_context *saHpiHotSwapTable_create_row(netsnmp_index
-                                                            *);
+  saHpiHotSwapTable_context *saHpiHotSwapTable_create_row (netsnmp_index *);
 
 #ifdef __cplusplus
 };

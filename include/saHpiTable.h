@@ -21,7 +21,8 @@
 #define SAHPITABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 #include <net-snmp/net-snmp-config.h>
@@ -30,7 +31,7 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
-   /*
+  /*
    * Number of index values in this table.
    * Consult the HPI-MIB
    *
@@ -52,144 +53,137 @@ extern          "C" {
    */
 #define SAHPI_RESOURCE_TAG_MAX 255
 
-    typedef struct saHpiTable_context_s {
-        netsnmp_index   index;
+  typedef struct saHpiTable_context_s
+  {
+    netsnmp_index index;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiDomainID;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiDomainID;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEntryID;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEntryID;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceID;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceID;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiResourceEntityPath[SNMP_MAX_MSG_SIZE];
-        long            saHpiResourceEntityPath_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiResourceEntityPath[SNMP_MAX_MSG_SIZE];
+    long saHpiResourceEntityPath_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceCapabilities;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceCapabilities;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiResourceSeverity;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiResourceSeverity;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoResourceRev;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoResourceRev;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoSpecificVer;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoSpecificVer;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoDeviceSupport;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoDeviceSupport;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoManufacturerId;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoManufacturerId;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoProductId;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoProductId;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoFirmwareMajorRev;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoFirmwareMajorRev;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoFirmwareMinorRev;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoFirmwareMinorRev;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceInfoAuxFirmwareRev;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiResourceInfoAuxFirmwareRev;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiResourceTagTextType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiResourceTagTextType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiResourceTagTextLanguage;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiResourceTagTextLanguage;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiResourceTag[SAHPI_RESOURCE_TAG_MAX];
-        long            saHpiResourceTag_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiResourceTag[SAHPI_RESOURCE_TAG_MAX];
+    long saHpiResourceTag_len;
 
-         /** INTEGER = ASN_INTEGER */
-        long            saHpiParamControl;
+	 /** INTEGER = ASN_INTEGER */
+    long saHpiParamControl;
 
-        /** RowStatus = ASN_INTEGER */
-      long            saHpiClearEvents;
+	/** RowStatus = ASN_INTEGER */
+    long saHpiClearEvents;
 
-         /** HpiTimeStamp = ASN_COUNTER64 */
-        integer64        saHpiEventLogTime;
+	 /** HpiTimeStamp = ASN_COUNTER64 */
+    integer64 saHpiEventLogTime;
 
       /** INTEGER = ASN_INTEGER */
-        long            saHpiEventLogState;
-        long  hash;
+    long saHpiEventLogState;
+    long hash;
 
-      /*
-       * Dirty bit. When set to 0, means this context is not
-       * used anywhere
-       */
-      unsigned int dirty_bit;
-      
-    } saHpiTable_context;
+    /*
+     * Dirty bit. When set to 0, means this context is not
+     * used anywhere
+     */
+    unsigned int dirty_bit;
+
+  } saHpiTable_context;
 
 /*************************************************************
  * function declarations
  */
 
-    void            initialize_table_saHpiTable(void);
- 
-    int             saHpiTable_get_value(netsnmp_request_info *,
-                                         netsnmp_index *,
-                                         netsnmp_table_request_info *);
+  void initialize_table_saHpiTable (void);
 
-  int populate_rpt( void );
+  int saHpiTable_get_value (netsnmp_request_info *,
+			    netsnmp_index *, netsnmp_table_request_info *);
 
-  unsigned long purge_rpt( void );
+  int populate_rpt (void);
+
+  unsigned long purge_rpt (void);
   /* 
    * The various SET operations. 
    */
-  int
-  set_table_severity(saHpiTable_context *ctx);
-  int
-  set_table_tag(saHpiTable_context *ctx);
+  int set_table_severity (saHpiTable_context * ctx);
+  int set_table_tag (saHpiTable_context * ctx);
 
-  int
-  set_table_param_control(saHpiTable_context *ctx);
+  int set_table_param_control (saHpiTable_context * ctx);
 
-  int
-  set_clear_events(saHpiTable_context *ctx);
-  
-  int 
-  set_event_log_time(saHpiTable_context *ctx);
+  int set_clear_events (saHpiTable_context * ctx);
 
-  int
-  set_logstate(saHpiTable_context *ctx);
+  int set_event_log_time (saHpiTable_context * ctx);
+
+  int set_logstate (saHpiTable_context * ctx);
   /*
    * Remvoe the RTP row (from SNMP memory, not SaHPI).
    */
 
 
-int 
-delete_rpt_row(SaHpiDomainIdT domain_id,
-	       SaHpiResourceIdT resource_id,
-	       SaHpiEntryIdT num); 
+  int
+    delete_rpt_row (SaHpiDomainIdT domain_id,
+		    SaHpiResourceIdT resource_id, SaHpiEntryIdT num);
 
 
-int
-update_event_status_flag(SaHpiDomainIdT domain_id,
-			     SaHpiResourceIdT resource_id,
-			     long event_status);
+  int
+    update_event_status_flag (SaHpiDomainIdT domain_id,
+			      SaHpiResourceIdT resource_id,
+			      long event_status);
 
   /*
    * Handler for timestamp inforamtion
    */
-int
-update_timestamp_handler(netsnmp_mib_handler *handler,
-			 netsnmp_handler_registration *reginfo,
-			 netsnmp_agent_request_info *reqinfo,
-			 netsnmp_request_info *requests);
+  int
+    update_timestamp_handler (netsnmp_mib_handler * handler,
+			      netsnmp_handler_registration * reginfo,
+			      netsnmp_agent_request_info * reqinfo,
+			      netsnmp_request_info * requests);
 /*************************************************************
  * oid declarations
  */
-     extern oid      saHpiTable_oid[];
-   extern size_t   saHpiTable_oid_len;
+  extern oid saHpiTable_oid[];
+  extern size_t saHpiTable_oid_len;
 
   //1,3,6,1,3,90,1,4
 
@@ -229,25 +223,25 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 
 
 
-    int             saHpiTable_extract_index(saHpiTable_context * ctx,
-                                             netsnmp_index * hdr);
+  int saHpiTable_extract_index (saHpiTable_context * ctx,
+				netsnmp_index * hdr);
 
-    void            saHpiTable_set_reserve1(netsnmp_request_group *);
-    void            saHpiTable_set_reserve2(netsnmp_request_group *);
-    void            saHpiTable_set_action(netsnmp_request_group *);
-    void            saHpiTable_set_commit(netsnmp_request_group *);
-    void            saHpiTable_set_free(netsnmp_request_group *);
-    void            saHpiTable_set_undo(netsnmp_request_group *);
+  void saHpiTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiTable_set_action (netsnmp_request_group *);
+  void saHpiTable_set_commit (netsnmp_request_group *);
+  void saHpiTable_set_free (netsnmp_request_group *);
+  void saHpiTable_set_undo (netsnmp_request_group *);
 
-    saHpiTable_context *saHpiTable_duplicate_row(saHpiTable_context *);
-    netsnmp_index  *saHpiTable_delete_row(saHpiTable_context *);
+  saHpiTable_context *saHpiTable_duplicate_row (saHpiTable_context *);
+  netsnmp_index *saHpiTable_delete_row (saHpiTable_context *);
 
-    int             saHpiTable_can_delete(saHpiTable_context * undo_ctx,
-                                          saHpiTable_context * row_ctx,
-                                          netsnmp_request_group * rg);
+  int saHpiTable_can_delete (saHpiTable_context * undo_ctx,
+			     saHpiTable_context * row_ctx,
+			     netsnmp_request_group * rg);
 
 
-    saHpiTable_context *saHpiTable_create_row(netsnmp_index *);
+  saHpiTable_context *saHpiTable_create_row (netsnmp_index *);
 
 
 

@@ -21,7 +21,8 @@
 #define SAHPIEVENTTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -45,215 +46,220 @@ extern          "C" {
 #define EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX 32
 #define EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX 3
 
-        /** Index saHpiDomainID is external */
-        /** Index saHpiResourceID is external */
-        /** Index saHpiEntryID is external */
+	/** Index saHpiDomainID is external */
+	/** Index saHpiResourceID is external */
+	/** Index saHpiEntryID is external */
 
-    typedef struct saHpiEventTable_context_s {
-        netsnmp_index   index;
+  typedef struct saHpiEventTable_context_s
+  {
+    netsnmp_index index;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventIndex;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventIndex;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventType;
 
-        /** HpiTimeStamp = ASN_COUNTER64 */
-        integer64   saHpiEventTimestamp;
+	/** HpiTimeStamp = ASN_COUNTER64 */
+    integer64 saHpiEventTimestamp;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSeverity;
-
-
-      // SENSOR TYPE information only: BEGIN
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorNum;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorType;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorCategory;
-
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiEventSensorAssertion;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryUnspecified;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryThreshold;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryUsage;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryState;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryPredFail;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryLimit;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryPerformance;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategorySeverity;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryPresence;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryEnable;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryAvailability;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryRedundancy;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryUser;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorStateCategoryGeneric;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorOptionalData;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorTriggerReadingType;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorTriggerReadingRaw;
-
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorTriggerReadingInterpretedType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSeverity;
 
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventSensorTriggerReadingInterpreted[EVENT_TRIGGER_READING_INTERPRETED_MAX];
-        long            saHpiEventSensorTriggerReadingInterpreted_len;
+    // SENSOR TYPE information only: BEGIN
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorNum;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventSensorTriggerReadingEventState[EVENT_TRIGGER_READING_EVENT_STATE_MAX];
-        long            saHpiEventSensorTriggerReadingEventState_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorType;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorTriggerThresholdType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorCategory;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorTriggerThresholdRaw;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiEventSensorAssertion;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventSensorTriggerThresholdInterpretedType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryUnspecified;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventSensorTriggerThresholdInterpreted[EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX];
-        long            saHpiEventSensorTriggerThresholdInterpreted_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryThreshold;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventSensorTriggerThresholdEventState[EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
-        long            saHpiEventSensorTriggerThresholdEventState_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryUsage;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorPreviousState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryState;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorOem;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryPredFail;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventSensorSpecific;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryLimit;
 
-      // SENSOR END 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventHotSwapState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryPerformance;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventPreviousHotSwapState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategorySeverity;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventWatchdogNum;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryPresence;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventWatchdogAction;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryEnable;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventWatchdogPreTimerAction;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryAvailability;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiEventWatchdogUse;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryRedundancy;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventOemManufacturerIdT;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryUser;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventOemEventData[SAHPI_OEM_EVENT_DATA_SIZE];
-        long            saHpiEventOemEventData_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorStateCategoryGeneric;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventUserEventData[SAHPI_USER_EVENT_DATA_SIZE];
-        long            saHpiEventUserEventData_len;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorOptionalData;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorTriggerReadingType;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorTriggerReadingRaw;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorTriggerReadingInterpretedType;
 
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiEventDelete;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiEventSensorTriggerReadingInterpreted
+      [EVENT_TRIGGER_READING_INTERPRETED_MAX];
+    long saHpiEventSensorTriggerReadingInterpreted_len;
 
-      long hash;
-      long resource_id;
-      long domain_id;
-    } saHpiEventTable_context;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiEventSensorTriggerReadingEventState
+      [EVENT_TRIGGER_READING_EVENT_STATE_MAX];
+    long saHpiEventSensorTriggerReadingEventState_len;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorTriggerThresholdType;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorTriggerThresholdRaw;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventSensorTriggerThresholdInterpretedType;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiEventSensorTriggerThresholdInterpreted
+      [EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX];
+    long saHpiEventSensorTriggerThresholdInterpreted_len;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiEventSensorTriggerThresholdEventState
+      [EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
+    long saHpiEventSensorTriggerThresholdEventState_len;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorPreviousState;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorOem;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventSensorSpecific;
+
+    // SENSOR END 
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventHotSwapState;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventPreviousHotSwapState;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventWatchdogNum;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventWatchdogAction;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventWatchdogPreTimerAction;
+
+	/** INTEGER = ASN_INTEGER */
+    long saHpiEventWatchdogUse;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiEventOemManufacturerIdT;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiEventOemEventData[SAHPI_OEM_EVENT_DATA_SIZE];
+    long saHpiEventOemEventData_len;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiEventUserEventData[SAHPI_USER_EVENT_DATA_SIZE];
+    long saHpiEventUserEventData_len;
+
+
+	/** TruthValue = ASN_INTEGER */
+    long saHpiEventDelete;
+
+    long hash;
+    long resource_id;
+    long domain_id;
+  } saHpiEventTable_context;
 
 /*************************************************************
  * function declarations
  */
 
-    void            initialize_table_saHpiEventTable(void);
+  void initialize_table_saHpiEventTable (void);
 
-    int             saHpiEventTable_get_value(netsnmp_request_info *,
-                                              netsnmp_index *,
-                                              netsnmp_table_request_info
-                                              *);
+  int saHpiEventTable_get_value (netsnmp_request_info *,
+				 netsnmp_index *,
+				 netsnmp_table_request_info *);
 
   /*
-int
-populate_event(SaHpiSelEntryIdT,
-	       SaHpiEventT *,
-	       SaHpiRptEntryT *t,
-	       SaHpiRdrT *,
-	       oid *,  size_t *,
-	       oid *, const size_t,
-	       oid *, const size_t);
+     int
+     populate_event(SaHpiSelEntryIdT,
+     SaHpiEventT *,
+     SaHpiRptEntryT *t,
+     SaHpiRdrT *,
+     oid *,  size_t *,
+     oid *, const size_t,
+     oid *, const size_t);
 
-  */
-  int
-  populate_event( void );
+   */
+  int populate_event (void);
 
-  unsigned long 
-  purge_event ( void );
+  unsigned long purge_event (void);
 
   //int delete_event_entry(saHpiEventTable_context *ctx);
 
 
-  
-int
-delete_event_row(SaHpiDomainIdT domain_id,
-		 SaHpiResourceIdT resource_id,
-		 unsigned long num);
-  
-				
+
   int
-event_count_entries_handler(netsnmp_mib_handler *handler,
-			    netsnmp_handler_registration *reginfo,
-			    netsnmp_agent_request_info *reqinfo,
-			    netsnmp_request_info *requests);
+    delete_event_row (SaHpiDomainIdT domain_id,
+		      SaHpiResourceIdT resource_id, unsigned long num);
+
+
+  int
+    event_count_entries_handler (netsnmp_mib_handler * handler,
+				 netsnmp_handler_registration * reginfo,
+				 netsnmp_agent_request_info * reqinfo,
+				 netsnmp_request_info * requests);
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiEventTable_oid[];
-    extern size_t   saHpiEventTable_oid_len;
+  extern oid saHpiEventTable_oid[];
+  extern size_t saHpiEventTable_oid_len;
   //  1,3,6,1,3,90,2,1,2
 #define saHpiEventTable_TABLE_OID events_OID,2
 
@@ -312,38 +318,36 @@ event_count_entries_handler(netsnmp_mib_handler *handler,
 
 
 
-    int             saHpiEventTable_extract_index(saHpiEventTable_context *
-                                                  ctx,
-                                                  netsnmp_index * hdr);
+  int saHpiEventTable_extract_index (saHpiEventTable_context *
+				     ctx, netsnmp_index * hdr);
 
-    void            saHpiEventTable_set_reserve1(netsnmp_request_group *);
-    void            saHpiEventTable_set_reserve2(netsnmp_request_group *);
-    void            saHpiEventTable_set_action(netsnmp_request_group *);
-    void            saHpiEventTable_set_commit(netsnmp_request_group *);
-    void            saHpiEventTable_set_free(netsnmp_request_group *);
-    void            saHpiEventTable_set_undo(netsnmp_request_group *);
-  
+  void saHpiEventTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiEventTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiEventTable_set_action (netsnmp_request_group *);
+  void saHpiEventTable_set_commit (netsnmp_request_group *);
+  void saHpiEventTable_set_free (netsnmp_request_group *);
+  void saHpiEventTable_set_undo (netsnmp_request_group *);
+
     saHpiEventTable_context
-        *saHpiEventTable_duplicate_row(saHpiEventTable_context *);
+    * saHpiEventTable_duplicate_row (saHpiEventTable_context *);
 
 
-    netsnmp_index  *saHpiEventTable_delete_row(saHpiEventTable_context *);
+  netsnmp_index *saHpiEventTable_delete_row (saHpiEventTable_context *);
 
 
-    int             saHpiEventTable_can_delete(saHpiEventTable_context *
-                                               undo_ctx,
-                                               saHpiEventTable_context *
-                                               row_ctx,
-                                               netsnmp_request_group * rg);
+  int saHpiEventTable_can_delete (saHpiEventTable_context *
+				  undo_ctx,
+				  saHpiEventTable_context *
+				  row_ctx, netsnmp_request_group * rg);
 
 
 
-    saHpiEventTable_context *saHpiEventTable_create_row(netsnmp_index *);
+  saHpiEventTable_context *saHpiEventTable_create_row (netsnmp_index *);
 
   /*
-    saHpiEventTable_context *saHpiEventTable_get(const char *name,
-                                                 int len);
-  */
+     saHpiEventTable_context *saHpiEventTable_get(const char *name,
+     int len);
+   */
 
 #ifdef __cplusplus
 };

@@ -21,7 +21,8 @@
 #define SAHPIRDRTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -31,7 +32,7 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
-   /*
+  /*
    * Number of index values in this table.
    * Consult the HPI-MIB
    *
@@ -40,62 +41,61 @@ extern          "C" {
    */
 #define RDR_INDEX_NR 4
 
-  
-  typedef struct saHpiRdrTable_context_s {
-      netsnmp_index   index;
+
+  typedef struct saHpiRdrTable_context_s
+  {
+    netsnmp_index index;
 
        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiResourceID;
+    unsigned long saHpiResourceID;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiRdrRecordId;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiRdrRecordId;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiRdrType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiRdrType;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiRdrEntityPath[SNMP_MAX_MSG_SIZE];
-        long            saHpiRdrEntityPath_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiRdrEntityPath[SNMP_MAX_MSG_SIZE];
+    long saHpiRdrEntityPath_len;
 
-        /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiRdr[MAX_OID_LEN];
-        long            saHpiRdr_len;
+	/** RowPointer = ASN_OBJECT_ID */
+    oid saHpiRdr[MAX_OID_LEN];
+    long saHpiRdr_len;
 
-        /** COUNTER = ASN_COUNTER */
+	/** COUNTER = ASN_COUNTER */
     // It is  the child_id.
-        unsigned long   saHpiRdrId;
+    unsigned long saHpiRdrId;
 
-        /** RowPointer = ASN_OBJECT_ID */
-          oid             saHpiRdrRTP[MAX_OID_LEN];
-        long            saHpiRdrRTP_len;
+	/** RowPointer = ASN_OBJECT_ID */
+    oid saHpiRdrRTP[MAX_OID_LEN];
+    long saHpiRdrRTP_len;
 
     long domain_id;
 
-      long hash;
+    long hash;
 
     unsigned int dirty_bit;
-    } saHpiRdrTable_context;
+  } saHpiRdrTable_context;
 
 /*************************************************************
  * function declarations
  */
 
-    void            initialize_table_saHpiRdrTable(void);
+  void initialize_table_saHpiRdrTable (void);
 
-    int             saHpiRdrTable_get_value(netsnmp_request_info *,
-                                            netsnmp_index *,
-                                            netsnmp_table_request_info *);
+  int saHpiRdrTable_get_value (netsnmp_request_info *,
+			       netsnmp_index *, netsnmp_table_request_info *);
 
- int populate_rdr(SaHpiRptEntryT *rpt_entry,
-		  oid *rpt_oid, size_t rpt_oid_len,
-		  oid *resource_oid, size_t resource_oid_len);
+  int populate_rdr (SaHpiRptEntryT * rpt_entry,
+		    oid * rpt_oid, size_t rpt_oid_len,
+		    oid * resource_oid, size_t resource_oid_len);
 
-  unsigned long  purge_rdr( void );
-int
-delete_rdr_row(SaHpiDomainIdT domain_id,
-	       SaHpiResourceIdT resource_id,
-	       SaHpiEntryIdT num,
-	       SaHpiRdrTypeT type);
+  unsigned long purge_rdr (void);
+  int
+    delete_rdr_row (SaHpiDomainIdT domain_id,
+		    SaHpiResourceIdT resource_id,
+		    SaHpiEntryIdT num, SaHpiRdrTypeT type);
 
 
 /*************************************************************
@@ -123,11 +123,11 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
 #define SCALAR_COLUMN_SAHPIRDRCOUNT 1
 
 
-    int             saHpiRdrTable_extract_index(saHpiRdrTable_context *
-                                                ctx, netsnmp_index * hdr);
+  int saHpiRdrTable_extract_index (saHpiRdrTable_context *
+				   ctx, netsnmp_index * hdr);
 
 
-    saHpiRdrTable_context *saHpiRdrTable_create_row(netsnmp_index *);
+  saHpiRdrTable_context *saHpiRdrTable_create_row (netsnmp_index *);
 
 
 

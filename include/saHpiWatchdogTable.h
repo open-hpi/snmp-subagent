@@ -21,7 +21,8 @@
 #define SAHPIWATCHDOGTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -38,85 +39,82 @@ extern          "C" {
    */
 #define WATCHDOG_INDEX_NR 3
 
-    typedef struct saHpiWatchdogTable_context_s {
-        netsnmp_index   index;
+  typedef struct saHpiWatchdogTable_context_s
+  {
+    netsnmp_index index;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogNum;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogNum;
 
-        /** TruthValue = ASN_INTEGER */
-        int            saHpiWatchdogLog;
+	/** TruthValue = ASN_INTEGER */
+    int saHpiWatchdogLog;
 
-        /** TruthValue = ASN_INTEGER */
-        int            saHpiWatchdogRunning;
+	/** TruthValue = ASN_INTEGER */
+    int saHpiWatchdogRunning;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiWatchdogTimerUse;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiWatchdogTimerUse;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiWatchdogTimerAction;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiWatchdogTimerAction;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiWatchdogPretimerInterrupt;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiWatchdogPretimerInterrupt;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogPreTimeoutInterval;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogPreTimeoutInterval;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogTimerUseExpFlags;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogTimerUseExpFlags;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogTimerInitialCount;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogTimerInitialCount;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogTimerPresentCount;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogTimerPresentCount;
 
       /** TruthValue = ASN_INTEGER */
-      long            saHpiWatchdogTimerReset;
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiWatchdogOem;
+    long saHpiWatchdogTimerReset;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiWatchdogOem;
 
       /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiWatchdogRDR[MAX_OID_LEN];
-        long            saHpiWatchdogRDR_len;
+    oid saHpiWatchdogRDR[MAX_OID_LEN];
+    long saHpiWatchdogRDR_len;
 
-        long resource_id;
-        long domain_id;
-	long hash;
-    } saHpiWatchdogTable_context;
+    long resource_id;
+    long domain_id;
+    long hash;
+  } saHpiWatchdogTable_context;
 
 /*************************************************************
  * function declarations
  */
-   
-    void            initialize_table_saHpiWatchdogTable(void);
- 
-    int             saHpiWatchdogTable_get_value(netsnmp_request_info *,
-                                                 netsnmp_index *,
-                                                 netsnmp_table_request_info
-                                                 *);
+
+  void initialize_table_saHpiWatchdogTable (void);
+
+  int saHpiWatchdogTable_get_value (netsnmp_request_info *,
+				    netsnmp_index *,
+				    netsnmp_table_request_info *);
 
 
-  int  populate_watchdog(SaHpiWatchdogRecT *watchdog, 
-			 SaHpiRptEntryT *rpt_entry,
-			 oid *rdr_oid, size_t rdr_oid_len,
-			 oid *watchdog_oid, 
-			 size_t *watchdog_oid_len);
-  
+  int populate_watchdog (SaHpiWatchdogRecT * watchdog,
+			 SaHpiRptEntryT * rpt_entry,
+			 oid * rdr_oid, size_t rdr_oid_len,
+			 oid * watchdog_oid, size_t * watchdog_oid_len);
+
 
   int
-  delete_watchdog_row(SaHpiDomainIdT domain_id,
-		  SaHpiResourceIdT resource_id,
-		  SaHpiWatchdogNumT num);
+    delete_watchdog_row (SaHpiDomainIdT domain_id,
+			 SaHpiResourceIdT resource_id, SaHpiWatchdogNumT num);
 
-  int set_watchdog(saHpiWatchdogTable_context *ctx);
-  int set_timer_reset(saHpiWatchdogTable_context *ctx);  
- 
- int
- update_watchdog_row(SaHpiDomainIdT,
-		     SaHpiResourceIdT,
-		     SaHpiWatchdogNumT,
-		     SaHpiWatchdogEventT *);
+  int set_watchdog (saHpiWatchdogTable_context * ctx);
+  int set_timer_reset (saHpiWatchdogTable_context * ctx);
+
+  int
+    update_watchdog_row (SaHpiDomainIdT,
+			 SaHpiResourceIdT,
+			 SaHpiWatchdogNumT, SaHpiWatchdogEventT *);
 
 /*************************************************************
  * oid declarations
@@ -149,38 +147,35 @@ extern          "C" {
 #define saHpiWatchdogTable_COL_MAX 13
 
 
-    int            
-        saHpiWatchdogTable_extract_index(saHpiWatchdogTable_context * ctx,
-                                         netsnmp_index * hdr);
+  int
+    saHpiWatchdogTable_extract_index (saHpiWatchdogTable_context * ctx,
+				      netsnmp_index * hdr);
 
-    void            saHpiWatchdogTable_set_reserve1(netsnmp_request_group
-                                                    *);
-    void            saHpiWatchdogTable_set_reserve2(netsnmp_request_group
-                                                    *);
-    void            saHpiWatchdogTable_set_action(netsnmp_request_group *);
-    void            saHpiWatchdogTable_set_commit(netsnmp_request_group *);
-    void            saHpiWatchdogTable_set_free(netsnmp_request_group *);
-    void            saHpiWatchdogTable_set_undo(netsnmp_request_group *);
+  void saHpiWatchdogTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiWatchdogTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiWatchdogTable_set_action (netsnmp_request_group *);
+  void saHpiWatchdogTable_set_commit (netsnmp_request_group *);
+  void saHpiWatchdogTable_set_free (netsnmp_request_group *);
+  void saHpiWatchdogTable_set_undo (netsnmp_request_group *);
 
     saHpiWatchdogTable_context
-        *saHpiWatchdogTable_duplicate_row(saHpiWatchdogTable_context *);
-    netsnmp_index 
-        *saHpiWatchdogTable_delete_row(saHpiWatchdogTable_context *);
+    * saHpiWatchdogTable_duplicate_row (saHpiWatchdogTable_context *);
+    netsnmp_index
+    * saHpiWatchdogTable_delete_row (saHpiWatchdogTable_context *);
 
-    int            
-        saHpiWatchdogTable_can_delete(saHpiWatchdogTable_context *
-                                      undo_ctx,
-                                      saHpiWatchdogTable_context * row_ctx,
-                                      netsnmp_request_group * rg);
-
-
-
-    saHpiWatchdogTable_context *saHpiWatchdogTable_create_row(netsnmp_index
-                                                              *);
+  int
+    saHpiWatchdogTable_can_delete (saHpiWatchdogTable_context *
+				   undo_ctx,
+				   saHpiWatchdogTable_context * row_ctx,
+				   netsnmp_request_group * rg);
 
 
 
- 
+  saHpiWatchdogTable_context *saHpiWatchdogTable_create_row (netsnmp_index *);
+
+
+
+
 
 #ifdef __cplusplus
 };

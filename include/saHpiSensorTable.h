@@ -21,7 +21,8 @@
 #define SAHPISENSORTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -68,135 +69,141 @@ extern          "C" {
 #define POS_NEG_THD_HYSTERESIS 7
 
 
-    typedef struct saHpiSensorTable_context_s {
-        netsnmp_index   index;
-                  
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorIndex;
+  typedef struct saHpiSensorTable_context_s
+  {
+    netsnmp_index index;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorType;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorIndex;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorCategory;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorEventsCategoryControl;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorCategory;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorEventsState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorEventsCategoryControl;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorStatus;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorEventsState;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorAssertEvents;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorStatus;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorDeassertEvents;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorAssertEvents;
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiSensorIgnore;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorDeassertEvents;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorReadingFormats;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiSensorIgnore;
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiSensorIsNumeric;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorReadingFormats;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorSignFormat;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiSensorIsNumeric;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorBaseUnits;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorSignFormat;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorModifierUnits;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorBaseUnits;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorModifierUse;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorModifierUnits;
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiSensorFactorsStatic;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorModifierUse;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorFactors[SAHPISENSORFACTORS_MAX];
-        long            saHpiSensorFactors_len;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiSensorFactorsStatic;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSensorFactorsLinearization;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiSensorFactors[SAHPISENSORFACTORS_MAX];
+    long saHpiSensorFactors_len;
 
-         /** TruthValue = ASN_INTEGER */
-        long            saHpiSensorPercentage;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSensorFactorsLinearization;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorRangeFlags;
+	 /** TruthValue = ASN_INTEGER */
+    long saHpiSensorPercentage;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorRangeReadingValuesPresent[SAHPI_RANGE_VALUES_MAX];
-        long            saHpiSensorRangeReadingValuesPresent_len;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorRangeFlags;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorRangeReadingRaw[SAHPI_RANGE_RAW_MAX];
-        long            saHpiSensorRangeReadingRaw_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSensorRangeReadingValuesPresent[SAHPI_RANGE_VALUES_MAX];
+    long saHpiSensorRangeReadingValuesPresent_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorRangeReadingInterpreted[SAHPI_RANGE_INTERPRETED_MAX];
-        long            saHpiSensorRangeReadingInterpreted_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiSensorRangeReadingRaw[SAHPI_RANGE_RAW_MAX];
+    long saHpiSensorRangeReadingRaw_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorRangeReadingEventSensor[SAHPI_RANGE_EVENT_SENSOR_MAX];
-        long            saHpiSensorRangeReadingEventSensor_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSensorRangeReadingInterpreted[SAHPI_RANGE_INTERPRETED_MAX];
+    long saHpiSensorRangeReadingInterpreted_len;
 
-
-         long   saHpiSensorThresholdDefnIsThreshold;
-
-
-
-        long   saHpiSensorThresholdDefnTholdCapabilities;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSensorRangeReadingEventSensor[SAHPI_RANGE_EVENT_SENSOR_MAX];
+    long saHpiSensorRangeReadingEventSensor_len;
 
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorThresholdDefnReadThold;
+    long saHpiSensorThresholdDefnIsThreshold;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorThresholdDefnWriteThold;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorThresholdDefnFixedThold;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorThresholdRaw[THRESHOLD_RAW_MAX];
-        long            saHpiSensorThresholdRaw_len;
+    long saHpiSensorThresholdDefnTholdCapabilities;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorThresholdInterpreted[THRESHOLD_INTERPRETED_MAX];
-        long            saHpiSensorThresholdInterpreted_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorOEM;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorThresholdDefnReadThold;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorThresholdDefnWriteThold;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorThresholdDefnFixedThold;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiSensorThresholdRaw[THRESHOLD_RAW_MAX];
+    long saHpiSensorThresholdRaw_len;
+
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiSensorThresholdInterpreted[THRESHOLD_INTERPRETED_MAX];
+    long saHpiSensorThresholdInterpreted_len;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSensorOEM;
 
       /** RowPointer = ASN_OBJECT_ID */
-          oid             saHpiSensorRDR[MAX_OID_LEN];
-      long            saHpiSensorRDR_len;
-      long resource_id;
-      long domain_id;
-      long hash;
+    oid saHpiSensorRDR[MAX_OID_LEN];
+    long saHpiSensorRDR_len;
+    long resource_id;
+    long domain_id;
+    long hash;
 
 
-    } saHpiSensorTable_context;
+  } saHpiSensorTable_context;
 
   /*
    * A mapping structure for reading values.
    */
-typedef  struct sensor_threshold_to_mib_s {
-    SaHpiSensorReadingT* reading;
+  typedef struct sensor_threshold_to_mib_s
+  {
+    SaHpiSensorReadingT *reading;
     SaHpiUint8T bit;
     int pos;
-} sensor_threshold_to_mib;
+  } sensor_threshold_to_mib;
 
-  typedef struct sensor_reading_to_mib_s {
-    SaHpiSensorReadingT* reading;
+  typedef struct sensor_reading_to_mib_s
+  {
+    SaHpiSensorReadingT *reading;
     SaHpiSensorRangeFlagsT flag;
     int pos;
   } sensor_reading_to_mib;
@@ -205,29 +212,26 @@ typedef  struct sensor_threshold_to_mib_s {
 /*************************************************************
  * function declarations
  */
- 
-    void            initialize_table_saHpiSensorTable(void);
- 
-    int             saHpiSensorTable_get_value(netsnmp_request_info *,
-                                                netsnmp_index *,
-                                                netsnmp_table_request_info
-                                                *);
-						
 
-  int  populate_sensor(SaHpiSensorRecT *sensor,
-		       SaHpiRptEntryT *rpt_entry,
-		       oid *rdr_oid, size_t rdr_oid_len,
-		       oid *sensor_oid, 
-		       size_t *sensor_oid_len);
+  void initialize_table_saHpiSensorTable (void);
+
+  int saHpiSensorTable_get_value (netsnmp_request_info *,
+				  netsnmp_index *,
+				  netsnmp_table_request_info *);
+
+
+  int populate_sensor (SaHpiSensorRecT * sensor,
+		       SaHpiRptEntryT * rpt_entry,
+		       oid * rdr_oid, size_t rdr_oid_len,
+		       oid * sensor_oid, size_t * sensor_oid_len);
 
   int
-  delete_sensor_row(SaHpiDomainIdT domain_id,
-		    SaHpiResourceIdT resource_id,
-		    SaHpiSensorNumT num);
+    delete_sensor_row (SaHpiDomainIdT domain_id,
+		       SaHpiResourceIdT resource_id, SaHpiSensorNumT num);
 
-  int set_sensor(saHpiSensorTable_context *ctx);
+  int set_sensor (saHpiSensorTable_context * ctx);
 
-  int set_sensor_event(saHpiSensorTable_context *ctx);
+  int set_sensor_event (saHpiSensorTable_context * ctx);
 
 
 /*************************************************************
@@ -277,36 +281,30 @@ typedef  struct sensor_threshold_to_mib_s {
 #define saHpiSensorTable_COL_MIN 1
 #define saHpiSensorTable_COL_MAX 33
 
- 
-    int            
-        saHpiSensorTable_extract_index(saHpiSensorTable_context * ctx,
-                                        netsnmp_index * hdr);
-  
-    void            saHpiSensorTable_set_reserve1(netsnmp_request_group
-                                                   *);
-    void            saHpiSensorTable_set_reserve2(netsnmp_request_group
-                                                   *);
-    void            saHpiSensorTable_set_action(netsnmp_request_group *);
-    void            saHpiSensorTable_set_commit(netsnmp_request_group *);
-    void            saHpiSensorTable_set_free(netsnmp_request_group *);
-    void            saHpiSensorTable_set_undo(netsnmp_request_group *);
-  
+
+  int
+    saHpiSensorTable_extract_index (saHpiSensorTable_context * ctx,
+				    netsnmp_index * hdr);
+
+  void saHpiSensorTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiSensorTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiSensorTable_set_action (netsnmp_request_group *);
+  void saHpiSensorTable_set_commit (netsnmp_request_group *);
+  void saHpiSensorTable_set_free (netsnmp_request_group *);
+  void saHpiSensorTable_set_undo (netsnmp_request_group *);
+
     saHpiSensorTable_context
-        *saHpiSensorTable_duplicate_row(saHpiSensorTable_context *);
-    netsnmp_index  *saHpiSensorTable_delete_row(saHpiSensorTable_context
-                                                 *);
+    * saHpiSensorTable_duplicate_row (saHpiSensorTable_context *);
+  netsnmp_index *saHpiSensorTable_delete_row (saHpiSensorTable_context *);
 
-    int             saHpiSensorTable_can_delete(saHpiSensorTable_context
-                                                 * undo_ctx,
-                                                 saHpiSensorTable_context
-                                                 * row_ctx,
-                                                 netsnmp_request_group *
-                                                 rg);
+  int saHpiSensorTable_can_delete (saHpiSensorTable_context
+				   * undo_ctx,
+				   saHpiSensorTable_context
+				   * row_ctx, netsnmp_request_group * rg);
 
 
 
-    saHpiSensorTable_context *saHpiSensorTable_create_row(netsnmp_index
-                                                            *);
+  saHpiSensorTable_context *saHpiSensorTable_create_row (netsnmp_index *);
 
 
 #ifdef __cplusplus

@@ -21,7 +21,8 @@
 #define SAHPISYSTEMEVENTLOGTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -46,233 +47,231 @@ extern          "C" {
 #define SEL_TRIGGER_THRESHOLD_INTERPRETED_MAX 32
 #define SEL_TRIGGER_THRESHOLD_EVENT_STATE_MAX 3
 
-        /** Index saHpiDomainID is external */
-        /** Index saHpiResourceID is external */
-        /** Index saHpiSystemEventLogEntryId is internal */
+	/** Index saHpiDomainID is external */
+	/** Index saHpiResourceID is external */
+	/** Index saHpiSystemEventLogEntryId is internal */
 
-    typedef struct saHpiSystemEventLogTable_context_s {
-        netsnmp_index   index;
+  typedef struct saHpiSystemEventLogTable_context_s
+  {
+    netsnmp_index index;
 
-          /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogIndex;
+	  /** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogIndex;
 
 
-        /** TimeStamp = ASN_TIMETICKS */
-        integer64   saHpiSystemEventLogAddedTimestamp;
-    
+	/** TimeStamp = ASN_TIMETICKS */
+    integer64 saHpiSystemEventLogAddedTimestamp;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogType;
 
-        /** HpiTimeStamp = ASN_COUNTER64 */
-        integer64           saHpiSystemEventLogTimestamp;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSeverity;
+	/** HpiTimeStamp = ASN_COUNTER64 */
+    integer64 saHpiSystemEventLogTimestamp;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorNum;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSeverity;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorType;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorNum;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorCategory;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorType;
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorAssertion;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorCategory;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryUnspecified;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiSystemEventLogSensorAssertion;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryThreshold;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryUnspecified;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryUsage;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryThreshold;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryUsage;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryPredFail;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryState;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryLimit;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryPredFail;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryPerformance;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryLimit;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategorySeverity;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryPerformance;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryPresence;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategorySeverity;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryEnable;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryPresence;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryAvailability;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryEnable;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryRedundancy;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryAvailability;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryUser;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryRedundancy;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogSensorStateCategoryGeneric;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryUser;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorOptionalData;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorStateCategoryGeneric;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorTriggerReadingType;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorOptionalData;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorTriggerReadingRaw;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorTriggerReadingType;
 
-        /** INTEGER = ASN_INTEGER */
-        long           
-            saHpiSystemEventLogSensorTriggerReadingInterpretedType;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorTriggerReadingRaw;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char  
-            saHpiSystemEventLogSensorTriggerReadingInterpreted[SEL_TRIGGER_READING_INTERPRETED_MAX];
-        long           
-            saHpiSystemEventLogSensorTriggerReadingInterpreted_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorTriggerReadingInterpretedType;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char  
-            saHpiSystemEventLogSensorTriggerReadingEventState[SEL_TRIGGER_READING_EVENT_STATE_MAX ];
-        long           
-            saHpiSystemEventLogSensorTriggerReadingEventState_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSystemEventLogSensorTriggerReadingInterpreted
+      [SEL_TRIGGER_READING_INTERPRETED_MAX];
+    long saHpiSystemEventLogSensorTriggerReadingInterpreted_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorTriggerThresholdType;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSystemEventLogSensorTriggerReadingEventState
+      [SEL_TRIGGER_READING_EVENT_STATE_MAX];
+    long saHpiSystemEventLogSensorTriggerReadingEventState_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorTriggerThresholdRaw;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorTriggerThresholdType;
 
-        /** INTEGER = ASN_INTEGER */
-        long           
-            saHpiSystemEventLogSensorTriggerThresholdInterpretedType;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorTriggerThresholdRaw;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char  
-            saHpiSystemEventLogSensorTriggerThresholdInterpreted[SEL_TRIGGER_THRESHOLD_INTERPRETED_MAX];
-        long           
-            saHpiSystemEventLogSensorTriggerThresholdInterpreted_len;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogSensorTriggerThresholdInterpretedType;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char  
-            saHpiSystemEventLogSensorTriggerThresholdEventState[SEL_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
-        long           
-            saHpiSystemEventLogSensorTriggerThresholdEventState_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSystemEventLogSensorTriggerThresholdInterpreted
+      [SEL_TRIGGER_THRESHOLD_INTERPRETED_MAX];
+    long saHpiSystemEventLogSensorTriggerThresholdInterpreted_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorPreviousState;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSystemEventLogSensorTriggerThresholdEventState
+      [SEL_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
+    long saHpiSystemEventLogSensorTriggerThresholdEventState_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorOem;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorPreviousState;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogSensorSpecific;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorOem;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogHotSwapState;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogSensorSpecific;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogPreviousHotSwapState;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogHotSwapState;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogWatchdogNum;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogPreviousHotSwapState;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogWatchdogAction;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogWatchdogNum;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogWatchdogPreTimerAction;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogWatchdogAction;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogWatchdogUse;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogWatchdogPreTimerAction;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSystemEventLogOemManufacturerIdT;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiSystemEventLogWatchdogUse;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSystemEventLogOemEventData[SAHPI_OEM_EVENT_DATA_SIZE];
-        long            saHpiSystemEventLogOemEventData_len;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiSystemEventLogOemManufacturerIdT;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSystemEventLogUserEventData[SAHPI_USER_EVENT_DATA_SIZE];
-        long            saHpiSystemEventLogUserEventData_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiSystemEventLogOemEventData[SAHPI_OEM_EVENT_DATA_SIZE];
+    long saHpiSystemEventLogOemEventData_len;
 
-        /** RowStatus = ASN_INTEGER */
-        long            saHpiSystemEventLogDelete;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char
+      saHpiSystemEventLogUserEventData[SAHPI_USER_EVENT_DATA_SIZE];
+    long saHpiSystemEventLogUserEventData_len;
 
-      long hash;
-      unsigned long resource_id;
-      unsigned long domain_id;
+	/** RowStatus = ASN_INTEGER */
+    long saHpiSystemEventLogDelete;
 
-    } saHpiSystemEventLogTable_context;
+    long hash;
+    unsigned long resource_id;
+    unsigned long domain_id;
+
+  } saHpiSystemEventLogTable_context;
 
 /*************************************************************
  * function declarations
  */
-   
-    void            initialize_table_saHpiSystemEventLogTable(void);
 
-    int             saHpiSystemEventLogTable_get_value(netsnmp_request_info
-                                                       *, netsnmp_index *,
-                                                       netsnmp_table_request_info
-                                                       *);
+  void initialize_table_saHpiSystemEventLogTable (void);
 
-  int populate_sel(SaHpiRptEntryT *rpt_entry);
-  //		   	  oid *DomainID_oid, const size_t DomainID_oid_len,
-  //			  oid *ResourceID_oid, const size_t ResourceID_oid_len);
+  int saHpiSystemEventLogTable_get_value (netsnmp_request_info
+					  *, netsnmp_index *,
+					  netsnmp_table_request_info *);
+
+  int populate_sel (SaHpiRptEntryT * rpt_entry);
+  //                      oid *DomainID_oid, const size_t DomainID_oid_len,
+  //                      oid *ResourceID_oid, const size_t ResourceID_oid_len);
 
 
-		   
+
   //  int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
 
   //int
   //set_logstate(saHpiSystemEventLogTable_context *ctx);
 
-  int 
-  set_SEL_delete(saHpiSystemEventLogTable_context *ctx);
+  int set_SEL_delete (saHpiSystemEventLogTable_context * ctx);
 
   //int
   //set_timestamp();
 
+  int delete_SEL_row (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id);
+
+
   int
-  delete_SEL_row(SaHpiDomainIdT domain_id,
-		 SaHpiResourceIdT resource_id);
+    event_log_update_timestamp_handler (netsnmp_mib_handler * handler,
+					netsnmp_handler_registration *
+					reginfo,
+					netsnmp_agent_request_info * reqinfo,
+					netsnmp_request_info * requests);
+  int event_log_current_timestamp_handler (netsnmp_mib_handler * handler,
+					   netsnmp_handler_registration *
+					   reginfo,
+					   netsnmp_agent_request_info *
+					   reqinfo,
+					   netsnmp_request_info * requests);
 
 
-int
-event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
-			 netsnmp_handler_registration *reginfo,
-			 netsnmp_agent_request_info *reqinfo,
-			 netsnmp_request_info *requests);
-int
-event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
-			 netsnmp_handler_registration *reginfo,
-			 netsnmp_agent_request_info *reqinfo,
-			 netsnmp_request_info *requests);
-
-
-int
-event_log_entries_handler(netsnmp_mib_handler *handler,
-			 netsnmp_handler_registration *reginfo,
-			 netsnmp_agent_request_info *reqinfo,
-			 netsnmp_request_info *requests);
+  int
+    event_log_entries_handler (netsnmp_mib_handler * handler,
+			       netsnmp_handler_registration * reginfo,
+			       netsnmp_agent_request_info * reqinfo,
+			       netsnmp_request_info * requests);
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiSystemEventLogTable_oid[];
-    extern size_t   saHpiSystemEventLogTable_oid_len;
+  extern oid saHpiSystemEventLogTable_oid[];
+  extern size_t saHpiSystemEventLogTable_oid_len;
 //1,3,6,1,3,90,2,2,9
 #define saHpiSystemEventLogTable_TABLE_OID systemEvents_OID, 9
 
@@ -330,52 +329,45 @@ event_log_entries_handler(netsnmp_mib_handler *handler,
 #define saHpiSystemEventLogTable_COL_MIN 1
 #define saHpiSystemEventLogTable_COL_MAX 47
 
-   
 
-    int            
-        saHpiSystemEventLogTable_extract_index
-        (saHpiSystemEventLogTable_context * ctx, netsnmp_index * hdr);
-  
-    void           
-        saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group *);
-    void           
-        saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group *);
-    void           
-        saHpiSystemEventLogTable_set_action(netsnmp_request_group *);
-    void           
-        saHpiSystemEventLogTable_set_commit(netsnmp_request_group *);
-    void            saHpiSystemEventLogTable_set_free(netsnmp_request_group
-                                                      *);
-    void            saHpiSystemEventLogTable_set_undo(netsnmp_request_group
-                                                      *);
+
+  int
+    saHpiSystemEventLogTable_extract_index
+    (saHpiSystemEventLogTable_context * ctx, netsnmp_index * hdr);
+
+  void saHpiSystemEventLogTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiSystemEventLogTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiSystemEventLogTable_set_action (netsnmp_request_group *);
+  void saHpiSystemEventLogTable_set_commit (netsnmp_request_group *);
+  void saHpiSystemEventLogTable_set_free (netsnmp_request_group *);
+  void saHpiSystemEventLogTable_set_undo (netsnmp_request_group *);
 
     saHpiSystemEventLogTable_context
-        *saHpiSystemEventLogTable_duplicate_row
-        (saHpiSystemEventLogTable_context *);
-  
-    netsnmp_index 
-        *saHpiSystemEventLogTable_delete_row
-        (saHpiSystemEventLogTable_context *);
+    * saHpiSystemEventLogTable_duplicate_row
+    (saHpiSystemEventLogTable_context *);
 
-    int            
-        saHpiSystemEventLogTable_can_delete
-        (saHpiSystemEventLogTable_context * undo_ctx,
-         saHpiSystemEventLogTable_context * row_ctx,
-         netsnmp_request_group * rg);
+    netsnmp_index
+    * saHpiSystemEventLogTable_delete_row
+    (saHpiSystemEventLogTable_context *);
+
+  int
+    saHpiSystemEventLogTable_can_delete
+    (saHpiSystemEventLogTable_context * undo_ctx,
+     saHpiSystemEventLogTable_context * row_ctx, netsnmp_request_group * rg);
 
 
 
     saHpiSystemEventLogTable_context
-        *saHpiSystemEventLogTable_create_row(netsnmp_index *);
+    * saHpiSystemEventLogTable_create_row (netsnmp_index *);
 
   /*
-    saHpiSystemEventLogTable_context *saHpiSystemEventLogTable_get(const
-                                                                   char
-                                                                   *name,
-                                                                   int
-                                                                   len);
+     saHpiSystemEventLogTable_context *saHpiSystemEventLogTable_get(const
+     char
+     *name,
+     int
+     len);
 
-  */
+   */
 #ifdef __cplusplus
 };
 #endif
