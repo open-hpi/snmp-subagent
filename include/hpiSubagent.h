@@ -61,7 +61,8 @@
 #endif
 
 /*
- * True and false values in this subagent
+ * True and false values in this subagent (which are the
+ * same as SAHPI_TRUE and SAHPI_FALSE)
  */
 #define AGENT_TRUE 1
 #define AGENT_FALSE 0
@@ -109,6 +110,16 @@
 
 // SnmpTrapOID.0
 #define snmptrap_oid 1,3,6,1,6,3,1,1,4,1,0
+
+/*
+ * Handler for parsing configuration tokens.
+ */
+#define TRAPS_TOKEN "send_traps_on_startup"
+#define INTERVAL_TOKEN "check_hpi_interval"
+
+void hpiSubagent_parse_config_traps(const char *, char *);
+void hpiSubagent_parse_config_interval(const char *, char *);
+
 
 /*
  * Close the HPI session.
