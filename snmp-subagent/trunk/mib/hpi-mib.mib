@@ -67,7 +67,7 @@ hpiB MODULE-IDENTITY
         "
     DESCRIPTION
     
-        For security reasons it is recommend to use a SNMP v2 or v3c 
+        "For security reasons it is recommend to use a SNMP v2 or v3c
 	SNMP daemon.
 	
 	Additionally  if fine grain access configuration is desired, for 
