@@ -219,9 +219,9 @@ saHpiWatchdogTable_modify_context(SaHpiWatchdogRecT *entry,
     if (wdog) {
       ctx->saHpiWatchdogLog = (wdog->Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
       ctx->saHpiWatchdogRunning = (wdog->Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-      ctx->saHpiWatchdogTimerUse = wdog->TimerUse;
-      ctx->saHpiWatchdogTimerAction = wdog->TimerAction;
-      ctx->saHpiWatchdogPretimerInterrupt = wdog->PretimerInterrupt;
+      ctx->saHpiWatchdogTimerUse = wdog->TimerUse+1;
+      ctx->saHpiWatchdogTimerAction = wdog->TimerAction+1;
+      ctx->saHpiWatchdogPretimerInterrupt = wdog->PretimerInterrupt+1;
       ctx->saHpiWatchdogPreTimeoutInterval = wdog->PreTimeoutInterval;
       ctx->saHpiWatchdogTimerUseExpFlags = wdog->TimerUseExpFlags;
       ctx->saHpiWatchdogTimerInitialCount = wdog->InitialCount;
@@ -272,9 +272,9 @@ int set_timer_reset(saHpiWatchdogTable_context *ctx) {
       DEBUGMSGTL((AGENT,"log: %d, Run: %d\n", wdog.Log, wdog.Running));
       ctx->saHpiWatchdogLog = (wdog.Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
       ctx->saHpiWatchdogRunning = (wdog.Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-      ctx->saHpiWatchdogTimerUse = wdog.TimerUse;
-      ctx->saHpiWatchdogTimerAction = wdog.TimerAction;
-      ctx->saHpiWatchdogPretimerInterrupt = wdog.PretimerInterrupt;
+      ctx->saHpiWatchdogTimerUse = wdog.TimerUse+1;
+      ctx->saHpiWatchdogTimerAction = wdog.TimerAction+1;
+      ctx->saHpiWatchdogPretimerInterrupt = wdog.PretimerInterrupt+1;
       ctx->saHpiWatchdogPreTimeoutInterval = wdog.PreTimeoutInterval;
       ctx->saHpiWatchdogTimerUseExpFlags = wdog.TimerUseExpFlags;
       ctx->saHpiWatchdogTimerInitialCount = wdog.InitialCount;
@@ -299,9 +299,9 @@ int set_watchdog(saHpiWatchdogTable_context *ctx) {
   if (ctx) {
     wdog.Log = (ctx->saHpiWatchdogLog == MIB_TRUE) ? SAHPI_TRUE : SAHPI_FALSE;
     wdog.Running = (ctx->saHpiWatchdogRunning == MIB_TRUE) ? SAHPI_TRUE : SAHPI_FALSE;
-    wdog.TimerUse = ctx->saHpiWatchdogTimerUse;
-    wdog.TimerAction = ctx->saHpiWatchdogTimerAction;
-    wdog.PretimerInterrupt = ctx->saHpiWatchdogPretimerInterrupt;
+    wdog.TimerUse = ctx->saHpiWatchdogTimerUse+1;
+    wdog.TimerAction = ctx->saHpiWatchdogTimerAction+1;
+    wdog.PretimerInterrupt = ctx->saHpiWatchdogPretimerInterrupt+1;
     wdog.PreTimeoutInterval = ctx->saHpiWatchdogPreTimeoutInterval;
     wdog.TimerUseExpFlags =  ctx->saHpiWatchdogTimerUseExpFlags;
     wdog.InitialCount = ctx->saHpiWatchdogTimerInitialCount;
@@ -341,9 +341,9 @@ int set_watchdog(saHpiWatchdogTable_context *ctx) {
 
     ctx->saHpiWatchdogLog = (wdog.Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
     ctx->saHpiWatchdogRunning = (wdog.Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-    ctx->saHpiWatchdogTimerUse = wdog.TimerUse;
-    ctx->saHpiWatchdogTimerAction = wdog.TimerAction;
-    ctx->saHpiWatchdogPretimerInterrupt = wdog.PretimerInterrupt;
+    ctx->saHpiWatchdogTimerUse = wdog.TimerUse+1;
+    ctx->saHpiWatchdogTimerAction = wdog.TimerAction+1;
+    ctx->saHpiWatchdogPretimerInterrupt = wdog.PretimerInterrupt+1;
     ctx->saHpiWatchdogPreTimeoutInterval = wdog.PreTimeoutInterval;
     ctx->saHpiWatchdogTimerUseExpFlags = wdog.TimerUseExpFlags;
     ctx->saHpiWatchdogTimerInitialCount = wdog.InitialCount;
@@ -353,8 +353,35 @@ int set_watchdog(saHpiWatchdogTable_context *ctx) {
   return AGENT_ERR_NULL_DATA;
 }
 
+ int
+ update_watchdog_row(SaHpiDomainIdT domain_id,
+		     SaHpiResourceIdT resource_id,
+		     SaHpiWatchdogNumT num,
+		     SaHpiWatchdogEventT *wdog) {
+   saHpiWatchdogTable_context *ctx;
+  oid index_oid[WATCHDOG_INDEX_NR];
+  netsnmp_index index;
 
+    // Look at the MIB to find out what the indexs are
+  index_oid[0] = domain_id;
+  index_oid[1] = resource_id;
+  index_oid[2] = num;
+    // Possible more indexes?
+  index.oids = (oid *)&index_oid;
+  index.len = WATCHDOG_INDEX_NR;
+  ctx = CONTAINER_FIND(cb.container, &index);
 
+  if (ctx) {
+
+    ctx->saHpiWatchdogTimerUse = wdog->WatchdogUse+1;
+    ctx->saHpiWatchdogTimerAction = wdog->WatchdogAction+1;
+    ctx->saHpiWatchdogPretimerInterrupt = wdog->WatchdogPreTimerAction+1;
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
+   
+ }
 /************************************************************
  * the *_row_copy routine
  */
@@ -743,17 +770,17 @@ saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
 
         case COLUMN_SAHPIWATCHDOGTIMERUSE:
 	  // HPI-MIB::saHpiWatchdogTimerUse 
-	  if ( ((*var->val.integer < 0) || 
-	       (*var->val.integer > 5)) &&
-	       (*var->val.integer != 0x0F)) {
+	  if ( ((*var->val.integer < 1) || 
+	       (*var->val.integer > 7)) &&
+	       (*var->val.integer != 16)) {
 	    rc = SNMP_ERR_BADVALUE;
 	  }
 	  break;
 
         case COLUMN_SAHPIWATCHDOGTIMERACTION:
 	  // HPI-MIB::saHpiWatchdogTimerAction
-	  if ((*var->val.integer < 0) ||
-	      (*var->val.integer > 3)) {
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 4)) {
 	    rc = SNMP_ERR_BADVALUE;
 	  }
 	  break;
@@ -761,9 +788,9 @@ saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
         case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
             /** INTEGER = ASN_INTEGER */
 	  // HPI-MIB::saHpiWatchdogPretimerInterrupt
-	   if ( ((*var->val.integer < 0) || 
-	       (*var->val.integer > 3)) &&
-	       (*var->val.integer != 0x0F)) {
+	   if ( ((*var->val.integer < 1) || 
+	       (*var->val.integer > 4)) &&
+	       (*var->val.integer != 16)) {
 	    rc = SNMP_ERR_BADVALUE;
 	  }
 	   break;
