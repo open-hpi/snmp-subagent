@@ -46,6 +46,12 @@ extern          "C" {
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiSystemEventLogged[MAX_OID_LEN];
         long            saHpiSystemEventLogged_len;
+      /** TruthValue = ASN_INTEGER */
+        long            saHpiSystemEventClearEventTable;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogState;
+
 
       long hash;
       unsigned long resource_id;
@@ -71,12 +77,19 @@ extern          "C" {
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
+					SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
 					oid *event_entry, 
 					size_t event_entry_oid_len,
 					saHpiSystemEventLogTable_context *ctx);
 		   
   int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
+
+int
+set_logstate(saHpiSystemEventLogTable_context *ctx);
+
+int 
+set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
 
 int
 event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
@@ -103,8 +116,10 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPISYSTEMEVENTLOGENTRYID 1
 #define COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP 2
 #define COLUMN_SAHPISYSTEMEVENTLOGGED 3
+#define COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE 4
+#define COLUMN_SAHPISYSTEMEVENTLOGSTATE 5
 #define saHpiSystemEventLogTable_COL_MIN 1
-#define saHpiSystemEventLogTable_COL_MAX 3
+#define saHpiSystemEventLogTable_COL_MAX 5
 
    
    
@@ -112,7 +127,7 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
     int            
         saHpiSystemEventLogTable_extract_index
         (saHpiSystemEventLogTable_context * ctx, netsnmp_index * hdr);
-  /*
+  
     void           
         saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group *);
     void           
@@ -129,7 +144,7 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
     saHpiSystemEventLogTable_context
         *saHpiSystemEventLogTable_duplicate_row
         (saHpiSystemEventLogTable_context *);
-  */
+  
     netsnmp_index 
         *saHpiSystemEventLogTable_delete_row
         (saHpiSystemEventLogTable_context *);
@@ -145,13 +160,14 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
     saHpiSystemEventLogTable_context
         *saHpiSystemEventLogTable_create_row(netsnmp_index *);
 
+  /*
     saHpiSystemEventLogTable_context *saHpiSystemEventLogTable_get(const
                                                                    char
                                                                    *name,
                                                                    int
                                                                    len);
 
-
+  */
 #ifdef __cplusplus
 };
 #endif

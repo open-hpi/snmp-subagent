@@ -75,6 +75,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
   int rc;
   netsnmp_index sel_index;
   saHpiSystemEventLogTable_context *sel_context;
+  SaHpiBoolT state;
   //  long backup_count = event_log_entries;
 
   DEBUGMSGTL((AGENT,"\t--- populate_sel: Entry\n"));
@@ -100,6 +101,13 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
     entry_id = SAHPI_OLDEST_ENTRY;
     while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
 
+      err = saHpiEventLogStateGet(session_id,
+				  rpt_entry->ResourceId,
+				  &state);
+
+      if (err != SA_OK)
+	state = SAHPI_TRUE;
+
       err = saHpiEventLogEntryGet(session_id,
 				  rpt_entry->ResourceId,
 				  entry_id,
@@ -109,6 +117,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 				  &rdr_entry,
 				  NULL);
 
+      
       if (err == SA_OK) {
 	// The MIB containst the order of indexes
 	sel_oid[0] = rpt_entry->DomainId;
@@ -135,7 +144,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 		       &rdr_entry, 
 		       child_oid, &child_oid_len);
 	
-	if (saHpiSystemEventLogTable_modify_context(&sel,
+	if (saHpiSystemEventLogTable_modify_context(&sel, &state,
 						    rpt_entry,
 						    child_oid, child_oid_len,
 						    sel_context)
@@ -159,6 +168,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
+					SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
 					oid *event_entry, 
 					size_t event_entry_oid_len,
@@ -185,6 +195,8 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->hash = hash;
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
+
+    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
     ctx->saHpiSystemEventLogTimestamp = sel->Timestamp;
     ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
@@ -194,6 +206,62 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
   }
   return AGENT_ERR_NULL_DATA;
 }
+
+int
+set_logstate(saHpiSystemEventLogTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiBoolT enable;
+
+  enable = (ctx->saHpiSystemEventLogState == MIB_TRUE) ? SAHPI_TRUE : SAHPI_FALSE;
+
+  if (ctx) {
+
+      // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    
+    rc = saHpiEventLogStateSet(session_id,
+			       ctx->resource_id,
+			       enable);
+
+    DEBUGMSGTL((AGENT,"Error is %d\n", rc));
+    if (rc != SA_OK) 
+      return AGENT_ERR_OPERATION;
+    
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+int 
+set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    
+    rc = saHpiEventLogClear(session_id,
+			    ctx->resource_id);
+
+    DEBUGMSGTL((AGENT,"Error is %d\n", rc));
+    if (rc != SA_OK) 
+	return AGENT_ERR_OPERATION;
+      
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+
+}
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -213,27 +281,31 @@ saHpiSystemEventLogTable_cmp(const void *lhs, const void *rhs)
         (saHpiSystemEventLogTable_context *) rhs;
     int rc;
     DEBUGMSGTL((AGENT,"saHpiSystemEventLogTable_cmp: Called\n"));
+    DEBUGMSGTL((AGENT,"Checking: %d.%d ? %d.%d\n",
+		context_l->domain_id, context_l->resource_id,
+		context_r->domain_id, context_r->resource_id));
 
     if (context_l->domain_id < context_r->domain_id)
       return -1;
     rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
     
     if (rc != 0) 
-	return rc;
+	return 1;
 
     if (context_l->resource_id < context_r->resource_id)
 	return -1;
 
-    rc =(context_l->resource_id == context_r->resource_id) ? 0: 1;
-
+    return (context_l->resource_id == context_r->resource_id) ? 0: 1;
+    /*
+      // Only use two indexes. 
     if (rc != 0)
-      return rc;
-
+      return 1;
+    
     if (context_l->saHpiSystemEventLogEntryId < context_r->saHpiSystemEventLogEntryId)
 	return -1;
     return (context_l->saHpiSystemEventLogEntryId == context_r->saHpiSystemEventLogEntryId) ? 0: 1;
+    */
 }
-
 
 
 /************************************************************
@@ -270,6 +342,8 @@ saHpiSystemEventLogTable_row_copy(saHpiSystemEventLogTable_context * dst,
            src->saHpiSystemEventLogged_len);
     dst->saHpiSystemEventLogged_len = src->saHpiSystemEventLogged_len;
 
+    dst->saHpiSystemEventClearEventTable = src->saHpiSystemEventClearEventTable;
+    dst->saHpiSystemEventLogState = src->saHpiSystemEventLogState;
     dst->resource_id = src->resource_id;
     dst->hash = src->hash;
     dst->domain_id = src->domain_id;
@@ -357,9 +431,7 @@ saHpiSystemEventLogTable_can_delete(saHpiSystemEventLogTable_context *
                                     row_ctx, netsnmp_request_group * rg)
 {
 
-    /*
-     * TODO: check for other deletion requirements here
-     */
+
     return 1;
 }
 
@@ -393,6 +465,7 @@ saHpiSystemEventLogTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash =0;
+    ctx->saHpiSystemEventClearEventTable = SNMP_ROW_ACTIVE;
 
     return ctx;
 }
@@ -428,20 +501,12 @@ saHpiSystemEventLogTable_duplicate_row(saHpiSystemEventLogTable_context *
 netsnmp_index  *
 saHpiSystemEventLogTable_delete_row(saHpiSystemEventLogTable_context * ctx)
 {
-    /*
-     * netsnmp_mutex_destroy(ctx->lock); 
-     */
+   
 
     if (ctx->index.oids)
         free(ctx->index.oids);
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
 
-    /*
-     * release header
-     */
     free(ctx);
 
     return NULL;
@@ -466,13 +531,132 @@ saHpiSystemEventLogTable_delete_row(saHpiSystemEventLogTable_context * ctx)
 void
 saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
 {
+  saHpiSystemEventLogTable_context *row_ctx =
+        (saHpiSystemEventLogTable_context *) rg->existing_row;
   
+
+    netsnmp_variable_list *var;
+    netsnmp_request_group_item *current;
+   
+    int             rc;
+
+
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+	case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
+	case COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP:
+	case COLUMN_SAHPISYSTEMEVENTLOGGED:
+	  rc = SNMP_ERR_NOTWRITABLE;
+	  break;
+
+        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+            /** TruthValue = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiSystemEventClearEventTable));
+            break;
+
+        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiSystemEventLogState));
+            break;
+
+        default:/** We shouldn't get here */
+            rc = SNMP_ERR_GENERR;
+            snmp_log(LOG_ERR, "unknown column in "
+                     "saHpiSystemEventLogTable_set_reserve1\n");
+	    break;
+        }
+
+        if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+        rg->status = SNMP_MAX(rg->status, current->ri->status);
+    }
+
 }
 
 void
 saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 {
-  
+    saHpiSystemEventLogTable_context *ctx = NULL;
+    saHpiSystemEventLogTable_context *undo_ctx =
+      (saHpiSystemEventLogTable_context *) rg->undo_info;
+
+    netsnmp_request_group_item *current;
+    netsnmp_variable_list *var;
+    int             rc;
+     netsnmp_index	index;
+
+    rg->rg_void = rg->list->ri;
+
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+            /** TruthValue = ASN_INTEGER */
+	  rc = netsnmp_check_vb_rowstatus(var,
+					  undo_ctx ? undo_ctx->saHpiSystemEventClearEventTable : 0 );
+            break;
+
+        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 2)) {
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
+
+        default:/** We shouldn't get here */
+            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	    break;
+        }
+
+        if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+    }
+
+  for (current = rg->list; current; current = current->next) {
+      // Does the row exist?
+      index.oids = current->tri->index_oid;
+      index.len = current->tri->index_oid_len;
+      ctx = CONTAINER_FIND(cb.container, &index);
+      if (ctx == NULL) { // Empty. Not found.
+	var = current->ri->requestvb;
+	rc = SNMP_ERR_GENERR;
+	// Do the check only for one type of column:
+	if (current->tri->colnum == COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE) {
+
+	  // SNMPv2-TC has a diagram of actions.
+	  if ((*var->val.integer == SNMP_ROW_CREATEANDGO)
+	      || (*var->val.integer == SNMP_ROW_ACTIVE)
+	      || (*var->val.integer == SNMP_ROW_NOTINSERVICE))
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	  if (*var->val.integer == SNMP_ROW_NOTREADY) // notReady(3)
+	    rc = SNMP_ERR_INCONSISTENTNAME;
+	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
+	    rc = SNMP_ERR_WRONGVALUE;
+	  if (*var->val.integer == SNMP_ROW_DESTROY) // This is suppose to return NOERROR even if it does not EXIST!
+	    rc = SNMP_ERR_INCONSISTENTNAME;
+	}
+
+	if (rc)
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
+      }
+    }  
+
 }
 
 /************************************************************
@@ -489,6 +673,71 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 void
 saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 {
+
+   netsnmp_variable_list *var;
+    saHpiSystemEventLogTable_context *row_ctx =
+        (saHpiSystemEventLogTable_context *) rg->existing_row;
+
+
+    saHpiSystemEventLogTable_context *ctx;
+    saHpiSystemEventLogTable_context tmp;
+
+    netsnmp_request_group_item *current;
+
+   
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+            /** TruthValue = ASN_INTEGER */
+            row_ctx->saHpiSystemEventClearEventTable = *var->val.integer;
+	    // This can erase many tables. Including this one.
+	    if (set_clear_event_table(row_ctx) != AGENT_ERR_NOERROR) {
+	      // Look in the SNMPv2-TC to find the diagram for this.
+	      netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					     SNMP_ERR_INCONSISTENTVALUE);
+	    } else {
+	      // IBM-KR repopulate() or re-hash-event-table() ?
+
+	      // The operation went fine.
+	      // Remove all rows with the right ResourceId.
+	      netsnmp_assert(cb.container->next != NULL);
+	      tmp.resource_id = row_ctx->resource_id;
+	      tmp.domain_id = row_ctx->domain_id;
+
+	      while ( (ctx =CONTAINER_FIND(cb.container->next, &tmp)) != NULL) {
+		DEBUGMSGTL((AGENT,"Found object: %d\n",ctx->saHpiSystemEventLogEntryId));
+		CONTAINER_REMOVE(cb.container, ctx);
+		
+	      }
+	      DEBUGMSGTL((AGENT,"Done."));
+	      event_log_entries = CONTAINER_SIZE(cb.container);
+	      // Now how do you notify event Table to delete?
+	      // rehash?
+	      
+	    }
+            break;
+
+        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiSystemEventLogState = *var->val.integer;
+	    if (set_logstate(row_ctx) != AGENT_ERR_NOERROR) {
+	        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 SNMP_ERR_GENERR);
+	    }
+            break;
+
+        default:/** We shouldn't get here */
+            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+        }
+
+	
+    }
+
+   
   
 }
 
@@ -750,6 +999,23 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
         snmp_set_var_typed_value(var, ASN_OBJECT_ID,
                                  (char *) &context->saHpiSystemEventLogged,
                                  context->saHpiSystemEventLogged_len);
+        break;
+  case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+            /** RowStatus = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventClearEventTable,
+                                 sizeof(context->
+                                        saHpiSystemEventClearEventTable));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogState,
+                                 sizeof(context->
+                                        saHpiSystemEventLogState));
         break;
 
     default:/** We shouldn't get here */

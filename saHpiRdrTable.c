@@ -55,15 +55,17 @@ static u_long rdr_count = 0;
 /************************************************************
  * keep binary tree to find context by name
  */
-static int      saHpiRdrTable_cmp(const void *lhs, const void *rhs);
+//static int      saHpiRdrTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
+/*
 static int
 saHpiRdrTable_cmp(const void *lhs, const void *rhs)
 {
+
     saHpiRdrTable_context *context_l = (saHpiRdrTable_context *) lhs;
     saHpiRdrTable_context *context_r = (saHpiRdrTable_context *) rhs;
    
@@ -74,14 +76,14 @@ saHpiRdrTable_cmp(const void *lhs, const void *rhs)
 
     rc = (context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0 : 1;
 
-    if (rc==0)
+    if (rc!=0)
       return rc;
 
     if (context_l->saHpiRdrRecordId < context_r->saHpiRdrRecordId)
       return -1;
     rc = (context_l->saHpiRdrRecordId == context_r->saHpiRdrRecordId) ? 0 : 1;
 
-    if (rc==0)
+    if (rc!=0)
       return rc;
 
     if (context_l->saHpiRdrType < context_r->saHpiRdrType)
@@ -89,7 +91,7 @@ saHpiRdrTable_cmp(const void *lhs, const void *rhs)
     return (context_l->saHpiRdrType == context_r->saHpiRdrType) ? 0 : 1;
 
 }
-
+  */
 
 
 
@@ -794,17 +796,17 @@ initialize_table_saHpiRdrTable(void)
                                 netsnmp_container_find
                                 ("saHpiRdrTable_secondary:"
                                  "saHpiRdrTable:" "table_container"));
-    cb.container->next->compare = saHpiRdrTable_cmp;
+    //    cb.container->next->compare = saHpiRdrTable_cmp;
 
     cb.create_row = (UserRowMethod *) saHpiRdrTable_create_row;
 
    
-    cb.duplicate_row = (UserRowMethod *) saHpiRdrTable_duplicate_row;
-    cb.delete_row = (UserRowMethod *) saHpiRdrTable_delete_row;
+    //    cb.duplicate_row = (UserRowMethod *) saHpiRdrTable_duplicate_row;
+    //    cb.delete_row = (UserRowMethod *) saHpiRdrTable_delete_row;
    
-    cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiRdrTable_row_copy;
+    //    cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiRdrTable_row_copy;
    
-    cb.can_delete = (Netsnmp_User_Row_Action *) saHpiRdrTable_can_delete;
+    //    cb.can_delete = (Netsnmp_User_Row_Action *) saHpiRdrTable_can_delete;
    /* 
     cb.set_reserve1 = saHpiRdrTable_set_reserve1;
     cb.set_reserve2 = saHpiRdrTable_set_reserve2;
