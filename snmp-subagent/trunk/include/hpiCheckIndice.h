@@ -93,8 +93,13 @@ int saHpiEntryId_check_index(long val);
 /********************************/
 /* saHpiEnableChangeEventTable  */    
 /********************************/
-int saHpiSensorNum_check_index(long val);
 int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiSensorEnableChangeEventTimestamp);
+
+/********************************/
+/* saHpiSensorTable  */    
+/********************************/
+int saHpiSensorNum_check_index(long val);
+
 
 
 
