@@ -2068,7 +2068,7 @@ saHpiSystemEventLogUpdateTimestamp OBJECT-TYPE
 
 saHpiSystemEventLogCurrentTime OBJECT-TYPE
 	SYNTAX		TimeStamp
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"The CurrentTime entry denotes the log's idea of the current time; i.e the
    			timestamp that would be placed on an entry if it was added now.
