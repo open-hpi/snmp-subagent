@@ -253,9 +253,7 @@ saHpiSensorTable_modify_context(SaHpiSensorRecT *entry,
   // Make sure they are valid.
   if (entry && ctx) {
     
-    // We are subtracting SaHpiTextBufferT b/c the underlaying HPI
-    // library is not zeroing out the memory for not used entries -
-    // thus garbage in SaHpiTextBufferT exist,
+
     hash = calculate_hash_value(entry, sizeof(SaHpiSensorRecT));
     
     DEBUGMSGTL((AGENT," Hash value: %d, in ctx: %d\n", hash, ctx->hash));

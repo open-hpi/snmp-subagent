@@ -102,6 +102,7 @@ static trap_vars saHpiWatchdogNotification[] = {
 #define OEM_NOTIF_COUNT 4
 #define OEM_NOTIF_MANUF_ID 2
 #define OEM_NOTIF_EVENT_DATA 3
+
 static trap_vars saHpiOEMNotification[] = {  
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0}, 
@@ -193,7 +194,7 @@ int populate_event() {
 	event.Timestamp = -1;
 	event.Severity = 3;
 	strncpy(event.EventDataUnion.UserEvent.UserEventData,"Grozny smok.", 12);
-      */
+      */      
       if (rpt.ResourceCapabilities == 0) { // OEM or USER type event
 	rpt.ResourceId = 0;
 	rpt.DomainId = 0;
@@ -1331,30 +1332,6 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 			     row_ctx->saHpiEventIndex);
 	*/
 	rg->row_deleted = 1;
-	/*
-	  // IBM-KR: TODO, MOVE THIS TO SEL 
-	  
-	// Only do the operation when its set to destroy(6)
-	if (((saHpiEventTable_context *) rg->existing_row)->hash != 0) {
-	  // Delete the entry only for existing rows.
-	  if (delete_event_entry(row_ctx) != AGENT_ERR_NOERROR) {
-	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					   SNMP_ERR_INCONSISTENTVALUE);
-	  }
-	} else {// It went fine
-	  rg->row_deleted = 1; 
-	  //Delete it also in SEL.
-	  delete_SEL_row(row_ctx->domain_id,
-			 row_ctx->resource_id,
-			 row_ctx->saHpiEventIndex);
-
-	  // Update our RPT table
-	  update_event_status_flag(row_ctx->domain_id,
-			     row_ctx->resource_id,
-			     row_ctx->saHpiEventIndex,
-			     SNMP_ROW_NOTINSERVICE);
-	}
-	*/
       } else // The rest of SNMP_ROW operations (4,5)
 	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 				       SNMP_ERR_INCONSISTENTVALUE);
