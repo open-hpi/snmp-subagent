@@ -176,7 +176,7 @@ int getSaHpiSession (SaHpiSessionIdT * out);
  *  AGENT_ERR_RPTGET - error during saHpiRptInfoGet operation
  *  
  */
-int didSaHpiChanged (int *answer, SaHpiRptInfoT * info);
+int didSaHpiChanged (int *answer, void * info);
 
 /*
  * Convert the decimal SAHPI error codes into character
