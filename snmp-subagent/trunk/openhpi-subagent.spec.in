@@ -18,7 +18,7 @@ Group: Utilities
 AutoReq: no
 Requires: libc.so.6 libglib-1.2.so.0 libpthread.so.0 
 Requires: libnetsnmp.so.5 libnetsnmpagent.so.5
-Requires: openhpi = 0.4
+Requires: openhpi = 0.5
 
 %description 
 This package contains an SNMP subagent for the Service Availability Forum's 
