@@ -26,7 +26,7 @@
 #include <hpiSubagent.h>
 
 
-#include <openhpi.h>
+#include <glib.h>
 #include <epath_utils.h>
 
 #include <saHpiTable.h>
