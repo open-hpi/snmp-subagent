@@ -439,10 +439,10 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 //IBM-KR: Endian
 
-      ctx->saHpiEventTimestamp.low = event_entry->Timestamp  & 0xffffffff;
+      ctx->saHpiEventTimestamp.low = event_entry->Timestamp & 0xffffffff;
       ctx->saHpiEventTimestamp.high = event_entry->Timestamp >> 32;
 
-      ctx->saHpiEventSeverity = event_entry->Severity+1;
+      ctx->saHpiEventSeverity = event_entry->Severity + 1;
 
       if (event_entry->EventType == SAHPI_ET_SENSOR)
 	{
@@ -492,7 +492,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
 	    {
-	      ctx->saHpiEventSensorTriggerReadingRaw = reading.Raw;//IBM-KR:htonl (reading.Raw);
+	      ctx->saHpiEventSensorTriggerReadingRaw = reading.Raw;	//IBM-KR:htonl (reading.Raw);
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 	    {
@@ -545,7 +545,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
 	    {
-	      ctx->saHpiEventSensorTriggerThresholdRaw = reading.Raw;//htonl (reading.Raw);
+	      ctx->saHpiEventSensorTriggerThresholdRaw = reading.Raw;	//htonl (reading.Raw);
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 	    {

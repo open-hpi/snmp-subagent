@@ -539,13 +539,14 @@ getSaHpiSession (SaHpiSessionIdT * out)
 	}
       session_avail = AGENT_TRUE;
       //Subscribe to the Events
-   }
+    }
 
-   
+
   rediscover_count--;
-  if (rediscover_count <= 0) {
+  if (rediscover_count <= 0)
+    {
       // Re-set the  rediscover_count;
-      DEBUGMSGTL((AGENT,"Calling 'saHpiResourceDiscover()'.\n"));
+      DEBUGMSGTL ((AGENT, "Calling 'saHpiResourceDiscover()'.\n"));
       rediscover_count = REDISCOVER_COUNT_MAX;
       err = saHpiResourcesDiscover (session_id);
       if (SA_OK != err)
@@ -554,7 +555,7 @@ getSaHpiSession (SaHpiSessionIdT * out)
 		    get_error_string (err));
 	  return AGENT_ERR_DISCOVER;
 	}
-  }
+    }
 
   if (out)
     *out = session_id;
@@ -582,14 +583,14 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
 	}
     }
   /* 
-  err = saHpiResourcesDiscover (session_id);
-  if (SA_OK != err)
-  {
-          snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
-                    get_error_string (err));
-          return AGENT_ERR_DISCOVER;
-  }
-  */  
+     err = saHpiResourcesDiscover (session_id);
+     if (SA_OK != err)
+     {
+     snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
+     get_error_string (err));
+     return AGENT_ERR_DISCOVER;
+     }
+   */
   err = saHpiRptInfoGet (session_id, &rpt_info_new);
   if (SA_OK != err)
     {
