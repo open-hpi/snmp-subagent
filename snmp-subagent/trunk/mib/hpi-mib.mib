@@ -2633,7 +2633,7 @@ saHpiRdrEntry OBJECT-TYPE
         DESCRIPTION 	" The following describes the different types of records that exist within a
          RDR repository and the RDR super-structure to all of the specific RDR types
          (sensor, inventory data, watchdog, etc.)."
-        INDEX   { saHpiResourceID, saHpiRdrRecordId, saHpiRdrType }
+        INDEX   { saHpiDomainID, saHpiResourceID, saHpiRdrRecordId, saHpiRdrType }
 
         ::= {saHpiRdrTable 1} 
                                                  
@@ -2749,7 +2749,7 @@ saHpiCtrlEntry OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 		"Definition of the control resource data record."
-	INDEX	{ saHpiCtrlNum }
+	INDEX	{ saHpiDomainID, saHpiResourceID, saHpiCtrlNum }
 	::= {saHpiCtrlTable 1}
 
 
@@ -3175,7 +3175,7 @@ saHpiSensorEntry OBJECT-TYPE
         DESCRIPTION
         " This is the sensor resource data record which
 	describes all of the static  data associated with a sensor."
-        INDEX   { saHpiSensorIndex }
+        INDEX   { saHpiDomainID, saHpiResourceID, saHpiSensorIndex }
         ::= {saHpiSensorTable 1}
 
 SaHpiSensorEntry ::= SEQUENCE {
@@ -4302,7 +4302,7 @@ saHpiInventoryEntry OBJECT-TYPE
 	DESCRIPTION
 		"These structures are used to read and write inventory data to entity inventory
 		repositories within a resource."
-	INDEX	{ saHpiInventoryEirId, saHpiInventoryIndex }
+	INDEX	{ saHpiDomainID, saHpiResourceID, saHpiInventoryEirId, saHpiInventoryIndex }
 	::= {saHpiInventoryTable 1}
 
 
@@ -4847,7 +4847,7 @@ saHpiWatchdogEntry OBJECT-TYPE
  identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All watchdogs must be
  represented in the RDR repository with an saHpiWatchdogRecT, including the
  watchdog with an identifier of SAHPI_DEFAULT_WATCHDOG_NUM."
-        INDEX   { saHpiWatchdogNum }
+        INDEX   { saHpiDomainID, saHpiResourceID, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
 SaHpiWatchdogEntry ::= SEQUENCE {
@@ -5093,6 +5093,8 @@ hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
 
 saHpiSensorNotification NOTIFICATION-TYPE
 	OBJECTS {	
+		saHpiDomainID,
+		saHpiResourceID,
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventSensorCategory,
@@ -5111,6 +5113,8 @@ saHpiSensorNotification NOTIFICATION-TYPE
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiDomainID,
+		saHpiResourceID,
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventHotSwapState,
@@ -5123,6 +5127,8 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiDomainID,
+		saHpiResourceID,
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventWatchdogNum,
@@ -5137,6 +5143,8 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiDomainID,
+		saHpiResourceID,
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventOemManufacturerIdT,
@@ -5149,6 +5157,8 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 
 saHpiUserNotifications NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiDomainID,
+		saHpiResourceID,
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventUserEventData
@@ -5160,9 +5170,9 @@ saHpiUserNotifications NOTIFICATION-TYPE
 
 saHpiResourceNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiEntryID,
-		saHpiResourceID,
 		saHpiDomainID,
+		saHpiResourceID,
+		saHpiEntryID,
 		saHpiResourceEntityPath,
 		saHpiResourceCapabilities,
 		saHpiResourceSeverity,
@@ -5176,6 +5186,7 @@ saHpiResourceNotifications NOTIFICATION-TYPE
 
 saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiDomainID,
 		saHpiResourceID,
 		saHpiRdrRecordId,
 		saHpiRdrType,

@@ -30,19 +30,14 @@ extern          "C" {
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
 
-
-typedef  struct sensor_threshold_to_mib_s {
-    SaHpiSensorReadingT* reading;
-    SaHpiUint8T bit;
-    int pos;
-} sensor_threshold_to_mib;
-
-  typedef struct sensor_reading_to_mib_s {
-    SaHpiSensorReadingT* reading;
-    SaHpiSensorRangeFlagsT flag;
-    int pos;
-  } sensor_reading_to_mib;
-
+  /*
+   * Number of index values in this table
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define SENSOR_INDEX_NR 3
   /* 
    * MAX values from the MIB.
    */
@@ -54,6 +49,9 @@ typedef  struct sensor_threshold_to_mib_s {
 #define THRESHOLD_RAW_MAX  32
 #define THRESHOLD_INTERPRETED_MAX 264
 
+  /*
+   * Position of values within a OCTET
+   */
 #define POS_MAX 0
 #define POS_MIN 1
 #define POS_NOMINAL 2
@@ -188,6 +186,20 @@ typedef  struct sensor_threshold_to_mib_s {
 
     } saHpiSensorTable_context;
 
+  /*
+   * A mapping structure for reading values.
+   */
+typedef  struct sensor_threshold_to_mib_s {
+    SaHpiSensorReadingT* reading;
+    SaHpiUint8T bit;
+    int pos;
+} sensor_threshold_to_mib;
+
+  typedef struct sensor_reading_to_mib_s {
+    SaHpiSensorReadingT* reading;
+    SaHpiSensorRangeFlagsT flag;
+    int pos;
+  } sensor_reading_to_mib;
 
 
 /*************************************************************
@@ -195,21 +207,15 @@ typedef  struct sensor_threshold_to_mib_s {
  */
  
     void            initialize_table_saHpiSensorTable(void);
-  /*  
-    const saHpiSensorTable_context
-        *saHpiSensorTable_get_by_idx(netsnmp_index *);
-    const saHpiSensorTable_context
-        *saHpiSensorTable_get_by_idx_rs(netsnmp_index *, int row_status);
-	*/
+ 
     int             saHpiSensorTable_get_value(netsnmp_request_info *,
                                                 netsnmp_index *,
                                                 netsnmp_table_request_info
                                                 *);
 						
 
-  int  populate_sensor(
-		       SaHpiSensorRecT *sensor,
-		       	SaHpiRptEntryT *rpt_entry,
+  int  populate_sensor(SaHpiSensorRecT *sensor,
+		       SaHpiRptEntryT *rpt_entry,
 		       oid *rdr_oid, size_t rdr_oid_len,
 		       oid *sensor_oid, 
 		       size_t *sensor_oid_len);
@@ -227,8 +233,8 @@ typedef  struct sensor_threshold_to_mib_s {
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiSensorTable_oid[];
-    extern size_t   saHpiSensorTable_oid_len;
+  //   extern oid      saHpiSensorTable_oid[];
+  //  extern size_t   saHpiSensorTable_oid_len;
 //1,3,6,1,3,90,3,6
 #define saHpiSensorTable_TABLE_OID hpiResources_OID,6
 

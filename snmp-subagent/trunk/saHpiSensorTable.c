@@ -34,14 +34,14 @@ static netsnmp_table_array_callbacks cb;
 
 extern int send_traps_on_startup;
 
-oid             saHpiSensorTable_oid[] = { saHpiSensorTable_TABLE_OID };
-size_t          saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oid);
+static oid             saHpiSensorTable_oid[] = { saHpiSensorTable_TABLE_OID };
+static size_t          saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oid);
 
 //  { 1, 3, 6, 1, 3, 90, 3, 5, 0 };
-oid      saHpiSensorCount_oid[] = { hpiResources_OID, 5, 0 };
+static oid      saHpiSensorCount_oid[] = { hpiResources_OID, 5, 0 };
 
 //  { 1, 3, 6, 1, 3, 90, 4, 1, 0 }; 
-oid      saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
+static oid      saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
 
 static u_long sensor_count = 0;
 
@@ -84,21 +84,21 @@ static sensor_reading_to_mib sensor_reading[] = {
   {NULL, SAHPI_SRF_NOMINAL, POS_NOMINAL}};
 
 static int  
-saHpiSensorTable_modify_context(
-			     SaHpiSensorRecT *entry, 			     
-			     SaHpiSensorThresholdsT *sensor_threshold,
-			     SaHpiSensorEvtEnablesT *enables,
-			     SaHpiRptEntryT *rpt_entry,
-			     oid *, size_t,
-			     saHpiSensorTable_context *ctx);
+saHpiSensorTable_modify_context( SaHpiSensorRecT *entry, 			     
+				 SaHpiSensorThresholdsT *sensor_threshold,
+				 SaHpiSensorEvtEnablesT *enables,
+				 SaHpiRptEntryT *rpt_entry,
+				 oid *, size_t,
+				 saHpiSensorTable_context *ctx);
 
+//static
+//int send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx);
 
- static
-  int send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx);
-static
-void 
+static void 
  fill_sensor_threshold_info(saHpiSensorTable_context *ctx, 
 			    SaHpiSensorThresholdsT *sensor_threshold);
+
+/*
 static
 void
 make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list, 
@@ -107,6 +107,7 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 	      u_char type,
 	      const u_char *value, 
 	      const size_t value_len);
+*/
 
 
 int
@@ -119,7 +120,7 @@ populate_sensor(SaHpiSensorRecT *sensor,
 
   int rc = AGENT_ERR_NOERROR;
 
-  oid index_oid[1];
+  oid index_oid[SENSOR_INDEX_NR];
   oid column[2];
 
   netsnmp_index	sensor_index;
@@ -131,10 +132,12 @@ populate_sensor(SaHpiSensorRecT *sensor,
   DEBUGMSGTL((AGENT,"\n\t--- populate_sensor: Entry.\n"));
 
   if (sensor) {
-    sensor_index.len = 1;
+    sensor_index.len = SENSOR_INDEX_NR;
     // Look at the MIB to find out what the indexs are
-    index_oid[0] = sensor->Num;
-    // Possible more indexs?
+    index_oid[0] = rpt_entry->DomainId;
+    index_oid[1] = rpt_entry->ResourceId;
+    index_oid[2] = sensor->Num;
+
     sensor_index.oids = (oid *)&index_oid;
     // We are re-populating. Check for existing entries
     sensor_context = NULL;
@@ -144,17 +147,18 @@ populate_sensor(SaHpiSensorRecT *sensor,
       // New entry. Add it
       sensor_context = saHpiSensorTable_create_row(&sensor_index);
     } 
-    if (!sensor_context) 
+    if (!sensor_context) {
+      snmp_log(LOG_ERR,"Not enough memory for a sensor row!");
       return AGENT_ERR_INTERNAL_ERROR;
-	
+    }
     // Generate our full OID
     column[0] = 1;
     column[1] =  COLUMN_SAHPISENSORINDEX;
 	     
     build_full_oid(saHpiSensorTable_oid, saHpiSensorTable_oid_len,
-		       column, 2,
-		       &sensor_index,
-		       sensor_oid, MAX_OID_LEN, sensor_oid_len);
+		   column, 2,
+		   &sensor_index,
+		   sensor_oid, MAX_OID_LEN, sensor_oid_len);
 
     // By this stage, sensor_context surely has something in it.
     // '*_modify_context' does a checksum check to see if 
@@ -164,10 +168,10 @@ populate_sensor(SaHpiSensorRecT *sensor,
     // Get Threshold Data
 
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-     
-    DEBUGMSGTL((AGENT,"Calling SensorThresholdGet\n"));
+    }
 
     rc = saHpiSensorThresholdsGet(session_id,
 				  rpt_entry->ResourceId,
@@ -175,13 +179,21 @@ populate_sensor(SaHpiSensorRecT *sensor,
 				  &sensor_threshold);
 
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiSensorThresholdsGet fails with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  SensorThresholdGet fails with return code: %d.\n", rc));
+      return AGENT_ERR_OPERATION;
     }
 
     rc = saHpiSensorEventEnablesGet(session_id,
 				    rpt_entry->ResourceId,
 				    sensor->Num,
 				    &enables);
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiSensorEventEnablesGet fails with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  saHpiSensorEventEnablesGet fails with return code: %d.\n", rc));
+      // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
+    }
 
     if (saHpiSensorTable_modify_context(sensor, 
 					&sensor_threshold,
@@ -195,7 +207,8 @@ populate_sensor(SaHpiSensorRecT *sensor,
 	  sensor_count = CONTAINER_SIZE(cb.container);
 
 	  if (send_traps_on_startup == TRUE) {
-	    send_saHpiSensorTable_notification(sensor_context);
+	    DEBUGMSGTL((AGENT,"IBM-KR: TODO - notifications.\n"));
+	    //	    send_saHpiSensorTable_notification(sensor_context);
 	  }
 
     }
@@ -214,15 +227,17 @@ delete_sensor_row(SaHpiDomainIdT domain_id,
 	      SaHpiSensorNumT sensor_num) {
 
   saHpiSensorTable_context *ctx;
-  oid index_oid[1];
+  oid index_oid[SENSOR_INDEX_NR];
   netsnmp_index	sensor_index;
 
 
   // Look at the MIB to find out what the indexs are
-  index_oid[0] = sensor_num;
+  index_oid[0] = domain_id;
+  index_oid[1] = resource_id;
+  index_oid[2] = sensor_num;
   // Possible more indexs?
   sensor_index.oids = (oid *)&index_oid;
-  sensor_index.len = 1;
+  sensor_index.len = SENSOR_INDEX_NR;
 
   ctx = CONTAINER_FIND(cb.container, &sensor_index);
 
@@ -236,8 +251,7 @@ delete_sensor_row(SaHpiDomainIdT domain_id,
 }
 
 int  
-saHpiSensorTable_modify_context(
-				SaHpiSensorRecT *entry,
+saHpiSensorTable_modify_context(SaHpiSensorRecT *entry,
 				SaHpiSensorThresholdsT *sensor_threshold,
 				SaHpiSensorEvtEnablesT *enables,
 				SaHpiRptEntryT *rpt_entry,
@@ -301,7 +315,6 @@ saHpiSensorTable_modify_context(
     ctx->saHpiSensorDeassertEvents = enables->DeassertEvents;
 
 
-    //
     ctx->saHpiSensorIgnore = (entry->Ignore == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
     ctx->saHpiSensorReadingFormats = data.ReadingFormats;
@@ -629,22 +642,25 @@ int set_sensor(saHpiSensorTable_context *ctx) {
     }    
       // Get the seesion_id
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-     
-    DEBUGMSGTL((AGENT,"Calling saHpiSensorThresholdsSet with SensorNum: %d\n", ctx->saHpiSensorIndex ));
+    }
+
     rc = saHpiSensorThresholdsSet(session_id, 
 				ctx->resource_id,
 				ctx->saHpiSensorIndex,
 				&thd);
 
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiSensorThresholdSet fails with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiSensorThresholdsSet fails with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
 
     // Re-read the data. Might be different, so we will need
     // to populate the ctx.
-    DEBUGMSGTL((AGENT,"Calling SensorThresholdGet\n"));
+
     memset(&thd, 0x00, sizeof(SaHpiSensorThresholdsT));
     rc = saHpiSensorThresholdsGet(session_id,
 				  ctx->resource_id,
@@ -652,7 +668,9 @@ int set_sensor(saHpiSensorTable_context *ctx) {
 				  &thd);
 
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to  SensorThresholdGet fails with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  SensorThresholdGet fails with return code: %d\n", rc));      
+      return AGENT_ERR_OPERATION;
     }
     // Update the latest data.
     fill_sensor_threshold_info(ctx, &thd);
@@ -681,9 +699,10 @@ set_sensor_event(saHpiSensorTable_context *ctx) {
 
       // Get the seesion_id
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;    
-
+    }
     DEBUGMSGTL((AGENT,"Calling 'saHpiSensorEventEnablesSet'\n"));
     rc = saHpiSensorEventEnablesSet(session_id,
 				    ctx->resource_id,
@@ -691,7 +710,8 @@ set_sensor_event(saHpiSensorTable_context *ctx) {
 				    &enables);
 
     if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Error for 'saHpiSensorEventEnablesSet' is %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiSensorEventEnablesSet failed wit return code %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiSensorEventEnablesSet failed wit return code %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
     
@@ -701,7 +721,7 @@ set_sensor_event(saHpiSensorTable_context *ctx) {
 }
 
 
-
+/*
 int
 send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx) {
 
@@ -716,7 +736,7 @@ send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx) {
 			    (u_char *)saHpiSensorNotification_oid,
 			    OID_LENGTH(saHpiSensorNotification_oid)* sizeof(oid));
 
-  /*
+  
   make_SaHpiSensorTable_trap_msg(notification_vars,
 			      &ctx->index,
 			      COLUMN_SAHPIRDRRESOURCEID,
@@ -758,7 +778,7 @@ send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx) {
 		ASN_OBJECT_ID,
 		(char *)ctx->saHpiRdrRTP,
 		sizeof(oid)*ctx->saHpiRdrRTP_len);
-  */
+  
 
  snmp_varlist_add_variable(&notification_vars,
 			   saHpiSensorCount_oid, OID_LENGTH(saHpiSensorCount_oid),
@@ -804,47 +824,8 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 			
   
 }
+*/
 
-/************************************************************
- * keep binary tree to find context by name
- */
-static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-
-static int
-saHpiSensorTable_cmp(const void *lhs, const void *rhs)
-{
-    saHpiSensorTable_context *context_l =
-        (saHpiSensorTable_context *) lhs;
-    saHpiSensorTable_context *context_r =
-        (saHpiSensorTable_context *) rhs;
-
-    int rc;
-    if (context_l->domain_id < context_r->domain_id)
-          return -1;
-     rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
-
-     if (rc != 0)
-		return 1;
-
-     if (context_l->resource_id < context_r->resource_id)
-		return -1;
-
-     rc = (context_l->resource_id == context_r->resource_id) ? 0: 1;
-
-     if (rc != 0)
-		return 1;
-
-    if (context_l->saHpiSensorIndex < context_r->saHpiSensorIndex) 
-      return -1;
-
-    return (context_l->saHpiSensorIndex == context_r->saHpiSensorIndex) ? 0 : 1;
-
-}
 
 
 /************************************************************
@@ -995,6 +976,9 @@ saHpiSensorTable_extract_index(saHpiSensorTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
+    netsnmp_variable_list var_saHpiDomainID;
+    netsnmp_variable_list var_saHpiResourceID;
+
     netsnmp_variable_list var_saHpiSensorIndex;
     int             err;
 
@@ -1013,6 +997,14 @@ saHpiSensorTable_extract_index(saHpiSensorTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
+    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
+    var_saHpiDomainID.type = ASN_UNSIGNED;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
+    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
+    var_saHpiResourceID.type = ASN_UNSIGNED;
+    var_saHpiResourceID.next_variable = &var_saHpiSensorIndex;
+
     memset(&var_saHpiSensorIndex, 0x00, sizeof(var_saHpiSensorIndex));
     var_saHpiSensorIndex.type = ASN_UNSIGNED;
     var_saHpiSensorIndex.next_variable = NULL;
@@ -1020,7 +1012,7 @@ saHpiSensorTable_extract_index(saHpiSensorTable_context * ctx,
     /*
      * parse the oid into the individual components
      */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiSensorIndex);
+    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
     if (err == SNMP_ERR_NOERROR) {       
         ctx->saHpiSensorIndex = *var_saHpiSensorIndex.val.integer;    
     }
@@ -1497,6 +1489,8 @@ initialize_table_saHpiSensorTable(void)
      */
         /** index: saHpiSensorIndex */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiSensorTable_COL_MIN;
     table_info->max_column = saHpiSensorTable_COL_MAX;
@@ -1510,12 +1504,7 @@ initialize_table_saHpiSensorTable(void)
                                           "saHpiSensorTable:"
                                           "table_container");
        
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiSensorTable_secondary:"
-                                 "saHpiSensorTable:" "table_container"));
-    			 
-    cb.container->next->compare = saHpiSensorTable_cmp;
+  
     
     //    cb.can_set = 1;
 

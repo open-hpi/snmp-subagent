@@ -33,11 +33,12 @@ extern int send_traps_on_startup;
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
-oid             saHpiCtrlTable_oid[] = { saHpiCtrlTable_TABLE_OID };
-size_t          saHpiCtrlTable_oid_len = OID_LENGTH(saHpiCtrlTable_oid);
+static oid             saHpiCtrlTable_oid[] = { saHpiCtrlTable_TABLE_OID };
+static size_t          saHpiCtrlTable_oid_len = OID_LENGTH(saHpiCtrlTable_oid);
 
-oid      saHpiCtrlCount_oid[] = { hpiResources_OID, 3, 0};
   //1, 3, 6, 1, 3, 90, 3, 3, 0 };
+static oid      saHpiCtrlCount_oid[] = { hpiResources_OID, 3, 0};
+
 
 static u_long control_count = 0;
 
@@ -51,6 +52,7 @@ saHpiCtrlTable_modify_context(
 			     saHpiCtrlTable_context *ctx);
 
 
+
 int
 populate_control(SaHpiCtrlRecT *ctrl, 
 		 SaHpiRptEntryT *rpt_entry,
@@ -60,9 +62,9 @@ populate_control(SaHpiCtrlRecT *ctrl,
 
   int rc = AGENT_ERR_NOERROR;
 
-  oid index_oid[1];
-  oid column[2];
-   SaHpiSessionIdT session_id;
+  oid                          index_oid[CTRL_INDEX_NR];
+  oid                          column[2];
+  SaHpiSessionIdT    session_id;
   netsnmp_index	                ctrl_index;
   saHpiCtrlTable_context	*ctrl_context; 
   SaHpiCtrlStateT               ctrl_state;
@@ -71,9 +73,11 @@ populate_control(SaHpiCtrlRecT *ctrl,
 
   if (ctrl) {
 
-    ctrl_index.len = 1;
+    ctrl_index.len = CTRL_INDEX_NR;
     // Look at the MIB to find out what the indexs are
-    index_oid[0] = ctrl->Num;
+    index_oid[0] = rpt_entry->DomainId;
+    index_oid[1] = rpt_entry->ResourceId;
+    index_oid[2] = ctrl->Num;
     // Possible more indexes?
     ctrl_index.oids = (oid *)&index_oid;
     // We are re-populating. Check for existing entries
@@ -85,30 +89,34 @@ populate_control(SaHpiCtrlRecT *ctrl,
       ctrl_context = saHpiCtrlTable_create_row(&ctrl_index);
     } 
 
-    if (!ctrl_context) 
+    if (!ctrl_context) {
+      snmp_log(LOG_ERR,"Not enough memory for a control row!");
       return AGENT_ERR_INTERNAL_ERROR;
-	
+    }
     // Generate our full OID
     column[0] = 1; // SaHpiCtrlTable 1
     column[1] = COLUMN_SAHPICTRLNUM;
 	     
     build_full_oid(saHpiCtrlTable_oid, saHpiCtrlTable_oid_len,
 		   column, 2, // length of column is 2.
-		       &ctrl_index,
-		       ctrl_oid, MAX_OID_LEN, ctrl_oid_len);
+		   &ctrl_index,
+		   ctrl_oid, MAX_OID_LEN, ctrl_oid_len);
 
     // Get the Control State
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-     
+    }
     rc = saHpiControlStateGet(session_id,
 			      rpt_entry->ResourceId,
 			      ctrl->Num,
 			      &ctrl_state);
 
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiControlStateGet failed with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiControlStateGet failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
 
     // By this stage, ctrl_context surely has something in it.
@@ -117,9 +125,10 @@ populate_control(SaHpiCtrlRecT *ctrl,
     // information from RDR and the OIDs passed.
     if (saHpiCtrlTable_modify_context(ctrl, 
 				      &ctrl_state,
-				      rpt_entry,				      				      rdr_entry_oid, rdr_entry_oid_len,
+				      rpt_entry,
+				      rdr_entry_oid, rdr_entry_oid_len,
 				      ctrl_context)
-	    == AGENT_NEW_ENTRY) {
+	== AGENT_NEW_ENTRY) {
 
 	  CONTAINER_INSERT(cb.container, ctrl_context);	  
 	  control_count = CONTAINER_SIZE(cb.container);
@@ -134,7 +143,7 @@ populate_control(SaHpiCtrlRecT *ctrl,
 
 
 int
-read_ctrl_state(saHpiCtrlTable_context *ctx) {
+read_textline(saHpiCtrlTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
   SaHpiCtrlStateT state;
@@ -145,9 +154,10 @@ read_ctrl_state(saHpiCtrlTable_context *ctx) {
  
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;    
-   
+    }
     memset(&state, 0x00, sizeof(SaHpiCtrlStateT));
     state.Type = ctx->saHpiCtrlType-1;
     state.StateUnion.Text.Line = ctx->saHpiCtrlState[0];
@@ -159,13 +169,16 @@ read_ctrl_state(saHpiCtrlTable_context *ctx) {
 			      &state);
 
     if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateGet', rc: %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiControlStateGet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateGet' failed. return code: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
-    // Copy the data in the objects.
+    // Copy the data in the columns.
     ctx->saHpiCtrlTextType = state.StateUnion.Text.Text.DataType;
     ctx->saHpiCtrlTextLanguage = state.StateUnion.Text.Text.Language;
-    ctx->saHpiCtrlText_len = (state.StateUnion.Text.Text.DataLength < SAHPI_TEXT_MAX) ? state.StateUnion.Text.Text.DataLength : SAHPI_TEXT_MAX;
+    ctx->saHpiCtrlText_len = (state.StateUnion.Text.Text.DataLength < SAHPI_TEXT_MAX) ? 
+      state.StateUnion.Text.Text.DataLength : SAHPI_TEXT_MAX;
+
     memcpy(ctx->saHpiCtrlText,
 	   &state.StateUnion.Text.Text.Data,
 	   ctx->saHpiCtrlText_len);
@@ -188,9 +201,11 @@ set_ctrl_state(saHpiCtrlTable_context *ctx) {
  
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;    
-   
+    }
+
     memset(&state, 0x00, sizeof(SaHpiCtrlStateT));
     rc = saHpiControlStateGet(session_id,
 			      ctx->resource_id,
@@ -198,7 +213,8 @@ set_ctrl_state(saHpiCtrlTable_context *ctx) {
 			      &state);
 
     if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateGet', rc: %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiControlStateGet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiControlStateGet failed with return code: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
     // To be compliant with the HPI.
@@ -232,6 +248,8 @@ set_ctrl_state(saHpiCtrlTable_context *ctx) {
 	state.StateUnion.Text.Text.DataType = ctx->saHpiCtrlTextType-1;
 	state.StateUnion.Text.Text.Language = ctx->saHpiCtrlTextLanguage;
 	state.StateUnion.Text.Text.DataLength = ctx->saHpiCtrlText_len;
+	// reserve2 made sure that the length of data is less (or equal)
+	// than Text.Data can hold
 	memcpy(&state.StateUnion.Text.Text.Data,
 	       ctx-> saHpiCtrlText,
 	       ctx->saHpiCtrlText_len);
@@ -256,7 +274,8 @@ set_ctrl_state(saHpiCtrlTable_context *ctx) {
 			      &state);
 
     if (SA_OK != rc) {
-      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateSet', rc: %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiControlStateSet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiControlStateSet failed with return code %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
     return AGENT_ERR_NOERROR;
@@ -333,11 +352,11 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
       ctx->saHpiCtrlType = entry->Type +1;
       // IBM-KR: End of adding +1
       ctx->saHpiCtrlOem = entry->Oem;
-      ctx->saHpiCtrlRDR_len = rdr_entry_oid_len *sizeof(oid);
 
+      ctx->saHpiCtrlRDR_len = rdr_entry_oid_len *sizeof(oid);
       memcpy(ctx->saHpiCtrlRDR, rdr_entry, ctx->saHpiCtrlRDR_len);
 
-      // Union
+      // Unions
       memset(ctx->saHpiCtrlState, 0x00, SAHPI_CTRL_STATE_MAX);
       ctx->saHpiCtrlState_len = 0;
 
@@ -392,13 +411,13 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
       case SAHPI_CTRL_TYPE_STREAM:
 	// SaHpiCtrlRecStreamT
 	stream = entry->TypeUnion.Stream;
-
+	// define from SaHpi.h
 	ctx->saHpiCtrlAttributes_len = SAHPI_CTRL_MAX_STREAM_LENGTH;
 	memcpy(ctx->saHpiCtrlAttributes,
 	       &stream.Default.Stream, 
 	       ctx->saHpiCtrlAttributes_len);
 	// SaHpiCtrlStateStreamT
-	state->StateUnion.Stream.StreamLength = htonl(	state->StateUnion.Stream.StreamLength);
+	state->StateUnion.Stream.StreamLength = htonl(state->StateUnion.Stream.StreamLength);
 	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateStreamT);
 	memcpy(ctx->saHpiCtrlState,
 	       &state->StateUnion.Stream,
@@ -415,11 +434,15 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
 	ctx->saHpiCtrlAttributes[2] = text.Language;
 	// Text encoding
 	ctx->saHpiCtrlAttributes[3] = text.DataType;
+	ctx->saHpiCtrlAttributes_len = ( text.Default.Text.DataLength + 4 <= SAHPI_CTRL_STATE_MAX) ?
+	  text.Default.Text.DataLength : SAHPI_CTRL_STATE_MAX;
+
 	memcpy(ctx->saHpiCtrlAttributes+4,
 	       text.Default.Text.Data, 
-	       text.Default.Text.DataLength);
-	ctx->saHpiCtrlAttributes_len = text.Default.Text.DataLength + 4;
+	       ctx->saHpiCtrlAttributes_len);
 
+	ctx->saHpiCtrlAttributes_len += 4;
+		
 	//SaHpiCtrlStateTextT
 	ctx->saHpiCtrlState[0] = state->StateUnion.Text.Line;
 	ctx->saHpiCtrlState_len = sizeof(SaHpiTxtLineNumT);
@@ -430,10 +453,6 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
 	memcpy(ctx->saHpiCtrlText,
 	       state->StateUnion.Text.Text.Data,
 	       ctx->saHpiCtrlText_len);
-
-	DEBUGMSGTL((AGENT,"S: %d, A:%d, T:%d\n", ctx->saHpiCtrlState_len,
-		    ctx->saHpiCtrlAttributes_len,
-		    state->StateUnion.Text.Text.DataLength));
 	break;
 
       case SAHPI_CTRL_TYPE_OEM:
@@ -442,9 +461,11 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
 	ctx->saHpiCtrlAttributes_len = SAHPI_CTRL_OEM_CONFIG_LENGTH + sizeof(SaHpiManufacturerIdT);
 	memcpy(ctx->saHpiCtrlAttributes,
 	       &oem, ctx->saHpiCtrlAttributes_len );
+	
 	memcpy(ctx->saHpiCtrlAttributes + ctx->saHpiCtrlAttributes_len,
 	       &oem.Default.Body,
 	       oem.Default.BodyLength);
+
 	ctx->saHpiCtrlAttributes_len += oem.Default.BodyLength;
 	
 	//SaHpiCtrlStateOemT
@@ -480,45 +501,6 @@ saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
 }
 
 
-
-/************************************************************
- * keep binary tree to find context by name
- */
-static int      saHpiCtrlTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-
-static int
-saHpiCtrlTable_cmp(const void *lhs, const void *rhs)
-{
-    saHpiCtrlTable_context *context_l = (saHpiCtrlTable_context *) lhs;
-    saHpiCtrlTable_context *context_r = (saHpiCtrlTable_context *) rhs;
-
-    int rc;
-    if (context_l->domain_id < context_r->domain_id)
-          return -1;
-     rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
-
-     if (rc != 0)
-		return 1;
-
-     if (context_l->resource_id < context_r->resource_id)
-		return -1;
-
-     rc = (context_l->resource_id == context_r->resource_id) ? 0: 1;
-
-     if (rc != 0)
-		return 1;
-
-     if (context_l->saHpiCtrlNum < context_r->saHpiCtrlNum)
-       return -1;
-
-     return (context_l->saHpiCtrlNum == context_r->saHpiCtrlNum) ? 0 : 1;
-
-}
 
 
 
@@ -591,6 +573,8 @@ saHpiCtrlTable_extract_index(saHpiCtrlTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
+    netsnmp_variable_list var_saHpiDomainID;
+    netsnmp_variable_list var_saHpiResourceID;
     netsnmp_variable_list var_saHpiCtrlNum;
     int             err;
 
@@ -609,6 +593,14 @@ saHpiCtrlTable_extract_index(saHpiCtrlTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
+    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
+    var_saHpiDomainID.type = ASN_UNSIGNED;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
+    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
+    var_saHpiResourceID.type = ASN_UNSIGNED;
+    var_saHpiResourceID.next_variable = &var_saHpiCtrlNum;
+
     memset(&var_saHpiCtrlNum, 0x00, sizeof(var_saHpiCtrlNum));
     var_saHpiCtrlNum.type = ASN_UNSIGNED;
     var_saHpiCtrlNum.next_variable = NULL;
@@ -617,7 +609,7 @@ saHpiCtrlTable_extract_index(saHpiCtrlTable_context * ctx,
     /*
      * parse the oid into the individual components
      */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiCtrlNum);
+    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
@@ -648,7 +640,7 @@ saHpiCtrlTable_can_delete(saHpiCtrlTable_context * undo_ctx,
 {
 
    
-    return 0;
+  return 1;
 }
 
 
@@ -756,19 +748,14 @@ saHpiCtrlTable_set_reserve1(netsnmp_request_group * rg)
 {
   saHpiCtrlTable_context *row_ctx =
         (saHpiCtrlTable_context *) rg->existing_row;
-    saHpiCtrlTable_context *undo_ctx =
-        (saHpiCtrlTable_context *) rg->undo_info;
+
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
-    int             rc;
 
+    int rc;
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_reserve1: Entry\n"));
+
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -843,7 +830,7 @@ saHpiCtrlTable_set_reserve1(netsnmp_request_group * rg)
 				       rc);
       } 
     }
-
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_reserve1: Exit\n"));
 }
 
 void
@@ -851,18 +838,14 @@ saHpiCtrlTable_set_reserve2(netsnmp_request_group * rg)
 {
    saHpiCtrlTable_context *row_ctx =
         (saHpiCtrlTable_context *) rg->existing_row;
-    saHpiCtrlTable_context *undo_ctx =
-        (saHpiCtrlTable_context *) rg->undo_info;
+
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
 
     rg->rg_void = rg->list->ri;
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_reserve2: Entry\n"));
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -959,7 +942,7 @@ saHpiCtrlTable_set_reserve2(netsnmp_request_group * rg)
             netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
                                            rc);
     }
-
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_reserve2: Exit\n"));
 }
 
 /************************************************************
@@ -985,7 +968,7 @@ saHpiCtrlTable_set_action(netsnmp_request_group * rg)
 
     int             rc = SNMP_ERR_NOERROR;
 
-
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_action: Entry\n"));
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -998,7 +981,7 @@ saHpiCtrlTable_set_action(netsnmp_request_group * rg)
 
 	    if (row_ctx->saHpiCtrlType-1 == SAHPI_CTRL_TYPE_TEXT) {
 	      // Want to read a new line.
-	      if (read_ctrl_state(row_ctx) != AGENT_ERR_NOERROR) {
+	      if (read_textline(row_ctx) != AGENT_ERR_NOERROR) {
 		// Would be nice to have : "Wrong line error"
 		rc = SNMP_ERR_GENERR;
 	      }
@@ -1037,7 +1020,7 @@ saHpiCtrlTable_set_action(netsnmp_request_group * rg)
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
 				       current->ri,rc);
 
-    
+    DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_action: Exit\n"));    
 }
 
 /************************************************************
@@ -1143,14 +1126,14 @@ initialize_table_saHpiCtrlTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    /*
-     * TODO: add any external indexes here.
-     */
+ 
 
     /*
      * internal indexes
      */
         /** index: saHpiCtrlNum */
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiCtrlTable_COL_MIN;
@@ -1162,13 +1145,7 @@ initialize_table_saHpiCtrlTable(void)
     cb.get_value = saHpiCtrlTable_get_value;
     cb.container = netsnmp_container_find("saHpiCtrlTable_primary:"
                                           "saHpiCtrlTable:"
-                                          "table_container");
-    
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiCtrlTable_secondary:"
-                                 "saHpiCtrlTable:" "table_container"));
-    cb.container->next->compare = saHpiCtrlTable_cmp;
+                                          "table_container");    
     
 
     cb.create_row = (UserRowMethod *) saHpiCtrlTable_create_row;
