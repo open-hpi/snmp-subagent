@@ -23,7 +23,7 @@
 
 #include <net-snmp/library/snmp_assert.h>
 #include "saHpiEventTable.h"
-
+#include <saHpiSystemEventLogTable.h>
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
@@ -372,6 +372,38 @@ delete_entry(saHpiEventTable_context *ctx) {
   return AGENT_ERR_NULL_DATA;
   
 }
+
+
+
+int
+delete_event_row(SaHpiDomainIdT domain_id,
+		 SaHpiResourceIdT resource_id,
+		 SaHpiSelEntryIdT num)
+{
+  saHpiEventTable_context *ctx;
+
+  netsnmp_index event_index;
+  oid event_oid[3];
+  DEBUGMSGTL((AGENT,"-delete_event_row\n"));
+
+  event_oid[0] = domain_id;
+  event_oid[1] = resource_id;
+  event_oid[2] = num;
+    
+  event_index.oids = (oid *)&event_oid;
+  event_index.len = 3;
+
+  ctx = CONTAINER_FIND(cb.container, &event_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    event_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+
+  return AGENT_ERR_NOT_FOUND;  
+}
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -390,7 +422,10 @@ saHpiEventTable_cmp(const void *lhs, const void *rhs)
 
     int rc;
 
-    DEBUGMSGTL((AGENT,"_cmp\n"));
+    DEBUGMSGTL((AGENT,"saHpiEventTable_cmp: Called\n"));
+    DEBUGMSGTL((AGENT,"Checking: %d.%d ? %d.%d\n",
+		context_l->domain_id, context_l->resource_id,
+		context_r->domain_id, context_r->resource_id));
     if (context_l->domain_id < context_r->domain_id)
       return -1;
 
@@ -851,8 +886,8 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
     saHpiEventTable_context *undo_ctx =
       (saHpiEventTable_context *) rg->undo_info;
 
- saHpiEventTable_context *ctx = NULL;
-     netsnmp_index	index;
+    //saHpiEventTable_context *ctx = NULL;
+    //  netsnmp_index	index;
 
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
@@ -860,11 +895,6 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
 
     rg->rg_void = rg->list->ri;
 
-
-    if (undo_ctx) {
-      DEBUGMSGTL((AGENT,"Have undo_ctx?"));
-      DEBUGMSGTL((AGENT,"%d\n", undo_ctx->saHpiEventDelete));
-    }
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -875,30 +905,31 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
         case COLUMN_SAHPIEVENTDELETE:
             /** RowStatus = ASN_INTEGER */	  
 	  rc = netsnmp_check_vb_rowstatus(var, 
-					  undo_ctx ? undo_ctx->saHpiEventDelete : 0 );
-					  
-
+					  undo_ctx ? undo_ctx->saHpiEventDelete : 0 );	 
 	  break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	    break;
         }
 
         if (rc) {
 	  DEBUGMSGTL((AGENT,"rci s %d\n", rc));
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
 	}
     }
 
     for (current = rg->list; current; current = current->next) {
       // Does the row exist?
-      index.oids = current->tri->index_oid;
-      index.len = current->tri->index_oid_len;
-      ctx = CONTAINER_FIND(cb.container, &index);
-      if (ctx == NULL) {
-	rc = SNMP_ERR_GENERR;
-	 var = current->ri->requestvb;
+      //index.oids = current->tri->index_oid;
+      //index.len = current->tri->index_oid_len;
+      //ctx = CONTAINER_FIND(cb.container, &index);
+      //if (ctx == NULL) {
+      if ( ((saHpiEventTable_context *) rg->existing_row)->hash == 0) {
+	rc =  SNMP_ERR_NOSUCHNAME;
+	var = current->ri->requestvb;
+
 	// SNMPv2-TC has a diagram of actions.
 	if ((*var->val.integer == SNMP_ROW_CREATEANDGO) // createAndGo(4)
 	    || (*var->val.integer == SNMP_ROW_ACTIVE) // active (1)
@@ -910,12 +941,12 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
 	  rc = SNMP_ERR_WRONGVALUE;
 	if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
 	  rc = SNMP_ERR_INCONSISTENTNAME;
-
+      
 	if (rc)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 rc);
       }
-    }  
+    }
 }
 
 /************************************************************
@@ -956,13 +987,19 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
       }
     */
       DEBUGMSGTL((AGENT,"ACTION: %d\n", *var->val.integer));
+
       if ((*var->val.integer == SNMP_ROW_DESTROY)) {
 	// Only do the operation when its set to destroy(6)
 	if (delete_entry(row_ctx) != AGENT_ERR_NOERROR) {
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 SNMP_ERR_INCONSISTENTVALUE);
-	} else // It went fine
+	} else {// It went fine
 	  rg->row_deleted = 1; 
+	  //Delete it also in SEL.
+	  delete_SEL_row(row_ctx->domain_id,
+			 row_ctx->resource_id,
+			 row_ctx->saHpiEventIndex);
+	}
       } else // The rest of SNMP_ROW operations (4,5)
 	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 				       SNMP_ERR_INCONSISTENTVALUE);
@@ -1119,12 +1156,13 @@ initialize_table_saHpiEventTable(void)
     netsnmp_table_container_register(my_handler, table_info, &cb,
                                      cb.container, 1);
 
+  netsnmp_register_read_only_instance(netsnmp_create_handler_registration
+					("event_count_entries",
+					 event_count_entries_handler,
+					 saHpiEventCount_oid,
+					 OID_LENGTH(saHpiEventCount_oid),
+					 HANDLER_CAN_RONLY));
 
-    netsnmp_register_read_only_counter32_instance("event_count_entries",
-					      saHpiEventCount_oid,
-					      OID_LENGTH(saHpiEventCount_oid),
-					      &event_count,
-					      NULL);
 }
 
 /************************************************************
@@ -1529,3 +1567,19 @@ saHpiEventTable_get_value(netsnmp_request_info *request,
     return SNMP_ERR_NOERROR;
 }
 
+
+int
+event_count_entries_handler(netsnmp_mib_handler *handler,
+			 netsnmp_handler_registration *reginfo,
+			 netsnmp_agent_request_info *reqinfo,
+			 netsnmp_request_info *requests) {
+
+  event_count = CONTAINER_SIZE(cb.container);
+
+  if (reqinfo->mode == MODE_GET)
+    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+			     (u_char *) &event_count,
+			     sizeof(event_count));
+  
+  return SNMP_ERR_NOERROR;
+}
