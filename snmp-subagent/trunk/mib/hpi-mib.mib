@@ -25,7 +25,7 @@ hpi MODULE-IDENTITY
 		Sean Dague
 	      		Postal: IBM
 				2455 South Road
-				Poughkeepsie, Ny 12601
+				Poughkeepsie, NY 12601
 				US
 			Tel:	+1 845 433 2965
 			Fax:	+1 845 433 2379
@@ -57,7 +57,7 @@ hpi MODULE-IDENTITY
 		David Judkovics
 	       		Postal: IBM
 				1701 North St.
-				Endicott (Home of IBM), NY 13760
+				Endicott, NY 13760
 				US
 			Tel:	+1 607 429 4745
 			E-mail: djudkovi@us.ibm.com
@@ -3288,7 +3288,7 @@ SaHpiUserEventEntry ::= SEQUENCE {
 
 	saHpiUserEventTimestamp		SaHpiTime,
 
--- User event , writeable.
+-- IBM-DJ User event , writeable.
 	
 	saHpiUserEventTextType		SaHpiTextType,
 	saHpiUserEventTextLanguage 	SaHpiTextLanguage,
@@ -6197,17 +6197,13 @@ hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
 
 saHpiSensorNotification NOTIFICATION-TYPE
 	OBJECTS {	
-		saHpiDomainId,
-		saHpiResourceId,
---		saHpiEventIndex,
-		saHpiEventSeverity
---		saHpiEventSensorCategory,
---		saHpiEventSensorState,
---		saHpiEventSensorNum,
---		saHpiEventSensorType,
---		saHpiEventSensorOptionalData,
---		saHpiEventSensorTriggerReadingRaw,
---		saHpiEventSensorOem
+		saHpiSensorEventType,
+		saHpiSensorEventCategory,
+		saHpiSensorEventState,
+		saHpiEventSensorTriggerReadingType,
+		saHpiEventSensorTriggerReading,
+		saHpiEventSensorTriggerThresholdType,
+		saHpiEventSensorTriggerThreshold
 	}
 	STATUS current
  	DESCRIPTION
@@ -6218,8 +6214,9 @@ saHpiSensorNotification NOTIFICATION-TYPE
 
 saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
 	OBJECTS {	
-		saHpiDomainId,
-		saHpiResourceId
+		saHpiSensorEnableChangeEventType,
+		saHpiSensorEnableChangeEventCategory,
+		saHpiSensorEnableChangeEventState
 	}
 	STATUS current
  	DESCRIPTION
@@ -6230,14 +6227,7 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
 
 saHpiResourceNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEntryID,
---		saHpiResourceEntityPath,
---		saHpiResourceCapabilities,
---		saHpiResourceSeverity,
---		saHpiEntryCount,
---		saHpiEntryUpdateCount
+		saHpiResourceEventType
 	}
 	STATUS current
 	DESCRIPTION
@@ -6246,8 +6236,7 @@ saHpiResourceNotifications NOTIFICATION-TYPE
 	
 saHpiDomainNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
+		saHpiDomainEventType
 	}
 	STATUS current
 	DESCRIPTION
@@ -6257,14 +6246,7 @@ saHpiDomainNotifications NOTIFICATION-TYPE
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventWatchdogNum,
---		saHpiEventWatchdogAction,
---		saHpiEventWatchdogPreTimerAction,
---		saHpiEventWatchdogUse
+		saHpiWatchdogEventAction
 	}
 	STATUS current
 	DESCRIPTION
@@ -6274,12 +6256,7 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventHotSwapState,
---		saHpiEventPreviousHotSwapState
+		saHpiHotSwapEventState
 	}
 	STATUS current
 	DESCRIPTION
@@ -6289,8 +6266,7 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 
 saHpiSoftwareNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
+		saHpiSoftwareEventType
 	}
 	STATUS current
 	DESCRIPTION
@@ -6301,15 +6277,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 	failure to start-up properly, or inconsistencies in persisted data."
 	::= { hpiNotifications 7 }
 
-
 saHpiOEMNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventOemManufacturerIdT,
---		saHpiEventOemEventData
+		saHpiOEMEventData
 	}
 	STATUS current
 	DESCRIPTION
@@ -6318,11 +6288,7 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 
 saHpiUserNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventUserEventData
+		saHpiUserEventTimestamp
 	}
 	STATUS current
 	DESCRIPTION
