@@ -860,7 +860,7 @@ int populate_drt(void) {
 	netsnmp_index domain_refer_index;
 
 	saHpiDomainReferenceTable_context  *domain_ref_ctx;
-	int rc = 0;
+	SaErrorT rc = 0;
 
 	SaHpiEntryIdT 	EntryId;
 	SaHpiEntryIdT 	NextEntryId;
@@ -868,27 +868,15 @@ int populate_drt(void) {
 
 	memset(&DrtEntry, 0, sizeof(DrtEntry));
 
-#if 0
-	SaHpiSessionIdT sid;
-	
-	if ( SA_OK != saHpiSessionOpen(
-		SAHPI_UNSPECIFIED_DOMAIN_ID, 
-		&sid, NULL) ){
-		dbg("ERROR: populate_drt, saHpiSessionOpen Failed!"); 
-		rc = -1;
-	} else {
-		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
-		top_drt.sid = sid;
-		populate_drt_call  = TRUE;
-	}
-#endif
-
 	EntryId = SAHPI_FIRST_ENTRY;
 	do {
-		saHpiDrtEntryGet(top_drt.sid, 
+		rc = saHpiDrtEntryGet(top_drt.sid, 
 				 EntryId,
 				 &NextEntryId,
 				 &DrtEntry);
+
+		if (rc != SA_OK) break;
+
 		EntryId = NextEntryId;
 
 		/* create domain tuple/ index */
@@ -917,6 +905,8 @@ int populate_drt(void) {
 
 		/* commit/add */
 		CONTAINER_INSERT(cb.container, domain_ref_ctx);
+
+		dbg("just inserted row into container, populate drt");
 
 	} while (EntryId != SAHPI_LAST_ENTRY);
 
