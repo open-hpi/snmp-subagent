@@ -21,7 +21,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <glib.h>
 
-#define ENDIAN_FIX 1
 /*
  * Our Net-SNMP "call-sign"
  */

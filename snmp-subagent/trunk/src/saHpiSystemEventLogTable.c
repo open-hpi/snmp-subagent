@@ -110,23 +110,14 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 	}
       //event_log_entries = info.Entries;
       event_log_size = info.Size;
-      memcpy (&event_log_update_timestamp,
-	      &info.UpdateTimestamp, sizeof (SaHpiTimeT));
-#ifdef ENDIAN_FIX
-      event_log_update_timestamp.low = htonl (event_log_update_timestamp.low);
 
-      event_log_update_timestamp.high =
-	htonl (event_log_update_timestamp.high);
-#endif 
-      memcpy (&event_log_current_timestamp,
-	      &info.CurrentTime, sizeof (SaHpiTimeT));
-#ifdef ENDIAN_FIX
-      event_log_current_timestamp.low =
-	htonl (event_log_current_timestamp.low);
+// IBM-KR: Endian
+      event_log_update_timestamp.low = info.UpdateTimestamp & 0xffffffff;
+      event_log_update_timestamp.high =info.UpdateTimestamp >> 32;
 
-      event_log_current_timestamp.high =
-	htonl (event_log_current_timestamp.high);
-#endif
+      event_log_current_timestamp.low =info.CurrentTime & 0xffffffff;
+      event_log_current_timestamp.high = info.CurrentTime >> 32;
+
       event_log_enabled = (info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
       event_log_overflow_flag =
 	(info.OverflowFlag == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
@@ -240,15 +231,9 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
       ctx->resource_id = rpt->ResourceId;
       ctx->domain_id = rpt->DomainId;
 
-
-      memcpy (&ctx->saHpiSystemEventLogAddedTimestamp,
-	      &sel->Timestamp, sizeof (SaHpiTimeT));
-#ifdef ENDIAN_FIX
-      ctx->saHpiSystemEventLogAddedTimestamp.low =
-	htonl (ctx->saHpiSystemEventLogAddedTimestamp.low);
-      ctx->saHpiSystemEventLogAddedTimestamp.high =
-	htonl (ctx->saHpiSystemEventLogAddedTimestamp.high);
-#endif
+// IBM-KR: Endian
+      ctx->saHpiSystemEventLogAddedTimestamp.low =sel->Timestamp & 0xffffffff;
+      ctx->saHpiSystemEventLogAddedTimestamp.high = sel->Timestamp >> 32;
 
       ctx->saHpiSystemEventLogIndex = sel->EntryId;
 
@@ -259,15 +244,10 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
 	  ctx->saHpiSystemEventLogType = event_entry->EventType + 1;
 
-	  memcpy (&ctx->saHpiSystemEventLogTimestamp,
-		  &event_entry->Timestamp, sizeof (SaHpiTimeT));
-#ifdef ENDIAN_FIX
-	  ctx->saHpiSystemEventLogTimestamp.low =
-	    htonl (ctx->saHpiSystemEventLogTimestamp.low);
+// IBM-KR: Endian
+	  ctx->saHpiSystemEventLogTimestamp.low = event_entry->Timestamp & 0xffffffff;
+	  ctx->saHpiSystemEventLogTimestamp.high = event_entry->Timestamp >> 32;
 
-	  ctx->saHpiSystemEventLogTimestamp.high =
-	    htonl (ctx->saHpiSystemEventLogTimestamp.high);
-#endif
 	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity+1;
 
 	  if (event_entry->EventType == SAHPI_ET_SENSOR)

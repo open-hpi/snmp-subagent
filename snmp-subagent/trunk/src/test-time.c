@@ -8,14 +8,13 @@
   done
  */
 
-#include <SaHpi.h>
 #include <stdio.h>
 #include <time.h>
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 int
-convert (SaHpiTimeT hpi_time) {
+convert (long long hpi_time) {
 	time_t hpi_tt = 0;
 	time_t local_tt= 0;
 	struct tm *hpi_tm,*local_tm;
@@ -118,8 +117,12 @@ main (int argc, char **argv){
       /* manipuate the information ourselves */
       for(vars = response->variables; vars; vars = vars->next_variable) {
         if (vars->type == ASN_COUNTER64) {
-		memcpy(&time_is, vars->val.counter64, sizeof(SaHpiTimeT));
-		rc=		convert(time_is);	
+
+		time_is = (*vars->val.counter64).high;
+        	time_is = time_is << 32;
+        	time_is += (*vars->val.counter64).low;
+	
+		rc=convert(time_is);	
 		if (rc != 0)
 			fprintf(stderr,"+++ test failed\n");
 		else
