@@ -493,8 +493,7 @@ u_long rpt_new_entry_count;
 u_long event_new_entry_count;
 u_long sel_new_entry_count;
 
-int
-build_full_oid (oid * prefix, size_t prefix_len,
+int build_full_oid (oid * prefix, size_t prefix_len,
 		oid * column, size_t column_len,
 		netsnmp_index * index,
 		oid * out_oid, size_t in_len, size_t * out_len)
