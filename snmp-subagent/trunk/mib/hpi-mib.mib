@@ -5219,8 +5219,6 @@ saHpiSensorThdLowCriticalIsWritable	OBJECT-TYPE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdLowCriticalEntry 2}
 
---IBMDJ make type and value writeable for all related tables
-	
 saHpiSensorThdLowCriticalType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
         MAX-ACCESS      read-write
@@ -6255,7 +6253,6 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
                         implementation-dependent means.
 	
 	Bit flags are:
---IBMDJ  are theses the correct values for mask values??????
 	SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
  	SAHPI_WATCHDOG_EXP_BIOS_POST   0x04
  	SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
