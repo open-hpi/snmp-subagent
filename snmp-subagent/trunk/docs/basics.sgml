@@ -12,14 +12,14 @@
         marks of others.
 -->
 <chapter>
-  <title>Introduction</title>
+  <title>Skeleton code</title>
   <sect1>
-    <title>The Basics</title>
+    <title>Generation of skeleton code</title>
     <para>
     
     </para>
     <sect2>
-      <title>Purpose of this Document</title>
+      <title>mib2c</title>
       <para>
         This document is intended to serve as the developer
         manual for writting SNMP sub-agents using NetSNMP 5.0.x API. 
@@ -34,38 +34,6 @@
 	and usage scenarios. It is a living document, and as such will
 	evolve.
 
-	<!--
-      <mediaobject>
-        <imageobject>
-          <imagedata fileref="images/set-actions.jpg">
-        </imageobject>
-      </mediaobject>
-	-->
-      </para>
-    </sect2>
-    <sect2>
-      <title>Terminology</title>
-      <para>
-        <informaltable frame="all">
-          <tgroup cols="2">
-            <thead>
-              <row>
-                <entry>Acronym</entry>
-                <entry>Description</entry>
-              </row>
-            </thead>
-            <tbody>
-              <row>
-                <entry>HPI</entry>
-                <entry>Hardware Platform Interface</entry>
-              </row>
-              <row>
-                <entry>Sub-agent</entry>
-                <entry>The SNMP backend.</entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </informaltable>
       </para>
     </sect2>
   </sect1>
