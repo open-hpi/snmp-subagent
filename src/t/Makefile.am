@@ -3,7 +3,8 @@ MAINTAINERCLEANFILES = Makefile.in
 INCLUDES 		= -I$(top_srcdir)/include 
 
 TESTS = \
-	t0.sh
+	t0.sh \
+	t1.sh
 
 clean:
 	rm -f *.log

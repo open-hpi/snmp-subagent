@@ -22,8 +22,10 @@ fi
 
 start
 
-q $SNMPWALK -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET hpi | grep -v Counter64 > $0.tmp
-cat $0.tmp | grep -v $SNMPWALK > $0.result
+dbg "Remove the Event tables"
+q $SNMPSET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiEventDelete.0.1.0 = 6  > $0.tmp
+q $SNMPWALK -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET events >> $0.tmp
+cat $0.tmp | grep -v $SNMPSET | grep -v $SNMPWALK > $0.result
 rm $0.tmp
 
 check
