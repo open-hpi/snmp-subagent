@@ -50,7 +50,8 @@ hpiSubagent_SOURCES	= hpiB.c \
 			saHpiSoftwareEventTable.c \
 			saHpiUserEventTable.c \
 			saHpiWatchdogEventTable.c \
-			saHpiWatchdogTable.c
+			saHpiWatchdogTable.c \
+			hpiCheckIndice.c
 
 hpiSubagent_LDADD	= 
 hpiSubagent_LDFLAGS	= 
