@@ -4401,6 +4401,7 @@ SaHpiWatchdogEntry ::= SEQUENCE {
 	saHpiWatchdogTimerUseExpFlags	Unsigned32,
 	saHpiWatchdogTimerInitialCount	Unsigned32,
 	saHpiWatchdogTimerPresentCount	Unsigned32,
+	saHpiWatchdogTimerReset		TruthValue,
 	saHpiWatchdogOem		Unsigned32,
 	saHpiWatchdogRDR		RowPointer
       }
@@ -4567,19 +4568,31 @@ saHpiWatchdogTimerPresentCount OBJECT-TYPE
                         number of milliseconds between each tick. "
         ::= {saHpiWatchdogEntry 10}
 
+saHpiWatchdogTimerReset OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"This object provides a method to start or restart
+	the watchdog timer from the initial countdown value. 
+
+	Setting this to true(1) will 'strobe' the counter and reset to
+	the initial countdown value as specified in 
+	saHpiWatchdogTimerInitialCount."
+	::= {saHpiWatchdogEntry 11}
+
 saHpiWatchdogOem OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Reserved for OEM use"
-        ::= {saHpiWatchdogEntry 11}
+        ::= {saHpiWatchdogEntry 12}
 
 saHpiWatchdogRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiWatchdogEntry 12}
+	::= {saHpiWatchdogEntry 13}
 -- 
 -- Notifications
 --
@@ -4919,6 +4932,7 @@ saHpiWatchdogGroup OBJECT-GROUP
 		saHpiWatchdogTimerUseExpFlags,
 		saHpiWatchdogTimerInitialCount,
 		saHpiWatchdogTimerPresentCount,
+		saHpiWatchdogTimerReset,
 		saHpiWatchdogOem,
 		saHpiWatchdogRDR
 	}
