@@ -26,6 +26,7 @@
 #include <saHpiCtrlTable.h>
 #include <saHpiInventoryTable.h>
 #include <saHpiWatchdogTable.h>
+#include <saHpiHotSwapTable.h>
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiEventTable.h>
 #include <hpiSubagent.h>
@@ -240,6 +241,7 @@ main (int argc, char **argv) {
   initialize_table_saHpiCtrlTable();
   initialize_table_saHpiInventoryTable();
   initialize_table_saHpiWatchdogTable();
+  initialize_table_saHpiHotSwapTable();
 
   initialize_table_saHpiSystemEventLogTable();
   initialize_table_saHpiEventTable();

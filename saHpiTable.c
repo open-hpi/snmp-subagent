@@ -29,6 +29,7 @@
 #include <saHpiTable.h>
 #include <saHpiRdrTable.h>
 #include <saHpiSystemEventLogTable.h>
+#include <saHpiHotSwapTable.h>
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
@@ -180,24 +181,32 @@ populate_rpt() {
 
 	   // Now we have to see if this RTP record has any
 	   // RDRs. If so, need to populate RDR
+	   // Generate our full OID for the first object.
+	   column[0] = 1;
+	   // Point to first object.
+	   column[1] = COLUMN_SAHPIDOMAINID;
+	   
+	   build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
+			  column, column_len,
+			  &rpt_index,
+			  full_oid, MAX_OID_LEN, &full_oid_len);
 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-	     // Generate our full OID for the first object.
-	     column[0] = 1;
-	     // Point to first object.
-	     column[1] = COLUMN_SAHPIDOMAINID;
-	     
-	     build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
-			    column, column_len,
-			    &rpt_index,
-			    full_oid, MAX_OID_LEN, &full_oid_len);
-			    
 	     populate_rdr(&rpt_entry, rpt_entry.ResourceId, 
 			  full_oid, full_oid_len);
 	   }
 	   // if (rpt... blah
-	   //
-	   populate_sel(&rpt_entry);
+	   if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
+	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
+	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
+	     populate_sel(&rpt_entry);
+	   }
+	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
+	     /*
+	     populate_hotswap(&rpt_entry, rpt_entry.ResourceId,
+			      full_oid, full_oid_len);
+	     */
+	   }
 	 } // rc != SA_OK
 	 // Try next one ?
 	 else {

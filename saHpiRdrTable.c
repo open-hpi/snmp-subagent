@@ -133,7 +133,6 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	
 	if (rdr_entry.RdrType == SAHPI_SENSOR_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
-	  DEBUGMSGTL((AGENT,"CHILD ID: %d\n", child_id));
 	  rc = populate_sensor(&rdr_entry.RdrTypeUnion.SensorRec, 
 			       resource_id,
 			       full_oid, full_oid_len, 
@@ -141,7 +140,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	}
 	if (rdr_entry.RdrType == SAHPI_CTRL_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
-	  DEBUGMSGTL((AGENT,"CHILD ID: %d\n", child_id));
+
 	  rc =populate_control(&rdr_entry.RdrTypeUnion.CtrlRec,
 			       full_oid, full_oid_len,
 			       child_oid, &child_oid_len);

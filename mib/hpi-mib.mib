@@ -2278,7 +2278,8 @@ SaHpiHotSwapEntry ::= SEQUENCE {
     saHpiHotSwapEventSeverity  INTEGER,
     saHpiInsertTimeout         Unsigned32,
     saHpiExtractTimeout        Unsigned32,
-    saHpiActionRequest         INTEGER }
+    saHpiActionRequest         INTEGER,
+    saHpiHotSwapRTP		RowPointer }
 
 
 saHpiHotSwapIndicator OBJECT-TYPE
@@ -2452,6 +2453,13 @@ saHpiActionRequest OBJECT-TYPE
         "Derived from function prototype in the SAI-HPI-A.01.01 page 69."
     ::= {saHpiHotSwapEntry 9}
 
+saHpiHotSwapRTP	OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"OID for RTP"
+	::= {saHpiHotSwapEntry 10}
+	
 --/*******************************************************************************
 -- * ********************************************************************************
 -- * ********** ********** ********** Resource Data Record ********** **********
@@ -4887,7 +4895,8 @@ saHpiHotSwapGroup OBJECT-GROUP
 		saHpiHotSwapEventSeverity,
 		saHpiInsertTimeout,
 		saHpiExtractTimeout,
-		saHpiActionRequest
+		saHpiActionRequest,
+		saHpiHotSwapRTP
 	}
 	STATUS current
 	DESCRIPTION
