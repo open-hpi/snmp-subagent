@@ -1013,12 +1013,11 @@ saHpiCtrlTable_set_action(netsnmp_request_group * rg)
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
-    }
 
     if (rc) 
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
 				       current->ri,rc);
-
+    }
     DEBUGMSGTL((AGENT,"saHpiCtrlTable_set_action: Exit\n"));    
 }
 
