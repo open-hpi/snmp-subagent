@@ -52,6 +52,15 @@ hpi MODULE-IDENTITY
 				US
 			Tel:	+1 617 693 1718
 			E-mail: konradr@us.ibm.com
+		
+		David Judkovics
+	       		Postal: IBM
+				1701 North St.
+				Endicott (Home of IBM), NY 13760
+				US
+			Tel:	+1 607 429 4745
+			E-mail: djudkovi@us.ibm.com
+			
         "
     DESCRIPTION
 	"This MIB defines the HPI instrumentation based on
@@ -509,6 +518,103 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 				zulu (137)
 			}
 
+SaHpiSensorUnits ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION	"This is a list of all the sensor units supported by HPI."
+	SYNTAX		INTEGER {
+				undefined(0),
+				unspecified(1), 
+				degreesC(2), 
+				degreesF(3),
+				degreesK(4), 
+				volts(5), 
+				amps(6),
+				watts(7), 
+				joules(8), 
+				coulombs(9),
+				va(10), 
+				nits(11), 
+				lumen(12),
+				lux(13), 
+				candela(14), 
+				kpa(15),
+				psi(16), 
+				newton(17), 
+				cfm(18),
+				rpm(19), 
+				hz(20), 
+				microsecond(21),
+				millisecond(22), 
+				second(23), 
+				minute(24),
+				hour(25), 
+				day(26), 
+				week(27),
+				mil(28), 
+				inches(29), 
+				feet(30),
+				cuInches(31), 
+				cuFeet(32), 
+				mm(33),
+				cm(34), 
+				m(35), 
+				cuCm(36),
+				cuM(37), 
+				liters(38), 
+				fluidOunce(39),
+				radians(40), 
+				steradians(41), 
+				revolutions(42),
+				cycles(43), 
+				gravities(44), 
+				ounce(45),
+				pound(46), 
+				ftLbs(47), 
+				ozInches(48),
+				gauss(49), 
+				gilberts(50), 
+				henry(51),
+				millihenry(52), 
+				farad(53), 
+				microfarad(54),
+				ohms(55), 
+				siemens(56), 
+				mole(57),
+				becquerel(58), 
+				ppm(59), 
+				reserved(60),
+				decibels(61), 
+				dba(62), 
+				dbc(63),
+				gray(64), 
+				sievert(65), 
+				colorTempDegK(66),
+				bit(67), 
+				kilobit(68), 
+				megabit(69),
+				gigabit(70), 
+				byte(71), 
+				kilobyte(72),
+				megabyte(73), 
+				gigabyte(74), 
+				word(75),
+				dword(76), 
+				qword(77), 
+				line(78),
+				hit(79), 
+				miss(80), 
+				retry(81),
+				reset(82), 
+				overrun(83), 
+				underrun(84),
+				collision(85), 
+				packets(86), 
+				messages(87),
+				characters(88), 
+				errors(89), 
+				correctableErrors(90),
+				uncorrectableErrors(91)
+			} 
 
 --
 -- DomainInfo, DRT, DAT, and RPT Entry
@@ -4173,30 +4279,45 @@ saHpiSensorEntry OBJECT-TYPE
 
 SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorIndex			Unsigned32,
-	saHpiSensorType			INTEGER,
+	saHpiSensorType				INTEGER,
 	saHpiSensorCategory			INTEGER,
+	
+	saHpiEnableCtrl	  			TruthValue,
+	
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsSupported		OCTET STRING,
-	saHpiSensorStatus			INTEGER,
-	saHpiSensorAssertEvents			OCTET STRING,
-	saHpiSensorDeassertEvents		OCTET STRING,
-	saHpiSensorIgnore			TruthValue,
-	saHpiSensorReadingFormats		Unsigned32,
-	saHpiSensorIsNumeric                   TruthValue,
-	saHpiSensorSignFormat                  INTEGER,
-	saHpiSensorBaseUnits                   INTEGER,
-	saHpiSensorModifierUnits               INTEGER,
-	saHpiSensorModifierUse                 INTEGER,
+	
 
-	saHpiSensorFactorsStatic		TruthValue,
-	saHpiSensorFactors			OCTET STRING,
-	saHpiSensorFactorsLinearization	INTEGER,
+--    SaHpiSensorDataFormatT  DataFormat;    /* Format of the data */
+--typedef struct {
+--    SaHpiBoolT                 IsSupported;    /* Indicates if sensor data 
+--                                                   readings are supported.*/
+--    SaHpiSensorReadingTypeT    ReadingType;    /* Type of value for sensor 
+--                                                   reading. */
+--    SaHpiSensorUnitsT          BaseUnits;      /* Base units (meters, etc.)  */
+--    SaHpiSensorUnitsT          ModifierUnits;  /* Modifier unit (second, etc.)*/
+--    SaHpiSensorModUnitUseT     ModifierUse;    /* Modifier use(m/sec, etc.)  */
+--    SaHpiBoolT                 Percentage;     /* Is value a percentage */
+--    SaHpiSensorRangeT          Range;          /* Valid range of sensor */
+--    SaHpiFloat64T              AccuracyFactor; /* Accuracy */
+--} SaHpiSensorDataFormatT;
+
+	saHpiSensorIsSupported		        TruthValue, 
+	saHpiSensorReadingType			INTEGER,
+	saHpiSensorBaseUnits			SaHpiSensorUnits,
+	saHpiSensorModifierUnits	        SaHpiSensorUnits,
+	saHpiSensorModifierUse                 	INTEGER,
 	saHpiSensorPercentage 			TruthValue,
+	        
+	saHpiSensorRangeFlags  			OCTET STRING,      					
+--	saHpiSensorReadingMax			OCTET STRING,
+--	saHpiSensorReadingMin			OCTET STRING,
+--	saHpiSensorReadingNominal		OCTET STRING,
+--	saHpiSensorReadingNormalMax		OCTET STRING,
+--	saHpiSensorReadingNormalMn		OCTET STRING,
 
-	saHpiSensorRangeFlags			OCTET STRING,
-	saHpiSensorHasThresholds		TruthValue,
-	saHpiSensorThresholdCapabilities	INTEGER,
-	saHpiSensorOEM				Unsigned32,
+--	saHpiAccuracyFactor
+	
 	saHpiSensorRDR				RowPointer
 	}
 
@@ -4205,7 +4326,10 @@ saHpiSensorIndex OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The sensor number. "
+        DESCRIPTION     "The sensor number. 
+	The following specifies the named range for standard sensor numbers. */
+	SAHPI_STANDARD_SENSOR_MIN   (SaHpiSensorNumT)0x00000100
+	SAHPI_STANDARD_SENSOR_MAX   (SaHpiSensorNumT)0x000001FF"
         ::= {saHpiSensorEntry 1}
 
 
@@ -4253,31 +4377,39 @@ saHpiSensorType OBJECT-TYPE
 				lan (40),
 				managementSubsystemHealth (41),
 				battery (42),
-				operational (162),
-				oemSensor (194)
+				operational (161),
+				oemSensor (193)
 			}
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "General sensor type. "
         ::= {saHpiSensorEntry 2}
 
+saHpiEnableCtrl OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "True if HPI User can enable or disable sensor via saHpiSensorEnableSet()."
+        ::= {saHpiSensorEntry 3}
+
+
 saHpiSensorCategory OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
-				unspecified (1),
-				threshold (2),
-				usage (3),
-				state (4),
-				predFail (5),
-				limit (6),
-				performance (7),
-				severity (8),
-				presence (9),
-				enable (10),
-				availability (11),
-				redundancy (12),
-				user (127),
-				generic (128)
+				unspecified (2),
+				threshold (3),
+				usage (4),
+				state (5),
+				predFail (6),
+				limit (7),
+				performance (8),
+				severity (9),
+				presence (10),
+				enable (11),
+				availability (12),
+				redundancy (13),
+				user (128),
+				generic (129)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -4291,422 +4423,184 @@ saHpiSensorCategory OBJECT-TYPE
 	have state meanings other than those identified with other event 
 	categories.
 	"		
-        ::= {saHpiSensorEntry 3}
+        ::= {saHpiSensorEntry 4}
 
 saHpiSensorEventsCategoryControl OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
 				perEvent(1),
-				entireSensor(2),
-				globalDisable(3),
-				noEvents(4)
+				readOnlyMasks(2),
+				readOnly(3)
 			}
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Event Control
-			
-			 This type defines how sensor event messages can be controlled (can be turned 
-			 off and on for each type of event, etc.).
-			
-			    perEvent(1) ,      Event message control per event 
-			    entireSensor(2),   Control for entire sensor only 
-			    globalDisable(3),  Global disable of events only 
-			    noEvents(4)        Events not supported 
-			"
-        ::= {saHpiSensorEntry 4}
+        DESCRIPTION     
+	"perEvent - Event message control per event,             
+	   or by entire sensor; sensor event enable     
+	   status can be changed, and assert/deassert   
+	   masks can be changed      
+	readOnlyMasks - Control for entire sensor only; sensor       
+	   event enable status can be changed, but      
+	   assert/deassert masks cannot be changed 
+	readOnly - Event control not supported; sensor event    
+	   enable status cannot be changed and          
+	   assert/deassert masks cannot be changed"
+        ::= {saHpiSensorEntry 5}
 
 saHpiSensorEventsSupported OBJECT-TYPE
         SYNTAX          OCTET STRING 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Bit mask of event states supported.
-	The following event states are specified relative to the 
-	categories listed in saHpiSensorCategory. The event types 
-	are only valid for their given category. Each set of 
+        DESCRIPTION     
+	"Event States
+	
+	The following event states are specified relative to the categories listed 
+	above. The event types are only valid for their given category. Each set of 
 	events is labeled as to which category it belongs to.
-	Each event will have only one event state associated with it. 
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
+	Each event will have only one event state associated with it. When retrieving
+	the event status or event enabled status a bit mask of all applicable event 
+	states is used. Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+	
+	SaHpiEventCategoryT == <any> 
+	
+	SAHPI_ES_UNSPECIFIED (SaHpiEventStateT)0x0000
+	
+	SaHpiEventCategoryT == SAHPI_EC_THRESHOLD 
+	When using these event states, the event state should match
+	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+	event severity of SAHPI_MINOR).
+	
+	SAHPI_ES_LOWER_MINOR (SaHpiEventStateT)0x0001
+	SAHPI_ES_LOWER_MAJOR (SaHpiEventStateT)0x0002
+	SAHPI_ES_LOWER_CRIT  (SaHpiEventStateT)0x0004
+	SAHPI_ES_UPPER_MINOR (SaHpiEventStateT)0x0008
+	SAHPI_ES_UPPER_MAJOR (SaHpiEventStateT)0x0010
+	SAHPI_ES_UPPER_CRIT  (SaHpiEventStateT)0x0020
+	
+	SaHpiEventCategoryT == SAHPI_EC_USAGE
+	SAHPI_ES_IDLE   (SaHpiEventStateT)0x0001
+	SAHPI_ES_ACTIVE (SaHpiEventStateT)0x0002
+	SAHPI_ES_BUSY   (SaHpiEventStateT)0x0004
+	
+	SaHpiEventCategoryT == SAHPI_EC_STATE
+	SAHPI_ES_STATE_DEASSERTED (SaHpiEventStateT)0x0001
+	SAHPI_ES_STATE_ASSERTED   (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_PRED_FAIL
+	SAHPI_ES_PRED_FAILURE_DEASSERT (SaHpiEventStateT)0x0001
+	SAHPI_ES_PRED_FAILURE_ASSERT   (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_LIMIT
+	SAHPI_ES_LIMIT_NOT_EXCEEDED (SaHpiEventStateT)0x0001
+	SAHPI_ES_LIMIT_EXCEEDED     (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_PERFORMANCE
+	SAHPI_ES_PERFORMANCE_MET   (SaHpiEventStateT)0x0001
+	SAHPI_ES_PERFORMANCE_LAGS  (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_SEVERITY 
+	When using these event states, the event state should match
+	the event severity 
+	
+	SAHPI_ES_OK                  (SaHpiEventStateT)0x0001
+	SAHPI_ES_MINOR_FROM_OK       (SaHpiEventStateT)0x0002
+	SAHPI_ES_MAJOR_FROM_LESS     (SaHpiEventStateT)0x0004
+	SAHPI_ES_CRITICAL_FROM_LESS  (SaHpiEventStateT)0x0008
+	SAHPI_ES_MINOR_FROM_MORE     (SaHpiEventStateT)0x0010
+	SAHPI_ES_MAJOR_FROM_CRITICAL (SaHpiEventStateT)0x0020
+	SAHPI_ES_CRITICAL            (SaHpiEventStateT)0x0040
+	SAHPI_ES_MONITOR             (SaHpiEventStateT)0x0080
+	SAHPI_ES_INFORMATIONAL       (SaHpiEventStateT)0x0100
+	
+	SaHpiEventCategoryT == SAHPI_EC_PRESENCE
+	SAHPI_ES_ABSENT  (SaHpiEventStateT)0x0001
+	SAHPI_ES_PRESENT (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_ENABLE
+	SAHPI_ES_DISABLED (SaHpiEventStateT)0x0001
+	SAHPI_ES_ENABLED  (SaHpiEventStateT)0x0002
+	
+	SaHpiEventCategoryT == SAHPI_EC_AVAILABILITY
+	SAHPI_ES_RUNNING       (SaHpiEventStateT)0x0001
+	SAHPI_ES_TEST          (SaHpiEventStateT)0x0002
+	SAHPI_ES_POWER_OFF     (SaHpiEventStateT)0x0004
+	SAHPI_ES_ON_LINE       (SaHpiEventStateT)0x0008
+	SAHPI_ES_OFF_LINE      (SaHpiEventStateT)0x0010
+	SAHPI_ES_OFF_DUTY      (SaHpiEventStateT)0x0020
+	SAHPI_ES_DEGRADED      (SaHpiEventStateT)0x0040
+	SAHPI_ES_POWER_SAVE    (SaHpiEventStateT)0x0080
+	SAHPI_ES_INSTALL_ERROR (SaHpiEventStateT)0x0100
+	
+	SaHpiEventCategoryT == SAHPI_EC_REDUNDANCY
+	SAHPI_ES_FULLY_REDUNDANT                  	(SaHpiEventStateT)0x0001
+	SAHPI_ES_REDUNDANCY_LOST                  	(SaHpiEventStateT)0x0002
+	SAHPI_ES_REDUNDANCY_DEGRADED              	(SaHpiEventStateT)0x0004
+	SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0008
+	SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0010
+	SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0020
+	SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    	(SaHpiEventStateT)0x0040
+	SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     	(SaHpiEventStateT)0x0080
+	
+	SaHpiEventCategoryT == SAHPI_EC_GENERIC || SAHPI_EC_SENSOR_SPECIFIC
+	These event states are implementation-specific.
+	
+	SAHPI_ES_STATE_00  (SaHpiEventStateT)0x0001
+	SAHPI_ES_STATE_01  (SaHpiEventStateT)0x0002
+	SAHPI_ES_STATE_02  (SaHpiEventStateT)0x0004
+	SAHPI_ES_STATE_03  (SaHpiEventStateT)0x0008
+	SAHPI_ES_STATE_04  (SaHpiEventStateT)0x0010
+	SAHPI_ES_STATE_05  (SaHpiEventStateT)0x0020
+	SAHPI_ES_STATE_06  (SaHpiEventStateT)0x0040
+	SAHPI_ES_STATE_07  (SaHpiEventStateT)0x0080
+	SAHPI_ES_STATE_08  (SaHpiEventStateT)0x0100
+	SAHPI_ES_STATE_09  (SaHpiEventStateT)0x0200
+	SAHPI_ES_STATE_10  (SaHpiEventStateT)0x0400
+	SAHPI_ES_STATE_11  (SaHpiEventStateT)0x0800
+	SAHPI_ES_STATE_12  (SaHpiEventStateT)0x1000
+	SAHPI_ES_STATE_13  (SaHpiEventStateT)0x2000
+	SAHPI_ES_STATE_14  (SaHpiEventStateT)0x4000"
+        ::= {saHpiSensorEntry 6}
 
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.  
 
-	A NULL value indicates not set/used.
-
-	The event status values are specified as a list of
-	possible string enumerations. For example for a sensor
-	that is category severity, this object might hold the values:
-	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
-
-	Depending on the category of the sensor, the possible values
-	of this object differ.
-
-	For the category = unspecified, the value can be:
-		'SAHPI_ES_UNSPECIFIED'
-
-	For threshold category, all of the possible values are:
-		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
- 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
- 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
-
-	For a usage category, all off the possible values are:
-		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
-
-	For state category, all of the possible values are:
-		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
-
-	For predictive failure category, all of the possible values are:
-		'SAHPI_ES_PRED_FAILURE_DEASSERT,
-		 SAHPI_ES_PRED_FAILURE_ASSERT'
-
-	For limit category, the possible values are: 	
-		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
-		 SAHPI_ES_LIMIT_EXCEEDED'
-
-	For performance category, the possible values are:
-		'SAHPI_ES_PERFORMANCE_MET, 
-		SAHPI_ES_PERFORMANCE_LAGS'
-
-	For severity category, the possible values are:
-		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
-		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
-		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
-		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
-		SAHPI_ES_INFORMATIONAL'
-
-	For presence category, the possible values are:
-		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
-
-	For enable category, the possible values are:
-		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
-			
-	For availability category, the possible values are: 
-		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
-		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
-		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
-		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
-
-	For redundancy category, the possible values are:
-		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
-		SAHPI_ES_REDUNDANCY_DEGRADED, 
-		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
-
-	For generic category, the possible values are:
-		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
-		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
-		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
-		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
-		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
-		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
-		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
-		SAHPI_ES_STATE_14'"
-        ::= {saHpiSensorEntry 5}
-
-saHpiSensorStatus OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				eventsEnabled(129),
-				scanEnabled(65),				
-				busy(33),
-				eventsEnabledandscanEndabled(193),
-				eventsEnabledandbusy(161),
-				scanEnabledandBusy(97),
-				eventsEnabledandscanEnabledandBusy(225)	
-			} 
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION	
-	"The sensor status structure is used to determine if sensor 	
-	scanning is enabled and if events are enabled. If events are 
-	enabled, the structure will have valid data for the outstanding 
-	sensor event states.    "
-	::= {saHpiSensorEntry 6}
+saHpiSensorIsSupported	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if sensor data readings are supported."
+        ::= {saHpiSensorEntry 7}
 	
 
-saHpiSensorAssertEvents OBJECT-TYPE
-	SYNTAX		OCTET STRING
-	MAX-ACCESS	read-write
+saHpiSensorReadingType 	OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined(0),
+				int64(1),    
+				uint64(2),   
+				float64(3),  
+				buffer(4)    			
+			} 
+	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
-	"This object provides the ability to get the disable or enable event 
-message generation status for individual sensor events. The sensor
-event states are relative to the event category specified by the
-sensor. See the saHpiEventCategory object for more information.
-
-A event state in this object indicates that an event
-will be generated when the corresponding event state 
-changes from de-asserted to asserted on that sensor. "
-	::= {saHpiSensorEntry 7}
-
-
-saHpiSensorDeassertEvents OBJECT-TYPE
-	SYNTAX		OCTET STRING	
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION	
-	"This object provides the ability to get the disable or enable event 
-message generation status for individual sensor events. The sensor
-event states are relative to the event category specified by the
-sensor. See the saHpiEventCategory object for more information.
-
-A event state  in this object indicates that an event
-will be generated when the corresponding event state 
-changes from asserted to de-asserted on that sensor. "
+	"Type of value for sensor reading."
 	::= {saHpiSensorEntry 8}
 
-
-saHpiSensorIgnore OBJECT-TYPE
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Ignore sensor (entity not present, disabled, etc.)
-
-	IBM-KR: If this is 'false' then this sensor wouldn't show up at all, would it?"
-        ::= {saHpiSensorEntry 9}
-
-saHpiSensorReadingFormats OBJECT-TYPE
-        SYNTAX          Unsigned32 (1..7)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Indicates if sensor supports readings in raw, interpreted,
-	and/or event status formats
-	 
-	SAHPI_SRF_RAW         0x01
- 	SAHPI_SRF_INTERPRETED 0x02
- 	SAHPI_SRF_EVENT_STATE 0x04
-
-	"
-        ::= {saHpiSensorEntry 10}
-
-saHpiSensorIsNumeric OBJECT-TYPE
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "If FALSE, rest of this structure is not meaningful."
-        ::= {saHpiSensorEntry 11}
-
-saHpiSensorSignFormat OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				unsigned(1),
-				sdf1SComplement(2),
-				sdf2SComplement(3)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Sign Format
-			 
-	This type defines what the sign format of the sensor's raw value is 
-	(1's complement, unsigned, etc.).  "
-        ::= {saHpiSensorEntry 12}
-
-saHpiSensorBaseUnits OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				unspecified (1),
-				degreesC (2),
-				degreesF (3),
-				degreesK (4),
-				volts (5),
-				amps (6),
-				watts (7),
-				joules (8),
-				coulombs (9),
-				va (10),
-				nits (11),
-				lumen (12),
-				lux (13),
-				candela (14),
-				kpa (15),
-				psi (16),
-				newton (17),
-				cfm (18),
-				rpm (19),
-				hz (20),
-				microsecond (21),
-				millisecond (22),
-				second (23),
-				minute (24),
-				hour (25),
-				day (26),
-				week (27),
-				mil (28),
-				inches (29),
-				feet (30),
-				cuIn (31),
-				cuFeet (32),
-				mm (33),
-				cm (34),
-				m (35),
-				cuCm (36),
-				cuM (37),
-				liters (38),
-				fluidOunce (39),
-				radians (40),
-				steradians (41),
-				revolutions (42),
-				cycles (43),
-				gravities (44),
-				ounce (45),
-				pound (46),
-				ftLb (47),
-				ozIn (48),
-				gauss (49),
-				gilberts (50),
-				henry (51),
-				millihenry (52),
-				farad (53),
-				microfarad (54),
-				ohms (55),
-				siemens (56),
-				mole (57),
-				becquerel (58),
-				ppm (59),
-				reserved (60),
-				decibels (61),
-				dba (62),
-				dbc (63),
-				gray (64),
-				sievert (65),
-				colorTempDegK (66),
-				bit (67),
-				kilobit (68),
-				megabit (69),
-				gigabit (70),
-				byte (71),
-				kilobyte (72),
-				megabyte (73),
-				gigabyte (74),
-				word (75),
-				dword (76),
-				qword (77),
-				line (78),
-				hit (79),
-				miss (80),
-				retry (81),
-				reset (82),
-				overrun (83),
-				underrun (84),
-				collision (85),
-				packets (86),
-				messages (87),
-				characters (88),
-				errors (89),
-				correctableErrors (90),
-				uncorrectableErrors (91)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Base units (meters, etc.). 
-	This is a list of all the sensor units supported by HPI."
-        ::= {saHpiSensorEntry 13}
-
-saHpiSensorModifierUnits OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				unspecified (1),
-				degreesC (2),
-				degreesF (3),
-				degreesK (4),
-				volts (5),
-				amps (6),
-				watts (7),
-				joules (8),
-				coulombs (9),
-				va (10),
-				nits (11),
-				lumen (12),
-				lux (13),
-				candela (14),
-				kpa (15),
-				psi (16),
-				newton (17),
-				cfm (18),
-				rpm (19),
-				hz (20),
-				microsecond (21),
-				millisecond (22),
-				second (23),
-				minute (24),
-				hour (25),
-				day (26),
-				week (27),
-				mil (28),
-				inches (29),
-				feet (30),
-				cuIn (31),
-				cuFeet (32),
-				mm (33),
-				cm (34),
-				m (35),
-				cuCm (36),
-				cuM (37),
-				liters (38),
-				fluidOunce (39),
-				radians (40),
-				steradians (41),
-				revolutions (42),
-				cycles (43),
-				gravities (44),
-				ounce (45),
-				pound (46),
-				ftLb (47),
-				ozIn (48),
-				gauss (49),
-				gilberts (50),
-				henry (51),
-				millihenry (52),
-				farad (53),
-				microfarad (54),
-				ohms (55),
-				siemens (56),
-				mole (57),
-				becquerel (58),
-				ppm (59),
-				reserved (60),
-				decibels (61),
-				dba (62),
-				dbc (63),
-				gray (64),
-				sievert (65),
-				colorTempDegK (66),
-				bit (67),
-				kilobit (68),
-				megabit (69),
-				gigabit (70),
-				byte (71),
-				kilobyte (72),
-				megabyte (73),
-				gigabyte (74),
-				word (75),
-				dword (76),
-				qword (77),
-				line (78),
-				hit (79),
-				miss (80),
-				retry (81),
-				reset (82),
-				overrun (83),
-				underrun (84),
-				collision (85),
-				packets (86),
-				messages (87),
-				characters (88),
-				errors (89),
-				correctableErrors (90),
-				uncorrectableErrors (91)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Modifier unit (second, etc.).  
-	This is a list of all the sensor units supported by HPI"
-        ::= {saHpiSensorEntry 14}
-
+saHpiSensorBaseUnits 	OBJECT-TYPE
+	SYNTAX		SaHpiSensorUnits
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"See Definition."
+	::= {saHpiSensorEntry 9}
+	
+saHpiSensorModifierUnits 	OBJECT-TYPE
+	SYNTAX		SaHpiSensorUnits
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"See Definition."
+	::= {saHpiSensorEntry 10}
+	
 saHpiSensorModifierUse OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
@@ -4722,117 +4616,32 @@ saHpiSensorModifierUse OBJECT-TYPE
 	base unit == meter, modifier unit == seconds, and
 	 modifier unit use == basicOverModifier(1). 
 	The resulting unit would be meters per second."			
-        ::= {saHpiSensorEntry 15}
-
-saHpiSensorFactorsStatic OBJECT-TYPE
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " True if the sensor factors are static. If 
-			factors vary over sensor range, and are not
-                        accessible through HPI."
-        ::= {saHpiSensorEntry 16}
-
-
-saHpiSensorFactors OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE (1..10))
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	This object represents certain attributes of the factor table.
-	It must be interpreted in the context saHpiSensorFactorsT 
-	(from the HPI specification). The information in this object
-	is determined based on saHpiSensorFactorsStatic.
-
-	Octets  are as follow:
-	1-2		M_Factor (16-bit signed integer)
-	3-4		B_Factor (16-bit signed integer)
-	5-6		Accuracy Factor (16-but unsigned integer)
-	7		Tolerance Factor (8-bit unsigned integer)
-	8		Accuracy Exponent (8-bit unsigned integer)
-	9		Result Exponent	(8-bit signed integer)
-	10		B Exponent	(8-bit signed integer) "	
-        ::= {saHpiSensorEntry 17}
-
-saHpiSensorFactorsLinearization OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				unspecified (1),
-				linear (2),
-				ln (3),
-				log10 (4),
-				log2 (5),
-				e (6),
-				exp10 (7),
-				exp2 (8),
-				oneoverx (9),
-				sqrx (10),
-				cubex (11),
-				sqrtx (12),
-				cubertx (13),
-				nonlinear (114),
-				oem (115)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Linearization"
-        ::= {saHpiSensorEntry 18}
+        ::= {saHpiSensorEntry 11}
 
 saHpiSensorPercentage OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Is the value a percentage."
-        ::= {saHpiSensorEntry 19}
+        ::= {saHpiSensorEntry 12}
 
-saHpiSensorRangeFlags OBJECT-TYPE
-	SYNTAX		OCTET STRING
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	
-	"Defines which range flags the sensor supports. They
-	can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
-	nothing if the sensor does not support any ranges."
-	::= {saHpiSensorEntry 20}
-
-saHpiSensorHasThresholds OBJECT-TYPE
-        SYNTAX          TruthValue
+saHpiSensorRangeFlags 	OBJECT-TYPE
+        SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " True if the sensor supports threshold values."
-        ::= {saHpiSensorEntry 21}
+        DESCRIPTION
+        "Defines which range flags the sensor supports. They
+        can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
+        nothing if the sensor does not support any ranges."
+        ::= {saHpiSensorEntry 13}
 
-saHpiSensorThresholdCapabilities OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				raw(2),
-				interpreted(3),
-				rawAndInterpreted(4)
-			}
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"
-	If set to raw(2) the raw value in the
-	threshold tables is used for reading/writing. 
-	If set to interpreted(3) the interpreted value in the
-	threshold tables is used for reading/writing. 
-	If set to rawAndInterpreted(4) both raw value and interpreted
-	value can be used for reading/writing."
-	::= {saHpiSensorEntry 22}
-	
-saHpiSensorOEM OBJECT-TYPE
-        SYNTAX          Unsigned32 
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " Reserved for OEM use."
-        ::= {saHpiSensorEntry 23}
 
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 24}
+	::= {saHpiSensorEntry 14}
 
 --
 -- /*******************************************************************************
@@ -5036,8 +4845,6 @@ saHpiSensorReadingCurrentEventStatus OBJECT-TYPE
 		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
 		SAHPI_ES_STATE_14'"
         ::= {saHpiSensorReadingCurrentEntry 5}
-
-
 
 saHpiSensorReadingMaxTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMaxEntry
@@ -8011,24 +7818,11 @@ saHpiSensorGroup	OBJECT-GROUP
 		saHpiSensorCategory,
 		saHpiSensorEventsCategoryControl,
 		saHpiSensorEventsSupported,
-		saHpiSensorStatus,
-        	saHpiSensorAssertEvents,
-        	saHpiSensorDeassertEvents,
-		saHpiSensorIgnore,
-		saHpiSensorReadingFormats,
-		saHpiSensorIsNumeric,
-		saHpiSensorSignFormat,
 		saHpiSensorBaseUnits,
 		saHpiSensorModifierUnits,
 		saHpiSensorModifierUse,
-		saHpiSensorFactorsStatic,
-		saHpiSensorFactors,
-		saHpiSensorFactorsLinearization,
 		saHpiSensorPercentage,
 		saHpiSensorRangeFlags,
-		saHpiSensorHasThresholds,
-		saHpiSensorThresholdCapabilities,
-		saHpiSensorOEM,
 		saHpiSensorRDR
 	}
 	STATUS current
