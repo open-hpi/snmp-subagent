@@ -491,10 +491,11 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
 {
     saHpiWatchdogTable_context *row_ctx =
         (saHpiWatchdogTable_context *) rg->existing_row;
-    /*    saHpiWatchdogTable_context *undo_ctx =
-	  (saHpiWatchdogTable_context *) rg->undo_info;*/
+    saHpiWatchdogTable_context *ctx = NULL;
+
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
+    netsnmp_index index;
     int             rc;
 
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_reserve1.Entry\n"));
@@ -583,7 +584,16 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
                                            rc);
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
-
+    for (current = rg->list; current; current = current->next) {
+    // Does the row exist?
+	index.oids = current->tri->index_oid;
+	index.len = current->tri->index_oid_len;
+	ctx = CONTAINER_FIND(cb.container, &index);
+	if (ctx == NULL) {
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 SNMP_ERR_GENERR);
+	}
+    }
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_reserve1. Exit\n"));
 }
 

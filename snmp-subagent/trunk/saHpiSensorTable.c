@@ -729,9 +729,12 @@ static int
 saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
                            saHpiSensorTable_context * src)
 {
+
+
     if (!dst || !src)
         return 1;
 
+    DEBUGMSGTL((AGENT,"_row_copy"));
     /*
      * copy index, if provided
      */
@@ -1006,8 +1009,12 @@ saHpiSensorTable_delete_row(saHpiSensorTable_context * ctx)
 void
 saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
 {
+
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
+    
+    netsnmp_index index;
+    saHpiSensorTable_context *ctx = NULL;
     int             rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve1. Entry\n"));
@@ -1071,7 +1078,37 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
                                            rc);
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
-
+    for (current = rg->list; current; current = current->next) {
+    // Does the row exist?
+      
+	index.oids = current->tri->index_oid;
+	index.len = current->tri->index_oid_len;
+	/*
+	if (rg->existing_row->index.oids) {
+	  DEBUGMSGTL((AGENT,"index exist!"));
+	  DEBUGMSGTL((AGENT,rg->existing_row->index.oids,
+		      rg->existing_row->index->len));
+	  DEBUGMSGTL((AGENT,"\n"));
+	}
+	*/
+	ctx = CONTAINER_FIND(cb.container, &index);
+	if (ctx == NULL) {
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 SNMP_ERR_GENERR);
+	} else {
+	  
+	  // Stick the values in the row_ctx, for next operation needed 
+	  DEBUGMSGTL((AGENT,"There is one, the index is:\n"));
+	  /*
+	  DEBUGMSGTL((AGENT,rg->existing_row->index->oids,
+		      rg->existing_row->index->len));
+	  DEBUGMSGTL((AGENT,"\n"));
+	  */
+	  //	  free (rg->existing_row)
+	  // rg->existing_row 
+	}
+	  
+    }
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve1: Exit (rc:%d)\n", rc));
 }
 
