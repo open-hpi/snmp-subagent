@@ -45,6 +45,11 @@ oid saHpiDomainReferenceTable_oid[] = { saHpiDomainReferenceTable_TABLE_OID };
 size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_oid);
 
 
+void poplulate_saHpiDomainReferenceTable() 
+{
+	dbg("WARNING: poplulate_saHpiDomainReferenceTable: not implemented!");
+}
+
 #ifdef saHpiDomainReferenceTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
