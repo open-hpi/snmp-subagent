@@ -2284,6 +2284,7 @@ saHpiEventEntry OBJECT-TYPE
 SaHpiEventEntry ::= SEQUENCE {
 
 	saHpiEvent		RowPointer,
+	saHpiEventType		INTEGER,
 	saHpiEventSeverity	INTEGER,
 	saHpiEventHistorical	TruthValue,
 	saHpiEventQueueStatus	Unsigned32,
@@ -2297,6 +2298,26 @@ saHpiEvent OBJECT-TYPE
     DESCRIPTION
 	"Pointer to the event."
     ::= {saHpiEventEntry 1}
+
+saHpiEventType 		OBJECT-TYPE
+        SYNTAX          INTEGER{
+				undefined (0),
+				resource(1),
+				domain(2),
+				sensor(3),
+				sensorEnableChange(4),
+				hotswap(5),
+				watchdog(6),
+				hpiSw(7),
+				oem(8),
+				user(10)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Event type. 
+	Note: The enumerated named have +1 added as opposed to the 
+	SA HPI spec for the same constants.  "
+        ::= {saHpiEventEntry 2}
 
 saHpiEventSeverity OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2313,7 +2334,7 @@ saHpiEventSeverity OBJECT-TYPE
         DESCRIPTION     "Severity of event. 
 	Note: The enumerated named have +1 added as opposed to the 
 	SA HPI spec for the same constants.  "
-        ::= {saHpiEventEntry 2}
+        ::= {saHpiEventEntry 3}
 
 
 saHpiEventHistorical OBJECT-TYPE
@@ -2322,7 +2343,7 @@ saHpiEventHistorical OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	"True is event log."
-    ::= {saHpiEventEntry 3}
+    ::= { saHpiEventEntry 4 }
 
 
 saHpiEventQueueStatus OBJECT-TYPE
@@ -2332,7 +2353,7 @@ saHpiEventQueueStatus OBJECT-TYPE
     DESCRIPTION
 	"  This status word is returned to HPI Users that request it
 	when saHpiEventGet() is called."
-    ::= {saHpiEventEntry 4}
+    ::= { saHpiEventEntry 5 }
     
 saHpiEventSaHpiTime	OBJECT-TYPE
     SYNTAX	SaHpiTimeString
@@ -2343,7 +2364,7 @@ saHpiEventSaHpiTime	OBJECT-TYPE
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiEventEntry 5}
+    ::= { saHpiEventEntry 6 }
 
 
 --IBMKR: Add more in description.
