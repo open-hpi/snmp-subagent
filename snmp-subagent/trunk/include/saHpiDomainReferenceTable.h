@@ -139,6 +139,8 @@ struct sa_resource_table {
         GStaticRecMutex lock;
 };
 
+#define DOMAIN_REF_INDEX_LEN 2
+
 int populate_drt(void);
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did);
 
