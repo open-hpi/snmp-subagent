@@ -442,10 +442,11 @@ build_reading_strings (SaHpiSensorReadingT * reading,
   if (interpreted_reading_len) 
     *interpreted_reading_len = 0;
 
-  if (event_status_len || event_status) {
+  if (event_status_len)
     *event_status_len = 0;
+  if (event_status)
     *event_status = 0;
-  }
+  
 
   /* 
    *       SaHpiSensorInterpretedT     Interpreted;

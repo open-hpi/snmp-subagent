@@ -2413,15 +2413,16 @@ saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
 saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
         SYNTAX         INTEGER {
 				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
-				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
 
-				enabledEventsScan(289)
+				raw(2),
+				interpreted(3),
+				eventState(5),
+
+				rawAndInterpreted(4),
+				rawAndEventState(6),
+				rawAndInterpretedAndEventState(8),
+
+				interpretedAndEventState(7)
 			}
         MAX-ACCESS      read-only
         STATUS          current
