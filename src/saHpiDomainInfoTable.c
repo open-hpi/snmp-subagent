@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiDomainInfoTable.h"
+#include "hpiCheckIndice.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -262,13 +263,7 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainInfoTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = NULL;
 
 
     /*
@@ -281,14 +276,8 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
         */
                 ctx->saHpiDomainId = *var_saHpiDomainId.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);   
     }
 
     /*
@@ -670,6 +659,7 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+#if 0 /* TODO DMJ */
 #ifndef saHpiDomainInfoTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
@@ -683,6 +673,7 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmDelete : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmDelete : NULL);
+#endif /* DMJ */
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
