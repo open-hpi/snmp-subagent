@@ -80,10 +80,6 @@ populate_hotswap(SaHpiRptEntryT *rpt_entry,
 	== AGENT_NEW_ENTRY) {
       
       CONTAINER_INSERT(cb.container, hotswap_context);
-      /*
-	IBM-KR: TODO
-	notifications
-      */
     }
 
   }
@@ -540,9 +536,14 @@ set_hotswap_action_request(saHpiHotSwapTable_context *ctx) {
 int
 delete_hotswap_row(SaHpiDomainIdT domain_id,
 		   SaHpiResourceIdT resource_id)  {
+
   saHpiHotSwapTable_context *ctx;
   oid hotswap_oid[HOTSWAP_INDEX_NR];
   netsnmp_index	hotswap_index;
+  int rc = AGENT_ERR_NOT_FOUND;
+
+  DEBUGMSGTL((AGENT,"delete_hotswap_row (%d, %d). Entry\n",
+  	domain_id, resource_id));
 
   hotswap_oid[0]=domain_id;
   hotswap_oid[1]=resource_id;	
@@ -556,9 +557,10 @@ delete_hotswap_row(SaHpiDomainIdT domain_id,
 
   if (ctx) {
     CONTAINER_REMOVE(cb.container, ctx);
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_hotswap_row. Exit (rc: %d).\n", rc));
+  return rc;
 }
 
 int
@@ -569,6 +571,7 @@ update_hotswap_event(SaHpiDomainIdT domain_id,
   saHpiHotSwapTable_context *ctx;
   oid hotswap_oid[HOTSWAP_INDEX_NR];
   netsnmp_index	hotswap_index;
+  int rc = AGENT_ERR_NOT_FOUND;
 
   hotswap_oid[0]=domain_id;
   hotswap_oid[1]=resource_id;	
@@ -580,13 +583,12 @@ update_hotswap_event(SaHpiDomainIdT domain_id,
   ctx = CONTAINER_FIND(cb.container, &hotswap_index);
 
   if (ctx) {
-
     ctx->saHpiHotSwapState = event->HotSwapState+1;
     ctx->saHpiHotSwapPreviousState = event->PreviousHotSwapState+1;
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }
 
-  return AGENT_ERR_NOT_FOUND;
+  return rc;
 }
 
 /************************************************************

@@ -246,11 +246,12 @@ delete_inventory_row(SaHpiDomainIdT domain_id,
 		     long count)
 {
   saHpiInventoryTable_context *ctx;
-
+  int rc = AGENT_ERR_NOT_FOUND;
   oid inv_oid[INVENTORY_INDEX_NR];
   netsnmp_index index;
 
-  DEBUGMSGTL((AGENT,"- delete_inventory_row (static)\n"));
+  DEBUGMSGTL((AGENT,"static delete_inventory_row (%d, %d, %d, %d) Entry.\n",
+  	domain_id, resource_id, num, count));
   inv_oid[0] = domain_id;
   inv_oid[1] = resource_id;
   inv_oid[2] = num;
@@ -262,14 +263,12 @@ delete_inventory_row(SaHpiDomainIdT domain_id,
   ctx = CONTAINER_FIND(cb.container, &index);
   
   if (ctx) {
-      DEBUGMSGTL((AGENT,"Searching %d.%d to delete. Found in: %X\n",
-		  num,count, ctx));
       CONTAINER_REMOVE(cb.container, ctx);
       inventory_count = CONTAINER_SIZE(cb.container);
-      return AGENT_ERR_NOERROR;
+      rc = AGENT_ERR_NOERROR;
   }
-  return AGENT_ERR_NOT_FOUND;
-
+  DEBUGMSGTL((AGENT,"static delete_inventory_row. Exit (rc: %d)\n", rc));
+  return rc;
 }
 
 
@@ -283,10 +282,12 @@ delete_inventory_rows(SaHpiDomainIdT domain_id,
 {
   saHpiInventoryTable_context *ctx;
   long i;
+  int rc = AGENT_ERR_NOT_FOUND;
   oid inv_oid[INVENTORY_INDEX_NR];
   netsnmp_index index;
 
-  DEBUGMSGTL((AGENT,"- delete_inventory_row\n"));
+  DEBUGMSGTL((AGENT,"delete_inventory_rows (%d, %d, %d). Entry\n",
+  	domain_id, resource_id, num));
   
   inv_oid[0] = domain_id;
   inv_oid[1] = resource_id;
@@ -305,9 +306,10 @@ delete_inventory_rows(SaHpiDomainIdT domain_id,
 			   num,
 			   i);
     }
-    return AGENT_ERR_NOERROR;
+    rc=AGENT_ERR_NOERROR;
   }
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_inventory_rows. Exit (rc: %d)\n", rc));
+  return rc;
   
 }
 

@@ -46,7 +46,9 @@ static SaErrorT err;
  * Configuration options. Changed by config file.
  */
 
-int send_traps_on_startup = AGENT_TRUE;
+int send_traps = AGENT_FALSE;
+static int send_traps_on_startup = AGENT_FALSE;
+
 // Check for information every x seconds.
 int alarm_interval = 5;
 
@@ -370,9 +372,13 @@ main (int argc, char **argv) {
   initialize_table_saHpiSystemEventLogTable();
   initialize_table_saHpiEventTable();
   
+  if (send_traps_on_startup == AGENT_TRUE)
+    send_traps = AGENT_TRUE;
+
   if (populate_rpt() != AGENT_ERR_NOERROR) {
     //goto stop;
     } 
+  send_traps = AGENT_TRUE;
   /*
   if (init_alarm() != AGENT_ERR_NOERROR) {
     goto stop;

@@ -32,8 +32,6 @@ static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
 
-extern int send_traps_on_startup;
-
 static oid             saHpiSensorTable_oid[] = { saHpiSensorTable_TABLE_OID };
 static size_t          saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oid);
 
@@ -194,10 +192,7 @@ populate_sensor(SaHpiSensorRecT *sensor,
 	  CONTAINER_INSERT(cb.container, sensor_context);	  
 	  sensor_count = CONTAINER_SIZE(cb.container);
 
-	  if (send_traps_on_startup == TRUE) {
-	    DEBUGMSGTL((AGENT,"IBM-KR: TODO - notifications.\n"));
-	    //	    send_saHpiSensorTable_notification(sensor_context);
-	  }
+	 
 
     }
     rc = AGENT_ERR_NOERROR;
@@ -217,8 +212,10 @@ delete_sensor_row(SaHpiDomainIdT domain_id,
   saHpiSensorTable_context *ctx;
   oid index_oid[SENSOR_INDEX_NR];
   netsnmp_index	sensor_index;
+  int rc = AGENT_ERR_NOT_FOUND;
 
-
+  DEBUGMSGTL((AGENT,"delete_sensor_row (%d, %d, %d). Entry.\n",
+  	domain_id, resource_id, sensor_num));
   // Look at the MIB to find out what the indexs are
   index_oid[0] = domain_id;
   index_oid[1] = resource_id;
@@ -232,10 +229,10 @@ delete_sensor_row(SaHpiDomainIdT domain_id,
   if (ctx) {
     CONTAINER_REMOVE(cb.container, ctx);
     sensor_count = CONTAINER_SIZE(cb.container);
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }
-    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_sensor_row. Exit (rc: %d).\n",rc));
+  return rc;
 }
 
 int  

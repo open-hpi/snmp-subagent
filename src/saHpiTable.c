@@ -38,7 +38,7 @@
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
-extern int send_traps_on_startup;
+extern int send_traps;
 
 static u_long entry_count = 0;
 static u_long update_entry_count = -1;
@@ -98,7 +98,9 @@ populate_rpt() {
    SaHpiTimeT           time;
    SaHpiBoolT state;
    int new_entries;
-
+   unsigned int deleted;
+  
+   int rc;
    long backup_count = entry_count;
 
    oid			rpt_oid[RPT_INDEX_NR];
@@ -108,6 +110,11 @@ populate_rpt() {
    //   int                  column_len = 2;
    size_t              DomainID_oid_len;
    size_t              ResourceID_oid_len;
+   
+   SaHpiDomainIdT domain_id;
+   SaHpiResourceIdT resource_id;
+   SaHpiEntryIdT num;
+   SaHpiCapabilitiesT capabilities;
 
    netsnmp_index	rpt_index;
    saHpiTable_context	*rpt_context; 
@@ -183,7 +190,7 @@ populate_rpt() {
 	       return AGENT_ERR_INTERNAL_ERROR;
 	     }
 	   }
-
+	   
 	   // Generate our full OID for the DomainID
 	   column[0] = 1;
 	   // Point to first object.
@@ -200,7 +207,10 @@ populate_rpt() {
 			  column, 2,
 			  &rpt_index,
 			  ResourceID_oid, MAX_OID_LEN, &ResourceID_oid_len);
-	   
+
+	   // Mark this row as clean.
+	   rpt_context->dirty_bit = AGENT_FALSE;	
+   
 	   // By this stage, rpt_context surely has something in it.
 	   // '<table>_modify_context(..)' does a checksum check to see if 
 	   // the record needs to be altered.
@@ -215,8 +225,8 @@ populate_rpt() {
 	     CONTAINER_INSERT(cb.container, rpt_context);
 
 	     entry_count = CONTAINER_SIZE(cb.container);
-	     /* IBM-KR: TODO */
-	     if (send_traps_on_startup == AGENT_TRUE) {
+
+	     if (send_traps == AGENT_TRUE) {
 	       if (trap != NULL) {
 		 trap_var = build_notification(&rpt_index,
 					       trap, trap_len,
@@ -228,7 +238,7 @@ populate_rpt() {
 					       rpt_entry.ResourceId,
 					       ResourceID_oid, ResourceID_oid_len);
 		 if (trap_var != NULL) {
-		   // Add some more (entryCount, and entryUpdate)
+		   // Add two more entries: entryCount, and entryUpdate
 		   snmp_varlist_add_variable(&trap_var,
 					     saHpiEntryCount_oid, 
 					     OID_LENGTH(saHpiEntryCount_oid),
@@ -241,10 +251,12 @@ populate_rpt() {
 					     ASN_UNSIGNED,
 					     (u_char *)&update_entry_count,
 					     sizeof(update_entry_count));
-		   DEBUGMSGTL((AGENT,"Sending the TRAP\n"));
+		   DEBUGMSGTL((AGENT,"Sending the TRAP message\n"));
 		   send_v2trap(trap_var);
 		   snmp_free_varbind(trap_var);
 		 } else {
+		   // IBM-KR: TODO
+		   // Should use 'snmp_log' perhaps?
 		   DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
 		 }
 
@@ -255,15 +267,16 @@ populate_rpt() {
 	 
 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-	     populate_rdr(&rpt_entry,  
+	     rc = populate_rdr(&rpt_entry,  
 			  DomainID_oid, DomainID_oid_len,
 			  ResourceID_oid, ResourceID_oid_len);
+	     
 	   }
 	   // if (rpt... blah
 	 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
 	     
-	     populate_hotswap(&rpt_entry, 
+	     rc = populate_hotswap(&rpt_entry, 
 			      DomainID_oid, DomainID_oid_len);
 	     //			      ResourceID_oid, ResourceID_oid_len);
 	     
@@ -275,7 +288,7 @@ populate_rpt() {
 	     if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
-	       populate_sel(&rpt_entry,
+	       rc = populate_sel(&rpt_entry,
 			    DomainID_oid, DomainID_oid_len,
 			    ResourceID_oid, ResourceID_oid_len);
 	   }
@@ -287,11 +300,71 @@ populate_rpt() {
      } while (next != SAHPI_LAST_ENTRY);
 
        // Now check for deleted entries. 
-       // IBM-KR: TODO
 
+       rpt_context = CONTAINER_FIRST(cb.container);       
+       DEBUGMSGTL((AGENT,"Deleting not-used rows. rpt_context: %X\n", rpt_context));
+       while (rpt_context != NULL) {
+	 
+	 deleted = AGENT_FALSE;
+	 DEBUGMSGTL((AGENT,"Found %d.%d d: %d\n", rpt_context->saHpiDomainID,
+		     rpt_context->saHpiResourceID, rpt_context->dirty_bit));
+
+	 if (rpt_context != NULL) {
+	   if (rpt_context->dirty_bit == AGENT_FALSE) {
+	     // Making it dirty again.
+	     rpt_context->dirty_bit = AGENT_TRUE;
+	   } else {
+	     domain_id = rpt_context->saHpiDomainID;
+	     resource_id = rpt_context->saHpiResourceID;
+	     num = rpt_context->saHpiEntryID;
+	     capabilities = rpt_context->saHpiResourceCapabilities;
+	     // We are getting the next item here b/c effectivly the the rpt_context
+	     // will be set to NULL in the 'delete_rpt_row' 
+	     rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
+	     deleted = AGENT_TRUE;
+	     // Delete the RPT (the 'delete_rpt' will delete the rest of corresponding rows)
+	     rc = delete_rpt_row(domain_id,
+				 resource_id,
+				 num);
+	     if (rc != AGENT_ERR_NOERROR)
+	       DEBUGMSGTL((AGENT,"delete_rpt_row failed. return code: %d\n", rc));
+	     
+ /* 	     if (capabilities & SAHPI_CAPABILITY_RDR) {  */
+/* 	       rc = AGENT_ERR_NOTFOUND; */
+/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_NO_RECORD) == AGENT_NO_ERROR) */
+/* 		 rc = AGENT_NO_ERROR; */
+	       
+/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_CTRL_RECORD) == AGENT_NO_ERROR) */
+/* 		 rc = AGENT_NO_ERROR; */
+	       
+/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_SENSOR_RECORD) == AGENT_NO_ERROR) */
+/* 		 rc = AGENT_NO_ERROR; */
+	       
+/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_INVENTORY_RECORD) == AGENT_NO_ERROR) */
+/* 		 rc = AGENT_NO_ERROR; */
+	       
+/* 	       if ( delete_rdr_row(domain_id, resource_id, num, SAHPI_WATCHDOG_RECORD) == AGENT_NO_ERROR) */
+/* 		 rc = AGENT_NO_ERROR; */
+	       
+	       
+/* 	       if (rc != AGENT_ERR_NOERROR) */
+/* 		 DEBUGMSGTL((AGENT,"delete_rdr_rows failed. return code: %d\n", rc)); */
+/* 	     } */
+
+/* 	     if (capabilities & SAHPI_CAPABILITY_HOTSWAP) { */
+/* 	       rc = delete_hotswap_row(domain_id, resource_id); */
+/* 	       if (rc != AGENT_ERR_NOERROR) */
+/* 		 DEBUGMSGTL((AGENt,"delete_hotswap_row failed. Return code: %d\n", rc)); */
+/* 	     } */
+
+	   }
+	 }
+	 // Only get the next item if no deletion has happend.
+	 if (deleted == AGENT_FALSE)
+	   rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
+       }
      }  // if new_entries ...    
-
-     // Now 
+     
    }
 
    if (err == SA_OK) 
@@ -597,6 +670,10 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
   saHpiTable_context *ctx;
   oid rpt_oid[RPT_INDEX_NR];
   netsnmp_index	rpt_index;
+  int rc= AGENT_ERR_NOT_FOUND;
+
+  DEBUGMSGTL((AGENT,"delete_rpt_row (%d, %d, %d). Entry\n", 
+  	domain_id, resource_id, num));
 
   rpt_oid[0]=domain_id;
   rpt_oid[1]=resource_id;	
@@ -611,10 +688,10 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
   if (ctx) {
     CONTAINER_REMOVE(cb.container, ctx);
     entry_count = CONTAINER_SIZE(cb.container);
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }
-    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_rpt_row. Exit (rc: %d).\n", rc));  
+  return rc;
 }
 
 
@@ -751,6 +828,7 @@ saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
 	   sizeof(integer64));
 
     dst->hash = src->hash;
+    dst->dirty_bit = src->dirty_bit;
     DEBUGMSGTL((AGENT,"--- saHpiTable_row_copy: Exit. "));
 
     return 0;
@@ -887,6 +965,7 @@ saHpiTable_create_row(netsnmp_index * hdr)
     ctx->saHpiEventLogTime.low = 0;
     ctx->saHpiEventLogTime.high = 0;
   
+    ctx->dirty_bit = AGENT_TRUE;
     return ctx;
 }
 
