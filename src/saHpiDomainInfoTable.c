@@ -65,12 +65,15 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	saHpiDomainInfoTable_context *domain_info_context;
 	netsnmp_variable_list *trap_var;
 
+	DEBUGMSGTL ((AGENT, "populate_saHpiDomainInfoTable\n"));
+
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, "saHpiDomainInfoGet Failed: rv = %d\n",rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	
+	domain_info_index.len = DOMAIN_INFO_INDEX_NR;
 	domain_info_oid[0] = domain_info.DomainId;
 	domain_info_index.oids = (oid *) & domain_info_oid;
 	
@@ -84,7 +87,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 			saHpiDomainInfoTable_create_row ( &domain_info_index);
 	}
 	if (!domain_info_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a RPT row!");
+		snmp_log (LOG_ERR, "Not enough memory for a DomainInfo row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}	
 
@@ -182,9 +185,6 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	CONTAINER_INSERT (cb.container, domain_info_context);
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
-	
-	DEBUGMSGTL ((AGENT, 
-		"WARNING: populate_saHpiDomainInfoTable SCALARS: not implemented!"));
 		
 		return rv;
 }
@@ -194,34 +194,34 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
  * int handle_saHpiDomainInfoEntryCount()
  */
 int
-handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
+	DEBUGMSGTL ((AGENT, "handle_saHpiDomainInfoEntryCount: Entry Count is %d\n", 
+					domain_info_entry_count));  	
+	
     /* We are never called for a GETNEXT if it's registered as a
        "instance", as it's "magically" handled for us.  */
 
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
-    
+  
     switch(reqinfo->mode) {
-
-        case MODE_GET:
+        case MODE_GET:        
             snmp_set_var_typed_value(
             		requests->requestvb, 
             		ASN_COUNTER,
-                    /* XXX: a pointer to the scalar's data */
-                    (u_char *) domain_info_entry_count,
-                    /* XXX: the length of the data in bytes */
+                    (u_char *) &domain_info_entry_count,
                     sizeof(domain_info_entry_count) );
             break;
-
-
         default:
             /* we should never get here, so this is a really bad error */
             return SNMP_ERR_GENERR;
     }
+    
+	DEBUGMSGTL ((AGENT, "handle_saHpiDomainInfoEntryCount: Returning" ));    
 
     return SNMP_ERR_NOERROR;
 }
@@ -232,6 +232,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
 int
 initialize_table_saHpiDomainInfoEntryCount(void)
 {
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainInfoEntryCount, called\n"));	
 	netsnmp_register_scalar( 
         netsnmp_create_handler_registration(
         	"saHpiDomainInfoEntryCount", 
@@ -316,7 +317,9 @@ saHpiDomainInfoTable_get( const char *name, int len )
  */
 void
 init_saHpiDomainInfoTable(void)
-{
+{	
+	DEBUGMSGTL ((AGENT, "init_saHpiDomainInfoTable\n"));
+
     initialize_table_saHpiDomainInfoTable();
     
     initialize_table_saHpiDomainInfoEntryCount();
@@ -393,8 +396,6 @@ static int saHpiDomainInfoTable_row_copy(saHpiDomainInfoTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiDomainInfoTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -417,7 +418,8 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
 
     /*
      * copy index, if provided
-     */    if(hdr) {
+     */    
+ 	if(hdr) {
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
@@ -830,31 +832,6 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
     }
 
     /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-/* TODO DMJ doesn't understand why this is here     
-#ifndef saHpiDomainInfoTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-*/
-    /*
-     * check activation/deactivation
-     */
-/*    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-*/
-    /*
      * TODO: if you have dependencies on other tables, this would be
      * a good place to check those, too.
      */
@@ -1020,8 +997,6 @@ void saHpiDomainInfoTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiDomainInfoTable_SET_HANDLING */
 
 
 /************************************************************
