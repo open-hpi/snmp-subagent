@@ -7405,7 +7405,7 @@ saHpiInventoryOEM OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "OEM value for the inventory record. This is manufacturere' 
+        "OEM value for the inventory record. This is manufacturer' 
         specific value."
         ::= {saHpiInventoryEntry 3}
 
