@@ -213,7 +213,8 @@ getSaHpiSession(SaHpiSessionIdT *out) {
   DEBUGMSGTL((AGENT,"--- getSaHpiSession: Entry. "));
 
   if (session_avail == AGENT_FALSE) {
-
+    // IBM-KR: TODO
+    // These DEBUGMSGLT should be turned to snmp_log
     err = saHpiInitialize(&version);
     if (SA_OK != err) {
       DEBUGMSGTL((AGENT,"saHpiInitialize error: %d ", err));
@@ -230,6 +231,13 @@ getSaHpiSession(SaHpiSessionIdT *out) {
       DEBUGMSGTL((AGENT,"saHpiResourcesDiscover error: %d ", err));
       return AGENT_ERR_DISCOVER;
    }
+    //Subscribe to the Events
+
+    err = saHpiSubscribe( session_id, SAHPI_FALSE);
+    if (SA_OK != err) {
+      DEBUGMSGTL((AGENT,"saHpiSubscribe failed. Return code: %d", err));
+      return AGENT_ERR_SUBSCRIBE;
+    }
    session_avail = AGENT_TRUE;   
   }
 

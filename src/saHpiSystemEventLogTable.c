@@ -330,27 +330,19 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
 
 {
   saHpiSystemEventLogTable_context *ctx;
-  //saHpiSystemEventLogTable_context tmp;
   int rc = AGENT_ERR_NOT_FOUND;
-  oid sel_oid[SEL_INDEX_NR];
-  netsnmp_index sel_index;
+  unsigned long i;
 
-  DEBUGMSGTL((AGENT,"delete_SEL_row (%d, %d). Entry\n",
+  DEBUGMSGTL((AGENT,"TODO: delete_SEL_row (%d, %d). Entry\n",
   	domain_id, resource_id));
 
-  sel_oid[0] = domain_id;
-  sel_oid[1] = resource_id;
-  sel_oid[2] = 0;
-  sel_index.oids = (oid *) &sel_oid;
-  sel_index.len = SEL_INDEX_NR;
-  ctx = CONTAINER_FIND(cb.container, &sel_index);
-
+  /*  
   if (ctx) {
     // Notify
     CONTAINER_REMOVE(cb.container, ctx);
     event_log_entries = CONTAINER_SIZE(cb.container);
     rc= AGENT_ERR_NOERROR;
-  }
+    }*/
   DEBUGMSGTL((AGENT,"delete_SEL_row. Exit (rc: %d)\n", rc));
   return rc;
   
