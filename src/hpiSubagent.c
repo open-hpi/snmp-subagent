@@ -52,6 +52,10 @@ static int send_traps_on_startup = AGENT_FALSE;
 // Check for information every x seconds.
 int alarm_interval = 5;
 
+// Max EVENT rows.
+int MAX_EVENT_ENTRIES = 512;
+// IBM-KR: TODO, add a configuration entry for this.
+
 static RETSIGTYPE
 stop_server(int a) {
     keep_running = 0;
@@ -324,6 +328,20 @@ hpiSubagent_parse_config_interval(const char *token, char *cptr)
     alarm_interval = x;
   }
 }
+void
+hpiSubagent_parse_config_max_event(const char *token, char *cptr)
+{
+  int x = atoi(cptr);
+  char buf[BUFSIZ];
+  
+  if (x < -1) {
+    sprintf(buf, "hpiSubagent: '%s' unrecognized", cptr);
+    config_perror(buf);
+  } else {
+    snmp_log(LOG_INFO,"Max Event rows%d.\n", x);
+    MAX_EVENT_ENTRIES = x;
+  }
+}
 
 
 
@@ -359,6 +377,12 @@ main (int argc, char **argv) {
 				hpiSubagent_parse_config_interval,
 				NULL,
 				"hpiSubagent time in seconds before HPI API is queried for information.");
+
+  snmpd_register_config_handler(MAX_EVENT_TOKEN,
+				hpiSubagent_parse_config_max_event,
+				NULL,
+				"hpiSubagent MAX number of rows for Events.");
+
   init_snmp(AGENT);
   /* Initialize tables */
   initialize_table_saHpiTable();
@@ -380,10 +404,10 @@ main (int argc, char **argv) {
     //goto stop;
     } 
   populate_event();
-  /*
+
   if (init_alarm() != AGENT_ERR_NOERROR) {
-    goto stop;
-  } */
+    //    goto stop;
+  }
   /* If we're going to be a snmp master agent, initial the ports */
 
   if (!agentx_subagent)

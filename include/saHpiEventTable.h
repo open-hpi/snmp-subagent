@@ -231,6 +231,9 @@ populate_event(SaHpiSelEntryIdT,
   int
   populate_event( void );
 
+  unsigned long 
+  purge_event ( void );
+
   int delete_event_entry(saHpiEventTable_context *ctx);
 
 

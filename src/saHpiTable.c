@@ -326,7 +326,7 @@ populate_rpt() {
  *  - RPT
  *  - HotSwap
  */
-int purge_rpt ( void ) {
+unsigned long  purge_rpt ( void ) {
 
   SaHpiDomainIdT domain_id;
   SaHpiResourceIdT resource_id;

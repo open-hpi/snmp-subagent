@@ -116,9 +116,11 @@
  */
 #define TRAPS_TOKEN "send_traps_on_startup"
 #define INTERVAL_TOKEN "check_hpi_interval"
+#define MAX_EVENT_TOKEN "max_event_rows"
 
 void hpiSubagent_parse_config_traps(const char *, char *);
 void hpiSubagent_parse_config_interval(const char *, char *);
+void hpiSubagent_parse_config_max_event(const char *, char *);
 
 
 /*
