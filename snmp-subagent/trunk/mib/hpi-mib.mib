@@ -6380,8 +6380,9 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor resource data record which
-        describes the static data associated with sensors."
+        "This table contains the fields used to define the senosr 
+	SAHPI_SRF_MAX values.  It is representative of the static data 
+	found in the SAI-HPI-B.01.01 RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
@@ -6440,8 +6441,11 @@ saHpiSensorReadingMinEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        " This is the sensor resource data record which
-        describes the dynamic data associated with sensors."
+        "This table contains the fields used to define the senosr 
+	SAHPI_SRF_MIN values.  It is representative of the static data 
+	found in the SAI-HPI-B.01.01 RDR records."
+	REFERENCE
+	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorReadingMinTable 1}
 
