@@ -56,7 +56,7 @@ extern "C"
    * Max length of data in saHpiCtrlAttributes object.
    * Look in the HPI-MIB
    */
-#define SAHPI_CTRL_ATTR_MAX 269
+#define SAHPI_CTRL_ATTR_MAX 270
 
   /*
    * Deprectated?

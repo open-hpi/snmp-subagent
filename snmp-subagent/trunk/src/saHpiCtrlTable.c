@@ -545,15 +545,19 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      ctx->saHpiCtrlAttributes[2] = text.Language;
 	      // Text encoding
 	      ctx->saHpiCtrlAttributes[3] = text.DataType;
+	      // Line number
+	      ctx->saHpiCtrlAttributes[4] = text.Default.Line;
+	      // Data length
+	      ctx->saHpiCtrlAttributes[5] = text.Default.Text.DataLength;
 	      ctx->saHpiCtrlAttributes_len =
-		(text.Default.Text.DataLength + 4 <=
-		 SAHPI_CTRL_STATE_MAX) ? text.Default.Text.
-		DataLength : SAHPI_CTRL_STATE_MAX;
+		(text.Default.Text.DataLength + 6 <=
+		 SAHPI_CTRL_ATTR_MAX) ? text.Default.Text.
+		DataLength : SAHPI_CTRL_ATTR_MAX;
 
-	      memcpy (ctx->saHpiCtrlAttributes + 4,
+	      memcpy (ctx->saHpiCtrlAttributes + 6,
 		      text.Default.Text.Data, ctx->saHpiCtrlAttributes_len);
 
-	      ctx->saHpiCtrlAttributes_len += 4;
+	      ctx->saHpiCtrlAttributes_len += 6;
 
 	      //SaHpiCtrlStateTextT
 	      ctx->saHpiCtrlState[0] = state->StateUnion.Text.Line;
@@ -576,6 +580,12 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      memcpy (ctx->saHpiCtrlAttributes, &oem,
 		      ctx->saHpiCtrlAttributes_len);
 
+	      // body length (default)
+	      ctx->saHpiCtrlAttributes[ctx->saHpiCtrlAttributes_len] =
+		oem.Default.BodyLength;
+	      ctx->saHpiCtrlAttributes_len++;
+
+	      // default text.
 	      memcpy (ctx->saHpiCtrlAttributes + ctx->saHpiCtrlAttributes_len,
 		      &oem.Default.Body, oem.Default.BodyLength);
 
