@@ -31,6 +31,15 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
+/*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define EVENT_INDEX_NR 3
+
 #define EVENT_TRIGGER_READING_INTERPRETED_MAX 32
 #define EVENT_TRIGGER_READING_EVENT_STATE_MAX 3
 #define EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX 32

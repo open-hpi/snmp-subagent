@@ -129,7 +129,8 @@ void hpiSubagent_parse_config_interval(const char *, char *);
  *   AGENT_ERR_SESSION_CLOSE if encountered problems. Query 'rcSaHpi()' to
  *      find out what kind of return code SAHPI library returns.
  */
-int closeSaHpiSession();
+int 
+closeSaHpiSession( void );
 
 /*
  * Get the HPI session key. If the session hasn't been started this
@@ -176,7 +177,7 @@ int didSaHpiChanged(int *answer, SaHpiRptInfoT *info );
  * Return:
  *  Consult SaHpi.h for the latest information.
  */
-SaErrorT rcSaHpi();
+SaErrorT rcSaHpi( void );
 
 /*
  * Calculate a hash value of the 'data' which is 'len' bytes

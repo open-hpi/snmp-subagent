@@ -30,6 +30,16 @@ extern          "C" {
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
 #include <hpiSubagent.h>
+
+/*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define SEL_INDEX_NR 3
+
         /** Index saHpiDomainID is external */
         /** Index saHpiResourceID is external */
         /** Index saHpiSystemEventLogEntryId is internal */
@@ -65,11 +75,7 @@ extern          "C" {
  */
    
     void            initialize_table_saHpiSystemEventLogTable(void);
-    const saHpiSystemEventLogTable_context
-        *saHpiSystemEventLogTable_get_by_idx(netsnmp_index *);
-    const saHpiSystemEventLogTable_context
-        *saHpiSystemEventLogTable_get_by_idx_rs(netsnmp_index *,
-                                                int row_status);
+
     int             saHpiSystemEventLogTable_get_value(netsnmp_request_info
                                                        *, netsnmp_index *,
                                                        netsnmp_table_request_info

@@ -50,7 +50,7 @@ int send_traps_on_startup = AGENT_TRUE;
 // Check for information every x seconds.
 int alarm_interval = 5;
 
-RETSIGTYPE
+static RETSIGTYPE
 stop_server(int a) {
     keep_running = 0;
 }
