@@ -143,7 +143,8 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 	      rdr_oid[0] = rpt_entry->DomainId;
 	      rdr_oid[1] = rpt_entry->ResourceId;
 	      rdr_oid[2] = rdr_entry.RecordId;
-	      rdr_oid[3] = rdr_entry.RdrType;
+		// The type is +1 from the SAF HPI SA spec
+	      rdr_oid[3] = rdr_entry.RdrType+1;
 
 	      rdr_index.oids = (oid *) & rdr_oid;
 
@@ -416,7 +417,9 @@ purge_rdr ()
 		  // _only_ the specific subtypes. Therfore other records
 		  // with the same resource_id, domain_id, and num can still
 		  // exist.
-		  switch (type)
+
+		/* Subtract -1 to be compliant with the +1 addition */
+		  switch (type-1)
 		    {
 		    case SAHPI_NO_RECORD:
 		      break;
@@ -539,13 +542,13 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	  if ((ctx->domain_id == rpt_entry->DomainId) &&
 	      (ctx->saHpiResourceID == rpt_entry->ResourceId) &&
 	      (ctx->saHpiRdrRecordId == entry->RecordId) &&
-	      (ctx->saHpiRdrType == entry->RdrType)) {
+	      (ctx->saHpiRdrType == entry->RdrType+1)) {
 		  update_entry = MIB_TRUE;
 		  DEBUGMSGTL((AGENT,"Updating RDR entry. [%d, %d, %d, %d]\n",
 					  rpt_entry->DomainId,
 					  rpt_entry->ResourceId,
 					  entry->RecordId,
-					  entry->RdrType));
+					  entry->RdrType+1));
 	     }
 
 	}
@@ -558,7 +561,7 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
       //ctx->child_id = child_id;
       ctx->saHpiResourceID = rpt_entry->ResourceId;
       ctx->saHpiRdrRecordId = entry->RecordId;
-      ctx->saHpiRdrType = entry->RdrType;
+      ctx->saHpiRdrType = entry->RdrType+1;
 
       len = entitypath2string (&entry->Entity,
 			       ctx->saHpiRdrEntityPath, SNMP_MAX_MSG_SIZE);

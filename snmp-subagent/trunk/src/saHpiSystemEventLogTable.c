@@ -270,8 +270,8 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	    {
 	      sensor = event_entry->EventDataUnion.SensorEvent;
 	      ctx->saHpiSystemEventLogSensorNum = sensor.SensorNum;
-	      ctx->saHpiSystemEventLogSensorType = sensor.SensorType;
-	      ctx->saHpiSystemEventLogSensorCategory = sensor.EventCategory;
+	      ctx->saHpiSystemEventLogSensorType = sensor.SensorType + 1;
+	      ctx->saHpiSystemEventLogSensorCategory = sensor.EventCategory + 1;
 	      ctx->saHpiSystemEventLogSensorAssertion =
 		(sensor.Assertion == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 	      if (sensor.EventCategory & SAHPI_EC_THRESHOLD)
