@@ -4350,27 +4350,49 @@ saHpiRdrEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiResourceEntryId, 
-                saHpiRdrType 
+		saHpiRdrEntryId
         }
 
         ::= {saHpiRdrTable 1} 
                                                  
 SaHpiRdrEntry ::= SEQUENCE {
 
+        saHpiRdrEntryId         Counter32,
+	saHpiRdrNext		Counter32,
         saHpiRdrType            INTEGER,
         saHpiRdrEntityPath      OCTET STRING,
         
         saHpiRdrIsFru	        TruthValue,     
 
         saHpiRdrRowPointer      RowPointer,
-        saHpiRdrId              Counter32,
         saHpiRdrRPT             RowPointer,
         
         saHpiRdrTextType        SaHpiTextType,
         saHpiRdrTextLanguage    SaHpiTextLanguage,
         saHpiRdrIdString        OCTET STRING
         }
+
+saHpiRdrEntryId OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Id of the RDR entry. "
+	::=   {saHpiRdrEntry 1 }
+	
+saHpiRdrNextEntryId OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Id of the next RDR entry. Use this to aid in 
+	walking just the RDRs for a given ResourceId.  For example If 
+	you know the DomainId and ResourceId use SAHPI_FIRST_ENTRY to 
+	retrieve this columnar node. Now you have the saHpiRdrEntryId 
+	for the next Rdr owned by the Resource in question.  When the 
+	value of saHpiRdrNextEntryId is SAHPI_LAST_ENTRY it means the 
+	index specified represents the last valid RDR  represented by 
+	the Resource in question."
+	REFERENCE "see section 7.1.1."
+	::=   {saHpiRdrEntry 1 }
 
 saHpiRdrType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -4382,13 +4404,13 @@ saHpiRdrType OBJECT-TYPE
                                 watchdogRdr(5),
                                 annunciatorRdr(6)
                         }
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Type of RDR entry.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
-	::=   {saHpiRdrEntry 1 }
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	::=   {saHpiRdrEntry 2 }
 
 
 saHpiRdrEntityPath OBJECT-TYPE
@@ -4413,7 +4435,7 @@ saHpiRdrEntityPath OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-	::=   {saHpiRdrEntry 2 }
+	::=   {saHpiRdrEntry 3 }
 
         
 saHpiRdrIsFru OBJECT-TYPE 
@@ -4423,7 +4445,7 @@ saHpiRdrIsFru OBJECT-TYPE
         DESCRIPTION     "Entity is a FRU.  This field is Only valid if the 
         Entity path given in the 'Entity' field is different from the Entity 
         path in the RPT entry for the resource."
-	::=   {saHpiRdrEntry 3 }
+	::=   {saHpiRdrEntry 4 }
 
 
 saHpiRdrRowPointer OBJECT-TYPE
@@ -4436,14 +4458,6 @@ saHpiRdrRowPointer OBJECT-TYPE
              saHpiSensorRec
              saHpiInventoryRec
              saHpiWatchdogRec"
-	::=   {saHpiRdrEntry 4 }
-
-
-saHpiRdrId OBJECT-TYPE
-        SYNTAX          Counter32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Id of the RDR entry. "
 	::=   {saHpiRdrEntry 5 }
 
 
@@ -4452,8 +4466,7 @@ saHpiRdrRPT OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Forward pointer to the Resource Presence Table (RPT) 
-	entry. Another method to match the RPT and RDR is to compare the 
-	EntityPath, but this is much easier. "
+	entry."
 	::=   {saHpiRdrEntry 6 }
 
 
@@ -4521,8 +4534,11 @@ SaHpiCtrlEntry ::= SEQUENCE {
         saHpiCtrlType           INTEGER,
  
         saHpiCtrlState          OCTET STRING,
-        saHpiCtrlData        OCTET STRING,
+        saHpiCtrlData        	OCTET STRING,
         
+        saHpiDefaultCtrlMode     INTEGER,        
+        saHpiDefaultCtrlReadOnly TruthValue,      
+	
         saHpiCtrlMode           INTEGER,        
         saHpiCtrlReadOnly       TruthValue,      
                                          
@@ -4565,10 +4581,10 @@ saHpiCtrlOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
-This enumeration defines the what the control's output will be. 
+	This enumeration defines the what the control's output will be. 
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiCtrlEntry 2}
 
 saHpiCtrlType OBJECT-TYPE 
@@ -4584,12 +4600,38 @@ saHpiCtrlType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
-This enumerated type defines the different types of generic controls. 
+	This enumerated type defines the different types of generic controls. 
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiCtrlEntry 3}
 
+saHpiDefaultCtrlMode OBJECT-TYPE 
+        SYNTAX          INTEGER {
+                                undefined(0),
+                                auto(1),
+                                manual(2)
+                        }
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION "
+	Default stater of control.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+	REFERENCE "see section 7.3, 7.3.3, 8.7."
+        ::= {saHpiCtrlEntry 4}
+        
+saHpiDefaultCtrlReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates the default state of mode."
+	
+	REFERENCE "see section 7.3, 7.3.3, 8.7."
+        ::= {saHpiCtrlEntry 5}
+	
 saHpiCtrlMode OBJECT-TYPE 
         SYNTAX          INTEGER {
                                 undefined(0),
@@ -4598,26 +4640,46 @@ saHpiCtrlMode OBJECT-TYPE
                         }
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     
-	"This object describes how the control is managed.  The control may be managed automatically by the implementation (auto mode).  Or it may be managed by the HPI User (manual mode).  Some controls allow their modes to be changed, allowing the HPI User to determine if they will manage the control, or relinquish the management to the implementation.  But, other controls do not allow the mode to be changed.  These static-mode controls are indicated with the saHpiCtrlReadOnly flag set as part of the default control mode.
+        DESCRIPTION "
+	   
+	If this columnar node is written to when the saHpiCtrlReadOnly Flag 
+	is TRUE the an SNMP error of notWritable is returned.  
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
-        ::= {saHpiCtrlEntry 4}
+	This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to SAHPI_CTRL_MODE_AUTO, the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+	The CtrlState parameter must be of the correct type for the specified 
+	control.  
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+	REFERENCE "see section 7.3 and 7.3.3."
+        ::= {saHpiCtrlEntry 6}
         
 saHpiCtrlReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if mode is read-only"
-        ::= {saHpiCtrlEntry 5}
+        ::= {saHpiCtrlEntry 7}
         
 saHpiCtrlWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if mode is write-only"
-        ::= {saHpiCtrlEntry 6}
+        DESCRIPTION     "Indicates if Control is write-only"
+	
+	REFERENCE "See remarks section 7.3.2."
+        ::= {saHpiCtrlEntry 8}
 
 saHpiCtrlState OBJECT-TYPE
         SYNTAX          OCTET STRING (SIZE(1|4|9))
@@ -4625,9 +4687,13 @@ saHpiCtrlState OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
         This attribute represents the current setting of the control.  It must
-         be interpreted in the context of saHpiCtrlType.
-        if you wish to change the values of the data, this is the object
+        be interpreted in the context of saHpiCtrlType.
+        If you wish to change the values of the data, this is the object
         to use.
+	
+	You may not change the state of the control unless the Mode is set to
+	SAHPI_CTRL_MODE_MANUAL.  If a write is attempted when the mode is set to
+	SAHPI_CTRL_MODE_AUTO SNMP will return a notWriteable error code.
 
         digital  - Unsigned 32bit integer (4 octets) defined as:
                      off(1)
@@ -4679,7 +4745,7 @@ saHpiCtrlState OBJECT-TYPE
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-B.01.01 pages 93, 94."
          
-        ::= {saHpiCtrlEntry 7}
+        ::= {saHpiCtrlEntry 9}
 
 saHpiCtrlData          OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(4|9|12|262|270))
@@ -4742,28 +4808,28 @@ saHpiCtrlData          OBJECT-TYPE
         " 
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-B.01.01 pages 92, 93, 94."
-        ::= {saHpiCtrlEntry 8}
+        ::= {saHpiCtrlEntry 10}
 
 saHpiCtrlOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Reserved for OEM use"
-        ::= {saHpiCtrlEntry 9}
+        ::= {saHpiCtrlEntry 11}
 
 saHpiCtrlTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "See Definition"
-        ::= {saHpiCtrlEntry 10}
+        ::= {saHpiCtrlEntry 12}
 
 saHpiCtrlTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "See Definition."
-        ::= {saHpiCtrlEntry 11}
+        ::= {saHpiCtrlEntry 13}
 
 saHpiCtrlText OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4805,14 +4871,14 @@ saHpiCtrlText OBJECT-TYPE
         REFERENCE
         "Derieved from typedef and function calls described in
         SAI-HPI-B.01.01 pages 84...89."
-        ::= {saHpiCtrlEntry 12}
+        ::= {saHpiCtrlEntry 14}
 
 saHpiCtrlRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
-        ::= {saHpiCtrlEntry 13}
+        ::= {saHpiCtrlEntry 15}
 
 
 --/*******************************************************************************
