@@ -116,6 +116,13 @@ hpi MODULE-IDENTITY
 
 hpiEntity       OBJECT IDENTIFIER ::= { hpi 1 }
 
+-- The Events tables:
+hpiEvents       OBJECT IDENTIFIER ::= { hpi 2 }
+events          OBJECT IDENTIFIER ::= { hpiEvents 1 }
+eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
+
+-- The resource tables.
+hpiResources    OBJECT IDENTIFIER ::= { hpi 3 }
 
 -- ************************************************
 -- **
@@ -988,6 +995,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
+	saHpiDomainId			Unsigned32,
         saHpiDomainCapabilities         OCTET STRING,
         saHpiIsPeer                     TruthValue,         
                                                                       
@@ -1014,6 +1022,20 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
         saHpiDatOverflow                TruthValue,
         saHpiDomainGuid                 OCTET STRING            
         }
+
+
+saHpiDomainId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+	    "The SAHPI_UNSPECIFIED_DOMAIN_ID value is used to specify the default 
+	    domain.
+
+	    SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) "
+	::=   {saHpiDomainInfoEntry 1 }
+
+
         
 saHpiDomainCapabilities OBJECT-TYPE 
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -1032,7 +1054,8 @@ saHpiDomainCapabilities OBJECT-TYPE
           columnar object.
 
           "
-	::=   {saHpiDomainInfoEntry 1 }
+	::=   {saHpiDomainInfoEntry 2 }
+
 
 
 saHpiIsPeer OBJECT-TYPE
@@ -1042,7 +1065,8 @@ saHpiIsPeer OBJECT-TYPE
         DESCRIPTION     
         "Indicates that this domain participates in a peer relationship.
         TRUE = Domain is peer.  FALSE = Domain is not peer "
-	::=   {saHpiDomainInfoEntry 2 }
+	::=   {saHpiDomainInfoEntry 3 }
+
 
 
 saHpiDomainTagTextType OBJECT-TYPE 
@@ -1051,7 +1075,8 @@ saHpiDomainTagTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Information tag associated with domain. 
         See Definition for SaHpiTextType for more details."
-	::=   {saHpiDomainInfoEntry 3 }
+	::=   {saHpiDomainInfoEntry 4 }
+
 
 
 saHpiDomainTagTextLanguage OBJECT-TYPE
@@ -1060,7 +1085,8 @@ saHpiDomainTagTextLanguage OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Information tag associated with domain.
         See Definition for SaHpiTextLanguage for more details."
-	::=   {saHpiDomainInfoEntry 4 }
+	::=   {saHpiDomainInfoEntry 5 }
+
 
 
 saHpiDomainTag  OBJECT-TYPE
@@ -1070,7 +1096,8 @@ saHpiDomainTag  OBJECT-TYPE
         DESCRIPTION     "Information tag associated with domain.
         The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-	::=   {saHpiDomainInfoEntry 5 }
+	::=   {saHpiDomainInfoEntry 6 }
+
 
       
 saHpiDrtUpdateCount OBJECT-TYPE 
@@ -1081,7 +1108,8 @@ saHpiDrtUpdateCount OBJECT-TYPE
         "This count is incremented any time the
         table is changed. It rolls over to zero when the maximum 
         value (2^32) is reached." 
-	::=   {saHpiDomainInfoEntry 6 }
+	::=   {saHpiDomainInfoEntry 7 }
+
 
 
 saHpiDrtUpdateTimestamp OBJECT-TYPE
@@ -1090,7 +1118,8 @@ saHpiDrtUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the
         DRT table is changed. Refer to SaSaHpiTime for full describption."
-	::=   {saHpiDomainInfoEntry 7 }
+	::=   {saHpiDomainInfoEntry 8 }
+
 
 
 saHpiRptUpdateCount OBJECT-TYPE 
@@ -1099,7 +1128,8 @@ saHpiRptUpdateCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This count is incremented any time the RPT is changed.
          It rolls over to zero when the maximum (2^32) value is reached " 
-	::=   {saHpiDomainInfoEntry 8 }
+	::=   {saHpiDomainInfoEntry 9 }
+
 
 
 saHpiRptUpdateTimestamp OBJECT-TYPE
@@ -1109,7 +1139,8 @@ saHpiRptUpdateTimestamp OBJECT-TYPE
         DESCRIPTION     
         "This timestamp is set any time the RPT table is changed.
         Refer to SaSaHpiTime for full describption."
-	::=   {saHpiDomainInfoEntry 9 }
+	::=   {saHpiDomainInfoEntry 10 }
+
 
 
 saHpiDatUpdateCount OBJECT-TYPE 
@@ -1118,7 +1149,8 @@ saHpiDatUpdateCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This count is incremented any time the DAT is changed.
         It rolls over to zero when the maximum value (2^32) is reached " 
-	::=   {saHpiDomainInfoEntry 10 }
+	::=   {saHpiDomainInfoEntry 11 }
+
 
 
 saHpiDatUpdateTimestamp OBJECT-TYPE
@@ -1127,7 +1159,8 @@ saHpiDatUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the DAT is changed.
         Refer to SaSaHpiTime for full describption."
-	::=   {saHpiDomainInfoEntry 11 }
+	::=   {saHpiDomainInfoEntry 12 }
+
 
                 
 saHpiActiveAlarms OBJECT-TYPE 
@@ -1135,7 +1168,8 @@ saHpiActiveAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active alarms in the DAT." 
-	::=   {saHpiDomainInfoEntry 12 }
+	::=   {saHpiDomainInfoEntry 13 }
+
 
         
 saHpiCriticalAlarms OBJECT-TYPE 
@@ -1143,7 +1177,8 @@ saHpiCriticalAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active critical alarms in the DAT." 
-	::=   {saHpiDomainInfoEntry 13 }
+	::=   {saHpiDomainInfoEntry 14 }
+
 
         
 saHpiMajorAlarms OBJECT-TYPE 
@@ -1151,7 +1186,8 @@ saHpiMajorAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active major alarms in the DAT." 
-	::=   {saHpiDomainInfoEntry 14 }
+	::=   {saHpiDomainInfoEntry 15 }
+
 
         
 saHpiMinorAlarms OBJECT-TYPE 
@@ -1159,7 +1195,8 @@ saHpiMinorAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active minor alarms in the DAT." 
-	::=   {saHpiDomainInfoEntry 15 }
+	::=   {saHpiDomainInfoEntry 16 }
+
 
         
 saHpiDatUserAlarmLimit OBJECT-TYPE 
@@ -1168,7 +1205,8 @@ saHpiDatUserAlarmLimit OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Maximum User Alarms that can be added to DAT.  
         0=no fixed limit." 
-	::=   {saHpiDomainInfoEntry 16 }
+	::=   {saHpiDomainInfoEntry 17 }
+
 
         
 saHpiDatOverflow OBJECT-TYPE
@@ -1177,7 +1215,8 @@ saHpiDatOverflow OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Set to True if there are one or more non-User Alarms 
         that are missing from the DAT because of space limitations."
-	::=   {saHpiDomainInfoEntry 17 }
+	::=   {saHpiDomainInfoEntry 18 }
+
 
         
 saHpiDomainGuid         OBJECT-TYPE 
@@ -1194,7 +1233,7 @@ saHpiDomainGuid         OBJECT-TYPE
         Management Baseline, Version 2.0 specification.  HPI uses
         version 1 of the GUID format, with a 3-bit variant field of 
         10x (where x indicates 'don't care')"
-	::=   {saHpiDomainInfoEntry 18 }
+	::=   {saHpiDomainInfoEntry 19 }
 
 
 
@@ -1586,7 +1625,6 @@ saHpiResourceEntry OBJECT-TYPE
 
 SaHpiResourceEntry ::= SEQUENCE {
 
-        saHpiDomainId                           Unsigned32,
 
         saHpiEntryId                            Unsigned32,
         saHpiResourceId                         Unsigned32,
@@ -1616,43 +1654,38 @@ SaHpiResourceEntry ::= SEQUENCE {
         
         saHpiParamControl                       INTEGER
 
-        --saHpiClearEvents                      RowStatus,
-        --saHpiEventLogTime                     SaHpiTime,
-        --saHpiEventLogState                    INTEGER
         }
 
-saHpiDomainId OBJECT-TYPE 
-        SYNTAX          Unsigned32 
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     
-        "The Domain ID is used when the resource is also a domain.
-        The SAHPI_UNSPECIFIED_DOMAIN_ID value may be used by an 
-        implementation when populating the ResourceId value for 
-        an RPT entry that is a domain only.
-
-        Note:
-                SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
-        ::= {saHpiResourceEntry 1}
-
+        
 saHpiEntryId OBJECT-TYPE 
         SYNTAX          Unsigned32      
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Entry ID for record
                 Table Related Type Definitions  
                 SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
                 SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
                 SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
-        ::= {saHpiResourceEntry 2}
+	::=   {saHpiResourceEntry 1 }
+
 
 
 saHpiResourceId OBJECT-TYPE 
         SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Resource identifier."
-        ::= {saHpiResourceEntry 3}
+        DESCRIPTION     "Resource identifier.
+
+
+	The SAHPI_UNSPECIFIED_RESOURCE_ID value is used to specify the Domain
+	Event Log and to specify that there is no resource for such things as HPI 
+	User events/alarms.  
+
+	Note:
+	SAHPI_UNSPECIFIED_RESOURCE_ID 0xFFFFFFFF"
+
+	::=   {saHpiResourceEntry 2 }
+
 
 saHpiResourceEntityPath OBJECT-TYPE 
         SYNTAX          OCTET STRING
@@ -1680,7 +1713,8 @@ saHpiResourceEntityPath OBJECT-TYPE
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
-        ::= {saHpiResourceEntry 4}
+	::=   {saHpiResourceEntry 3 }
+
 
 saHpiResourceCapabilities OBJECT-TYPE 
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -1743,7 +1777,8 @@ saHpiResourceCapabilities OBJECT-TYPE
         
         SENSOR
         "
-        ::= {saHpiResourceEntry 5}
+	::=   {saHpiResourceEntry 4 }
+
         
 saHpiResourceHotSwapCapabilities OBJECT-TYPE 
         SYNTAX          Unsigned32 
@@ -1759,7 +1794,8 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
 
         INDICATOR_SUPPORTED
                 Indicates whether or not the resource has a hot swap indicator."
-        ::= {saHpiResourceEntry 6}
+	::=   {saHpiResourceEntry 5 }
+
 
 
 saHpiResourceSeverity OBJECT-TYPE 
@@ -1779,14 +1815,16 @@ saHpiResourceSeverity OBJECT-TYPE
         
         Note: The enumerated named have +1 added as opposed to the SA HPI 
         spec for the same constants.  "
-        ::= {saHpiResourceEntry 7}
+	::=   {saHpiResourceEntry 6 }
+
 
 saHpiResourceFailed OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "TRUE = Resource Not Functional.  FALSE = Resource Functional "
-        ::= {saHpiResourceEntry 8}
+	::=   {saHpiResourceEntry 7 }
+
 
 saHpiResourceInfoResourceRev OBJECT-TYPE 
         SYNTAX          Unsigned32(0..255)
@@ -1810,7 +1848,8 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
         All of the fields in the following structure may or 
         may not be used by a given resource."
 
-        ::= {saHpiResourceEntry 9}
+	::=   {saHpiResourceEntry 8 }
+
 
 saHpiResourceInfoSpecificVer OBJECT-TYPE 
         SYNTAX          Unsigned32(0..255)
@@ -1833,7 +1872,8 @@ saHpiResourceInfoSpecificVer OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 10}
+	::=   {saHpiResourceEntry 9 }
+
 
 
 saHpiResourceInfoDeviceSupport OBJECT-TYPE 
@@ -1857,7 +1897,8 @@ saHpiResourceInfoDeviceSupport OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 11}
+	::=   {saHpiResourceEntry 10 }
+
 
 
 saHpiResourceInfoManufacturerId OBJECT-TYPE 
@@ -1881,7 +1922,8 @@ saHpiResourceInfoManufacturerId OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 12}
+	::=   {saHpiResourceEntry 11 }
+
 
 
 saHpiResourceInfoProductId OBJECT-TYPE 
@@ -1905,7 +1947,8 @@ saHpiResourceInfoProductId OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 13}
+	::=   {saHpiResourceEntry 12 }
+
 
 
 saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE 
@@ -1929,7 +1972,8 @@ saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 14}
+	::=   {saHpiResourceEntry 13 }
+
 
 saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE 
         SYNTAX          Unsigned32(0..255)
@@ -1952,7 +1996,8 @@ saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 15}
+	::=   {saHpiResourceEntry 14 }
+
 
 
 saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE 
@@ -1976,7 +2021,8 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
-        ::= {saHpiResourceEntry 16}
+	::=   {saHpiResourceEntry 15 }
+
 
 saHpiResourceInfoGuid   OBJECT-TYPE 
         SYNTAX          OCTET STRING(SIZE(0..15))
@@ -1989,7 +2035,8 @@ saHpiResourceInfoGuid   OBJECT-TYPE
         Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
         format, with a 3-bit variant field of 10x (where x indicates 'don't care')"
 
-        ::= {saHpiResourceEntry 17}
+	::=   {saHpiResourceEntry 16 }
+
 
 
 saHpiResourceTagTextType OBJECT-TYPE 
@@ -1997,14 +2044,16 @@ saHpiResourceTagTextType OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "See Definition."
-        ::= {saHpiResourceEntry 18}
+	::=   {saHpiResourceEntry 17 }
+
 
 saHpiResourceTagTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "See Definition."
-        ::= {saHpiResourceEntry 19}
+	::=   {saHpiResourceEntry 18 }
+
 
 saHpiResourceTag        OBJECT-TYPE
         SYNTAX          SaHpiText
@@ -2012,7 +2061,8 @@ saHpiResourceTag        OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Resource tag. The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-        ::= {saHpiResourceEntry 20}
+	::=   {saHpiResourceEntry 19 }
+
 
 saHpiParamControl OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2045,10 +2095,10 @@ saHpiParamControl OBJECT-TYPE
                         as resource-specific."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 162."
-        ::={saHpiResourceEntry 21}
+	::= {saHpiResourceEntry   20} 
 
 
-        
+
 --/*******************************************************************************
 -- * *****************************************************************************
 -- * **********                                                         ********** 
@@ -2086,6 +2136,7 @@ SaHpiAutoTimeoutEntry ::= SEQUENCE {
     
 saHpiHotSwapInsertTimeout OBJECT-TYPE
     SYNTAX      SaHpiTime
+--IBMKR: read-create? Why?
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
@@ -2393,9 +2444,6 @@ saHpiHotSwapRTP OBJECT-TYPE
 -- *******************************************************************************/
 --
 
-hpiEvents       OBJECT IDENTIFIER ::= { hpi 2 }
-
-events          OBJECT IDENTIFIER ::= { hpiEvents 1 }
 
 saHpiEventCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -2428,15 +2476,14 @@ saHpiEventEntry OBJECT-TYPE
         ::= {saHpiEventTable 1}
 
 SaHpiEventEntry ::= SEQUENCE {
-
         saHpiEvent              RowPointer,
-        saHpiEventType          INTEGER,
         saHpiEventSeverity      INTEGER,
         saHpiEventHistorical    TruthValue,
         saHpiEventQueueStatus   Unsigned32,
-        saHpiEventSaHpiTime     SaHpiTimeString
+        saHpiEventSaHpiTime     SaHpiTimeString,
+        saHpiEventType          INTEGER
         }
-
+--IBMKR: Should these four objects be read-create or read-only?
 saHpiEvent OBJECT-TYPE
     SYNTAX      RowPointer
     MAX-ACCESS  not-accessible
@@ -2444,6 +2491,53 @@ saHpiEvent OBJECT-TYPE
     DESCRIPTION
         "Pointer to the event."
     ::= {saHpiEventEntry 1}
+
+saHpiEventSeverity OBJECT-TYPE
+        SYNTAX          INTEGER{
+                                undefined (0),
+                                critical(1),
+                                major(2),
+                                minor(3),
+                                informational(4),
+                                ok(5),
+                                debug(241)
+                        }
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Severity of event. 
+        Note: The enumerated named have +1 added as opposed to the 
+        SA HPI spec for the same constants.  "
+        ::= {saHpiEventEntry 3}
+
+
+saHpiEventHistorical OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "True if event log."
+    ::= { saHpiEventEntry 4 }
+
+
+saHpiEventQueueStatus OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "  This status word is returned to HPI Users that request it
+        when saHpiEventGet() is called."
+    ::= { saHpiEventEntry 5 }
+    
+saHpiEventSaHpiTime     OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= { saHpiEventEntry 6 }
 
 saHpiEventType          OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2463,54 +2557,7 @@ saHpiEventType          OBJECT-TYPE
         DESCRIPTION     "Event type. 
         Note: The enumerated named have +1 added as opposed to the 
         SA HPI spec for the same constants.  "
-        ::= {saHpiEventEntry 2}
-
-saHpiEventSeverity OBJECT-TYPE
-        SYNTAX          INTEGER{
-                                undefined (0),
-                                critical(1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(241)
-                        }
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Severity of event. 
-        Note: The enumerated named have +1 added as opposed to the 
-        SA HPI spec for the same constants.  "
-        ::= {saHpiEventEntry 3}
-
-
-saHpiEventHistorical OBJECT-TYPE
-    SYNTAX      TruthValue
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-        "True is event log."
-    ::= { saHpiEventEntry 4 }
-
-
-saHpiEventQueueStatus OBJECT-TYPE
-    SYNTAX      Unsigned32
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-        "  This status word is returned to HPI Users that request it
-        when saHpiEventGet() is called."
-    ::= { saHpiEventEntry 5 }
-    
-saHpiEventSaHpiTime     OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-        "Refer to textual convention for SaHpiTime for more details.
-        The value is Equal to TIME_UNSPECIFED if time is not available; 
-        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
-        if less than or equal to TIME_MAX_RELATIVE."
-    ::= { saHpiEventEntry 6 }
+        ::= {saHpiEventEntry 7}
 
 -- *********************************
 -- **
@@ -2731,7 +2778,7 @@ SaHpiSensorEventEntry ::= SEQUENCE {
         
 saHpiSensorNum  OBJECT-TYPE
     SYNTAX      SaHpiInstrumentId
-    MAX-ACCESS  read-only
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
         "Resource ID owning the event"
@@ -2918,7 +2965,7 @@ saHpiEventSensorCurrentState OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+    "Refer to SaHpiEventState for more details."
     ::= {saHpiSensorEventEntry 13}
 
 
@@ -3164,20 +3211,20 @@ saHpiHotSwapEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiEventHistorical,
-                saHpiEventSaHpiTime
+                saHpiHotSwapEventTimestamp
         }
         ::= {saHpiHotSwapEventTable 1}
 
 SaHpiHotSwapEventEntry ::= SEQUENCE {
 
-        saHpiHotSwapEventTimestamp              SaHpiTime,
+        saHpiHotSwapEventTimestamp              SaHpiTimeString,
         saHpiHotSwapEventState                  SaHpiHotSwapState,
         saHpiHotSwapEventPreviousState          SaHpiHotSwapState,
         saHpiHotSwapEventDelete                 RowStatus
         }
 
 saHpiHotSwapEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTime
+    SYNTAX      SaHpiTimeString
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3260,7 +3307,7 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
         
 saHpiEventWatchdogNum   OBJECT-TYPE
     SYNTAX      SaHpiInstrumentId
-    MAX-ACCESS  read-only
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
         "Resource ID owning the event"
@@ -3361,13 +3408,13 @@ saHpiSoftwareEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiEventHistorical,
-                saHpiEventSaHpiTime
+                saHpiSoftwareEventTimestamp
         }
         ::= {saHpiSoftwareEventTable 1}
 
 SaHpiSoftwareEventEntry ::= SEQUENCE {
 
-        saHpiSoftwareEventTimestamp             SaHpiTime,
+        saHpiSoftwareEventTimestamp             SaHpiTimeString,
 
         saHpiSoftwareEventManufacturerIdT       Unsigned32,
         saHpiSoftwareEventType                  INTEGER,
@@ -3378,7 +3425,7 @@ SaHpiSoftwareEventEntry ::= SEQUENCE {
         }
 
 saHpiSoftwareEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTime
+    SYNTAX      SaHpiTimeString 
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3480,23 +3527,24 @@ saHpiOEMEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiEventHistorical,
-                saHpiEventSaHpiTime
+                saHpiOEMEventTimestamp
+
         }
         ::= {saHpiOEMEventTable 1}
 
 SaHpiOEMEventEntry ::= SEQUENCE {
 
-        saHpiOEMEventTimestamp          SaHpiTime,
+        saHpiOEMEventTimestamp          SaHpiTimeString,
 
         saHpiOEMEventManufacturerIdT    Unsigned32,
-        saHpiOemEventTextType           SaHpiTextType,
-        saHpiOemEventTextLanguage       SaHpiTextLanguage,
-        saHpiOemEventText               SaHpiText,
+        saHpiOEMEventTextType           SaHpiTextType,
+        saHpiOEMEventTextLanguage       SaHpiTextLanguage,
+        saHpiOEMEventText               SaHpiText,
         saHpiOEMEventDelete             RowStatus
         }
 
 saHpiOEMEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTime
+    SYNTAX      SaHpiTimeString
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3514,7 +3562,7 @@ saHpiOEMEventManufacturerIdT OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 2}
 
-saHpiOemEventTextType   OBJECT-TYPE
+saHpiOEMEventTextType   OBJECT-TYPE
     SYNTAX      SaHpiTextType
     MAX-ACCESS  read-only
     STATUS      current
@@ -3522,7 +3570,7 @@ saHpiOemEventTextType   OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 3}
 
-saHpiOemEventTextLanguage OBJECT-TYPE
+saHpiOEMEventTextLanguage OBJECT-TYPE
     SYNTAX      SaHpiTextLanguage
     MAX-ACCESS  read-only
     STATUS      current
@@ -3530,7 +3578,7 @@ saHpiOemEventTextLanguage OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 4}
 
-saHpiOemEventText       OBJECT-TYPE
+saHpiOEMEventText       OBJECT-TYPE
     SYNTAX      SaHpiText
     MAX-ACCESS  read-only
     STATUS      current
@@ -3606,14 +3654,13 @@ saHpiUserEventTimestamp OBJECT-TYPE
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiUserEventEntry 1}
--- User event , writeable.
         
 saHpiUserEventTextType OBJECT-TYPE
     SYNTAX      SaHpiTextType
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        ""
+        "Refer to SaHpiTextType for more details."
     ::= {saHpiUserEventEntry 2}
 
 
@@ -3622,7 +3669,7 @@ saHpiUserEventTextLanguage OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to saHpiTextLanguage for more details."
     ::= {saHpiUserEventEntry 3}
 
 saHpiUserEventText OBJECT-TYPE
@@ -3630,7 +3677,7 @@ saHpiUserEventText OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        " "
+        "Refer to saHpiText for more details. "
     ::= {saHpiUserEventEntry 4}
 
 saHpiUserEventDelete OBJECT-TYPE
@@ -3642,6 +3689,11 @@ saHpiUserEventDelete OBJECT-TYPE
 
     ::= {saHpiUserEventEntry 5}
 
+-- *********************************
+-- **
+-- **     Announcement table
+-- **
+-- *********************************
 
 saHpiAnnouncementCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3670,7 +3722,6 @@ saHpiAnnouncementEntry OBJECT-TYPE
 
 SaHpiAnnouncementEntry ::= SEQUENCE {
 
-        --saHpiAnnuoncementEntryId      Unsigned32,
         saHpiAnnuoncementTimestamp      SaHpiTime,
         saHpiAnnuoncementAddedByUser    TruthValue,
         saHpiAnnouncementSeverity       INTEGER,
@@ -3690,19 +3741,13 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
 
       }
       
---saHpiAnnuoncementEntryId      OBJECT-TYPE
---      SYNTAX          Unsigned32
---      MAX-ACCESS      read-only
---      STATUS          current
---      DESCRIPTION     "Announcment Entry Id."
---      ::= {saHpiAnnouncementEntry 1}
-
 saHpiAnnuoncementTimestamp      OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Time when announcement added to set."
-        ::= {saHpiAnnouncementEntry 2}
+	::=   {saHpiAnnouncementEntry 1 }
+
         
 saHpiAnnuoncementAddedByUser    OBJECT-TYPE
         SYNTAX          TruthValue
@@ -3710,7 +3755,8 @@ saHpiAnnuoncementAddedByUser    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "True if added to set by HPI User, False if added 
         automatically by HPI implementation."
-        ::= {saHpiAnnouncementEntry 3}
+	::=   {saHpiAnnouncementEntry 2 }
+
 
 saHpiAnnouncementSeverity       OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3727,14 +3773,16 @@ saHpiAnnouncementSeverity       OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Only used with DAT and Annunciator functions.  
         This is not a valid severity for events or alarms."
-        ::= {saHpiAnnouncementEntry 4}
+	::=   {saHpiAnnouncementEntry 3 }
+
         
 saHpiAnnuoncementAcknowledged   OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Acknowledged flag."
-        ::= {saHpiAnnouncementEntry 5}
+	::=   {saHpiAnnouncementEntry 4 }
+
         
 saHpiAnnouncementStatusCondType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3747,7 +3795,8 @@ saHpiAnnouncementStatusCondType OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Status Condition Type."
-        ::= {saHpiAnnouncementEntry 6}
+	::=   {saHpiAnnouncementEntry 5 }
+
 
 saHpiAnnouncementEntityPath     OBJECT-TYPE
         SYNTAX          OCTET STRING
@@ -3767,7 +3816,8 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-        ::= {saHpiAnnouncementEntry 7}  
+	::=   {saHpiAnnouncementEntry 6 }
+
         
 saHpiAnnouncementSensorNum      OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3775,7 +3825,8 @@ saHpiAnnouncementSensorNum      OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor associated with status Only valid 
         if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
-        ::= {saHpiAnnouncementEntry 8}
+	::=   {saHpiAnnouncementEntry 7 }
+
         
 saHpiAnnouncementEventState     OBJECT-TYPE
         SYNTAX          SaHpiEventState
@@ -3783,7 +3834,8 @@ saHpiAnnouncementEventState     OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Sensor event state. Only valid if Type is 
         SAHPI_STATUS_COND_TYPE_SENSOR.."
-        ::= {saHpiAnnouncementEntry 9}
+	::=   {saHpiAnnouncementEntry 8 }
+
             
 saHpiAnnouncementName   OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -3791,7 +3843,8 @@ saHpiAnnouncementName   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "AIS compatible identifier associated with Status condition."
-        ::= {saHpiAnnouncementEntry 10}
+	::=   {saHpiAnnouncementEntry 9 }
+
 
 saHpiAnnouncementMid    OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
@@ -3799,7 +3852,8 @@ saHpiAnnouncementMid    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Manufacturer Id associated with status condition, 
         required when type is SAHPI_STATUS_COND_TYPE_OEM."
-        ::= {saHpiAnnouncementEntry 11}
+	::=   {saHpiAnnouncementEntry 10 }
+
 
 saHpiAnnouncementTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
@@ -3807,7 +3861,8 @@ saHpiAnnouncementTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data. 
         See Definition for SaHpiTextType for more details."
-        ::= {saHpiAnnouncementEntry 12}
+	::=   {saHpiAnnouncementEntry 11 }
+
         
 saHpiAnnouncementTextLanguage   OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
@@ -3815,7 +3870,8 @@ saHpiAnnouncementTextLanguage   OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data.
         See Definition for SaHpiTextLanguage for more details."
-        ::= {saHpiAnnouncementEntry 13}
+	::=   {saHpiAnnouncementEntry 12 }
+
 
 saHpiAnnouncementText   OBJECT-TYPE
         SYNTAX          SaHpiText
@@ -3824,7 +3880,8 @@ saHpiAnnouncementText   OBJECT-TYPE
         DESCRIPTION     "Field Data.
         The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-        ::= {saHpiAnnouncementEntry 14}
+	::=   {saHpiAnnouncementEntry 13 }
+
 
 saHpiAnnouncementMode   OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3837,7 +3894,8 @@ saHpiAnnouncementMode   OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 " "
-        ::= {saHpiAnnouncementEntry 15}
+	::=   {saHpiAnnouncementEntry 14 }
+
 
 saHpiAnnouncementDelete OBJECT-TYPE
         SYNTAX          RowStatus
@@ -3845,7 +3903,7 @@ saHpiAnnouncementDelete OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 " "
-        ::= {saHpiAnnouncementEntry 16}
+	::=   {saHpiAnnouncementEntry 15 }
 
 
 --/*******************************************************************************
@@ -3855,7 +3913,11 @@ saHpiAnnouncementDelete OBJECT-TYPE
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-eventLog        OBJECT IDENTIFIER ::= {hpiEvents 2}
+-- *********************************
+-- **
+-- **     Event Info Log table
+-- **
+-- *********************************
 
 saHpiEventLogInfoTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiEventLogInfoEntry
@@ -3864,7 +3926,6 @@ saHpiEventLogInfoTable OBJECT-TYPE
         DESCRIPTION     
             "A table definining Event Log Information records."
         ::= {eventLog 1}
-
 
 saHpiEventLogInfoEntry OBJECT-TYPE
         SYNTAX          SaHpiEventLogInfoEntry
@@ -3989,6 +4050,7 @@ saHpiEventLogOverflowFlag OBJECT-TYPE
             "The OverflowFlag entry indicates the log has overflowed. 
         Events have been dropped or overwritten due to a table overflow. "
         ::= {saHpiEventLogInfoEntry 7}
+
 saHpiEventLogOverflowResetable OBJECT-TYPE
     SYNTAX      TruthValue
     MAX-ACCESS  read-write
@@ -4068,6 +4130,12 @@ saHpiEventLogState OBJECT-TYPE
         "Derieved from SA-HPI-B.01.01 page 61,62."
     ::= {saHpiEventLogInfoEntry 12}
 
+
+-- *********************************
+-- **
+-- **     Event Log
+-- **
+-- *********************************
 
 saHpiEventLogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiEventLogEntry
@@ -4161,7 +4229,6 @@ saHpiEventLog OBJECT-TYPE
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-hpiResources    OBJECT IDENTIFIER ::= { hpi 3 }
 
 
 saHpiRdrCount OBJECT-TYPE
@@ -4196,8 +4263,6 @@ saHpiRdrEntry OBJECT-TYPE
                                                  
 SaHpiRdrEntry ::= SEQUENCE {
 
--- IBMLR: Can this be replaced with saHpiRdrEntryId?
-        --saHpiRdrRecordId      Unsigned32,
         saHpiRdrType            INTEGER,
         saHpiRdrEntityPath      OCTET STRING,
         
@@ -4212,13 +4277,6 @@ SaHpiRdrEntry ::= SEQUENCE {
         saHpiRdrIdString        OCTET STRING
         }
 
---saHpiRdrRecordId OBJECT-TYPE
---        SYNTAX          Unsigned32
---        MAX-ACCESS      not-accessible
---        STATUS          current
---        DESCRIPTION     "Record Id for the RDR entry."
---        ::= {saHpiRdrEntry 1}
-
 saHpiRdrType OBJECT-TYPE
         SYNTAX          INTEGER {
                                 undefined(0),
@@ -4232,7 +4290,8 @@ saHpiRdrType OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Type of RDR entry."
-        ::= {saHpiRdrEntry 2}
+	::=   {saHpiRdrEntry 1 }
+
 
 saHpiRdrEntityPath OBJECT-TYPE
         SYNTAX          OCTET STRING
@@ -4259,7 +4318,8 @@ saHpiRdrEntityPath OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-        ::= {saHpiRdrEntry 3}
+	::=   {saHpiRdrEntry 2 }
+
         
 saHpiIsFru OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -4268,7 +4328,8 @@ saHpiIsFru OBJECT-TYPE
         DESCRIPTION     "Entity is a FRU.  This field is Only valid if the 
         Entity path given in the 'Entity' field is different from the Entity 
         path in the RPT entry for the resource."
-        ::= {saHpiRdrEntry 4}
+	::=   {saHpiRdrEntry 3 }
+
 
 saHpiRdr OBJECT-TYPE
         SYNTAX          RowPointer
@@ -4280,14 +4341,16 @@ saHpiRdr OBJECT-TYPE
              saHpiSensorRec
              saHpiInventoryRec
              saHpiWatchdogRec"
-        ::= {saHpiRdrEntry 5}
+	::=   {saHpiRdrEntry 4 }
+
 
 saHpiRdrId OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Id of the RDR entry. "
-        ::= {saHpiRdrEntry 6}
+	::=   {saHpiRdrEntry 5 }
+
 
 saHpiRdrRTP OBJECT-TYPE
         SYNTAX          RowPointer
@@ -4295,7 +4358,8 @@ saHpiRdrRTP OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Forward pointer to the RTP entry. Another method to match 
         the RPT and RDR is to compare the EntityPath, but this is much easier. "
-        ::= {saHpiRdrEntry 7}
+	::=   {saHpiRdrEntry 6 }
+
 
 saHpiRdrTextType OBJECT-TYPE
         SYNTAX          SaHpiTextType
@@ -4303,7 +4367,8 @@ saHpiRdrTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "See definition"
-        ::= {saHpiRdrEntry 8}
+	::=   {saHpiRdrEntry 7 }
+
 
 saHpiRdrTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
@@ -4311,14 +4376,16 @@ saHpiRdrTextLanguage OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "See definition"
-        ::= {saHpiRdrEntry 9}
+	::=   {saHpiRdrEntry 8 }
+
 
 saHpiRdrIdString OBJECT-TYPE
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "ID String of the RDR entry."
-        ::= {saHpiRdrEntry 10}
+	::=   {saHpiRdrEntry 9 }
+
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -6814,9 +6881,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
         OBJECTS {
-                saHpiOemEventTextType,
-                saHpiOemEventTextLanguage,
-                saHpiOemEventText
+                saHpiOEMEventTextType,
+                saHpiOEMEventTextLanguage,
+                saHpiOEMEventText
         }
         STATUS current
         DESCRIPTION
@@ -6857,9 +6924,6 @@ saHpiEntityGroup OBJECT-GROUP
                 saHpiEntryCount,
                 saHpiEntryUpdateCount,
                 saHpiEntryUpdateTimestamp,
-                saHpiDomainId ,
-                saHpiEntryId ,
-                saHpiResourceId ,
                 saHpiResourceEntityPath ,
                 saHpiResourceCapabilities ,
                 saHpiResourceSeverity ,
