@@ -2482,7 +2482,6 @@ SaHpiEventEntry ::= SEQUENCE {
         saHpiEventSaHpiTime     SaHpiTimeString,
         saHpiEventType          INTEGER
         }
---IBMKR: Should these four objects be read-create or read-only?
 saHpiEvent OBJECT-TYPE
     SYNTAX      RowPointer
     MAX-ACCESS  not-accessible
