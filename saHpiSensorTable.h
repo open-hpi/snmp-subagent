@@ -30,11 +30,6 @@ extern          "C" {
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
 
-  /*
-   * Hardcoded values in macros.
-   */
-
-  
 
 typedef  struct sensor_threshold_to_mib_s {
     SaHpiSensorReadingT* reading;
@@ -47,6 +42,7 @@ typedef  struct sensor_threshold_to_mib_s {
     SaHpiSensorRangeFlagsT flag;
     int pos;
   } sensor_reading_to_mib;
+
   /* 
    * MAX values from the MIB.
    */
@@ -180,7 +176,8 @@ typedef  struct sensor_threshold_to_mib_s {
       long resource_id;
       long domain_id;
       long hash;
-      
+
+
     } saHpiSensorTable_context;
 
 
@@ -190,7 +187,7 @@ typedef  struct sensor_threshold_to_mib_s {
  */
  
     void            initialize_table_saHpiSensorTable(void);
-  /*
+  /*  
     const saHpiSensorTable_context
         *saHpiSensorTable_get_by_idx(netsnmp_index *);
     const saHpiSensorTable_context
@@ -208,7 +205,13 @@ typedef  struct sensor_threshold_to_mib_s {
 		       oid *sensor_oid, 
 		       size_t *sensor_oid_len);
 
+int
+delete_sensor_row(SaHpiDomainIdT domain_id,
+		  SaHpiResourceIdT resource_id,
+		  SaHpiSensorNumT num);
+
   int set_sensor(saHpiSensorTable_context *ctx);
+
 int  
 saHpiSensorTable_modify_context(
 			     SaHpiSensorRecT *entry, 
@@ -313,10 +316,6 @@ update_char_with_raw_data(SaHpiUint32T value,
     saHpiSensorTable_context *saHpiSensorTable_create_row(netsnmp_index
                                                             *);
 
-#ifdef saHpiSensorTable_IDX2
-    saHpiSensorTable_context *saHpiSensorTable_get(const char *name,
-                                                     int len);
-#endif
 
 #ifdef __cplusplus
 };
