@@ -134,7 +134,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	if (rdr_entry.RdrType == SAHPI_SENSOR_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
 	  rc = populate_sensor(&rdr_entry.RdrTypeUnion.SensorRec, 
-			       rpt_entry->ResourceId,
+			       rpt_entry,
 			       full_oid, full_oid_len, 
 			       child_oid, &child_oid_len);
 	}
@@ -142,20 +142,21 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	  child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
 
 	  rc =populate_control(&rdr_entry.RdrTypeUnion.CtrlRec,
+			       rpt_entry,
 			       full_oid, full_oid_len,
 			       child_oid, &child_oid_len);
 	}
 	if (rdr_entry.RdrType == SAHPI_INVENTORY_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
 	  rc =populate_inventory(&rdr_entry.RdrTypeUnion.InventoryRec,
-				 rpt_entry->ResourceId,
+				 rpt_entry,
 				 full_oid, full_oid_len,
 				 child_oid, &child_oid_len);
 	}
 	if (rdr_entry.RdrType == SAHPI_WATCHDOG_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
 	  rc =populate_watchdog(&rdr_entry.RdrTypeUnion.WatchdogRec,
-				rpt_entry->ResourceId,
+				rpt_entry,
 				full_oid, full_oid_len,
 				child_oid, &child_oid_len);
 	}

@@ -2843,9 +2843,9 @@ saHpiCtrlState OBJECT-TYPE
 
         stream   - A stream control is represented as follows:
                      octet 1    - repeat flag
-                     octets 2-5 - count of octets of data stored in the stream specified 
+                     octets 2-3 - count of octets of data stored in the stream specified 
                                   in network byte order.
-                     octets 6-9 - contain the stream data.
+                     octets 4-7 - contain the stream data.
 
         text     - Text control attributes are represented as follows:
                      octet 1    - Line number (255 indicates all lines).

@@ -88,7 +88,7 @@ saHpiSensorTable_modify_context(
 			     SaHpiSensorRecT *entry, 			     
 			     SaHpiSensorThresholdsT *sensor_threshold,
 			     SaHpiSensorEvtEnablesT *enables,
-			     SaHpiResourceIdT resource_id,
+			     SaHpiRptEntryT *rpt_entry,
 			     oid *, size_t,
 			     saHpiSensorTable_context *ctx);
 
@@ -111,7 +111,7 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 
 int
 populate_sensor(SaHpiSensorRecT *sensor, 
-		SaHpiSessionIdT resource_id,
+		SaHpiRptEntryT *rpt_entry,
 		oid *rdr_entry_oid, size_t rdr_entry_oid_len,
 		oid *sensor_oid, size_t *sensor_oid_len) 
 {
@@ -170,7 +170,7 @@ populate_sensor(SaHpiSensorRecT *sensor,
     DEBUGMSGTL((AGENT,"Calling SensorThresholdGet\n"));
 
     rc = saHpiSensorThresholdsGet(session_id,
-				  resource_id,
+				  rpt_entry->ResourceId,
 				  sensor->Num,
 				  &sensor_threshold);
 
@@ -179,14 +179,14 @@ populate_sensor(SaHpiSensorRecT *sensor,
     }
 
     rc = saHpiSensorEventEnablesGet(session_id,
-				    resource_id,
+				    rpt_entry->ResourceId,
 				    sensor->Num,
 				    &enables);
 
     if (saHpiSensorTable_modify_context(sensor, 
 					&sensor_threshold,
 					&enables,
-					resource_id,
+					rpt_entry,
 					rdr_entry_oid, rdr_entry_oid_len,
 					sensor_context)
 	    == AGENT_NEW_ENTRY) {
@@ -240,7 +240,7 @@ saHpiSensorTable_modify_context(
 				SaHpiSensorRecT *entry,
 				SaHpiSensorThresholdsT *sensor_threshold,
 				SaHpiSensorEvtEnablesT *enables,
-				SaHpiResourceIdT resource_id,	
+				SaHpiRptEntryT *rpt_entry,
 				oid *rdr_entry, size_t rdr_entry_oid_len,
 				saHpiSensorTable_context *ctx) {
 
@@ -286,8 +286,8 @@ saHpiSensorTable_modify_context(
     ctx->saHpiSensorCategory = entry->Category;
 
     // DOAMIN
-    ctx->domain_id = 0;
-    ctx->resource_id = resource_id;
+    ctx->domain_id = rpt_entry->DomainId;
+    ctx->resource_id = rpt_entry->ResourceId;
     // IBM-KR: Adding +1
     ctx->saHpiSensorEventsCategoryControl = entry->EventCtrl+1;
     // IBM-KR: Revised in the future MIB - more columns possible

@@ -122,7 +122,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 				  &rdr_entry,
 				  NULL);
 
-      if (entry_id == prev_entry_id) return AGENT_ERR_OPERATION; 
       if (err == SA_OK) {
 	// The MIB containst the order of indexes
 	sel_oid[0] = rpt_entry->DomainId;

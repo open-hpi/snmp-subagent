@@ -97,7 +97,7 @@ extern          "C" {
 
 
   int  populate_watchdog(SaHpiWatchdogRecT *watchdog, 
-			 SaHpiResourceIdT resource_id,
+			 SaHpiRptEntryT *rpt_entry,
 			 oid *rdr_oid, size_t rdr_oid_len,
 			 oid *watchdog_oid, 
 			 size_t *watchdog_oid_len);
@@ -110,15 +110,7 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 
   int set_watchdog(saHpiWatchdogTable_context *ctx);
   
-  int  
-  saHpiWatchdogTable_modify_context(SaHpiWatchdogRecT *entry, 
-				    SaHpiResourceIdT resource_id,
-				    SaHpiWatchdogT *wdog,
-				    oid *, size_t,
-				    saHpiWatchdogTable_context *ctx);
-  
-
-
+ 
  
 
 /*************************************************************

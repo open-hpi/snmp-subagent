@@ -38,10 +38,19 @@ size_t          saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
 static oid      saHpiWatchdogCount_oid[] = { hpiResources_OID, 9, 0 };    
 static u_long watchdog_count;
 
+static int  
+  saHpiWatchdogTable_modify_context(SaHpiWatchdogRecT *entry, 
+				    SaHpiRptEntryT *rpt_entry,
+				    SaHpiWatchdogT *wdog,
+				    oid *, size_t,
+				    saHpiWatchdogTable_context *ctx);
+  
+
+
 
 int
 populate_watchdog(SaHpiWatchdogRecT *watchdog,  
-		  SaHpiResourceIdT resource_id,		  
+		  SaHpiRptEntryT *rpt_entry,
 		  oid *rdr_entry_oid, size_t rdr_entry_oid_len,
 		  oid *watchdog_oid, size_t *watchdog_oid_len) 
 {
@@ -99,7 +108,7 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
      
     DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerGet with %d\n", watchdog->WatchdogNum ));
     
-    rc = saHpiWatchdogTimerGet (session_id, resource_id,
+    rc = saHpiWatchdogTimerGet (session_id, rpt_entry->ResourceId,
 				watchdog->WatchdogNum,
 				&wdog);
 
@@ -108,7 +117,7 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
 	return AGENT_ERR_OPERATION;
     }
     
-    if (saHpiWatchdogTable_modify_context(watchdog, resource_id, &wdog,
+    if (saHpiWatchdogTable_modify_context(watchdog, rpt_entry, &wdog,
 					  rdr_entry_oid, rdr_entry_oid_len,
 					  watchdog_context)
 	== AGENT_NEW_ENTRY) {
@@ -158,7 +167,7 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 int  
 saHpiWatchdogTable_modify_context(
 				  SaHpiWatchdogRecT *entry,
-				  SaHpiResourceIdT resource_id,
+				  SaHpiRptEntryT *rpt_entry,
 				  SaHpiWatchdogT *wdog,
 				  oid *rdr_entry, size_t rdr_entry_oid_len,
 				  saHpiWatchdogTable_context *ctx) {
@@ -196,8 +205,8 @@ saHpiWatchdogTable_modify_context(
    
     ctx->saHpiWatchdogRDR_len = rdr_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiWatchdogRDR, rdr_entry, ctx->saHpiWatchdogRDR_len);
-    ctx->resource_id = resource_id; 
-    ctx->domain_id = 0;
+    ctx->resource_id = rpt_entry->ResourceId; 
+    ctx->domain_id = rpt_entry->DomainId;
     ctx->saHpiWatchdogNum = entry->WatchdogNum;
     ctx->saHpiWatchdogOem = entry->Oem;
     ctx->saHpiWatchdogTimerReset = MIB_FALSE;
