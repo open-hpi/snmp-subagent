@@ -4521,7 +4521,7 @@ saHpiWatchdogPreTimeoutInterval OBJECT-TYPE
         ::= {saHpiWatchdogEntry 7}
 
 saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
-        SYNTAX          Unsigned32 (1..32)
+        SYNTAX          Unsigned32 (0..32)
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "set of five bit flags which indicate that a Watchdog
@@ -4530,7 +4530,7 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
                         set until specifically cleared with a
                         SET on this object, or by some other
                         implementation-dependent means.
-
+	
 	Bit flags are:
 
 	SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
@@ -4538,7 +4538,9 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
  	SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
  	SAHPI_WATCHDOG_EXP_SMS_OS      0x10
  	SAHPI_WATCHDOG_EXP_OEM         0x20
-			"
+
+	The bit flag 0x00 indicates that this watchdog does not support
+	any of the flags."
         ::= {saHpiWatchdogEntry 8}
 
 saHpiWatchdogTimerInitialCount OBJECT-TYPE
