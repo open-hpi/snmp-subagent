@@ -312,7 +312,7 @@ int build_state_string (SaHpiEventCategoryT category,
    }
    
    if (idx > 0)
-     idx = idx-2;
+     idx = idx-STATESTRING_VALUE_DELIMITER_LENGTH;
 
    if (idx < max_len) 
      temp[idx] = 0x00;   
@@ -325,6 +325,50 @@ int build_state_string (SaHpiEventCategoryT category,
 
    free(temp);
    return rc;
+}
+
+int build_state_value (char *str,
+		       size_t len,
+		       SaHpiEventStateT *state) {
+
+  int rc = AGENT_ERR_NOERROR;
+  char *s = NULL;
+  char *delim = NULL;
+  char *tok = NULL;
+  int i = 0;
+
+  s = (char *)malloc (len);
+  if (s == NULL)
+    return AGENT_ERR_MEMORY_FAULT;
+
+  delim = (char *) malloc ( STATESTRING_VALUE_DELIMITER_LENGTH );
+  if (delim == NULL) {
+    free (s);
+    return AGENT_ERR_MEMORY_FAULT;
+  }
+
+  memcpy (s, str, len);
+  memcpy (delim, STATESTRING_VALUE_DELIMITER, STATESTRING_VALUE_DELIMITER_LENGTH);
+  tok = strtok(s, delim);
+  while (tok != NULL) {
+    
+    /*  snmp_log(LOG_INFO,"Tok: [%s]\n", tok); */
+    for (i = 0; i <STATESTRING_MAX_ENTRIES; i++) {
+      if (strncasecmp(tok, state_string[i].str,strlen(state_string[i].str)) == 0) {
+	/*
+	snmp_log(LOG_INFO,"Matched: %X [%s] = [%s]\n", 
+		 state_string[i].state,
+		 state_string[i].str,
+		 tok);
+	*/
+	*state = *state + state_string[i].state;
+      }
+    }
+    tok = strtok(NULL, delim);
+  }
+  
+  free (s);
+  return rc;
 }
 long
 calculate_hash_value (void *data, int len)
@@ -841,6 +885,7 @@ main (int argc, char **argv)
   int agentx_subagent = AGENT_TRUE;
   char c;
   int rc = 0;
+  
   pid_t child;
   /* change this if you want to be a SNMP master agent */
 
@@ -868,6 +913,7 @@ main (int argc, char **argv)
 	exit (1);
       }
   init_snmp_logging ();
+ 
   if (do_syslog == AGENT_TRUE)
     {
       snmp_enable_calllog ();

@@ -815,12 +815,32 @@ set_sensor_event (saHpiSensorTable_context * ctx)
 
   if (ctx)
     {
+      memset (&enables, 0x00, sizeof(SaHpiSensorEvtEnablesT));
+      enables.SensorStatus =  ctx->saHpiSensorStatus;
 
-      
-      enables.SensorStatus = ctx->saHpiSensorStatus;
-      enables.AssertEvents = ctx->saHpiSensorAssertEvents;
-      enables.DeassertEvents = ctx->saHpiSensorDeassertEvents;
-
+      rc = build_state_value (ctx->saHpiSensorAssertEvents,
+			      ctx->saHpiSensorAssertEvents_len,
+			      &enables.AssertEvents);
+      if (rc != AGENT_ERR_NOERROR) {
+	DEBUGMSGTL  ((AGENT,"Call to build_state_value with [%s] failed with rc: %d.\n",
+		      ctx->saHpiSensorAssertEvents, rc));
+	return AGENT_ERR_WRONG_DELIM;
+      }
+      rc = build_state_value (ctx->saHpiSensorDeassertEvents,
+			      ctx->saHpiSensorDeassertEvents_len,
+			      &enables.DeassertEvents);
+      if (rc != AGENT_ERR_NOERROR) {
+	DEBUGMSGTL  ((AGENT,"Call to build_state_value with [%s] failed with rc: %d.\n",
+		      ctx->saHpiSensorDeassertEvents, rc));
+	return AGENT_ERR_WRONG_DELIM;
+      }      
+      DEBUGMSGTL(( AGENT,
+		   "enables.SensorStatus:   %X\n" \
+		   "enables.AssertEvents:   %X[%s]\n" \
+		   "enables.DeassertEvents: %X[%s]\n",
+		   enables.SensorStatus, enables.AssertEvents,
+			ctx->saHpiSensorAssertEvents,
+		   enables.DeassertEvents, ctx->saHpiSensorDeassertEvents));
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);
       if (rc != AGENT_ERR_NOERROR)
@@ -844,6 +864,18 @@ set_sensor_event (saHpiSensorTable_context * ctx)
 		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
+
+       build_state_string(ctx->saHpiSensorCategory-1, 
+			 enables.AssertEvents,
+			 (char *)&ctx->saHpiSensorAssertEvents,
+			 &ctx->saHpiSensorAssertEvents_len,
+			 SENSOR_EVENTS_SUPPORTED_MAX);
+
+      build_state_string(ctx->saHpiSensorCategory-1, 
+			 enables.DeassertEvents,
+			 (char *)&ctx->saHpiSensorDeassertEvents,
+			 &ctx->saHpiSensorDeassertEvents_len,
+			 SENSOR_EVENTS_SUPPORTED_MAX);
 
       return AGENT_ERR_NOERROR;
     }
@@ -1206,18 +1238,37 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 	  break;
 
 	case COLUMN_SAHPISENSORASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  rc = netsnmp_check_vb_type_and_size (var, ASN_OCTET_STR,
-					       sizeof (row_ctx->
-						       saHpiSensorAssertEvents));
+	  /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
+	    {
+	      rc = SNMP_ERR_WRONGTYPE;
+	    }
+	  else if (var->val_len > SENSOR_EVENTS_SUPPORTED_MAX)
+	    {
+	      rc = SNMP_ERR_WRONGLENGTH;
+	    }
+	  else if (var->val_len < 0)
+	    {
+	      rc = SNMP_ERR_WRONGLENGTH;
+	    }
 	  break;
 
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  rc = netsnmp_check_vb_type_and_size (var, ASN_OCTET_STR,
-					       sizeof (row_ctx->
-						       saHpiSensorDeassertEvents));
+	  /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
+	    {
+	      rc = SNMP_ERR_WRONGTYPE;
+	    }
+	  else if (var->val_len > SENSOR_EVENTS_SUPPORTED_MAX)
+	    {
+	      rc = SNMP_ERR_WRONGLENGTH;
+	    }
+	  else if (var->val_len < 0)
+	    {
+	      rc = SNMP_ERR_WRONGLENGTH;
+	    }
 	  break;
+	  
 	case COLUMN_SAHPISENSORINDEX:
 	case COLUMN_SAHPISENSORTYPE:
 	case COLUMN_SAHPISENSORCATEGORY:
@@ -1374,6 +1425,7 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
 
   netsnmp_request_group_item *current;
   int rc = SNMP_ERR_NOERROR;
+  int rc2;
   DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_action: Entry\n"));
   for (current = rg->list; current; current = current->next)
     {
@@ -1385,24 +1437,33 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
 	case COLUMN_SAHPISENSORSTATUS:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
 	  row_ctx->saHpiSensorStatus = *var->val.integer;
-	  if (set_sensor_event (row_ctx) != AGENT_ERR_NOERROR)
+	  rc2 = set_sensor_event (row_ctx);
+	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
+	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	    rc = SNMP_ERR_BADVALUE;
 	  break;
 
 	case COLUMN_SAHPISENSORASSERTEVENTS:
 	  memcpy ( row_ctx->saHpiSensorAssertEvents,
 		   var->val.string, var->val_len);
 	  row_ctx->saHpiSensorAssertEvents_len = var->val_len;
-	  if (set_sensor_event (row_ctx) != AGENT_ERR_NOERROR)
+	  rc2 = set_sensor_event (row_ctx);
+	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
+	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	    rc = SNMP_ERR_BADVALUE;
 	  break;
 
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
 	  memcpy(  row_ctx->saHpiSensorDeassertEvents,
 		   var->val.string, var->val_len);
 	  row_ctx->saHpiSensorDeassertEvents_len = var->val_len;
-	  if (set_sensor_event (row_ctx) != AGENT_ERR_NOERROR)
+	  rc2 = set_sensor_event (row_ctx);
+	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
+	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	    rc = SNMP_ERR_BADVALUE;
 	  break;
 
 	case COLUMN_SAHPISENSORTHRESHOLDRAW:
