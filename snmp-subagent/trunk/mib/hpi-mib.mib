@@ -6459,7 +6459,7 @@ saHpiInventoryNumAreas OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of Area contained in IDR"
+    "Number of Area(s) contained in IDR"
     REFERENCE
     "See SAI-HPI-B.01.01 section 8.9 "
     ::= {saHpiInventoryEntry 6}
