@@ -28,7 +28,7 @@
 #include <saHpiHotSwapTable.h>
 #include <saHpiWatchdogTable.h>
 
-
+extern u_long event_new_entry_count;
 extern int send_traps;
 extern int MAX_EVENT_ENTRIES;
 static netsnmp_handler_registration *my_handler = NULL;
@@ -196,7 +196,7 @@ populate_event ()
   saHpiEventTable_context *event_context;
 
   DEBUGMSGTL ((AGENT, "\t--- populate_event. Entry\n"));
-
+  event_new_entry_count = 0;
   rc = getSaHpiSession (&session_id);
   if (rc != AGENT_ERR_NOERROR)
     {
@@ -298,6 +298,7 @@ populate_event ()
 	    {
 	      // New entry. Add it
 	      event_context = saHpiEventTable_create_row (&event_index);
+	      event_new_entry_count++;
 	    }
 
 	  // By this stage, event_context surely has something in it.
@@ -354,8 +355,10 @@ populate_event ()
 	}
 
     }				// while loop
-
   return rc;
+  if (event_new_entry_count > 0)
+        snmp_log  (LOG_INFO,"Found %d new Event records.\n", event_new_entry_count);
+
 }
 
 

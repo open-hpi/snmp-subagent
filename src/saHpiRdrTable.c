@@ -34,6 +34,7 @@
 #include <saHpiWatchdogTable.h>
 
 extern int send_traps;
+extern u_long rdr_new_entry_count;
 
 
 static netsnmp_handler_registration *my_handler = NULL;
@@ -66,7 +67,7 @@ static trap_vars saHpiResourceDataRecordNotification[] = {
 
 
 static u_long rdr_count = 0;
-
+extern u_long rdr_new_entry_count;
 static unsigned int rdr_mutex = AGENT_FALSE;
 
 static int
@@ -151,6 +152,7 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 	      if (backup_count == 0)
 		{
 		  rdr_context = saHpiRdrTable_create_row (&rdr_index);
+		  rdr_new_entry_count++;
 		}
 	      else
 		{
@@ -163,6 +165,7 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 		    {
 		      // New entry. Add it
 		      rdr_context = saHpiRdrTable_create_row (&rdr_index);
+		      rdr_new_entry_count++;
 		    }
 
 		  if (!rdr_context)
@@ -454,7 +457,7 @@ purge_rdr ()
 	}
       rdr_mutex = AGENT_FALSE;
     }
-  DEBUGMSGTL ((AGENT, "purge_rdr: Exit (delete: %d).\n", count));
+  DEBUGMSGTL ((AGENT, "purge_rdr: Exit (deleted: %d).\n", count));
   return count;
 }
 

@@ -26,6 +26,9 @@
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiEventTable.h>
 
+
+extern u_long sel_new_entry_count;
+
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
@@ -155,6 +158,7 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 		  // New entry. Add it
 		  sel_context =
 		    saHpiSystemEventLogTable_create_row (&sel_index);
+		  sel_new_entry_count++;
 		}
 	      // Notify RPT table that this row is active.
 	      update_event_status_flag (rpt_entry->DomainId,
