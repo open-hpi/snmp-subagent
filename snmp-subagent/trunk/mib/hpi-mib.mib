@@ -6,7 +6,8 @@ IMPORTS
 	NOTIFICATION-TYPE,
 	Unsigned32,
 	Counter32,
-	Counter64  		FROM SNMPv2-SMI
+	Counter64,
+	Opaque			FROM SNMPv2-SMI
 	TEXTUAL-CONVENTION,
 	DateAndTime,
 	RowPointer,
@@ -141,6 +142,15 @@ Unsigned8 ::= TEXTUAL-CONVENTION
 	"Derived from SAI-HPI-B.00.90 spec, pg 170.
 	see typedef unsigned char SaHpiUint8T;"
     SYNTAX	INTEGER(0..255)
+
+Float64	::= TEXTUAL-CONVENTION
+    STATUS	current
+    DESCRIPTION
+	"a 64 bit float number, 8 byte alignment"
+    REFERENCE
+    	"Derived from SAI-HPI-B.00.90 spec, pg 170."
+    SYNTAX	Opaque (SIZE(0..255))
+--IBMKR: Figure out the right length of the Float64
 
 SaHpiManufacturerId ::= TEXTUAL-CONVENTION
     STATUS	current
@@ -820,7 +830,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 	associated GUID."
 	INDEX	{ saHpiDomainId }
 	::= {saHpiDomainInfoTable 1}
-	
+
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
 	saHpiInfoDomainID		Unsigned32,
@@ -3097,7 +3107,7 @@ SaHpiEventLogEntry ::= SEQUENCE {
 
 saHpiEventLogIndex OBJECT-TYPE
         SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
 	    "Entry ID for record
@@ -3438,7 +3448,7 @@ SaHpiRdrEntry ::= SEQUENCE {
 
 saHpiRdrRecordId OBJECT-TYPE
         SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Record Id for the RDR entry."
         ::= {saHpiRdrEntry 1}
@@ -3453,7 +3463,7 @@ saHpiRdrType OBJECT-TYPE
 				watchdogRdr(5),
 				annunciatorRdr(6)
 			}
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Type of RDR entry."
         ::= {saHpiRdrEntry 2}
@@ -3896,32 +3906,31 @@ saHpiSensorEntry OBJECT-TYPE
         DESCRIPTION
         " This is the sensor resource data record which
 	describes all of the static  data associated with a sensor."
+--IBMKR: How do you set the sensors? 
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorIndex }
         ::= {saHpiSensorTable 1}
 
 SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorIndex			Unsigned32,
 	saHpiSensorType				INTEGER,
-	saHpiSensorCategory			INTEGER,
+	saHpiSensorCategory			SaHpiEventCategory,
 	
 	saHpiEnableCtrl	  			TruthValue,
 	
 	saHpiSensorEventsCategoryControl	INTEGER,
-	saHpiSensorEventsSupported		OCTET STRING,
+	saHpiSensorEventsSupported		SaHpiEventState,
 	
 	saHpiSensorIsSupported		        TruthValue, 
-	saHpiSensorReadingType			INTEGER,
+
+	saHpiSensorReadingType			SaHpiSensorReadingType,
 	saHpiSensorBaseUnits			SaHpiSensorUnits,
 	saHpiSensorModifierUnits	        SaHpiSensorUnits,
 	saHpiSensorModifierUse                 	INTEGER,
 	saHpiSensorPercentage 			TruthValue,
 	        
 	saHpiSensorRangeFlags  			OCTET STRING,      					
-	
-	saHpiAccuracyFactor			OCTET STRING,
+	saHpiAccuracyFactor			Float64,
     	
-	saHpiNonlinear 				TruthValue,
-	
 	saHpiOem				Unsigned32,
 	
 	saHpiSensorRDR				RowPointer
@@ -3930,12 +3939,14 @@ SaHpiSensorEntry ::= SEQUENCE {
 
 saHpiSensorIndex OBJECT-TYPE
         SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "The sensor number. 
-	The following specifies the named range for standard sensor numbers. */
-	SAHPI_STANDARD_SENSOR_MIN   (SaHpiSensorNumT)0x00000100
-	SAHPI_STANDARD_SENSOR_MAX   (SaHpiSensorNumT)0x000001FF"
+
+	The following specifies the named range for standard sensor numbers.
+
+	SAHPI_STANDARD_SENSOR_MIN   0x00000100
+	SAHPI_STANDARD_SENSOR_MAX   0x000001FF"
         ::= {saHpiSensorEntry 1}
 
 
@@ -3989,6 +4000,7 @@ saHpiSensorType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "General sensor type. "
+
         ::= {saHpiSensorEntry 2}
 
 saHpiEnableCtrl OBJECT-TYPE
@@ -4000,23 +4012,7 @@ saHpiEnableCtrl OBJECT-TYPE
 
 
 saHpiSensorCategory OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				unspecified (2),
-				threshold (3),
-				usage (4),
-				state (5),
-				predFail (6),
-				limit (7),
-				performance (8),
-				severity (9),
-				presence (10),
-				enable (11),
-				availability (12),
-				redundancy (13),
-				user (128),
-				generic (129)
-			}
+        SYNTAX          SaHpiEventCategory
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensors category.
@@ -4054,118 +4050,11 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
         ::= {saHpiSensorEntry 5}
 
 saHpiSensorEventsSupported OBJECT-TYPE
-        SYNTAX          OCTET STRING 
+        SYNTAX         	SaHpiEventState
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Event States
-	
-	The following event states are specified relative to the categories listed 
-	above. The event types are only valid for their given category. Each set of 
-	events is labeled as to which category it belongs to.
-	Each event will have only one event state associated with it. When retrieving
-	the event status or event enabled status a bit mask of all applicable event 
-	states is used. Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-	
-	SaHpiEventCategoryT == <any> 
-	
-	SAHPI_ES_UNSPECIFIED (SaHpiEventStateT)0x0000
-	
-	SaHpiEventCategoryT == SAHPI_EC_THRESHOLD 
-	When using these event states, the event state should match
-	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
-	event severity of SAHPI_MINOR).
-	
-	SAHPI_ES_LOWER_MINOR (SaHpiEventStateT)0x0001
-	SAHPI_ES_LOWER_MAJOR (SaHpiEventStateT)0x0002
-	SAHPI_ES_LOWER_CRIT  (SaHpiEventStateT)0x0004
-	SAHPI_ES_UPPER_MINOR (SaHpiEventStateT)0x0008
-	SAHPI_ES_UPPER_MAJOR (SaHpiEventStateT)0x0010
-	SAHPI_ES_UPPER_CRIT  (SaHpiEventStateT)0x0020
-	
-	SaHpiEventCategoryT == SAHPI_EC_USAGE
-	SAHPI_ES_IDLE   (SaHpiEventStateT)0x0001
-	SAHPI_ES_ACTIVE (SaHpiEventStateT)0x0002
-	SAHPI_ES_BUSY   (SaHpiEventStateT)0x0004
-	
-	SaHpiEventCategoryT == SAHPI_EC_STATE
-	SAHPI_ES_STATE_DEASSERTED (SaHpiEventStateT)0x0001
-	SAHPI_ES_STATE_ASSERTED   (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_PRED_FAIL
-	SAHPI_ES_PRED_FAILURE_DEASSERT (SaHpiEventStateT)0x0001
-	SAHPI_ES_PRED_FAILURE_ASSERT   (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_LIMIT
-	SAHPI_ES_LIMIT_NOT_EXCEEDED (SaHpiEventStateT)0x0001
-	SAHPI_ES_LIMIT_EXCEEDED     (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_PERFORMANCE
-	SAHPI_ES_PERFORMANCE_MET   (SaHpiEventStateT)0x0001
-	SAHPI_ES_PERFORMANCE_LAGS  (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_SEVERITY 
-	When using these event states, the event state should match
-	the event severity 
-	
-	SAHPI_ES_OK                  (SaHpiEventStateT)0x0001
-	SAHPI_ES_MINOR_FROM_OK       (SaHpiEventStateT)0x0002
-	SAHPI_ES_MAJOR_FROM_LESS     (SaHpiEventStateT)0x0004
-	SAHPI_ES_CRITICAL_FROM_LESS  (SaHpiEventStateT)0x0008
-	SAHPI_ES_MINOR_FROM_MORE     (SaHpiEventStateT)0x0010
-	SAHPI_ES_MAJOR_FROM_CRITICAL (SaHpiEventStateT)0x0020
-	SAHPI_ES_CRITICAL            (SaHpiEventStateT)0x0040
-	SAHPI_ES_MONITOR             (SaHpiEventStateT)0x0080
-	SAHPI_ES_INFORMATIONAL       (SaHpiEventStateT)0x0100
-	
-	SaHpiEventCategoryT == SAHPI_EC_PRESENCE
-	SAHPI_ES_ABSENT  (SaHpiEventStateT)0x0001
-	SAHPI_ES_PRESENT (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_ENABLE
-	SAHPI_ES_DISABLED (SaHpiEventStateT)0x0001
-	SAHPI_ES_ENABLED  (SaHpiEventStateT)0x0002
-	
-	SaHpiEventCategoryT == SAHPI_EC_AVAILABILITY
-	SAHPI_ES_RUNNING       (SaHpiEventStateT)0x0001
-	SAHPI_ES_TEST          (SaHpiEventStateT)0x0002
-	SAHPI_ES_POWER_OFF     (SaHpiEventStateT)0x0004
-	SAHPI_ES_ON_LINE       (SaHpiEventStateT)0x0008
-	SAHPI_ES_OFF_LINE      (SaHpiEventStateT)0x0010
-	SAHPI_ES_OFF_DUTY      (SaHpiEventStateT)0x0020
-	SAHPI_ES_DEGRADED      (SaHpiEventStateT)0x0040
-	SAHPI_ES_POWER_SAVE    (SaHpiEventStateT)0x0080
-	SAHPI_ES_INSTALL_ERROR (SaHpiEventStateT)0x0100
-	
-	SaHpiEventCategoryT == SAHPI_EC_REDUNDANCY
-	SAHPI_ES_FULLY_REDUNDANT                  	(SaHpiEventStateT)0x0001
-	SAHPI_ES_REDUNDANCY_LOST                  	(SaHpiEventStateT)0x0002
-	SAHPI_ES_REDUNDANCY_DEGRADED              	(SaHpiEventStateT)0x0004
-	SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0008
-	SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0010
-	SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES 	(SaHpiEventStateT)0x0020
-	SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    	(SaHpiEventStateT)0x0040
-	SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     	(SaHpiEventStateT)0x0080
-	
-	SaHpiEventCategoryT == SAHPI_EC_GENERIC || SAHPI_EC_SENSOR_SPECIFIC
-	These event states are implementation-specific.
-	
-	SAHPI_ES_STATE_00  (SaHpiEventStateT)0x0001
-	SAHPI_ES_STATE_01  (SaHpiEventStateT)0x0002
-	SAHPI_ES_STATE_02  (SaHpiEventStateT)0x0004
-	SAHPI_ES_STATE_03  (SaHpiEventStateT)0x0008
-	SAHPI_ES_STATE_04  (SaHpiEventStateT)0x0010
-	SAHPI_ES_STATE_05  (SaHpiEventStateT)0x0020
-	SAHPI_ES_STATE_06  (SaHpiEventStateT)0x0040
-	SAHPI_ES_STATE_07  (SaHpiEventStateT)0x0080
-	SAHPI_ES_STATE_08  (SaHpiEventStateT)0x0100
-	SAHPI_ES_STATE_09  (SaHpiEventStateT)0x0200
-	SAHPI_ES_STATE_10  (SaHpiEventStateT)0x0400
-	SAHPI_ES_STATE_11  (SaHpiEventStateT)0x0800
-	SAHPI_ES_STATE_12  (SaHpiEventStateT)0x1000
-	SAHPI_ES_STATE_13  (SaHpiEventStateT)0x2000
-	SAHPI_ES_STATE_14  (SaHpiEventStateT)0x4000"
+	""
         ::= {saHpiSensorEntry 6}
 
 
@@ -4178,13 +4067,7 @@ saHpiSensorIsSupported	OBJECT-TYPE
 	
 
 saHpiSensorReadingType 	OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined(0),
-				int64(1),    
-				uint64(2),   
-				float64(3),  
-				buffer(4)    			
-			} 
+	SYNTAX		SaHpiSensorReadingType
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
@@ -4242,7 +4125,7 @@ saHpiSensorRangeFlags 	OBJECT-TYPE
         ::= {saHpiSensorEntry 13}
 	
 saHpiAccuracyFactor	OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
+        SYNTAX          Float64
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
@@ -4252,27 +4135,21 @@ saHpiAccuracyFactor	OBJECT-TYPE
 	figures in all sensor accuracies, resolutions, and tolerances."
         ::= {saHpiSensorEntry 14}
 	
-saHpiNonlinear 		OBJECT-TYPE
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " If this flag is set, hysteresis values are calculated
-	at the nominal sensor value."
-        ::= {saHpiSensorEntry 15}
-	
 saHpiOem 		OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Reserved for OEM use."
-        ::= {saHpiSensorEntry 16}
+        DESCRIPTION     " "
+
+        ::= {saHpiSensorEntry 15}
+	
 	    
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 17}
+	::= {saHpiSensorEntry 16}
 
 --
 -- /*******************************************************************************
@@ -5922,8 +5799,8 @@ saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiDomainId,
 		saHpiResourceId,
-		saHpiRdrRecordId,
-		saHpiRdrType,
+--		saHpiRdrRecordId,
+--		saHpiRdrType,
 		saHpiRdrEntityPath,
 		saHpiRdr,
 		saHpiRdrRTP,
@@ -6003,8 +5880,8 @@ saHpiHotSwapGroup OBJECT-GROUP
 saHpiResourceDataRecordGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiRdrCount,
-		saHpiRdrRecordId,
-		saHpiRdrType,
+--		saHpiRdrRecordId,
+--		saHpiRdrType,
 		saHpiRdrEntityPath,
 		saHpiRdr,
 		saHpiRdrId,
@@ -6018,7 +5895,7 @@ saHpiResourceDataRecordGroup OBJECT-GROUP
 saHpiSensorGroup	OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorCount,
-		saHpiSensorIndex,
+--		saHpiSensorIndex,
 		saHpiSensorType,
 		saHpiSensorCategory,
 		saHpiSensorEventsCategoryControl,
