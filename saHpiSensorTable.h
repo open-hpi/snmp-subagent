@@ -208,7 +208,8 @@ typedef  struct sensor_threshold_to_mib_s {
 						
 
   int  populate_sensor(
-		       SaHpiSensorRecT *sensor,SaHpiSessionIdT resource_id,
+		       SaHpiSensorRecT *sensor,
+		       	SaHpiRptEntryT *rpt_entry,
 		       oid *rdr_oid, size_t rdr_oid_len,
 		       oid *sensor_oid, 
 		       size_t *sensor_oid_len);

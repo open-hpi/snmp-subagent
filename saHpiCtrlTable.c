@@ -41,8 +41,19 @@ oid      saHpiCtrlCount_oid[] = { hpiResources_OID, 3, 0};
 
 static u_long control_count = 0;
 
+
+static int  
+saHpiCtrlTable_modify_context(
+			     SaHpiCtrlRecT *entry,
+			     SaHpiCtrlStateT *ctrl_state,
+			     SaHpiRptEntryT *rpt_entry,
+			     oid *rdr_entry, size_t rdr_entry_oid_len,
+			     saHpiCtrlTable_context *ctx);
+
+
 int
 populate_control(SaHpiCtrlRecT *ctrl, 
+		 SaHpiRptEntryT *rpt_entry,
 		 oid *rdr_entry_oid, size_t rdr_entry_oid_len,
 		 oid *ctrl_oid, size_t *ctrl_oid_len) 
 {
@@ -51,9 +62,10 @@ populate_control(SaHpiCtrlRecT *ctrl,
 
   oid index_oid[1];
   oid column[2];
-  
+   SaHpiSessionIdT session_id;
   netsnmp_index	                ctrl_index;
   saHpiCtrlTable_context	*ctrl_context; 
+  SaHpiCtrlStateT               ctrl_state;
 
   DEBUGMSGTL((AGENT,"\n\t--- populate_ctrl: Entry.\n"));
 
@@ -85,18 +97,32 @@ populate_control(SaHpiCtrlRecT *ctrl,
 		       &ctrl_index,
 		       ctrl_oid, MAX_OID_LEN, ctrl_oid_len);
 
+    // Get the Control State
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;
+     
+    rc = saHpiControlStateGet(session_id,
+			      rpt_entry->ResourceId,
+			      ctrl->Num,
+			      &ctrl_state);
+
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+
     // By this stage, ctrl_context surely has something in it.
     // '*_modify_context' does a checksum check to see if 
     // the record needs to be altered, and if so populates with
     // information from RDR and the OIDs passed.
     if (saHpiCtrlTable_modify_context(ctrl, 
-				      rdr_entry_oid, rdr_entry_oid_len,
+				      &ctrl_state,
+				      rpt_entry,				      				      rdr_entry_oid, rdr_entry_oid_len,
 				      ctrl_context)
 	    == AGENT_NEW_ENTRY) {
 
 	  CONTAINER_INSERT(cb.container, ctrl_context);	  
 	  control_count = CONTAINER_SIZE(cb.container);
-
     }
     rc = AGENT_ERR_NOERROR;
   } else
@@ -105,10 +131,13 @@ populate_control(SaHpiCtrlRecT *ctrl,
   DEBUGMSGTL((AGENT,"\n\t--- populate_ctrl. Exit\n"));
   return rc;
 }
+
 int
-set_table_state(saHpiCtrlTable_context *ctx) {
+set_ctrl_state(saHpiCtrlTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
+  SaHpiCtrlStateT state;
+  
   SaErrorT rc;
 
   if (ctx) {
@@ -118,21 +147,83 @@ set_table_state(saHpiCtrlTable_context *ctx) {
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
    
-   
+    memset(&state, 0x00, sizeof(SaHpiCtrlStateT));
+    rc = saHpiControlStateGet(session_id,
+			      ctx->resource_id,
+			      ctx->saHpiCtrlNum,
+			      &state);
+
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateGet', rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // To be compliant with the HPI.
+    state.Type = ctx->saHpiCtrlType-1;
+  
+    switch(state.Type) {
+    case SAHPI_CTRL_TYPE_DIGITAL:
+      memcpy(&state.StateUnion.Digital,
+	     ctx->saHpiCtrlState, sizeof(SaHpiCtrlStateDigitalT));
+      state.StateUnion.Digital = ntohl(state.StateUnion.Digital);
+      break;
+    case SAHPI_CTRL_TYPE_DISCRETE:
+      memcpy(&state.StateUnion.Discrete,
+	     ctx->saHpiCtrlState, sizeof(SaHpiCtrlStateDiscreteT));
+      state.StateUnion.Discrete = ntohl(state.StateUnion.Discrete);
+      break;
+    case SAHPI_CTRL_TYPE_ANALOG:
+      // This is Int32
+      memcpy(&state.StateUnion.Analog,
+	     ctx->saHpiCtrlState, sizeof(SaHpiCtrlStateAnalogT));      
+      state.StateUnion.Analog = ntohl(state.StateUnion.Analog);
+      break;
+    case SAHPI_CTRL_TYPE_STREAM:
+      memcpy(&state.StateUnion.Stream,
+	     ctx->saHpiCtrlState, sizeof(SaHpiCtrlStateStreamT));
+      state.StateUnion.Stream.StreamLength = ntohl( state.StateUnion.Stream.StreamLength);
+      break;
+    case SAHPI_CTRL_TYPE_TEXT:
+      state.StateUnion.Text.Line = ctx->saHpiCtrlState[0];
+      state.StateUnion.Text.Text.DataType = ctx->saHpiCtrlTextType-1;
+      state.StateUnion.Text.Text.Language = ctx->saHpiCtrlTextLanguage;
+      state.StateUnion.Text.Text.DataLength = ctx->saHpiCtrlText_len;
+      memcpy(&state.StateUnion.Text.Text.Data,
+	     ctx-> saHpiCtrlText,
+	     ctx->saHpiCtrlText_len);
+      break;
+    case SAHPI_CTRL_TYPE_OEM:
+      memcpy(&state.StateUnion.Oem.MId,
+	     ctx->saHpiCtrlText,
+	      ctx->saHpiCtrlText_len);
+      
+      state.StateUnion.Oem.MId = ntohl(state.StateUnion.Oem.MId);
+      state.StateUnion.Oem.BodyLength = ctx->saHpiCtrlText_len;
+      memcpy(&state.StateUnion.Oem.Body,
+	     ctx->saHpiCtrlText,
+	     ctx->saHpiCtrlText_len);
+      break;
     }
     
+    rc = saHpiControlStateSet(session_id,
+			      ctx->resource_id,
+			      ctx->saHpiCtrlNum,
+			      &state);
+
+    if (SA_OK != rc) {
+      DEBUGMSGTL((AGENT,"Call to 'saHpiControlStateSet', rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
     return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
 }
 
 int  
-saHpiCtrlTable_modify_context(
-			     SaHpiCtrlRecT *entry,
-			     oid *rdr_entry, size_t rdr_entry_oid_len,
-			     saHpiCtrlTable_context *ctx) {
+saHpiCtrlTable_modify_context(SaHpiCtrlRecT *entry,
+			      SaHpiCtrlStateT *state,
+			      SaHpiRptEntryT *rpt_entry,
+			      oid *rdr_entry, size_t rdr_entry_oid_len,
+			      saHpiCtrlTable_context *ctx) {
 
   long hash;
 
@@ -164,9 +255,12 @@ saHpiCtrlTable_modify_context(
 	return AGENT_ENTRY_EXIST;
       }
     }
-
+    if (hash == 0)
+      hash = 1;
     ctx->hash = hash;
-    DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->Num));
+
+    ctx->resource_id = rpt_entry->ResourceId;
+    ctx->domain_id = rpt_entry->DomainId;
 
     ctx->saHpiCtrlNum = entry->Num;
     ctx->saHpiCtrlBool = (entry->Ignore == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
@@ -178,48 +272,75 @@ saHpiCtrlTable_modify_context(
       // IBM-KR: End of adding +1
       ctx->saHpiCtrlOem = entry->Oem;
       ctx->saHpiCtrlRDR_len = rdr_entry_oid_len *sizeof(oid);
+
       memcpy(ctx->saHpiCtrlRDR, rdr_entry, ctx->saHpiCtrlRDR_len);
 
       // Union
-      memset(ctx->saHpiCtrlState, 0x00, sizeof(ctx->saHpiCtrlState));
+      memset(ctx->saHpiCtrlState, 0x00, SAHPI_CTRL_STATE_MAX);
       ctx->saHpiCtrlState_len = 0;
+
+      memset(ctx-> saHpiCtrlAttributes, 0x00, SAHPI_CTRL_ATTR_MAX);
+      ctx->saHpiCtrlAttributes_len = 0;
+
       switch (entry->Type) {
       case SAHPI_CTRL_TYPE_DIGITAL:
 	// SaHpiCtrlRecDigitalT
 	digital = entry->TypeUnion.Digital;	
 	digital.Default = htonl(digital.Default);
-	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateDigitalT);
-	memcpy(ctx->saHpiCtrlState, 
+	ctx->saHpiCtrlAttributes_len = sizeof(SaHpiCtrlStateDigitalT);
+	memcpy(ctx->saHpiCtrlAttributes, 
 	       &digital.Default, ctx->saHpiCtrlState_len);
-
+	// SaHpiCtrlStateDigitalT
+	state->StateUnion.Digital = htonl(state->StateUnion.Digital);
+	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateDigitalT);
+	memcpy(ctx->saHpiCtrlState,
+	       &state->StateUnion.Digital,
+	       ctx->saHpiCtrlState_len);
 	break;
       case SAHPI_CTRL_TYPE_DISCRETE:
 	// SaHpiCtrlStateDiscreteT
 	discrete = entry->TypeUnion.Discrete;
 	discrete.Default = htonl(discrete.Default);
+	ctx->saHpiCtrlAttributes_len = sizeof(SaHpiCtrlStateDiscreteT);
+	memcpy(ctx->saHpiCtrlAttributes,
+	       &discrete.Default, ctx->saHpiCtrlAttributes_len);
+	//SaHpiCtrlStateDiscreteT
+	state->StateUnion.Discrete = htonl(state->StateUnion.Discrete);
 	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateDiscreteT);
 	memcpy(ctx->saHpiCtrlState,
-	       &discrete.Default, ctx->saHpiCtrlState_len);
+	       &state->StateUnion.Discrete,
+	       ctx->saHpiCtrlState_len);
 	break;
       case SAHPI_CTRL_TYPE_ANALOG:
-	// SaHpiCtrlRecAnalogT
+	// SaHpiCtrlStateAnalogT 
 	analog = entry->TypeUnion.Analog;	
 	analog.Min = htonl(analog.Min);
 	analog.Max = htonl(analog.Max);
 	analog.Default = htonl(analog.Default);
-	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlRecAnalogT);
+	ctx->saHpiCtrlAttributes_len = sizeof(SaHpiCtrlRecAnalogT);
+	memcpy(ctx->saHpiCtrlAttributes,
+	       &analog, ctx->saHpiCtrlAttributes_len);
+	// SaHpiCtrlStateAnalogT
+	state->StateUnion.Analog = htonl(state->StateUnion.Analog);
+	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateAnalogT);
 	memcpy(ctx->saHpiCtrlState,
-	       &analog, ctx->saHpiCtrlState_len );
+	       &state->StateUnion.Analog,
+	       ctx->saHpiCtrlState_len);
 	break;
       case SAHPI_CTRL_TYPE_STREAM:
 	// SaHpiCtrlRecStreamT
 	stream = entry->TypeUnion.Stream;
-	stream.Default.StreamLength = htonl(stream.Default.StreamLength);
+
+	ctx->saHpiCtrlAttributes_len = SAHPI_CTRL_MAX_STREAM_LENGTH;
+	memcpy(ctx->saHpiCtrlAttributes,
+	       &stream.Default.Stream, 
+	       ctx->saHpiCtrlAttributes_len);
+	// SaHpiCtrlStateStreamT
+	state->StateUnion.Stream.StreamLength = htonl(	state->StateUnion.Stream.StreamLength);
 	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlStateStreamT);
 	memcpy(ctx->saHpiCtrlState,
-	       &stream.Default, 
+	       &state->StateUnion.Stream,
 	       ctx->saHpiCtrlState_len);
-
 	break;
       case SAHPI_CTRL_TYPE_TEXT:
 	// SaHpiCtrlRecTextT
@@ -232,22 +353,46 @@ saHpiCtrlTable_modify_context(
 	ctx->saHpiCtrlState[2] = text.Language;
 	// Text encoding
 	ctx->saHpiCtrlState[3] = text.DataType;
-	// Line number
-	ctx->saHpiCtrlState[4] = text.Default.Line;
-	memcpy(ctx->saHpiCtrlState+5,
+	memcpy(ctx->saHpiCtrlAttributes+4,
 	       text.Default.Text.Data, 
 	       text.Default.Text.DataLength);
-	ctx->saHpiCtrlState_len = text.Default.Text.DataLength + 5;
+	ctx->saHpiCtrlAttributes_len = text.Default.Text.DataLength + 4;
+
+	//SaHpiCtrlStateTextT
+	ctx->saHpiCtrlState[0] = state->StateUnion.Text.Line;
+	ctx->saHpiCtrlTextType = state->StateUnion.Text.Text.DataType;
+	ctx->saHpiCtrlTextLanguage = state->StateUnion.Text.Text.Language;
+	ctx->saHpiCtrlText_len = state->StateUnion.Text.Text.DataLength;
+	memcpy(ctx->saHpiCtrlText,
+	       state->StateUnion.Text.Text.Data,
+	       ctx->saHpiCtrlText_len);
 	break;
+
       case SAHPI_CTRL_TYPE_OEM:
 	oem = entry->TypeUnion.Oem;
 	oem.MId = htonl(oem.MId);
-	oem.Default.MId = htonl(oem.Default.MId);	
-	ctx->saHpiCtrlState_len = sizeof(SaHpiCtrlRecOemT);
-	memcpy(ctx->saHpiCtrlState,
-	       &oem, ctx->saHpiCtrlState_len );	
+	//oem.Default.MId = htonl(oem.Default.MId);	
+	ctx->saHpiCtrlAttributes_len = SAHPI_CTRL_OEM_CONFIG_LENGTH + sizeof(SaHpiManufacturerIdT);
+	memcpy(ctx->saHpiCtrlAttributes,
+	       &oem, ctx->saHpiCtrlAttributes_len );
+	memcpy(ctx->saHpiCtrlAttributes + ctx->saHpiCtrlAttributes_len,
+	       &oem.Default.Body,
+	       oem.Default.BodyLength);
+	// IBM-KR: BUG!
+	//	ctx->saHpiCtrlAttributes += oem.Default.BodyLength;
+	//SaHpiCtrlStateOemT
+
+	//
 	break;
       }
+
+       if (entry->Type != state->Type) {
+	DEBUGMSGTL((AGENT,"Entry type != state type (%d=?%d)\n",
+		    entry->Type, state->Type));
+	// Change 'state' to be NULL
+	ctx->saHpiCtrlState_len = 0;
+	       
+       }
     }
    
     return AGENT_NEW_ENTRY;

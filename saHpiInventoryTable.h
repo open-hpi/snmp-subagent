@@ -130,17 +130,13 @@ extern          "C" {
                                                   *);
 
 int  populate_inventory(
-		      SaHpiInventoryRecT *control,SaHpiResourceIdT resource_id,
+		      SaHpiInventoryRecT *control,
+		      SaHpiRptEntryT *rpt_entry,
 		       oid *rdr_oid, size_t rdr_oid_len,
 		       oid *control_oid, 
 		       size_t *control_oid_len);
 
-int  
-saHpiInventoryTable_modify_context(SaHpiInventoryRecT *entry,SaHpiResourceIdT resource_id,
-				   long count,
-				   SaHpiInventoryDataT *inv_data, SaHpiUint32T inv_data_size,
-                             oid *rdr_entry, size_t rdr_entry_oid_len,
-                             saHpiInventoryTable_context *ctx);
+
 
 void
 update_context_on_inventory_data(SaHpiInventGeneralDataT *data,

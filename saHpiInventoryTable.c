@@ -44,9 +44,18 @@ delete_inventory_row(SaHpiDomainIdT domain_id,
 		     SaHpiResourceIdT resource_id,
 		     SaHpiEirIdT num,
 		     long count);
+
+static int  
+saHpiInventoryTable_modify_context(SaHpiInventoryRecT *entry,
+				   SaHpiRptEntryT *rpt_entry,
+				   long count,
+				   SaHpiInventoryDataT *inv_data, 
+				   SaHpiUint32T inv_data_size,
+				   oid *rdr_entry, size_t rdr_entry_oid_len,
+				   saHpiInventoryTable_context *ctx);
 int
 populate_inventory(SaHpiInventoryRecT *inventory, 
-		   SaHpiResourceIdT resource_id,
+		   SaHpiRptEntryT *rpt_entry,
 		   oid *rdr_entry_oid, size_t rdr_entry_oid_len,
 		   oid *inventory_oid, size_t *inventory_oid_len) 
 {
@@ -88,7 +97,8 @@ memory_fixed:
     memset(data, 0x00, initial_size);
     DEBUGMSGTL((AGENT,"Calling saHpiEntityInventoryDataRead with buffer size %d\n", initial_size));
     
-    rc = saHpiEntityInventoryDataRead (session_id, resource_id,
+    rc = saHpiEntityInventoryDataRead (session_id, 
+				       rpt_entry->ResourceId,
 					inventory->EirId,
 					initial_size,
 					data,
@@ -143,7 +153,7 @@ memory_fixed:
       
     
       if (saHpiInventoryTable_modify_context(inventory, 
-					     resource_id,
+					     rpt_entry,
 					     count,
 					     data, data_len,
 					     rdr_entry_oid, rdr_entry_oid_len,
@@ -266,7 +276,8 @@ delete_inventory_rows(SaHpiDomainIdT domain_id,
 
 int  
 saHpiInventoryTable_modify_context(
-				   SaHpiInventoryRecT *entry,SaHpiResourceIdT resource_id,
+				   SaHpiInventoryRecT *entry,
+				   SaHpiRptEntryT *rpt_entry,
 				   long count,
 				   SaHpiInventoryDataT *inv_data, SaHpiUint32T inv_data_size,
 				   oid *rdr_entry, size_t rdr_entry_oid_len,
@@ -303,8 +314,8 @@ saHpiInventoryTable_modify_context(
     ctx->hash = hash;
 
     DEBUGMSGTL((AGENT,"Creating columns for: %d, %d\n", entry->EirId, count));
-    ctx->resource_id = resource_id;
-    ctx->domain_id = 0;
+    ctx->resource_id = rpt_entry->ResourceId;
+    ctx->domain_id = rpt_entry->DomainId;
     ctx->saHpiInventoryRDR_len = rdr_entry_oid_len*sizeof(oid);
     memcpy(ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
     ctx->saHpiInventoryEirId = entry->EirId;
