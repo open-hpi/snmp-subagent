@@ -88,16 +88,23 @@ typedef  struct sensor_threshold_to_mib_s {
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiSensorEventsState;
 
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSensorStatus;
 
-      long   saHpiSensorIgnore;
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSensorAssertEvents;
 
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSensorDeassertEvents;
+
+        /** TruthValue = ASN_INTEGER */
+        long            saHpiSensorIgnore;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiSensorReadingFormats;
 
-
-        long   saHpiSensorIsNumeric;
-
+        /** TruthValue = ASN_INTEGER */
+        long            saHpiSensorIsNumeric;
 
         /** INTEGER = ASN_INTEGER */
         long            saHpiSensorSignFormat;
@@ -111,8 +118,8 @@ typedef  struct sensor_threshold_to_mib_s {
         /** INTEGER = ASN_INTEGER */
         long            saHpiSensorModifierUse;
 
-        long   saHpiSensorFactorsStatic;
-
+        /** TruthValue = ASN_INTEGER */
+        long            saHpiSensorFactorsStatic;
 
         /** OCTETSTR = ASN_OCTET_STR */
         unsigned char   saHpiSensorFactors[SAHPISENSORFACTORS_MAX];
@@ -121,7 +128,8 @@ typedef  struct sensor_threshold_to_mib_s {
         /** INTEGER = ASN_INTEGER */
         long            saHpiSensorFactorsLinearization;
 
-        long   saHpiSensorPercentage;
+         /** TruthValue = ASN_INTEGER */
+        long            saHpiSensorPercentage;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiSensorRangeFlags;
@@ -205,41 +213,15 @@ typedef  struct sensor_threshold_to_mib_s {
 		       oid *sensor_oid, 
 		       size_t *sensor_oid_len);
 
-int
-delete_sensor_row(SaHpiDomainIdT domain_id,
-		  SaHpiResourceIdT resource_id,
-		  SaHpiSensorNumT num);
+  int
+  delete_sensor_row(SaHpiDomainIdT domain_id,
+		    SaHpiResourceIdT resource_id,
+		    SaHpiSensorNumT num);
 
   int set_sensor(saHpiSensorTable_context *ctx);
 
-int  
-saHpiSensorTable_modify_context(
-			     SaHpiSensorRecT *entry, 
-			     SaHpiSensorThresholdsT *sensor_threshold,
-			     SaHpiResourceIdT resource_id,
-			     oid *, size_t,
-			     saHpiSensorTable_context *ctx);
+  int set_sensor_event(saHpiSensorTable_context *ctx);
 
-
- 
-  int send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx);
-
-void 
- fill_sensor_threshold_info(saHpiSensorTable_context *ctx, 
-			    SaHpiSensorThresholdsT *sensor_threshold);
-void
-make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
-  /*
-void
-update_char_with_raw_data(SaHpiUint32T value,
-			  const int pos,
-			  const char *);
-  */
 
 /*************************************************************
  * oid declarations
@@ -257,33 +239,36 @@ update_char_with_raw_data(SaHpiUint32T value,
 #define COLUMN_SAHPISENSORCATEGORY 3
 #define COLUMN_SAHPISENSOREVENTSCATEGORYCONTROL 4
 #define COLUMN_SAHPISENSOREVENTSSTATE 5
-#define COLUMN_SAHPISENSORIGNORE 6
-#define COLUMN_SAHPISENSORREADINGFORMATS 7
-#define COLUMN_SAHPISENSORISNUMERIC 8
-#define COLUMN_SAHPISENSORSIGNFORMAT 9
-#define COLUMN_SAHPISENSORBASEUNITS 10
-#define COLUMN_SAHPISENSORMODIFIERUNITS 11
-#define COLUMN_SAHPISENSORMODIFIERUSE 12
-#define COLUMN_SAHPISENSORFACTORSSTATIC 13
-#define COLUMN_SAHPISENSORFACTORS 14
-#define COLUMN_SAHPISENSORFACTORSLINEARIZATION 15
-#define COLUMN_SAHPISENSORPERCENTAGE 16
-#define COLUMN_SAHPISENSORRANGEFLAGS 17
-#define COLUMN_SAHPISENSORRANGEREADINGVALUESPRESENT 18
-#define COLUMN_SAHPISENSORRANGEREADINGRAW 19
-#define COLUMN_SAHPISENSORRANGEREADINGINTERPRETED 20
-#define COLUMN_SAHPISENSORRANGEREADINGEVENTSENSOR 21
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNISTHRESHOLD 22
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES 23
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNREADTHOLD 24
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNWRITETHOLD 25
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNFIXEDTHOLD 26
-#define COLUMN_SAHPISENSORTHRESHOLDRAW 27
-#define COLUMN_SAHPISENSORTHRESHOLDINTERPRETED 28
-#define COLUMN_SAHPISENSOROEM 29
-#define COLUMN_SAHPISENSORRDR 30
+#define COLUMN_SAHPISENSORSTATUS 6
+#define COLUMN_SAHPISENSORASSERTEVENTS 7
+#define COLUMN_SAHPISENSORDEASSERTEVENTS 8
+#define COLUMN_SAHPISENSORIGNORE 9
+#define COLUMN_SAHPISENSORREADINGFORMATS 10
+#define COLUMN_SAHPISENSORISNUMERIC 11
+#define COLUMN_SAHPISENSORSIGNFORMAT 12
+#define COLUMN_SAHPISENSORBASEUNITS 13
+#define COLUMN_SAHPISENSORMODIFIERUNITS 14
+#define COLUMN_SAHPISENSORMODIFIERUSE 15
+#define COLUMN_SAHPISENSORFACTORSSTATIC 16
+#define COLUMN_SAHPISENSORFACTORS 17
+#define COLUMN_SAHPISENSORFACTORSLINEARIZATION 18
+#define COLUMN_SAHPISENSORPERCENTAGE 19
+#define COLUMN_SAHPISENSORRANGEFLAGS 20
+#define COLUMN_SAHPISENSORRANGEREADINGVALUESPRESENT 21
+#define COLUMN_SAHPISENSORRANGEREADINGRAW 22
+#define COLUMN_SAHPISENSORRANGEREADINGINTERPRETED 23
+#define COLUMN_SAHPISENSORRANGEREADINGEVENTSENSOR 24
+#define COLUMN_SAHPISENSORTHRESHOLDDEFNISTHRESHOLD 25
+#define COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES 26
+#define COLUMN_SAHPISENSORTHRESHOLDDEFNREADTHOLD 27
+#define COLUMN_SAHPISENSORTHRESHOLDDEFNWRITETHOLD 28
+#define COLUMN_SAHPISENSORTHRESHOLDDEFNFIXEDTHOLD 29
+#define COLUMN_SAHPISENSORTHRESHOLDRAW 30
+#define COLUMN_SAHPISENSORTHRESHOLDINTERPRETED 31
+#define COLUMN_SAHPISENSOROEM 32
+#define COLUMN_SAHPISENSORRDR 33
 #define saHpiSensorTable_COL_MIN 1
-#define saHpiSensorTable_COL_MAX 30
+#define saHpiSensorTable_COL_MAX 33
 
  
     int            
