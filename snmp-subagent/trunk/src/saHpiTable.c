@@ -616,8 +616,8 @@ int set_event_log_time(saHpiTable_context *ctx) {
 			      time);
 
     if (rc != SA_OK) {
-      snmp_log(LOG_ERR,"Call to saHpiEventLogTimeSet failed with return code: %d.\n");
-      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogTimeSet' failed with rc: %d\n"));
+      snmp_log(LOG_ERR,"Call to saHpiEventLogTimeSet failed with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogTimeSet' failed with rc: %d\n",rc));
       return AGENT_ERR_OPERATION;
     }
     
@@ -647,7 +647,7 @@ int set_clear_events(saHpiTable_context *ctx) {
 
     if (rc != SA_OK) {
       snmp_log(LOG_ERR,"Call to saHpiEventLogClear failed with return code: %d.\n", rc);
-      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogClear' rc: %d\n"));
+      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogClear' rc: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
     
@@ -678,7 +678,7 @@ int set_table_param_control(saHpiTable_context *ctx) {
 			  action);
    
     if (rc != SA_OK) {
-      snmp_log(LOG_ERR,"Call to saHpiParamControl failed, return code: %d.\n");
+      snmp_log(LOG_ERR,"Call to saHpiParamControl failed, return code: %d.\n", rc);
       DEBUGMSGTL((AGENT,"Call to saHpiParmControl rc: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
@@ -856,7 +856,7 @@ saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
 
     dst->hash = src->hash;
     dst->dirty_bit = src->dirty_bit;
-    DEBUGMSGTL((AGENT,"--- saHpiTable_row_copy: Exit. "));
+
 
     return 0;
 }
@@ -1333,15 +1333,11 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 	      {
 		// Success. Now its time to remove the events and SEL entries.
 
-		for (count = 0; 
-		     ((delete_event_row(row_ctx->saHpiDomainID,
-					  row_ctx->saHpiResourceID,
-					  count) == AGENT_ERR_NOERROR) &&
-		      (delete_SEL_row(row_ctx->saHpiDomainID,
-				      row_ctx->saHpiResourceID,
-				      count) == AGENT_ERR_NOERROR)); count++) 
-		  DEBUGMSGTL((AGENT,"Deleted %d,%d,%d from SEL and Event table.\n",
-			      row_ctx->saHpiDomainID, row_ctx->saHpiResourceID, count));
+		delete_SEL_row(row_ctx->saHpiDomainID,
+			       row_ctx->saHpiResourceID);
+
+		DEBUGMSGTL((AGENT,"Deleted %d,%d from SEL.\n",
+			    row_ctx->saHpiDomainID, row_ctx->saHpiResourceID));
 	      }
 	
 	    
@@ -1374,7 +1370,7 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 					   rc);
      
     }
-    DEBUGMSGTL((AGENT,"saHpiTable_set_action. Exit.\n"));
+    DEBUGMSGTL((AGENT,"saHpiTable_set_action. Exit (rc: %d).\n",rc));
 }
 
 /************************************************************

@@ -326,8 +326,8 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,
-	       SaHpiResourceIdT resource_id,
-	       SaHpiSelEntryIdT num)
+	       SaHpiResourceIdT resource_id)
+
 {
   saHpiSystemEventLogTable_context *ctx;
   //saHpiSystemEventLogTable_context tmp;
@@ -335,12 +335,12 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   oid sel_oid[SEL_INDEX_NR];
   netsnmp_index sel_index;
 
-  DEBUGMSGTL((AGENT,"delete_SEL_row (%d, %d, %d). Entry\n",
-  	domain_id, resource_id, num));
+  DEBUGMSGTL((AGENT,"delete_SEL_row (%d, %d). Entry\n",
+  	domain_id, resource_id));
 
   sel_oid[0] = domain_id;
   sel_oid[1] = resource_id;
-  sel_oid[2] = num;
+  sel_oid[2] = 0;
   sel_index.oids = (oid *) &sel_oid;
   sel_index.len = SEL_INDEX_NR;
   ctx = CONTAINER_FIND(cb.container, &sel_index);
@@ -606,18 +606,10 @@ saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
 
         case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
             /** TruthValue = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->
-                                                       saHpiSystemEventClearEventTable));
+	  rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+					      sizeof(row_ctx->
+						     saHpiSystemEventClearEventTable));
             break;
-	    /*
-        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->
-                                                       saHpiSystemEventLogState));
-            break;
-	    */
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -660,14 +652,6 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 					  undo_ctx ? undo_ctx->saHpiSystemEventClearEventTable : 0 );
             break;
 
-	    /*
-        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-	  if ((*var->val.integer < 1) ||
-	      (*var->val.integer > 2)) {
-	    rc = SNMP_ERR_BADVALUE;
-	  }
-	  break;
-	    */
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
@@ -686,7 +670,7 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
       // 0 the API couldn't find the right context.
 
       if ( ((saHpiSystemEventLogTable_context *) rg->existing_row)->hash == 0) {
-	rc =  SNMP_ERR_NOSUCHNAME;
+	//rc =  SNMP_ERR_NOSUCHNAME;
 	var = current->ri->requestvb;
 	// Do the check only for one type of column:
 	if (current->tri->colnum == COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE) {
@@ -699,10 +683,10 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 	    rc = SNMP_ERR_INCONSISTENTNAME;
 	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
 	    rc = SNMP_ERR_WRONGVALUE;
-	  if (*var->val.integer == SNMP_ROW_DESTROY) 
+	  //if (*var->val.integer == SNMP_ROW_DESTROY) 
 	    // This is suppose to return NOERROR even if it does not EXIST!
 	    // Can't do that.
-	    rc = SNMP_ERR_INCONSISTENTNAME;
+	    //rc = SNMP_ERR_INCONSISTENTNAME;
 	}
 
 	if (rc)
@@ -745,41 +729,26 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiSystemEventClearEventTable = *var->val.integer;
 	    // This can erase many tables. Including this one.
-	    if (set_clear_event_table(row_ctx) != AGENT_ERR_NOERROR) {
-	      // Look in the SNMPv2-TC to find the diagram for this.
-	      netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					     SNMP_ERR_INCONSISTENTVALUE);
-	    } else {
+	    rg->row_deleted = 1;
 
-	      rg->row_deleted = 1;
-	      // Delete it also in event.
-	/*
-	      delete_event_row(row_ctx->domain_id,
-			       row_ctx->resource_id,
-			       row_ctx->saHpiSystemEventLogEntryId);
-	*/
-	      // Notify the RPT table.
-	      update_event_status_flag(row_ctx->domain_id,
-				 row_ctx->resource_id,
-				 row_ctx->saHpiSystemEventLogEntryId,
-				 SNMP_ROW_NOTINSERVICE);
-
-	      // Now we have to send off an event?
-	      // IBM-KR: TODO
-	      
+	    // Only do it for rows that exist.
+	    if (row_ctx->hash != 0) {
+	      if (set_clear_event_table(row_ctx) != AGENT_ERR_NOERROR) {
+		// Look in the SNMPv2-TC to find the diagram for this.
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					       SNMP_ERR_INCONSISTENTVALUE);
+		
+	      } else {
+		// Notify the RPT table.
+		update_event_status_flag(row_ctx->domain_id,
+					 row_ctx->resource_id,
+					 row_ctx->saHpiSystemEventLogEntryId,
+					 SNMP_ROW_NOTINSERVICE);
+		
+	      }
 	    }
             break;
-	    /*
-        case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-            row_ctx->saHpiSystemEventLogState = *var->val.integer;
-	    if (set_logstate(row_ctx) != AGENT_ERR_NOERROR) {
-	        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_GENERR);
-	    } else {
-	      // IBM-KR: TODO: Send event?
-	    }
-            break;
-	    */
+
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
