@@ -1249,12 +1249,12 @@ saHpiDomainGuid         OBJECT-TYPE
 
 -- *************************************
 -- **
--- **   DRT
+-- **   Domain Reference Table
 -- **
 -- *************************************
 
 
-saHpiDrtEntryCount OBJECT-TYPE
+saHpiDomainReferenceEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -1264,8 +1264,8 @@ saHpiDrtEntryCount OBJECT-TYPE
         notifications."
         ::= {hpiEntity 3}
         
-saHpiDrtTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiDrtEntry
+saHpiDomainReferenceTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiDomainReferenceEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
@@ -1283,31 +1283,31 @@ saHpiDrtTable OBJECT-TYPE
         (SAHPI_DOMAIN_REF_REMOVED)."
         ::= {hpiEntity 4}
 
-saHpiDrtEntry OBJECT-TYPE
-        SYNTAX          SaHpiDrtEntry
+saHpiDomainReferenceEntry OBJECT-TYPE
+        SYNTAX          SaHpiDomainReferenceEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         ""
         INDEX   { 
                 saHpiDomainId, 
-                saHpiEntryId 
+                saHpiDomainId
         }
-        ::= {saHpiDrtTable 1}
+        ::= {saHpiDomainReferenceTable 1}
         
-SaHpiDrtEntry ::= SEQUENCE {
-        saHpiDrtIsPeer          TruthValue
+SaHpiDomainReferenceEntry ::= SEQUENCE {
+        saHpiDomainReferenceIsPeer          TruthValue
                    
         }
 
-saHpiDrtIsPeer OBJECT-TYPE
+saHpiDomainReferenceIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates that this domain participates in a
         peer relationship.
         TRUE = Domain is peer.  FALSE = Domain is not peer (is a child) "
-        ::= {saHpiDrtEntry 1}
+        ::= {saHpiDomainReferenceEntry 1}
 
 -- *************************************
 -- **
@@ -1662,7 +1662,7 @@ SaHpiResourceEntry ::= SEQUENCE {
         saHpiResourceTagTextLanguage            SaHpiTextLanguage,
         saHpiResourceTag                        SaHpiText,
         
-        saHpiParamControl                       INTEGER
+        saHpiResourceParamControl                       INTEGER
 
         }
 
@@ -2074,7 +2074,7 @@ saHpiResourceTag        OBJECT-TYPE
 	::=   {saHpiResourceEntry 19 }
 
 
-saHpiParamControl OBJECT-TYPE
+saHpiResourceParamControl OBJECT-TYPE
         SYNTAX          INTEGER {
                                 undefined(0),
                                 restoreDefaultParm(1),
