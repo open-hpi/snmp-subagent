@@ -1498,7 +1498,7 @@ saHpiDomainAlarmEntry OBJECT-TYPE
         
 SaHpiDomainAlarmEntry ::= SEQUENCE {
 
-        saHpiDomainAlarmId                    	SaHpiInstrumentId,    
+        saHpiDomainAlarmId                    	SaHpiEntryId,    
         saHpiDomainAlarmTimestamp             	SaHpiTime,  
         saHpiDomainAlarmSeverity              	INTEGER,  
         saHpiDomainAlarmAcknowledged          	TruthValue,
@@ -1549,11 +1549,9 @@ saHpiDomainAlarmSeverity OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Severity of alarm.
-(Only used with DAT and Annunciator functions.  This is not a valid
-severity for events or alarms) 
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiDomainAlarmEntry 3}
         
 saHpiDomainAlarmAcknowledged OBJECT-TYPE
@@ -1616,8 +1614,8 @@ saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
         DESCRIPTION     
         "Enumeration of status condition type. 
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiDomainAlarmEntry 5}   
 
 saHpiDomainAlarmCondEntityPath OBJECT-TYPE 
@@ -1625,15 +1623,7 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Entity assoc. with status condition: 
-        If resource manages a FRU, entity path of the FRU.
-        If resource manages a single entity, entity path of 
-        that entity. 
-        If resource manages multiple entities, the entity path 
-        of the 'primary' entity managed by the resource.  
-        
-        Must be set to the same value in every domain which 
-        contains this resource.
+        "Entity Path associated with status condition.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -1649,8 +1639,8 @@ saHpiDomainAlarmCondSensorNum OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Sensor associated with status Only valid if Type is
-         SAHPI_STATUS_COND_TYPE_SENSOR"
+        "Sensor associated with status Only valid if 
+	saHpiDomainAlarmCondStatusCondType is sensor(1)."
         ::= {saHpiDomainAlarmEntry 7}
         
 saHpiDomainAlarmCondEventState OBJECT-TYPE
@@ -1658,8 +1648,8 @@ saHpiDomainAlarmCondEventState OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Sensor event state.  Only valid if saHpiDomainAlarmCondStatusCondType is 
-        sensor(1)."
+        "Sensor event state.  Only valid if 
+	saHpiDomainAlarmCondStatusCondType is sensor(1)."
         ::= {saHpiDomainAlarmEntry 8}
         
 saHpiDomainAlarmCondNameValue OBJECT-TYPE 
@@ -1688,8 +1678,11 @@ saHpiDomainAlarmCondTextType OBJECT-TYPE
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION     "Optional data associated with status 
-        condition. For more details, see textual definition"
+        DESCRIPTION     
+	"Optional data associated with status condition associated with 
+	Domain. . For more details, see textual definition and 
+	saHpiDomainAlarmCondDomainTextType and 
+	saHpiDomainAlarmCondDomainTextLanguage"
         ::= {saHpiDomainAlarmEntry 11}
 
 saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
@@ -1716,43 +1709,43 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION
-  "This columnar node contains the status of the row and also
-   perform add and delete operations.
+	"This columnar node contains the status of the row and is also
+	used to perform add and delete operations.
 
-   The status column uses four defined values:
+	The status column uses four defined values:
 
-    - `active(1)', which indicates that the conceptual row is
-       available for use by the managed device;
+	- `active(1)', which indicates that the conceptual row is
+	available for use by the managed device;
 
-    - `notInService(2)', which indicates that the conceptual
-    	row exists in the agent, but is unavailable for use by
+	- `notInService(2)', which indicates that the conceptual
+	row exists in the agent, but is unavailable for use by
 	the managed device (see NOTE below); 'notInService' has
 	no implication regarding the internal consistency of
 	the row, availability of resources, or consistency with
 	the current state of the managed device.
 
-    - `createAndWait(5)', which is supplied by a management
-      station wishing to create a new instance of a
-      conceptual row (but not make it available for use by
-      the managed device). This function is used to add a User 
-      Alarm to the Domain Alarm Table and User Even Table.
-      The row is created (and changes state to 'active' when 
-      the saHpiDomainAlarmSeverity has been set on) to a 
-      new instance of the conceptual row. The dis-allowed 
-      saHpiDomainAlarmSeverity values are minor(3), major(2), and
-      critical(3). When a row is created in the DAT it is also
-      duplicated in the User Event Table.
+	- `createAndWait(5)', which is supplied by a management
+	station wishing to create a new instance of a
+	conceptual row (but not make it available for use by
+	the managed device). This operation is used to add a User 
+	Alarm to the Domain Alarm Table.  It also subsequently 
+	appears in the User Event Table (a duplicate).
+	The row is created (and changes state to 'active' when 
+	the saHpiDomainAlarmSeverity has been set on) to a 
+	new instance of the conceptual row. The dis-allowed 
+	saHpiDomainAlarmSeverity values are minor(3), major(2), and
+	critical(3). When a row is created in the DAT it is also
+	duplicated in the User Event Table.
 
-    - `destroy(6)', which is supplied by a management station
-      wishing to delete all of the instances associated with
-      an existing conceptual row. This function allows the 
-      HPI MIB User to delete a single User Alarm from the 
-      Domain Alarm Table and User Event Table. 
-      Only User Alarms added to the DAT and User Event Table 
-      can be deleted. To delete a single, specific alarm, set the 
-      saHpiDomainAlarmId parameter to a value representing an 
-      actual User Alarm in the DAT.
-	"
+	- `destroy(6)', which is supplied by a management station
+	wishing to delete all of the instances associated with
+	an existing conceptual row. This function allows the 
+	HPI MIB User to delete a single User Alarm from the 
+	Domain Alarm Table and User Event Table. 
+	Only User Alarms added to the DAT and User Event Table 
+	can be deleted. To delete a single, specific alarm, set the 
+	saHpiDomainAlarmId parameter to a value representing an 
+	actual User Alarm in the DAT."
         ::= {saHpiDomainAlarmEntry 14}
 
 --/*******************************************************************************
