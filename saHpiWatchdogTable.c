@@ -130,6 +130,31 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
 }
 
 
+int
+delete_watchdog(SaHpiDomainIdT domain_id,
+		SaHpiResourceIdT resource_id,
+		SaHpiWatchdogNumT num) {
+
+  saHpiWatchdogTable_context *ctx;
+  oid index_oid[1];
+  netsnmp_index index;
+
+    // Look at the MIB to find out what the indexs are
+  index_oid[0] = num;
+    // Possible more indexes?
+  index.oids = (oid *)&index_oid;
+
+  ctx = CONTAINER_FIND(cb.container, &index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    watchdog_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
+}
+
 int  
 saHpiWatchdogTable_modify_context(
 				  SaHpiWatchdogRecT *entry,
@@ -162,6 +187,8 @@ saHpiWatchdogTable_modify_context(
       }
     }
 
+    if (hash == 0)
+      hash = 1;
     ctx->hash = hash;
 
     DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->WatchdogNum));
@@ -170,9 +197,10 @@ saHpiWatchdogTable_modify_context(
     ctx->saHpiWatchdogRDR_len = rdr_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiWatchdogRDR, rdr_entry, ctx->saHpiWatchdogRDR_len);
     ctx->resource_id = resource_id; 
-    
+    ctx->domain_id = 0;
     ctx->saHpiWatchdogNum = entry->WatchdogNum;
     ctx->saHpiWatchdogOem = entry->Oem;
+    ctx->saHpiWatchdogTimerReset = MIB_FALSE;
     if (wdog) {
       ctx->saHpiWatchdogLog = (wdog->Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
       ctx->saHpiWatchdogRunning = (wdog->Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
@@ -188,6 +216,61 @@ saHpiWatchdogTable_modify_context(
   }
   
   return AGENT_ERR_NULL_DATA;
+}
+
+int set_timer_reset(saHpiWatchdogTable_context *ctx) {
+  SaHpiWatchdogT wdog;
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+    if (ctx->saHpiWatchdogRunning == MIB_TRUE) {
+
+       // Get the seesion_id
+      rc = getSaHpiSession(&session_id);
+      if (rc != AGENT_ERR_NOERROR) 
+	return rc;
+      
+      DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerReset with %d\n", ctx->saHpiWatchdogNum ));
+      
+      rc = saHpiWatchdogTimerReset (session_id, 
+				    ctx->resource_id,
+				    ctx->saHpiWatchdogNum);
+      
+      if (rc != SA_OK) {
+	DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+	return AGENT_ERR_OPERATION;
+      }
+      // Get the new changes.
+      DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerGet with %d\n", ctx->saHpiWatchdogNum ));
+      memset(&wdog, 0x00, sizeof(SaHpiWatchdogT));
+
+      rc = saHpiWatchdogTimerGet (session_id, ctx->resource_id,
+				  ctx->saHpiWatchdogNum,
+				  &wdog);
+      if (rc != SA_OK) {
+	DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+	return AGENT_ERR_OPERATION;
+      }
+      DEBUGMSGTL((AGENT,"log: %d, Run: %d\n", wdog.Log, wdog.Running));
+      ctx->saHpiWatchdogLog = (wdog.Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
+      ctx->saHpiWatchdogRunning = (wdog.Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+      ctx->saHpiWatchdogTimerUse = wdog.TimerUse;
+      ctx->saHpiWatchdogTimerAction = wdog.TimerAction;
+      ctx->saHpiWatchdogPretimerInterrupt = wdog.PretimerInterrupt;
+      ctx->saHpiWatchdogPreTimeoutInterval = wdog.PreTimeoutInterval;
+      ctx->saHpiWatchdogTimerUseExpFlags = wdog.TimerUseExpFlags;
+      ctx->saHpiWatchdogTimerInitialCount = wdog.InitialCount;
+      ctx->saHpiWatchdogTimerPresentCount = wdog.PresentCount;
+      // MIB change. 
+      // IBM-KR: Should this be set to something else, perhaps?
+      ctx->saHpiWatchdogTimerReset = MIB_FALSE;
+      return AGENT_ERR_NOERROR;
+    }
+    return AGENT_ERR_OPERATION;
+  }
+  return AGENT_ERR_NULL_DATA;
+    
 }
 
 int set_watchdog(saHpiWatchdogTable_context *ctx) {
@@ -310,6 +393,7 @@ saHpiWatchdogTable_row_copy(saHpiWatchdogTable_context * dst,
 
     dst->hash = src->hash;
     dst->resource_id = src->resource_id;
+    dst-> saHpiWatchdogTimerReset = src->saHpiWatchdogTimerReset;
     return 0;
 }
 
@@ -381,7 +465,7 @@ saHpiWatchdogTable_can_delete(saHpiWatchdogTable_context * undo_ctx,
                               saHpiWatchdogTable_context * row_ctx,
                               netsnmp_request_group * rg)
 {
-  DEBUGMSGTL((AGENT,"saHpiWatchdogTable_can_delete.\n"));
+
     return 1;
 }
 
@@ -425,7 +509,7 @@ saHpiWatchdogTable_create_row(netsnmp_index * hdr)
     ctx->saHpiWatchdogTimerInitialCount = 0;
     ctx->saHpiWatchdogTimerPresentCount = 0;
     ctx->saHpiWatchdogOem = 0;
-     
+    ctx->saHpiWatchdogTimerReset = MIB_FALSE;
     ctx->hash =0;
     return ctx;
 }
@@ -438,7 +522,7 @@ saHpiWatchdogTable_context *
 saHpiWatchdogTable_duplicate_row(saHpiWatchdogTable_context * row_ctx)
 {
     saHpiWatchdogTable_context *dup;
-    DEBUGMSGTL((AGENT,"saHpiWatchdogTable_duplicate_row.\n"));
+
     if (!row_ctx)
         return NULL;
 
@@ -461,7 +545,7 @@ netsnmp_index  *
 saHpiWatchdogTable_delete_row(saHpiWatchdogTable_context * ctx)
 {
 
-  DEBUGMSGTL((AGENT,"saHpiWatchdogTable_delete_row.\n"));
+
     if (ctx->index.oids)
         free(ctx->index.oids);
 
@@ -491,11 +575,11 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
 {
     saHpiWatchdogTable_context *row_ctx =
         (saHpiWatchdogTable_context *) rg->existing_row;
-    saHpiWatchdogTable_context *ctx = NULL;
+
 
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
-    netsnmp_index index;
+
     int             rc;
 
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_reserve1.Entry\n"));
@@ -572,6 +656,12 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
                                                 sizeof(row_ctx->
                                                        saHpiWatchdogTimerPresentCount));
             break;       
+	case COLUMN_SAHPIWATCHDOGTIMERRESET:
+	  /** TruthValue = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiWatchdogTimerReset));
+            break;
 
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
@@ -585,14 +675,17 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
     for (current = rg->list; current; current = current->next) {
-    // Does the row exist?
-	index.oids = current->tri->index_oid;
-	index.len = current->tri->index_oid_len;
-	ctx = CONTAINER_FIND(cb.container, &index);
-	if (ctx == NULL) {
+
+      // The nice thing about this API is that _row_copy() is called
+      // for this row - if the API has matched the index with an
+      // already existing entry. We check the 'hash' value. If its
+      // 0 the API couldn't find the right context.
+
+       if ( ((saHpiWatchdogTable_context *) rg->existing_row)->hash == 0) {
+
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_GENERR);
-	}
+					  SNMP_ERR_NOSUCHNAME);
+       }
     }
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_reserve1. Exit\n"));
 }
@@ -600,11 +693,6 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
 {
-  /*saHpiWatchdogTable_context *row_ctx =
-        (saHpiWatchdogTable_context *) rg->existing_row;
-     
-    saHpiWatchdogTable_context *undo_ctx =
-    (saHpiWatchdogTable_context *) rg->undo_info;*/
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc = SNMP_ERR_NOERROR;
@@ -618,12 +706,8 @@ saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
         rc = SNMP_ERR_NOERROR;
 
         switch (current->tri->colnum) {
-
+	case COLUMN_SAHPIWATCHDOGTIMERRESET: 
         case COLUMN_SAHPIWATCHDOGLOG:
-            /** TruthValue = ASN_INTEGER */
-            rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
-            break;
-
         case COLUMN_SAHPIWATCHDOGRUNNING:
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
@@ -685,10 +769,7 @@ saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
                                            rc);
     }
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_reserve2. Exit (rc: %d)\n", rc));
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+
 }
 
 /************************************************************
@@ -708,15 +789,12 @@ saHpiWatchdogTable_set_action(netsnmp_request_group * rg)
     netsnmp_variable_list *var;
     saHpiWatchdogTable_context *row_ctx =
         (saHpiWatchdogTable_context *) rg->existing_row;
-    /*    saHpiWatchdogTable_context *undo_ctx =
-	  (saHpiWatchdogTable_context *) rg->undo_info;*/
+
     netsnmp_request_group_item *current;
+    int rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_action. Entry\n"));
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
+
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -768,15 +846,32 @@ saHpiWatchdogTable_set_action(netsnmp_request_group * rg)
             row_ctx->saHpiWatchdogTimerPresentCount = *var->val.integer;
             break;       
 
+	case COLUMN_SAHPIWATCHDOGTIMERRESET:
+            /** TruthValue = ASN_INTEGER */
+            row_ctx->saHpiWatchdogTimerReset = *var->val.integer;
+
+	    // Set it only when set to MIB_TRUE
+	    if (row_ctx->saHpiWatchdogTimerReset == MIB_TRUE) {
+	      if (set_timer_reset(row_ctx) != AGENT_ERR_NOERROR)
+		rc = SNMP_ERR_GENERR;	    
+	    }
+            break;
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
 
-	DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_action: Calling 'set_watchdog'\n"));
-	if (set_watchdog(row_ctx) != AGENT_ERR_NOERROR) {
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_GENERR);
+	if (current->tri->colnum !=  COLUMN_SAHPIWATCHDOGTIMERRESET) {
+	  DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_action: Calling 'set_watchdog'\n"));
+	  if (set_watchdog(row_ctx) != AGENT_ERR_NOERROR) {
+	    rc = SNMP_ERR_GENERR;
+	  }
 	}
+
+	if (rc)
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
+	  
+	
     }
 
     DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_action. Exit\n"));   
@@ -803,65 +898,7 @@ saHpiWatchdogTable_set_action(netsnmp_request_group * rg)
 void
 saHpiWatchdogTable_set_commit(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;    
-    netsnmp_request_group_item *current;
-    DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_commit. Entry\n"));
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPIWATCHDOGLOG:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGRUNNING:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSE:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERACTION:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    break;
-        }
-    }
-    DEBUGMSGTL((AGENT,"saHpiWatchdogTable_set_commit. Exit\n"));
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+  
 }
 
 /************************************************************
@@ -875,63 +912,6 @@ saHpiWatchdogTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiWatchdogTable_set_free(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-   
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPIWATCHDOGLOG:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGRUNNING:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSE:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERACTION:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-     
-
-        default:/** We shouldn't get here */
-            /** should have been logged in reserve1 */
-	  break;
-        }
-    }
-
    
 }
 
@@ -956,64 +936,7 @@ saHpiWatchdogTable_set_free(netsnmp_request_group * rg)
 void
 saHpiWatchdogTable_set_undo(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;  
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPIWATCHDOGLOG:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGRUNNING:
-            /** TruthValue = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSE:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERACTION:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
-            /** INTEGER = ASN_INTEGER */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;
-
-        case COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            break;        
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    break;
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+  
 }
 
 
@@ -1058,9 +981,7 @@ initialize_table_saHpiWatchdogTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    /*
-     * TODO: add any external indexes here.
-     */
+  
 
     /*
      * internal indexes
@@ -1113,7 +1034,7 @@ initialize_table_saHpiWatchdogTable(void)
     netsnmp_table_container_register(my_handler, table_info, &cb,
                                      cb.container, 1);
 
- netsnmp_register_read_only_counter32_instance("watchdoig_count",
+    netsnmp_register_read_only_counter32_instance("watchdog_count",
 						  saHpiWatchdogCount_oid,
 						  OID_LENGTH(saHpiWatchdogCount_oid),
 						  &watchdog_count,
@@ -1218,6 +1139,13 @@ saHpiWatchdogTable_get_value(netsnmp_request_info *request,
                                         saHpiWatchdogTimerPresentCount));
         break;
 
+    case COLUMN_SAHPIWATCHDOGTIMERRESET:
+            /** TruthValue = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiWatchdogTimerReset,
+                                 sizeof(context->saHpiWatchdogTimerReset));
+        break;
     case COLUMN_SAHPIWATCHDOGOEM:
             /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
@@ -1238,12 +1166,4 @@ saHpiWatchdogTable_get_value(netsnmp_request_info *request,
     return SNMP_ERR_NOERROR;
 }
 
-/************************************************************
- * saHpiWatchdogTable_get_by_idx
- */
-const saHpiWatchdogTable_context *
-saHpiWatchdogTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiWatchdogTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
+
