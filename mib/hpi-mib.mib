@@ -537,7 +537,7 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
          When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
 
     REFERENCE 
-        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144."
+        "Derived from states described in the SAI-HPI-B.00.90 pages 143,144."
 
     SYNTAX      INTEGER {
                     undefined(0),
@@ -2109,7 +2109,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
         the appropriate hot swap state."
 
     REFERENCE 
-        "Derived from typedef in the SAI-HPI-B.01.01 page 158-159."
+        "Derived from typedef in the SAI-HPI-B.00.90 page 158-159."
     ::= {saHpiHotSwapEntry 1}
 
 
@@ -2141,7 +2141,7 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
         == INSERTION_PENDING is initially generated."
 
     REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 149-150"
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 149-150"
 
     ::= {saHpiHotSwapEntry 2}
 
@@ -2175,7 +2175,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         "
 
         REFERENCE 
-                "Derived from function prototypes in the SAI-HPI-B.01.01 pages 153,154"
+                "Derived from function prototypes in the SAI-HPI-B.00.90 pages 153,154"
     
         ::= {saHpiHotSwapEntry 3}
 
@@ -2199,7 +2199,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         extraction process via software."
 
         REFERENCE 
-                "Derived from function prototype in the SAI-HPI-B.01.01 page 157."
+                "Derived from function prototype in the SAI-HPI-B.00.90 page 157."
         ::= {saHpiHotSwapEntry 4}
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
@@ -2231,7 +2231,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
         this function is not applicable to those resources."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 147."
+        "Derived from function prototype in the SAI-HPI-B.00.90 page 147."
     ::= {saHpiHotSwapEntry 5}
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
@@ -2252,7 +2252,7 @@ Because a resource that supports the simplified hot swap model will never transi
 Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
 
     REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 148-149."
+        "Derived from function prototype in the SAI-HPI-B.00.90 page 148-149."
     ::= {saHpiHotSwapEntry 6}
 
 saHpiHotSwapResetAction OBJECT-TYPE
@@ -3885,7 +3885,7 @@ saHpiEventLogCurrentTime OBJECT-TYPE
     Refer to SaHpiTime for full describption."
 
     REFERENCE
-        "Derived from typedefs in SAI-HPI-B.01.01 page 59."
+        "Derived from typedefs in SAI-HPI-B.00.90 page 59."
         ::= {saHpiEventLogInfoEntry 5}
 
 saHpiEventLogIsEnabled OBJECT-TYPE
@@ -4556,7 +4556,7 @@ saHpiCtrlText OBJECT-TYPE
         "
         REFERENCE
         "Derieved from typedef and function calls described in
-        SAI-HPI-B.01.01 pages 92...97."
+        SAI-HPI-B.00.90 pages 92...97."
         ::= {saHpiCtrlEntry 12}
 
 saHpiCtrlRDR OBJECT-TYPE
@@ -6672,7 +6672,7 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         DESCRIPTION
         "Sensor event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-B.01.01 pages 77..78."
+        "Derived from typedefs in SAI-HPI-B.00.90 pages 77..78."
         ::= { hpiNotifications 2 }
 
 saHpiResourceNotifications NOTIFICATION-TYPE
