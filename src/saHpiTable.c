@@ -209,12 +209,12 @@ populate_rpt() {
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
 	     populate_sel(&rpt_entry);
 	   }
-	   //	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
+	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
 	     
 	     populate_hotswap(&rpt_entry, 
 			      full_oid, full_oid_len);
 	     
-	     //}
+	     }
 	 } // rc != SA_OK
 	 // Try next one ?
 	 else {

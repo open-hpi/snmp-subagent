@@ -2480,7 +2480,7 @@ saHpiHotSwapResetState OBJECT-TYPE
                         indicates entity's reset line is deasserted."
     REFERENCE 
         "Derived from actions defined for function prototypes in the 
-         SAI-HPI-A.01.01 pages 73, 74."
+         SAI-HPI-A.02.01 pages 73, 74."
     ::= { saHpiHotSwapEntry 3 }
 
 
@@ -2493,7 +2493,7 @@ saHpiHotSwapState OBJECT-TYPE
             activeUnhealthy(4),
             extractionPending(5),
             notPresent(6) }
-    MAX-ACCESS read-create
+    MAX-ACCESS read-only
     STATUS current
     DESCRIPTION
         "The hot swap state of the resource.
