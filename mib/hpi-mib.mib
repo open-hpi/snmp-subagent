@@ -2199,11 +2199,11 @@ saHpiEventEntry OBJECT-TYPE
 SaHpiEventEntry ::= SEQUENCE {
 
 	saHpiEvent		RowPointer,
-	saHpiInstrumentId	SaHpiInstrumentId,
+	saHpiResourceIdx	Unsigned32,
 	saHpiEventSeverity	INTEGER,
 	saHpiEventHistorical	TruthValue,
-
-	saHpiEventQueueStatus	Unsigned32
+	saHpiEventQueueStatus	Unsigned32,
+	saHpiEventSaHpiTime   	SaHpiTime
 	}
 
 saHpiEvent OBJECT-TYPE
@@ -2214,12 +2214,12 @@ saHpiEvent OBJECT-TYPE
 	"Pointer to the event."
     ::= {saHpiEventEntry 1}
 
-saHpiInstrumentId OBJECT-TYPE
-    SYNTAX	SaHpiInstrumentId
+saHpiResourceIdx OBJECT-TYPE
+    SYNTAX	Unsigned32
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Instrument Id"
+	"Resource ID owning the event"
     ::= {saHpiEventEntry 2}
 
 saHpiEventSeverity OBJECT-TYPE
@@ -2257,17 +2257,27 @@ saHpiEventQueueStatus OBJECT-TYPE
 	"  This status word is returned to HPI Users that request it
 	when saHpiEventGet() is called."
     ::= {saHpiEventEntry 5}
-
     
+saHpiEventSaHpiTime	OBJECT-TYPE
+    SYNTAX	SaHpiTime
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Refer to textual convention for SaHpiTime for more details.
+	The value is Equal to TIME_UNSPECIFED if time is not available; 
+    	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+	if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiEventEntry 6}
+
 
 --IBMKR: Add more in description.
 --IBMKR: Remove from index the saHpiDomainId and saHpiResourceId
 -- since the data is enumerated per saHpiEventIndex and a SensorNum/Watchdog
--- has no relation to a resource and domain? Or does it?
+-- has no relation to a resource and domain? Or does it?  
+-- IBMDJ I believe these should say DomainId/ResourceId	
+
 --IBMKR: Replicate the three Watchdog objects - they are used in the RDR fields.
 --IBMRK: Docuemnt in sahpiRresouceID 'UNSPECTIFIED' value.
-
-
 
 -- *********************************
 -- **
@@ -2297,11 +2307,11 @@ saHpiResourceEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiResourceEventTimestamp
 	}
-	::= {saHpiResourceEventTable 1}
+	::= { saHpiResourceEventTable 1 }
 
 SaHpiResourceEventEntry ::= SEQUENCE {
 
@@ -2375,9 +2385,9 @@ saHpiDomainEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiDomainEventTimestamp
 	}
 	::= {saHpiDomainEventTable 1}
 
@@ -2453,14 +2463,16 @@ saHpiSensorEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
+		saHpiSensorNum, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiSensorEventTimestamp
 	}
 	::= {saHpiSensorEventTable 1}
 
 SaHpiSensorEventEntry ::= SEQUENCE {
 
+	saHpiSensorNum				SaHpiInstrumentId,
 	saHpiSensorEventTimestamp		SaHpiTime,
 	saHpiSensorEventType			INTEGER,
 	saHpiSensorEventCategory		SaHpiEventCategory,
@@ -2484,6 +2496,15 @@ SaHpiSensorEventEntry ::= SEQUENCE {
 	saHpiEventSensorSpecific		Unsigned32,
 	saHpiEventSensorDelete			RowStatus
 	}
+	
+saHpiSensorNum	OBJECT-TYPE
+    SYNTAX	SaHpiInstrumentId
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Resource ID owning the event"
+    ::= {saHpiSensorEventEntry 1}
+
 
 saHpiSensorEventTimestamp OBJECT-TYPE
     SYNTAX	SaHpiTime
@@ -2494,7 +2515,7 @@ saHpiSensorEventTimestamp OBJECT-TYPE
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiSensorEventEntry 1}
+    ::= {saHpiSensorEventEntry 2}
 
 
 saHpiSensorEventType OBJECT-TYPE
@@ -2548,7 +2569,7 @@ saHpiSensorEventType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "General Sensor Type"
 
-        ::= {saHpiSensorEventEntry 2}
+        ::= {saHpiSensorEventEntry 3}
 
 saHpiSensorEventCategory OBJECT-TYPE
     SYNTAX	SaHpiEventCategory
@@ -2556,7 +2577,7 @@ saHpiSensorEventCategory OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 3}
+    ::= {saHpiSensorEventEntry 4}
 
 
 saHpiSensorEventAssertion OBJECT-TYPE
@@ -2565,7 +2586,7 @@ saHpiSensorEventAssertion OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 4}
+    ::= {saHpiSensorEventEntry 5}
 
 
 saHpiSensorEventState OBJECT-TYPE
@@ -2574,7 +2595,7 @@ saHpiSensorEventState OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 5}
+    ::= {saHpiSensorEventEntry 6}
 
 saHpiEventSensorOptionalData OBJECT-TYPE
     SYNTAX	Unsigned8
@@ -2582,7 +2603,7 @@ saHpiEventSensorOptionalData OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 6}
+    ::= {saHpiSensorEventEntry 7}
 
 
 -- SaHpiSensorReading 
@@ -2594,7 +2615,7 @@ saHpiEventSensorTriggerReadingType OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 7}
+    ::= {saHpiSensorEventEntry 8}
 
 
 saHpiEventSensorTriggerReading OBJECT-TYPE
@@ -2603,7 +2624,7 @@ saHpiEventSensorTriggerReading OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 8}
+    ::= {saHpiSensorEventEntry 9}
 
 
 saHpiEventSensorTriggerThresholdType OBJECT-TYPE
@@ -2612,7 +2633,7 @@ saHpiEventSensorTriggerThresholdType OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 9}
+    ::= {saHpiSensorEventEntry 10}
 
 saHpiEventSensorTriggerThreshold OBJECT-TYPE
     SYNTAX	SaHpiSensorReadingValue
@@ -2620,7 +2641,7 @@ saHpiEventSensorTriggerThreshold OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 10}
+    ::= {saHpiSensorEventEntry 11}
 
 
 saHpiEventSensorPreviousState OBJECT-TYPE
@@ -2629,7 +2650,7 @@ saHpiEventSensorPreviousState OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 11}
+    ::= {saHpiSensorEventEntry 12}
 
 saHpiEventSensorCurrentState OBJECT-TYPE
     SYNTAX	SaHpiEventState
@@ -2637,7 +2658,7 @@ saHpiEventSensorCurrentState OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 12}
+    ::= {saHpiSensorEventEntry 13}
 
 
 saHpiEventSensorOem OBJECT-TYPE
@@ -2646,7 +2667,7 @@ saHpiEventSensorOem OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 13}
+    ::= {saHpiSensorEventEntry 14}
 
 saHpiEventSensorSpecific OBJECT-TYPE
     SYNTAX	Unsigned32
@@ -2654,7 +2675,7 @@ saHpiEventSensorSpecific OBJECT-TYPE
     STATUS	current
     DESCRIPTION
 	""
-    ::= {saHpiSensorEventEntry 14}
+    ::= {saHpiSensorEventEntry 15}
 
 saHpiEventSensorDelete OBJECT-TYPE
     SYNTAX	RowStatus
@@ -2663,7 +2684,7 @@ saHpiEventSensorDelete OBJECT-TYPE
     DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
 
-    ::= {saHpiSensorEventEntry 15}
+    ::= {saHpiSensorEventEntry 16}
 
 
 -- *********************************
@@ -2695,9 +2716,10 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
+		saHpiSensorNum,
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiSensorEnableChangeEventTimestamp
 	}
 	::= {saHpiSensorEnableChangeEventTable 1}
 
@@ -2882,9 +2904,9 @@ saHpiHotSwapEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiEventSaHpiTime
 	}
 	::= {saHpiHotSwapEventTable 1}
 
@@ -2962,14 +2984,15 @@ saHpiWatchdogEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
+		saHpiEventWatchdogNum, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiWatchdogEventTimestamp
 	}
 	::= {saHpiWatchdogEventTable 1}
 
 SaHpiWatchdogEventEntry ::= SEQUENCE {
-
+	saHpiEventWatchdogNum			SaHpiInstrumentId,
 	saHpiWatchdogEventTimestamp		SaHpiTime,
 -- IBMKR: Add some Textual Convention for these enumerations?
 --IBMKR: Missing 
@@ -2978,6 +3001,14 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
 	saHpiWatchdogEventUse			INTEGER,
 	saHpiWatchdogEventDelete		RowStatus
 	}
+	
+saHpiEventWatchdogNum	OBJECT-TYPE
+    SYNTAX	SaHpiInstrumentId
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Resource ID owning the event"
+    ::= { saHpiWatchdogEventEntry 1 }
 
 saHpiWatchdogEventTimestamp OBJECT-TYPE
     SYNTAX	SaHpiTime
@@ -2988,7 +3019,7 @@ saHpiWatchdogEventTimestamp OBJECT-TYPE
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiWatchdogEventEntry 1}
+    ::= {saHpiWatchdogEventEntry 2}
 
 
 saHpiWatchdogEventAction OBJECT-TYPE
@@ -3005,7 +3036,7 @@ saHpiWatchdogEventAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-        ::= {saHpiWatchdogEventEntry 2}
+        ::= {saHpiWatchdogEventEntry 3}
 
 saHpiWatchdogEventPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -3022,7 +3053,7 @@ saHpiWatchdogEventPreTimerAction OBJECT-TYPE
 	    "These enumerations represent the possible types of interrupts that may be
 	    triggered by a watchdog pre-timer event. The actual meaning of these
 	    operations may differ depending on the hardware architecture. "
-        ::= {saHpiWatchdogEventEntry 3}
+        ::= {saHpiWatchdogEventEntry 4}
 
 saHpiWatchdogEventUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3046,7 +3077,7 @@ saHpiWatchdogEventUse OBJECT-TYPE
 	indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 	or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-        ::= {saHpiWatchdogEventEntry 4}
+        ::= {saHpiWatchdogEventEntry 5}
 
 
 saHpiWatchdogEventDelete OBJECT-TYPE
@@ -3056,7 +3087,7 @@ saHpiWatchdogEventDelete OBJECT-TYPE
     DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
 
-    ::= {saHpiWatchdogEventEntry 5}
+    ::= {saHpiWatchdogEventEntry 6}
 
 
 
@@ -3089,9 +3120,9 @@ saHpiSoftwareEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiEventSaHpiTime
 	}
 	::= {saHpiSoftwareEventTable 1}
 
@@ -3208,9 +3239,9 @@ saHpiOEMEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiEventSaHpiTime
 	}
 	::= {saHpiOEMEventTable 1}
 
@@ -3290,9 +3321,9 @@ saHpiUserEventEntry OBJECT-TYPE
 	INDEX	{ 
 		saHpiDomainId,
 		saHpiResourceId, 
-		saHpiInstrumentId, 
 		saHpiEventSeverity,
-		saHpiEventHistorical
+		saHpiEventHistorical,
+		saHpiUserEventTimestamp
 	}
 	::= {saHpiUserEventTable 1}
 
