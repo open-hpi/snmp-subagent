@@ -122,7 +122,7 @@ extern "C"
     long resource_id;
     long domain_id;
     long hash;
-
+    int flags;
 
   } saHpiSensorTable_context;
 

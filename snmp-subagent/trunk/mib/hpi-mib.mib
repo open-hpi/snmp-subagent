@@ -4419,6 +4419,7 @@ saHpiSensorReadingCurrentInterpreted OBJECT-TYPE
 
 saHpiSensorReadingCurrentStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -4614,6 +4615,7 @@ saHpiSensorReadingMaxInterpreted OBJECT-TYPE
 
 saHpiSensorReadingMaxStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -4808,6 +4810,7 @@ saHpiSensorReadingMinInterpreted OBJECT-TYPE
 
 saHpiSensorReadingMinStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -5003,6 +5006,7 @@ saHpiSensorReadingNominalInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNominalStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -5198,6 +5202,7 @@ saHpiSensorReadingNormalMaxInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -5393,6 +5398,7 @@ saHpiSensorReadingNormalMinInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNormalMinStatus OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				enabledEvents(129),
 				enabledScan(65),
 				busy(33),
@@ -5612,7 +5618,7 @@ saHpiSensorThdLowCriticalRaw OBJECT-TYPE
 
 saHpiSensorThdLowCriticalInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the catastrophic lower
@@ -5742,7 +5748,7 @@ saHpiSensorThdLowMajorRaw OBJECT-TYPE
 
 saHpiSensorThdLowMajorInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the severely degraded
@@ -5871,7 +5877,7 @@ saHpiSensorThdLowMinorRaw OBJECT-TYPE
 
 saHpiSensorThdLowMinorInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which is the degraded status at the lower 
@@ -6003,7 +6009,7 @@ saHpiSensorThdUpCriticalRaw OBJECT-TYPE
 
 saHpiSensorThdUpCriticalInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the  catastrophic
@@ -6134,7 +6140,7 @@ saHpiSensorThdUpMajorRaw OBJECT-TYPE
 
 saHpiSensorThdUpMajorInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the severely degraded
@@ -6265,7 +6271,7 @@ saHpiSensorThdUpMinorRaw OBJECT-TYPE
 
 saHpiSensorThdUpMinorInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the  degraded
@@ -6398,7 +6404,7 @@ saHpiSensorThdPosHysteresisRaw OBJECT-TYPE
 
 saHpiSensorThdPosHysteresisInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the 
@@ -6527,7 +6533,7 @@ saHpiSensorThdNegHysteresisRaw OBJECT-TYPE
 
 saHpiSensorThdNegHysteresisInterpreted OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
 	"Interpreted threshold value which defines the negative hysteresis

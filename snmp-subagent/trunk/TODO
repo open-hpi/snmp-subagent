@@ -3,3 +3,4 @@
  - Perhaps write a struct for the saHpiDomainID, saHpiResourceIdT, oids, and such to pass that instead of individual entries?
  - Add another argument for 'getSaHpiSession' - domain_id. 
  - Do all of those IBM-KR comments left behind and make sure they are (not)valid.- Add support for sending traps when an RDR/RTP/Event row is removed.
+ - Remove saHpiEventSensorTriggerThresholdInterpretedType - and make it return decoded String values.
