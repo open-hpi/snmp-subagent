@@ -42,6 +42,7 @@
 #include "saHpiDomainReferenceTable.h"
 #include "epath_utils.h"
 #include "sahpi_event_utils.h"
+#include "hpiSubagent.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -1513,7 +1514,7 @@ int populate_dat(void) {
 	saHpiDomainAlarmTable_context  
 		*domain_alarm_ctx;
 
-	int rval = 0;
+	int rc = 0;
 	SaHpiSessionIdT sid;
 
 	SaHpiAlarmT alarm_entry;
@@ -1639,7 +1640,9 @@ int populate_dat(void) {
 
 	}
 
-	return rval;
+	DEBUGMSGTL ((AGENT, "populate_dat. Exit (rc: %d).\n", rc));
+
+	return rc;
 
 }
 

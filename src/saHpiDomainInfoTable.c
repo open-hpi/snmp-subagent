@@ -40,6 +40,7 @@
 #include "saHpiDomainInfoTable.h"
 #include "hpiCheckIndice.h"
 #include "SaHpi.h"
+#include "hpiSubagent.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -1124,7 +1125,7 @@ int populate_domain_info( void ) {
 	netsnmp_index domain_info_index;
 
 	saHpiDomainInfoTable_context  *domain_info_ctx;
-	int rval = 0;
+	int rc = 0;
 	SaHpiSessionIdT sid;
 
 	SaHpiDomainInfoT DomainInfo;
@@ -1135,7 +1136,7 @@ int populate_domain_info( void ) {
 		get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID), 
 		&DomainInfo) ) {
 		dbg("ERROR: populate_drt, saHpiDomainInfoGet Failed!"); 
-		rval = -1;
+		rc = -1;
 	} else {
 
 	/* create domain tuple/ index */
@@ -1246,7 +1247,9 @@ int populate_domain_info( void ) {
 
 	}
 
-	return rval;
+	DEBUGMSGTL ((AGENT, "populate_domain_info. Exit (rc: %d).\n", rc));
+
+	return rc;
 
 }
 
