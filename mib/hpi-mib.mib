@@ -6080,7 +6080,7 @@ SaHpiInventoryEntry ::= SEQUENCE {
         
 saHpiInventoryId       	OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
@@ -6205,7 +6205,7 @@ SaHpiAreaEntry ::= SEQUENCE {
         
 saHpiAreaId       	OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
@@ -6295,9 +6295,6 @@ saHpiFieldEntry OBJECT-TYPE
         "These structures are used to read and write inventory data repository 
         field records.
 	
-	
-	
-	
 	"
         INDEX   { 
                 saHpiDomainId, 
@@ -6321,7 +6318,7 @@ SaHpiInventoryFieldEntry ::= SEQUENCE {
 	
 saHpiFieldId       	OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
@@ -7489,7 +7486,6 @@ saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
 
 saHpiInventoryGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiInventoryId,
 		saHpiInventoryPersistent,
 		saHpiInventoryOEM,
 		saHpiInventoryUpdateCount,
@@ -7504,7 +7500,6 @@ saHpiInventoryGroup OBJECT-GROUP
 
 saHpiAreaGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiAreaId,
 		saHpiAreaType,
 		saHpiAreaIsReadOnly,
 		saHpiAreaDelete,
@@ -7517,7 +7512,6 @@ saHpiAreaGroup OBJECT-GROUP
 
 saHpiFieldGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiFieldId,
 		saHpiFieldType,
 		saHpiFieldIsReadOnly,
 		saHpiFieldTextType,
