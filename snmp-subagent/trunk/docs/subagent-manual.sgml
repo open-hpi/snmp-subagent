@@ -32,6 +32,8 @@
 <!ENTITY chapter2 SYSTEM "introduction.sgml">
 <!ENTITY chapter3 SYSTEM "basics.sgml">
 <!ENTITY chapter4 SYSTEM "understanding.sgml">
+<!ENTITY chapter5 SYSTEM "understanding2.sgml">
+<!ENTITY chapter6 SYSTEM "understanding3.sgml">
 ]>
 
 <!--
@@ -44,6 +46,8 @@
 	&chapter2;
 	&chapter3;
 	&chapter4; 
+	&chapter5; 
+	&chapter6; 
 </book>
       
 
