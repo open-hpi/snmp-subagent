@@ -133,9 +133,9 @@ eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
 
 -- The resource tables.
 
-hpiControl	OBJECT IDENTIFIER ::= { hpiResources 3 }
-hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
+hpiControl	OBJECT IDENTIFIER ::= { hpiResources 7 }
 hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
+hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 9 }
 
 
 -- ************************************************
