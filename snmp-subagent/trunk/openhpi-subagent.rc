@@ -19,6 +19,10 @@
 isUnited=`grep "UnitedLinux" /etc/issue`
 isSUSE=`grep "SuSE" /etc/issue`
 
+prog=/usr/bin/hpiSubagent
+# Enable forking
+OPTIONS="-f"
+
 if [ "$isUnited" ] || [ "$isSUSE" ]; then
 
  . /etc/rc.status
@@ -29,12 +33,12 @@ if [ "$isUnited" ] || [ "$isSUSE" ]; then
   case "$1" in
     start)
 	echo -n "Starting up HPI SNMP sub-agent daemon  "
-	startproc /usr/sbin/hpiSubagent
+	startproc $prog $OPTIONS
 	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down HPI SNMP sub-agent daemon  "	
-	killproc -TERM /usr/sbin/hpiSubagent
+	killproc -TERM $proc
 	rc_status -v
 	;;
     try-restart)
@@ -48,7 +52,7 @@ if [ "$isUnited" ] || [ "$isSUSE" ]; then
 	;;
     status)
 	echo -n "Checking for HPI SNMP sub-agent:"
-	checkproc /usr/sbin/hpiSubagent  ; rc_status -v
+	checkproc $prog  ; rc_status -v
 	;;
     *)
 	echo "Usage: $0 {start|stop|status|try-restart|restart}"
@@ -64,19 +68,19 @@ else
    case "$1" in
      start)
 	echo -n $"Starting up HPI SNMP sub-agent daemon: "
-	daemon hpiSubagent 
+	daemon $prog $OPTIONS  
 	RETVAL=$?
 	echo
 	;;
 
      stop)
 	echo -n $"Shutting down HPI SNMP sub-agent daemon: "
-	killproc hpiSubagent
+	killproc $prog 
 	RETVAL=$?
 	echo
 	;;
      status) 
-	status hpiSubagent
+	status $prog 
 	RETVAL=$?
 	;;
      restart|reload)
