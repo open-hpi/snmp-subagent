@@ -134,18 +134,18 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 	DESCRIPTION	"This time is set any time the table is changed. 
 	If the implementation cannot supply an absolute timestamp, then it may
 	supply a timestamp relative to some system-defined epoch, such as 
-	system boot. The value SaHpi_TIME_UNSPECIFIED indicates that the 
+	system boot. The value SAHPI_TIME_UNSPECIFIED indicates that the 
 	time of the update cannot be determined.
 
 	Otherwise, If the value is less than or equal to 
-	SaHpi_TIME_MAX_RELATIVE, then it is relative; 
-	if it is greater than SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+	SAHPI_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute.
 
 	Unspecified or unknown time  is:
-			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
 			
 	Maximum time that can be specified as relative:
-			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 
 			 
 	Note: The same functionality - when the table is changed - is available
 	via notifications."
@@ -199,12 +199,12 @@ saHpiDomainID OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"The Domain ID is used when the resource is also a domain.
- 	The SaHpi_UNSPECIFIED_DOMAIN_ID value may be used by an 
+ 	The SAHPI_UNSPECIFIED_DOMAIN_ID value may be used by an 
 	implementation when populating the ResourceId value for 
 	an RPT entry that is a domain only.
 
 	Note:
- 		SaHpi_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+ 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
 	::= {saHpiEntry 1}
 
 saHpiEntryID OBJECT-TYPE 
@@ -237,7 +237,7 @@ saHpiResourceEntityPath OBJECT-TYPE
 
 	This object converts HPI's saHpiEntityPathT structure 
 	and an OpenHPI canonical string. The canonical string is 
-	formed by removing the SaHpi_ENT_ prefix from the 
+	formed by removing the SAHPI_ENT_ prefix from the 
 	HPI types, and creating tuples for the entity types. 
 	
 	Order of significance is inverted to make entity paths 
@@ -262,9 +262,9 @@ saHpiResourceCapabilities OBJECT-TYPE
 	these capabilities; ie. zero is not a valid value for a 
 	resource's capabilities.
 			
-	SaHpi_CAPABILITY_DOMAIN           (0x80000000)
-	SaHpi_CAPABILITY_RESOURCE         (0X40000000) 
-	SaHpi_CAPABILITY_EVT_DEASSERTS	  (0x00008000)
+	SAHPI_CAPABILITY_DOMAIN           (0x80000000)
+	SAHPI_CAPABILITY_RESOURCE         (0X40000000) 
+	SAHPI_CAPABILITY_EVT_DEASSERTS	  (0x00008000)
 	Indicates that all sensors on the resource have the property 
 	that their Assertion and Deassertion event enable flags are 
 	the same. That is, for all event states whose assertion 
@@ -273,30 +273,30 @@ saHpiResourceCapabilities OBJECT-TYPE
 	track the state of sensors on the resource by monitoring 
 	events rather than polling for state changes.
 
-	SaHpi_CAPABILITY_AGGREGATE_STATUS  (0x00002000) 
-	SaHpi_CAPABILITY_CONFIGURATION	   (0x00001000)
-	SaHpi_CAPABILITY_MANAGED_HOTSWAP   (0x00000800) 
+	SAHPI_CAPABILITY_AGGREGATE_STATUS  (0x00002000) 
+	SAHPI_CAPABILITY_CONFIGURATION	   (0x00001000)
+	SAHPI_CAPABILITY_MANAGED_HOTSWAP   (0x00000800) 
 	Indicates that the resource supports managed hotswap. 
 	Since hotswap only makes sense for field-replaceable units, 
-	the SaHpi_CAPABILITY_FRU capability bit must also be set 
+	the SAHPI_CAPABILITY_FRU capability bit must also be set 
 	for this resource.
 
-	SaHpi_CAPABILITY_WATCHDOG          (0x00000400)
-	SaHpi_CAPABILITY_CONTROL           (0x00000200) 
-	SaHpi_CAPABILITY_FRU		   (0x00000100)
+	SAHPI_CAPABILITY_WATCHDOG          (0x00000400)
+	SAHPI_CAPABILITY_CONTROL           (0x00000200) 
+	SAHPI_CAPABILITY_FRU		   (0x00000100)
 	Indicates that the resource is a field-replaceable unit; 
 	i.e., it is capable of being removed and replaced in a 
 	live system. This does not necessarily imply that the 
 	resource supports managed hotswap.
 
-	SaHpi_CAPABILITY_INVENTORY_DATA     (0x00000008) 
-	SaHpi_CAPABILITY_SEL                (0x00000004) 
-	SaHpi_CAPABILITY_RDR		    (0x00000002) 
+	SAHPI_CAPABILITY_INVENTORY_DATA     (0x00000008) 
+	SAHPI_CAPABILITY_SEL                (0x00000004) 
+	SAHPI_CAPABILITY_RDR		    (0x00000002) 
 	Indicates that a resource data record (RDR) repository is 
 	supplied by the resource. Since the existence of an RDR is 
 	mandatory, this capability must be asserted.         
 
-	SaHpi_CAPABILITY_SENSOR             (0x00000001)"
+	SAHPI_CAPABILITY_SENSOR             (0x00000001)"
 	::= {saHpiEntry 5}
 
 saHpiResourceSeverity OBJECT-TYPE 
@@ -831,18 +831,18 @@ saHpiEventTimestamp OBJECT-TYPE
 	Time in the format of a 64-bit unsigned integer.
 	If the implementation cannot supply an absolute timestamp, then it may
 	supply a timestamp relative to some system-defined epoch, such as 
-	system boot. The value SaHpi_TIME_UNSPECIFIED indicates that the 
+	system boot. The value SAHPI_TIME_UNSPECIFIED indicates that the 
 	time of the update cannot be determined.
 
 	Otherwise, If the value is less than or equal to 
-	SaHpi_TIME_MAX_RELATIVE, then it is relative; 
-	if it is greater than SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+	SAHPI_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute.
 
 	Unspecified or unknown time  is:
-			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
 			
 	Maximum time that can be specified as relative:
-			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 
 			 
 	Note: The same functionality - when the table is changed - 
 	is available via notifications."
@@ -980,7 +980,7 @@ saHpiEventSensorStateCategoryUnspecified OBJECT-TYPE
 
 	Bit masks:
 			 
-			SaHpi_ES_UNSPECIFIED 0x0001
+			SAHPI_ES_UNSPECIFIED 0x0001
 	"		 
         ::= {saHpiEventEntry 9}
 
@@ -1000,15 +1000,15 @@ saHpiEventSensorStateCategoryThreshold OBJECT-TYPE
 	of all applicable event states is used.
 
 	When using these event states, the event state should match
-	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-	event severity of SaHpi_MINOR).
+	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+	event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 	"		
         ::= {saHpiEventEntry 10}
 
@@ -1029,9 +1029,9 @@ saHpiEventSensorStateCategoryUsage OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 	"		
         ::= {saHpiEventEntry 11}
 saHpiEventSensorStateCategoryState OBJECT-TYPE
@@ -1051,8 +1051,8 @@ saHpiEventSensorStateCategoryState OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 	"
         ::= {saHpiEventEntry 12}
 saHpiEventSensorStateCategoryPredFail OBJECT-TYPE
@@ -1072,8 +1072,8 @@ saHpiEventSensorStateCategoryPredFail OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 	"
         ::= {saHpiEventEntry 13}
 
@@ -1094,8 +1094,8 @@ saHpiEventSensorStateCategoryLimit OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 	"
         ::= {saHpiEventEntry 14}
 
@@ -1115,8 +1115,8 @@ saHpiEventSensorStateCategoryPerformance OBJECT-TYPE
 	of all applicable event states is used.
 
 	Bit masks:
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 	"		
         ::= {saHpiEventEntry 15}
@@ -1139,15 +1139,15 @@ saHpiEventSensorStateCategorySeverity OBJECT-TYPE
 	When using these event states, the event state should match
 	the event severity: 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 	"		
         ::= {saHpiEventEntry 16}
 saHpiEventSensorStateCategoryPresence OBJECT-TYPE
@@ -1167,8 +1167,8 @@ saHpiEventSensorStateCategoryPresence OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 	"			
         ::= {saHpiEventEntry 17}
 saHpiEventSensorStateCategoryEnable OBJECT-TYPE
@@ -1188,8 +1188,8 @@ saHpiEventSensorStateCategoryEnable OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 	"		
         ::= {saHpiEventEntry 18}
 saHpiEventSensorStateCategoryAvailability OBJECT-TYPE
@@ -1209,15 +1209,15 @@ saHpiEventSensorStateCategoryAvailability OBJECT-TYPE
 
 	Bit masks:
 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 	"
         ::= {saHpiEventEntry 19}
 saHpiEventSensorStateCategoryRedundancy OBJECT-TYPE
@@ -1237,14 +1237,14 @@ saHpiEventSensorStateCategoryRedundancy OBJECT-TYPE
 
 	Bit masks:
 			 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 	"
         ::= {saHpiEventEntry 20}
 saHpiEventSensorStateCategoryUser OBJECT-TYPE
@@ -1267,21 +1267,21 @@ saHpiEventSensorStateCategoryUser OBJECT-TYPE
 	These event states are defined by the user of the
 	implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000"
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 21}
 saHpiEventSensorStateCategoryGeneric OBJECT-TYPE
         SYNTAX          INTEGER (0..16384)
@@ -1303,21 +1303,21 @@ saHpiEventSensorStateCategoryGeneric OBJECT-TYPE
 	These event states are defined by the OEM of the
 	implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000"
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 22}
 
 saHpiEventSensorOptionalData OBJECT-TYPE
@@ -1435,87 +1435,87 @@ saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
 			 
 	 saHpiEventCategory == <any> 
 			
-			SaHpi_ES_UNSPECIFIED 0x0000
+			SAHPI_ES_UNSPECIFIED 0x0000
 			 
 	saHpiEventCategory == threshold(1) 
 	When using these event states, the event state should match
-	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-	event severity of SaHpi_MINOR).
+	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+	event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 			
 	 saHpiEventCategory == usage(2)
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 			
 	 saHpiEventCategory == state(3)
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 			
 	 saHpiEventCategory ==  predFail(4)
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 	
 	 saHpiEventCategory == limit(5) 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 			
 	saHpiEventCategory ==  performance(6)
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 			
 	saHpiEventCategory == severity (7) 
 	When using these event states, the event state should match
 	the event severity 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 			
 	saHpiEventCategory == presence (8) 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 			
 	saHpiEventCategory == enable (9)
  
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 			
 	saHpiEventCategory == availability (10)
 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 			
 	saHpiEventCategory == redundancy(11)
 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 			
 			
 	saHpiEventCategory == generic(127) || user(126) 
@@ -1523,21 +1523,21 @@ saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
 	These event states are defined by the OEM or the user of the
 	implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000
 	"
         ::= {saHpiEventEntry 28}
 
@@ -1637,87 +1637,87 @@ saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
 			 
 	 saHpiEventCategory == <any> 
 			
-			SaHpi_ES_UNSPECIFIED 0x0000
+			SAHPI_ES_UNSPECIFIED 0x0000
 			 
 	saHpiEventCategory == threshold(1) 
 	When using these event states, the event state should match
-	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-	event severity of SaHpi_MINOR).
+	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+	event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 			
 	 saHpiEventCategory == usage(2)
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 			
 	 saHpiEventCategory == state(3)
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 			
 	 saHpiEventCategory ==  predFail(4)
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 	
 	 saHpiEventCategory == limit(5) 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 			
 	saHpiEventCategory ==  performance(6)
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 			
 	saHpiEventCategory == severity (7) 
 	When using these event states, the event state should match
 	the event severity 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 			
 	saHpiEventCategory == presence (8) 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 			
 	saHpiEventCategory == enable (9)
  
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 			
 	saHpiEventCategory == availability (10)
 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 			
 	saHpiEventCategory == redundancy(11)
 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 			
 			
 	saHpiEventCategory == generic(127) || user(126) 
@@ -1725,21 +1725,21 @@ saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
 	These event states are defined by the OEM or the user of the
 	implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000
 	"
         ::= {saHpiEventEntry 33}
 
@@ -1760,105 +1760,105 @@ saHpiEventSensorPreviousState OBJECT-TYPE
 			 
 			 saHpiEventCategory == <any> 
 			
-			 SaHpi_ES_UNSPECIFIED 0x0000
+			 SAHPI_ES_UNSPECIFIED 0x0000
 			 
-			 saHpiEventCategory == SaHpi_EC_THRESHOLD 
+			 saHpiEventCategory == SAHPI_EC_THRESHOLD 
 			 When using these event states, the event state should match
-			 the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-			 event severity of SaHpi_MINOR).
+			 the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+			 event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 			
-			 saHpiEventCategory == SaHpi_EC_USAGE 
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 saHpiEventCategory == SAHPI_EC_USAGE 
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 			
-			 saHpiEventCategory == SaHpi_EC_STATE 
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 saHpiEventCategory == SAHPI_EC_STATE 
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_PRED_FAIL 
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 saHpiEventCategory == SAHPI_EC_PRED_FAIL 
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_LIMIT 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 saHpiEventCategory == SAHPI_EC_LIMIT 
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_PERFORMANCE 
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 saHpiEventCategory == SAHPI_EC_PERFORMANCE 
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 			
-			 saHpiEventCategory == SaHpi_EC_SEVERITY 
+			 saHpiEventCategory == SAHPI_EC_SEVERITY 
 			 When using these event states, the event state should match
 			 the event severity 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 			
-			 saHpiEventCategory == SaHpi_EC_PRESENCE 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 saHpiEventCategory == SAHPI_EC_PRESENCE 
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_ENABLE 
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 saHpiEventCategory == SAHPI_EC_ENABLE 
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_AVAILABILITY 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 saHpiEventCategory == SAHPI_EC_AVAILABILITY 
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 			
-			 saHpiEventCategory == SaHpi_EC_REDUNDANCY 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 saHpiEventCategory == SAHPI_EC_REDUNDANCY 
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 			
 			
-			 saHpiEventCategory == SaHpi_EC_GENERIC || SaHpi_EC_USER
+			 saHpiEventCategory == SAHPI_EC_GENERIC || SAHPI_EC_USER
 			 These event states are defined by the OEM or the user of the
 			 implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000"
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 34}
 
 saHpiEventSensorOem OBJECT-TYPE
@@ -1962,10 +1962,10 @@ saHpiEventWatchdogUse OBJECT-TYPE
 			
 			 These enumerations represent the possible watchdog users that may have caused 
 			 the watchdog to expire. For instance, if watchdog is being used during power 
-			 on self test (POST), and it expires, the SaHpi_WTU_BIOS_POST expiration type 
+			 on self test (POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
 			 will be set. Most specific uses for Watchdog timer by users of HPI should 
-			 indicate SaHpi_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
-			 or SaHpi_WTU_OEM if it is used for some other purpose."
+			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
+			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
         ::= {saHpiEventEntry 42}
 
@@ -1987,7 +1987,7 @@ saHpiEventOemManufacturerIdT OBJECT-TYPE
 			 may be obtained by following the instructions located at
 			
 			     http:www.iana.orgcgi-binenterprise.pl
-			Its SaHpi_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
+			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
 				
         ::= {saHpiEventEntry 43}
@@ -2051,19 +2051,19 @@ saHpiSystemEventLogUpdateTimestamp OBJECT-TYPE
                                      supply an absolute timestamp, then it may
                                      supply a timestamp relative to some system-
                                      defined epoch, such as system boot. The
-                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     value SAHPI_TIME_UNSPECIFIED indicates that
                                      the time of the update cannot be determined.
                                      Otherwise, If the value is less than or
-                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     equal to SAHPI_TIME_MAX_RELATIVE, then it
                                      is relative; if it is greater than
-                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+                                     SAHPI_TIME_MAX_RELATIVE, then it is absolute.
 
 
 			 Unspecified or unknown time  is:
-			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
 			
 			 Maximum time that can be specified as relative 
-			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 "
 	::= {systemEvents 3}
 
 saHpiSystemEventLogCurrentTime OBJECT-TYPE
@@ -2077,19 +2077,19 @@ saHpiSystemEventLogCurrentTime OBJECT-TYPE
                                      supply an absolute timestamp, then it may
                                      supply a timestamp relative to some system-
                                      defined epoch, such as system boot. The
-                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     value SAHPI_TIME_UNSPECIFIED indicates that
                                      the time of the update cannot be determined.
                                      Otherwise, If the value is less than or
-                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     equal to SAHPI_TIME_MAX_RELATIVE, then it
                                      is relative; if it is greater than
-                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+                                     SAHPI_TIME_MAX_RELATIVE, then it is absolute.
 
 
 			 Unspecified or unknown time  is:
-			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
 			
 			 Maximum time that can be specified as relative 
-			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 "
 	::= {systemEvents 4}
 
 saHpiSystemEventLogEnabled OBJECT-TYPE
@@ -2124,9 +2124,9 @@ saHpiSystemEventLogOverflowAction OBJECT-TYPE
 	DESCRIPTION	"The OverflowAction entry indicates the behavior of the SEL when an overflow 
 			   occurs. 
 
-			    SaHpi_SEL_OVERFLOW_DROP,         New entries are dropped when log is full
-			    SaHpi_SEL_OVERFLOW_WRAP,         Log wraps when log is full 
-			    SaHpi_SEL_OVERFLOW_WRITELAST     Last entry overwritten when log is full "
+			    SAHPI_SEL_OVERFLOW_DROP,         New entries are dropped when log is full
+			    SAHPI_SEL_OVERFLOW_WRAP,         Log wraps when log is full 
+			    SAHPI_SEL_OVERFLOW_WRITELAST     Last entry overwritten when log is full "
 	::= {systemEvents 7}
 
 saHpiSystemEventLogDeleteEntrySupported OBJECT-TYPE
@@ -2171,9 +2171,9 @@ saHpiSystemEventLogEntryId OBJECT-TYPE
 
  			Reserved values for event log entry IDs
 
- 			SaHpi_OLDEST_ENTRY    0x00000000
- 			SaHpi_NEWEST_ENTRY    0xFFFFFFFF
- 			SaHpi_NO_MORE_ENTRIES 0xFFFFFFFE
+ 			SAHPI_OLDEST_ENTRY    0x00000000
+ 			SAHPI_NEWEST_ENTRY    0xFFFFFFFF
+ 			SAHPI_NO_MORE_ENTRIES 0xFFFFFFFE
 			"
         ::= {saHpiSystemEventLogEntry 1}
 
@@ -2186,19 +2186,19 @@ saHpiSystemEventLogTimestamp OBJECT-TYPE
                                      supply an absolute timestamp, then it may
                                      supply a timestamp relative to some system-
                                      defined epoch, such as system boot. The
-                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     value SAHPI_TIME_UNSPECIFIED indicates that
                                      the time of the update cannot be determined.
                                      Otherwise, If the value is less than or
-                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     equal to SAHPI_TIME_MAX_RELATIVE, then it
                                      is relative; if it is greater than
-                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+                                     SAHPI_TIME_MAX_RELATIVE, then it is absolute.
 
 
 			 Unspecified or unknown time  is:
-			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			 SAHPI_TIME_UNSPECIFIED     0x8000000000000000
 			
 			 Maximum time that can be specified as relative 
-			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 "
         ::= {saHpiSystemEventLogEntry 2}
 
 saHpiSystemEventLogged OBJECT-TYPE
@@ -2529,7 +2529,7 @@ saHpiRdrEntityPath OBJECT-TYPE
 
 	This object converts HPI's saHpiEntityPathT structure 
 	and an OpenHPI canonical string. The canonical string is 
-	formed by removing the SaHpi_ENT_ prefix from the 
+	formed by removing the SAHPI_ENT_ prefix from the 
 	HPI types, and creating tuples for the entity types. 
 	
 	Order of significance is inverted to make entity paths 
@@ -2925,24 +2925,24 @@ saHpiSensorCategory OBJECT-TYPE
 			 event category, the event states take on different meanings for events 
 			 generated by specific sensors.
 			
-			 The SaHpi_EC_GENERIC category can be used for discrete sensors which have 
+			 The SAHPI_EC_GENERIC category can be used for discrete sensors which have 
 			 state meanings other than those identified with other event categories.
 			
-			 SaHpi_EC_UNSPECIFIED  0x00  Unspecified 
-			 SaHpi_EC_THRESHOLD    0x01  Threshold events 
-			 SaHpi_EC_USAGE        0x02  Usage state events 
-			 SaHpi_EC_STATE        0x03  Generic state events 
-			 SaHpi_EC_PRED_FAIL    0x04  Predictive fail events 
-			 SaHpi_EC_LIMIT        0x05  Limit events 
-			 SaHpi_EC_PERFORMANCE  0x06  Performance events    
-			 SaHpi_EC_SEVERITY     0x07  Severity  indicating events 
-			 SaHpi_EC_PRESENCE     0x08  Device presence events 
-			 SaHpi_EC_ENABLE       0x09  Device enabled events 
-			 SaHpi_EC_AVAILABILITY 0x0A  Availability state events 
+			 SAHPI_EC_UNSPECIFIED  0x00  Unspecified 
+			 SAHPI_EC_THRESHOLD    0x01  Threshold events 
+			 SAHPI_EC_USAGE        0x02  Usage state events 
+			 SAHPI_EC_STATE        0x03  Generic state events 
+			 SAHPI_EC_PRED_FAIL    0x04  Predictive fail events 
+			 SAHPI_EC_LIMIT        0x05  Limit events 
+			 SAHPI_EC_PERFORMANCE  0x06  Performance events    
+			 SAHPI_EC_SEVERITY     0x07  Severity  indicating events 
+			 SAHPI_EC_PRESENCE     0x08  Device presence events 
+			 SAHPI_EC_ENABLE       0x09  Device enabled events 
+			 SAHPI_EC_AVAILABILITY 0x0A  Availability state events 
 			
-			 SaHpi_EC_REDUNDANCY   0x0B  Redundancy state events 
-			 SaHpi_EC_USER	       0x7E  User defined events 
-			 SaHpi_EC_GENERIC      0x7F  OEM defined events"
+			 SAHPI_EC_REDUNDANCY   0x0B  Redundancy state events 
+			 SAHPI_EC_USER	       0x7E  User defined events 
+			 SAHPI_EC_GENERIC      0x7F  OEM defined events"
         ::= {saHpiSensorEntry 3}
 
 saHpiSensorEventsCategoryControl OBJECT-TYPE
@@ -2985,87 +2985,87 @@ saHpiSensorEventsState OBJECT-TYPE
 			 
 	 saHpiSensorCategory == <any> 
 			
-			SaHpi_ES_UNSPECIFIED 0x0000
+			SAHPI_ES_UNSPECIFIED 0x0000
 			 
 	saHpiSensorCategory == threshold(1) 
 	When using these event states, the event state should match
-	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-	event severity of SaHpi_MINOR).
+	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+	event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 			
 	 saHpiSensorCategory == usage(2)
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 			
 	 saHpiSensorCategory == state(3)
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 			
 	 saHpiSensorCategory ==  predFail(4)
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 	
 	 saHpiSensorCategory == limit(5) 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 			
 	saHpiSensorCategory ==  performance(6)
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 			
 	saHpiSensorCategory == severity (7) 
 	When using these event states, the event state should match
 	the event severity 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 			
 	saHpiSensorCategory == presence (8) 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 			
 	saHpiSensorCategory == enable (9)
  
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 			
 	saHpiSensorCategory == availability (10)
 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 			
 	saHpiSensorCategory == redundancy(11)
 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 			
 			
 	saHpiSensorCategory == generic(127) || user(126) 
@@ -3073,21 +3073,21 @@ saHpiSensorEventsState OBJECT-TYPE
 	These event states are defined by the OEM or the user of the
 	implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000"
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000"
 
         ::= {saHpiSensorEntry 5}
 
@@ -3108,9 +3108,9 @@ saHpiSensorReadingFormats OBJECT-TYPE
 	Indicates if sensor supports readings in raw, interpreted,
 	and/or event status formats
 	 
-	SaHpi_SRF_RAW         0x01
- 	SaHpi_SRF_INTERPRETED 0x02
- 	SaHpi_SRF_EVENT_STATE 0x04
+	SAHPI_SRF_RAW         0x01
+ 	SAHPI_SRF_INTERPRETED 0x02
+ 	SAHPI_SRF_EVENT_STATE 0x04
 
 	"
         ::= {saHpiSensorEntry 7}
@@ -3534,9 +3534,9 @@ saHpiSensorRangeReadingEventSensor OBJECT-TYPE
 	have valid data for the outstanding sensor event states. 
 	The flags for the first octet are
 
-			SaHpi_SENSTAT_EVENTS_ENABLED(128),
-			SaHpi_SENSTAT_SCAN_ENABLED(64),
-			SaHpi_SENSTAT_BUSY(32)
+			SAHPI_SENSTAT_EVENTS_ENABLED(128),
+			SAHPI_SENSTAT_SCAN_ENABLED(64),
+			SAHPI_SENSTAT_BUSY(32)
 
 	The next two octets are event States
 			
@@ -3551,105 +3551,105 @@ saHpiSensorRangeReadingEventSensor OBJECT-TYPE
 			 
 			 saHpiEventCategory == <any> 
 			
-			 SaHpi_ES_UNSPECIFIED 0x0000
+			 SAHPI_ES_UNSPECIFIED 0x0000
 			 
-			 saHpiEventCategory == SaHpi_EC_THRESHOLD 
+			 saHpiEventCategory == SAHPI_EC_THRESHOLD 
 			 When using these event states, the event state should match
-			 the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
-			 event severity of SaHpi_MINOR).
+			 the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
+			 event severity of SAHPI_MINOR).
 			
-			 SaHpi_ES_LOWER_MINOR 0x0001
-			 SaHpi_ES_LOWER_MAJOR 0x0002
-			 SaHpi_ES_LOWER_CRIT  0x0004
-			 SaHpi_ES_UPPER_MINOR 0x0008
-			 SaHpi_ES_UPPER_MAJOR 0x0010
-			 SaHpi_ES_UPPER_CRIT  0x0020
+			 SAHPI_ES_LOWER_MINOR 0x0001
+			 SAHPI_ES_LOWER_MAJOR 0x0002
+			 SAHPI_ES_LOWER_CRIT  0x0004
+			 SAHPI_ES_UPPER_MINOR 0x0008
+			 SAHPI_ES_UPPER_MAJOR 0x0010
+			 SAHPI_ES_UPPER_CRIT  0x0020
 			
-			 saHpiEventCategory == SaHpi_EC_USAGE 
-			 SaHpi_ES_IDLE   0x0001
-			 SaHpi_ES_ACTIVE 0x0002
-			 SaHpi_ES_BUSY   0x0004
+			 saHpiEventCategory == SAHPI_EC_USAGE 
+			 SAHPI_ES_IDLE   0x0001
+			 SAHPI_ES_ACTIVE 0x0002
+			 SAHPI_ES_BUSY   0x0004
 			
-			 saHpiEventCategory == SaHpi_EC_STATE 
-			 SaHpi_ES_STATE_DEASSERTED 0x0001
-			 SaHpi_ES_STATE_ASSERTED   0x0002
+			 saHpiEventCategory == SAHPI_EC_STATE 
+			 SAHPI_ES_STATE_DEASSERTED 0x0001
+			 SAHPI_ES_STATE_ASSERTED   0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_PRED_FAIL 
-			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			 saHpiEventCategory == SAHPI_EC_PRED_FAIL 
+			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_LIMIT 
-			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			 saHpiEventCategory == SAHPI_EC_LIMIT 
+			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_PERFORMANCE 
-			 SaHpi_ES_PERFORMANCE_MET   0x0001
-			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			 saHpiEventCategory == SAHPI_EC_PERFORMANCE 
+			 SAHPI_ES_PERFORMANCE_MET   0x0001
+			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 			
-			 saHpiEventCategory == SaHpi_EC_SEVERITY 
+			 saHpiEventCategory == SAHPI_EC_SEVERITY 
 			 When using these event states, the event state should match
 			 the event severity 
 			
-			 SaHpi_ES_OK                  0x0001
-			 SaHpi_ES_MINOR_FROM_OK       0x0002
-			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
-			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
-			 SaHpi_ES_MINOR_FROM_MORE     0x0010
-			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SaHpi_ES_CRITICAL            0x0040
-			 SaHpi_ES_MONITOR             0x0080
-			 SaHpi_ES_INFORMATIONAL       0x0100
+			 SAHPI_ES_OK                  0x0001
+			 SAHPI_ES_MINOR_FROM_OK       0x0002
+			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
+			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
+			 SAHPI_ES_MINOR_FROM_MORE     0x0010
+			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SAHPI_ES_CRITICAL            0x0040
+			 SAHPI_ES_MONITOR             0x0080
+			 SAHPI_ES_INFORMATIONAL       0x0100
 			
-			 saHpiEventCategory == SaHpi_EC_PRESENCE 
-			 SaHpi_ES_ABSENT  0x0001
-			 SaHpi_ES_PRESENT 0x0002
+			 saHpiEventCategory == SAHPI_EC_PRESENCE 
+			 SAHPI_ES_ABSENT  0x0001
+			 SAHPI_ES_PRESENT 0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_ENABLE 
-			 SaHpi_ES_DISABLED 0x0001
-			 SaHpi_ES_ENABLED  0x0002
+			 saHpiEventCategory == SAHPI_EC_ENABLE 
+			 SAHPI_ES_DISABLED 0x0001
+			 SAHPI_ES_ENABLED  0x0002
 			
-			 saHpiEventCategory == SaHpi_EC_AVAILABILITY 
-			 SaHpi_ES_RUNNING       0x0001
-			 SaHpi_ES_TEST          0x0002
-			 SaHpi_ES_POWER_OFF     0x0004
-			 SaHpi_ES_ON_LINE       0x0008
-			 SaHpi_ES_OFF_LINE      0x0010
-			 SaHpi_ES_OFF_DUTY      0x0020
-			 SaHpi_ES_DEGRADED      0x0040
-			 SaHpi_ES_POWER_SAVE    0x0080
-			 SaHpi_ES_INSTALL_ERROR 0x0100
+			 saHpiEventCategory == SAHPI_EC_AVAILABILITY 
+			 SAHPI_ES_RUNNING       0x0001
+			 SAHPI_ES_TEST          0x0002
+			 SAHPI_ES_POWER_OFF     0x0004
+			 SAHPI_ES_ON_LINE       0x0008
+			 SAHPI_ES_OFF_LINE      0x0010
+			 SAHPI_ES_OFF_DUTY      0x0020
+			 SAHPI_ES_DEGRADED      0x0040
+			 SAHPI_ES_POWER_SAVE    0x0080
+			 SAHPI_ES_INSTALL_ERROR 0x0100
 			
-			 saHpiEventCategory == SaHpi_EC_REDUNDANCY 
-			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
-			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
-			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
-			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			 saHpiEventCategory == SAHPI_EC_REDUNDANCY 
+			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
+			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
+			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
+			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 			
 			
-			 saHpiEventCategory == SaHpi_EC_GENERIC || SaHpi_EC_USER
+			 saHpiEventCategory == SAHPI_EC_GENERIC || SAHPI_EC_USER
 			 These event states are defined by the OEM or the user of the
 			 implementation. 
 			
-			 SaHpi_ES_STATE_00  0x0001
-			 SaHpi_ES_STATE_01  0x0002
-			 SaHpi_ES_STATE_02  0x0004
-			 SaHpi_ES_STATE_03  0x0008
-			 SaHpi_ES_STATE_04  0x0010
-			 SaHpi_ES_STATE_05  0x0020
-			 SaHpi_ES_STATE_06  0x0040
-			 SaHpi_ES_STATE_07  0x0080
-			 SaHpi_ES_STATE_08  0x0100
-			 SaHpi_ES_STATE_09  0x0200
-			 SaHpi_ES_STATE_10  0x0400
-			 SaHpi_ES_STATE_11  0x0800
-			 SaHpi_ES_STATE_12  0x1000
-			 SaHpi_ES_STATE_13  0x2000
-			 SaHpi_ES_STATE_14  0x4000"
+			 SAHPI_ES_STATE_00  0x0001
+			 SAHPI_ES_STATE_01  0x0002
+			 SAHPI_ES_STATE_02  0x0004
+			 SAHPI_ES_STATE_03  0x0008
+			 SAHPI_ES_STATE_04  0x0010
+			 SAHPI_ES_STATE_05  0x0020
+			 SAHPI_ES_STATE_06  0x0040
+			 SAHPI_ES_STATE_07  0x0080
+			 SAHPI_ES_STATE_08  0x0100
+			 SAHPI_ES_STATE_09  0x0200
+			 SAHPI_ES_STATE_10  0x0400
+			 SAHPI_ES_STATE_11  0x0800
+			 SAHPI_ES_STATE_12  0x1000
+			 SAHPI_ES_STATE_13  0x2000
+			 SAHPI_ES_STATE_14  0x4000"
         ::= {saHpiSensorEntry 21}
 
 
@@ -3678,14 +3678,14 @@ saHpiSensorThresholdDefnReadThold OBJECT-TYPE
 			
 			 These types define what threshold values are readable. 
 			
-			 SaHpi_STM_LOW_MINOR      0x01
-			 SaHpi_STM_LOW_MAJOR      0x02
-			 SaHpi_STM_LOW_CRIT       0x04
-			 SaHpi_STM_UP_MINOR       0x08
-			 SaHpi_STM_UP_MAJOR       0x10
-			 SaHpi_STM_UP_CRIT        0x20
-			 SaHpi_STM_UP_HYSTERESIS  0x40
-			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_MINOR      0x01
+			 SAHPI_STM_LOW_MAJOR      0x02
+			 SAHPI_STM_LOW_CRIT       0x04
+			 SAHPI_STM_UP_MINOR       0x08
+			 SAHPI_STM_UP_MAJOR       0x10
+			 SAHPI_STM_UP_CRIT        0x20
+			 SAHPI_STM_UP_HYSTERESIS  0x40
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
         ::= {saHpiSensorEntry 24}
 
 saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
@@ -3696,14 +3696,14 @@ saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
 			
 			 These types define what threshold values are writable. 
 			
-			 SaHpi_STM_LOW_MINOR      0x01
-			 SaHpi_STM_LOW_MAJOR      0x02
-			 SaHpi_STM_LOW_CRIT       0x04
-			 SaHpi_STM_UP_MINOR       0x08
-			 SaHpi_STM_UP_MAJOR       0x10
-			 SaHpi_STM_UP_CRIT        0x20
-			 SaHpi_STM_UP_HYSTERESIS  0x40
-			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_MINOR      0x01
+			 SAHPI_STM_LOW_MAJOR      0x02
+			 SAHPI_STM_LOW_CRIT       0x04
+			 SAHPI_STM_UP_MINOR       0x08
+			 SAHPI_STM_UP_MAJOR       0x10
+			 SAHPI_STM_UP_CRIT        0x20
+			 SAHPI_STM_UP_HYSTERESIS  0x40
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
         ::= {saHpiSensorEntry 25}
 
 saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
@@ -3714,14 +3714,14 @@ saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
 			
 			 These types define what threshold values are  fixed. 
 
-			 SaHpi_STM_LOW_MINOR      0x01
-			 SaHpi_STM_LOW_MAJOR      0x02
-			 SaHpi_STM_LOW_CRIT       0x04
-			 SaHpi_STM_UP_MINOR       0x08
-			 SaHpi_STM_UP_MAJOR       0x10
-			 SaHpi_STM_UP_CRIT        0x20
-			 SaHpi_STM_UP_HYSTERESIS  0x40
-			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_MINOR      0x01
+			 SAHPI_STM_LOW_MAJOR      0x02
+			 SAHPI_STM_LOW_CRIT       0x04
+			 SAHPI_STM_UP_MINOR       0x08
+			 SAHPI_STM_UP_MAJOR       0x10
+			 SAHPI_STM_UP_CRIT        0x20
+			 SAHPI_STM_UP_HYSTERESIS  0x40
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
         ::= {saHpiSensorEntry 26}
 
 
@@ -3880,7 +3880,7 @@ saHpiInventoryEirId OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Identifier for an entity inventory repository. The  default is
-	SaHpi_DEFAULT_INVENTORY_ID  0x00 "
+	SAHPI_DEFAULT_INVENTORY_ID  0x00 "
         ::= {saHpiInventoryEntry 1}
 
 
@@ -4383,9 +4383,9 @@ saHpiWatchdogEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     " When the 'Watchdog' capability is set in a resource, a watchdog with an
- identifier of SaHpi_DEFAULT_WATCHDOG_NUM is required. All watchdogs must be
+ identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All watchdogs must be
  represented in the RDR repository with an saHpiWatchdogRecT, including the
- watchdog with an identifier of SaHpi_DEFAULT_WATCHDOG_NUM."
+ watchdog with an identifier of SAHPI_DEFAULT_WATCHDOG_NUM."
         INDEX   { saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
@@ -4531,11 +4531,11 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
 
 	Bit flags are:
 
-	SaHpi_WATCHDOG_EXP_BIOS_FRB2   0x02
- 	SaHpi_WATCHDOG_EXP_BIOS_POST   0x04
- 	SaHpi_WATCHDOG_EXP_OS_LOAD     0x08
- 	SaHpi_WATCHDOG_EXP_SMS_OS      0x10
- 	SaHpi_WATCHDOG_EXP_OEM         0x20
+	SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
+ 	SAHPI_WATCHDOG_EXP_BIOS_POST   0x04
+ 	SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
+ 	SAHPI_WATCHDOG_EXP_SMS_OS      0x10
+ 	SAHPI_WATCHDOG_EXP_OEM         0x20
 			"
         ::= {saHpiWatchdogEntry 8}
 
