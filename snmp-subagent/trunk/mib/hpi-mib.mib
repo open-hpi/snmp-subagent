@@ -7291,7 +7291,7 @@ saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor hysteresis information can be written to. "
+        "Defines if sensor hysteresis information can be written."
         REFERENCE
         "Object derived from SAF SAI-HPI-B.01.01 section 7.2.14."
         ::= {saHpiSensorThdNegHysteresisEntry 2}
