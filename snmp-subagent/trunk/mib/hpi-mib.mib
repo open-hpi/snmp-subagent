@@ -66,7 +66,7 @@ hpi MODULE-IDENTITY
     DESCRIPTION
 	"This MIB defines the HPI instrumentation based on
 	'Service Availability Forum Hardware Platform Interface'
-	(SA-HPI-A.01.01).
+	(SA-HPI-B.01.01).
 
 	This MIB module defines a set of objects that allow the 
          management of entities on a variety of hardware platforms.  The  
@@ -173,7 +173,7 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
     SYNTAX Unsigned32
 
 
-HpiTimeStamp ::= TEXTUAL-CONVENTION
+SaHpiTime ::= TEXTUAL-CONVENTION
     STATUS       current
     DESCRIPTION
 	"
@@ -843,15 +843,15 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 				      
 	saHpiDrtUpdateCount		Unsigned32,
  				      			      
-	saHpiDrtUpdateTimestamp		HpiTimeStamp,
+	saHpiDrtUpdateTimestamp		SaHpiTime,
 				      
 	saHpiRptUpdateCount 		Unsigned32,
      		      				      
-	saHpiRptUpdateTimestamp		HpiTimeStamp,
+	saHpiRptUpdateTimestamp		SaHpiTime,
 						      
 	saHpiDatUpdateCount		Unsigned32,
 
-	saHpiDatUpdateTimestamp		HpiTimeStamp,
+	saHpiDatUpdateTimestamp		SaHpiTime,
 	saHpiActiveAlarms		Unsigned32,
 	saHpiCriticalAlarms		Unsigned32,
 	saHpiMajorAlarms		Unsigned32,
@@ -935,11 +935,11 @@ saHpiDrtUpdateCount OBJECT-TYPE
 	::= {saHpiDomainInfoEntry 7}
 
 saHpiDrtUpdateTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"This timestamp is set any time the
-	DRT table is changed. Refer to SaHpiTimeStamp for full describption."
+	DRT table is changed. Refer to SaSaHpiTime for full describption."
 	::= {saHpiDomainInfoEntry 8}	
 
 saHpiRptUpdateCount OBJECT-TYPE 
@@ -951,12 +951,12 @@ saHpiRptUpdateCount OBJECT-TYPE
 	::= {saHpiDomainInfoEntry 9}
 
 saHpiRptUpdateTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
 	"This timestamp is set any time the RPT table is changed.
-	Refer to SaHpiTimeStamp for full describption."
+	Refer to SaSaHpiTime for full describption."
 	::= {saHpiDomainInfoEntry 10}
 
 saHpiDatUpdateCount OBJECT-TYPE 
@@ -968,11 +968,11 @@ saHpiDatUpdateCount OBJECT-TYPE
 	::= {saHpiDomainInfoEntry 11}
 
 saHpiDatUpdateTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"This timestamp is set any time the DAT is changed.
-	Refer to SaHpiTimeStamp for full describption."
+	Refer to SaSaHpiTime for full describption."
 	::= {saHpiDomainInfoEntry 12}
 		
 saHpiActiveAlarms OBJECT-TYPE 
@@ -1142,7 +1142,7 @@ saHpiDatEntry OBJECT-TYPE
 SaHpiDatEntry ::= SEQUENCE {
 
 	saHpiAlarmId			Unsigned32,    
-	saHpiTimestamp			HpiTimeStamp,  
+	saHpiTimestamp			SaHpiTime,  
 	saHpiSeverity   		INTEGER,  
 	saHpiAcknowledged       	TruthValue,
 	
@@ -1169,11 +1169,11 @@ saHpiAlarmId OBJECT-TYPE
 	::= {saHpiDatEntry 1}
 	
 saHpiTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION     "Time when alarm was added to the DAT table.
-	Refer to SaHpiTimeStamp for full describption."
+	Refer to SaSaHpiTime for full describption."
 	::= {saHpiDatEntry 2}
 
 saHpiSeverity OBJECT-TYPE 
@@ -1346,12 +1346,13 @@ saHpiEntryUpdateCount OBJECT-TYPE
 	::= {hpiEntity 8}
 
 saHpiEntryUpdateTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
+	DESCRIPTION	"Refer to SaSaHpiTime for full describption."
 	::= {hpiEntity 9}
 
+--IBMKR: Perhaps the name saHpiResourceTable is a better name?
 saHpiTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF SaHpiEntry
 	MAX-ACCESS	not-accessible
@@ -1413,7 +1414,7 @@ SaHpiEntry ::= SEQUENCE {
 	
 	saHpiParamControl			INTEGER,
 	saHpiClearEvents			RowStatus,
-	saHpiEventLogTime			HpiTimeStamp,
+	saHpiEventLogTime			SaHpiTime,
 	saHpiEventLogState			INTEGER
 	}
 
@@ -1851,10 +1852,10 @@ saHpiClearEvents OBJECT-TYPE
 	::= {saHpiEntry 22}
 
 saHpiEventLogTime	OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION     "Refer to SaHpiTimeStamp for full describption."
+	DESCRIPTION     "Refer to SaSaHpiTime for full describption."
 	::= {saHpiEntry 23}
 
 saHpiEventLogState OBJECT-TYPE
@@ -1880,6 +1881,277 @@ saHpiEventLogState OBJECT-TYPE
 	This object is provided so that management software can 
 	override the default value, if desired."
 	::= {saHpiEntry 24}	
+
+--/*******************************************************************************
+-- * ********************************************************************************
+-- * ********** ********** ********** Hot Swap table ********** **********
+-- * **********
+-- * ********************************************************************************
+-- * *******************************************************************************/
+
+saHpiHotSwapTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF SaHpiHotSwapEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "This table represents management attributes common to all hot swappable 
+         entities in the managed platform.  The entries in this table are 
+         straight from the HPI spec.  This table builds upon information present 
+         in the Entity Table."
+    ::= { hpiEntity 11 }
+
+
+saHpiHotSwapEntry OBJECT-TYPE
+    SYNTAX SaHpiHotSwapEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "An entry describing a particular hot swappable entity."
+    INDEX { saHpiDomainId, saHpiResourceId }
+    ::= { saHpiHotSwapTable 1 }
+
+
+SaHpiHotSwapEntry ::= SEQUENCE {
+
+    saHpiHotSwapIndicator      INTEGER,
+
+
+    saHpiHotSwapState          INTEGER,
+    saHpiHotSwapPreviousState  INTEGER,
+
+
+    saHpiHotSwapInsertTimeout	SaHpiTime,
+
+    saHpiHotSwapExtractTimeout	SaHpiTime,
+
+
+    saHpiHotSwapActionRequest  INTEGER,
+    saHpiHotSwapPolicyCancel	INTEGER,
+    saHpiHotSwapResourceRequest	INTEGER,
+
+
+    saHpiHotSwapRTP	       RowPointer }
+
+
+saHpiHotSwapIndicator OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    off(1),
+		    on(2)
+		}
+    MAX-ACCESS	read-create
+    STATUS	current
+    DESCRIPTION
+	"A FRU associated with a hot-swappable resource may include
+	a hot swap indicator such as a blue LED. This indicator signifies 
+	that the FRU is ready for removal. 
+
+	This columnar node allows the HPI User to retrieve and set the
+	state of this indicator. 
+
+	When retrieving the values, the valid states are either 
+	SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
+	This columnar node will return information, regardless of what hot
+	swap state the resource is in.
+
+	When setting the values,  valid states include
+	SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
+	This function will set the indicator regardless of what hot swap 
+	state the resource is in, though it is recommended that this
+	function be used only in conjunction with moving the resource to 
+	the appropriate hot swap state."
+
+    REFERENCE 
+        "Derived from typedef in the SAI-HPI-B.01.01 page 158-159."
+    ::= {saHpiHotSwapEntry 1}
+
+
+saHpiHotSwapState OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    inactive(1),
+		    insertionPending(2),
+		    active(3),
+		    extractionPending(4),
+		    notPresent(5) 
+		 }
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+        "The hot swap state of the resource.
+
+inactive(1):
+
+	The INACTIVE state indicates that the FRU, which supports the full hot swap model, is no longer active in the system, and that it has completed the extraction process. When a FRU completes the hardware disconnection process, it is logically and electrically disconnected or isolated from the platform but still physically located in the platform, so the associated resource remains in the domain. Typically, a FRU will be powered off or held in reset when in this state. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource is transitioning to an INACTIVE state.
+
+insertionPending(2):
+
+	The INSERTION PENDING state is entered after a resource that supports the full hot swap model has been added to the domain, as a result of the associated FRU being physically inserted into the system. This state indicates the resource is transitioning from a NOT PRESENT state or INACTIVE state into the ACTIVE state. When transitioning into the INSERTION PENDING state, the resource should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event can be generated when the ejector latch is shut (cPCI) or the device is seated in a slot. 
+	Upon receiving the event, the HPI User has the opportunity to discover the capabilities of the resource before allowing the FRU associated with the resource to power on and become an active component in the system. During this state, the FRU can be commanded to power on or de-assert reset.
+
+
+active(3):
+
+	The ACTIVE state indicates that a resource is now an active member of the domain.
+
+	After a FRU completes the hardware connection process, the associated resource enters the ACTIVE state. This does not mean that the FRU is now active at the software level, but merely indicates that the FRU is now active in the system and that it should not be abruptly removed. The HPI implementation generates a hot swap event with HotSwapState = SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
+
+extractionPending(4):
+
+	The EXTRACTION PENDING state indicates that the resource, which supports the full hot swap model, has requested extraction of the associated FRU. Typically, a resource enters an EXTRACTION PENDING state when an ejector latch is opened (PICMG 2.1) or when a hot swap button is pressed. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that supports Managed Hot Swap requests extraction. 
+	Upon receiving the event, the HPI User has the opportunity to unload software drivers, relocate processes, or unmount file systems (software disconnect) before allowing a FRU to power down and disconnect from the system.
+
+notPresent(5):
+
+	 The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
+
+	 The event can indicate a normal transition from INACTIVE to the NOT PRESENT state or a surprise extraction from any other state.  Normal transition events are issued with a severity of SAHPI_INFORMATIONAL. A resource following the simplified hot swap model always indicates the transition to the NOT PRESENT state as a surprise extraction.
+	 When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
+
+    REFERENCE 
+        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144 and 156."
+    ::= {saHpiHotSwapEntry 2}
+
+saHpiHotSwapPreviousState OBJECT-TYPE
+    SYNTAX	INTEGER {
+    	            undefined(0),
+		    inactive(1),
+		    insertionPending(2),
+		    active(3),
+		    extractionPending(4),
+		    notPresent(5)
+		}
+    MAX-ACCESS 	read-only
+    STATUS 	current
+    DESCRIPTION
+        "The previous hot swap state of the resource.  See 
+    saHpiHotSwapState description for explanation of states."
+
+    REFERENCE 
+        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144."
+    ::= {saHpiHotSwapEntry 3}
+
+saHpiHotSwapInsertTimeout OBJECT-TYPE
+    SYNTAX	SaHpiTime
+    MAX-ACCESS	read-create
+    STATUS 	current
+    DESCRIPTION
+	"This function allows the HPI User to configure a timeout for how long to wait before the default auto-insertion policy is invoked on a resource within a specific domain.  This function accepts a parameter instructing each resource to impose a delay before performing its default hot swap policy for auto-insertion.  The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK to prevent auto-insertion from ever occurring.  
+	If the parameter is set to another value, then it defines the number of nanoseconds between the time a hot swap event with saHpiHotSwapState == INSERTION_PENDING is generated, and the time that the auto-insertion policy will be invoked for that resource.  If, during this time period, a saHpiHotSwapPolicyCancel function call is processed, the timer will be stopped, and the auto-insertion policy will not be invoked.  Each domain maintains a single auto-insert timeout value and it is applied to all contained resources upon insertion, which support managed hot swap.
+Once the auto-insertion process begins, the HPI User will not be allowed to take control of the insertion process; hence, the timeout should be set appropriately to allow for this condition.  Note that the timeout period begins when the hot swap event with saHpiHotSwapState == INSERTION_PENDING is initially generated."
+
+    REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 149-150"
+
+    ::= {saHpiHotSwapEntry 4}
+
+
+saHpiHotSwapExtractTimeout OBJECT-TYPE
+    SYNTAX	SaHpiTime
+    MAX-ACCESS	read-create
+    STATUS	current
+    DESCRIPTION
+	"This function allows the HPI User to configure a timeout for how 
+	long to wait before the default auto-extraction policy is invoked. 
+	This function accepts a parameter instructing the resource to impose
+	a delay before performing its default hot swap policy for 
+	auto-extraction. The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE
+	to direct the resource to proceed immediately to auto-extraction, or
+	to SAHPI_TIMEOUT_BLOCK to prevent auto-extraction from ever occurring
+	on a resource. If the parameter is set to another value, then it
+	defines the number of nanoseconds between the time a hot swap event 
+	with saHpiHotSwapState = extractionPending(5) is generated and the 
+	time that the auto-extraction policy will be invoked for the
+	resource. If, during this time period, a saHpiHotSwapPolicyCancel 
+	function call is processed, the timer will be stopped, and the 
+	auto-extraction policy will not be invoked. 
+
+	Once the auto-extraction process begins, the HPI User will not be 
+	allowed to take control of the extraction process; hence, the 
+	timeout should be set appropriately to allow for this condition. 
+
+	Note that the timeout period begins when the hot swap event with 
+	saHpiHotSwapState = extractionPending(4) is initially generated.
+    	"
+
+    REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 153,154"
+    
+    ::= {saHpiHotSwapEntry 5}
+
+
+saHpiHotSwapActionRequest OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    insertion(1),
+		    extraction(2)
+		}
+    MAX-ACCESS	read-create
+    STATUS	current
+    DESCRIPTION
+	"A resource supporting hot swap typically requires a physical
+	action on the associated FRU to invoke an insertion or extraction 
+	process. An insertion process is invoked by physically inserting
+	the FRU into a chassis. Physically opening an ejector latch or 
+	pressing a button invokes the extraction process. 
+
+	This columnar node allows the HPI User to invoke an insertion or 
+	extraction process via software."
+
+    REFERENCE 
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 157."
+    ::= {saHpiHotSwapEntry 6}
+
+saHpiHotSwapPolicyCancel OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    cancel(1)
+
+		}
+    MAX-ACCESS	read-create
+    STATUS	current
+    DESCRIPTION
+	"A resource supporting hot swap typically supports default policies for insertion and extraction. On insertion, the default policy may be for the resource to turn the associated FRU~s local power on and to de-assert reset. On extraction, the default policy may be for the resource to immediately power off the FRU and turn on a hot swap indicator. This function allows an HPI User, after receiving a hot swap event with saHpiHotSwapState equal to INSERTION_PENDING or EXTRACTION_PENDING, to prevent the default policy from being executed.  
+
+Once the resource transitions to either the ACTIVE or INACTIVE state, the default policies will once again execute, unless cancelled using saHpiHotSwapPolicyCancel.
+
+The default policy cannot be canceled once it has begun to execute.  
+
+Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
+
+    REFERENCE 
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 147."
+    ::= {saHpiHotSwapEntry 7}
+
+saHpiHotSwapResourceRequest OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    setActive(1),
+		    setInActive(2)
+		}
+    MAX-ACCESS	read-create
+    STATUS	current
+    DESCRIPTION
+	"Depending on the values, the user can:
+
+ - use this function to request a resource to return to the ACTIVE state from the EXTRACTION PENDING state in order to reject an extraction request.
+Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources.
+
+ - use this function to request a resource to return to the INACTIVE state from the INSERTION PENDING state to abort a hot-swap insertion action.
+Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
+
+    REFERENCE 
+        "Derived from function prototype in the SAI-HPI-B.01.01 page 148-149."
+    ::= {saHpiHotSwapEntry 8}
+
+saHpiHotSwapRTP	OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"OID for RTP"
+	::= {saHpiHotSwapEntry 10}
+
+
 	
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -1937,17 +2209,17 @@ saHpiResourceEventEntry OBJECT-TYPE
 
 SaHpiResourceEventEntry ::= SEQUENCE {
 
-	saHpiResourceEventTimestamp		HpiTimeStamp,
+	saHpiResourceEventTimestamp		SaHpiTime,
 	saHpiResourceType			INTEGER
 
 	}
 
 saHpiResourceEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2005,17 +2277,17 @@ saHpiDomainEventEntry OBJECT-TYPE
 
 SaHpiDomainEventEntry ::= SEQUENCE {
 
-	saHpiDomainEventTimestamp		HpiTimeStamp,
+	saHpiDomainEventTimestamp		SaHpiTime,
 	saHpiDomainEventType			INTEGER
 
 	}
 
 saHpiDomainEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2073,7 +2345,7 @@ saHpiSensorEventEntry OBJECT-TYPE
 
 SaHpiSensorEventEntry ::= SEQUENCE {
 
-	saHpiSensorEventTimestamp		HpiTimeStamp,
+	saHpiSensorEventTimestamp		SaHpiTime,
 	saHpiSensorEventType			INTEGER,
 	saHpiSensorEventCategory		SaHpiEventCategory,
 	saHpiSensorEventAssertion		TruthValue,
@@ -2098,11 +2370,11 @@ SaHpiSensorEventEntry ::= SEQUENCE {
 	}
 
 saHpiSensorEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2307,7 +2579,7 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 
 SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
 	
-	saHpiSensorEnableChangeEventTimestamp	HpiTimeStamp,
+	saHpiSensorEnableChangeEventTimestamp	SaHpiTime,
 	saHpiSensorEnableChangeEventType       	INTEGER,
 	saHpiSensorEnableChangeEventCategory   	SaHpiEventCategory,
 	
@@ -2321,11 +2593,11 @@ SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
 	}
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2483,17 +2755,17 @@ saHpiHotSwapEventEntry OBJECT-TYPE
 
 SaHpiHotSwapEventEntry ::= SEQUENCE {
 
-	saHpiHotSwapEventTimestamp		HpiTimeStamp,
+	saHpiHotSwapEventTimestamp		SaHpiTime,
 	saHpiHotSwapEventState			SaHpiEventState,
 	saHpiHotSwapEventPreviousState		SaHpiEventState
 	}
 
 saHpiHotSwapEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2569,7 +2841,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
 
 SaHpiWatchdogEventEntry ::= SEQUENCE {
 
-	saHpiWatchdogEventTimestamp		HpiTimeStamp,
+	saHpiWatchdogEventTimestamp		SaHpiTime,
 -- IBMKR: Add some Textual Convention for these enumerations?
 --IBMKR: Missing 
 	saHpiWatchdogEventAction		INTEGER,
@@ -2578,11 +2850,11 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
 	}
 
 saHpiWatchdogEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2685,7 +2957,7 @@ saHpiSoftwareEventEntry OBJECT-TYPE
 
 SaHpiSoftwareEventEntry ::= SEQUENCE {
 
-	saHpiSoftwareEventTimestamp		HpiTimeStamp,
+	saHpiSoftwareEventTimestamp		SaHpiTime,
 
 	saHpiSoftwareEventManufacturerIdT	Unsigned32,
 	saHpiSoftwareEventType			INTEGER,
@@ -2695,11 +2967,11 @@ SaHpiSoftwareEventEntry ::= SEQUENCE {
 	}
 
 saHpiSoftwareEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2793,18 +3065,18 @@ saHpiOEMEventEntry OBJECT-TYPE
 
 SaHpiOEMEventEntry ::= SEQUENCE {
 
-	saHpiOEMEventTimestamp		HpiTimeStamp,
+	saHpiOEMEventTimestamp		SaHpiTime,
 
 	saHpiOEMEventManufacturerIdT	Unsigned32,
 	saHpiOEMEventEventData		OCTET STRING
 	}
 
 saHpiOEMEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2864,7 +3136,7 @@ saHpiUserEventEntry OBJECT-TYPE
 
 SaHpiUserEventEntry ::= SEQUENCE {
 
-	saHpiUserEventTimestamp		HpiTimeStamp,
+	saHpiUserEventTimestamp		SaHpiTime,
 
 -- User event , writeable.
 	
@@ -2877,11 +3149,11 @@ SaHpiUserEventEntry ::= SEQUENCE {
 	}
 
 saHpiUserEventTimestamp OBJECT-TYPE
-    SYNTAX	HpiTimeStamp
+    SYNTAX	SaHpiTime
     MAX-ACCESS	read-create
     STATUS	current
     DESCRIPTION
-	"Refer to textual convention for HpiTimeStamp for more details.
+	"Refer to textual convention for SaHpiTime for more details.
 	The value is Equal to TIME_UNSPECIFED if time is not available; 
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
@@ -2997,17 +3269,17 @@ saHpiEventLogUserEventMaxSize OBJECT-TYPE
     ::= {eventLog 3}
 
 saHpiEventLogUpdateTimestamp OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
 	    "The UpdateTimestamp entry denotes the time of the last
 	update to the Event Log. 
-	Refer to SaHpiTimeStamp for full describption."
+	Refer to SaSaHpiTime for full describption."
 	::= {eventLog 4}
 
 saHpiEventLogCurrentTime OBJECT-TYPE
-	SYNTAX		HpiTimeStamp
+	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
@@ -3015,7 +3287,7 @@ saHpiEventLogCurrentTime OBJECT-TYPE
 	current time; i.e the timestamp that would be placed on an
 	entry if it was added now. 
 
-	Refer to SaHpiTimeStamp for full describption."
+	Refer to SaSaHpiTime for full describption."
 	::= {eventLog 5}
 
 saHpiEventLogIsEnabled OBJECT-TYPE
@@ -3099,7 +3371,7 @@ saHpiEventLogEntry OBJECT-TYPE
 SaHpiEventLogEntry ::= SEQUENCE {
 	saHpiEventLogIndex		Unsigned32,
 	saHpiEventLogType		INTEGER,
-	saHpiEventLogAddedTimestamp	HpiTimeStamp,
+	saHpiEventLogAddedTimestamp	SaHpiTime,
 
 	saHpiEvent			RowPointer,
 	saHpiEventLogDelete		RowStatus
@@ -3144,10 +3416,10 @@ saHpiEventLogType OBJECT-TYPE
 	::= {saHpiEventLogEntry 2}
 
 saHpiEventLogAddedTimestamp OBJECT-TYPE
-        SYNTAX          HpiTimeStamp
+        SYNTAX          SaHpiTime
         MAX-ACCESS      read-only
         STATUS          current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
+	DESCRIPTION	"Refer to SaHpiTime for full describption."
         ::= {saHpiEventLogEntry 3}
 
 
@@ -3168,232 +3440,6 @@ saHpiEventLogDelete OBJECT-TYPE
 	"Set this to destory(6) or notInService(2) to delete this entry."
 	::= {saHpiEventLogEntry 5}
 
---/*******************************************************************************
--- * ********************************************************************************
--- * ********** ********** ********** Hot Swap table ********** **********
--- * **********
--- * ********************************************************************************
--- * *******************************************************************************/
-
-saHpiHotSwapTable OBJECT-TYPE
-    SYNTAX SEQUENCE OF SaHpiHotSwapEntry
-    MAX-ACCESS not-accessible
-    STATUS current
-    DESCRIPTION
-        "This table represents management attributes common to all hot swappable 
-         entities in the managed platform.  The entries in this table are 
-         straight from the HPI spec.  This table builds upon information present 
-         in the Entity Table."
-    ::= { hpiResources 11 }
-
-
-saHpiHotSwapEntry OBJECT-TYPE
-    SYNTAX SaHpiHotSwapEntry
-    MAX-ACCESS not-accessible
-    STATUS current
-    DESCRIPTION
-        "An entry describing a particular hot swappable entity."
-    INDEX { saHpiDomainId, saHpiResourceId }
-    ::= { saHpiHotSwapTable 1 }
-
-
-SaHpiHotSwapEntry ::= SEQUENCE {
-    saHpiHotSwapIndicator      INTEGER,
-    saHpiHotSwapPowerState     INTEGER,
-    saHpiHotSwapResetState     INTEGER,
-    saHpiHotSwapState          INTEGER,
-    saHpiHotSwapPreviousState  INTEGER,
-    saHpiHotSwapEventSeverity  INTEGER,
-    saHpiHotSwapInsertTimeout  Unsigned32,
-    saHpiHotSwapExtractTimeout Unsigned32,
-    saHpiHotSwapActionRequest  INTEGER,
-    saHpiHotSwapRTP	       RowPointer }
-
-
-saHpiHotSwapIndicator OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            off(1),
-            on(2) }
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "The indicator (typically an LED) indicating that an entity is ready to
-                  be removed."
-    REFERENCE 
-        "Derived from typedef in the SAI-HPI-A.01.01 page 100."
-    ::= { saHpiHotSwapEntry 1 }
-
-
-saHpiHotSwapPowerState OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            off(1),
-            on(2),
-            cycle(3) }
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "Indicates the power state of the entity."
-    REFERENCE 
-        "Derived from typedef in the SAI-HPI-A.01.01 page 100."
-    ::= { saHpiHotSwapEntry 2 }
-
-
-saHpiHotSwapResetState OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            coldReset(1),
-            warmReset(2),
-            resetAssert(3),
-            resetDeassert(4) }
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "coldReset(write-only): Executes a cold reset on entity.
-
-         warmReset(write-only): Executes a warm reset on entity.
-
-         resetAssert: When written, assert entity's reset line.  When read, 
-                      indicates entity's reset line is asserted.
-
-         resetDeassert: When written, deassert entity's reset line.  When read, 
-                        indicates entity's reset line is deasserted."
-    REFERENCE 
-        "Derived from actions defined for function prototypes in the 
-         SAI-HPI-A.02.01 pages 73, 74."
-    ::= { saHpiHotSwapEntry 3 }
-
-
-saHpiHotSwapState OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            inactive(1),
-            insertionPending(2),
-            activeHealthy(3),
-            activeUnhealthy(4),
-            extractionPending(5),
-            notPresent(6) }
-    MAX-ACCESS read-only
-    STATUS current
-    DESCRIPTION
-        "The hot swap state of the resource.
-
-         inactive: Indicates the FRU is no longer active in the system, and that 
-                   it has completed the extraction process.
-
-         activeHealthy: Indicates the entity is now an active 
-                        member of the domain.  After a FRU completes the 
-                        hardware connection process, the associated entity 
-                        enters the activeHealthy state if there are no faults 
-                        present.  An entity will transition between 
-                        activeHealthy and activeUnhealthy as fault conditions                  
-                        are asserted or cleared on the FRU.
-
-         activeUnHealthy: Indicates the entity is now an active 
-                          member of the domain.  After a FRU completes the 
-                          hardware connection process, the associated entity 
-                          enters the activeUnhealthy state if there are faults 
-                          present.  An entity will transition between 
-                          activeHealthy and activeUnhealthy as fault conditions 
-                          are asserted or cleared on the FRU.
-
-         extrationPending: Indicates that the entity has requested extraction of 
-                           the associated FRU.  Typically an entity enters this 
-                           state when an ejector latch is opened or when a hot 
-                           swap button is pressed.
-
-         insertionPending: Indicates entity is transitioning from notPresent or 
-                           inactive to an active state as a result of being 
-                           physically inserted into the system.
-
-         notPresent: The entity is not present in the system."
-    REFERENCE 
-        "Derived from states described in the SAI-HPI-A.01.01 pages 62, 63."
-    ::= { saHpiHotSwapEntry 4 }
-
-saHpiHotSwapPreviousState OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            inactive(1),
-            insertionPending(2),
-            activeHealthy(3),
-            activeUnhealthy(4),
-            extractionPending(5),
-            notPresent(6) }
-    MAX-ACCESS read-only
-    STATUS current
-    DESCRIPTION
-        "The previous hot swap state of the resource.  See hotSwapState 
-         description for explanation of states."
-    REFERENCE 
-        "Derived from states described in the SAI-HPI-A.01.01 pages 62, 63."
-    ::= { saHpiHotSwapEntry 5 }
-
-saHpiHotSwapEventSeverity OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            critical(1),
-            major(2),
-            minor(3),
-            informational(4),
-            ok(5),
-            debug(241) }
-    MAX-ACCESS read-only
-    STATUS current
-    DESCRIPTION
-        "Event severity."
-    REFERENCE 
-        "Derived from typedef saHpiSeverityT described in the SAI-HPI-A.01.01 
-         pages 100, 101."
-    ::= { saHpiHotSwapEntry 6 }
-
-
-saHpiHotSwapInsertTimeout OBJECT-TYPE
-    SYNTAX Unsigned32
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "Indicates how long to wait (ns) after receiving a FRU insertion 
-         indication before the default auto-insertion policy is invoked."
-    REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-A.01.01 pages 65, 66."
-    ::= { saHpiHotSwapEntry 7 }
-
-
-saHpiHotSwapExtractTimeout OBJECT-TYPE
-    SYNTAX Unsigned32
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "Indicates how long to wait (ns) after receiving a FRU extraction 
-         indication before the default auto-extraction policy is invoked."
-    REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-A.01.01 pages 67, 68."
-    ::= { saHpiHotSwapEntry 8 }
-
-
-saHpiHotSwapActionRequest OBJECT-TYPE
-    SYNTAX INTEGER {
-    		undefined(0),
-            insertion(1),
-            extraction(2) }
-    MAX-ACCESS read-create
-    STATUS current
-    DESCRIPTION
-        "This is set when the user wants to invoke either the auto-insertion or
-         auto-extraction policy without waiting for a FRU insertion/extraction 
-         first."
-    REFERENCE 
-        "Derived from function prototype in the SAI-HPI-A.01.01 page 69."
-    ::= {saHpiHotSwapEntry 9}
-
-saHpiHotSwapRTP	OBJECT-TYPE
-	SYNTAX		RowPointer
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"OID for RTP"
-	::= {saHpiHotSwapEntry 10}
 	
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -5753,11 +5799,8 @@ saHpiEventGroup OBJECT-GROUP
 saHpiHotSwapGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiHotSwapIndicator,
-		saHpiHotSwapPowerState,
-		saHpiHotSwapResetState,
 		saHpiHotSwapState,
 		saHpiHotSwapPreviousState,
-		saHpiHotSwapEventSeverity,
 		saHpiHotSwapInsertTimeout,
 		saHpiHotSwapExtractTimeout,
 		saHpiHotSwapActionRequest,
