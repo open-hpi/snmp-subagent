@@ -42,9 +42,13 @@ It will generate the subagent code and put the configuration file
 RUNNING
 ---------------------------------------------------------
 
+0. Configure your OpenHPI installation to work. Make sure that /etc/openhpi/openhpi.conf
+   lists the correct plugin.
 1. Start the NetSNMP daemon.
-2. Start the hpiSubagent. You should see something similar in the
+2. Start the hpiSubagent. (either use the runtime script: /etc/init.d/openhpi-subagent,
+   or just run it from the terminal).  You should see something similar in the
    syslog log file - /var/log/messages:
+
    ...
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Not sending events during startup.
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Checking HPI infrastructure every 4 seconds.
@@ -76,6 +80,11 @@ RUNNING
    HPI-MIB::saHpiResourceEntityPath.0.2.2 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{POWER_SUPPLY,1}"
    ....
 
+4). If you want to receive traps make sure you are running a SNMP trap daemon
+    (NetSNMP provides one - snmptrapd). Furthermore make sure that the SNMP daemon is
+    configured to send traps and specify its destination (man snmpd.conf).
+
+
 ---------------------------------------------------------
 CLEANUP
 ---------------------------------------------------------
@@ -97,15 +106,41 @@ GENERAL RELEASE NOTES and WHAT'S NEW
 
 * Support for full implementation of the HPI-MIB v1.4
   (included). This means HPI 1.0 instrumentation using 
-  HPI-MIB objects in nine tables:
+  HPI-MIB objects in twenty-three tables:
 	- Resource Presence Table entities,
 		- HotSwap capabilities,
 	- Resource Data Records,
-		- Sensors,
+		- Sensors
+		    - Current sensor reading,
+		    - Reading values for 
+			 - Max,
+			 - Min, 
+			 - Nominal, 
+			 - Normal maximum, 
+			 - Normal minimum
+		    - Threshold values for:
+			- Upper Critical,
+			- Upper Major,
+			- Upper Minor,
+			- Lower Critical,
+			- Lower Major,
+			- Lower Minor,
+			- Positive Hysteresis,
+			- Negativie Hysteresis	
 		- Inventory,
 		- Control,
 		- Watchdog
 	- Events and System Event Log
+
+* Support for notifications/TRAPS as defined in the MIB:
+	- For Events:
+		- Sensor,
+		- Hot Swap,
+		- Watchdog,
+		- OEM,
+		- User
+	- For Resource Data Records,
+	- For Resource Presence Table
 
 * Support for user configurable options:
 	 - update timer for new RPT/RDR/Events ,
@@ -115,6 +150,37 @@ GENERAL RELEASE NOTES and WHAT'S NEW
 
 * Example code for retrieving instrumentation information
   using SNMP.
+
+* Fix many bugs:
+    852223      Definition Conflicts between net-snmp-config.h and config.h
+    861785      missing release files in agent
+    861788      basics.sgml lacks formatting
+    872434      Ugly hexidecimal string in HPI-MIB::saHpiSystemEventLogOemEv
+    872437      segfault when populating inventory entries using snmp_bc
+    872580      Duplicate items are added in all the tables, except one
+    873853      Change the 'hpi' OID from experimental to what SAF ratified
+    873854      Make the 'saHpiSystemEventDelete' and 'saHpiEventDelete' wrt
+    873961      Duplicate control, inventory, sensor, and watchdog tables.
+    876161      Memory consumption > 64MB after 3 days and grows.
+    876166      Too many sensors, control, inventory objects.
+    876241      The saHpiCtrlState OBJECT in the MIB defines wrong length ..
+    876243      saHpiCtrlState object for type analog in description mention
+    876290      The 'SaHpiCtrlAttributes' is missing info about Analog type.
+    876304      Make the MIB Sensor reading return dynamic data
+    876402      saHpiCtrlBool should have a better name, like SaHpiCtrlIgnor
+    876405      saHpiCtrlAttributes for the type 'stream' is missing data.
+    876446      The description in the SaHpiCtrlAttributes is confusing.
+    876904      Missing Data Configuration elements
+    877063      consolodate ..StateCategoryXXXX fields
+    878592      hpiSubagent: SEGMENT FAULT with latest code
+    885081      +1 for all enumerated objects in the MIB.
+    887238      The saHpiInventoryTable is missing an object.
+    887240      saHpiInventoryAttributes is missing information about Oem ty
+    892911      If no startup events is selected, the SNMP daemon never
+    893138      The syslog logging needs to have more information.
+    893142      snmpd: send_trap: Unknown PDU type
+    894664      Missing OEM variable for rdr inventory type
+    904673      Add Sensor Readings Flags to saHpiSensorEntry
 	
 Consult the ChangeLog for more details.
 
@@ -122,9 +188,17 @@ Consult the ChangeLog for more details.
 FOR MORE INFO
 ---------------------------------------------------------
 
-For more information please see the project webiste at 
+For more information please see the project website at 
 http://openhpi.sourceforge.net
 
 Also visit SAForum's website at http://www.saforum.org
 
+
+---------------------------------------------------------
+BUGS
+---------------------------------------------------------
+
+If you have any bugs, issues, please visit the project
+website http://openhpi.sourceforge.net, or visit us
+in the #openhpi channel on FreeNode and OFTN network.
 
