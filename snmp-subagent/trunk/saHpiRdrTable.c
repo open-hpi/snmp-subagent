@@ -22,7 +22,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 
-#include "epath_utils.h"
+#include <epath_utils.h>
 #include <SaHpi.h>
 
 #include <hpiSubagent.h>
@@ -56,7 +56,6 @@ static u_long rdr_count = 0;
 
 int
 populate_rdr(SaHpiRptEntryT *rpt_entry, 
-	     SaHpiResourceIdT resource_id,
 	     oid *rpt_oid, size_t rpt_oid_len) 
 {
 
@@ -88,12 +87,12 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
     next_rdr= SAHPI_FIRST_ENTRY;
     do {
       current_rdr = next_rdr;
-      err = saHpiRdrGet(session_id, resource_id,
+      err = saHpiRdrGet(session_id, rpt_entry->ResourceId,
 			current_rdr, &next_rdr, &rdr_entry);
       
       if (SA_OK == err) {
 	// Look at the MIB to find out what the indexs are
-	rdr_oid[0]=resource_id;
+	rdr_oid[0]=rpt_entry->ResourceId;
 	rdr_oid[1]=rdr_entry.RecordId;
 	rdr_oid[2]=rdr_entry.RdrType;
 	
@@ -130,11 +129,12 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 			    
 	DEBUGMSGTL((AGENT,"Our first OBJECT OID for RDR row is: "));
 	DEBUGMSGOID((AGENT, full_oid, full_oid_len));
-	
+	// IBM-KR: Just pass the RPT entry - that way the domainID can
+	// be extracted as well.
 	if (rdr_entry.RdrType == SAHPI_SENSOR_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
 	  rc = populate_sensor(&rdr_entry.RdrTypeUnion.SensorRec, 
-			       resource_id,
+			       rpt_entry->ResourceId,
 			       full_oid, full_oid_len, 
 			       child_oid, &child_oid_len);
 	}
@@ -148,14 +148,14 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	if (rdr_entry.RdrType == SAHPI_INVENTORY_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
 	  rc =populate_inventory(&rdr_entry.RdrTypeUnion.InventoryRec,
-				 resource_id,
+				 rpt_entry->ResourceId,
 				 full_oid, full_oid_len,
 				 child_oid, &child_oid_len);
 	}
 	if (rdr_entry.RdrType == SAHPI_WATCHDOG_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
 	  rc =populate_watchdog(&rdr_entry.RdrTypeUnion.WatchdogRec,
-				resource_id,
+				rpt_entry->ResourceId,
 				full_oid, full_oid_len,
 				child_oid, &child_oid_len);
 	}
@@ -169,7 +169,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	// the record needs to be altered, and if so populates with
 	// information from RDR and the OIDs passed.
 
-	if (saHpiRdrTable_modify_context(resource_id,
+	if (saHpiRdrTable_modify_context(rpt_entry,
 					 &rdr_entry, 
 					 rdr_context,
 					 rpt_oid,
@@ -232,7 +232,7 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
 }
 
 int  
-saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
+saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 			     SaHpiRdrT *entry,
 			     saHpiRdrTable_context *ctx,
 			     oid *rpt_oid,
@@ -273,14 +273,19 @@ saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
 
     ctx->hash = hash;
 
-    ctx->saHpiResourceID = resource_id;
+    ctx->saHpiResourceID = rpt_entry->ResourceId;
     ctx->saHpiRdrRecordId = entry->RecordId;
     ctx->saHpiRdrType = entry->RdrType;
 
     len = entitypath2string(
 			    &entry->Entity, 
-			    (gchar *)&ctx->saHpiRdrEntityPath, 
+			    ctx->saHpiRdrEntityPath, 
 			    SNMP_MAX_MSG_SIZE);
+    if (len == 0) {
+    	len = entitypath2string(&rpt_entry->ResourceEntity,
+				ctx->saHpiRdrEntityPath,
+				SNMP_MAX_MSG_SIZE);
+    }
     if (len < 0) {
       // Bummer, EntityPath too long to fit in the SNMP_MAX_MSG_SIZE.
       len = 0;

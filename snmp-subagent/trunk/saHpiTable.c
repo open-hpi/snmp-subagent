@@ -187,7 +187,7 @@ populate_rpt() {
 			  full_oid, MAX_OID_LEN, &full_oid_len);
 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-	     populate_rdr(&rpt_entry, rpt_entry.ResourceId, 
+	     populate_rdr(&rpt_entry,  
 			  full_oid, full_oid_len);
 	   }
 	   // if (rpt... blah
@@ -267,7 +267,7 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
 
     len = entitypath2string(
 			    &entry->ResourceEntity, 
-			    (gchar *)&ctx->saHpiResourceEntityPath, 
+			    ctx->saHpiResourceEntityPath, 
 			    SNMP_MAX_MSG_SIZE);
     if (len < 0) {
       // Bummer, EntityPath too long to fit in the SNMP_MAX_MSG_SIZE.

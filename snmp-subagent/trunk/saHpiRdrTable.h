@@ -78,7 +78,6 @@ extern          "C" {
                                             netsnmp_table_request_info *);
 
  int populate_rdr(SaHpiRptEntryT *rpt_entry,
-		  SaHpiResourceIdT resource_id,
 		  oid *rpt_oid, size_t rpt_oid_len);
 
 int
@@ -87,7 +86,7 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
 	       SaHpiEntryIdT num,
 	       SaHpiRdrTypeT type);
 int  
-saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
+saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
 			     SaHpiRdrT *entry, 
 			     saHpiRdrTable_context *ctx,
 			     oid* rdr_oid, size_t oid_len,
