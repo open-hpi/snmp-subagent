@@ -104,17 +104,18 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 		 oid * sensor_oid, size_t * sensor_oid_len)
 {
 
-  int i = 0;
   int rc = AGENT_ERR_NOERROR;
 
   oid index_oid[SENSOR_INDEX_NR];
   oid column[2];
 
   netsnmp_index sensor_index;
+#ifdef BUG_873961
+  int i = 0;
   netsnmp_void_array *array;
-
-  saHpiSensorTable_context *sensor_context;
   saHpiSensorTable_context *ctx;
+#endif
+  saHpiSensorTable_context *sensor_context;
   SaHpiSensorThresholdsT sensor_threshold;
   SaHpiSessionIdT session_id;
   SaHpiSensorEvtEnablesT enables;

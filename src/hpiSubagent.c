@@ -144,19 +144,19 @@ build_notification (const netsnmp_index * index,
   snmp_varlist_add_variable (&notification_vars,
 			     snmptrap, OID_LENGTH (snmptrap),
 			     ASN_OBJECT_ID,
-			     (u_char *) (oid *) notification_oid,
+			     (const u_char *) (const oid *) notification_oid,
 			     notification_oid_len * sizeof (oid));
 
   // Next the DomainID
   snmp_varlist_add_variable (&notification_vars,
 			     domain_id_oid, domain_id_oid_len,
 			     ASN_UNSIGNED,
-			     (u_char *) & domain_id, sizeof (SaHpiDomainIdT));
+			     (const u_char *) & domain_id, sizeof (SaHpiDomainIdT));
   // The ResourceID
   snmp_varlist_add_variable (&notification_vars,
 			     resource_id_oid, resource_id_oid_len,
 			     ASN_UNSIGNED,
-			     (u_char *) & resource_id,
+			     (const u_char *) & resource_id,
 			     sizeof (SaHpiResourceIdT));
 
   // Attach the rest of information
