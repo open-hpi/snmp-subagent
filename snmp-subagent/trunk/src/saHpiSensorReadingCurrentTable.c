@@ -694,7 +694,7 @@ saHpiSensorReadingCurrentTable_get_value (netsnmp_request_info * request,
   saHpiSensorReadingCurrentTable_context *context =
     (saHpiSensorReadingCurrentTable_context *) item;
 
- #ifdef GET_ROUTINE_CALLS_SNMP_GET
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
   SaHpiSensorReadingT reading;
   SaHpiSessionIdT session_id;
   int rc = AGENT_ERR_NOERROR;

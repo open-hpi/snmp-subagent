@@ -99,7 +99,7 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 				  saHpiHotSwapTable_context * ctx)
 {
   unsigned int update_entry = MIB_FALSE;
-  long hash;
+  long hash = 0;
   int rc;
   SaHpiSessionIdT session_id;
   SaHpiHsIndicatorStateT indication_state;
@@ -110,40 +110,31 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
   SaHpiTimeoutT insert_t;
   SaHpiTimeoutT extract_t;
 
-  if (rpt_entry && ctx)
+  if (rpt_entry)
     {
       hash = calculate_hash_value (rpt_entry, sizeof (SaHpiRptEntryT)
 				   - sizeof (SaHpiTextBufferT));
-      DEBUGMSGTL ((AGENT, " Hash value: %d, in ctx: %d\n", hash, ctx->hash));
-
+    }
+  if (ctx)
+    {
       if (ctx->hash != 0)
 	{
-	  // Only do the check if the hash value is something else than zero.
-	  // 'zero' value is only for newly created records, and in some
-	  // rare instances when the hash has rolled to zero - in which
-	  // case we will just consider the worst-case scenario and update
-	  // the record and not trust the hash value.
-	  if (hash == ctx->hash)
-	    {
-	      // The same data. No need to change.
-	      return AGENT_ENTRY_EXIST;
-	    }
-	  if ((ctx->resource_id ==  rpt_entry->ResourceId) && 
-	      (ctx->domain_id == rpt_entry->DomainId)) {
-		  DEBUGMSGTL((AGENT,"Updating HotSwap entry [%d, %d]\n",
-					  rpt_entry->DomainId,
-					  rpt_entry->ResourceId));
-		  update_entry = MIB_TRUE;
-	   }
+	  DEBUGMSGTL ((AGENT, "Updating HotSwap entry [%d, %d]\n",
+		       ctx->domain_id, ctx->resource_id));
+	  update_entry = MIB_TRUE;
+
 	}
 
       if (hash == 0)
 	hash = 1;
       ctx->hash = hash;
 
-      ctx->resource_id = rpt_entry->ResourceId;
-      ctx->domain_id = rpt_entry->DomainId;
-
+      if (rpt_entry)
+	{
+	  ctx->resource_id = rpt_entry->ResourceId;
+	  ctx->domain_id = rpt_entry->DomainId;
+	  ctx->saHpiHotSwapEventSeverity = rpt_entry->ResourceSeverity + 1;
+	}
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);
       if (rc != AGENT_ERR_NOERROR)
@@ -155,10 +146,10 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 
       // Indicator
       DEBUGMSGTL ((AGENT, "Calling saHpiHotSwapIndicatorStateGet with %d\n",
-		   rpt_entry->ResourceId));
+		   ctx->resource_id));
 
       rc = saHpiHotSwapIndicatorStateGet (session_id,
-					  rpt_entry->ResourceId,
+					  ctx->resource_id,
 					  &indication_state);
       if (rc != SA_OK)
 	{
@@ -172,10 +163,10 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 
       // PowerState
       DEBUGMSGTL ((AGENT, "Calling saHpiResourcePowerStateGet with %d\n",
-		   rpt_entry->ResourceId));
+		   ctx->resource_id));
 
       rc = saHpiResourcePowerStateGet (session_id,
-				       rpt_entry->ResourceId, &power_state);
+				       ctx->resource_id, &power_state);
 
       if (rc != SA_OK)
 	{
@@ -188,10 +179,10 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 
       // ResetState
       DEBUGMSGTL ((AGENT, "Calling saHpiResourceResetStateGet with %d\n",
-		   rpt_entry->ResourceId));
+		   ctx->resource_id));
 
       rc = saHpiResourceResetStateGet (session_id,
-				       rpt_entry->ResourceId, &reset_action);
+				       ctx->resource_id, &reset_action);
 
       if (rc != SA_OK)
 	{
@@ -205,9 +196,9 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 
       // State
       DEBUGMSGTL ((AGENT, "Calling saHpiHotSwapStateGet with %d\n",
-		   rpt_entry->ResourceId));
+		   ctx->resource_id));
 
-      rc = saHpiHotSwapStateGet (session_id, rpt_entry->ResourceId, &state);
+      rc = saHpiHotSwapStateGet (session_id, ctx->resource_id, &state);
 
       if (rc != SA_OK)
 	{
@@ -221,15 +212,11 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	  ctx->saHpiHotSwapPreviousState = 0;
 	}
 
-      ctx->saHpiHotSwapEventSeverity = rpt_entry->ResourceSeverity + 1;
 
       // InsertTimeout
-      DEBUGMSGTL ((AGENT, "Calling saHpiAutoInsertTimeoutGet with %d\n",
-		   rpt_entry->ResourceId));
+      DEBUGMSGTL ((AGENT, "Calling saHpiAutoInsertTimeoutGet \n"));
 
-      rc = saHpiAutoInsertTimeoutGet (session_id,
-				      //      rpt_entry->ResourceId,
-				      &insert_t);
+      rc = saHpiAutoInsertTimeoutGet (session_id, &insert_t);
 
       if (rc != SA_OK)
 	{
@@ -244,10 +231,10 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 
       // Extract timeout
       DEBUGMSGTL ((AGENT, "Calling saHpiAutoExtractTimeoutGet with %d\n",
-		   rpt_entry->ResourceId));
+		   ctx->resource_id));
 
       rc = saHpiAutoExtractTimeoutGet (session_id,
-				       rpt_entry->ResourceId, &extract_t);
+				       ctx->resource_id, &extract_t);
 
       if (rc != SA_OK)
 	{
@@ -265,11 +252,12 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
       ctx->saHpiHotSwapActionRequest = 0;
 
       // Copy the RPT OID.
+      if (rpt_oid) {
       ctx->saHpiHotSwapRTP_len = rpt_oid_len * sizeof (oid);
       memcpy (ctx->saHpiHotSwapRTP, rpt_oid, ctx->saHpiHotSwapRTP_len);
-
+      }
       if (update_entry == MIB_TRUE)
-	      return AGENT_ENTRY_EXIST;
+	return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
   return AGENT_ERR_NULL_DATA;
@@ -382,20 +370,20 @@ set_hotswap_powerstate (saHpiHotSwapTable_context * ctx)
 	}
 
       // Get the new value
-      DEBUGMSGTL ((AGENT, "Calling with saHpiHotSwapIndicatorStateGet %d\n",
+      DEBUGMSGTL ((AGENT, "Calling with saHpiResourcePowerStateGet %d\n",
 		   ctx->resource_id));
 
-      rc = saHpiHotSwapIndicatorStateGet (session_id, ctx->resource_id,
-					  &power_state);
+      rc = saHpiResourcePowerStateGet (session_id, ctx->resource_id,
+				       &power_state);
 
 
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiHotSwapIndicatorStateGet failed with rc: %s\n",
+		    "Call to saHpiResourcePowerStateGet failed with rc: %s\n",
 		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiHotSwapIndicatorStateGet failed with rc: %s\n",
+		       "Call to saHpiResourcePowerStateGet failed with rc: %s\n",
 		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
@@ -1356,6 +1344,11 @@ saHpiHotSwapTable_get_value (netsnmp_request_info * request,
   netsnmp_variable_list *var = request->requestvb;
   saHpiHotSwapTable_context *context = (saHpiHotSwapTable_context *) item;
 
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
+saHpiHotSwapTable_modify_context (NULL,
+				NULL, -1,
+			        context);
+#endif
   switch (table_info->colnum)
     {
 

@@ -40,18 +40,17 @@ OID_LENGTH (saHpiSensorThdUpMinorTable_oid);
 
 static int
 modify_saHpiSensorThdUpMinorTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdUpMinorTable_context
-					   * ctx);
+				       SaHpiResourceIdT resource_id,
+				       SaHpiSensorNumT sensor_num,
+				       SaHpiSensorThdDefnT * threshold_def,
+				       SaHpiSensorReadingT * reading,
+				       saHpiSensorThdUpMinorTable_context
+				       * ctx);
 
 int
 delete_ThdUpMinor_row (SaHpiDomainIdT domain_id,
-			   SaHpiResourceIdT resource_id,
-			   SaHpiSensorNumT sensor_num)
+		       SaHpiResourceIdT resource_id,
+		       SaHpiSensorNumT sensor_num)
 {
 
   saHpiSensorThdUpMinorTable_context *ctx;
@@ -85,10 +84,10 @@ delete_ThdUpMinor_row (SaHpiDomainIdT domain_id,
 
 int
 populate_ThdUpMinor (SaHpiDomainIdT domain_id,
-			 SaHpiResourceIdT resource_id,
-			 SaHpiSensorNumT sensor_id,
-			 SaHpiSensorThdDefnT *threshold_def,
-			 SaHpiSensorReadingT * reading)
+		     SaHpiResourceIdT resource_id,
+		     SaHpiSensorNumT sensor_id,
+		     SaHpiSensorThdDefnT * threshold_def,
+		     SaHpiSensorReadingT * reading)
 {
 
 
@@ -124,8 +123,7 @@ populate_ThdUpMinor (SaHpiDomainIdT domain_id,
 	  /* 
 	     New entry. Create it.
 	   */
-	  ctx =
-	    saHpiSensorThdUpMinorTable_create_row (&sensor_thd_index);
+	  ctx = saHpiSensorThdUpMinorTable_create_row (&sensor_thd_index);
 	}
       if (!ctx)
 	{
@@ -135,11 +133,11 @@ populate_ThdUpMinor (SaHpiDomainIdT domain_id,
 	}
 
       if (modify_saHpiSensorThdUpMinorTable_row (domain_id,
-						     resource_id,
-						     sensor_id,
-						     threshold_def,
-						     reading,
-						     ctx) == AGENT_NEW_ENTRY)
+						 resource_id,
+						 sensor_id,
+						 threshold_def,
+						 reading,
+						 ctx) == AGENT_NEW_ENTRY)
 	{
 	  /*
 	   * Add new entry.
@@ -159,13 +157,12 @@ populate_ThdUpMinor (SaHpiDomainIdT domain_id,
 
 int
 modify_saHpiSensorThdUpMinorTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdUpMinorTable_context
-					   * ctx)
+				       SaHpiResourceIdT resource_id,
+				       SaHpiSensorNumT sensor_num,
+				       SaHpiSensorThdDefnT * threshold_def,
+				       SaHpiSensorReadingT * reading,
+				       saHpiSensorThdUpMinorTable_context
+				       * ctx)
 {
 
   long hash = 0;
@@ -219,20 +216,19 @@ modify_saHpiSensorThdUpMinorTable_row (SaHpiDomainIdT domain_id,
 			     &ctx->saHpiSensorThdUpMinorRaw,
 			     ctx->saHpiSensorThdUpMinorInterpreted,
 			     &ctx->saHpiSensorThdUpMinorInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
+      if (threshold_def) {
+      ctx->saHpiSensorThdUpMinorIsReadable =
+	((threshold_def->ReadThold & SAHPI_STM_UP_MINOR) ==
+	 SAHPI_STM_UP_MINOR) ? MIB_TRUE : MIB_FALSE;
 
-      ctx->saHpiSensorThdUpMinorIsReadable = 
-	((threshold_def->ReadThold & SAHPI_STM_UP_MINOR) == SAHPI_STM_UP_MINOR) ?
-	MIB_TRUE : MIB_FALSE;
-      
-      ctx->saHpiSensorThdUpMinorIsWritable = 
-	((threshold_def->WriteThold & SAHPI_STM_UP_MINOR) == SAHPI_STM_UP_MINOR) ?
-	MIB_TRUE : MIB_FALSE;
-  ctx->saHpiSensorThdUpMinorIsFixed = 
-	((threshold_def->FixedThold & SAHPI_STM_UP_MINOR) == SAHPI_STM_UP_MINOR) ?
-	MIB_TRUE : MIB_FALSE;
-
+      ctx->saHpiSensorThdUpMinorIsWritable =
+	((threshold_def->WriteThold & SAHPI_STM_UP_MINOR) ==
+	 SAHPI_STM_UP_MINOR) ? MIB_TRUE : MIB_FALSE;
+      ctx->saHpiSensorThdUpMinorIsFixed =
+	((threshold_def->FixedThold & SAHPI_STM_UP_MINOR) ==
+	 SAHPI_STM_UP_MINOR) ? MIB_TRUE : MIB_FALSE;
+       }
       /* END */
       DEBUGMSGTL ((AGENT, "Modify saHpiSensorThdUpMinorTable_ctx: Exit"));
       if (update_entry == MIB_TRUE)
@@ -248,7 +244,9 @@ modify_saHpiSensorThdUpMinorTable_row (SaHpiDomainIdT domain_id,
 }
 
 
-int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
+int
+set_ThdUpMinor (saHpiSensorThdUpMinorTable_context * ctx)
+{
 
   SaHpiSensorThresholdsT thd;
   SaHpiSessionIdT session_id;
@@ -270,10 +268,11 @@ int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
       /*
        * Get the current threshold information
        */
-      DEBUGMSGTL((AGENT,"resource_id: %d, sensor_id: %d\n", ctx->resource_id, ctx->sensor_id));
-      rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+      DEBUGMSGTL ((AGENT, "resource_id: %d, sensor_id: %d\n",
+		   ctx->resource_id, ctx->sensor_id));
+      rc =
+	saHpiSensorThresholdsGet (session_id, ctx->resource_id,
+				  ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -286,25 +285,26 @@ int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
 	  return AGENT_ERR_OPERATION;
 	}
 
-	/* Update the correct entry.	 */
-      
-      if (thd.UpMinor.ValuesPresent & SAHPI_SRF_INTERPRETED) {
-	thd.UpMinor.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-	memcpy(&thd.UpMinor.Interpreted.Value.SensorBuffer,
-		&ctx->saHpiSensorThdUpMinorInterpreted,
-		ctx->saHpiSensorThdUpMinorInterpreted_len);
-	       
-      }
-      if (thd.UpMinor.ValuesPresent & SAHPI_SRF_RAW) {
-	thd.UpMinor.Raw = ctx->saHpiSensorThdUpMinorRaw;
-      }
+      /* Update the correct entry.     */
+
+      if (thd.UpMinor.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	{
+	  thd.UpMinor.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
+	  memcpy (&thd.UpMinor.Interpreted.Value.SensorBuffer,
+		  &ctx->saHpiSensorThdUpMinorInterpreted,
+		  ctx->saHpiSensorThdUpMinorInterpreted_len);
+
+	}
+      if (thd.UpMinor.ValuesPresent & SAHPI_SRF_RAW)
+	{
+	  thd.UpMinor.Raw = ctx->saHpiSensorThdUpMinorRaw;
+	}
 
       /*
        * Set the thresholds 
        */
       rc = saHpiSensorThresholdsSet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -324,8 +324,7 @@ int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
 
       memset (&thd, 0x00, sizeof (SaHpiSensorThresholdsT));
       rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -343,8 +342,7 @@ int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
 			     &ctx->saHpiSensorThdUpMinorRaw,
 			     ctx->saHpiSensorThdUpMinorInterpreted,
 			     &ctx->saHpiSensorThdUpMinorInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
 
 
       DEBUGMSGTL ((AGENT, "set_ThdUpMinor: Exit.\n"));
@@ -356,6 +354,7 @@ int set_ThdUpMinor (saHpiSensorThdUpMinorTable_context *ctx) {
 
 
 }
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -384,30 +383,27 @@ static int
   /*
    * copy components into the context structure
    */
-   dst->saHpiSensorThdUpMinorIsReadable =
-        src->saHpiSensorThdUpMinorIsReadable;
+  dst->saHpiSensorThdUpMinorIsReadable = src->saHpiSensorThdUpMinorIsReadable;
 
-    dst->saHpiSensorThdUpMinorIsWritable =
-        src->saHpiSensorThdUpMinorIsWritable;
+  dst->saHpiSensorThdUpMinorIsWritable = src->saHpiSensorThdUpMinorIsWritable;
 
-    dst->saHpiSensorThdUpMinorIsFixed =
-        src->saHpiSensorThdUpMinorIsFixed;
+  dst->saHpiSensorThdUpMinorIsFixed = src->saHpiSensorThdUpMinorIsFixed;
 
-    dst->saHpiSensorThdUpMinorValuesPresent =
-        src->saHpiSensorThdUpMinorValuesPresent;
+  dst->saHpiSensorThdUpMinorValuesPresent =
+    src->saHpiSensorThdUpMinorValuesPresent;
 
-    dst->saHpiSensorThdUpMinorRaw = src->saHpiSensorThdUpMinorRaw;
+  dst->saHpiSensorThdUpMinorRaw = src->saHpiSensorThdUpMinorRaw;
 
-    memcpy(dst->saHpiSensorThdUpMinorInterpreted,
-           src->saHpiSensorThdUpMinorInterpreted,
-           src->saHpiSensorThdUpMinorInterpreted_len);
-    dst->saHpiSensorThdUpMinorInterpreted_len =
-        src->saHpiSensorThdUpMinorInterpreted_len;
+  memcpy (dst->saHpiSensorThdUpMinorInterpreted,
+	  src->saHpiSensorThdUpMinorInterpreted,
+	  src->saHpiSensorThdUpMinorInterpreted_len);
+  dst->saHpiSensorThdUpMinorInterpreted_len =
+    src->saHpiSensorThdUpMinorInterpreted_len;
 
-    dst->resource_id = src->resource_id;
-    dst->domain_id = src->domain_id;
-    dst->sensor_id = src->sensor_id;
-    dst->hash = src->hash;
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  dst->sensor_id = src->sensor_id;
+  dst->hash = src->hash;
 
   return 0;
 }
@@ -480,9 +476,9 @@ int
       /*
        * copy index components into the context structure
        */
-	ctx->domain_id  = *var_saHpiDomainID.val.integer;
-	ctx->resource_id = *var_saHpiResourceID.val.integer;
-	ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
+      ctx->domain_id = *var_saHpiDomainID.val.integer;
+      ctx->resource_id = *var_saHpiResourceID.val.integer;
+      ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
     }
 
   /*
@@ -503,8 +499,7 @@ int
 int
   saHpiSensorThdUpMinorTable_can_delete
   (saHpiSensorThdUpMinorTable_context * undo_ctx,
-   saHpiSensorThdUpMinorTable_context * row_ctx,
-   netsnmp_request_group * rg)
+   saHpiSensorThdUpMinorTable_context * row_ctx, netsnmp_request_group * rg)
 {
 
   return 1;
@@ -539,9 +534,9 @@ saHpiSensorThdUpMinorTable_create_row (netsnmp_index * hdr)
       return NULL;
     }
   ctx->saHpiSensorThdUpMinorIsReadable = MIB_FALSE;
-  ctx->saHpiSensorThdUpMinorIsWritable= MIB_FALSE;
+  ctx->saHpiSensorThdUpMinorIsWritable = MIB_FALSE;
   ctx->saHpiSensorThdUpMinorIsFixed = MIB_FALSE;
-  ctx->saHpiSensorThdUpMinorValuesPresent= 0;
+  ctx->saHpiSensorThdUpMinorValuesPresent = 0;
   return ctx;
 }
 
@@ -550,7 +545,7 @@ saHpiSensorThdUpMinorTable_create_row (netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiSensorThdUpMinorTable_context
-  *saHpiSensorThdUpMinorTable_duplicate_row
+  * saHpiSensorThdUpMinorTable_duplicate_row
   (saHpiSensorThdUpMinorTable_context * row_ctx)
 {
   saHpiSensorThdUpMinorTable_context *dup;
@@ -612,19 +607,21 @@ void
 saHpiSensorThdUpMinorTable_set_reserve1 (netsnmp_request_group * rg)
 {
   saHpiSensorThdUpMinorTable_context *row_ctx =
-        (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
+    (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
 
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int             rc =0;
+  netsnmp_variable_list *var;
+  netsnmp_request_group_item *current;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_reserve1. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_reserve1. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
 	case COLUMN_SAHPISENSORTHDUPMINORISREADABLE:
 	case COLUMN_SAHPISENSORTHDUPMINORISWRITABLE:
@@ -633,78 +630,84 @@ saHpiSensorThdUpMinorTable_set_reserve1 (netsnmp_request_group * rg)
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMINORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->
-                                                       saHpiSensorThdUpMinorRaw));
-            break;
+	case COLUMN_SAHPISENSORTHDUPMINORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+					       sizeof (row_ctx->
+						       saHpiSensorThdUpMinorRaw));
+	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	    if (var->type != ASN_OCTET_STR)
+	case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
 	    {
 	      rc = SNMP_ERR_WRONGTYPE;
 	    }
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorThdUpMinorTable_set_reserve1\n");
-        }
+	default:
+		/** We shouldn't get here */
+	  rc = SNMP_ERR_GENERR;
+	  snmp_log (LOG_ERR, "unknown column in "
+		    "saHpiSensorThdUpMinorTable_set_reserve1\n");
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
-        rg->status = SNMP_MAX(rg->status, current->ri->status);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+      rg->status = SNMP_MAX (rg->status, current->ri->status);
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_reserve1. Exit. (rc:%d) \n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMinorTable_set_reserve1. Exit. (rc:%d) \n",
+	       rc));
 }
 
 void
 saHpiSensorThdUpMinorTable_set_reserve2 (netsnmp_request_group * rg)
 {
- saHpiSensorThdUpMinorTable_context *row_ctx =
-        (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int             rc = 0;
+  saHpiSensorThdUpMinorTable_context *row_ctx =
+    (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  int rc = 0;
 
-    rg->rg_void = rg->list->ri;
+  rg->rg_void = rg->list->ri;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_reserve2. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_reserve2. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
-        case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
-        case COLUMN_SAHPISENSORTHDUPMINORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
+      switch (current->tri->colnum)
+	{
+	case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
+	case COLUMN_SAHPISENSORTHDUPMINORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
 	  if (row_ctx->saHpiSensorThdUpMinorIsWritable == MIB_FALSE)
-	  {
-	    rc = SNMP_ERR_NOACCESS;
-	  }
+	    {
+	      rc = SNMP_ERR_NOACCESS;
+	    }
 	  if (row_ctx->saHpiSensorThdUpMinorIsFixed == MIB_TRUE)
 	    {
-	    rc = SNMP_ERR_NOACCESS;
+	      rc = SNMP_ERR_NOACCESS;
 	    }
-	  
-	break;
+
+	  break;
 
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
     }
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_reserve2. Exit (rc:%d).\n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMinorTable_set_reserve2. Exit (rc:%d).\n",
+	       rc));
 }
 
 /************************************************************
@@ -721,51 +724,55 @@ saHpiSensorThdUpMinorTable_set_reserve2 (netsnmp_request_group * rg)
 void
 saHpiSensorThdUpMinorTable_set_action (netsnmp_request_group * rg)
 {
- netsnmp_variable_list *var;
-    saHpiSensorThdUpMinorTable_context *row_ctx =
-        (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  saHpiSensorThdUpMinorTable_context *row_ctx =
+    (saHpiSensorThdUpMinorTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
 
-    int             rc = 0;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_action. Entry\n")); 
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_action. Entry\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
+      var = current->ri->requestvb;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
-        case COLUMN_SAHPISENSORTHDUPMINORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiSensorThdUpMinorRaw = *var->val.integer;
-	    if (set_ThdUpMinor(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
-            break;
+	case COLUMN_SAHPISENSORTHDUPMINORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  row_ctx->saHpiSensorThdUpMinorRaw = *var->val.integer;
+	  if (set_ThdUpMinor (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
+	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiSensorThdUpMinorInterpreted,
-                   var->val.string, var->val_len);
-            row_ctx->saHpiSensorThdUpMinorInterpreted_len =
-                var->val_len;
-	    if (set_ThdUpMinor(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
+	case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  memcpy (row_ctx->saHpiSensorThdUpMinorInterpreted,
+		  var->val.string, var->val_len);
+	  row_ctx->saHpiSensorThdUpMinorInterpreted_len = var->val_len;
+	  if (set_ThdUpMinor (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
 
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
     }
 
-   
-    if (rc) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info *) rg->
-                                       rg_void, rc);
-        return;
+
+  if (rc)
+    {
+      netsnmp_set_mode_request_error (MODE_SET_BEGIN,
+				      (netsnmp_request_info *) rg->
+				      rg_void, rc);
+      return;
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMinorTable_set_action. Exit (rc: %d)\n",rc)); 
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMinorTable_set_action. Exit (rc: %d)\n", rc));
 }
 
 /************************************************************
@@ -895,8 +902,7 @@ initialize_table_saHpiSensorThdUpMinorTable (void)
   cb.get_value = saHpiSensorThdUpMinorTable_get_value;
   cb.container =
     netsnmp_container_find ("saHpiSensorThdUpMinorTable_primary:"
-			    "saHpiSensorThdUpMinorTable:"
-			    "table_container");
+			    "saHpiSensorThdUpMinorTable:" "table_container");
 
 
   cb.create_row = (UserRowMethod *) saHpiSensorThdUpMinorTable_create_row;
@@ -934,72 +940,104 @@ initialize_table_saHpiSensorThdUpMinorTable (void)
  */
 int
 saHpiSensorThdUpMinorTable_get_value (netsnmp_request_info * request,
-					  netsnmp_index * item,
-					  netsnmp_table_request_info
-					  * table_info)
+				      netsnmp_index * item,
+				      netsnmp_table_request_info * table_info)
 {
   netsnmp_variable_list *var = request->requestvb;
   saHpiSensorThdUpMinorTable_context *context =
     (saHpiSensorThdUpMinorTable_context *) item;
 
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
+  SaHpiSensorThresholdsT sensor_threshold;
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+    }
+  rc = saHpiSensorThresholdsGet (session_id,
+				 context->resource_id,
+				 context->sensor_id, &sensor_threshold);
+
+  if (rc != SA_OK)
+    {
+      snmp_log (LOG_ERR,
+		"Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+		get_error_string (rc));
+      DEBUGMSGTL ((AGENT,
+		   "Call to  SensorThresholdGet fails with return code: %s.\n",
+		   get_error_string (rc)));
+      return AGENT_ERR_OPERATION;
+    }
+  if (rc == AGENT_ERR_NOERROR)
+    {
+      modify_saHpiSensorThdUpMinorTable_row (context->domain_id,
+						 context->resource_id,
+						 context->sensor_id,
+						 NULL,
+						 &sensor_threshold.
+						 UpMinor, context);
+    }
+#endif
   switch (table_info->colnum)
     {
 
     case COLUMN_SAHPISENSORTHDUPMINORISREADABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorIsReadable,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMinorIsReadable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMinorIsReadable,
+				sizeof (context->
+					saHpiSensorThdUpMinorIsReadable));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMINORISWRITABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorIsWritable,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMinorIsWritable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMinorIsWritable,
+				sizeof (context->
+					saHpiSensorThdUpMinorIsWritable));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMINORISFIXED:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorIsFixed,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMinorIsFixed));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMinorIsFixed,
+				sizeof (context->
+					saHpiSensorThdUpMinorIsFixed));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMINORVALUESPRESENT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorValuesPresent,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMinorValuesPresent));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMinorValuesPresent,
+				sizeof (context->
+					saHpiSensorThdUpMinorValuesPresent));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMINORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-	if (context->saHpiSensorThdUpMinorIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorRaw,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMinorRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      if (context->saHpiSensorThdUpMinorIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				  (char *) &context->
+				  saHpiSensorThdUpMinorRaw,
+				  sizeof (context->saHpiSensorThdUpMinorRaw));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMINORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	if (context->saHpiSensorThdUpMinorIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMinorInterpreted,
-                                 context->
-                                 saHpiSensorThdUpMinorInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      if (context->saHpiSensorThdUpMinorIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				  (char *) &context->
+				  saHpiSensorThdUpMinorInterpreted,
+				  context->
+				  saHpiSensorThdUpMinorInterpreted_len);
+      break;
 
     default:
 	    /** We shouldn't get here */

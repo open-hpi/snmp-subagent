@@ -189,40 +189,44 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 		       rc));
 	  return rc;
 	}
-
-      rc = saHpiSensorThresholdsGet (session_id,
-				     rpt_entry->ResourceId,
-				     sensor->Num, &sensor_threshold);
-
-      if (rc != SA_OK)
+      if (sensor->ThresholdDefn.IsThreshold == SAHPI_TRUE)
 	{
-	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
-		    get_error_string (rc));
-	  DEBUGMSGTL ((AGENT,
-		       "Call to  SensorThresholdGet fails with return code: %s.\n",
-		       get_error_string (rc)));
-	  return AGENT_ERR_OPERATION;
+	  rc = saHpiSensorThresholdsGet (session_id,
+					 rpt_entry->ResourceId,
+					 sensor->Num, &sensor_threshold);
+
+	  if (rc != SA_OK)
+	    {
+	      snmp_log (LOG_ERR,
+			"Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+			get_error_string (rc));
+	      DEBUGMSGTL ((AGENT,
+			   "Call to  SensorThresholdGet fails with return code: %s.\n",
+			   get_error_string (rc)));
+	      return AGENT_ERR_OPERATION;
+	    }
 	}
-
-
-
-
-      rc = saHpiSensorEventEnablesGet (session_id,
-				       rpt_entry->ResourceId,
-				       sensor->Num, &enables);
-
-      if (rc != SA_OK)
+      /*
+       * No need to call a plugin that does not support
+       * events.
+       */
+      if (sensor->EventCtrl != SAHPI_SEC_NO_EVENTS)
 	{
-	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorEventEnablesGet fails with return code: %s.\n",
-		    get_error_string (rc));
-	  DEBUGMSGTL ((AGENT,
-		       "Call to  saHpiSensorEventEnablesGet fails with return code: %s.\n",
-		       get_error_string (rc)));
-	  // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
-	}
+	  rc = saHpiSensorEventEnablesGet (session_id,
+					   rpt_entry->ResourceId,
+					   sensor->Num, &enables);
 
+	  if (rc != SA_OK)
+	    {
+	      snmp_log (LOG_ERR,
+			"Call to saHpiSensorEventEnablesGet fails with return code: %s.\n",
+			get_error_string (rc));
+	      DEBUGMSGTL ((AGENT,
+			   "Call to  saHpiSensorEventEnablesGet fails with return code: %s.\n",
+			   get_error_string (rc)));
+	      // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
+	    }
+	}
       rc = saHpiSensorReadingGet (session_id,
 				  rpt_entry->ResourceId,
 				  sensor->Num, &current_reading);
@@ -701,21 +705,26 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 			  (char *) &ctx->saHpiSensorEventsSupported,
 			  &ctx->saHpiSensorEventsSupported_len,
 			  SENSOR_EVENTS_SUPPORTED_MAX);
+      /*
+       * No need to update a sensor that does not support
+       * events.
+       */  
+      if (entry->EventCtrl != SAHPI_SEC_NO_EVENTS)
+	{
+	  ctx->saHpiSensorStatus = enables->SensorStatus;
 
-      ctx->saHpiSensorStatus = enables->SensorStatus;
+	  build_state_string (entry->Category,
+			      enables->AssertEvents,
+			      (char *) &ctx->saHpiSensorAssertEvents,
+			      &ctx->saHpiSensorAssertEvents_len,
+			      SENSOR_EVENTS_SUPPORTED_MAX);
 
-      build_state_string (entry->Category,
-			  enables->AssertEvents,
-			  (char *) &ctx->saHpiSensorAssertEvents,
-			  &ctx->saHpiSensorAssertEvents_len,
-			  SENSOR_EVENTS_SUPPORTED_MAX);
-
-      build_state_string (entry->Category,
-			  enables->DeassertEvents,
-			  (char *) &ctx->saHpiSensorDeassertEvents,
-			  &ctx->saHpiSensorDeassertEvents_len,
-			  SENSOR_EVENTS_SUPPORTED_MAX);
-
+	  build_state_string (entry->Category,
+			      enables->DeassertEvents,
+			      (char *) &ctx->saHpiSensorDeassertEvents,
+			      &ctx->saHpiSensorDeassertEvents_len,
+			      SENSOR_EVENTS_SUPPORTED_MAX);
+	}
 
 
       ctx->saHpiSensorIgnore =
