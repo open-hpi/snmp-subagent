@@ -132,6 +132,15 @@ netSnmpIETFWGTable_get( const char *name, int len )
 }
 #endif
 
+static void
+print_string(netsnmp_index *i, void *v)
+{
+    int a;
+    printf("item %p = [",i);
+    for (a = 1; a <= i->oids[0]; a++)
+	printf("%c", (char) i->oids[a]);
+    printf("]\n");
+}
 
 /************************************************************
  * Initializes the netSnmpIETFWGTable module
@@ -139,11 +148,70 @@ netSnmpIETFWGTable_get( const char *name, int len )
 void
 init_netSnmpIETFWGTable(void)
 {
-    initialize_table_netSnmpIETFWGTable();
+   netsnmp_index index;
+   oid index_oid[MAX_OID_LEN];
+   char *index_char[] = {"hickory","joe","hickory","bob","new orleans","help"};
+   int i,j;
+   netSnmpIETFWGTable_context *ctx;
 
-    /*
-     * TODO: perform any startup stuff here
+   initialize_table_netSnmpIETFWGTable();
+
+   for (i = 0; i< 6; i++) {
+     /*
+       First value of an index that is ASN_OCTET_STR is 
+       the length of the string.
      */
+	index_oid[0] = strlen(index_char[i]);
+	/* The rest is the data copied. */
+	for (j = 0; j < index_oid[0];j++) {
+		index_oid[j+1] = *(index_char[i]+j);	
+
+	}
+        index.oids = (oid *) &index_oid;
+        index.len = index_oid[0]+1;
+	ctx = NULL;
+	/* Search for it first. */
+	ctx = CONTAINER_FIND (cb.container, &index);
+	if (!ctx) {
+	  /* No dice. We add the new row */
+		ctx = netSnmpIETFWGTable_create_row( &index);
+		printf("inserting %s\n", ctx->	 nsIETFWGName);
+		CONTAINER_INSERT (cb.container, ctx);
+	}
+
+   } 
+   /*
+    Since we are done adding the rows, let us display them for the fun.
+    The easy way:
+   */
+
+   CONTAINER_FOR_EACH(cb.container, print_string, NULL);
+
+   /*     
+   We do not like 'joe', so we remove him.
+   */
+   index_oid[0] = 3;
+   index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
+   index.oids = (oid *) &index_oid;
+   index.len = 4;
+   CONTAINER_REMOVE( cb.container, &index);
+   printf("Removed joe\n");
+
+   /*
+     Or the hard way:
+   */
+   
+   ctx = CONTAINER_FIRST(cb.container);
+   printf("Find first = %p %s\n",ctx, ctx->nsIETFWGName);
+    while( ctx ) {
+        ctx = CONTAINER_NEXT(cb.container,ctx);
+        if(ctx)
+            printf("Find next = %p %s\n",ctx, ctx->nsIETFWGName);
+        else
+            printf("Find next = %p\n",ctx);
+    }
+
+  
 }
 
 /************************************************************
@@ -219,7 +287,7 @@ netSnmpIETFWGTable_extract_index( netSnmpIETFWGTable_context * ctx, netsnmp_inde
     snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_nsIETFWGName.next_variable = &var_XX;
+       var_nsIETFWGName.next_variable = NULL;
 #endif
 
 
@@ -270,11 +338,11 @@ int netSnmpIETFWGTable_can_delete(netSnmpIETFWGTable_context *undo_ctx,
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
-     */
+     *
     if(netSnmpIETFWGTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
         return 0;
 
-    /*
+     *
      * TODO: check for other deletion requirements here
      */
     return 1;
@@ -321,10 +389,8 @@ netSnmpIETFWGTable_create_row( netsnmp_index* hdr)
      * yourself to use.  If you allocated memory earlier,
      * make sure you free it for earlier error cases!
      */
-    /**
-     ctx->nsIETFWGChair1 = 0;
-     ctx->nsIETFWGChair2 = 0;
-    */
+    ctx->nsIETFWGChair1_len = 0;
+    ctx->nsIETFWGChair2_len = 0;
 
     return ctx;
 }
@@ -785,9 +851,10 @@ initialize_table_netSnmpIETFWGTable(void)
     cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)netSnmpIETFWGTable_row_copy;
-
+/*
     cb.can_activate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_activate;
     cb.can_deactivate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_deactivate;
+*/
     cb.can_delete = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_delete;
 
     cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;

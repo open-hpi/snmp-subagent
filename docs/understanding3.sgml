@@ -136,7 +136,7 @@
 </programlisting>
 	    <para>Create a handler which contains the OID of the table,
 	whether it can be written to, and which (if any) if the
-	NET-SNMP API helper functions to use.
+	NET-SNMP library helper functions to use.
 		</para>
 <note>
 	<para>An OID - Object IDentifier is a an array of <emphasis>longs</emphasis>.
@@ -181,7 +181,7 @@
 </programlisting>
 		<para>
 		 Line 769 registers the GET routine which will be responsible
-		for provinding the Net-SNMP API with the correct data and value. More on this in later sections.
+		for provinding the Net-SNMP library with the correct data and value. More on this in later sections.
 		</para>
 	</sect2>
 	<sect2><title>Register compare function</title>
@@ -199,11 +199,20 @@
 		the address of a user-written routine in the callback mechanism) 
 		the OID compare routine. This
 		routine is <emphasis>NOT</emphasis> needed if your table rows
-		don't have any external depedency on sort order. 
+		only have one index value. If you do have more
+		than one index value, and you do <emphasis>need</emphasis> 
+		to sort the rows based on a custom sorting algorithm, then
+		make sure that <emphasis>netSnmpIETFWGTable_cmp</emphasis>
+		is properly implemented.
+		</para>
+		<para>
+		If you do not need to use a custom sorting algorithm, and have
+		more than one index value undefine <emphasis>netSnmpIETFWGTable_IDX2</emphasis> and let the NetSNMP library do the sorting.
 		</para>
 		<note>
 			<para>The compare routine is <emphasis>ONLY</emphasis>
-			used during removal of rows. Not when rows are added.
+			used during adding and removal of rows that have more than
+			one index value.  
 			</para>
 		</note>
 		<para>	
@@ -228,7 +237,7 @@
 	exercised when the sub-agent code uses the internal routines.
 	</para>
 	<para>
-	The process which the NetSNMP API uses to decide if the data is OK 
+	The process which the NetSNMP library uses to decide if the data is OK 
 	is a four state system. The data is writen to a new row or
 	an existing one, if it has passed the RESERVE1, RESERVE2, and ACTION
 	phase. The ACTION phase does the modification and if anything goes wrong
@@ -236,7 +245,7 @@
 	</para>
 	<note>
 		<para>This two-phase commit system is unique. Many other
-		SNMP sub-agent APIs do not implement such technique and
+		SNMP sub-agent librarys do not implement such technique and
 		have only one SET operation which has to take care of 
 		checking the type, size, limitation, perform the write, and
 		undo if needed.
@@ -322,7 +331,7 @@ functions is the responsibilty of the user (more on this in later sections):
    order might be completly different from ASCII sort order). 
   </para>
   <para>
-   Therfore the NetSNMP API provides a method to register a generic compare function which 
+   Therfore the NetSNMP library provides a method to register a generic compare function which 
    can handle n-many index tuples. This allows the developer to customize
    in which order rows are added or removed. 
   </para>   
@@ -330,20 +339,21 @@ functions is the responsibilty of the user (more on this in later sections):
   <title>Generic compare function</title>
 
 	<para>
-	The compare function is only used if <emphasis>netSnmpIETFWGTable_IDX2
-	</emphasis> is defined. This compare function is used by NetSNMP API
-	when rows are being deleted. If this function is not enabled, the
-	NetSNMP API will use its own generic compare function - which compares
-	index tuples and returns the answer based on ASCII ascending order.
+	The secondary compare function is only used if <emphasis>netSnmpIETFWGTable_IDX2
+	</emphasis> is defined. This compare function is used by NetSNMP library
+	when rows are being added or deleted that have more than one index value. 
+	If this function is not enabled, the
+	NetSNMP library will use its own generic compare function - which compares
+	index tuples and returns an answer based on ASCII ascending order.
 	</para>
 	<para>
-	It returns an integer less than, equal to, or greater than zero
-	if lhs (first argument) is found, respectively, to be less than, to match, 
-	or be greater than rhs.
+	The goal of this compare function is to return an integer less than, 
+	equal to, or greater than zero if lhs (first argument) is found, 
+	respectively, to be less than, to match, or be greater than rhs.
 	</para>
 	<para>
 	The implementation of this function is quite straightforward. You use
-	your own method (of figuring out which of passed <emphasis>context</emphasis>
+	your own method of figuring out which of passed <emphasis>context</emphasis>
 	structures is less, matches or greater.
 	</para>
  </sect2>
@@ -352,7 +362,7 @@ functions is the responsibilty of the user (more on this in later sections):
     	<para>
     	The tree searching function purpose is to find a <emphasis>context</emphasis>
 	structure based on the custom arguments (defined by developer). 
-	This function is not used by NetSNMP API - it's a helper function for 
+	This function is not used by NetSNMP library - it's a helper function for 
 	the developer if needed.
 	</para>
 	<para>
@@ -416,7 +426,7 @@ functions is the responsibilty of the user (more on this in later sections):
 	<para>
 	 The <emphasis>netSnmpIETFWGTable_extract_index</emphasis> is a very
 	important function and needs tweaking to work. It's purpose is
-	to extract the index tuple in an appropiate format for NetSNMP API 
+	to extract the index tuple in an appropiate format for NetSNMP library 
 	to understand. 
 	</para>
 	<para>
@@ -429,21 +439,20 @@ functions is the responsibilty of the user (more on this in later sections):
 	 the work. However it might be unclear what exactly is being done.
 	</para>
 	<programlisting role='C'>
-197     netsnmp_variable_list var_nsIETFWGName;
+     netsnmp_variable_list var_nsIETFWGName;
 ...
-212     /**
-213      * Create variable to hold each component of the index
-214      */
-215        memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
-216        var_nsIETFWGName.type = ASN_OCTET_STR;
-217        /** TODO: link this index to the next, or NULL for the last one */
-218 #ifdef TABLE_CONTAINER_TODO
-219     snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index list not implemented        !\n" );
-220     return 0;
-221 #else
-222        var_nsIETFWGName.next_variable = &amp var_XX;
-223 #endif
-224
+     /**
+      * Create variable to hold each component of the index
+      */
+        memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
+        var_nsIETFWGName.type = ASN_OCTET_STR;
+        /** TODO: link this index to the next, or NULL for the last one */
+ #ifdef TABLE_CONTAINER_TODO
+     snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index list not implemented        !\n" );
+     return 0;
+ #else
+        var_nsIETFWGName.next_variable = &amp var_XX;
+ #endif
 	</programlisting>
 	<para>
 	  The <emphasis>var_nsIETFWGName</emphasis> is the first index of 
@@ -541,7 +550,7 @@ nsIETFWGIsWorking OBJECT-TYPE
 	allocated memory).
 	</para>
 <programlisting role='C'>
-254     snmp_reset_var_buffers( &amp var_nsIETFWGName );
+     snmp_reset_var_buffers( &amp var_nsIETFWGName );
 </programlisting>
 	<note>
 		<para>If you add more index values and change the order in which
@@ -676,7 +685,7 @@ nsIETFWGIsWorking OBJECT-TYPE
     784 #endif
 </programlisting>
 	<para>
-	The NetSNMP API uses this information to call the create_row function
+	The NetSNMP library uses this information to call the create_row function
 	whenever a SET request is issued against a non-existing row. 
 	The NetSNMP library first searches through the rows - if it
 	cannot find a row with the matching index value, it calls
@@ -708,16 +717,16 @@ nsIETFWGIsWorking OBJECT-TYPE
 </programlisting>		
 	<para>
 	After line 142 the table is ready to populated with entries. The couple of
-	previous sections explained what the <emphasis>context</emphasis> structure. It is
+	previous sections explained what the <emphasis>context</emphasis> structure is. It is
 	placeholder for data.
 	</para>
 	<para>
 	Creating the <emphasis>context</emphasis> structure and as well the <emphasis>netsnmp_index</emphasis>
-	was explained as well in the previous sections.
+	was explained in the previous sections.
 	</para>
 	<para>
-	So where is the magic that will actually put that <emphasis>container</emphasis> structure for 
-	NetSNMP library? Look in net-snmp/library/container.h. In it, there are a couple of macro calls :
+	The big question is where is the magic that will actually put that <emphasis>container</emphasis> structure for 
+	NetSNMP library? Look in net-snmp/library/container.h. In it there are a couple of macro calls :
 	</para>
 <programlisting role='C'>
    /*
@@ -734,10 +743,145 @@ nsIETFWGIsWorking OBJECT-TYPE
 </programlisting>
 	<para>
 	This the <emphasis>magic</emphasis> that will put the <emphasis>context</emphasis>
-	structures in the memory and make the 
+	structures in the memory and make the NetSNMP library aware of the rows.
+
+	</para>
+	<para>
+	These macros provide a <emphasis>wrapper</emphasis> around the row-data 
+	(<emphasis>context</emphasis> structure) and make its manipulation possible.
+	</para>
+	<para>
+	A good comprehensive example of how to use CONTAINER_ macros is
+	available in NetSNMP source tarball - in the snmplib/test_binary_array.c
+,
+	or the following example in this tutorial (these lines of code were 
+	inserted after initialize_table_netSnmpIETFWGTable(); (line 142).
+	It also assumed that create_row function is fully implemented.
+	</para>
+<programlisting role='C'>
+static void
+print_string(netsnmp_index *i, void *v)
+{
+    int a;
+    printf("item %p = [",i);
+    for (a = 1; a <= i->oids[0]; a++)
+	printf("%c", (char) i->oids[a]);
+    printf("]\n");
+}
+
+/************************************************************
+ * Initializes the netSnmpIETFWGTable module
+ */
+void
+init_netSnmpIETFWGTable(void)
+{
+   netsnmp_index index;
+   oid index_oid[MAX_OID_LEN];
+   char *index_char[] = {"hickory","joe","hickory","bob","new orleans","help"};
+   int i,j;
+   netSnmpIETFWGTable_context *ctx;
+
+   initialize_table_netSnmpIETFWGTable();
+
+   for (i = 0; i< 6; i++) {
+     /*
+       First value of an index that is ASN_OCTET_STR is 
+       the length of the string.
+     */
+	index_oid[0] = strlen(index_char[i]);
+	/* The rest is the data copied. */
+	for (j = 0; j < index_oid[0];j++) {
+		index_oid[j+1] = *(index_char[i]+j);	
+
+	}
+        index.oids = (oid *) &amp index_oid;
+        index.len = index_oid[0]+1;
+	ctx = NULL;
+	/* Search for it first. */
+	ctx = CONTAINER_FIND (cb.container, &amp index);
+	if (!ctx) {
+	  /* No dice. We add the new row */
+		ctx = netSnmpIETFWGTable_create_row( &amp index);
+		printf("inserting %s\n", ctx->	 nsIETFWGName);
+		CONTAINER_INSERT (cb.container, ctx);
+	}
+
+   } 
+   /*
+    Since we are done adding the rows, let us display them for the fun.
+    The easy way:
+   */
+
+   CONTAINER_FOR_EACH(cb.container, print_string, NULL);
+
+   /*     
+   We do not like 'joe', so we remove him.
+   */
+   index_oid[0] = 3;
+   index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+   CONTAINER_REMOVE( cb.container, &amp index);
+   printf("Removed joe\n");
+
+   /*
+     Or the hard way:
+   */
+   
+   ctx = CONTAINER_FIRST(cb.container);
+   printf("Find first = %p %s\n",ctx, ctx->nsIETFWGName);
+    while( ctx ) {
+        ctx = CONTAINER_NEXT(cb.container,ctx);
+        if(ctx)
+            printf("Find next = %p %s\n",ctx, ctx->nsIETFWGName);
+        else
+            printf("Find next = %p\n",ctx);
+    }
+
+  
+}
+</programlisting>
+	<para>
+	The output of this daemon should look like this:
+	</para>
+<programlisting role='C'>
+inserting hickory
+inserting joe
+inserting bob
+inserting new orleans
+inserting help
+item 0x4036d008 = [bob]
+item 0x4033c008 = [joe]
+item 0x4030b008 = [hickory]
+item 0x4039e008 = [new orleans]
+item 0x403cf008 = [help]
+Removed joe
+Find first = 0x4036d008 bob
+Find next = 0x403cf008 help
+Find next = 0x4030b008 hickory
+Find next = 0x4039e008 new orleans
+Find next = (nil)
+</programlisting>
+	<para>
+	You might wonder why the rows are alphabethicly sorted? The reason is that the
+	NetSNMP library uses its own sorting method when adding/deleting rows.
+	It is set by default to be the function <emphasis>netsnmp_compare_netsnmp_index</emphasis> which has the exact same function prototype as the <emphasis>
+static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis>.
+	If you would like to use your own sorting method, add in 
+	initialize_table_netSnmpIETFWGTable function the following line:
+	</para>
+<programlisting role='C'>
+	    cb.container->compare = netSnmpIETFWGTable_cmp;
+</programlisting>
+	<para>
+	And make sure that your compare function works properly.
 	</para>
 	</sect3>
 	</sect2>
-			
+    <sect2>
+	<title>Writing a row</title>
+	<para>
+
+	</para>				
   </sect1>
 </chapter>
