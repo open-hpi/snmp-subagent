@@ -71,6 +71,10 @@ extern "C"
     oid saHpiRdrRTP[MAX_OID_LEN];
     long saHpiRdrRTP_len;
 
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiRdrIdString[SNMP_MAX_MSG_SIZE];
+    long saHpiRdrIdString_len;
+
     SaHpiDomainIdT domain_id;
     long hash;
     unsigned int dirty_bit;
@@ -115,8 +119,9 @@ extern "C"
 #define COLUMN_SAHPIRDR 4
 #define COLUMN_SAHPIRDRID 5
 #define COLUMN_SAHPIRDRRTP 6
+#define COLUMN_SAHPIRDRIDSTRING 7
 #define saHpiRdrTable_COL_MIN 1
-#define saHpiRdrTable_COL_MAX 6
+#define saHpiRdrTable_COL_MAX 7
 
 #define SCALAR_COLUMN_SAHPIRDRCOUNT 1
 
