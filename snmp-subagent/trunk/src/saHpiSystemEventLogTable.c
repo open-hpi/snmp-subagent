@@ -485,7 +485,10 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	      memcpy (ctx->saHpiSystemEventLogOemEventData,
 		      oem.OemEventData, SAHPI_OEM_EVENT_DATA_SIZE);
 	      ctx->saHpiSystemEventLogOemEventData_len =
-		SAHPI_OEM_EVENT_DATA_SIZE;
+		      strlen(oem.OemEventData);
+
+	     if (ctx->saHpiSystemEventLogOemEventData_len >SAHPI_OEM_EVENT_DATA_SIZE) 
+		     	ctx->saHpiSystemEventLogOemEventData_len  = SAHPI_OEM_EVENT_DATA_SIZE;
 
 
 	    }
@@ -496,8 +499,11 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	      memcpy (ctx->saHpiSystemEventLogUserEventData,
 		      user.UserEventData, SAHPI_USER_EVENT_DATA_SIZE);
 	      ctx->saHpiSystemEventLogUserEventData_len =
-		SAHPI_USER_EVENT_DATA_SIZE;
+		      strlen(user.UserEventData);
 
+	      if (ctx->saHpiSystemEventLogUserEventData_len > SAHPI_USER_EVENT_DATA_SIZE)
+		      ctx->saHpiSystemEventLogUserEventData_len = SAHPI_USER_EVENT_DATA_SIZE;
+	
 	    }
 	}
 
