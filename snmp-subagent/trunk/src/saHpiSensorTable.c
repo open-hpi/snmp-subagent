@@ -241,6 +241,7 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiSensorTable_delete_row (ctx);
       sensor_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

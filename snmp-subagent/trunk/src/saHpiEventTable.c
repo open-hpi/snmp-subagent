@@ -380,6 +380,7 @@ purge_event (void)
 	{
 	  event_context = CONTAINER_FIRST (cb.container);
 	  CONTAINER_REMOVE (cb.container, event_context);
+	  saHpiEventTable_delete_row (event_context);
 	  i--;
 	}
     }
@@ -841,6 +842,7 @@ delete_event_row (SaHpiDomainIdT domain_id,
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiEventTable_delete_row (ctx);
       event_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

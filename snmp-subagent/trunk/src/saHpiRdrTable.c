@@ -468,6 +468,7 @@ delete_rdr_row (SaHpiDomainIdT domain_id,
     {
 
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiRdrTable_delete_row (ctx);
       rdr_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

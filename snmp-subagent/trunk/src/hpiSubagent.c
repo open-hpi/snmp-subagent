@@ -607,7 +607,6 @@ main (int argc, char **argv)
       /* if you use select(), see snmp_select_info() in snmp_api(3) */
       /*     --- OR ---  */
       rc = agent_check_and_process (1);	/* 0 == don't block */
-	printf("KONRAD: %d\n", rc);
     }
 stop:
   /* at shutdown time */
