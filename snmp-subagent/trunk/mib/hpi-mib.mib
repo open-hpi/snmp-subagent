@@ -6747,10 +6747,6 @@ saHpiFieldStatus        OBJECT-TYPE
                      notInService(2),
                      createAndWait(5),
                      destroy(6)
-    The RowStatus textual convention is used to manage the	
-    creation and deletion of conceptual rows, and is used as the
-    value of the SYNTAX clause for the status column of a
-    conceptual row (as described in Section 7.7.1 of [2].)
 
     The status column has four defined values:
 
