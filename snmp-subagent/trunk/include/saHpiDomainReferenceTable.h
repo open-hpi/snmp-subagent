@@ -143,6 +143,7 @@ struct sa_resource_table {
 #define DOMAIN_REF_INDEX_LEN 2
 
 int populate_drt(void);
+SaErrorT open_session_unspecified_domain(void);
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did);
 
 

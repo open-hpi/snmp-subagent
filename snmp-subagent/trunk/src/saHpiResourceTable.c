@@ -1383,7 +1383,6 @@ int populate_rpt(void) {
 		if (rpt_entry.ResourceCapabilities & 
 			SAHPI_CAPABILITY_MANAGED_HOTSWAP) 
 			populate_hot_swap(&rpt_entry);
-
 	}
 
 	DEBUGMSGTL ((AGENT, "populate_rpt. Exit (rc: %d).\n", rc));

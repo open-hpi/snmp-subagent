@@ -953,95 +953,92 @@ usage(char *applName)
 int
 main (int argc, char **argv)
 {
-  int agentx_subagent = AGENT_TRUE;
-  int c;
-  int rc = 0;
+	  int agentx_subagent = AGENT_TRUE;
+	  int c;
+	  int rc = 0;
+	
+	  pid_t child;
+	  /* change this if you want to be a SNMP master agent */
 
-  pid_t child;
-  /* change this if you want to be a SNMP master agent */
+	  while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
+	
+	    switch (c) {
+	
+	      case 'f':
+		do_fork = AGENT_TRUE;
+		   break;
+	
+	      case 'd':
+		debug_register_tokens (AGENT);
+		snmp_enable_stderrlog ();
+		snmp_set_do_debugging (1);
+	      break;
+	
+	      case 's':
+		do_syslog = AGENT_FALSE;
+	      break;
+	
+	      case 'C':
+		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+				       NETSNMP_DS_LIB_DONT_READ_CONFIGS,
+				       1);
+	      break;
+	
+	      case 'x':
+		netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+				      NETSNMP_DS_AGENT_X_SOCKET,
+				      optarg);
+	      break;
+	
+	      case 'h':
+	      default:
+		usage(argv[0]);
+		exit(1);
+	      break;
+	    }
+	  }
 
+	  init_snmp_logging ();
+	
+	  if (do_syslog == AGENT_TRUE) {
+	      snmp_enable_calllog ();
+	      snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
+	  }
+	  snmp_log (LOG_INFO, "Starting %s\n", version);
+	  /* we're an agentx subagent? */
+	  if (agentx_subagent) {
+	      /* make us a agentx client. */
+	      rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
+					   NETSNMP_DS_AGENT_ROLE, 1);
+	  }
+	
+	  /* initialize the agent library */
+	  rc = init_agent (AGENT);
+	  if (rc != 0) {
+	      snmp_log (LOG_ERR, "Could not initialize connection to SNMP daemon. \n"
+			"Perhaps you are running %s as non-root?\n", argv[0]);
+	      exit (rc);
+	  }
 
-  while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
-
-    switch (c) {
-
-      case 'f':
-        do_fork = AGENT_TRUE;
-	   break;
-
-      case 'd':
-        debug_register_tokens (AGENT);
-        snmp_enable_stderrlog ();
-        snmp_set_do_debugging (1);
-      break;
-
-      case 's':
-        do_syslog = AGENT_FALSE;
-      break;
-
-      case 'C':
-        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
-                               NETSNMP_DS_LIB_DONT_READ_CONFIGS,
-                               1);
-      break;
-
-      case 'x':
-        netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-                              NETSNMP_DS_AGENT_X_SOCKET,
-                              optarg);
-      break;
-
-      case 'h':
-      default:
-        usage(argv[0]);
-        exit(1);
-      break;
-    }
-  }
-
-  init_snmp_logging ();
-
-  if (do_syslog == AGENT_TRUE)
-    {
-      snmp_enable_calllog ();
-      snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
-    }
-  snmp_log (LOG_INFO, "Starting %s\n", version);
-  /* we're an agentx subagent? */
-  if (agentx_subagent)
-    {
-      /* make us a agentx client. */
-      rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
-				   NETSNMP_DS_AGENT_ROLE, 1);
-    }
-
-  /* initialize the agent library */
-  rc = init_agent (AGENT);
-  if (rc != 0)
-    {
-      snmp_log (LOG_ERR, "Could not initialize connection to SNMP daemon. \n"
-		"Perhaps you are running %s as non-root?\n", argv[0]);
-      exit (rc);
-    }
-
-  /* Read configuration information here, before we initialize */
-
-  snmpd_register_config_handler (TRAPS_TOKEN,
-				 hpiSubagent_parse_config_traps,
-				 NULL,
-				 "hpiSubagent on/off switch for sending events upon startup");
-
-  snmpd_register_config_handler (INTERVAL_TOKEN,
-				 hpiSubagent_parse_config_interval,
-				 NULL,
-				 "hpiSubagent time in seconds before HPI API is queried for information.");
-
-  snmpd_register_config_handler (MAX_EVENT_TOKEN,
-				 hpiSubagent_parse_config_max_event,
-				 NULL,
-				 "hpiSubagent MAX number of rows for Events.");
+	  /* Read configuration information here, before we initialize */
+	
+	  snmpd_register_config_handler (TRAPS_TOKEN,
+					 hpiSubagent_parse_config_traps,
+					 NULL,
+					 "hpiSubagent on/off switch for sending events upon startup");
+	
+	  snmpd_register_config_handler (INTERVAL_TOKEN,
+					 hpiSubagent_parse_config_interval,
+					 NULL,
+					 "hpiSubagent time in seconds before HPI API is queried for information.");
+	
+	  snmpd_register_config_handler (MAX_EVENT_TOKEN,
+					 hpiSubagent_parse_config_max_event,
+					 NULL,
+					 "hpiSubagent MAX number of rows for Events.");
 
 	/* Initialize HPI library*/
+	open_session_unspecified_domain();
 	saHpiDiscover( get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID) );
 
 	init_snmp (AGENT);
