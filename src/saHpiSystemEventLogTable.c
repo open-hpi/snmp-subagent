@@ -153,6 +153,7 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 	      if (!sel_context)
 		{
 		  // New entry. Add it
+		  DEBUGMSGTL((AGENT,"1 MEMORY"));
 		  sel_context =
 		    saHpiSystemEventLogTable_create_row (&sel_index);
 		}
@@ -167,7 +168,7 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 							   sel_context)
 		  == AGENT_NEW_ENTRY)
 		{
-
+		DEBUGMSGTL((AGENT,"2 MEMORY"));
 		  CONTAINER_INSERT (cb.container, sel_context);
 		  event_log_entries = CONTAINER_SIZE (cb.container);
 		}
@@ -1885,10 +1886,13 @@ saHpiSystemEventLogTable_get_value (netsnmp_request_info * request,
 
     case COLUMN_SAHPISYSTEMEVENTLOGDELETE:
 	    /** RowStatus = ASN_INTEGER */
+      /*
       snmp_set_var_typed_value (var, ASN_INTEGER,
 				(char *) &context->
 				saHpiSystemEventLogDelete,
 				sizeof (context->saHpiSystemEventLogDelete));
+	*/
+      return SNMP_ERR_GENERR;
       break;
 
     default:

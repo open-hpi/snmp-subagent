@@ -1973,9 +1973,12 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 
     case COLUMN_SAHPIEVENTDELETE:
 	    /** RowStatus = ASN_INTEGER */
+      /*
       snmp_set_var_typed_value (var, ASN_INTEGER,
 				(char *) &context->saHpiEventDelete,
 				sizeof (context->saHpiEventDelete));
+	*/
+      return SNMP_ERR_GENERR;
       break;
 
     default:
