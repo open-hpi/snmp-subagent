@@ -208,6 +208,9 @@ modify_saHpiSensorReadingNominalTable_row (SaHpiDomainIdT domain_id,
 	hash = 1;		/* Need this - we consider hash
 				 * values of '0' uninitialized */
       ctx->hash = hash;
+      ctx->resource_id = resource_id;
+      ctx->domain_id = domain_id;
+      ctx->sensor_id = sensor_num;
 
 
       build_reading_strings (reading,
@@ -282,7 +285,10 @@ static int
 	  src->saHpiSensorReadingNominalEventStatus_len);
   dst->saHpiSensorReadingNominalEventStatus_len =
     src->saHpiSensorReadingNominalEventStatus_len;
-
+ dst->resource_id = src->resource_id;
+    dst->domain_id = src->domain_id;
+    dst->sensor_id = src->sensor_id;
+    dst->hash = src->hash;
   return 0;
 }
 

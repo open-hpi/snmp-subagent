@@ -37,6 +37,17 @@
 #include <saHpiSensorReadingNormalMaxTable.h>
 #include <saHpiSensorReadingNormalMinTable.h>
 
+#include <saHpiSensorThdLowCriticalTable.h>
+#include <saHpiSensorThdLowMinorTable.h>
+#include <saHpiSensorThdLowMajorTable.h>
+
+#include <saHpiSensorThdUpCriticalTable.h>
+#include <saHpiSensorThdUpMinorTable.h>
+#include <saHpiSensorThdUpMajorTable.h>
+
+#include <saHpiSensorThdPosHysteresisTable.h>
+#include <saHpiSensorThdNegHysteresisTable.h>
+
 #include <hpiSubagent.h>
 #include <alarm.h>
 #include <stdio.h>
@@ -417,16 +428,21 @@ build_reading_strings (SaHpiSensorReadingT * reading,
   char format[SENSOR_READING_MAX_LEN];
 
 
-  *values_present = reading->ValuesPresent + 1;
-  if (reading->ValuesPresent & SAHPI_SRF_RAW)
-    *raw_reading = reading->Raw;
-  else
-    *raw_reading = 0;
+  if (values_present) 
+    *values_present = reading->ValuesPresent + 1;
+  if (raw_reading) {
+    if (reading->ValuesPresent & SAHPI_SRF_RAW)
+      *raw_reading = reading->Raw;
+    else
+      *raw_reading = 0;
+  }
+  if (interpreted_reading_len) 
+    *interpreted_reading_len = 0;
 
-  *interpreted_reading_len = 0;
-  *event_status_len = 0;
-  *event_status = 0;
-
+  if (event_status_len || event_status) {
+    *event_status_len = 0;
+    *event_status = 0;
+  }
 
   /* 
    *       SaHpiSensorInterpretedT     Interpreted;
@@ -438,10 +454,12 @@ build_reading_strings (SaHpiSensorReadingT * reading,
 
       if (reading->Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER)
 	{
-	  memcpy (interpreted_reading,
-		  &reading->Interpreted.Value.SensorBuffer,
-		  SAHPI_SENSOR_BUFFER_LENGTH);
-	  *interpreted_reading_len = SAHPI_SENSOR_BUFFER_LENGTH;
+	  if (interpreted_reading) {
+	    memcpy (interpreted_reading,
+		    &reading->Interpreted.Value.SensorBuffer,
+		    SAHPI_SENSOR_BUFFER_LENGTH);
+	    *interpreted_reading_len = SAHPI_SENSOR_BUFFER_LENGTH;
+	  }
 	}
 
       else
@@ -480,17 +498,17 @@ build_reading_strings (SaHpiSensorReadingT * reading,
 	   *
 	   * Any ideas?
 	   */
-
-	  switch (reading->Interpreted.Type)
-	    {
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorInt8);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-	      *interpreted_reading_len =
+	  if (interpreted_reading) {
+	    switch (reading->Interpreted.Type)
+	      {
+	      case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
+		*interpreted_reading_len =
+		  snprintf (interpreted_reading,
+			    interpreted_reading_max,
+			    format, reading->Interpreted.Value.SensorInt8);
+		break;
+	      case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+		*interpreted_reading_len =
 		snprintf (interpreted_reading,
 			  interpreted_reading_max,
 			  format, reading->Interpreted.Value.SensorInt16);
@@ -530,22 +548,22 @@ build_reading_strings (SaHpiSensorReadingT * reading,
 	      break;
 	    }
 
-	  DEBUGMSGTL ((AGENT, "KONRAD: %d [%s]\n", *interpreted_reading_len,
-		       interpreted_reading));
 	  *interpreted_reading_len =
 	    (*interpreted_reading_len >
 	     interpreted_reading_max) ? interpreted_reading_max :
 	    *interpreted_reading_len;
 
-
+	  }
 	}
     }
   if (reading->ValuesPresent & SAHPI_SRF_EVENT_STATE)
     {
-      *sensor_status = reading->EventStatus.SensorStatus + 1;
-      build_state_string (sensor_category,
-			  reading->EventStatus.EventStatus,
-			  event_status, event_status_len, event_status_max);
+      if (sensor_status)
+	*sensor_status = reading->EventStatus.SensorStatus + 1;
+      if (event_status || event_status_len) 
+	build_state_string (sensor_category,
+			    reading->EventStatus.EventStatus,
+			    event_status, event_status_len, event_status_max);
     }
   return AGENT_ERR_NOERROR;
 }
@@ -1154,6 +1172,17 @@ main (int argc, char **argv)
   initialize_table_saHpiSensorReadingNominalTable ();
   initialize_table_saHpiSensorReadingNormalMaxTable ();
   initialize_table_saHpiSensorReadingNormalMinTable ();
+
+  initialize_table_saHpiSensorThdLowCriticalTable ();
+  initialize_table_saHpiSensorThdLowMajorTable ();
+  initialize_table_saHpiSensorThdLowMinorTable ();
+
+  initialize_table_saHpiSensorThdUpCriticalTable ();
+  initialize_table_saHpiSensorThdUpMajorTable ();
+  initialize_table_saHpiSensorThdUpMinorTable ();
+
+  initialize_table_saHpiSensorThdNegHysteresisTable ();
+  initialize_table_saHpiSensorThdPosHysteresisTable ();
 
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
