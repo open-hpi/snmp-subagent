@@ -29,6 +29,7 @@
 #include <saHpiHotSwapTable.h>
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiEventTable.h>
+
 #include <hpiSubagent.h>
 #include <alarm.h>
 #include <stdio.h>
