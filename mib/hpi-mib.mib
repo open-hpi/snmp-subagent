@@ -194,7 +194,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
 -- RPT Entry
 --
 
-saHpiDomainInfoCount OBJECT-TYPE
+saHpiDomainInfoEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -741,7 +741,7 @@ saHpiDrtIsPeer OBJECT-TYPE
         ::= {saHpiDrtEntry 3}
 	
 
-saHpiDatCount OBJECT-TYPE
+saHpiDatEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
