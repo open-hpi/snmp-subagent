@@ -104,43 +104,390 @@
 #include <saHpiAnnouncementEventLogTable.h>
 
 
-
-/*
- * Internal prototypes
- */
-static void usage(char *applName);
-
-
 /*
  * Internal data for the sub-agent.
  */
 static int keep_running;
 static int session_avail = AGENT_FALSE;
-//static SaHpiSessionIdT session_id;
-//static SaHpiRptInfoT rpt_info;
 static SaErrorT err;
 
 static const char *version =
   "$Id$";
+
+
 /*
  * Configuration options. Changed by config file.
  */
+#define REDISCOVER_COUNT_MAX 10;
 
 int send_traps = AGENT_FALSE;
 static int send_traps_on_startup = AGENT_FALSE;
 
-// Check for information every x seconds.
-int alarm_interval = 10;
+int alarm_interval = 10; // Check for information every x seconds. 
 
-#define REDISCOVER_COUNT_MAX 10;
 static int rediscover_count = 0;
-// Max EVENT rows.
-int MAX_EVENT_ENTRIES = 512;
+int MAX_EVENT_ENTRIES = 512; // Max EVENT rows. 
 
 //Use syslog 
 static int do_syslog = AGENT_TRUE;
 static int do_fork = AGENT_FALSE;
 
+/*
+static int send_traps_on_startup = AGENT_FALSE;
+int alarm_interval = 10;
+MAX_EVENT_ENTRIES = 512;
+static int do_syslog = AGENT_TRUE;
+static int do_fork = AGENT_FALSE;
+int send_traps = AGENT_FALSE;
+*/
+/*
+ * Internal prototypes
+ */
+static void usage(char *applName);
+
+static RETSIGTYPE stop_server (int a)
+{
+  keep_running = 0;
+}
+
+
+void hpiSubagent_parse_config_traps (const char *token, char *cptr)
+{
+  int x = -1;
+  char buf[BUFSIZ];
+
+  if (!strncasecmp (cptr, "on", 2) ||
+      !strncasecmp (cptr, "yes", 3) || !strncasecmp (cptr, "true", 4))
+    {
+      x = AGENT_TRUE;
+      snmp_log (LOG_INFO, "Sending EVENTS during startup.\n");
+    }
+  else if (!strncasecmp (cptr, "off", 3) ||
+	   !strncasecmp (cptr, "no", 2) || !strncasecmp (cptr, "false", 5))
+    {
+      x = AGENT_FALSE;
+      snmp_log (LOG_INFO, "Not sending events during startup.\n");
+    }
+
+  if ((x != AGENT_TRUE) && (x != AGENT_FALSE))
+    {
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_traps, '%s' unrecognized", cptr);
+      config_perror (buf);
+    }
+  else
+    {
+
+      send_traps_on_startup = x;
+    }
+}
+
+void hpiSubagent_parse_config_interval (const char *token, char *cptr)
+{
+  int x = atoi (cptr);
+  char buf[BUFSIZ];
+
+  if (x < -1)
+    {
+
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_interval, '%s' unrecognized", cptr);
+      config_perror (buf);
+    }
+  else
+    {
+      snmp_log (LOG_INFO, "Checking HPI infrastructure every %d seconds.\n",
+		x);
+      alarm_interval = x;
+    }
+}
+void hpiSubagent_parse_config_max_event (const char *token, char *cptr)
+{
+  int x = atoi (cptr);
+  char buf[BUFSIZ];
+
+  if (x < -1)
+    {
+
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_max_event, '%s' unrecognized", cptr);
+      config_perror (buf);
+    }
+  else
+    {
+      snmp_log (LOG_INFO, "Max Event rows %d.\n", x);
+      MAX_EVENT_ENTRIES = x;
+    }
+}
+
+void usage(char *applName)
+{
+  printf("Usage: %s [OPTION]...\n", applName);
+  printf("\n");
+  printf("Options:\n");
+  printf("  -d            enables debug mode\n");
+  printf("  -f            enables forking\n");
+  printf("  -s            disables logging via syslog facility\n");
+  printf("  -C            do not read default SNMP configuration files\n");
+  printf("  -x ADDRESS    use ADDRESS as AgentX address\n");  
+  printf("  -h            print this help and exit\n");
+
+  return;
+}
+
+int
+main (int argc, char **argv)
+{
+	  	int agentx_subagent = AGENT_TRUE;
+	  	int c;
+	  	int rc = 0;
+        	  
+	  	SaErrorT 	rv = SA_OK;
+		SaHpiVersionT	hpiVer;
+		SaHpiSessionIdT sessionid;
+		
+	  	pid_t child;
+	  	/* change this if you want to be a SNMP master agent */
+
+	  	while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
+	    switch (c) {
+	   	case 'f':
+			do_fork = AGENT_TRUE;
+		   	break;
+	
+	    case 'd':
+			debug_register_tokens (AGENT);
+			snmp_enable_stderrlog ();
+			snmp_set_do_debugging (1);
+	      	break;
+	
+	  	case 's':
+			do_syslog = AGENT_FALSE;
+	      	break;
+	
+	   	case 'C':
+			netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+				       NETSNMP_DS_LIB_DONT_READ_CONFIGS,
+				       1);
+	     	break;
+	
+	  	case 'x':
+			netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+				      NETSNMP_DS_AGENT_X_SOCKET,
+				      optarg);
+	      	break;
+	
+	 	case 'h':
+	    default:
+			usage(argv[0]);
+			exit(1);
+	      	break;
+	    }
+	  }
+
+	  init_snmp_logging ();
+	
+	  if (do_syslog == AGENT_TRUE) {
+	      snmp_enable_calllog ();
+	      snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
+	  }
+	  snmp_log (LOG_INFO, "Starting %s\n", version);
+	  /* we're an agentx subagent? */
+	  if (agentx_subagent) {
+	      /* make us a agentx client. */
+	      rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
+					   NETSNMP_DS_AGENT_ROLE, 1);
+	  }
+	
+	  /* initialize the agent library */
+	  rc = init_agent (AGENT);
+	  if (rc != 0) {
+	      snmp_log (LOG_ERR, "Could not initialize connection to SNMP daemon. \n"
+			"Perhaps you are running %s as non-root?\n", argv[0]);
+	      exit (rc);
+	  }
+
+	  /* Read configuration information here, before we initialize */
+	
+	  snmpd_register_config_handler (TRAPS_TOKEN,
+					 hpiSubagent_parse_config_traps,
+					 NULL,
+					 "hpiSubagent on/off switch for sending events upon startup");
+	
+	  snmpd_register_config_handler (INTERVAL_TOKEN,
+					 hpiSubagent_parse_config_interval,
+					 NULL,
+					 "hpiSubagent time in seconds before HPI API is queried for information.");
+	
+	  snmpd_register_config_handler (MAX_EVENT_TOKEN,
+					 hpiSubagent_parse_config_max_event,
+					 NULL,
+					 "hpiSubagent MAX number of rows for Events.");
+
+	/* 
+	 * Initialize HPI library
+	 */
+	DEBUGMSGTL ((AGENT, "saHpiVersionGet\n"));
+	hpiVer = saHpiVersionGet();
+	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));
+
+	DEBUGMSGTL ((AGENT, "saHpiSessionOpen\n"));
+	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
+	
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns %s\n",
+			oh_lookup_error(rv)));
+		exit(-1);
+	}
+   	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
+   		sessionid));
+
+	/*
+	 * Resource discovery
+	 */
+	DEBUGMSGTL ((AGENT, "saHpiDiscover\n"));	
+	rv = saHpiDiscover(sessionid);
+	
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, "saHpiDiscover returns %s\n",oh_lookup_error(rv)));
+		exit(-1);
+	}
+
+	init_snmp (AGENT);
+
+		/* Initialize subagent tables */
+		init_saHpiDomainInfoTable(); 
+	/*	init_saHpiDomainAlarmTable();
+		init_saHpiDomainReferenceTable();
+		
+		init_saHpiResourceTable();
+		init_saHpiRdrTable();
+		
+		init_saHpiAnnunciatorTable();
+		
+		init_saHpiInventoryTable();
+		init_saHpiFieldTable();
+		init_saHpiAreaTable();
+		
+		init_saHpiSensorTable();
+		init_saHpiCurrentSensorStateTable();
+		init_saHpiSensorReadingMaxTable();
+		init_saHpiSensorReadingMinTable();
+		init_saHpiSensorReadingNominalTable();
+		init_saHpiSensorReadingNormalMaxTable();
+		init_saHpiSensorReadingNormalMinTable();
+		init_saHpiSensorThdLowCriticalTable();
+		init_saHpiSensorThdLowMajorTable();
+		init_saHpiSensorThdLowMinorTable();
+		init_saHpiSensorThdNegHysteresisTable();
+		init_saHpiSensorThdPosHysteresisTable();
+		init_saHpiSensorThdUpCriticalTable();
+		init_saHpiSensorThdUpMajorTable();
+		init_saHpiSensorThdUpMinorTable();
+		
+		init_saHpiCtrlAnalogTable();
+		init_saHpiCtrlDigitalTable();
+		init_saHpiCtrlDiscreteTable();
+		init_saHpiCtrlOemTable();
+		init_saHpiCtrlStreamTable();
+		init_saHpiCtrlTextTable();
+		
+		init_saHpiWatchdogTable();
+		init_saHpiHotSwapTable();
+		init_saHpiAutoInsertTimeoutTable();
+		
+		init_saHpiEventTable();
+		init_saHpiResourceEventTable();
+		init_saHpiDomainEventTable();
+		init_saHpiSensorEventTable();
+		init_saHpiSensorEnableChangeEventTable();
+		init_saHpiHotSwapEventTable();
+		init_saHpiWatchdogEventTable();
+		init_saHpiSoftwareEventTable();
+		init_saHpiOEMEventTable();
+		init_saHpiUserEventTable();
+		init_saHpiAnnouncementTable();
+		
+		init_saHpiEventLogInfoTable();
+		init_saHpiEventLogTable();
+		init_saHpiResourceEventLogTable();
+		init_saHpiDomainEventLogTable();
+		init_saHpiSensorEventLogTable();
+		init_saHpiSensorEnableChangeEventLogTable();
+		init_saHpiHotSwapEventLogTable();
+		init_saHpiWatchdogEventLogTable();
+		init_saHpiSoftwareEventLogTable();
+		init_saHpiOEMEventLogTable();
+		init_saHpiUserEventLogTable();
+		init_saHpiAnnouncementEventLogTable();	
+*/
+		if (send_traps_on_startup == AGENT_TRUE)
+			send_traps = AGENT_TRUE;
+
+		/* after initialization populate tables */
+		populate_saHpiDomainInfoTable(sessionid);
+/*		populate_saHpiDomainAlarmTable();
+		poplulate_saHpiDomainReferenceTable();	
+		populate_saHpiResourceTable();
+		populate_saHpiRdrTable();		
+*/
+
+
+		dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
+  		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
+
+
+  if (init_alarm () != AGENT_ERR_NOERROR)
+    {
+      snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
+      rc = -1;
+      goto stop;
+    }
+
+  send_traps = AGENT_TRUE;
+  /* If we're going to be a snmp master agent, initial the ports */
+
+  if (!agentx_subagent)
+    init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
+
+  if (do_fork == AGENT_TRUE)
+    {
+      if ((child = fork ()) < 0)
+	{
+	  snmp_log (LOG_ERR, "Could not fork!\n");
+	  exit (-1);
+	}
+      if (child != 0)
+	exit (0);
+    }
+  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
+  keep_running = 1;
+  signal (SIGTERM, stop_server);
+  signal (SIGINT, stop_server);
+
+  /* you're main loop here... */
+  while (keep_running)
+    {
+      /* if you use select(), see snmp_select_info() in snmp_api(3) */
+      /*     --- OR ---  */
+      rc = agent_check_and_process (1);	/* 0 == don't block */
+    }
+stop:
+
+  dbg("WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!");
+  //closeSaHpiSession();
+  /* at shutdown time */
+  snmp_log (LOG_INFO, "Stopping %s\n", version);
+  snmp_shutdown (AGENT);
+  
+  return rc;
+}
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+#if 0
 
 /*
  * Count of newly added RPT, RDR, Events and SEL entries since last  populate_ call
@@ -150,15 +497,6 @@ u_long rdr_new_entry_count;
 u_long rpt_new_entry_count;
 u_long event_new_entry_count;
 u_long sel_new_entry_count;
-
-static RETSIGTYPE
-stop_server (int a)
-{
-  keep_running = 0;
-}
-
-#if 0
-
 
 int
 build_full_oid (oid * prefix, size_t prefix_len,
@@ -886,339 +1224,4 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
   return rc;
 
 }
-
 #endif
-
-void
-hpiSubagent_parse_config_traps (const char *token, char *cptr)
-{
-  int x = -1;
-  char buf[BUFSIZ];
-
-  if (!strncasecmp (cptr, "on", 2) ||
-      !strncasecmp (cptr, "yes", 3) || !strncasecmp (cptr, "true", 4))
-    {
-      x = AGENT_TRUE;
-      snmp_log (LOG_INFO, "Sending EVENTS during startup.\n");
-    }
-  else if (!strncasecmp (cptr, "off", 3) ||
-	   !strncasecmp (cptr, "no", 2) || !strncasecmp (cptr, "false", 5))
-    {
-      x = AGENT_FALSE;
-      snmp_log (LOG_INFO, "Not sending events during startup.\n");
-    }
-
-  if ((x != AGENT_TRUE) && (x != AGENT_FALSE))
-    {
-	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_traps, '%s' unrecognized", cptr);
-      config_perror (buf);
-    }
-  else
-    {
-
-      send_traps_on_startup = x;
-    }
-}
-
-void
-hpiSubagent_parse_config_interval (const char *token, char *cptr)
-{
-  int x = atoi (cptr);
-  char buf[BUFSIZ];
-
-  if (x < -1)
-    {
-
-	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_interval, '%s' unrecognized", cptr);
-      config_perror (buf);
-    }
-  else
-    {
-      snmp_log (LOG_INFO, "Checking HPI infrastructure every %d seconds.\n",
-		x);
-      alarm_interval = x;
-    }
-}
-void
-hpiSubagent_parse_config_max_event (const char *token, char *cptr)
-{
-  int x = atoi (cptr);
-  char buf[BUFSIZ];
-
-  if (x < -1)
-    {
-
-	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_max_event, '%s' unrecognized", cptr);
-      config_perror (buf);
-    }
-  else
-    {
-      snmp_log (LOG_INFO, "Max Event rows %d.\n", x);
-      MAX_EVENT_ENTRIES = x;
-    }
-}
-
-void
-usage(char *applName)
-{
-  printf("Usage: %s [OPTION]...\n", applName);
-  printf("\n");
-  printf("Options:\n");
-  printf("  -d            enables debug mode\n");
-  printf("  -f            enables forking\n");
-  printf("  -s            disables logging via syslog facility\n");
-  printf("  -C            do not read default SNMP configuration files\n");
-  printf("  -x ADDRESS    use ADDRESS as AgentX address\n");  
-  printf("  -h            print this help and exit\n");
-
-  return;
-}
-
-int
-main (int argc, char **argv)
-{
-	  	int agentx_subagent = AGENT_TRUE;
-	  	int c;
-	  	int rc = 0;
-        	  
-	  	SaErrorT 	rv = SA_OK;
-		SaHpiVersionT	hpiVer;
-		SaHpiSessionIdT sessionid;
-		
-	  	pid_t child;
-	  	/* change this if you want to be a SNMP master agent */
-
-	  	while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
-	    switch (c) {
-	   	case 'f':
-			do_fork = AGENT_TRUE;
-		   	break;
-	
-	    case 'd':
-			debug_register_tokens (AGENT);
-			snmp_enable_stderrlog ();
-			snmp_set_do_debugging (1);
-	      	break;
-	
-	  	case 's':
-			do_syslog = AGENT_FALSE;
-	      	break;
-	
-	   	case 'C':
-			netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
-				       NETSNMP_DS_LIB_DONT_READ_CONFIGS,
-				       1);
-	     	break;
-	
-	  	case 'x':
-			netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
-				      NETSNMP_DS_AGENT_X_SOCKET,
-				      optarg);
-	      	break;
-	
-	 	case 'h':
-	    default:
-			usage(argv[0]);
-			exit(1);
-	      	break;
-	    }
-	  }
-
-	  init_snmp_logging ();
-	
-	  if (do_syslog == AGENT_TRUE) {
-	      snmp_enable_calllog ();
-	      snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
-	  }
-	  snmp_log (LOG_INFO, "Starting %s\n", version);
-	  /* we're an agentx subagent? */
-	  if (agentx_subagent) {
-	      /* make us a agentx client. */
-	      rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
-					   NETSNMP_DS_AGENT_ROLE, 1);
-	  }
-	
-	  /* initialize the agent library */
-	  rc = init_agent (AGENT);
-	  if (rc != 0) {
-	      snmp_log (LOG_ERR, "Could not initialize connection to SNMP daemon. \n"
-			"Perhaps you are running %s as non-root?\n", argv[0]);
-	      exit (rc);
-	  }
-
-	  /* Read configuration information here, before we initialize */
-	
-	  snmpd_register_config_handler (TRAPS_TOKEN,
-					 hpiSubagent_parse_config_traps,
-					 NULL,
-					 "hpiSubagent on/off switch for sending events upon startup");
-	
-	  snmpd_register_config_handler (INTERVAL_TOKEN,
-					 hpiSubagent_parse_config_interval,
-					 NULL,
-					 "hpiSubagent time in seconds before HPI API is queried for information.");
-	
-	  snmpd_register_config_handler (MAX_EVENT_TOKEN,
-					 hpiSubagent_parse_config_max_event,
-					 NULL,
-					 "hpiSubagent MAX number of rows for Events.");
-
-	/* 
-	 * Initialize HPI library
-	 */
-	DEBUGMSGTL ((AGENT, "saHpiVersionGet\n"));
-	hpiVer = saHpiVersionGet();
-	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));
-
-	DEBUGMSGTL ((AGENT, "saHpiSessionOpen\n"));
-	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
-	
-	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns %s\n",
-			oh_lookup_error(rv)));
-		exit(-1);
-	}
-   	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
-   		sessionid));
-
-	/*
-	 * Resource discovery
-	 */
-	DEBUGMSGTL ((AGENT, "saHpiDiscover\n"));	
-	rv = saHpiDiscover(sessionid);
-	
-	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "saHpiDiscover returns %s\n",oh_lookup_error(rv)));
-		exit(-1);
-	}
-
-	init_snmp (AGENT);
-
-	/* Initialize subagent tables */
-	init_saHpiDomainInfoTable(); 
-/*	init_saHpiDomainAlarmTable();
-	init_saHpiDomainReferenceTable();
-	
-	init_saHpiResourceTable();
-	init_saHpiRdrTable();
-	
-	init_saHpiAnnunciatorTable();
-	
-	init_saHpiInventoryTable();
-	init_saHpiFieldTable();
-	init_saHpiAreaTable();
-	
-	init_saHpiSensorTable();
-	init_saHpiCurrentSensorStateTable();
-	init_saHpiSensorReadingMaxTable();
-	init_saHpiSensorReadingMinTable();
-	init_saHpiSensorReadingNominalTable();
-	init_saHpiSensorReadingNormalMaxTable();
-	init_saHpiSensorReadingNormalMinTable();
-	init_saHpiSensorThdLowCriticalTable();
-	init_saHpiSensorThdLowMajorTable();
-	init_saHpiSensorThdLowMinorTable();
-	init_saHpiSensorThdNegHysteresisTable();
-	init_saHpiSensorThdPosHysteresisTable();
-	init_saHpiSensorThdUpCriticalTable();
-	init_saHpiSensorThdUpMajorTable();
-	init_saHpiSensorThdUpMinorTable();
-	
-	init_saHpiCtrlAnalogTable();
-	init_saHpiCtrlDigitalTable();
-	init_saHpiCtrlDiscreteTable();
-	init_saHpiCtrlOemTable();
-	init_saHpiCtrlStreamTable();
-	init_saHpiCtrlTextTable();
-	
-	init_saHpiWatchdogTable();
-	init_saHpiHotSwapTable();
-	init_saHpiAutoInsertTimeoutTable();
-	
-	init_saHpiEventTable();
-	init_saHpiResourceEventTable();
-	init_saHpiDomainEventTable();
-	init_saHpiSensorEventTable();
-	init_saHpiSensorEnableChangeEventTable();
-	init_saHpiHotSwapEventTable();
-	init_saHpiWatchdogEventTable();
-	init_saHpiSoftwareEventTable();
-	init_saHpiOEMEventTable();
-	init_saHpiUserEventTable();
-	init_saHpiAnnouncementTable();
-	
-	init_saHpiEventLogInfoTable();
-	init_saHpiEventLogTable();
-	init_saHpiResourceEventLogTable();
-	init_saHpiDomainEventLogTable();
-	init_saHpiSensorEventLogTable();
-	init_saHpiSensorEnableChangeEventLogTable();
-	init_saHpiHotSwapEventLogTable();
-	init_saHpiWatchdogEventLogTable();
-	init_saHpiSoftwareEventLogTable();
-	init_saHpiOEMEventLogTable();
-	init_saHpiUserEventLogTable();
-	init_saHpiAnnouncementEventLogTable();	
-*/
-
-		if (send_traps_on_startup == AGENT_TRUE)
-			send_traps = AGENT_TRUE;
-
-		/* after initialization populate tables */
-		populate_saHpiDomainInfoTable();
-/*		populate_saHpiDomainAlarmTable();
-		poplulate_saHpiDomainReferenceTable();	
-		populate_saHpiResourceTable();
-		populate_saHpiRdrTable();		
-*/
-
-
-		dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
-  		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
-
-
-  if (init_alarm () != AGENT_ERR_NOERROR)
-    {
-      snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
-      rc = -1;
-      goto stop;
-    }
-
-  send_traps = AGENT_TRUE;
-  /* If we're going to be a snmp master agent, initial the ports */
-
-  if (!agentx_subagent)
-    init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
-
-  if (do_fork == AGENT_TRUE)
-    {
-      if ((child = fork ()) < 0)
-	{
-	  snmp_log (LOG_ERR, "Could not fork!\n");
-	  exit (-1);
-	}
-      if (child != 0)
-	exit (0);
-    }
-  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
-  keep_running = 1;
-  signal (SIGTERM, stop_server);
-  signal (SIGINT, stop_server);
-
-  /* you're main loop here... */
-  while (keep_running)
-    {
-      /* if you use select(), see snmp_select_info() in snmp_api(3) */
-      /*     --- OR ---  */
-      rc = agent_check_and_process (1);	/* 0 == don't block */
-    }
-stop:
-
-  dbg("WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!");
-  //closeSaHpiSession();
-  /* at shutdown time */
-  snmp_log (LOG_INFO, "Stopping %s\n", version);
-  snmp_shutdown (AGENT);
-  
-  return rc;
-}

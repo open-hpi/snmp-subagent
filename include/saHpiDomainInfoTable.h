@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <SaHpi.h>
+
         /** Index saHpiDomainId is internal */
 
 typedef struct saHpiDomainInfoTable_context_s {
@@ -109,7 +111,7 @@ typedef struct saHpiDomainInfoTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-void populate_saHpiDomainInfoTable(void);
+void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * function declarations
