@@ -8046,7 +8046,7 @@ saHpiCurrentSensorStateDeassertEventMask  OBJECT-TYPE
 	If the sensor deassert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
-	"Derived from SAI-HPI-B.01.01 page 7.2.13 and 7.2.14."
+	"Derived from SAI-HPI-B.01.01 sections 7.2.13 and 7.2.14."
         ::= {saHpiCurrentSensorStateEntry 8}
 
         
@@ -10000,7 +10000,7 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         DESCRIPTION
         "Sensor enable change event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-B.01.01 pages 7.2.9 and 7.2.10."
+        "Derived from typedefs in SAI-HPI-B.01.01 sections 7.2.9 and 7.2.10."
         ::= { hpiNotifications 2 }
 
 saHpiResourceNotifications NOTIFICATION-TYPE
