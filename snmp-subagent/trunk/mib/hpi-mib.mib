@@ -7134,7 +7134,8 @@ saHpiWatchdogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table of watchdog  resource data records."
+        DESCRIPTION     "Table of watchdog  information including watchdog
+	RDR data."
         ::= {hpiResources 10}
 
 saHpiWatchdogEntry OBJECT-TYPE
