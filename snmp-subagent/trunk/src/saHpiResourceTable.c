@@ -1303,7 +1303,9 @@ int populate_rpt(void) {
 			rpt_ctx->saHpiResourceEntityPath_len = 
 				res_cap_buf.DataLength;
 		} else {
+			rc = -1;
 			dbg("ERROR: saHpiResourceCapabilities, populate_rpt");
+			break;
 		}
 
 		/* saHpiResourceHotSwapCapabilities */
@@ -1375,6 +1377,8 @@ int populate_rpt(void) {
 		
 		/* commit/add */
 		CONTAINER_INSERT(cb.container, rpt_ctx);
+
+		populate_hot_swap(&rpt_entry);
 
 	}
 
