@@ -306,4 +306,27 @@ functions is the responsibilty of the user (more on this in later sections):
 	</note>
       </sect2>
  </sect1>
+
+ <sect1>
+  <title>Compare function: netSnmpIETFWGTable_cmp</title>
+
+	<para>
+	The compare function is only used if <emphasis>netSnmpIETFWGTable_IDX2
+	</emphasis> is defined. This compare function is used by NetSNMP API
+	when rows are being deleted. If this function is not enabled, the
+	NetSNMP API will use its own generic compare function - which compares
+	index tuples and returns the answer based on ascending order.
+	</para>
+	<para>
+	The commented out example code demonstrates how to implement this
+	function.
+	</para>
+ </sect1>
+
+ <sect1>
+   <title>netSnmpIETFWGTable_get</title>
+
+	<para>
+	</para> 
+ </sect1>
 </chapter>
