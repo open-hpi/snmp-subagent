@@ -98,7 +98,7 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 				  oid * rpt_oid, size_t rpt_oid_len,
 				  saHpiHotSwapTable_context * ctx)
 {
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   int rc;
   SaHpiSessionIdT session_id;
@@ -128,6 +128,13 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id ==  rpt_entry->ResourceId) && 
+	      (ctx->domain_id == rpt_entry->DomainId)) {
+		  DEBUGMSGTL((AGENT,"Updating HotSwap entry [%d, %d]\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId));
+		  update_entry = MIB_TRUE;
+	   }
 	}
 
       if (hash == 0)
@@ -261,6 +268,8 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
       ctx->saHpiHotSwapRTP_len = rpt_oid_len * sizeof (oid);
       memcpy (ctx->saHpiHotSwapRTP, rpt_oid, ctx->saHpiHotSwapRTP_len);
 
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
   return AGENT_ERR_NULL_DATA;

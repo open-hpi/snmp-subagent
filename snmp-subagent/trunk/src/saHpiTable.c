@@ -461,7 +461,7 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
 			   size_t * var_len, oid ** var_trap_oid)
 {
 
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   int len;
   // Make sure they are valid.
@@ -489,6 +489,15 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->saHpiDomainID == entry->DomainId) &&
+	      (ctx->saHpiResourceID == entry->ResourceId) &&
+	      (ctx->saHpiEntryID == entry->EntryId)) {
+		  update_entry = MIB_TRUE;
+		  DEBUGMSGTL((AGENT,"Updating RPT entry [%d, %d, %d]\n",
+				  entry->DomainId,
+				  entry->ResourceId,
+				  entry->EntryId));
+	     }
 	}
 
       if (hash == 0)
@@ -567,7 +576,8 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       *var_len = RPT_NOTIF_COUNT;
       *var_trap_oid = (oid *) & saHpiResourceNotification_oid;
 
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 

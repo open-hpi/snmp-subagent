@@ -398,7 +398,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 				trap_vars ** var, size_t * var_len,
 				oid ** var_trap_oid)
 {
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   SaHpiSensorEventT sensor;
   SaHpiSensorReadingT reading;
@@ -425,6 +425,16 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id== rpt_entry->ResourceId) &&
+	      (ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->saHpiEventIndex == entry_id)) {
+		  DEBUGMSGTL((AGENT,"Updating Event entry [%d, %d, %d].\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  entry_id));
+
+		  update_entry = MIB_TRUE;
+	   }
 	}
 
       if (hash == 0)
@@ -807,7 +817,8 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	  *var_trap_oid = saHpiUserNotification_oid;
 
 	}
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
   return AGENT_ERR_NULL_DATA;

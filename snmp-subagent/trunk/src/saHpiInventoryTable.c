@@ -349,7 +349,7 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 				    oid * rdr_entry, size_t rdr_entry_oid_len,
 				    saHpiInventoryTable_context * ctx)
 {
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   SaHpiInventDataRecordT data;
   long len;
@@ -376,6 +376,17 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id == rpt_entry->ResourceId) && 
+	      (ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->saHpiInventoryEirId == entry->EirId) &&
+	      (ctx->saHpiInventoryIndex == count)) {
+		  DEBUGMSGTL((AGENT,"Updating inventory entry [%d, %d, %d, %d]\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  entry->EirId,
+					  count));
+		  update_entry = MIB_TRUE;
+	    }
 	}
 
       if (hash == 0)
@@ -387,6 +398,7 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
       ctx->saHpiInventoryRDR_len = rdr_entry_oid_len * sizeof (oid);
       memcpy (ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
       ctx->saHpiInventoryEirId = entry->EirId;
+      ctx->saHpiInventoryIndex = count;
 
       ctx->saHpiInventoryAttributes_len = 0;
       memset (ctx->saHpiInventoryAttributes, 0x00,
@@ -491,6 +503,8 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 	    }
 
 	}
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 
