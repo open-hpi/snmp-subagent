@@ -54,6 +54,7 @@ static u_long sensor_count = 0;
 #define SENSOR_THD_UP_HYSTERESIS 6
 #define SENSOR_THD_LOW_HYSTERESIS 7
 #define SENSOR_THD_COUNT 8
+
 static sensor_threshold_to_mib sensor_thd[] = {
   {NULL, SAHPI_STM_LOW_MINOR, POS_LOW_MINOR},
   {NULL, SAHPI_STM_LOW_MAJOR, POS_LOW_MAJOR},
@@ -71,7 +72,6 @@ static sensor_threshold_to_mib sensor_thd[] = {
 #define SENSOR_READING_NORMAL_MIN 2
 #define SENSOR_READING_NORMAL_MAX 3
 #define SENSOR_READING_NOMINAL 4
-
 #define SENSOR_READING_COUNT 5
 /*
  * This is quite location dependent.
@@ -136,7 +136,6 @@ populate_sensor(SaHpiSensorRecT *sensor,
     
     // Get Threshold Data
 
-// Get Inventory Data
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;
@@ -192,7 +191,7 @@ saHpiSensorTable_modify_context(
   SaHpiSensorThdDefnT thd;
   SaHpiSensorReadingT *reading;
 
-  DEBUGMSGTL((AGENT,"1:Sensor threshold: %x\n", sensor_threshold));
+  DEBUGMSGTL((AGENT,"Sensor threshold: %x\n", sensor_threshold));
   // Make sure they are valid.
   if (entry && ctx) {
     
@@ -282,7 +281,7 @@ saHpiSensorTable_modify_context(
     sensor_reading[SENSOR_READING_NORMAL_MAX].reading = &data.Range.NormalMax;
     sensor_reading[SENSOR_READING_NOMINAL].reading = &data.Range.Nominal;
 
-    // TEST. The dummy plugin doesn't have these values filled, so we made some up.
+    // TEST. The dummy plugin doesn't have these values filled, so we made some up to test the sub-agent.
     /*
       data.Range.Flags =  data.Range.Flags | SAHPI_SRF_NOMINAL;    
       data.Range.Nominal.ValuesPresent = SAHPI_SRF_INTERPRETED;
@@ -292,7 +291,7 @@ saHpiSensorTable_modify_context(
       data.Range.Flags = data.Range.Flags | SAHPI_SRF_NORMAL_MIN;
       data.Range.NormalMin.ValuesPresent = SAHPI_SRF_INTERPRETED;
       data.Range.NormalMin.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-      strncpy(data.Range.NormalMin.Interpreted.Value.SensorBuffer, "aaaabbbbcccc", 32);
+      strncpy(data.Range.NormalMin.Interpreted.Value.SensorBuffer, "aaaabbbbcccc", 12);
 
       data.Range.Flags = data.Range.Flags | SAHPI_SRF_NORMAL_MAX;
       data.Range.NormalMax.ValuesPresent = SAHPI_SRF_EVENT_STATE;
@@ -395,11 +394,12 @@ saHpiSensorTable_modify_context(
 void fill_sensor_threshold_info(saHpiSensorTable_context *ctx, 
 				SaHpiSensorThresholdsT *sensor_threshold) {
 
+  int i;
   DEBUGMSGTL((AGENT,"fill_sensor_threshold_info: Entry.\n"));
 
   if (sensor_threshold) {
     memset(ctx->saHpiSensorThresholdInterpreted, 0x00, THRESHOLD_RAW_MAX);
-    memset( ctx->saHpiSensorThresholdRaw, 0x00, THRESHOLD_INTERPRETED_MAX);
+    memset(ctx->saHpiSensorThresholdRaw, 0x00, THRESHOLD_INTERPRETED_MAX);
     ctx->saHpiSensorThresholdInterpreted_len = 0;
     ctx->saHpiSensorThresholdRaw_len = 0;
 
@@ -411,141 +411,158 @@ void fill_sensor_threshold_info(saHpiSensorTable_context *ctx,
       &sensor_threshold->LowCritical;
     sensor_thd[SENSOR_THD_UP_MINOR].reading =
       &sensor_threshold->UpMinor;
-      
-    //   DEBUGMSGTL((AGENT,"Capability key is %d\n", ctx->saHpiSensorTholdCapabilities));
-    /*
-    if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) {
-      
-      ctx->saHpiSensorThresholdRaw_len = THRESHOLD_RAW_MAX;
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->LowCritical.Raw, 
-				POS_LOW_CRITICAL,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->LowMajor.Raw,
-				POS_LOW_MAJOR,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->LowMinor.Raw,
-				POS_LOW_MINOR,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->UpCritical.Raw,
-				POS_UP_CRITICAL,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->UpMajor.Raw,
-				POS_UP_MAJOR,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->UpMinor.Raw,
-				POS_UP_MINOR,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->PosThdHysteresis.Raw,
-				POS_POS_THD_HYSTERESIS,
-				ctx->saHpiSensorThresholdRaw);
-	UPDATE_CHAR_WITH_UINT32(sensor_threshold->NegThdHysteresis.Raw,
-				POS_NEG_THD_HYSTERESIS,
-				ctx->saHpiSensorThresholdRaw);
-
-      }
-      if (thd.TholdCapabilities & SAHPI_STC_INTERPRETED) {
-	ctx->saHpiSensorThresholdInterpreted_len = THRESHOLD_INTERPRETED_MAX;
-
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->LowCritical.Interpreted,
-				POS_LOW_CRITICAL,
-				ctx->saHpiSensorThresholdInterpreted);
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->LowMajor.Interpreted,
-				POS_LOW_MAJOR,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->LowMinor.Interpreted,
-				POS_LOW_MINOR,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->UpCritical.Interpreted,
-				POS_UP_CRITICAL,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->UpMajor.Interpreted,
-				POS_UP_MAJOR,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->UpMinor.Interpreted,
-				POS_UP_MINOR,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->PosThdHysteresis.Interpreted,
-				POS_POS_THD_HYSTERESIS,
-				ctx->saHpiSensorThresholdInterpreted)
-	UPDATE_CHAR_WITH_BUFFER(sensor_threshold->NegThdHysteresis.Interpreted,
-				POS_NEG_THD_HYSTERESIS,
-				ctx->saHpiSensorThresholdInterpreted)
-      }
-       DEBUGMSGTL((AGENT,"L: %d, L: %d\n", ctx->saHpiSensorThresholdInterpreted_len,
-		ctx->saHpiSensorThresholdRaw_len));
+    sensor_thd[SENSOR_THD_UP_MAJOR].reading =
+      &sensor_threshold->UpMajor;
+    sensor_thd[SENSOR_THD_UP_CRIT].reading =
+      &sensor_threshold->UpCritical;
+    sensor_thd[SENSOR_THD_UP_HYSTERESIS].reading =
+      &sensor_threshold->PosThdHysteresis;
+    sensor_thd[SENSOR_THD_LOW_HYSTERESIS].reading =
+      &sensor_threshold->NegThdHysteresis;
+    /* TEST
+       ctx->saHpiSensorThresholdDefnTholdCapabilities = SAHPI_STC_INTERPRETED;
+       sensor_threshold->LowMinor.Interpreted.Type= 0xFF;
+       sensor_threshold->UpCritical.Interpreted.Type = 0xAA;
+       strncpy(sensor_threshold->LowMinor.Interpreted.Value.SensorBuffer,
+       "aaaabbbbccccddddeeeeffffgggghhhhxzxzxzxzxz", 32);
+       strncpy(sensor_threshold->UpCritical.Interpreted.Value.SensorBuffer,
+       "aaaabbbbccccddddeeeeffffgggghhhhxzxzxzxzxzxzxz", 32);
     */
+    if  (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) {       
+      DEBUGMSGTL((AGENT,"Values are SAHPI_STC_RAW\n"));
+      for (i = 0; i< SENSOR_THD_COUNT; i++) {
+	// Normalize the data and put it in saHpiSensorThresholdRaw
+	sensor_thd[i].reading->Raw = htonl(sensor_thd[i].reading->Raw);
+	memcpy(ctx->saHpiSensorThresholdRaw + 
+	       (sensor_thd[i].pos * SIZEOF_UINT32),
+	       &sensor_thd[i].reading->Raw,
+	       SIZEOF_UINT32);
+	//DEBUGMSGTL((AGENT,"%d: Raw: %X at %X (base is %X)\n",
+	//	    i, sensor_thd[i].reading->Raw,
+	//    ctx->saHpiSensorThresholdRaw + 
+	//    (sensor_thd[i].pos * SIZEOF_UINT32),
+	//     ctx->saHpiSensorThresholdRaw));
+      }
+      // Set the lenght
+      ctx->saHpiSensorThresholdRaw_len = THRESHOLD_RAW_MAX;
+    }
+    // Can't do 'else' b/c its a bit flag.
+    if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_INTERPRETED) {      
+      DEBUGMSGTL((AGENT,"Values are SAHPI_STC_RAW\n"));
+      for (i = 0; i<SENSOR_THD_COUNT; i++) {
+	// Convert from our platform to network order
+	switch (sensor_thd[i].reading->Interpreted.Type) {
+	case  SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
+	case  SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+	  sensor_thd[i].reading->Interpreted.Value.SensorUint16 =
+	    htons( sensor_thd[i].reading->Interpreted.Value.SensorUint16);
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+	   sensor_thd[i].reading->Interpreted.Value.SensorUint32 =
+	    htonl(sensor_thd[i].reading->Interpreted.Value.SensorUint32);
+	   break;
+	default:
+	  break;
+	}
+	// Copy the type of data (uint8, 16, 32, float, etc)
+	ctx->saHpiSensorThresholdInterpreted[sensor_thd[i].pos * (SAHPI_SENSOR_BUFFER_LENGTH +1)] = 
+	  sensor_thd[i].reading->Interpreted.Type;
+	// Copy the data.
+	memcpy (ctx->saHpiSensorThresholdInterpreted + 1 +
+		(sensor_thd[i].pos * (1+SAHPI_SENSOR_BUFFER_LENGTH)),
+		sensor_thd[i].reading->Interpreted.Value.SensorBuffer,
+		SAHPI_SENSOR_BUFFER_LENGTH);
+	//DEBUGMSGTL((AGENT,"%d: Type: %X at %X (base is %X)\n",
+	//    i, sensor_thd[i].reading->Interpreted.Type,
+	//   ctx->saHpiSensorThresholdInterpreted + 
+	//   (sensor_thd[i].pos * 32) + 1,
+	//    ctx->saHpiSensorThresholdInterpreted));
+      }
+      ctx->saHpiSensorThresholdInterpreted_len = THRESHOLD_INTERPRETED_MAX;
+    }  
   }
+  DEBUGMSGTL((AGENT,"fill_sensor_threshold_info: Exit.\n"));
 }
+
 int set_sensor(saHpiSensorTable_context *ctx) {
 
   SaHpiSensorThresholdsT thd;
   SaHpiSessionIdT session_id;
   SaErrorT rc; 
+  int i;
+  
+
   DEBUGMSGTL((AGENT,"set_sensor: Entry.\n"));
   if (ctx) {
+    // Set up the table
+    sensor_thd[SENSOR_THD_LOW_MINOR].reading = 
+      &thd.LowMinor;
+    sensor_thd[SENSOR_THD_LOW_MAJOR].reading =
+      &thd.LowMajor;
+    sensor_thd[SENSOR_THD_LOW_CRIT].reading =
+      &thd.LowCritical;
+    sensor_thd[SENSOR_THD_UP_MINOR].reading =
+      &thd.UpMinor;
+    sensor_thd[SENSOR_THD_UP_MAJOR].reading =
+      &thd.UpMajor;
+    sensor_thd[SENSOR_THD_UP_CRIT].reading =
+      &thd.UpCritical;
+    sensor_thd[SENSOR_THD_UP_HYSTERESIS].reading =
+      &thd.PosThdHysteresis;
+    sensor_thd[SENSOR_THD_LOW_HYSTERESIS].reading =
+      &thd.NegThdHysteresis;
 
     memset(&thd, 0x00, sizeof(SaHpiSensorThresholdsT));
     // Check in saHpiSensorThresholdDefnWriteThold to see which
-    // values can be writen and only write those.
-    /*
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_CRIT) {
-      thd.LowCritical.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(LowCritical, POS_LOW_CRITICAL);
-      UPDATE_BUFFER_WITH_CHAR(LowCritical, POS_LOW_CRITICAL);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MINOR) {
-      thd.LowMinor.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(LowMinor, POS_LOW_MINOR);
-      UPDATE_BUFFER_WITH_CHAR(LowMinor, POS_LOW_MINOR);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MAJOR) {
-      thd.LowMajor.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(LowMajor, POS_LOW_MAJOR);
-      UPDATE_BUFFER_WITH_CHAR(LowMajor, POS_LOW_MAJOR);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_CRIT) {
-      thd.UpCritical.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(UpCritical, POS_UP_CRITICAL);
-      UPDATE_BUFFER_WITH_CHAR(UpCritical, POS_UP_CRITICAL);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MAJOR) {
-      thd.UpMajor.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(UpMajor, POS_UP_MAJOR);
-      UPDATE_BUFFER_WITH_CHAR(UpMajor, POS_UP_MAJOR);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MINOR) {
-      thd.UpMinor.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(UpMinor, POS_UP_MINOR);
-      UPDATE_BUFFER_WITH_CHAR(UpMinor, POS_UP_MINOR);
-    }
-
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_HYSTERESIS) {
-      thd.LowCritical.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(PosThdHysteresis, POS_POS_THD_HYSTERESIS);
-      UPDATE_BUFFER_WITH_CHAR(PosThdHysteresis, POS_POS_THD_HYSTERESIS);
-    }
-    if (ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_HYSTERESIS) {
-      thd.LowCritical.ValuesPresent = ctx->saHpiSensorThresholdDefnTholdCapabilities;
-
-      UPDATE_UINT32_WITH_CHAR(NegThdHysteresis, POS_NEG_THD_HYSTERESIS);
-      UPDATE_BUFFER_WITH_CHAR(NegThdHysteresis, POS_NEG_THD_HYSTERESIS);
-    }
-    */
+    // values can be put in 'thd' and only put those in
+    for (i = 0; i < SENSOR_THD_COUNT;i++) {
+      if (ctx->saHpiSensorThresholdDefnWriteThold & sensor_thd[i].bit) {
+	DEBUGMSGTL((AGENT,"%d: %X is writeable\n", i, sensor_thd[i].bit));
+	if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) {
+	  // Put the data in the SaHpiSensorThresholdsT.<name>.Raw	  
+	  memcpy(&sensor_thd[i].reading->Raw,
+		 ctx->saHpiSensorThresholdRaw + 
+		 (sensor_thd[i].pos * SIZEOF_UINT32),
+		 SIZEOF_UINT32);
+	  // Convert back to our platform type.
+	  sensor_thd[i].reading->Raw = ntohl(sensor_thd[i].reading->Raw);
+	  DEBUGMSGTL((AGENT,"SAHPI_STC_RAW: %X\n", sensor_thd[i].reading->Raw));
+	}
+	if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_INTERPRETED) {
+	  // Put the data in the SaHpiSensor.<name>.Intepreted		
+	  memcpy (&sensor_thd[i].reading->Interpreted.Value.SensorBuffer,
+		  ctx->saHpiSensorThresholdInterpreted + 1 +
+		  (sensor_thd[i].pos * (1+SAHPI_SENSOR_BUFFER_LENGTH)),
+		  SAHPI_SENSOR_BUFFER_LENGTH);
+	  // In the type.
+	  sensor_thd[i].reading->Interpreted.Type = 
+	    ctx->saHpiSensorThresholdInterpreted[sensor_thd[i].pos * (SAHPI_SENSOR_BUFFER_LENGTH +1)];
+	  // Convert from Network Order to our platform,.
+	  switch (sensor_thd[i].reading->Interpreted.Type) {
+	  case  SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
+	  case  SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+	    sensor_thd[i].reading->Interpreted.Value.SensorUint16 =
+	      ntohs( sensor_thd[i].reading->Interpreted.Value.SensorUint16);
+	    break;
+	  case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+	  case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+	    sensor_thd[i].reading->Interpreted.Value.SensorUint32 =
+	      ntohl(sensor_thd[i].reading->Interpreted.Value.SensorUint32);
+	    break;
+	  default:
+	    break;
+	  }
+	  DEBUGMSGTL((AGENT,"SAHPI_SRC_INTERPRETED.\n"));
+	}
+      }
+    }    
       // Get the seesion_id
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;
      
-    DEBUGMSGTL((AGENT,"Calling saHpiSensorThresholdsSet with %d\n", ctx->saHpiSensorIndex ));
-   
-    
+    DEBUGMSGTL((AGENT,"Calling saHpiSensorThresholdsSet with SensorNum: %d\n", ctx->saHpiSensorIndex ));
     rc = saHpiSensorThresholdsSet(session_id, 
 				ctx->resource_id,
 				ctx->saHpiSensorIndex,
@@ -555,6 +572,22 @@ int set_sensor(saHpiSensorTable_context *ctx) {
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
+
+    // Re-read the data. Should be exactly the same.      
+    DEBUGMSGTL((AGENT,"Calling SensorThresholdGet\n"));
+    memset(&thd, 0x00, sizeof(SaHpiSensorThresholdsT));
+    rc = saHpiSensorThresholdsGet(session_id,
+				  ctx->resource_id,
+				  ctx->saHpiSensorIndex,
+				  &thd);
+
+    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+    // Put the latest data.
+    fill_sensor_threshold_info(ctx, &thd);
+
     return AGENT_ERR_NOERROR;
   }
   DEBUGMSGTL((AGENT,"set_sensor: Exit.\n"));
@@ -1029,7 +1062,7 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc = SNMP_ERR_NOERROR;
-
+    int i;
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve2: Entry\n"));
     rg->rg_void = rg->list->ri;
 
@@ -1043,34 +1076,14 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
 
         case COLUMN_SAHPISENSORTHRESHOLDRAW:
 	  // If not defined as writeable, check to make sure its not modified
-	  /*
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MINOR)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_LOW_MINOR);
+	  for (i=0; i< SENSOR_THD_COUNT;i++) {
+	    if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & sensor_thd[i].bit)) { 
+	      // The data for which the write bit is not SET, is set to \0
+	      DEBUGMSGTL((AGENT,"%d: Setting %X to ZERO\n", i, var->val.string));
+	      memset(var->val.string + (sensor_thd[i].pos * SIZEOF_UINT32),
+		     0x00, SIZEOF_UINT32);
+	    }
 	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MAJOR)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_LOW_MAJOR);
-	  }
-	  
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_CRIT)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_LOW_CRITICAL);
-	  }
-
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MINOR)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_UP_MINOR);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MAJOR)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_UP_MAJOR);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_CRIT)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_UP_CRITICAL);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_HYSTERESIS)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx, POS_POS_THD_HYSTERESIS);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_HYSTERESIS)) {
-	    CHECK_THRESHOLD_RAW(row_ctx, undo_ctx,  POS_NEG_THD_HYSTERESIS);
-	  }
-	  */
 	  break;
 
         case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:

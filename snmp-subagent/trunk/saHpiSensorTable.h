@@ -33,33 +33,8 @@ extern          "C" {
   /*
    * Hardcoded values in macros.
    */
-#define UPDATE_CHAR_WITH_UINT32(val,pos,data) val = htonl(val);\
-memcpy((char *)(data+(pos*4)), &val, 4); 
-  //#define UPDATE_UINT32_WITH_CHAR(val,pos,data) memcpy(&val, (char *)(data+(pos*4)), 4); val = ntohl(val);
-#define UPDATE_UINT32_WITH_CHAR(val, pos) \
- memcpy(&thd.val.Raw, (char *)(ctx->saHpiSensorThresholdRaw + (pos*4)), 4);\
-  thd.val.Raw = ntohl(thd.val.Raw);
-
-#define UPDATE_CHAR_WITH_BUFFER(val,pos,data) \
- if ((val.Type == SAHPI_SENSOR_INTERPRETED_TYPE_UINT16)  || (val.Type == SAHPI_SENSOR_INTERPRETED_TYPE_INT16)) val.Value.SensorUint16=htons(val.Value.SensorUint16); \
-if ((val.Type == SAHPI_SENSOR_INTERPRETED_TYPE_UINT32) || (val.Type == SAHPI_SENSOR_INTERPRETED_TYPE_INT32)) val.Value.SensorUint32 = htonl(val.Value.SensorUint32); \
-DEBUGMSGTL((AGENT,"Copying %X to %x (base: %x, %x)\n", val, (data+(pos*33)), data, data+264));\
-data[pos*SAHPI_SENSOR_BUFFER_LENGTH] = val.Type; \
-memcpy((char *)(data+1+(pos*SAHPI_SENSOR_BUFFER_LENGTH)),val.Value.SensorBuffer, SAHPI_SENSOR_BUFFER_LENGTH); 
 
   
-#define UPDATE_BUFFER_WITH_CHAR(val, pos) memcpy(&thd.val.Interpreted.Value.SensorBuffer, (char *)(ctx->saHpiSensorThresholdInterpreted + 1 + (pos * SAHPI_SENSOR_BUFFER_LENGTH)), SAHPI_SENSOR_BUFFER_LENGTH); \
-thd.val.Interpreted.Type = ctx->saHpiSensorThresholdInterpreted[pos * SAHPI_SENSOR_BUFFER_LENGTH]; \
-if ((thd.val.Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_UINT16)  || (thd.val.Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_INT16)) \
-  thd.val.Interpreted.Value.SensorUint16=ntohs(thd.val.Interpreted.Value.SensorUint16); \
-if ((thd.val.Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_UINT32) || (thd.val.Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_INT32)) thd.val.Interpreted.Value.SensorUint32 = ntohl(thd.val.Interpreted.Value.SensorUint32); 
-  
-
-#define CHECK_THRESHOLD_RAW(r1, r2, pos) \
-if (r1->saHpiSensorThresholdRaw[pos*4] != r2->saHpiSensorThresholdRaw[pos*4]) rc =  SNMP_ERR_INCONSISTENTVALUE;
-
-#define CHECK_THRESHOLD_INTERPRETED(r1, r2, pos) \
-if (memcpy(r1->saHpiSensorThresholdInterpreted + (pos*SAHPI_SENSOR_BUFFER_LENGTH), r2->saHpiSensorThresholdInterpreted + (pos*SAHPI_SENSOR_BUFFER_LENGTH), SAHPI_SENSOR_BUFFER_LENGTH +1) != 0)  rc = SNMP_ERR_INCONSISTENTVALUE; 
 
 typedef  struct sensor_threshold_to_mib_s {
     SaHpiSensorReadingT* reading;

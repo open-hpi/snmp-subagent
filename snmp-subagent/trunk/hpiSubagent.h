@@ -166,13 +166,10 @@ SaErrorT rcSaHpi();
  * Note: If 'len' is set outside the boundary of 'data' this will 
  * segment fault your program.
  *
- * Parameters:
- *   [IN] void *data - pointer to the data
- *   [IN] int len - length of the data in bytes.
+ * @param *data  [IN] void *data - pointer to the data
+ * @param len  [IN] int len - length of the data in bytes.
  *
- * Return:
- *
- *  hash value. 
+ * @return hash value. 
  */
 long calculate_hash_value(void *data, int len);
 
@@ -202,12 +199,3 @@ int build_full_oid(oid *prefix, size_t prefix_len,
 		   oid *column, size_t column_len,
 		   netsnmp_index *index,
 		   oid *out_oid, size_t in_len, size_t *out_len);
-
-/*
- * Check the 'var' data for the correct values of TruthValue (as specified
- * in SMI-v2-TC).
- *
- * @param var the data
- * @return SNMP_ERR_NOERROR Data is fine
- * @return SNMP_ERR_BADVALUE Bad value.
- */
