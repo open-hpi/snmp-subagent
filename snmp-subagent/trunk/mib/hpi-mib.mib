@@ -1701,7 +1701,17 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Entity Path associated with status condition.
+        "Entity Path associated with alarm condition.
+	
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contains SAHPI_ENT_ prefixes they too cshall be 
+	removed.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -1709,7 +1719,6 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-
         ::= {saHpiDomainAlarmEntry 6}
 
 saHpiDomainAlarmCondSensorNum OBJECT-TYPE 
@@ -1818,9 +1827,9 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
 	wishing to delete all of the instances associated with
 	an existing conceptual row. This function allows the 
 	HPI MIB User to delete a single User Alarm from the 
-	Domain Alarm Table and User Event Table. 
-	Only User Alarms added to the DAT and User Event Table 
-	can be deleted. To delete a single, specific alarm, set the 
+	Domain Alarm Table. Note this has no efect on the 'User 
+	Event Table.'  Only User Alarms added to the DAT can be 
+	deleted. To delete a single, specific alarm, set the 
 	saHpiDomainAlarmId parameter to a value representing an 
 	actual User Alarm in the DAT."
         ::= {saHpiDomainAlarmEntry 14}
@@ -1946,20 +1955,18 @@ saHpiResourceEntityPath OBJECT-TYPE
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        If resource manages a FRU, entity path of the FRU.
-        If resource manages a single entity, entity path of 
-        that entity. 
-        If resource manages multiple entities, the entity path 
-        of the 'primary' entity managed by the resource.  
-        
-        Must be set to the same value in every domain which 
-        contains this resource.
-
-        This object converts HPI's saHpiEntityPathT structure. 
-	The canonical string is formed by removing the 
-	SAHPI_ENT_ prefix from the HPI types, and creating 
-	tuples for the entity types. 
+        DESCRIPTION     
+        "Entity Path associated with Resource.
+	
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contains SAHPI_ENT_ prefixes they too cshall be 
+	removed.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -4122,12 +4129,17 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION      
-        "Entity assoc. with status condition.
-
-        This object converts HPI's saHpiEntityPathT structure. 
-	The canonical string is formed by removing the 
-	SAHPI_ENT_ prefix from the HPI types, and creating 
-	tuples for the entity types. 
+        "Entity Path associated with Announcement.
+	
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contains SAHPI_ENT_ prefixes they too cshall be 
+	removed.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -4635,17 +4647,18 @@ saHpiRdrEntityPath OBJECT-TYPE
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        If resource manages a FRU, entity path of the FRU.
-        If resource manages a single entity, entity path of 
-        that entity. 
-        If resource manages multiple entities, the entity path 
-        of the 'primary' entity managed by the resource. 
+        DESCRIPTION     
+        "Entity Path associated with RDR.
 	
-        This object converts HPI's saHpiEntityPathT structure. 
-	The canonical string is formed by removing the 
-	SAHPI_ENT_ prefix from the HPI types, and creating 
-	tuples for the entity types.
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contains SAHPI_ENT_ prefixes they too cshall be 
+	removed.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
