@@ -1124,11 +1124,8 @@ saHpiDomainInfoEntry OBJECT-TYPE
         The value SAHPI_TIME_UNSPECIFIED indicates that the time of the 
         update cannot be determined. Otherwise, If the value is less
         than or equal to SAHPI_TIME_MAX_RELATIVE, then it is relative; if it is
-        greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute. 
+        greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute. "
         
-        The GUID is used to uniquely identify a domain. A GUID value of zero
-        is not valid and indicates that the domain does not have an
-        associated GUID."
         INDEX   { saHpiDomainId }
         ::= {saHpiDomainInfoTable 1}
 
@@ -1190,7 +1187,7 @@ saHpiDomainCapabilities OBJECT-TYPE
         AUTOINSERT_READ_ONLY
           Indicates that the domain auto insert timeout value is 
 	  read-only and may not be modified using the 
-	  saHpiHotSwapAutoInsertTimeoutSet columnar object.
+	  saHpiAutoTimeoutForInsert columnar object.
 
           "
 	::=   {saHpiDomainInfoEntry 2 }
@@ -2306,8 +2303,8 @@ saHpiAutoTimeoutTable OBJECT-TYPE
     DESCRIPTION
     "In support of saHpiAutoInsertTimeoutGet(), saHpiAutoInsertTimeoutSet()
     saHpiAutoExtractTimeoutGet(), and saHpiAutoExtractTimeoutGet()"
-    REFERENCE
-	"Derieved from SA-HPI-B.01.01 page 141...146."
+    
+    REFERENCE "Derieved from SA-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
 
 saHpiAutoTimeoutEntry OBJECT-TYPE
@@ -2316,8 +2313,8 @@ saHpiAutoTimeoutEntry OBJECT-TYPE
 	STATUS 		current
 	DESCRIPTION
 	"Table of domains with a timeout for how long to wait before 
-the default auto-insertion policy is invoked on a resource within 
-a specific domain."
+	the default auto-insertion policy is invoked on a resource within 
+	a specific domain."
 	INDEX { saHpiDomainId }
 	::= { saHpiAutoTimeoutTable 1 }
 
@@ -2326,35 +2323,36 @@ SaHpiAutoTimeoutEntry ::= SEQUENCE {
     }
     
 saHpiAutoTimeoutForInsert OBJECT-TYPE
-    SYNTAX      SaHpiTime
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION
-        "This function allows the HPI User to configure a timeout for 
-how long to wait before the default auto-insertion policy is invoked 
-on a resource within a specific domain.  
+	SYNTAX      SaHpiTime
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION
+	"This function allows the HPI User to configure a timeout for 
+	how long to wait before the default auto-insertion policy is invoked
+	on a resource within a specific domain.  
 
-This function accepts a parameter instructing each resource to impose 
-a delay before performing its default hot swap policy for 
-auto-insertion.  The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE 
-to direct resources to proceed immediately to auto-insertion, 
-or to SAHPI_TIMEOUT_BLOCK to prevent auto-insertion from ever occurring.
-If the parameter is set to another value, then it defines the number 
-of nanoseconds between the time a hot swap event with 
-saHpiHotSwapState == INSERTION_PENDING is generated, and the time 
-that the auto-insertion policy will be invoked for that resource.  
-If, during this time period, a saHpiHotSwapPolicyCancel function 
-call is processed, the timer will be stopped, and the auto-insertion 
-policy will not be invoked.  Each domain maintains a single 
-auto-insert timeout value and it is applied to all contained resources 
-upon insertion, which support managed hot swap. Once the auto-insertion 
-process begins, the HPI User will not be allowed to take control of 
-the insertion process; hence, the timeout should be set appropriately 
-to allow for this condition.  Note that the timeout period begins 
-when the hot swap event with saHpiHotSwapState == INSERTION_PENDING 
-is initially generated." 
+	This function accepts a parameter instructing each resource to impose 
+	a delay before performing its default hot swap policy for 
+	auto-insertion.  The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE 
+	to direct resources to proceed immediately to auto-insertion, 
+	or to SAHPI_TIMEOUT_BLOCK to prevent auto-insertion from ever occurring.
+	If the parameter is set to another value, then it defines the number 
+	of nanoseconds between the time a hot swap event with 
+	saHpiHotSwapState == INSERTION_PENDING is generated, and the time 
+	that the auto-insertion policy will be invoked for that resource.  
+	If, during this time period, a saHpiHotSwapPolicyCancel function 
+	call is processed, the timer will be stopped, and the auto-insertion 
+	policy will not be invoked.  Each domain maintains a single 
+	auto-insert timeout value and it is applied to all contained resources 
+	upon insertion, which support managed hot swap. Once the auto-insertion 
+	process begins, the HPI User will not be allowed to take control of 
+	the insertion process; hence, the timeout should be set appropriately 
+	to allow for this condition.  Note that the timeout period begins 
+	when the hot swap event with saHpiHotSwapState == INSERTION_PENDING 
+	is initially generated." 
+	
     REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 141-142"
+        "Derived from function prototypes in the SAI-HPI-B.01.01 sectio  7.7.9"
 
     ::= { saHpiAutoTimeoutEntry 1 }
 
