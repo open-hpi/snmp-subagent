@@ -4248,7 +4248,7 @@ a specific index and setting this columnar node to destroy(6).
 
 -- *********************************
 -- **
--- **     Event Info Log table
+-- **     Event Log Info Table
 -- **
 -- *********************************
 
@@ -4346,13 +4346,31 @@ saHpiEventLogInfoTime OBJECT-TYPE
 
         Remarks:
 
-    Entries placed in the Event Log after this function is called will have Event Log timestamps (i.e., the Timestamp field in the SaHpiEventLogEntryT structure) based on the new time.  Setting the clock does not affect existing Event Log entries.  If the time is set to a relative time, subsequent entries placed in the Event Log will have an Event Log timestamp expressed as a relative time; if the time is set to an absolute time, subsequent entries will have an Event Log timestamp expressed as an absolute time.  
+	Entries placed in the Event Log after this function is 
+	called will have Event Log timestamps (i.e., the Timestamp 
+	field in the SaHpiEventLogEntryT structure) based on the 
+	new time.  Setting the clock does not affect existing Event 
+	Log entries.  If the time is set to a relative time, subsequent 
+	entries placed in the Event Log will have an Event Log 
+	timestamp expressed as a relative time; if the time is set to 
+	an absolute time, subsequent entries will have an Event Log 
+	timestamp expressed as an absolute time.  
 
-    This function only sets the Event Log time clock and does not have any direct bearing on the timestamps placed on events (i.e., the Timestamp field in the SaHpiEventT structure), or the timestamps placed in the domain RPT info record.  Setting the clocks used to generate timestamps other than Event Log timestamps is implementation-dependent, and should be documented by the HPI implementation provider.
+	This function only sets the Event Log time clock and does not have 
+	any direct bearing on the timestamps placed on events (i.e., the 
+	Timestamp field in the SaHpiEventT structure), or the timestamps 
+	placed in the domain RPT info record.  Setting the clocks used to 
+	generate timestamps other than Event Log timestamps is 
+	implementation-dependent, and should be documented by the HPI 
+	implementation provider.
 
-    Some underlying implementations may not be able to handle the same relative and absolute time ranges, as those defined in HPI.  Such limitations will be documented in implementation-specific documentation.  When a time value is set in a region that is not supported by the implementation, an error code of SNMP_GENERROR  will be returned.
+	Some underlying implementations may not be able to handle the same 
+	relative and absolute time ranges, as those defined in HPI.  Such 
+	limitations will be documented in implementation-specific documentation.  
+	When a time value is set in a region that is not supported by the 
+	implementation, an error code of SNMP_GENERROR  will be returned.
 
-    Refer to SaHpiTime for full description."
+	Refer to SaHpiTime for full description."
 
     REFERENCE
         "Derived from typedefs in SAI-HPI-B.01.01 page 51."
@@ -4558,6 +4576,1393 @@ saHpiEventLogRowPointer OBJECT-TYPE
         DESCRIPTION     
             "Pointer to the event."
         ::= {saHpiEventLogEntry 4}
+	
+
+-- *********************************
+-- **
+-- **     Resource Event Log
+-- **
+-- *********************************
+
+saHpiResourceEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This columnar node represents the subset of events that
+	are Resource Events."
+        ::= {eventLog 3}
+
+saHpiResourceEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that
+	are Resource Events."
+        ::= {eventLog 4}
+
+saHpiResourceEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiResourceEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= {eventLog 5}
+
+saHpiResourceEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiResourceEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION "Resource events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiResourceEventTimestamp
+        }
+        ::= { saHpiResourceEventLogTable 1 }
+
+SaHpiResourceEventLogEntry ::= SEQUENCE {
+
+        saHpiResourceEventLogTimestamp             SaHpiTimeString,
+        saHpiResourceEventLogType                  INTEGER
+
+        }
+
+saHpiResourceEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiResourceEventLogEntry 1}
+
+saHpiResourceEventLogType OBJECT-TYPE
+    SYNTAX      INTEGER {
+                        undefined(0),
+                        resourceFailure(1),
+                        resourceRestored(2),
+                        resourceAdded(3)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Resource events are sent to indicate the failure or 
+subsequent restoration of a resource.  Resource events can also be 
+used to announce the addition of a non-FRU resource to the RPT table.
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
+     REFERENCE
+	"Refer to SAI-HPI-B.01.01 section 3.8 for more information on Resource Failures."
+    ::= {saHpiResourceEventLogEntry 2}
+
+
+-- *********************************
+-- **
+-- **     Domain Event Log
+-- **
+-- *********************************
+
+saHpiDomainEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Domain events."
+        ::= {eventLog 6}
+
+saHpiDomainEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This Columnar node represents the subset of events 
+	that are Domain events."
+        ::= {eventLog 7}
+
+saHpiDomainEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiDomainEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= {eventLog 8}
+
+saHpiDomainEvenLogtEntry OBJECT-TYPE
+        SYNTAX          SaHpiDomainEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION "Domain events."
+        INDEX   { 
+                saHpiDomainId,
+		saHpiDomainEventEntryId,
+                saHpiEventSeverity,
+                saHpiDomainEventTimestamp
+        }
+        ::= {saHpiDomainEventLogTable 1}
+
+SaHpiDomainEventLogEntry ::= SEQUENCE {
+
+	saHpiDomainEventLogEntryId	Counter32,
+        saHpiDomainEventLogTimestamp 	SaHpiTimeString,
+        saHpiDomainEventLogType         INTEGER
+        }
+
+saHpiDomainEventLogEntryId OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This columnar node is an index for Domain Events in the table."
+    ::= {saHpiDomainEvenLogtEntry 1}
+
+
+saHpiDomainEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiDomainEvenLogtEntry 2}
+
+saHpiDomainEventLogType OBJECT-TYPE
+    SYNTAX      INTEGER {
+                        undefined(0),
+                        domainRefAdded(1),
+                        domainRefRemoved(2)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+--IBM-KR: add more
+        " Domain events are used to announce the addition of domain references 
+        and the removal of domain references to the DRT."
+
+    ::= {saHpiDomainEvenLogtEntry 3}
+
+
+-- *********************************
+-- **
+-- **     Sensor  Event Log
+-- **
+-- *********************************
+saHpiSensorEventEntryLogCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Sensor events."
+        ::= {eventLog 9}
+
+saHpiSensorEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Sensor Events."
+        ::= {eventLog 10}
+
+saHpiSensorEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiSensorEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= {eventLog 11}
+
+saHpiSensorEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiSensorEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "Sensor events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiSensorNum, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiSensorEventTimestamp
+        }
+        ::= {saHpiSensorEventLogTable 1}
+
+SaHpiSensorEventLogEntry ::= SEQUENCE {
+
+        saHpiSensorEventLogTimestamp               SaHpiTimeString,
+        saHpiSensorEventLogType                    SaHpiSensorType,
+        saHpiSensorEventLogCategory                SaHpiEventCategory,
+        saHpiSensorEventLogAssertion               TruthValue,
+
+        saHpiSensorEventLogState                   SaHpiEventState,
+
+        saHpiSensorEventLogOptionalData            SaHpiOptionalData,
+        
+        saHpiSensorEventLogTriggerReadingType      SaHpiSensorReadingType,
+        saHpiSensorEventLogTriggerReading          SaHpiSensorReadingValue,
+
+        saHpiSensorEventLogTriggerThresholdType    SaHpiSensorReadingType,
+        saHpiSensorEventLogTriggerThreshold        SaHpiSensorReadingValue,
+
+        saHpiSensorEventLogPreviousState           SaHpiEventState,
+        saHpiSensorEventLogCurrentState            SaHpiEventState,
+
+        saHpiSensorEventLogOem                     Unsigned32,
+        saHpiSensorEventLogSpecific                Unsigned32
+        }
+        
+
+saHpiSensorEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiSensorEventLogEntry 1}
+
+saHpiSensorEventLogType OBJECT-TYPE
+	SYNTAX		SaHpiSensorType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Refer to the textual convention for more
+details."
+        ::= {saHpiSensorEventLogEntry 2}
+
+saHpiSensorEventLogCategory OBJECT-TYPE
+    SYNTAX      SaHpiEventCategory
+    MAX-ACCESS  read-only       
+    STATUS      current
+    DESCRIPTION
+    "Event category: See TEXTUAL-CONVENTION, SaHpiEventCategory."
+    ::= {saHpiSensorEventLogEntry 3}
+
+saHpiSensorEventLogAssertion OBJECT-TYPE
+        SYNTAX      TruthValue
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Sensor Events and Sensor Event States:
+        Each Event State may be asserted or deasserted.  The set of Event
+	States a sensor may support is defined by the sensor's 
+	'Event Category.'  A particular sensor, however, does not have to 
+	support all the Event States defined for its event category.  
+	The specific Event States that a particular sensor supports are 
+	indicated in the 'Events' field in the sensor's RDR. A sensor is 
+	not required to support any Event States. If no Event States are 
+	supported by a sensor, the 'Events' field will be 0x0000.  A sensor 
+	may not support any Event States that are not defined for its event 
+	category. Each Event State is independent, although in some event 
+	categories the meaning assigned to the Event States will imply that 
+	certain Event States will be mutually exclusive.  For example, a 
+	sensor that uses the SAHPI_EC_LIMIT event category should only have 
+	one of the two Event States, SAHPI_ES_LIMIT_NOT_EXCEEDED or 
+	SAHPI_ES_LIMIT_EXCEEDED asserted at any one time. Except where mutual 
+	exclusion is implied, however, sensors may have multiple Event States 
+	asserted simultaneously. For example, the event category 
+	SAHPI_EC_THRESHOLD uses six different event states to report the 
+	relationship between the value currently measured by the sensor and up 
+	to six different 'threshold' values.  Each threshold is independently 
+	examined, and each Event State that represents a threshold that has 
+	been 'crossed' will be asserted.  Threshold values must be configured 
+	so that 'Minor', 'Major' and 'Critical' thresholds are increasingly 
+	extreme readings, such that when a 'Major' threshold has been crossed, 
+	the corresponding 'Minor' threshold will also have been crossed, and 
+	thus both Event States will be asserted. When a sensor Event State is 
+	asserted or deasserted, an event may be generated by the resource.  
+        The generated event identifies the sensor and the event state 
+        being asserted or deasserted.  The HPI implementation may assign event
+        severity levels for each event state assertion or deassertion on an 
+        individual sensor basis."      
+
+
+    ::= {saHpiSensorEventLogEntry 4}
+
+
+saHpiSensorEventLogState OBJECT-TYPE
+        SYNTAX      SaHpiEventState
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Refer to the textual convention for more details."
+        ::= {saHpiSensorEventLogEntry 5}
+
+saHpiSensorEventLogOptionalData OBJECT-TYPE
+        SYNTAX      SaHpiOptionalData
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "See textual convention aHpiOptionalData."
+        ::= {saHpiSensorEventLogEntry 6}
+
+
+saHpiSensorEventLogTriggerReadingType OBJECT-TYPE
+    SYNTAX      SaHpiSensorReadingType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "Refer to the textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 7}
+
+saHpiSensorEventLogTriggerReading OBJECT-TYPE
+    SYNTAX      SaHpiSensorReadingValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 8}
+
+
+saHpiSensorEventLogTriggerThresholdType OBJECT-TYPE
+    SYNTAX      SaHpiSensorReadingType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 9}
+
+saHpiSensorEventLogTriggerThreshold OBJECT-TYPE
+    SYNTAX      SaHpiSensorReadingValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 10}
+
+
+saHpiSensorEventLogPreviousState OBJECT-TYPE
+    SYNTAX      SaHpiEventState
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 11}
+
+saHpiSensorEventLogCurrentState OBJECT-TYPE
+    SYNTAX      SaHpiEventState
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "Refer to SaHpiEventState textual convention for more details."
+    ::= {saHpiSensorEventLogEntry 12}
+
+
+saHpiSensorEventLogOem OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "Reserved for OEM use."
+    ::= {saHpiSensorEventLogEntry 13}
+
+saHpiSensorEventLogSpecific OBJECT-TYPE
+    SYNTAX      Unsigned32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+    "DMJ, Charlene knows it KR"
+    ::= {saHpiSensorEventLogEntry 14}
+
+
+-- *********************************
+-- **
+-- **     Sensor Enable Change Event Log
+-- **
+-- *********************************
+saHpiSensorEnableChangeEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Sensor Enable ChangeEvents."
+        ::= { eventLog 12 }
+
+saHpiSensorEnableChangeEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Sensor Enable ChangeEvents."
+        ::= { eventLog 13 }
+
+saHpiSensorEnableChangeEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiSensorEnableChangeEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 14 }
+
+saHpiSensorEnableChangeEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiSensorEnableChangeEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "Sensor Enable Change events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiSensorNum,
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiSensorEnableChangeEventTimestamp
+        }
+        ::= {saHpiSensorEnableChangeEventLogTable 1}
+
+SaHpiSensorEnableChangeEventLogEntry ::= SEQUENCE {
+        
+        saHpiSensorEnableChangeEventLogTimestamp   	SaHpiTimeString,
+        saHpiSensorEnableChangeEventLogType        	SaHpiSensorType,
+        saHpiSensorEnableChangeEventLogCategory    	SaHpiEventCategory,
+        
+        saHpiSensorEnableChangeEventLogEnabled          TruthValue,
+        saHpiSensorEnableChangeEventLogEventsEnabled    TruthValue,
+        saHpiSensorEnableChangeEventLogAssertEvents     SaHpiEventState,
+        saHpiSensorEnableChangeEventLogDeassertEvents   SaHpiEventState,
+        saHpiSensorEnableChangeEventLogOptionalData     SaHpiOptionalData,
+
+        saHpiSensorEnableChangeEventLogState       	SaHpiEventState
+        }
+
+saHpiSensorEnableChangeEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiSensorEnableChangeEventLogEntry 1}
+
+saHpiSensorEnableChangeEventLogType OBJECT-TYPE
+    SYNTAX      SaHpiSensorType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Refer to the textual convention for more
+details."
+    ::= {saHpiSensorEnableChangeEventLogEntry 2}
+
+saHpiSensorEnableChangeEventLogCategory OBJECT-TYPE
+    SYNTAX      SaHpiEventCategory
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEnableChangeEventLogEntry 3}
+
+        
+saHpiSensorEnableChangeEventLogEnabled OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+	"Current sensor enable status."
+    ::= {saHpiSensorEnableChangeEventLogEntry 4}
+
+
+saHpiSensorEnableChangeEventLogEventsEnabled OBJECT-TYPE
+    SYNTAX TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Current event enable status."
+    ::= {saHpiSensorEnableChangeEventLogEntry 5}
+
+
+saHpiSensorEnableChangeEventLogAssertEvents OBJECT-TYPE
+    SYNTAX      SaHpiEventState
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSensorEnableChangeEventLogEntry 6}
+
+
+saHpiSensorEnableChangeEventLogDeassertEvents OBJECT-TYPE
+	SYNTAX      SaHpiEventState
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Refer to the textual convention for more details."
+	::= {saHpiSensorEnableChangeEventLogEntry 7}
+
+saHpiSensorEnableChangeEventLogOptionalData OBJECT-TYPE
+	SYNTAX      SaHpiOptionalData
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION 
+	"See textual convention SaHpiOptionalData."
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.14"
+	::= {saHpiSensorEnableChangeEventLogEntry 8}
+    
+saHpiSensorEnableChangeEventLogState OBJECT-TYPE
+	SYNTAX      SaHpiEventState
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Current set of asserted Event states."
+	::= {saHpiSensorEnableChangeEventLogEntry 9}
+
+
+-- *********************************
+-- **
+-- **     HotSwap Event Log
+-- **
+-- *********************************
+saHpiHotSwapEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are HotSwap Events."
+        ::= { eventLog 15 }
+
+saHpiHotSwapEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are HotSwap Events."
+        ::= { eventLog 16 }
+
+saHpiHotSwapEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiHotSwapEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 17 }
+
+saHpiHotSwapEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiHotSwapEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "Hot Swap events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiHotSwapEventTimestamp
+        }
+        ::= {saHpiHotSwapEventLogTable 1}
+
+SaHpiHotSwapEventLogEntry ::= SEQUENCE {
+
+        saHpiHotSwapEventLogTimestamp              SaHpiTimeString,
+        saHpiHotSwapEventLogState                  SaHpiHotSwapState,
+        saHpiHotSwapEventLogPreviousState          SaHpiHotSwapState
+        }
+
+saHpiHotSwapEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiHotSwapEventLogEntry 1}
+
+saHpiHotSwapEventLogState OBJECT-TYPE
+    SYNTAX      SaHpiHotSwapState
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION 
+        "Refer to the textual convention for full details."
+    ::= {saHpiHotSwapEventLogEntry 2}
+
+saHpiHotSwapEventLogPreviousState OBJECT-TYPE
+    SYNTAX      SaHpiHotSwapState
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION 
+        "Refer to the textual convention for full details."
+    ::= {saHpiHotSwapEventLogEntry 3}
+
+
+-- *********************************
+-- **
+-- **     Watchdog Event Log
+-- **
+-- *********************************
+saHpiWatchdogEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Watchdog Events."
+        ::= { eventLog 18 }
+
+saHpiWatchdogEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Watchdog Events."
+        ::= { eventLog 19 }
+
+saHpiWatchdogEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiWatchdogEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 20 }
+
+saHpiWatchdogEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiWatchdogEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "Watchdog events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiWatchdogNum, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiWatchdogEventTimestamp
+        }
+        ::= {saHpiWatchdogEventLogTable 1}
+
+SaHpiWatchdogEventLogEntry ::= SEQUENCE {
+        saHpiWatchdogEventLogTimestamp             SaHpiTimeString,
+        saHpiWatchdogEventLogAction                INTEGER,
+        saHpiWatchdogEventLogPreTimerAction        SaHpiWatchdogPreTimerAction,
+        saHpiWatchdogEventLogUse                   SaHpiWatchdogTimerUse 
+        }
+        
+
+saHpiWatchdogEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiWatchdogEventLogEntry 1}
+
+
+saHpiWatchdogEventLogAction OBJECT-TYPE
+        SYNTAX          INTEGER{ 
+                                undefined(0),
+                                noAction (1),
+                                reset (2),
+                                powerDown (3),
+                                powerCycle (4),
+                                timerInt (9)
+                        }
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        These enumerations represent the possible actions to be taken upon watchdog
+        timer timeout and the events that are generated for watchdog actions. "
+        ::= {saHpiWatchdogEventLogEntry 2}
+
+saHpiWatchdogEventLogPreTimerAction OBJECT-TYPE
+        SYNTAX          SaHpiWatchdogPreTimerAction
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+            "These enumerations represent the possible types of interrupts that may be
+            triggered by a watchdog pre-timer event. The actual meaning of these
+            operations may differ depending on the hardware architecture. "
+        ::= {saHpiWatchdogEventLogEntry 3}
+
+saHpiWatchdogEventLogUse OBJECT-TYPE
+        SYNTAX          SaHpiWatchdogTimerUse
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+        "Watchdog Timer Use                     
+        These enumerations represent the possible watchdog users that may have caused 
+        the watchdog to expire. For instance, if watchdog is being used during power 
+        on self test (POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
+        will be set. Most specific uses for Watchdog timer by users of HPI should 
+        indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
+        or SAHPI_WTU_OEM if it is used for some other purpose."
+        ::= {saHpiWatchdogEventLogEntry 4}
+
+
+
+-- *********************************
+-- **
+-- **     Software Event Log
+-- **
+-- *********************************
+saHpiSoftwareEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Software Events."
+        ::= { eventLog 21 }
+
+
+saHpiSoftwareEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are Software Events."
+        ::= { eventLog 22 }
+
+saHpiSoftwareEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiSoftwareEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 23 }
+
+saHpiSoftwareEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiSoftwareEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "Software events."
+        INDEX   { 
+                saHpiDomainId,
+		--IBMKR: Do you need ResourceId for a software event?
+                saHpiResourceId, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiSoftwareEventTimestamp
+        }
+        ::= {saHpiSoftwareEventLogTable 1}
+
+SaHpiSoftwareEventLogEntry ::= SEQUENCE {
+
+        saHpiSoftwareEventLogTimestamp             SaHpiTimeString,
+
+        saHpiSoftwareEventLogManufacturerIdT       SaHpiManufacturerId,
+        saHpiSoftwareEventLogType                  INTEGER,
+        saHpiSoftwareEventLogTextType              SaHpiTextType,
+        saHpiSoftwareEventLogTextLanguage          SaHpiTextLanguage,
+        saHpiSoftwareEventLogText                  SaHpiText
+        }
+
+saHpiSoftwareEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString 
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiSoftwareEventLogEntry 1}
+
+
+saHpiSoftwareEventLogManufacturerIdT OBJECT-TYPE
+    SYNTAX      SaHpiManufacturerId
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSoftwareEventLogEntry 2}
+
+
+saHpiSoftwareEventLogType OBJECT-TYPE
+    SYNTAX      INTEGER {
+                        undefined(0),
+                        hpieAudit(1),
+                        hpieStartup(2),
+                        hpieOther(3)
+                }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "The following type defines the types of events that can be 
+reported  by the HPI software implementation. 
+
+Audit events report a discrepancy in the audit process.  
+Audits are typically performed by HA software to detect problems.  
+Audits may look for such things as corrupted data stores, 
+inconsistent RPT information, or improperly managed queues.
+
+Startup events report a failure to start-up properly, or 
+inconsistencies in persisted data. 
+
+Note: Enumerated values are increased by one value compared to
+SAI-HPI-B spec."
+    ::= {saHpiSoftwareEventLogEntry 3}
+        
+saHpiSoftwareEventLogTextType OBJECT-TYPE
+    SYNTAX      SaHpiTextType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSoftwareEventLogEntry 4}
+
+
+saHpiSoftwareEventLogTextLanguage OBJECT-TYPE
+    SYNTAX      SaHpiTextLanguage
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSoftwareEventLogEntry 6}
+
+
+
+saHpiSoftwareEventLogText OBJECT-TYPE
+    SYNTAX      SaHpiText
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiSoftwareEventLogEntry 7}
+
+
+-- *********************************
+-- **
+-- **     OEM Event Log
+-- **
+-- *********************************
+saHpiOEMEventLogEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are OEM Events."
+        ::= { eventLog 24 }
+
+saHpiOEMEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are OEM Events."
+        ::= { eventLog 25 }
+
+saHpiOEMEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiOEMEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 26 }
+
+saHpiOEMEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiOEMEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "OEM events."
+        INDEX   { 
+                saHpiDomainId,
+                saHpiResourceId, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiOEMEventTimestamp
+
+        }
+        ::= {saHpiOEMEventLogTable 1}
+
+SaHpiOEMEventLogEntry ::= SEQUENCE {
+
+        saHpiOEMEventLogTimestamp          SaHpiTimeString,
+
+        saHpiOEMEventLogManufacturerIdT    SaHpiManufacturerId,
+        saHpiOEMEventLogTextType           SaHpiTextType,
+        saHpiOEMEventLogTextLanguage       SaHpiTextLanguage,
+        saHpiOEMEventLogText               SaHpiText
+        }
+
+saHpiOEMEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiOEMEventLogEntry 1}
+
+saHpiOEMEventLogManufacturerIdT OBJECT-TYPE
+    SYNTAX      SaHpiManufacturerId
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiOEMEventLogEntry 2}
+
+saHpiOEMEventLogTextType   OBJECT-TYPE
+    SYNTAX      SaHpiTextType
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiOEMEventLogEntry 3}
+
+saHpiOEMEventLogTextLanguage OBJECT-TYPE
+    SYNTAX      SaHpiTextLanguage
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiOEMEventLogEntry 4}
+
+saHpiOEMEventLogText       OBJECT-TYPE
+    SYNTAX      SaHpiText
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Refer to the textual convention for more details."
+    ::= {saHpiOEMEventLogEntry 5}
+
+
+-- *********************************
+-- **
+-- **     User Event Log
+-- **
+-- *********************************
+saHpiUserEvenLogtEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are User Events."
+        ::= { eventLog 27 }
+
+saHpiUserEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This columnar node represents the subset of events that 
+	are User Events."
+        ::= { eventLog 28 }
+
+saHpiUserEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiUserEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Event table. "
+        ::= { eventLog 29 }
+
+saHpiUserEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiUserEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 
+            "User events."
+        INDEX   { 
+                saHpiDomainId,
+		-- IBMKR: What is the ResourceId set to?
+                saHpiResourceId, 
+                saHpiEventSeverity,
+                saHpiEventHistorical,
+                saHpiUserEventTimestamp
+        }
+        ::= {saHpiUserEventLogTable 1}
+
+SaHpiUserEventLogEntry ::= SEQUENCE {
+
+        saHpiUserEventLogTimestamp      SaHpiTimeString,
+        saHpiUserEventLogTextType       SaHpiTextType,
+        saHpiUserEventLogTextLanguage   SaHpiTextLanguage,
+        saHpiUserEventLogText           SaHpiText,
+        saHpiUserEventLogRowStatus	RowStatus
+        }
+
+saHpiUserEventLogTimestamp OBJECT-TYPE
+    SYNTAX      SaHpiTimeString
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+        "Refer to textual convention for SaHpiTime for more details.
+        The value is Equal to TIME_UNSPECIFIED if time is not available; 
+        Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
+        if less than or equal to TIME_MAX_RELATIVE."
+    ::= {saHpiUserEventLogEntry 1}
+        
+saHpiUserEventLogTextType OBJECT-TYPE
+    SYNTAX      SaHpiTextType
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+        "Refer to SaHpiTextType for more details."
+    ::= {saHpiUserEventLogEntry 2}
+
+
+saHpiUserEventLogTextLanguage OBJECT-TYPE
+    SYNTAX      SaHpiTextLanguage
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+        "Refer to saHpiTextLanguage for more details."
+    ::= {saHpiUserEventLogEntry 3}
+
+saHpiUserEventLogText OBJECT-TYPE
+    SYNTAX      SaHpiText
+    MAX-ACCESS  read-create
+    STATUS      current
+    DESCRIPTION
+        "Refer to saHpiText for more details. "
+    ::= {saHpiUserEventLogEntry 4}
+
+saHpiUserEventLogRowStatus OBJECT-TYPE
+    SYNTAX      RowStatus
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION 
+        "This columnar node contains the status of the row and also
+	perform add and delete operations.
+
+	The status column uses four defined values:
+
+        - `active(1)', which indicates that the conceptual row is
+          available for use by the managed device;
+
+        - `createAndGo(4)', which is supplied by a management
+          station wishing to create a new instance of a
+          conceptual row (but not make it available for use by
+          the managed device). This function is used to add a 
+          User Alarm  to this User Event Table and also to the
+          to the Domain Alarm Table; When creating this row,
+          the value of saHpiEventSeverity indice must not be one of
+          these minor(3), major(2), and critical(3). The effect of
+          creating a new row will also be reflected in the DAT - with
+          a new row there.
+
+        - `destroy(6)', which is supplied by a management station
+          wishing to delete all of the instances associated with
+          an existing conceptual row. This function allows the 
+          HPI MIB User to delete a single User Alarm from the 
+          User Event Table and Domain Alarm Table. 
+          Only User Alarms added to the DAT and User Event Table can 
+	  be deleted. To delete a single, specific alarm, set the 
+          saHpiDomainAlarmId parameter to a value representing an 
+          actual User Alarm in the User Event Table."
+
+    ::= {saHpiUserEventLogEntry 5}
+
+-- *********************************
+-- **
+-- **     Announcement Event Log Table
+-- **
+-- *********************************
+
+saHpiAnnouncementEventLogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of announcements present on this system."
+        ::= { eventLog 30 }
+
+saHpiAnnouncementEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiAnnouncementEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "Table of Announcements."
+        ::= { eventLog 31 }
+
+saHpiAnnouncementEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiAnnouncementEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "The table of announcements is used to provide
+	a common interface to varied mechanisms for announcing conditions.
+
+	Each announcement in an Annunciator's current set contains a severity
+	level, details describing the specific condition that is being reported, 
+	an Acknowledged flag, a timestamp indicating when the announcement was 
+	added to the set, and an EntryId that uniquely identifies the particular 
+	status item within the set.
+
+	EntryIds are assigned to announcements as they are added to the set as 
+	well as a Timestamp.  After an announcement is deleted from the current 
+	set, its EntryId may be reused for a newly added announcement as long 
+	as the new announcement will have a different timestamp than any 
+	previously deleted announcement using the same EntryId.  Thus, the 
+	EntryId and Timestamp together will uniquely identify any announcement, 
+	which was ever present in the Annunciator's set.
+
+	The actual meaning of the Acknowledged flag is arbitrary, and the 
+	actions taken by the platform when announcements are flagged as 
+	'acknowledged' or 'unacknowledged' are implementation-specific.  
+	The intended use of the flag is to indicate whether a particular 
+	announcement in the current set has been recognized by whomever or 
+	whatever is inspecting the LEDs, displays, etc., that are being 
+	driven by the Annunciator management instrument.  Thus, when 
+	announcements are added to the current set, generally the flag 
+	should be set to indicate that the condition is 'unacknowledged'.  
+	Later, either as the result of an HPI SNMP Manager function call, or due 
+	to some implementation-dependent action (such as pressing an 
+	'acknowledge' button on a front-panel display), the flag can be 
+	changed to indicate that the announcement is now 'acknowledged.'
+
+	The ability to acknowledge announcements is not controlled 
+	by the Annunciator 'mode' setting (Auto, User, or Shared).  
+	Any announcement may be acknowledged by the HPI implementation, 
+	or via the saHpiAnnunciatorAcknowledge() function call, regardless 
+	of the current mode setting for the Annunciator.
+
+	Over time, announcements are added to and deleted from an 
+	Annunciator`s current set of announcements. This may be done 
+	automatically by the HPI implementation to reflect platform fault 
+	conditions, or by the HPI SNMP Manager via the HPI interface.  When 
+	announcements are added or deleted automatically by the HPI 
+	implementation, it is implementation-specific which announcements 
+	are added or removed.
+	"
+        INDEX   {       saHpiDomainId, 
+                        saHpiResourceId, 
+                        saHpiDomainAlarmId, 
+                        saHpiAnnouncementEntryId 
+		}
+        ::= {saHpiAnnouncementEventLogTable 1}
+
+SaHpiAnnouncementEventLogEntry ::= SEQUENCE {
+
+	saHpiAnnouncementEventLogEntryId	SaHpiEntryId,
+        saHpiAnnouncementEventLogTimestamp      SaHpiTime,
+        saHpiAnnouncementEventLogAddedByUser    TruthValue,
+        saHpiAnnouncementEventLogSeverity       INTEGER,
+        saHpiAnnouncementEventLogAcknowledged   TruthValue,
+        
+        saHpiAnnouncementEventLogStatusCondType INTEGER,
+        saHpiAnnouncementEventLogEntityPath     OCTET STRING,
+        saHpiAnnouncementEventLogSensorNum      Unsigned32,
+        saHpiAnnouncementEventLogEventState     SaHpiEventState,
+        saHpiAnnouncementEventLogName           OCTET STRING,
+        saHpiAnnouncementEventLogMid            SaHpiManufacturerId,
+        saHpiAnnouncementEventLogTextType       SaHpiTextType,
+        saHpiAnnouncementEventLogTextLanguage   SaHpiTextLanguage,
+        saHpiAnnouncementEventLogText           SaHpiText,
+        saHpiAnnouncementEventLogDelete         RowStatus
+
+      }
+      
+saHpiAnnouncementEventLogEntryId OBJECT-TYPE
+	SYNTAX		SaHpiEntryId
+        MAX-ACCESS      not-accessible 
+        STATUS          current
+        DESCRIPTION     "Entry ID for record
+                Table Related Type Definitions  
+                SAHPI_FIRST_ENTRY 0x00000000
+                SAHPI_LAST_ENTRY  0xFFFFFFFF"
+	::=   {saHpiAnnouncementEventLogEntry 1 }
+	
+saHpiAnnouncementEventLogTimestamp      OBJECT-TYPE
+        SYNTAX          SaHpiTime
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Time when announcement added to set."
+	::=   {saHpiAnnouncementEventLogEntry 2 }
+
+        
+saHpiAnnouncementEventLogAddedByUser    OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "True if added to set by HPI SNMP Manager, False if added 
+        automatically by HPI implementation."
+	::=   {saHpiAnnouncementEventLogEntry 3 }
+
+
+saHpiAnnouncementEventLogSeverity       OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                undefined(0),
+                                critical(1),
+                                major(2),
+                                minor(3),
+                                informational(4),
+                                ok(5),
+                                debug(241),
+                                allSeverities(256)
+                        }
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Only used with DAT and Annunciator functions.  
+        This is not a valid severity for events or alarms."
+	::=   {saHpiAnnouncementEventLogEntry 4 }
+
+        
+saHpiAnnouncementEventLogAcknowledged   OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Acknowledged flag."
+	::=   {saHpiAnnouncementEventLogEntry 5 }
+
+        
+saHpiAnnouncementEventLogStatusCondType OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                undefined(0),
+                                sensor(1),
+                                resource(2),
+                                oem(3),
+                                user(4)
+                        }
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Status Condition Type."
+	::=   {saHpiAnnouncementEventLogEntry 6 }
+
+
+saHpiAnnouncementEventLogEntityPath     OBJECT-TYPE
+        SYNTAX          OCTET STRING
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION      
+        "Entity Path associated with Announcement.
+	
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contain SAHPI_ENT_ prefixes they too shall be 
+	removed.
+        
+        Order of significance is inverted to make entity paths 
+        look more like Unix directory structure. It is also assumed 
+        that {ROOT,0} exists implicitly before all of these entries. 
+        
+        For example:
+         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+	::=   {saHpiAnnouncementEventLogEntry 7 }
+        
+saHpiAnnouncementEventLogSensorNum      OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Sensor associated with status Only valid 
+        if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
+	::=   {saHpiAnnouncementEventLogEntry 8 }
+
+        
+saHpiAnnouncementEventLogEventState     OBJECT-TYPE
+        SYNTAX          SaHpiEventState
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Sensor event state. Only valid if Type is 
+        SAHPI_STATUS_COND_TYPE_SENSOR.."
+	::=   {saHpiAnnouncementEventLogEntry 9 }
+
+            
+saHpiAnnouncementEventLogName   OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     
+        "AIS compatible identifier associated with Status condition."
+	::=   {saHpiAnnouncementEventLogEntry 10 }
+
+
+saHpiAnnouncementEventLogMid    OBJECT-TYPE
+        SYNTAX          SaHpiManufacturerId
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Manufacturer Id associated with status condition, 
+        required when type is SAHPI_STATUS_COND_TYPE_OEM."
+	::=   {saHpiAnnouncementEventLogEntry 11 }
+
+
+saHpiAnnouncementEventLogTextType OBJECT-TYPE 
+        SYNTAX          SaHpiTextType
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Field Data. 
+        See Definition for SaHpiTextType for more details."
+	::=   {saHpiAnnouncementEventLogEntry 12 }
+
+        
+saHpiAnnouncementEventLogTextLanguage   OBJECT-TYPE
+        SYNTAX          SaHpiTextLanguage
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Field Data.
+        See Definition for SaHpiTextLanguage for more details."
+	::=   {saHpiAnnouncementEventLogEntry 13 }
+
+
+saHpiAnnouncementEventLogText   OBJECT-TYPE
+        SYNTAX          SaHpiText
+        MAX-ACCESS      read-create
+        STATUS          current
+        DESCRIPTION     "Field Data.
+        The type of date is specified
+        by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+	::=   {saHpiAnnouncementEventLogEntry 14 }
+
+
+saHpiAnnouncementEventLogDelete OBJECT-TYPE
+        SYNTAX          RowStatus
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION
+        "This function allows the HPI SNMP Manager to delete a single 
+	announcement. Announcements may be deleted individually by specifying 
+	a specific index and setting this columnar node to destroy(6).
+	"
+	::=   {saHpiAnnouncementEventLogEntry 15 }
 
 
         
@@ -8589,7 +9994,7 @@ saHpiResourceNotifications NOTIFICATION-TYPE
         }
         STATUS current
         DESCRIPTION
-        "Resource (RPT) change event notifications."
+        "Resource failure/restoration event notifications."
         ::= { hpiNotifications 3 }
         
 saHpiDomainNotifications NOTIFICATION-TYPE
