@@ -4123,11 +4123,11 @@ saHpiCtrlState OBJECT-TYPE
 	to use.
 
         digital  - Unsigned 32bit integer (4 octets) defined as:
-                     off(0)
-                     on(1),
-                     pulseOff(2),
-                     pulseOn(3),
-                     auto(255)
+                     off(1)
+                     on(2),
+                     pulseOff(3),
+                     pulseOn(4),
+                     auto(256)
         discrete - Unsigned 32bit integer  (4 octets)
 
         analog   - octets 1-4 represent the value specified in
@@ -4203,10 +4203,10 @@ saHpiCtrlAttributes	OBJECT-TYPE
 		  octet 1	- max characters	
 		  octet 2	- max lines.
 		  octet 3	- Language.  The possible values are from
-				  0 to 136. Each values stands for a different
+				  1 to 137. Each values stands for a different
 				  language. The enumerations are:
-				  undef(0), afar(1), abkhazian(2),afrikaans(3),
-				  amharic(4),arabic(5), etc ...
+				  undef(1), afar(2), abkhazian(3),afrikaans(4),
+				  amharic(5),arabic(6), etc ...
 
 				  Look in saHpiCtrlTextLanguage object for
 				  all possible language enumerations.
