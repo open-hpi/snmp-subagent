@@ -1204,17 +1204,17 @@ saHpiDrtTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "A table, provided by an HPI implementation, of additional domains 
-	related to the current domain.
-	
-	The DRT contains an entry for each associated domain, and HPI Users may
-	read these entries to discover the presence of additional domains within 
-	a 'System'. The discovered domains can, in turn, be used to discover
-	additional resources and domains. The DRT is automatically built and 
-	maintained by the HPI implementation. Domain entries in the DRT may 
-	change over time if the 'System' configuration changes.  The domain
-	controller generates an event when a domain is added to the DRT 
-	(SAHPI_DOMAIN_REF_ADDED) and when a domain is removed from the DRT 
-	(SAHPI_DOMAIN_REF_REMOVED)."
+        related to the current domain.
+        
+        The DRT contains an entry for each associated domain, and HPI Users may
+        read these entries to discover the presence of additional domains within 
+        a 'System'. The discovered domains can, in turn, be used to discover
+        additional resources and domains. The DRT is automatically built and 
+        maintained by the HPI implementation. Domain entries in the DRT may 
+        change over time if the 'System' configuration changes.  The domain
+        controller generates an event when a domain is added to the DRT 
+        (SAHPI_DOMAIN_REF_ADDED) and when a domain is removed from the DRT 
+        (SAHPI_DOMAIN_REF_REMOVED)."
         ::= {hpiEntity 4}
 
 saHpiDrtEntry OBJECT-TYPE
@@ -2119,26 +2119,26 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "This function allows the HPI User to configure a timeout for how 
-	long to wait before the default auto-insertion policy is invoked 
-	on a resource within a specific domain.  This function accepts a 
-	parameter instructing each resource to impose a delay before 
-	performing its default hot swap policy for auto-insertion.  The 
-	parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
-	to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
-	to prevent auto-insertion from ever occurring. If the parameter is
-	set to another value, then it defines the number of nanoseconds 
-	between the time a hot swap event with saHpiHotSwapState == 
-	INSERTION_PENDING is generated, and the time that the auto-insertion 
-	policy will be invoked for that resource.  If, during this time period,
-	a saHpiHotSwapPolicyCancel function call is processed, the timer will 
-	be stopped, and the auto-insertion policy will not be invoked.  Each 
-	domain maintains a single auto-insert timeout value and it is applied 
-	to all contained resources upon insertion, which support managed hot 
-	swap. Once the auto-insertion process begins, the HPI User will not be 
-	allowed to take control of the insertion process; hence, the timeout 
-	should be set appropriately to allow for this condition.  Note that the 
-	timeout period begins when the hot swap event with saHpiHotSwapState 
-	== INSERTION_PENDING is initially generated."
+        long to wait before the default auto-insertion policy is invoked 
+        on a resource within a specific domain.  This function accepts a 
+        parameter instructing each resource to impose a delay before 
+        performing its default hot swap policy for auto-insertion.  The 
+        parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
+        to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
+        to prevent auto-insertion from ever occurring. If the parameter is
+        set to another value, then it defines the number of nanoseconds 
+        between the time a hot swap event with saHpiHotSwapState == 
+        INSERTION_PENDING is generated, and the time that the auto-insertion 
+        policy will be invoked for that resource.  If, during this time period,
+        a saHpiHotSwapPolicyCancel function call is processed, the timer will 
+        be stopped, and the auto-insertion policy will not be invoked.  Each 
+        domain maintains a single auto-insert timeout value and it is applied 
+        to all contained resources upon insertion, which support managed hot 
+        swap. Once the auto-insertion process begins, the HPI User will not be 
+        allowed to take control of the insertion process; hence, the timeout 
+        should be set appropriately to allow for this condition.  Note that the 
+        timeout period begins when the hot swap event with saHpiHotSwapState 
+        == INSERTION_PENDING is initially generated."
 
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 pages 149-150"
@@ -2147,10 +2147,10 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
 
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
-    SYNTAX      SaHpiTime
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
+        SYNTAX      SaHpiTime
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
         "This function allows the HPI User to configure a timeout for how 
         long to wait before the default auto-extraction policy is invoked. 
         This function accepts a parameter instructing the resource to impose
@@ -2174,21 +2174,21 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         saHpiHotSwapState = extractionPending(4) is initially generated.
         "
 
-    REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 153,154"
+        REFERENCE 
+                "Derived from function prototypes in the SAI-HPI-B.01.01 pages 153,154"
     
-    ::= {saHpiHotSwapEntry 3}
+        ::= {saHpiHotSwapEntry 3}
 
 
 saHpiHotSwapActionRequest OBJECT-TYPE
-    SYNTAX      INTEGER {
-                    undefined(0),
-                    insertion(1),
-                    extraction(2)
-                }
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
+        SYNTAX          INTEGER {
+                                undefined(0),
+                                insertion(1),
+                                extraction(2)
+                        }
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
         "A resource supporting hot swap typically requires a physical
         action on the associated FRU to invoke an insertion or extraction 
         process. An insertion process is invoked by physically inserting
@@ -2198,26 +2198,37 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         This columnar node allows the HPI User to invoke an insertion or 
         extraction process via software."
 
-    REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 157."
-    ::= {saHpiHotSwapEntry 4}
+        REFERENCE 
+                "Derived from function prototype in the SAI-HPI-B.01.01 page 157."
+        ::= {saHpiHotSwapEntry 4}
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
-    SYNTAX      INTEGER {
-                    undefined(0),
-                    cancel(1)
+        SYNTAX      INTEGER {
+                            undefined(0),
+                            cancel(1)
 
-                }
-    MAX-ACCESS  read-create
-    STATUS      current
-    DESCRIPTION
-        "A resource supporting hot swap typically supports default policies for insertion and extraction. On insertion, the default policy may be for the resource to turn the associated FRU~s local power on and to de-assert reset. On extraction, the default policy may be for the resource to immediately power off the FRU and turn on a hot swap indicator. This function allows an HPI User, after receiving a hot swap event with saHpiHotSwapState equal to INSERTION_PENDING or EXTRACTION_PENDING, to prevent the default policy from being executed.  
+                        }
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
+        "A resource supporting hot swap typically supports default policies for 
+        insertion and extraction. On insertion, the default policy may be for 
+        the resource to turn the associated FRU~s local power on and to 
+        de-assert reset. On extraction, the default policy may be for the 
+        resource to immediately power off the FRU and turn on a hot swap 
+        indicator. This function allows an HPI User, after receiving a hot 
+        swap event with saHpiHotSwapState equal to INSERTION_PENDING or 
+        EXTRACTION_PENDING, to prevent the default policy from being executed.  
 
-Once the resource transitions to either the ACTIVE or INACTIVE state, the default policies will once again execute, unless cancelled using saHpiHotSwapPolicyCancel.
+        Once the resource transitions to either the ACTIVE or INACTIVE state, 
+        the default policies will once again execute, unless cancelled using 
+        saHpiHotSwapPolicyCancel.
 
-The default policy cannot be canceled once it has begun to execute.  
+        The default policy cannot be canceled once it has begun to execute.  
 
-Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources."
+        Because a resource that supports the simplified hot swap model will 
+        never transition into INSERTION PENDING or EXTRACTION PENDING states, 
+        this function is not applicable to those resources."
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 147."
@@ -2624,7 +2635,7 @@ SaHpiSensorEventEntry ::= SEQUENCE {
         saHpiSensorEventState                   SaHpiEventState,
 
         saHpiEventSensorOptionalData            Unsigned8,
-	
+        
 -- IBMKR SaHpiSensorReading 
 
         saHpiEventSensorTriggerReadingType      SaHpiSensorReadingType,
@@ -2724,63 +2735,63 @@ saHpiSensorEventCategory OBJECT-TYPE
     ::= {saHpiSensorEventEntry 4}
 
 saHpiSensorEventAssertion OBJECT-TYPE
-	SYNTAX      TruthValue
-	MAX-ACCESS  read-only
-	STATUS      current
-	DESCRIPTION
-	"Sensor Events and Sensor Event States
-	Each Event State is a single bit value that may be asserted or 
-	deasserted.  The set of Event States a sensor may support
-	is defined by the sensor's 'Event Category.'  A particular sensor,
-	however, does not have to support all the Event States defined for
-	its event category.  The specific Event States that a particular
-	sensor supports are indicated in the 'Events' field in the 
-	sensor's RDR. A sensor is not required to support any Event States.
-	If no Event States are supported by a sensor, the 'Events' field 
-	will be 0x0000.  A sensor may not support any Event States that 
-	are not defined for its event category. Each Event State is 
-	independent, although in some event categories the meaning assigned
-	to the Event States will imply that certain Event States will be 
-	mutually exclusive.  For example, a sensor that uses the 
-	SAHPI_EC_LIMIT event category should only have one of the two Event 
-	States, SAHPI_ES_LIMIT_NOT_EXCEEDED or SAHPI_ES_LIMIT_EXCEEDED
-	asserted at any one time. Except where mutual exclusion is implied,
-	however, sensors may have multiple Event States asserted simultaneously.
-	For example, the event category SAHPI_EC_THRESHOLD uses six different
-	event states to report the relationship between the value currently
-	measured by the sensor and up to six different 'threshold' values.  
-	Each threshold is independently examined, and each Event State that 
-	represents a threshold that has been 'crossed' will be asserted.  
-	Threshold values must be configured so that 'Minor', 'Major' and 
-	'Critical' thresholds are increasingly extreme readings, such that
-	when a 'Major' threshold has been crossed, the corresponding 'Minor' 
-	threshold will also have been crossed, and thus both Event States 
-	will be asserted. When a sensor Event State is asserted or 
-	deasserted, an event may be generated by the resource.  
-	The generated event identifies the sensor and the event state 
-	being asserted or deasserted.  The HPI implementation may assign event
-	severity levels for each event state assertion or deassertion on an 
-	individual sensor basis."      
+        SYNTAX      TruthValue
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        "Sensor Events and Sensor Event States
+        Each Event State is a single bit value that may be asserted or 
+        deasserted.  The set of Event States a sensor may support
+        is defined by the sensor's 'Event Category.'  A particular sensor,
+        however, does not have to support all the Event States defined for
+        its event category.  The specific Event States that a particular
+        sensor supports are indicated in the 'Events' field in the 
+        sensor's RDR. A sensor is not required to support any Event States.
+        If no Event States are supported by a sensor, the 'Events' field 
+        will be 0x0000.  A sensor may not support any Event States that 
+        are not defined for its event category. Each Event State is 
+        independent, although in some event categories the meaning assigned
+        to the Event States will imply that certain Event States will be 
+        mutually exclusive.  For example, a sensor that uses the 
+        SAHPI_EC_LIMIT event category should only have one of the two Event 
+        States, SAHPI_ES_LIMIT_NOT_EXCEEDED or SAHPI_ES_LIMIT_EXCEEDED
+        asserted at any one time. Except where mutual exclusion is implied,
+        however, sensors may have multiple Event States asserted simultaneously.
+        For example, the event category SAHPI_EC_THRESHOLD uses six different
+        event states to report the relationship between the value currently
+        measured by the sensor and up to six different 'threshold' values.  
+        Each threshold is independently examined, and each Event State that 
+        represents a threshold that has been 'crossed' will be asserted.  
+        Threshold values must be configured so that 'Minor', 'Major' and 
+        'Critical' thresholds are increasingly extreme readings, such that
+        when a 'Major' threshold has been crossed, the corresponding 'Minor' 
+        threshold will also have been crossed, and thus both Event States 
+        will be asserted. When a sensor Event State is asserted or 
+        deasserted, an event may be generated by the resource.  
+        The generated event identifies the sensor and the event state 
+        being asserted or deasserted.  The HPI implementation may assign event
+        severity levels for each event state assertion or deassertion on an 
+        individual sensor basis."      
 
 
     ::= {saHpiSensorEventEntry 5}
 
 
 saHpiSensorEventState OBJECT-TYPE
-	SYNTAX      SaHpiEventState
-	MAX-ACCESS  read-only
-	STATUS      current
-	DESCRIPTION
-	""
-	::= {saHpiSensorEventEntry 6}
+        SYNTAX      SaHpiEventState
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        ""
+        ::= {saHpiSensorEventEntry 6}
 
 saHpiEventSensorOptionalData OBJECT-TYPE
-	SYNTAX      Unsigned8
-	MAX-ACCESS  read-only
-	STATUS      current
-	DESCRIPTION
-	""
-	::= {saHpiSensorEventEntry 7}
+        SYNTAX      Unsigned8
+        MAX-ACCESS  read-only
+        STATUS      current
+        DESCRIPTION
+        ""
+        ::= {saHpiSensorEventEntry 7}
 
 -- SaHpiSensorReading 
 
@@ -4756,32 +4767,32 @@ saHpiAssertEventMask    OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Two bit-mask values are returned by the saHpiSensorEventMasksGet()
-	function; one for the sensor assert event mask, and one for the 
-	sensor deassert event mask. A bit set to '1' in the AssertEventMask 
-	value indicates that an event will be generated by the sensor when 
-	the corresponding event state for that sensor changes from deasserted 
-	to asserted.  A bit set to '1' in the DeassertEventMask value indicates 
-	that an event will be generated by the sensor when the corresponding
-	event state for that sensor changes from asserted to deasserted.
-	Events will only be generated by the sensor if the appropriate 
-	AssertEventMask or DeassertEventMask bit is set, sensor events are 
-	enabled, and the sensor is enabled.
-	
-	Remarks
-	For sensors hosted by a resource that has the 
-	SAHPI_CAPABILITY_EVT_DEASSERTS flag set in its RPT entry, the
-	assert and deassert event masks cannot be independently 
-	configured.  When saHpiSensorEventMasksSet() is called for 
-	sensors in a resource with this capability, the DeassertEventMask 
-	parameter is ignored, and the AssertEventMask parameter is used to 
-	determine which bits to set or clear in both the assert event mask 
-	and deassert event mask for the sensor. The AssertEventMask or 
-	DeassertEventMask parameter may be set to the special value, 
-	SAHPI_ALL_EVENT_STATES, indicating that all event states supported 
-	by the sensor should be added to or removed from, the corresponding 
-	sensor event mask.  If the sensor assert and/or deassert event 
-	masks change as a result of this function call, an event will be
-	generated."
+        function; one for the sensor assert event mask, and one for the 
+        sensor deassert event mask. A bit set to '1' in the AssertEventMask 
+        value indicates that an event will be generated by the sensor when 
+        the corresponding event state for that sensor changes from deasserted 
+        to asserted.  A bit set to '1' in the DeassertEventMask value indicates 
+        that an event will be generated by the sensor when the corresponding
+        event state for that sensor changes from asserted to deasserted.
+        Events will only be generated by the sensor if the appropriate 
+        AssertEventMask or DeassertEventMask bit is set, sensor events are 
+        enabled, and the sensor is enabled.
+        
+        Remarks
+        For sensors hosted by a resource that has the 
+        SAHPI_CAPABILITY_EVT_DEASSERTS flag set in its RPT entry, the
+        assert and deassert event masks cannot be independently 
+        configured.  When saHpiSensorEventMasksSet() is called for 
+        sensors in a resource with this capability, the DeassertEventMask 
+        parameter is ignored, and the AssertEventMask parameter is used to 
+        determine which bits to set or clear in both the assert event mask 
+        and deassert event mask for the sensor. The AssertEventMask or 
+        DeassertEventMask parameter may be set to the special value, 
+        SAHPI_ALL_EVENT_STATES, indicating that all event states supported 
+        by the sensor should be added to or removed from, the corresponding 
+        sensor event mask.  If the sensor assert and/or deassert event 
+        masks change as a result of this function call, an event will be
+        generated."
         ::= {saHpiSensorEntry 8}
 
 saHpiDeassertEventMask  OBJECT-TYPE
@@ -4790,32 +4801,32 @@ saHpiDeassertEventMask  OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Two bit-mask values are returned by the saHpiSensorEventMasksGet()
-	function; one for the sensor assert event mask, and one for the 
-	sensor deassert event mask. A bit set to '1' in the AssertEventMask 
-	value indicates that an event will be generated by the sensor when 
-	the corresponding event state for that sensor changes from deasserted 
-	to asserted.  A bit set to '1' in the DeassertEventMask value indicates 
-	that an event will be generated by the sensor when the corresponding
-	event state for that sensor changes from asserted to deasserted.
-	Events will only be generated by the sensor if the appropriate 
-	AssertEventMask or DeassertEventMask bit is set, sensor events are 
-	enabled, and the sensor is enabled.
-	
-	Remarks
-	For sensors hosted by a resource that has the 
-	SAHPI_CAPABILITY_EVT_DEASSERTS flag set in its RPT entry, the
-	assert and deassert event masks cannot be independently 
-	configured.  When saHpiSensorEventMasksSet() is called for 
-	sensors in a resource with this capability, the DeassertEventMask 
-	parameter is ignored, and the AssertEventMask parameter is used to 
-	determine which bits to set or clear in both the assert event mask 
-	and deassert event mask for the sensor. The AssertEventMask or 
-	DeassertEventMask parameter may be set to the special value, 
-	SAHPI_ALL_EVENT_STATES, indicating that all event states supported 
-	by the sensor should be added to or removed from, the corresponding 
-	sensor event mask.  If the sensor assert and/or deassert event 
-	masks change as a result of this function call, an event will be
-	generated."
+        function; one for the sensor assert event mask, and one for the 
+        sensor deassert event mask. A bit set to '1' in the AssertEventMask 
+        value indicates that an event will be generated by the sensor when 
+        the corresponding event state for that sensor changes from deasserted 
+        to asserted.  A bit set to '1' in the DeassertEventMask value indicates 
+        that an event will be generated by the sensor when the corresponding
+        event state for that sensor changes from asserted to deasserted.
+        Events will only be generated by the sensor if the appropriate 
+        AssertEventMask or DeassertEventMask bit is set, sensor events are 
+        enabled, and the sensor is enabled.
+        
+        Remarks
+        For sensors hosted by a resource that has the 
+        SAHPI_CAPABILITY_EVT_DEASSERTS flag set in its RPT entry, the
+        assert and deassert event masks cannot be independently 
+        configured.  When saHpiSensorEventMasksSet() is called for 
+        sensors in a resource with this capability, the DeassertEventMask 
+        parameter is ignored, and the AssertEventMask parameter is used to 
+        determine which bits to set or clear in both the assert event mask 
+        and deassert event mask for the sensor. The AssertEventMask or 
+        DeassertEventMask parameter may be set to the special value, 
+        SAHPI_ALL_EVENT_STATES, indicating that all event states supported 
+        by the sensor should be added to or removed from, the corresponding 
+        sensor event mask.  If the sensor assert and/or deassert event 
+        masks change as a result of this function call, an event will be
+        generated."
         ::= {saHpiSensorEntry 9}
 
 saHpiSensorCategory OBJECT-TYPE
@@ -6284,11 +6295,11 @@ saHpiWatchdogEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
-	"When the 'Watchdog' capability is set in a resource, a watchdog with 
-	an identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All 
-	watchdogs must be represented in the RDR repository with an 
-	saHpiWatchdogRecT, including the watchdog with an identifier of 
-	SAHPI_DEFAULT_WATCHDOG_NUM."
+        "When the 'Watchdog' capability is set in a resource, a watchdog with 
+        an identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All 
+        watchdogs must be represented in the RDR repository with an 
+        saHpiWatchdogRecT, including the watchdog with an identifier of 
+        SAHPI_DEFAULT_WATCHDOG_NUM."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
