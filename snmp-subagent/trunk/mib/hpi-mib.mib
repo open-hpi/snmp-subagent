@@ -6491,7 +6491,7 @@ saHpiSensorReadingNominalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNominalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining current sensor readings."
+        DESCRIPTION     "A table definining nominal sensor readings."
         ::= {hpiSensor 4}
 
 saHpiSensorReadingNominalEntry OBJECT-TYPE
