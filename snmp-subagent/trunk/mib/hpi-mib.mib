@@ -2957,7 +2957,7 @@ saHpiSensorEnableChangeEventState OBJECT-TYPE
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
-	""
+	"Current set of asserted Event states."
     ::= {saHpiSensorEnableChangeEventEntry 9}
 
 saHpiSensorEnableChangeDelete OBJECT-TYPE
@@ -2968,9 +2968,6 @@ saHpiSensorEnableChangeDelete OBJECT-TYPE
 	"Set this to destory(6) or notInService(2) to delete this entry."
 
     ::= {saHpiSensorEnableChangeEventEntry 10}
-
-
-
 
 -- *********************************
 -- **
@@ -3347,7 +3344,9 @@ SaHpiOEMEventEntry ::= SEQUENCE {
 	saHpiOEMEventTimestamp		SaHpiTime,
 
 	saHpiOEMEventManufacturerIdT	Unsigned32,
-	saHpiOEMEventData		OCTET STRING,
+	saHpiOemEventTextType		SaHpiTextType,
+	saHpiOemEventTextLanguage	SaHpiTextLanguage,
+	saHpiOemEventText		SaHpiText,
 	saHpiOEMEventDelete		RowStatus
 	}
 
@@ -3370,13 +3369,29 @@ saHpiOEMEventManufacturerIdT OBJECT-TYPE
 	" "
     ::= {saHpiOEMEventEntry 2}
 
-saHpiOEMEventData OBJECT-TYPE
-    SYNTAX	OCTET STRING
+saHpiOemEventTextType	OBJECT-TYPE
+    SYNTAX	SaHpiTextType
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
 	" "
     ::= {saHpiOEMEventEntry 3}
+
+saHpiOemEventTextLanguage OBJECT-TYPE
+    SYNTAX	SaHpiTextLanguage
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	" "
+    ::= {saHpiOEMEventEntry 4}
+
+saHpiOemEventText	OBJECT-TYPE
+    SYNTAX	SaHpiText
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	" "
+    ::= {saHpiOEMEventEntry 5}
 
 saHpiOEMEventDelete OBJECT-TYPE
     SYNTAX		RowStatus
@@ -3385,8 +3400,7 @@ saHpiOEMEventDelete OBJECT-TYPE
     DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
 
-    ::= {saHpiOEMEventEntry 4}
-
+    ::= {saHpiOEMEventEntry 6}
 
 
 -- *********************************
@@ -6459,7 +6473,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiOEMEventData
+		saHpiOemEventTextType,
+		saHpiOemEventTextLanguage,
+		saHpiOemEventText
 	}
 	STATUS current
 	DESCRIPTION
