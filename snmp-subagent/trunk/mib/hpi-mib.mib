@@ -4578,7 +4578,7 @@ SaHpiCtrlEntry ::= SEQUENCE {
    
         saHpiCtrlTextType       SaHpiTextType,
         saHpiCtrlTextLanguage   SaHpiTextLanguage,
-        saHpiCtrlText           OCTET STRING,
+        saHpiCtrlText           SaHpiText,
         
         saHpiCtrlRDR            RowPointer
 }
