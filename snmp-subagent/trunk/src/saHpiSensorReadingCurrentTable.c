@@ -209,7 +209,10 @@ modify_saHpiSensorReadingCurrentTable_row (SaHpiDomainIdT domain_id,
 				 * values of '0' uninitialized */
       ctx->hash = hash;
 
-
+      ctx->resource_id = resource_id;
+      ctx->domain_id = domain_id;
+      ctx->sensor_id = sensor_num;
+      ctx->sensor_category = sensor_category;
       build_reading_strings (reading,
 			     sensor_category,
 			     &ctx->saHpiSensorReadingCurrentValuesPresent,
@@ -282,6 +285,11 @@ static int
 	  src->saHpiSensorReadingCurrentEventStatus_len);
   dst->saHpiSensorReadingCurrentEventStatus_len =
     src->saHpiSensorReadingCurrentEventStatus_len;
+
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  dst->sensor_id = src->sensor_id;
+  dst->hash = src->hash;
 
   return 0;
 }
@@ -426,7 +434,7 @@ saHpiSensorReadingCurrentTable_create_row (netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiSensorReadingCurrentTable_context
-  *saHpiSensorReadingCurrentTable_duplicate_row
+  * saHpiSensorReadingCurrentTable_duplicate_row
   (saHpiSensorReadingCurrentTable_context * row_ctx)
 {
   saHpiSensorReadingCurrentTable_context *dup;
@@ -685,7 +693,36 @@ saHpiSensorReadingCurrentTable_get_value (netsnmp_request_info * request,
   netsnmp_variable_list *var = request->requestvb;
   saHpiSensorReadingCurrentTable_context *context =
     (saHpiSensorReadingCurrentTable_context *) item;
+  SaHpiSensorReadingT reading;
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+    }
+  rc = saHpiSensorReadingGet (session_id,
+			      context->resource_id,
+			      context->sensor_id, &reading);
 
+  if (rc != SA_OK)
+    {
+      snmp_log (LOG_ERR,
+		"Call to saHpiSensorReadingGet fails with return code: %s.\n",
+		get_error_string (rc));
+      DEBUGMSGTL ((AGENT,
+		   "Call to  saHpiSensorReadingGet fails with return code: %s.\n",
+		   get_error_string (rc)));
+    }
+  if (rc == AGENT_ERR_NOERROR)
+    {
+      modify_saHpiSensorReadingCurrentTable_row (context->domain_id,
+						 context->resource_id,
+						 context->sensor_id,
+						 context->sensor_category,
+						 &reading, context);
+    }
   switch (table_info->colnum)
     {
 
