@@ -5617,7 +5617,8 @@ SaHpiSensorThdLowCriticalEntry ::= SEQUENCE {
         saHpiSensorThdLowCriticalIsReadable             TruthValue,
         saHpiSensorThdLowCriticalIsWritable             TruthValue,
         saHpiSensorThdLowCriticalType                   SaHpiSensorReadingType, 
-        saHpiSensorThdLowCriticalValue                  SaHpiSensorReadingValue
+        saHpiSensorThdLowCriticalValue                  SaHpiSensorReadingValue,
+        saHpiSensorThdLowCriticalNonLinear       	TruthValue
         }
 
 saHpiSensorThdLowCriticalIsReadable     OBJECT-TYPE
@@ -5663,6 +5664,19 @@ saHpiSensorThdLowCriticalValue          OBJECT-TYPE
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowCriticalEntry 4}
 
+saHpiSensorThdLowCriticalNonLinear     OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= {saHpiSensorThdLowCriticalEntry 5}
+
+
 -- *********************************
 -- **
 -- **     saHpiSensorThdLowMajorTable
@@ -5693,7 +5707,8 @@ SaHpiSensorThdLowMajorEntry ::= SEQUENCE {
         saHpiSensorThdLowMajorIsReadable                TruthValue,
         saHpiSensorThdLowMajorIsWritable                TruthValue,
         saHpiSensorThdLowMajorType                      SaHpiSensorReadingType, 
-        saHpiSensorThdLowMajorValue                     SaHpiSensorReadingValue
+        saHpiSensorThdLowMajorValue                     SaHpiSensorReadingValue,
+	saHpiSensorThdLowMajorNonLinear			TruthValue
         }
 
 saHpiSensorThdLowMajorIsReadable        OBJECT-TYPE
@@ -5739,6 +5754,18 @@ saHpiSensorThdLowMajorValue             OBJECT-TYPE
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMajorEntry 4}
 
+saHpiSensorThdLowMajorNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdLowMajorEntry 5 }	
+
 -- *********************************
 -- **
 -- **     saHpiSensorThdLowMinorTable
@@ -5768,7 +5795,8 @@ SaHpiSensorThdLowMinorEntry ::= SEQUENCE {
         saHpiSensorThdLowMinorIsReadable        TruthValue,
         saHpiSensorThdLowMinorIsWritable        TruthValue,
         saHpiSensorThdLowMinorType              SaHpiSensorReadingType, 
-        saHpiSensorThdLowMinorValue             SaHpiSensorReadingValue
+        saHpiSensorThdLowMinorValue             SaHpiSensorReadingValue,
+	saHpiSensorThdLowMinorNonLinear		TruthValue
         }
 
 
@@ -5814,6 +5842,18 @@ saHpiSensorThdLowMinorValue             OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMinorEntry 4}
+	
+saHpiSensorThdLowMinorNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdLowMinorEntry 5 }
 
 -- *********************************
 -- **
@@ -5845,7 +5885,8 @@ SaHpiSensorThdUpCriticalEntry ::= SEQUENCE {
         saHpiSensorThdUpCriticalIsReadable      TruthValue,
         saHpiSensorThdUpCriticalIsWritable      TruthValue,
         saHpiSensorThdUpCriticalType            SaHpiSensorReadingType, 
-        saHpiSensorThdUpCriticalValue           SaHpiSensorReadingValue
+        saHpiSensorThdUpCriticalValue           SaHpiSensorReadingValue,
+	saHpiSensorThdUpCriticalNonLinear	TruthValue
         }
 
 saHpiSensorThdUpCriticalIsReadable      OBJECT-TYPE
@@ -5890,6 +5931,18 @@ saHpiSensorThdUpCriticalValue           OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpCriticalEntry 4}
+	
+saHpiSensorThdUpCriticalNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdUpCriticalEntry 5 }
 
 -- *********************************
 -- **
@@ -5921,7 +5974,8 @@ SaHpiSensorThdUpMajorEntry ::= SEQUENCE {
         saHpiSensorThdUpMajorIsReadable         TruthValue,
         saHpiSensorThdUpMajorIsWritable         TruthValue,
         saHpiSensorThdUpMajorType               SaHpiSensorReadingType, 
-        saHpiSensorThdUpMajorValue              SaHpiSensorReadingValue
+        saHpiSensorThdUpMajorValue              SaHpiSensorReadingValue,
+	saHpiSensorThdUpMajorNonLinear		TruthValue
         }
 
 saHpiSensorThdUpMajorIsReadable OBJECT-TYPE
@@ -5966,6 +6020,19 @@ saHpiSensorThdUpMajorValue              OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMajorEntry 4}
+	
+saHpiSensorThdUpMajorNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdUpMajorEntry 5 }
+
 
 -- *********************************
 -- **
@@ -5997,7 +6064,8 @@ SaHpiSensorThdUpMinorEntry ::= SEQUENCE {
         saHpiSensorThdUpMinorIsReadable         TruthValue,
         saHpiSensorThdUpMinorIsWritable         TruthValue,
         saHpiSensorThdUpMinorType               SaHpiSensorReadingType, 
-        saHpiSensorThdUpMinorValue              SaHpiSensorReadingValue
+        saHpiSensorThdUpMinorValue              SaHpiSensorReadingValue,
+	saHpiSensorThdUpMinorNonLinear		TruthValue
         }
 
 saHpiSensorThdUpMinorIsReadable OBJECT-TYPE
@@ -6042,6 +6110,19 @@ saHpiSensorThdUpMinorValue              OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMinorEntry 4}
+	
+saHpiSensorThdUpMinorNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdUpMinorEntry 5 }
+
 
 -- *********************************
 -- **
@@ -6073,7 +6154,8 @@ SaHpiSensorThdPosHysteresisEntry ::= SEQUENCE {
         saHpiSensorThdPosHysteresisIsReadable           TruthValue,
         saHpiSensorThdPosHysteresisIsWritable           TruthValue,
         saHpiSensorThdPosHysteresisType                 SaHpiSensorReadingType, 
-        saHpiSensorThdPosHysteresisValue                SaHpiSensorReadingValue
+        saHpiSensorThdPosHysteresisValue                SaHpiSensorReadingValue,
+	saHpiSensorThdPosHysteresisNonLinear		TruthValue
         }
 
 saHpiSensorThdPosHysteresisIsReadable   OBJECT-TYPE
@@ -6118,6 +6200,19 @@ saHpiSensorThdPosHysteresisValue                OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdPosHysteresisEntry 4}
+	
+saHpiSensorThdPosHysteresisNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdPosHysteresisEntry 5 }
+
 
 -- *********************************
 -- **
@@ -6149,7 +6244,8 @@ SaHpiSensorThdNegHysteresisEntry ::= SEQUENCE {
         saHpiSensorThdNegHysteresisIsReadable           TruthValue,
         saHpiSensorThdNegHysteresisIsWritable           TruthValue,
         saHpiSensorThdNegHysteresisType                 SaHpiSensorReadingType, 
-        saHpiSensorThdNegHysteresisValue                SaHpiSensorReadingValue
+        saHpiSensorThdNegHysteresisValue                SaHpiSensorReadingValue,
+	saHpiSensorThdNegHysteresisNonLinear		TruthValue
         }
 
 
@@ -6195,6 +6291,18 @@ saHpiSensorThdNegHysteresisValue                OBJECT-TYPE
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdNegHysteresisEntry 4}
+	
+saHpiSensorThdNegHysteresisNonLinear     	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+	"This columnar node flag is set, hysteresis values are calculated 
+	at the nominal sensor value."
+        REFERENCE
+        "Object derieved from SAF SAI-HPI-B.01.01 sections 7.2, 7.2.13,  
+	7.2.14, 8.3, 8.4, and 8.14."
+        ::= { saHpiSensorThdNegHysteresisEntry 5 }
 
 --
 -- /*******************************************************************************
