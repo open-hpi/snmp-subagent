@@ -1520,8 +1520,8 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
         }
         
 saHpiDomainAlarmId OBJECT-TYPE 
-        SYNTAX          SaHpiInstrumentId                
-        MAX-ACCESS      read-create
+        SYNTAX          SaHpiEntryId                
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "DomainAlarm Id"
 
