@@ -1047,7 +1047,7 @@ SaHpiDatEntry ::= SEQUENCE {
 	
 	saHpiAlarmCondDataTextType      SaHpiTextType,
 	saHpiAlarmCondDataTextLanguage  SaHpiTextLanguage,
-	saHpiAlarmCondData    		OCTET STRING
+	saHpiAlarmCondData    		SaHpiText
 	}
 	
 saHpiAlarmId OBJECT-TYPE 
@@ -1140,7 +1140,7 @@ saHpiAlarmCondEntityPath OBJECT-TYPE
  	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
 	::= {saHpiDatEntry 6}
-
+--IBMKR: This should not be an enumeration?
 saHpiAlarmCondSensorNum OBJECT-TYPE 
 	SYNTAX		INTEGER {
 				sensor(0),
@@ -1164,29 +1164,34 @@ saHpiAlarmCondEventState OBJECT-TYPE
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
-	"Sensor event state.  Only valid if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
+	"Sensor event state.  Only valid if saHpiAlarmCondStatusCondType is 
+	sensor(1)."
 	::= {saHpiDatEntry 8}
 	
+--IBMRK: What is AIS? Look in description.
 saHpiAlarmCondNameValue OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..255))
 	MAX-ACCESS	read-create
 	STATUS		current
-	DESCRIPTION	"AIS compatible identifier associated with Status condition"
+	DESCRIPTION	
+	"AIS compatible identifier associated with Status condition"
 	::= {saHpiDatEntry 9}
 	
 saHpiAlarmCondMid OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-create
 	STATUS		current
-	DESCRIPTION	"Manufacturer Id associated with status condition, 
-			 required when type is SAHPI_STATUS_COND_TYPE_OEM." 
+	DESCRIPTION	
+	"Manufacturer Id associated with status condition, 
+	required when saHpiAlarmCondStatusCondType is oem(3)."
 	::= {saHpiDatEntry 10}
 	
 saHpiAlarmCondDataTextType OBJECT-TYPE 
 	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"See Definition"
+	DESCRIPTION	"Optional data associated with status 
+	condition. For more details, see textual definition"
 	::= {saHpiDatEntry 11}
 
 saHpiAlarmCondDataTextLanguage OBJECT-TYPE
@@ -1194,16 +1199,22 @@ saHpiAlarmCondDataTextLanguage OBJECT-TYPE
 	MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     
-	"See Definition"
+	"Optional data associated with status 
+	condition. For more details, see textual definition"
 	::= {saHpiDatEntry 12}
 
 saHpiAlarmCondData	OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
+	SYNTAX		SaHpiText
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Resource tag. The type of date is specified
-	by saHpiAlarmCondDataTextType and saHpiAlarmCondDataTextLanguage."
+	DESCRIPTION	
+	"Optional data associated with status condition.
+	The type of date is specified by saHpiAlarmCondDataTextType and 
+	saHpiAlarmCondDataTextLanguage."
 	::= {saHpiDatEntry 13}
+
+
+-- IBMKR: A big nice seperator here would be nice.
 
 saHpiEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
@@ -1267,7 +1278,7 @@ SaHpiEntry ::= SEQUENCE {
 	saHpiEntryID				Unsigned32,
 	saHpiResourceID				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
-	saHpiResourceCapabilities 		Unsigned32,
+	saHpiResourceCapabilities 		OCTET STRING,
 	
 	saHpiResourceHotSwapCapabilities 	Unsigned32,	
 
@@ -1288,7 +1299,7 @@ SaHpiEntry ::= SEQUENCE {
 	
 	saHpiResourceTagTextType		SaHpiTextType,	
 	saHpiResourceTagTextLanguage		SaHpiTextLanguage,
-	saHpiResourceTag			OCTET STRING,
+	saHpiResourceTag			SaHpiText,
 	
 	saHpiParamControl			INTEGER,
 	saHpiClearEvents			RowStatus,
@@ -1353,53 +1364,65 @@ saHpiResourceEntityPath OBJECT-TYPE
 	::= {saHpiEntry 4}
 
 saHpiResourceCapabilities OBJECT-TYPE 
-	SYNTAX		Unsigned32 
+	SYNTAX		OCTET STRING(SIZE(0..255))
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	" 
 	Resource Capabilities
 	
-	This definition defines the capabilities of a given resource. One resource 
-	may support any number of capabilities using the bit mask. Because each entry
-	in an RPT will have the SAHPI_CAPABILITY_RESOURCE bit set, zero is not a
-	valid value for the capability flag, and is thus used to indicate 'no RPT
+	This definition defines the capabilities of a given resource.
+	One resource may support any number of capabilities using this
+	string (each capability has to be seperated by a delimeter). 
+
+	Because each entry in an RPT will have the 
+	RESOURCE string, no value  is not a valid value for the 
+	capability flag, and is thus used to indicate 'no RPT
 	entry present' in some function calls.
 	
-	SAHPI_CAPABILITY_RESOURCE   	(SaHpiCapabilitiesT)0X40000000       
-	SAHPI_CAPABILITY_EVT_DEASSERTS  (SaHpiCapabilitiesT)0x00008000 
-	  Indicates that all sensors on the resource have the property that their
-	  Assertion and Deassertion event enable flags are the same. That is,
-	  for all event states whose assertion triggers an event, it is
-	  guaranteed that the deassertion of that event will also
-	  trigger an event. Thus, an HPI User may track the state of sensors on the
-	  resource by monitoring events rather than polling for state changes.
-	SAHPI_CAPABILITY_AGGREGATE_STATUS	(SaHpiCapabilitiesT)0x00002000  
-	SAHPI_CAPABILITY_CONFIGURATION          (SaHpiCapabilitiesT)0x00001000 
-	SAHPI_CAPABILITY_MANAGED_HOTSWAP        (SaHpiCapabilitiesT)0x00000800 
-	  Indicates that the resource supports the full managed hot swap model. 
-	  Since hot swap only makes sense for field-replaceable units, the 
-	  SAHPI_CAPABILITY_FRU capability bit must also be set for this resource.
-	SAHPI_CAPABILITY_WATCHDOG 	(SaHpiCapabilitiesT)0x00000400         
-	SAHPI_CAPABILITY_CONTROL        (SaHpiCapabilitiesT)0x00000200   
-	SAHPI_CAPABILITY_FRU            (SaHpiCapabilitiesT)0x00000100 
-	  Indicates that the resource is a field-replaceable unit; i.e., it is
-	  capable of being removed and replaced in a live system. If
-	  SAHPI_CAPABILITY_MANAGED_HOTSWAP is also set, the resource supports
-	  the full hot swap model.  If SAHPI_CAPABILITY_MANAGED_HOTSWAP is not
-	  set, the resource supports the simplified hot swap model.
-	SAHPI_CAPABILITY_ANNUNCIATOR	(SaHpiCapabilitiesT)0x00000040 
-	SAHPI_CAPABILITY_POWER          (SaHpiCapabilitiesT)0x00000020 
-	SAHPI_CAPABILITY_RESET          (SaHpiCapabilitiesT)0x00000010 
-	SAHPI_CAPABILITY_INVENTORY_DATA (SaHpiCapabilitiesT)0x00000008   
-	SAHPI_CAPABILITY_EVENT_LOG      (SaHpiCapabilitiesT)0x00000004         
-	SAHPI_CAPABILITY_RDR            (SaHpiCapabilitiesT)0x00000002 
-	  Indicates that a resource data record (RDR) repository is supplied
-	  by the resource. Since the existence of an RDR is mandatory for all
-	  management instruments, this
-	  capability must be asserted if the resource
-	  contains any sensors, controls, watchdog timers, or inventory
-	  data repositories.         
-	SAHPI_CAPABILITY_SENSOR 	(SaHpiCapabilitiesT)0x00000001	
+	RESOURCE
+	EVT_DEASSERTS
+
+	Indicates that all sensors on the resource have the property that their
+	Assertion and Deassertion event enable flags are the same. That is,
+	for all event states whose assertion triggers an event, it is
+	guaranteed that the deassertion of that event will also
+	trigger an event. 
+	
+	Thus, an HPI User may track the state of sensors on the
+	resource by monitoring events rather than polling for state changes.
+
+	AGGREGATE_STATUS
+	CONFIGURATION
+	MANAGED_HOTSWAP
+
+	Indicates that the resource supports the full managed hot swap model. 
+	Since hot swap only makes sense for field-replaceable units, the 
+	FRU capability string must also be set for this columnar object.
+
+	WATCHDOG
+	CONTROL
+	FRU
+
+	Indicates that the resource is a field-replaceable unit; i.e., it is
+	capable of being removed and replaced in a live system. If
+	MANAGED_HOTSWAP is also set, the resource supports
+	the full hot swap model.  If MANAGED_HOTSWAP is not
+	set, the resource supports the simplified hot swap model.
+
+	ANNUNCIATOR
+	POWER
+	RESET
+	INVENTORY_DATA
+	EVENT_LOG
+	RDR
+
+	Indicates that a resource data record (RDR) repository is supplied
+	by the resource. Since the existence of an RDR is mandatory for all
+	management instruments, this capability must be asserted if the 
+	resource contains any sensors, controls, watchdog timers, or inventory
+	data repositories.         
+	
+	SENSOR
 	"
 	::= {saHpiEntry 5}
 	
@@ -1662,7 +1685,7 @@ saHpiResourceTagTextLanguage OBJECT-TYPE
 	::= {saHpiEntry 19}
 
 saHpiResourceTag	OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
+	SYNTAX		SaHpiText
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"Resource tag. The type of date is specified
