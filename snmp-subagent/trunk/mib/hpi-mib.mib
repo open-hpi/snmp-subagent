@@ -4508,7 +4508,7 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorType			INTEGER,
 	saHpiSensorCategory			INTEGER,
 	saHpiSensorEventsCategoryControl	INTEGER,
-	saHpiSensorEventsState			Unsigned32,
+	saHpiSensorEventsSupported		Unsigned32,
 	saHpiSensorStatus			Unsigned32,
 	saHpiSensorAssertEvents			Unsigned32,
 	saHpiSensorDeassertEvents		Unsigned32,
@@ -4670,7 +4670,7 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
 			"
         ::= {saHpiSensorEntry 4}
 
-saHpiSensorEventsState OBJECT-TYPE
+saHpiSensorEventsSupported OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
@@ -6747,7 +6747,7 @@ saHpiSensorGroup	OBJECT-GROUP
 		saHpiSensorType,
 		saHpiSensorCategory,
 		saHpiSensorEventsCategoryControl,
-		saHpiSensorEventsState,
+		saHpiSensorEventsSupported,
 		saHpiSensorStatus,
         	saHpiSensorAssertEvents,
         	saHpiSensorDeassertEvents,
