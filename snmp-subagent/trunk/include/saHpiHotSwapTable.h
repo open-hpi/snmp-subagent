@@ -1,5 +1,5 @@
-/*
-* (C) Copyright IBM Corp. 2003
+/* 
+ * (C) Copyright IBM Corp. 2003
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,99 +31,95 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
-        /** Index saHpiDomainID is external */
-        /** Index saHpiResourceID is external */
+   /*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define HOTSWAP_INDEX_NR 2
+
+  /* Per the MIB
+   */
+#define MIB_OFF 2
+#define MIB_ON 1
 
     typedef struct saHpiHotSwapTable_context_s {
         netsnmp_index   index;
-                         /** THIS MUST BE FIRST!!! */
-
-    
+   
         /** INTEGER = ASN_INTEGER */
         long            saHpiHotSwapIndicator;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiPowerState;
+        long            saHpiHotSwapPowerState;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiResetState;
+        long            saHpiHotSwapResetState;
 
         /** INTEGER = ASN_INTEGER */
         long            saHpiHotSwapState;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiPreviousHotSwapState;
+        long            saHpiHotSwapPreviousState;
 
         /** INTEGER = ASN_INTEGER */
         long            saHpiHotSwapEventSeverity;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiInsertTimeout;
+        unsigned long   saHpiHotSwapInsertTimeout;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiExtractTimeout;
+        unsigned long   saHpiHotSwapExtractTimeout;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiActionRequest;
+        long            saHpiHotSwapActionRequest;
 
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiHotSwapRTP[MAX_OID_LEN];
         long            saHpiHotSwapRTP_len;
 
-
-        long resource_id;
-        long domain_id;
-	long hash;
-        
-
+      long hash;
+      long domain_id;
+      long resource_id;
+      
     } saHpiHotSwapTable_context;
 
-/*************************************************************
- * function declarations
- */
-   
     void            initialize_table_saHpiHotSwapTable(void);
-  /*
-    const saHpiHotSwapTable_context
-        *saHpiHotSwapTable_get_by_idx(netsnmp_index *);
 
-    const saHpiHotSwapTable_context
-        *saHpiHotSwapTable_get_by_idx_rs(netsnmp_index *, int row_status);
-	*/
     int             saHpiHotSwapTable_get_value(netsnmp_request_info *,
                                                 netsnmp_index *,
                                                 netsnmp_table_request_info
                                                 *);
 
-
+int
+populate_hotswap(SaHpiRptEntryT *rpt_entry,
+		 oid *rpt_oid, size_t rpt_oid_len);
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiHotSwapTable_oid[];
-    extern size_t   saHpiHotSwapTable_oid_len;
-
-  //1,3,6,1,3,90,2,4
-  // IBM-KR: Fix this. Should be in hpiResources
-#define saHpiHotSwapTable_TABLE_OID hpiEvents_OID,4
+//    extern oid      saHpiHotSwapTable_oid[];
+  //   extern size_t   saHpiHotSwapTable_oid_len;
+//1,3,6,1,3,90,3,11
+#define saHpiHotSwapTable_TABLE_OID hpiResources_OID,11
 
 
 /*************************************************************
  * column number definitions for table saHpiHotSwapTable
  */
 #define COLUMN_SAHPIHOTSWAPINDICATOR 1
-#define COLUMN_SAHPIPOWERSTATE 2
-#define COLUMN_SAHPIRESETSTATE 3
+#define COLUMN_SAHPIHOTSWAPPOWERSTATE 2
+#define COLUMN_SAHPIHOTSWAPRESETSTATE 3
 #define COLUMN_SAHPIHOTSWAPSTATE 4
-#define COLUMN_SAHPIPREVIOUSHOTSWAPSTATE 5
+#define COLUMN_SAHPIHOTSWAPPREVIOUSSTATE 5
 #define COLUMN_SAHPIHOTSWAPEVENTSEVERITY 6
-#define COLUMN_SAHPIINSERTTIMEOUT 7
-#define COLUMN_SAHPIEXTRACTTIMEOUT 8
-#define COLUMN_SAHPIACTIONREQUEST 9
+#define COLUMN_SAHPIHOTSWAPINSERTTIMEOUT 7
+#define COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT 8
+#define COLUMN_SAHPIHOTSWAPACTIONREQUEST 9
 #define COLUMN_SAHPIHOTSWAPRTP 10
 #define saHpiHotSwapTable_COL_MIN 1
 #define saHpiHotSwapTable_COL_MAX 10
 
-   
 
     int            
         saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
@@ -143,18 +139,7 @@ extern          "C" {
     netsnmp_index  *saHpiHotSwapTable_delete_row(saHpiHotSwapTable_context
                                                  *);
 
-    int            
-        saHpiHotSwapTable_can_activate(saHpiHotSwapTable_context *
-                                       undo_ctx,
-                                       saHpiHotSwapTable_context * row_ctx,
-                                       netsnmp_request_group * rg);
-    int            
-        saHpiHotSwapTable_can_deactivate(saHpiHotSwapTable_context *
-                                         undo_ctx,
-                                         saHpiHotSwapTable_context *
-                                         row_ctx,
-                                         netsnmp_request_group * rg);
-
+  
     int             saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context
                                                  * undo_ctx,
                                                  saHpiHotSwapTable_context
@@ -163,11 +148,9 @@ extern          "C" {
                                                  rg);
 
 
-  saHpiHotSwapTable_context *saHpiHotSwapTable_create_row(netsnmp_index *hdr);
- 
-    saHpiHotSwapTable_context *saHpiHotSwapTable_get(const char *name,
-                                                     int len);
 
+    saHpiHotSwapTable_context *saHpiHotSwapTable_create_row(netsnmp_index
+                                                            *);
 
 #ifdef __cplusplus
 };
