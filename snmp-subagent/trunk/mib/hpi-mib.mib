@@ -4597,7 +4597,7 @@ saHpiWatchdogRDR OBJECT-TYPE
 -- Notifications
 --
 
-saHpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
+hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
 
 saHpiSensorNotification NOTIFICATION-TYPE
 	OBJECTS {	
@@ -4615,7 +4615,7 @@ saHpiSensorNotification NOTIFICATION-TYPE
 	"Sensor event notification."
 	REFERENCE 
 	"Derived from typedefs in SAI-HPI-A.01.01 pages 101, 102."
-	::= { saHpiNotifications 1 }
+	::= { hpiNotifications 1 }
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
 	OBJECTS {
@@ -4627,7 +4627,7 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"Hot swap notification."
-	::= { saHpiNotifications 2}
+	::= { hpiNotifications 2}
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
 	OBJECTS {
@@ -4641,7 +4641,7 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"Watchdog notification."
-	::= { saHpiNotifications 3}
+	::= { hpiNotifications 3}
 
 saHpiOEMNotifications NOTIFICATION-TYPE
 	OBJECTS {
@@ -4653,7 +4653,7 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"OEM event notifications."
-	::= { saHpiNotifications 4}
+	::= { hpiNotifications 4}
 
 saHpiUserNotifications NOTIFICATION-TYPE
 	OBJECTS {
@@ -4664,7 +4664,7 @@ saHpiUserNotifications NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"User event notifications."
-	::= { saHpiNotifications 5}
+	::= { hpiNotifications 5}
 
 saHpiResourceNotifications NOTIFICATION-TYPE
 	OBJECTS {
@@ -4680,7 +4680,7 @@ saHpiResourceNotifications NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"Resource (RPT) change event notifications."
-	::= { saHpiNotifications 6}
+	::= { hpiNotifications 6}
 
 saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
 	OBJECTS {
@@ -4695,7 +4695,7 @@ saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"Resource  Data Record change event notifications."
-	::= { saHpiNotifications 7}
+	::= { hpiNotifications 7}
 
 -- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----       
 --      OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2
