@@ -9,6 +9,7 @@ bin_PROGRAMS		= hpiSubagent
 SUBDIRS                 = 
 
 hpiSubagent_SOURCES	= hpiB.c \
+			hpiSubagent.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnunciatorTable.c \
 			saHpiAreaTable.c \
