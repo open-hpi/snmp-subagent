@@ -58,17 +58,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %files
 ###################################################
 %defattr(-,root,root)
-%doc README COPYING ChangeLog
-%doc docs/hld/*pdf
-%doc docs/hld/openhpi-manual
-%config /etc/@HPI_PKG@/*
-%dir /var/lib/@HPI_PKG@
-%{prefix}/lib/libopen*
-%{prefix}/lib/@HPI_PKG@/libdummy*
-%{prefix}/lib/@HPI_PKG@/libsysfs*
-%{prefix}/lib/@HPI_PKG@/libsnmp_bc*
-%{prefix}/lib/@HPI_PKG@/libwatchdog*
-%{prefix}/lib/@HPI_PKG@/libipmi*
+%doc README COPYING ChangeLog TODO
+%doc docs/*pdf
+%doc docs/subagent-manual/
+%config /etc/snmp/hpiSubagent.conf
+%{prefix}/bin/hpi*
 
 ###################################################
 %clean
