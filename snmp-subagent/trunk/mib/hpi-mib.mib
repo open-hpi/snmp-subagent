@@ -2162,7 +2162,7 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogEntryId	Unsigned32,
 	saHpiSystemEventLogTimestamp	TimeStamp,
 	saHpiSystemEventLogged		RowPointer,
-	saHpiSystemEventClearEventTable TruthValue,
+	saHpiSystemEventClearEventTable RowStatus,
 	saHpiSystemEventLogState	INTEGER
 	}
 
@@ -2212,7 +2212,7 @@ saHpiSystemEventLogged OBJECT-TYPE
         ::= {saHpiSystemEventLogEntry 3}
 
 saHpiSystemEventClearEventTable OBJECT-TYPE
-	SYNTAX		TruthValue
+	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"Erase the contents of system event rows (and event).
