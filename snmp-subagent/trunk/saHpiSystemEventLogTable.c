@@ -190,7 +190,9 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 	return AGENT_ENTRY_EXIST;
       }
     }
-
+    
+    if (hash == 0)
+      hash = 1;
     ctx->hash = hash;
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
