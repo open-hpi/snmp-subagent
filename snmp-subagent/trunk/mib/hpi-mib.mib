@@ -6382,7 +6382,7 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
         DESCRIPTION
         "This table contains the fields used to define the senosr 
 	SAHPI_SRF_MAX values.  It is representative of the static data 
-	found in the SAI-HPI-B.01.01 RDR records."
+	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
@@ -6443,7 +6443,7 @@ saHpiSensorReadingMinEntry OBJECT-TYPE
         DESCRIPTION
         "This table contains the fields used to define the senosr 
 	SAHPI_SRF_MIN values.  It is representative of the static data 
-	found in the SAI-HPI-B.01.01 RDR records."
+	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
@@ -6492,6 +6492,8 @@ saHpiSensorReadingNominalTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining nominal sensor readings."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 7.2 and 8.5."	
         ::= {hpiSensor 4}
 
 saHpiSensorReadingNominalEntry OBJECT-TYPE
@@ -6499,8 +6501,11 @@ saHpiSensorReadingNominalEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        " This is the sensor resource data record which
-        describes the dynamic data associated with sensors."
+        "This table contains the fields used to define the senosr 
+	SAHPI_SRF_NOMINAL values.  It is representative of the static data 
+	found in the SAI-HPI-B.01.01 sensor RDR records."
+	REFERENCE
+	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorReadingNominalTable 1}
 
