@@ -4181,108 +4181,171 @@ saHpiInventoryTextLanguage OBJECT-TYPE
 	::= {saHpiInventoryEntry 6}
 
 saHpiInventoryManufacturer OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Manufacturer  of the inventory resource data record product.
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 7}
 
 saHpiInventoryProductName OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255)) 
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255)) 
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Product name of the inventory resource data record product.
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 8}
 
 saHpiInventoryProductVersion OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Product version of the inventory resource data record product.
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 9}
 
 saHpiInventoryModelNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Model number of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 10}
 
 saHpiInventorySerialNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Serial number of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 11}
 
 saHpiInventoryPartNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Part number  of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 12}
 
 saHpiInventoryFileId OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	File id of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 13}
 
 saHpiInventoryAssetTag OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Asset tag of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 14}
 
 saHpiInventoryCustomField OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..255))
-        MAX-ACCESS      read-only
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	Custom field of the inventory resource data record product.
 
 	It must be interpreted in the context of saHpiInventoryRecordType to 
 	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item."
+        boardInfo(178), or oductInfo(179) of the inventory item.
+
+	Zero-length description means that the device does NOT have the means
+	to provide correct information (or simply the device not support 
+	this entry).
+
+	Changing this field in those cases may not alter the inventory 
+	information."
         ::= {saHpiInventoryEntry 15}
 
 saHpiInventoryRDR OBJECT-TYPE
