@@ -31,23 +31,25 @@
  */
 
 // Everything went fine
-#define AGENT_ERR_NOERROR 255
+#define AGENT_ERR_NOERROR 0
 // Problems initializing HPI library (perhaps the plugins are non-existent?)
-#define AGENT_ERR_INIT 254
+#define AGENT_ERR_INIT -254
 // Problems openning the session (right options in /etc/openhpi.conf file?)
-#define AGENT_ERR_SESSION_OPEN 253
+#define AGENT_ERR_SESSION_OPEN -253
 // Problems closing the session
-#define AGENT_ERR_SESSION_CLOSE 254
+#define AGENT_ERR_SESSION_CLOSE -254
 // Not enough memory for allocating memory
-#define AGENT_ERR_MEMORY_FAULT 253
+#define AGENT_ERR_MEMORY_FAULT -253
 // Couldn't not perform discovery of resources.
-#define AGENT_ERR_DISCOVER 252
+#define AGENT_ERR_DISCOVER -252
 // Couldn't get RPT information
-#define AGENT_ERR_RPTGET 251
+#define AGENT_ERR_RPTGET -251
 // Internal operation error
-#define AGENT_ERR_OPERATION 250
+#define AGENT_ERR_OPERATION -250
 // Internal programmer error. Should never surface to the user.
-#define AGENT_ERR_INTERNAL_ERROR 249
+#define AGENT_ERR_INTERNAL_ERROR -249
+
+#define AGENT_ERR_NOT_FOUND -248
 
 /* current sahpi.h missed SA_ERR_INVENT_DATA_TRUNCATED */
 #ifndef SA_ERR_INVENT_DATA_TRUNCATED
