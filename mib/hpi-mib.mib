@@ -6991,9 +6991,7 @@ saHpiSensorThdUpMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMajorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining severely degraded status at the
-        upper end of critical threshold values for sensor that supports raw or 
-        interpreted values."
+        DESCRIPTION     "A table defining upper major threshold values."
         ::= {hpiSensor 11}
 
 saHpiSensorThdUpMajorEntry OBJECT-TYPE
