@@ -138,13 +138,9 @@ populate_rpt ()
       if (rpt_mutex == AGENT_TRUE)
 	{
 
-	  memcpy (&update_timestamp,
-		  &rpt_info.UpdateTimestamp, sizeof (SaHpiTimeT));
-
-	#ifdef ENDIAN_FIX
-	 update_timestamp.low = htonl(update_timestamp.low);
-	 update_timestamp.high = htonl(update_timestamp.high);
-        #endif
+	// IBM-KR: Endian	
+	 update_timestamp.low = rpt_info.UpdateTimestamp  & 0xffffffff;
+	 update_timestamp.high = rpt_info.UpdateTimestamp  >> 32;
 
 	  update_entry_count = rpt_info.UpdateCount;
 	  // Yes, something new.
@@ -547,13 +543,9 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE;
       ctx->saHpiParamControl = PARAM_UNDEFINED;
 
-      // IBM-KR: TODO , test this code. Make sure the time is right.
-      memcpy (&ctx->saHpiEventLogTime, time, sizeof (SaHpiTimeT));
-
-     #ifdef ENDIAN_FIX
-      ctx->saHpiEventLogTime.high = htonl (ctx->saHpiEventLogTime.high);
-      ctx->saHpiEventLogTime.low = htonl (ctx->saHpiEventLogTime.low);
-     #endif 
+	// IBM-KR: Endian
+      ctx->saHpiEventLogTime.low = *time & 0xffffffff;
+      ctx->saHpiEventLogTime.high = *time >> 32;
 
       ctx->saHpiEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
@@ -681,17 +673,14 @@ set_event_log_time (saHpiTable_context * ctx)
   SaHpiSessionIdT session_id;
   SaErrorT rc;
   SaHpiTimeT time;
-  integer64 t;
   if (ctx)
     {
-      #ifdef ENDIAN_FIX
-      t.low = ntohl (ctx->saHpiEventLogTime.low);
-      t.high = ntohl (ctx->saHpiEventLogTime.high);
-      #endif
-      memcpy (&time, &t, sizeof (SaHpiTimeT));
-      DEBUGMSGTL ((AGENT, "Time is %d; was: %d, %d\n",
-		   time, ctx->saHpiEventLogTime.low,
-		   ctx->saHpiEventLogTime.high));
+	//IBM-KR: Endian
+
+	time = ctx->saHpiEventLogTime.high;
+	time = time << 32;
+	time += ctx->saHpiEventLogTime.low;
+
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);
       if (rc != AGENT_ERR_NOERROR)
