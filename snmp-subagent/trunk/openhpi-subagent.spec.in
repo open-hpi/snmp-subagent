@@ -59,6 +59,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 ###################################################
 %defattr(-,root,root)
 %doc README COPYING ChangeLog TODO
+%doc mib
 %doc docs/*pdf
 %doc docs/subagent-manual/
 %config /etc/snmp/hpiSubagent.conf
