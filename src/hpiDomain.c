@@ -14,6 +14,7 @@
  *
  */
 #include <SaHpi.h>
+#include <oh_error.h>
 #include <hpiDomain.h>
 			 
 struct sa_domain_table top_drt = {
@@ -25,6 +26,31 @@ struct sa_resource_table top_rpt = {
         .table = NULL,
         .lock = G_STATIC_REC_MUTEX_INIT
 };
+
+
+int populate_drt(void) {
+
+	int rval = 0;
+	SaHpiSessionIdT sid;
+
+	if ( SA_OK != saHpiSessionOpen(
+		SAHPI_UNSPECIFIED_DOMAIN_ID, 
+		&sid, NULL) ){
+		dbg("ERROR: populate_drt, saHpiSessionOpen Failed!"); 
+		rval = -1;
+	} else {
+		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
+		top_drt.sid = sid;
+	}
+
+	return rval;
+
+}
+
+SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
+	return top_drt.did;
+}
+
 
 
 
