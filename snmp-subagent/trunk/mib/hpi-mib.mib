@@ -797,7 +797,7 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B spec."
 	REFERENCE 
-        "Derived from states described in the SAI-HPI-B.01.01 pages 136,137."
+        "Derived from states described in the SAI-HPI-B.01.01 section(s) 8.13."
 
 	SYNTAX      INTEGER {
                     undefined(0),
@@ -2664,7 +2664,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
         the appropriate hot swap state."
 
     REFERENCE 
-        "Derived from typedef in the SAI-HPI-B.01.01 page 150-151."
+        "Derived from typedef in the SAI-HPI-B.01.01 section(s) 8.13."
     ::= {saHpiHotSwapEntry 1}
 
 
@@ -2674,6 +2674,8 @@ saHpiHotSwapState 	OBJECT-TYPE
         STATUS      current
         DESCRIPTION
 	"Refer to the textual convention for full details."
+	REFERENCE 
+        "Derived from typedef in the SAI-HPI-B.01.01 section(s) 8.13."	
         ::= { saHpiHotSwapEntry 2 }
 	
 saHpiHotSwapExtractTimeout OBJECT-TYPE
@@ -2705,7 +2707,8 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         "
 
         REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.01.01 pages 145,146"
+        "Derived from function prototypes in the SAI-HPI-B.01.01 sections 
+	7.7, 7.7.10, 7.7.11 and 8.13"
     
         ::= { saHpiHotSwapEntry 3 }
 
@@ -2730,8 +2733,9 @@ saHpiHotSwapActionRequest OBJECT-TYPE
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 
-        REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 149."
+	REFERENCE
+        "Derived from function prototypes in the SAI-HPI-B.01.01 sections 
+	7.7, 7.7.14 and 8.13"
         ::= { saHpiHotSwapEntry 4 }
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
@@ -2762,11 +2766,12 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
         never transition into INSERTION PENDING or EXTRACTION PENDING states, 
         this function is not applicable to those resources.
 
-    Note: Enumerated values are increased by one value compared to
-    SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B spec."
 
-    REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 139."
+	REFERENCE 
+	"Derived from function prototype in the SAI-HPI-B.01.01 page 7.7, 7.7.5 
+	and 8.13."
     ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
@@ -2798,7 +2803,8 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
 	SAI-HPI-B.01.01 spec."
 
 	REFERENCE 
-        "Derived from function prototype in the SAI-HPI-B.01.01 page 140-141."
+        "Derived from function prototype in the SAI-HPI-B.01.01 sections
+	7.7, 7.7.6, 7.7.7 and 8.13."
     ::= { saHpiHotSwapEntry 6 }
 
         
