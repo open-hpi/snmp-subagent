@@ -72,12 +72,7 @@ extern          "C" {
  */
 
     void            initialize_table_saHpiRdrTable(void);
-  //const saHpiRdrTable_context *saHpiRdrTable_get_by_idx(netsnmp_index *);
-  /*const saHpiRdrTable_context *saHpiRdrTable_get_by_idx_rs(netsnmp_index
-                                                             *,
-                                                             int
-                                                             row_status);
-  */
+
     int             saHpiRdrTable_get_value(netsnmp_request_info *,
                                             netsnmp_index *,
                                             netsnmp_table_request_info *);
@@ -86,7 +81,11 @@ extern          "C" {
 		  SaHpiResourceIdT resource_id,
 		  oid *rpt_oid, size_t rpt_oid_len);
 
-
+int
+delete_rdr_row(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id,
+	       SaHpiEntryIdT num,
+	       SaHpiRdrTypeT type);
 int  
 saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
 			     SaHpiRdrT *entry, 
@@ -134,29 +133,10 @@ make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list,
 
     int             saHpiRdrTable_extract_index(saHpiRdrTable_context *
                                                 ctx, netsnmp_index * hdr);
-  /*
-    void            saHpiRdrTable_set_reserve1(netsnmp_request_group *);
-    void            saHpiRdrTable_set_reserve2(netsnmp_request_group *);
-    void            saHpiRdrTable_set_action(netsnmp_request_group *);
-    void            saHpiRdrTable_set_commit(netsnmp_request_group *);
-    void            saHpiRdrTable_set_free(netsnmp_request_group *);
-    void            saHpiRdrTable_set_undo(netsnmp_request_group *);
-  */
-    saHpiRdrTable_context
-        *saHpiRdrTable_duplicate_row(saHpiRdrTable_context *);
-    netsnmp_index  *saHpiRdrTable_delete_row(saHpiRdrTable_context *);
-
-    int             saHpiRdrTable_can_delete(saHpiRdrTable_context *
-                                             undo_ctx,
-                                             saHpiRdrTable_context *
-                                             row_ctx,
-                                             netsnmp_request_group * rg);
-
 
 
     saHpiRdrTable_context *saHpiRdrTable_create_row(netsnmp_index *);
 
-    saHpiRdrTable_context *saHpiRdrTable_get(const char *name, int len);
 
 
 #ifdef __cplusplus

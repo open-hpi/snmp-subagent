@@ -52,48 +52,6 @@ static u_long rdr_count = 0;
 
 
 
-/************************************************************
- * keep binary tree to find context by name
- */
-//static int      saHpiRdrTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-/*
-static int
-saHpiRdrTable_cmp(const void *lhs, const void *rhs)
-{
-
-    saHpiRdrTable_context *context_l = (saHpiRdrTable_context *) lhs;
-    saHpiRdrTable_context *context_r = (saHpiRdrTable_context *) rhs;
-   
-    int             rc;
-
-    if (context_l->saHpiResourceID < context_r->saHpiResourceID) 
-      return -1;
-
-    rc = (context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0 : 1;
-
-    if (rc!=0)
-      return rc;
-
-    if (context_l->saHpiRdrRecordId < context_r->saHpiRdrRecordId)
-      return -1;
-    rc = (context_l->saHpiRdrRecordId == context_r->saHpiRdrRecordId) ? 0 : 1;
-
-    if (rc!=0)
-      return rc;
-
-    if (context_l->saHpiRdrType < context_r->saHpiRdrType)
-      return -1;
-    return (context_l->saHpiRdrType == context_r->saHpiRdrType) ? 0 : 1;
-
-}
-  */
-
-
 
 
 int
@@ -221,7 +179,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 					 child_oid_len,
 					 child_id)
 	    == AGENT_NEW_ENTRY) {
-	  DEBUGMSGTL((AGENT,"Adding it in\n"));
+
 	  CONTAINER_INSERT(cb.container, rdr_context);	  
 	  rdr_count = CONTAINER_SIZE(cb.container);
 
@@ -243,6 +201,36 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
   return rc;
 }
 
+
+int
+delete_rdr_row(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id,
+	       SaHpiEntryIdT num,
+	       SaHpiRdrTypeT type) {
+
+  saHpiRdrTable_context *ctx;
+  oid rdr_oid[3];
+  netsnmp_index	rdr_index;
+
+// Look at the MIB to find out what the indexs are
+  rdr_oid[0]=resource_id;
+  rdr_oid[1]=num;
+  rdr_oid[2]=type;
+
+  // Possible more indexs?
+  rdr_index.oids = (oid *)&rdr_oid;
+  rdr_index.len = 3;
+
+  ctx = CONTAINER_FIND(cb.container, &rdr_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    rdr_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
+}
 
 int  
 saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
@@ -281,9 +269,10 @@ saHpiRdrTable_modify_context(SaHpiResourceIdT resource_id,
       }
     }
 
-    ctx->hash = hash;
+    if (hash == 0)
+      hash = -1;
 
-    DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->RecordId));
+    ctx->hash = hash;
 
     ctx->saHpiResourceID = resource_id;
     ctx->saHpiRdrRecordId = entry->RecordId;
@@ -420,53 +409,50 @@ make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list,
   
 }
 
+
 /************************************************************
- * the *_row_copy routine
+ * keep binary tree to find context by name
  */
+//static int      saHpiRdrTable_cmp(const void *lhs, const void *rhs);
 
+/************************************************************
+ * compare two context pointers here. Return -1 if lhs < rhs,
+ * 0 if lhs == rhs, and 1 if lhs > rhs.
+ *
+ * IBM-KR: We only need to modify this code if we want to change the
+ * order of comparing the indexes.
+ */
+/*
 static int
-saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
-                       saHpiRdrTable_context * src)
+saHpiRdrTable_cmp(const void *lhs, const void *rhs)
 {
-  DEBUGMSGTL((AGENT,"--- saHpiRdrTable_row_copy: Entry.\n"));
 
-  if (!dst || !src)
-    return 1;
+    saHpiRdrTable_context *context_l = (saHpiRdrTable_context *) lhs;
+    saHpiRdrTable_context *context_r = (saHpiRdrTable_context *) rhs;
+   
+    int             rc;
+    DEBUGMSGTL((AGENT,"saHpiRdrTable_cmp\n"));
+    if (context_l->saHpiResourceID < context_r->saHpiResourceID) 
+      return -1;
 
+    rc = (context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0 : 1;
 
-    if (dst->index.oids)
-        free(dst->index.oids);
-    if (snmp_clone_mem((void *) &dst->index.oids, src->index.oids,
-                       src->index.len * sizeof(oid))) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
+    if (rc!=0)
+      return 1;
 
+    if (context_l->saHpiRdrRecordId < context_r->saHpiRdrRecordId)
+      return -1;
+    rc = (context_l->saHpiRdrRecordId == context_r->saHpiRdrRecordId) ? 0 : 1;
 
+    if (rc!=0)
+      return 1;
 
-    dst->saHpiResourceID = src->saHpiResourceID;
-    dst->saHpiRdrRecordId = src->saHpiRdrRecordId;
+    if (context_l->saHpiRdrType < context_r->saHpiRdrType)
+      return -1;
+    return (context_l->saHpiRdrType == context_r->saHpiRdrType) ? 0 : 1;
 
-    dst->saHpiRdrType = src->saHpiRdrType;
-
-    memcpy(dst->saHpiRdrEntityPath, src->saHpiRdrEntityPath,
-           src->saHpiRdrEntityPath_len);
-    dst->saHpiRdrEntityPath_len = src->saHpiRdrEntityPath_len;
-
-    memcpy(src->saHpiRdr, dst->saHpiRdr, src->saHpiRdr_len);
-    dst->saHpiRdr_len = src->saHpiRdr_len;
-
-    dst->saHpiRdrId = src->saHpiRdrId;
-
-    memcpy(src->saHpiRdrRTP, dst->saHpiRdrRTP, src->saHpiRdrRTP_len);
-    dst->saHpiRdrRTP_len = src->saHpiRdrRTP_len;
-
-    return 0;
 }
-
-
-
+*/
 /*
  * the *_extract_index routine
  */
@@ -522,13 +508,7 @@ saHpiRdrTable_extract_index(saHpiRdrTable_context * ctx,
 
         ctx->saHpiRdrType = *var_saHpiRdrType.val.integer;
 
-        /*
-         * TODO: check index for valid values. For EXAMPLE:
-         *
-         * if ( *var_saHpiRdrType.val.integer != XXX ) {
-         *    err = -1;
-         * }
-         */
+       
     }
 
     /*
@@ -539,22 +519,6 @@ saHpiRdrTable_extract_index(saHpiRdrTable_context * ctx,
     return err;
 }
 
-/************************************************************
- * the *_can_delete routine is called to determine if a row
- * can be deleted.
- *
- * return 1 if the row can be deleted
- * return 0 if the row cannot be deleted
- */
-int
-saHpiRdrTable_can_delete(saHpiRdrTable_context * undo_ctx,
-                         saHpiRdrTable_context * row_ctx,
-                         netsnmp_request_group * rg)
-{
-
-
-    return 0;
-}
 
 
 /************************************************************
@@ -573,7 +537,9 @@ saHpiRdrTable_can_delete(saHpiRdrTable_context * undo_ctx,
  */
 saHpiRdrTable_context *
 saHpiRdrTable_create_row(netsnmp_index * hdr)
+
 {
+
     saHpiRdrTable_context *ctx =
         SNMP_MALLOC_TYPEDEF(saHpiRdrTable_context);
     if (!ctx)
@@ -589,151 +555,6 @@ saHpiRdrTable_create_row(netsnmp_index * hdr)
     return ctx;
 }
 
-
-/************************************************************
- * the *_duplicate row routine
- */
-saHpiRdrTable_context *
-saHpiRdrTable_duplicate_row(saHpiRdrTable_context * row_ctx)
-{
-    saHpiRdrTable_context *dup;
-
-    if (!row_ctx)
-        return NULL;
-
-    dup = SNMP_MALLOC_TYPEDEF(saHpiRdrTable_context);
-    if (!dup)
-        return NULL;
-
-    if (saHpiRdrTable_row_copy(dup, row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
-
-    return dup;
-}
-
-/************************************************************
- * the *_delete_row method is called to delete a row.
- */
-netsnmp_index  *
-saHpiRdrTable_delete_row(saHpiRdrTable_context * ctx)
-{
-
-    if (ctx->index.oids)
-        free(ctx->index.oids);
-
-    free(ctx);
-
-    return NULL;
-}
-
-
-/************************************************************
- * RESERVE is used to check the syntax of all the variables
- * provided, that the values being set are sensible and consistent,
- * and to allocate any resources required for performing the SET.
- * After this stage, the expectation is that the set ought to
- * succeed, though this is not guaranteed. (In fact, with the UCD
- * agent, this is done in two passes - RESERVE1, and
- * RESERVE2, to allow for dependancies between variables).
- *
- * BEFORE calling this routine, the agent will call duplicate_row
- * to create a copy of the row (unless this is a new row; i.e.
- * row_created == 1).
- *
- * next state -> SET_RESERVE2 || SET_FREE
- */
-void
-saHpiRdrTable_set_reserve1(netsnmp_request_group * rg)
-{
- 
-}
-
-void
-saHpiRdrTable_set_reserve2(netsnmp_request_group * rg)
-{
-
-
-}
-
-/************************************************************
- * Assuming that the RESERVE phases were successful, the next
- * stage is indicated by the action value ACTION. This is used
- * to actually implement the set operation. However, this must
- * either be done into temporary (persistent) storage, or the
- * previous value stored similarly, in case any of the subsequent
- * ACTION calls fail.
- *
- * In your case, changes should be made to row_ctx. A copy of
- * the original row is in undo_ctx.
- */
-void
-saHpiRdrTable_set_action(netsnmp_request_group * rg)
-{
-   
-}
-
-/************************************************************
- * Only once the ACTION phase has completed successfully, can
- * the final COMMIT phase be run. This is used to complete any
- * writes that were done into temporary storage, and then release
- * any allocated resources. Note that all the code in this phase
- * should be "safe" code that cannot possibly fail (cue
- * hysterical laughter). The whole intent of the ACTION/COMMIT
- * division is that all of the fallible code should be done in
- * the ACTION phase, so that it can be backed out if necessary.
- *
- * BEFORE calling this routine, the agent will update the
- * container (inserting a row if row_created == 1, or removing
- * the row if row_deleted == 1).
- *
- * AFTER calling this routine, the agent will delete the
- * undo_info.
- */
-void
-saHpiRdrTable_set_commit(netsnmp_request_group * rg)
-{
-  
-}
-
-/************************************************************
- * If either of the RESERVE calls fail, the write routines
- * are called again with the FREE action, to release any resources
- * that have been allocated. The agent will then return a failure
- * response to the requesting application.
- *
- * AFTER calling this routine, the agent will delete undo_info.
- */
-void
-saHpiRdrTable_set_free(netsnmp_request_group * rg)
-{
- 
-}
-
-/************************************************************
- * If the ACTION phase does fail (for example due to an apparently
- * valid, but unacceptable value, or an unforeseen problem), then
- * the list of write routines are called again, with the UNDO
- * action. This requires the routine to reset the value that was
- * changed to its previous value (assuming it was actually changed),
- * and then to release any resources that had been allocated. As
- * with the FREE phase, the agent will then return an indication
- * of the error to the requesting application.
- *
- * BEFORE calling this routine, the agent will update the container
- * (remove any newly inserted row, re-insert any removed row).
- *
- * AFTER calling this routing, the agent will call row_copy
- * to restore the data in existing_row from the date in undo_info.
- * Then undo_info will be deleted (or existing row, if row_created
- * == 1).
- */
-void
-saHpiRdrTable_set_undo(netsnmp_request_group * rg)
-{
-  
-}
 
 
 
@@ -791,31 +612,16 @@ initialize_table_saHpiRdrTable(void)
     cb.container = netsnmp_container_find("saHpiRdrTable_primary:"
                                           "saHpiRdrTable:"
                                           "table_container");
-
+    /*
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find
                                 ("saHpiRdrTable_secondary:"
                                  "saHpiRdrTable:" "table_container"));
-    //    cb.container->next->compare = saHpiRdrTable_cmp;
-
+     cb.container->next->compare = saHpiRdrTable_cmp;
+    */
     cb.create_row = (UserRowMethod *) saHpiRdrTable_create_row;
 
-   
-    //    cb.duplicate_row = (UserRowMethod *) saHpiRdrTable_duplicate_row;
-    //    cb.delete_row = (UserRowMethod *) saHpiRdrTable_delete_row;
-   
-    //    cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiRdrTable_row_copy;
-   
-    //    cb.can_delete = (Netsnmp_User_Row_Action *) saHpiRdrTable_can_delete;
-   /* 
-    cb.set_reserve1 = saHpiRdrTable_set_reserve1;
-    cb.set_reserve2 = saHpiRdrTable_set_reserve2;
-    cb.set_action = saHpiRdrTable_set_action;
-    cb.set_commit = saHpiRdrTable_set_commit;
-    cb.set_free = saHpiRdrTable_set_free;
-    cb.set_undo = saHpiRdrTable_set_undo;
-   */ 
-
+      
     DEBUGMSGTL(("initialize_table_saHpiRdrTable",
                 "Registering table saHpiRdrTable " "as a table array\n"));
 
@@ -899,15 +705,3 @@ saHpiRdrTable_get_value(netsnmp_request_info *request,
     DEBUGMSGTL((AGENT,"--- saHpiRdrTable_get_value: Exit\n"));
     return SNMP_ERR_NOERROR;
 }
-
-/************************************************************
- * saHpiRdrTable_get_by_idx
- */
-/*
-const saHpiRdrTable_context *
-saHpiRdrTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiRdrTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
-*/
