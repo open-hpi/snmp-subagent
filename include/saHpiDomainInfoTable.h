@@ -121,9 +121,13 @@ const saHpiDomainInfoTable_context * saHpiDomainInfoTable_get_by_idx_rs(netsnmp_
                                         int row_status);
 int saHpiDomainInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * oid declarations scalars
+ */
+static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
 
 /*************************************************************
- * oid declarations
+ * oid declarations table
  */
 extern oid saHpiDomainInfoTable_oid[];
 extern size_t saHpiDomainInfoTable_oid_len;
