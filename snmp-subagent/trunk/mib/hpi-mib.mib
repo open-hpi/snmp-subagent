@@ -4892,6 +4892,184 @@ saHpiCtrlDiscreteRDR OBJECT-TYPE
         ::= {saHpiCtrlDiscreteEntry 8}
 
 
+saHpiCtrlAnalogEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of analog control records in the system."
+        ::= {hpiControl 6}
+
+saHpiCtrlAnalogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlAnalogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table of analog Control Resource Data Records and its states."
+        ::= {hpiControl 7}
+                
+
+saHpiCtrlAnalogEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlAnalogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+                "Definition of the analog control resource data record and its states table."
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
+        ::= {saHpiCtrlAnalogTable 1}
+
+
+SaHpiCtrlAnalogEntry ::= SEQUENCE {
+        saHpiCtrlAnalogOutputType		SaHpiCtrlOutputType,
+
+        saHpiCtrlAnalogMode     		SaHpiCtrlMode,        
+
+        saHpiCtrlAnalogIsReadOnly 		TruthValue,
+
+        saHpiCtrlAnalogIsWriteOnly		TruthValue,
+
+		saHpiCtrlAnalogDefaultMinState		INTEGER,
+		saHpiCtrlAnalogDefaultMaxState		INTEGER,
+		saHpiCtrlAnalogDefaultState		INTEGER,
+
+		saHpiCtrlAnalogState			INTEGER,
+
+        saHpiCtrlAnalogOem             Unsigned32, 
+   
+        saHpiCtrlAnalogRDR             RowPointer
+}
+
+
+saHpiCtrlAnalogOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+		"Refer to the textual convention for more details on the
+		enumerations.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+        ::= {saHpiCtrlAnalogEntry 1}
+
+
+saHpiCtrlAnalogMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"If this columnar node is written to when the saHpiCtrlAnalogIsReadOnly 
+	flag is TRUE the an SNMP error of notWritable is returned.  
+
+	This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+	The CtrlState parameter must be of the correct type for the specified 
+	control.  
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+	REFERENCE "See section 7.3 and 7.3.3."
+        ::= {saHpiCtrlAnalogEntry 2}
+        
+saHpiCtrlAnalogIsReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if mode is read-only"
+        ::= {saHpiCtrlAnalogEntry 3}
+        
+saHpiCtrlAnalogIsWriteOnly  OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if Control is write-only"
+	
+	REFERENCE "See remarks section 7.3.2."
+        ::= {saHpiCtrlAnalogEntry 4}
+
+saHpiCtrlAnalogDefaultMinState          OBJECT-TYPE
+        SYNTAX          INTEGER 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default min value of resource data records 
+	 	of the analog control.
+
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlAnalogEntry 5}
+
+saHpiCtrlAnalogDefaultMaxState          OBJECT-TYPE
+        SYNTAX          INTEGER 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default max value of resource data records 
+	 	of the analog control.
+
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlAnalogEntry 6}
+
+saHpiCtrlAnalogDefaultState          OBJECT-TYPE
+        SYNTAX          INTEGER 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default value of resource data records 
+	 	of the analog control.
+
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlAnalogEntry 7}
+
+saHpiCtrlAnalogState OBJECT-TYPE
+        SYNTAX          INTEGER 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+        This attribute represents the current analog setting of the control.  
+        Use this object to change the values of the data.
+	
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code.
+
+        "
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
+	7.3.3, 8.7 and 8.8."
+         
+        ::= {saHpiCtrlAnalogEntry 8}
+
+saHpiCtrlAnalogOem OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Reserved for OEM use"
+        ::= {saHpiCtrlAnalogEntry 9}
+
+
+saHpiCtrlAnalogRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        ::= {saHpiCtrlAnalogEntry 10}
+
+
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -7672,6 +7850,24 @@ saHpiCtrlDiscreteGroup OBJECT-GROUP
 		"saHpiCtrlDiscrete table."
 	::= { hpiMIBCompliances 22}
 
+saHpiCtrlAnalogGroup OBJECT-GROUP
+	OBJECTS {
+        saHpiCtrlAnalogOutputType,
+        saHpiCtrlAnalogMode,
+        saHpiCtrlAnalogIsReadOnly,
+        saHpiCtrlAnalogIsWriteOnly,
+		saHpiCtrlAnalogDefaultMinState,
+		saHpiCtrlAnalogDefaultMaxState,
+		saHpiCtrlAnalogDefaultState,
+		saHpiCtrlAnalogState,
+        saHpiCtrlAnalogOem, 
+        saHpiCtrlAnalogRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"saHpiCtrlAnalog table."
+	::= { hpiMIBCompliances 23}
+
 saHpiSensorGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorType,
@@ -7987,6 +8183,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiRdrGroup,
 		saHpiCtrlDigitalGroup,
 		saHpiCtrlDiscreteGroup,
+		saHpiCtrlAnalogGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
