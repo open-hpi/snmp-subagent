@@ -55,7 +55,7 @@ fi
 make DESTDIR=$RPM_BUILD_ROOT install
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
-cp openhpi-subagent.rc $RPM_BUILD_ROOT/etc/init.d
+install -m 744 openhpi-subagent.rc $RPM_BUILD_ROOT/etc/init.d/openhpi-subagent
 
 %post
 
