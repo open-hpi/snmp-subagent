@@ -1521,7 +1521,6 @@ SaHpiResourceEntry ::= SEQUENCE {
 	saHpiEntryId				Unsigned32,
 	saHpiResourceId				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
--- IBMKR: Resort the Rpt entries?
 	saHpiResourceCapabilities 		OCTET STRING,
 	
 	saHpiResourceHotSwapCapabilities 	Unsigned32,	
