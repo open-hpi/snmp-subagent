@@ -396,7 +396,7 @@ SaHpiTimeString ::= TEXTUAL-CONVENTION
 	STATUS       current
 	DESCRIPTION
 	"This textual convention defines the HPI time represented
-	as a string value.
+	as a string value encapsulating the 64-bit value.
 
 	An HPI time value represents the local time as the number of nanoseconds
 	from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
@@ -478,30 +478,31 @@ SaHpiTimeString ::= TEXTUAL-CONVENTION
 	SAHPI_TIMEOUT_BLOCK        -1LL"
 
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
+        "Derived from SAI-HPI-B.01.01 specification, section 8.1."
     SYNTAX      OCTET STRING(SIZE(0..255))
     
 
 SaHpiSeverity ::= TEXTUAL-CONVENTION
         STATUS      current
         DESCRIPTION     
-        "                       
-                Note these are the SAI-HPI-B.01.01 values, SNMP requires that
-                they are offset by +1.
-                                
-                SAHPI_CRITICAL = 0,
-                SAHPI_MAJOR,    
-                SAHPI_MINOR,    
-                SAHPI_INFORMATIONAL,
-                SAHPI_OK,
-                SAHPI_DEBUG = 0xF0,
+        "This textual convention defines the severity levels.
+
+    The possible levels are:
+
+         critical (1)
+         major (2)
+         minor (3)
+         informational (4)
+         ok (5)
+         debug (6)
                
-                Only used with DAT and Annunciator functions.  This is not a
-                valid severity for events or alarms. 
-                SAHPI_ALL_SEVERITIES = 0xFF
-        "
+    The last level, allSeverities(7) is only used with Domain Alarm Tabel
+    and Annunciator table.  It is not a valid severity for events or alarms.
+
+    Note: These values are offset by +1 as compared to the  SAI-HPI-B.01.01 
+    values. "
         REFERENCE
-        "Derived from SAI-HPI-B.01.01 section 8.14." 
+    "Derived from SAI-HPI-B.01.01 section 8.14." 
         SYNTAX  INTEGER {
                         undefined(0),
                         critical (1),
@@ -510,7 +511,7 @@ SaHpiSeverity ::= TEXTUAL-CONVENTION
                         informational (4),
                         ok (5),
                         debug (6),
-                        allseverities (7)
+                        allSeverities (7)
                 }
 
 
