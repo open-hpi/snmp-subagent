@@ -206,8 +206,9 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
   SaHpiUserEventT user;
 
   if (sel && ctx)
-    {
-      hash = calculate_hash_value (sel, sizeof (SaHpiSelEntryT));
+    { 
+      hash = calculate_hash_value (&sel->Event.EventDataUnion, 
+		      sizeof (SaHpiEventUnionT));
 
       DEBUGMSGTL ((AGENT, " Hash value: %d, in ctx: %d\n", hash, ctx->hash));
 
@@ -223,8 +224,14 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id == rpt->ResourceId) && 
+	      (ctx->domain_id == rpt->DomainId) && 
+	      (ctx->saHpiSystemEventLogIndex == sel->EntryId)) {
+		  return AGENT_ENTRY_EXIST; 
+	   }	
 	}
 
+      
       if (hash == 0)
 	hash = 1;
       ctx->hash = hash;
