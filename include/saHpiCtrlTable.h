@@ -50,7 +50,7 @@ extern "C"
    * The max for the CtrlState. Modeled after
    * saHpiCtrlStateT
    */
-#define SAHPI_CTRL_STATE_MAX 7
+#define SAHPI_CTRL_STATE_MAX 9
 
   /*
    * Max length of data in saHpiCtrlAttributes object.
