@@ -1,2 +1,2 @@
-HPI-MIB::saHpiEventDelete.0.1.0 = INTEGER: destroy(6)
+HPI-MIB::saHpiEventDelete.0.4.0 = INTEGER: destroy(6)
 HPI-MIB::saHpiEventCount.0 = Counter32: 0

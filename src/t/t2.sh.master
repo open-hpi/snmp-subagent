@@ -1,4 +1,4 @@
-HPI-MIB::saHpiSensorAssertEvents.0.1.1 = STRING: "UPPER_CRIT"
-HPI-MIB::saHpiSensorAssertEvents.0.1.1 = STRING: "UPPER_CRIT"
-HPI-MIB::saHpiSensorAssertEvents.0.1.1 = STRING: "UPPER_CRIT,LOWER_MAJOR"
-HPI-MIB::saHpiSensorAssertEvents.0.1.1 = STRING: "LOWER_MAJOR, UPPER_CRIT"
+HPI-MIB::saHpiSensorAssertEvents.0.4.1 = STRING: "UPPER_CRIT"
+HPI-MIB::saHpiSensorAssertEvents.0.4.1 = STRING: "UPPER_CRIT"
+HPI-MIB::saHpiSensorAssertEvents.0.4.1 = STRING: "UPPER_CRIT,LOWER_MAJOR"
+HPI-MIB::saHpiSensorAssertEvents.0.4.1 = STRING: "LOWER_MAJOR, UPPER_CRIT"

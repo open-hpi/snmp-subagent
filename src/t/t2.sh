@@ -20,16 +20,14 @@ if [ "$1" == "-v" ]; then
 	VERBOSE=yes
 fi
 
-start
 
 dbg "Set SensorAssertions"
 
-q $SNMPSET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.1.1 = UPPER_CRIT > $0.tmp
-q $SNMPGET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.1.1 >> $0.tmp
-q $SNMPSET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.1.1 = UPPER_CRIT,LOWER_MAJOR >> $0.tmp
-q $SNMPGET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.1.1 >> $0.tmp
+q $SNMPSET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.4.1 = UPPER_CRIT > $0.tmp
+q $SNMPGET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.4.1 >> $0.tmp
+q $SNMPSET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.4.1 = UPPER_CRIT,LOWER_MAJOR >> $0.tmp
+q $SNMPGET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEvents.0.4.1 >> $0.tmp
 cat $0.tmp | grep -v $SNMPSET | grep -v $SNMPGET > $0.result
 rm $0.tmp
 
-check
 stop
