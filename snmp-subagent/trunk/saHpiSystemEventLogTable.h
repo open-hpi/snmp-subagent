@@ -68,6 +68,13 @@ extern          "C" {
                                                        netsnmp_table_request_info
                                                        *);
   int populate_sel(SaHpiRptEntryT *rpt_entry);
+
+int
+saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
+					SaHpiRptEntryT *rpt,
+					oid *event_entry, 
+					size_t event_entry_oid_len,
+					saHpiSystemEventLogTable_context *ctx);
 		   
   int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
 
