@@ -52,7 +52,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiUserEventTable.c \
 			saHpiWatchdogEventTable.c \
 			saHpiWatchdogTable.c \
-			hpiCheckIndice.c
+			hpiCheckIndice.c \
+			hpiDomain.c
 
 hpiSubagent_LDADD	= 
 hpiSubagent_LDFLAGS	= 

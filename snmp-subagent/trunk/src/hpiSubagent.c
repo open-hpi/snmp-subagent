@@ -12,7 +12,7 @@
  *   Konrad Rzeszutek <konradr@us.ibm.com>
  *
  * $Id$
- *
+ *					  
  */
 
 #include <net-snmp/net-snmp-config.h>
