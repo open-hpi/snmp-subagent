@@ -52,6 +52,11 @@ typedef struct saHpiDomainReferenceTable_context_s {
 } saHpiDomainReferenceTable_context;
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+void poplulate_saHpiDomainReferenceTable(void);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiDomainReferenceTable(void);

@@ -57,6 +57,11 @@ typedef struct saHpiDomainEventTable_context_s {
 } saHpiDomainEventTable_context;
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+void populate_saHpiDomainAlarmTable(void);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiDomainEventTable(void);

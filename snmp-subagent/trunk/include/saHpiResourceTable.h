@@ -121,6 +121,11 @@ typedef struct saHpiResourceTable_context_s {
 } saHpiResourceTable_context;
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+void populate_saHpiResourceTable(void);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiResourceTable(void);
