@@ -169,21 +169,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 			   sel.EntryId,
 			   SNMP_ROW_ACTIVE);
 
-	// Now create the 'event' and get its OID to be copied to our
-	// SystemEventLogged OID
-	
-	/*
-	  // NEW MIB change.
-	  // IBM-KR: Add new rows.
 
-	populate_event(sel.EntryId,
-		       &sel.Event, 
-		       rpt_entry, 
-		       &rdr_entry, 
-		       child_oid, &child_oid_len,
-		       DomainID_oid, DomainID_oid_len,
-		       ResourceID_oid, ResourceID_oid_len);
-	*/
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,
 						    rpt_entry,
@@ -212,35 +198,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 }
 
 
-
-/*
-int
-delete_event_entry(saHpiEventTable_context *ctx) {
-
-  SaHpiSessionIdT session_id;
-  SaErrorT rc;
-  if (ctx) {
-    // Get the seesion_id
-    rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
-      return rc;    
-    
-    DEBUGMSGTL((AGENT,"Deleting entry: %d: %d: %d\n", session_id, ctx->resource_id, ctx->saHpiEventIndex));
-    rc = saHpiEventLogEntryDelete(session_id,
-				  ctx->resource_id,
-				  ctx->saHpiEventIndex);
-
-    if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Error is %d\n", rc));
-      return AGENT_ERR_OPERATION;
-    }
-    
-    return AGENT_ERR_NOERROR;
-  }
-  return AGENT_ERR_NULL_DATA;
-  
-}
-*/
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					//SaHpiBoolT *state,
@@ -326,24 +283,33 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,
-	       SaHpiResourceIdT resource_id)
+	       SaHpiResourceIdT resource_id) {
 
-{
   saHpiSystemEventLogTable_context *ctx;
   int rc = AGENT_ERR_NOT_FOUND;
   unsigned long i;
+  oid partial_index_oid[SEL_INDEX_NR-1];
+  netsnmp_index index;
+  netsnmp_void_array *array;
 
-  DEBUGMSGTL((AGENT,"TODO: delete_SEL_row (%d, %d). Entry\n",
+  DEBUGMSGTL((AGENT,"delete_SEL_row (%d, %d). Entry\n",
   	domain_id, resource_id));
 
-  /*  
-  if (ctx) {
-    // Notify
-    CONTAINER_REMOVE(cb.container, ctx);
-    event_log_entries = CONTAINER_SIZE(cb.container);
-    rc= AGENT_ERR_NOERROR;
-    }*/
-  DEBUGMSGTL((AGENT,"delete_SEL_row. Exit (rc: %d)\n", rc));
+  partial_index_oid[0] = domain_id;
+  partial_index_oid[1] = resource_id;
+
+  index.oids = (oid *)&partial_index_oid;
+  index.len = SEL_INDEX_NR-1;
+
+  array = CONTAINER_GET_SUBSET(cb.container, &index);
+  if (array->size > 0) {
+    for (i = 0; i < array->size; i++) {
+      ctx = array->array[i];
+      CONTAINER_REMOVE(cb.container, ctx);
+    }
+    rc = AGENT_ERR_NOERROR;
+  }
+  DEBUGMSGTL((AGENT,"delete_SEL_row. Exit (rc: %d, purged: %d records)\n", rc, array->size));
   return rc;
   
 }
