@@ -54,6 +54,7 @@
 
 #define AGENT_ERR_NOT_FOUND -248
 
+#define AGENT_ERR_BUILD_TRAP -247
 /* current sahpi.h missed SA_ERR_INVENT_DATA_TRUNCATED */
 #ifndef SA_ERR_INVENT_DATA_TRUNCATED
 //#warning "No 'SA_ERR_INVENT_DATA_TRUNCATED 'definition in sahpi.h!"

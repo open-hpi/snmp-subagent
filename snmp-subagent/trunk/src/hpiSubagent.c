@@ -230,7 +230,7 @@ getSaHpiSession(SaHpiSessionIdT *out) {
       DEBUGMSGTL((AGENT,"saHpiResourcesDiscover error: %d ", err));
       return AGENT_ERR_DISCOVER;
    }
-   session_avail = TRUE;   
+   session_avail = AGENT_TRUE;   
   }
 
   if (out)

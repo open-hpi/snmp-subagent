@@ -212,6 +212,35 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 }
 
 
+
+/*
+int
+delete_event_entry(saHpiEventTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  if (ctx) {
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    
+    DEBUGMSGTL((AGENT,"Deleting entry: %d: %d: %d\n", session_id, ctx->resource_id, ctx->saHpiEventIndex));
+    rc = saHpiEventLogEntryDelete(session_id,
+				  ctx->resource_id,
+				  ctx->saHpiEventIndex);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error is %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
+}
+*/
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					//SaHpiBoolT *state,
@@ -724,9 +753,11 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 
 	      rg->row_deleted = 1;
 	      // Delete it also in event.
+	/*
 	      delete_event_row(row_ctx->domain_id,
 			       row_ctx->resource_id,
 			       row_ctx->saHpiSystemEventLogEntryId);
+	*/
 	      // Notify the RPT table.
 	      update_event_status_flag(row_ctx->domain_id,
 				 row_ctx->resource_id,

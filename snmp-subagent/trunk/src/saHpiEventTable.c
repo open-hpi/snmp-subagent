@@ -183,10 +183,17 @@ int populate_event() {
   err = saHpiSubscribe( session_id, SAHPI_FALSE);
 
   while ( eventflag == AGENT_TRUE ) {
+    memset(&event, 0x20, sizeof(SaHpiEventT));
     err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
     if (err == SA_OK) {
-
-
+      /*  
+	rpt.ResourceCapabilities = 0;
+	event.Source = 200;
+	event.EventType = SAHPI_ET_USER;
+	event.Timestamp = -1;
+	event.Severity = 3;
+	strncpy(event.EventDataUnion.UserEvent.UserEventData,"Grozny smok.", 12);
+      */
       if (rpt.ResourceCapabilities == 0) { // OEM or USER type event
 	rpt.ResourceId = 0;
 	rpt.DomainId = 0;
@@ -288,39 +295,43 @@ int populate_event() {
 	    send_v2trap(trap_var);
 	    snmp_free_varbind(trap_var);
 	  } else {
-	    DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+	    snmp_log(LOG_WARNING,"Could not build an EVENT trap message.\n");
+	    rc = AGENT_ERR_BUILD_TRAP;
 	  }
-	}
+	}      
       }
     } else 
-      //    if (err != SA_OK) 
+      
       {
 	DEBUGMSGTL((AGENT,"%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ? 
 		    "No more EVENT  entries. " : 
 		    "Call to saHpiEventGet failed.", err));
 	eventflag = AGENT_FALSE;
       }
-
+    
   } // while loop
-
+  
   err = saHpiUnsubscribe( session_id);
-
+  if (err != SA_OK) {
+    DEBUGMSGTL((AGENT,"Failed to unsubscribe. Return code: %d.\n", err));
+  }
   return rc;
 }
   
 unsigned long purge_event( void ) {
   
-  unsigned long count = CONTAINER_SIZE(cb.container);
+  unsigned long count = 0;
+
   unsigned long i;
   saHpiEventTable_context *event_context;
   
   DEBUGMSGTL((AGENT,"purge_event. Entry.\n"));
-  if (count > MAX_EVENT_ENTRIES) {
-    // Delete 'count' entries.
-    count = count - MAX_EVENT_ENTRIES;
-    DEBUGMSGTL((AGENT,"Deleting %d EVENT rows.\n", count));
-    i = count;
-    while (i == 0) {
+  if ((i = CONTAINER_SIZE(cb.container)) > MAX_EVENT_ENTRIES) {
+    // Delete 'count' entries.    
+    i = i - MAX_EVENT_ENTRIES;
+    DEBUGMSGTL((AGENT,"Deleting %d EVENT rows.\n", i));
+    count = i;
+    while (i > 0) {
       event_context = CONTAINER_FIRST(cb.container);
       CONTAINER_REMOVE(cb.container, event_context);
       i--;      
@@ -336,7 +347,8 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
 			       SaHpiRptEntryT *rpt_entry,
 			       SaHpiRdrT *rdr_entry,
 			       saHpiEventTable_context *ctx,
-			       trap_vars **var, size_t *var_len, oid **var_trap_oid) {
+			       trap_vars **var, size_t *var_len, 
+			       oid **var_trap_oid) {
 
   long hash;
   SaHpiSensorEventT sensor;
@@ -576,7 +588,7 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
       *var_len = SENSOR_NOTIF_COUNT;
       *var_trap_oid = (oid *)&saHpiSensorNotification_oid;
       
-      // Update the Sensor table?
+      // Update the Sensor table with new information
       // No need
     }
 
@@ -614,11 +626,6 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
       *var_len = HOTSWAP_NOTIF_COUNT;
       *var_trap_oid = saHpiHotSwapNotification_oid;
       // Notify the HotSwap table about the event state
-      // IBM-KR: TODO
-      // The table might not exist yet (hasn't been created). What to do?
-      // Perhaps we should do the passes 
-      //  - rpt, rdr
-      // individually, and then do the events? using a poll mechanism instead?
       update_hotswap_event(rpt_entry->DomainId,
 			   rpt_entry->ResourceId,
 			   &hotswap);
@@ -741,49 +748,18 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
 
     }
 
- // Notify RPT table that we are active.
-    update_event_status_flag(rpt_entry->DomainId,
-		       rpt_entry->ResourceId,
-		       entry_id,
-		       SNMP_ROW_ACTIVE);
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
 }
 
-int
-delete_event_entry(saHpiEventTable_context *ctx) {
-
-  SaHpiSessionIdT session_id;
-  SaErrorT rc;
-  if (ctx) {
-    // Get the seesion_id
-    rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
-      return rc;    
-    
-    DEBUGMSGTL((AGENT,"Deleting entry: %d: %d: %d\n", session_id, ctx->resource_id, ctx->saHpiEventIndex));
-    rc = saHpiEventLogEntryDelete(session_id,
-				  ctx->resource_id,
-				  ctx->saHpiEventIndex);
-
-    if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Error is %d\n", rc));
-      return AGENT_ERR_OPERATION;
-    }
-    
-    return AGENT_ERR_NOERROR;
-  }
-  return AGENT_ERR_NULL_DATA;
-  
-}
 
 
 
 int
 delete_event_row(SaHpiDomainIdT domain_id,
 		 SaHpiResourceIdT resource_id,
-		 SaHpiSelEntryIdT num)
+		 unsigned long num)
 {
   saHpiEventTable_context *ctx;
   int rc = AGENT_ERR_NOT_FOUND;
@@ -1096,7 +1072,7 @@ saHpiEventTable_create_row(netsnmp_index * hdr)
 
     ctx->hash = 0;
     ctx->saHpiEventDelete = SNMP_ROW_ACTIVE;
-
+    
     return ctx;
 }
 
@@ -1167,7 +1143,9 @@ saHpiEventTable_set_reserve1(netsnmp_request_group * rg)
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
    
-    int             rc;
+    int             rc = SNMP_ERR_NOERROR;
+
+    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve1: Entry.\n"));
 
     for (current = rg->list; current; current = current->next) {
 
@@ -1242,27 +1220,24 @@ saHpiEventTable_set_reserve1(netsnmp_request_group * rg)
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
 
-  
+    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve1: Exit (rc: %d).\n", rc));
     
 }
 
 void
 saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
 {
-  //  saHpiEventTable_context *row_ctx =
-  //    (saHpiEventTable_context *) rg->existing_row;
     saHpiEventTable_context *undo_ctx =
       (saHpiEventTable_context *) rg->undo_info;
 
-    //saHpiEventTable_context *ctx = NULL;
-    //  netsnmp_index	index;
-
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
-    int             rc;
+    int             rc = SNMP_ERR_NOERROR;
 
     rg->rg_void = rg->list->ri;
 
+
+    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve2. Entry.\n"));
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -1282,20 +1257,19 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
         }
 
         if (rc) {
-	  DEBUGMSGTL((AGENT,"rci s %d\n", rc));
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 rc);
 	}
     }
 
     for (current = rg->list; current; current = current->next) {
-      // Does the row exist?
-      //index.oids = current->tri->index_oid;
-      //index.len = current->tri->index_oid_len;
-      //ctx = CONTAINER_FIND(cb.container, &index);
-      //if (ctx == NULL) {
+      
+      // We check to see if the row exist by finding the
+      // 'hash' variable. If its set to '0' - we know we have
+      // not manipulated it and thus its a non-existent row
+
       if ( ((saHpiEventTable_context *) rg->existing_row)->hash == 0) {
-	rc =  SNMP_ERR_NOSUCHNAME;
+	//rc =  SNMP_ERR_NOSUCHNAME;
 	var = current->ri->requestvb;
 
 	// SNMPv2-TC has a diagram of actions.
@@ -1307,14 +1281,20 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
 	  rc = SNMP_ERR_INCONSISTENTNAME;
 	if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
 	  rc = SNMP_ERR_WRONGVALUE;
-	if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
-	  rc = SNMP_ERR_INCONSISTENTNAME;
+
+	// IBM-KR: TODO. This 'destroy' should work on _ANY_ row (even
+	// non-existent ones. 
+
+
+	//if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
+	//  rc = SNMP_ERR_INCONSISTENTNAME;
       
 	if (rc)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 rc);
       }
     }
+    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve2. Exit (rc: %d).\n", rc));
 }
 
 /************************************************************
@@ -1332,35 +1312,35 @@ void
 saHpiEventTable_set_action(netsnmp_request_group * rg)
 {
   
-  saHpiEventTable_context *row_ctx =
-    (saHpiEventTable_context *) rg->existing_row;
   
   netsnmp_request_group_item *current;  
   netsnmp_variable_list *var;
 
-
+  DEBUGMSGTL((AGENT,"saHpiEventTable_set_action. Entry.\n"));
   for (current = rg->list; current; current = current->next) {
 
     
       var = current->ri->requestvb; 
-      /*
-      switch (current->tri->colnum) {
-      case COLUMN_SAHPIEVENTDELETE:
-      row_ctx->saHpiEventDelete = *var->val.integer;
-      break;
-      
-      default:
-      netsnmp_assert(0); 
-      break;
-      }
-    */
-      DEBUGMSGTL((AGENT,"ACTION: %d\n", *var->val.integer));
 
       if ((*var->val.integer == SNMP_ROW_DESTROY)) {
+	/*
+	  No need for that.
+	if (row_ctx->hash != 0)
+	  delete_event_row(row_ctx->domain_id,
+			     row_ctx->resource_id,
+			     row_ctx->saHpiEventIndex);
+	*/
+	rg->row_deleted = 1;
+	/*
+	  // IBM-KR: TODO, MOVE THIS TO SEL 
+	  
 	// Only do the operation when its set to destroy(6)
-	if (delete_event_entry(row_ctx) != AGENT_ERR_NOERROR) {
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_INCONSISTENTVALUE);
+	if (((saHpiEventTable_context *) rg->existing_row)->hash != 0) {
+	  // Delete the entry only for existing rows.
+	  if (delete_event_entry(row_ctx) != AGENT_ERR_NOERROR) {
+	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					   SNMP_ERR_INCONSISTENTVALUE);
+	  }
 	} else {// It went fine
 	  rg->row_deleted = 1; 
 	  //Delete it also in SEL.
@@ -1374,10 +1354,12 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 			     row_ctx->saHpiEventIndex,
 			     SNMP_ROW_NOTINSERVICE);
 	}
+	*/
       } else // The rest of SNMP_ROW operations (4,5)
 	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 				       SNMP_ERR_INCONSISTENTVALUE);
   }
+  DEBUGMSGTL((AGENT,"saHpiEventTable_set_action. Entry.\n"));
 }
 
 /************************************************************
