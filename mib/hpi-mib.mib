@@ -19,7 +19,7 @@ IMPORTS
         MODULE-COMPLIANCE, 
         OBJECT-GROUP,
         NOTIFICATION-GROUP      FROM SNMPv2-CONF
-		hpiD					FROM SAF-TC-MIB;
+	hpiD			FROM SAF-TC-MIB;
 
 
 hpiB0101 MODULE-IDENTITY
@@ -2022,7 +2022,7 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
 	
 	To delete a group of User Alarms by 
 	severity set saHpiDomainAlarmId == SAHPI_ENTRY_UNSPECIFIED
-	(see textual convention for more details.)
+	(see textual convention for more details.)"
 	REFERENCE
 	"SAI-HPI-B.01.01 section 6.6 and 6.6.5."
         ::= {saHpiDomainAlarmEntry 14}
@@ -3148,7 +3148,7 @@ saHpiDomainEventEntry OBJECT-TYPE
 SaHpiDomainEventEntry ::= SEQUENCE {
 
 	saHpiDomainEventEntryId			SaHpiEntryId,
-        saHpiDomainEventTimestamp               SaHpiTimeString,
+        saHpiDomainEventTimestamp               SaHpiTime,
         saHpiDomainEventType                    INTEGER
         }
 
@@ -3162,7 +3162,7 @@ saHpiDomainEventEntryId OBJECT-TYPE
 
 
 saHpiDomainEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3240,7 +3240,7 @@ saHpiSensorEventEntry OBJECT-TYPE
 SaHpiSensorEventEntry ::= SEQUENCE {
 
         saHpiSensorEventEntryId                 SaHpiEntryId,
-        saHpiSensorEventTimestamp               SaHpiTimeString,
+        saHpiSensorEventTimestamp               SaHpiTime,
         saHpiSensorEventType                    SaHpiSensorType,
         saHpiSensorEventCategory                SaHpiEventCategory,
         saHpiSensorEventAssertion               TruthValue,
@@ -3272,7 +3272,7 @@ saHpiSensorEventEntryId OBJECT-TYPE
     ::= {saHpiSensorEventEntry 1}
 
 saHpiSensorEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3479,7 +3479,7 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
         
         saHpiSensorEnableChangeEventEntryId             SaHpiEntryId,
-        saHpiSensorEnableChangeEventTimestamp   	SaHpiTimeString,
+        saHpiSensorEnableChangeEventTimestamp   	SaHpiTime,
         saHpiSensorEnableChangeEventType        	SaHpiSensorType,
         saHpiSensorEnableChangeEventCategory    	SaHpiEventCategory,
         
@@ -3501,7 +3501,7 @@ saHpiSensorEnableChangeEventEntryId OBJECT-TYPE
     ::= {saHpiSensorEnableChangeEventEntry 1}
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3633,7 +3633,7 @@ saHpiHotSwapEventEntry OBJECT-TYPE
 SaHpiHotSwapEventEntry ::= SEQUENCE {
 
         saHpiHotSwapEventEntryId              	SaHpiEntryId,
-        saHpiHotSwapEventTimestamp              SaHpiTimeString,
+        saHpiHotSwapEventTimestamp              SaHpiTime,
         saHpiHotSwapEventState                  SaHpiHotSwapState,
         saHpiHotSwapEventPreviousState          SaHpiHotSwapState
         }
@@ -3643,11 +3643,11 @@ saHpiHotSwapEventEntryId OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-        Arbitrary table index."
+        "Arbitrary table index."
     ::= {saHpiHotSwapEventEntry 1}
 
 saHpiHotSwapEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3725,7 +3725,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
 
 SaHpiWatchdogEventEntry ::= SEQUENCE {
         saHpiWatchdogEventEntryId             	SaHpiEntryId,
-        saHpiWatchdogEventTimestamp             SaHpiTimeString,
+        saHpiWatchdogEventTimestamp             SaHpiTime,
         saHpiWatchdogEventAction                INTEGER,
         saHpiWatchdogEventPreTimerAction        SaHpiWatchdogPreTimerAction,
         saHpiWatchdogEventUse                   SaHpiWatchdogTimerUse 
@@ -3741,7 +3741,7 @@ saHpiWatchdogEventEntryId OBJECT-TYPE
         
 
 saHpiWatchdogEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3846,7 +3846,7 @@ saHpiSoftwareEventEntry OBJECT-TYPE
 SaHpiSoftwareEventEntry ::= SEQUENCE {
 
         saHpiSoftwareEventEntryId             	SaHpiEntryId,
-        saHpiSoftwareEventTimestamp             SaHpiTimeString,
+        saHpiSoftwareEventTimestamp             SaHpiTime,
 
         saHpiSoftwareEventManufacturerIdT       SaHpiManufacturerId,
         saHpiSoftwareEventType                  INTEGER,
@@ -3857,14 +3857,14 @@ SaHpiSoftwareEventEntry ::= SEQUENCE {
 	
 saHpiSoftwareEventEntryId OBJECT-TYPE
     SYNTAX      SaHpiEntryId 
-    MAX-ACCESS  not-acessible
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
         "Arbitrary table index."
     ::= {saHpiSoftwareEventEntry 1}
 
 saHpiSoftwareEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString 
+    SYNTAX      SaHpiTime 
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -3988,7 +3988,7 @@ saHpiOEMEventEntry OBJECT-TYPE
 SaHpiOEMEventEntry ::= SEQUENCE {
 
         saHpiOEMEventEntryId          	SaHpiEntryId,
-        saHpiOEMEventTimestamp          SaHpiTimeString,
+        saHpiOEMEventTimestamp          SaHpiTime,
 
         saHpiOEMEventManufacturerIdT    SaHpiManufacturerId,
         saHpiOEMEventTextType           SaHpiTextType,
@@ -3998,14 +3998,14 @@ SaHpiOEMEventEntry ::= SEQUENCE {
 	
 saHpiOEMEventEntryId OBJECT-TYPE
     SYNTAX      SaHpiEntryId 
-    MAX-ACCESS  not-acessible
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
         "Arbitrary table index."
     ::= {saHpiOEMEventEntry 1}
 
 saHpiOEMEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -4098,6 +4098,7 @@ saHpiUserEventEntry OBJECT-TYPE
 SaHpiUserEventEntry ::= SEQUENCE {
 
         saHpiUserEventEntryId         	SaHpiEntryId,
+	saHpiUserEventTimestamp		SaHpiTime,
         saHpiUserEventTextType          SaHpiTextType,
         saHpiUserEventTextLanguage      SaHpiTextLanguage,
         saHpiUserEventText              SaHpiText,
@@ -4106,14 +4107,14 @@ SaHpiUserEventEntry ::= SEQUENCE {
 	
 saHpiUserEventEntryId OBJECT-TYPE
     SYNTAX      SaHpiEntryId 
-    MAX-ACCESS  not-acessible
+    MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
         "Arbitrary table index."
     ::= {saHpiUserEventEntry 1}
 
 saHpiUserEventTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
@@ -4810,14 +4811,14 @@ saHpiResourceEventLogEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventEntryId
+                saHpiResourceEventLogEntryId
         }
         ::= { saHpiResourceEventLogTable 1 }
 
 SaHpiResourceEventLogEntry ::= SEQUENCE {
 
         saHpiResourceEventLogEntryId               SaHpiEntryId,
-        saHpiResourceEventLogTimestamp             SaHpiTimeString,
+        saHpiResourceEventLogTimestamp             SaHpiTime,
         saHpiResourceEventLogType                  INTEGER
 
         }
@@ -4833,7 +4834,7 @@ saHpiResourceEventLogEntryId OBJECT-TYPE
     ::= {saHpiResourceEventLogEntry 1}
 
 saHpiResourceEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -4899,7 +4900,7 @@ saHpiDomainEventLogTable OBJECT-TYPE
         DESCRIPTION     "Event table. "
         ::= {eventLog 8}
 
-saHpiDomainEvenLogtEntry OBJECT-TYPE
+saHpiDomainEventLogtEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainEventLogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
@@ -4907,15 +4908,14 @@ saHpiDomainEvenLogtEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId,
 		saHpiDomainEventEntryId,
-                saHpiEventSeverity,
-                saHpiDomainEventTimestamp
+                saHpiEventSeverity
         }
         ::= {saHpiDomainEventLogTable 1}
 
 SaHpiDomainEventLogEntry ::= SEQUENCE {
 
-	saHpiDomainEventLogEntryId	Counter32,
-        saHpiDomainEventLogTimestamp 	SaHpiTimeString,
+	saHpiDomainEventLogEntryId	SaHpiEntryId,
+        saHpiDomainEventLogTimestamp 	SaHpiTime,
         saHpiDomainEventLogType         INTEGER
         }
 
@@ -4927,10 +4927,10 @@ saHpiDomainEventLogEntryId OBJECT-TYPE
         "This columnar node is an index for Domain Events in the table."
     REFERENCE
 	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiDomainEvenLogtEntry 1}
+    ::= {saHpiDomainEventLogtEntry 1}
 
 saHpiDomainEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -4938,7 +4938,7 @@ saHpiDomainEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiDomainEvenLogtEntry 2}
+    ::= {saHpiDomainEventLogtEntry 2}
 
 saHpiDomainEventLogType OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -4952,7 +4952,7 @@ saHpiDomainEventLogType OBJECT-TYPE
         " Domain events are used to announce the addition of domain references 
         and the removal of domain references to the DRT."
 
-    ::= {saHpiDomainEvenLogtEntry 3}
+    ::= {saHpiDomainEventLogtEntry 3}
 
 
 -- *********************************
@@ -5006,8 +5006,7 @@ saHpiSensorEventLogEntry OBJECT-TYPE
 
 SaHpiSensorEventLogEntry ::= SEQUENCE {
 
-        saHpiSensorEventEntryId                    SaHpiEntryId,
-        saHpiSensorEventLogTimestamp               SaHpiTimeString,
+        saHpiSensorEventLogTimestamp               SaHpiTime,
         saHpiSensorEventLogType                    SaHpiSensorType,
         saHpiSensorEventLogCategory                SaHpiEventCategory,
         saHpiSensorEventLogAssertion               TruthValue,
@@ -5029,18 +5028,8 @@ SaHpiSensorEventLogEntry ::= SEQUENCE {
         saHpiSensorEventLogSpecific                Unsigned32
         }
         
-saHpiSensorEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for Sensor Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiSensorEventLogEntry 1}
-
 saHpiSensorEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5048,15 +5037,15 @@ saHpiSensorEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiSensorEventLogEntry 2}
+    ::= {saHpiSensorEventLogEntry 1}
 
 saHpiSensorEventLogType OBJECT-TYPE
 	SYNTAX		SaHpiSensorType
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Refer to the textual convention for more
-details."
-        ::= {saHpiSensorEventLogEntry 3}
+	details."
+        ::= {saHpiSensorEventLogEntry 2}
 
 saHpiSensorEventLogCategory OBJECT-TYPE
     SYNTAX      SaHpiEventCategory
@@ -5064,7 +5053,7 @@ saHpiSensorEventLogCategory OBJECT-TYPE
     STATUS      current
     DESCRIPTION
     "Event category: See TEXTUAL-CONVENTION, SaHpiEventCategory."
-    ::= {saHpiSensorEventLogEntry 4}
+    ::= {saHpiSensorEventLogEntry 3}
 
 saHpiSensorEventLogAssertion OBJECT-TYPE
         SYNTAX      TruthValue
@@ -5103,7 +5092,7 @@ saHpiSensorEventLogAssertion OBJECT-TYPE
         being asserted or deasserted.  The HPI implementation may assign event
         severity levels for each event state assertion or deassertion on an 
         individual sensor basis."      
-    ::= {saHpiSensorEventLogEntry 5}
+    ::= {saHpiSensorEventLogEntry 4}
 
 saHpiSensorEventLogState OBJECT-TYPE
         SYNTAX      SaHpiEventState
@@ -5111,7 +5100,7 @@ saHpiSensorEventLogState OBJECT-TYPE
         STATUS      current
         DESCRIPTION
         "Refer to the textual convention for more details."
-        ::= {saHpiSensorEventLogEntry 6}
+        ::= {saHpiSensorEventLogEntry 5}
 
 saHpiSensorEventLogOptionalData OBJECT-TYPE
         SYNTAX      SaHpiOptionalData
@@ -5119,7 +5108,7 @@ saHpiSensorEventLogOptionalData OBJECT-TYPE
         STATUS      current
         DESCRIPTION
         "See textual convention aHpiOptionalData."
-        ::= {saHpiSensorEventLogEntry 7}
+        ::= {saHpiSensorEventLogEntry 6}
 
 
 saHpiSensorEventLogTriggerReadingType OBJECT-TYPE
@@ -5128,7 +5117,7 @@ saHpiSensorEventLogTriggerReadingType OBJECT-TYPE
     STATUS      current
     DESCRIPTION
     "Refer to the textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 8}
+    ::= {saHpiSensorEventLogEntry 7}
 
 saHpiSensorEventLogTriggerReading OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingValue
@@ -5136,7 +5125,7 @@ saHpiSensorEventLogTriggerReading OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 9}
+    ::= {saHpiSensorEventLogEntry 8}
 
 
 saHpiSensorEventLogTriggerThresholdType OBJECT-TYPE
@@ -5145,7 +5134,7 @@ saHpiSensorEventLogTriggerThresholdType OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 10}
+    ::= {saHpiSensorEventLogEntry 9}
 
 saHpiSensorEventLogTriggerThreshold OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingValue
@@ -5153,7 +5142,7 @@ saHpiSensorEventLogTriggerThreshold OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 11}
+    ::= {saHpiSensorEventLogEntry 10}
 
 
 saHpiSensorEventLogPreviousState OBJECT-TYPE
@@ -5162,7 +5151,7 @@ saHpiSensorEventLogPreviousState OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 12}
+    ::= {saHpiSensorEventLogEntry 11}
 
 saHpiSensorEventLogCurrentState OBJECT-TYPE
     SYNTAX      SaHpiEventState
@@ -5170,7 +5159,7 @@ saHpiSensorEventLogCurrentState OBJECT-TYPE
     STATUS      current
     DESCRIPTION
     "Refer to SaHpiEventState textual convention for more details."
-    ::= {saHpiSensorEventLogEntry 13}
+    ::= {saHpiSensorEventLogEntry 12}
 
 
 saHpiSensorEventLogOem OBJECT-TYPE
@@ -5179,7 +5168,7 @@ saHpiSensorEventLogOem OBJECT-TYPE
     STATUS      current
     DESCRIPTION
     "Reserved for OEM use."
-    ::= {saHpiSensorEventLogEntry 14}
+    ::= {saHpiSensorEventLogEntry 13}
 
 saHpiSensorEventLogSpecific OBJECT-TYPE
     SYNTAX      Unsigned32
@@ -5189,7 +5178,7 @@ saHpiSensorEventLogSpecific OBJECT-TYPE
     ""
     REFERENCE
     "SAI-HPI-B.01.01 section 8.14."
-    ::= {saHpiSensorEventLogEntry 15}
+    ::= {saHpiSensorEventLogEntry 14}
 
 
 -- *********************************
@@ -5243,7 +5232,7 @@ saHpiSensorEnableChangeEventLogEntry OBJECT-TYPE
 
 SaHpiSensorEnableChangeEventLogEntry ::= SEQUENCE {
         
-        saHpiSensorEnableChangeEventEntryId   		SaHpiEntryId,
+	saHpiSensorEnableChangeEventLogTimestamp	SaHpiTime,
         saHpiSensorEnableChangeEventLogType        	SaHpiSensorType,
         saHpiSensorEnableChangeEventLogCategory    	SaHpiEventCategory,
         
@@ -5256,19 +5245,8 @@ SaHpiSensorEnableChangeEventLogEntry ::= SEQUENCE {
         saHpiSensorEnableChangeEventLogState       	SaHpiEventState
         }
 	
-saHpiSensorEnableChangeEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for SensorEnableChangeEvent 
-	Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiSensorEnableChangeEventLogEntry 1}
-
 saHpiSensorEnableChangeEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5276,7 +5254,7 @@ saHpiSensorEnableChangeEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiSensorEnableChangeEventLogEntry 2}
+    ::= {saHpiSensorEnableChangeEventLogEntry 1}
 
 saHpiSensorEnableChangeEventLogType OBJECT-TYPE
     SYNTAX      SaHpiSensorType
@@ -5284,7 +5262,7 @@ saHpiSensorEnableChangeEventLogType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Refer to the textual convention for more
 details."
-    ::= {saHpiSensorEnableChangeEventLogEntry 3}
+    ::= {saHpiSensorEnableChangeEventLogEntry 2}
 
 saHpiSensorEnableChangeEventLogCategory OBJECT-TYPE
     SYNTAX      SaHpiEventCategory
@@ -5292,7 +5270,7 @@ saHpiSensorEnableChangeEventLogCategory OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEnableChangeEventLogEntry 4}
+    ::= {saHpiSensorEnableChangeEventLogEntry 3}
 
         
 saHpiSensorEnableChangeEventLogEnabled OBJECT-TYPE
@@ -5301,7 +5279,7 @@ saHpiSensorEnableChangeEventLogEnabled OBJECT-TYPE
     STATUS      current
     DESCRIPTION
 	"Current sensor enable status."
-    ::= {saHpiSensorEnableChangeEventLogEntry 5}
+    ::= {saHpiSensorEnableChangeEventLogEntry 4}
 
 
 saHpiSensorEnableChangeEventLogEventsEnabled OBJECT-TYPE
@@ -5310,7 +5288,7 @@ saHpiSensorEnableChangeEventLogEventsEnabled OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Current event enable status."
-    ::= {saHpiSensorEnableChangeEventLogEntry 6}
+    ::= {saHpiSensorEnableChangeEventLogEntry 5}
 
 
 saHpiSensorEnableChangeEventLogAssertEvents OBJECT-TYPE
@@ -5319,7 +5297,7 @@ saHpiSensorEnableChangeEventLogAssertEvents OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSensorEnableChangeEventLogEntry 7}
+    ::= {saHpiSensorEnableChangeEventLogEntry 6}
 
 
 saHpiSensorEnableChangeEventLogDeassertEvents OBJECT-TYPE
@@ -5328,7 +5306,7 @@ saHpiSensorEnableChangeEventLogDeassertEvents OBJECT-TYPE
 	STATUS      current
 	DESCRIPTION
 	"Refer to the textual convention for more details."
-	::= {saHpiSensorEnableChangeEventLogEntry 8}
+	::= {saHpiSensorEnableChangeEventLogEntry 7}
 
 saHpiSensorEnableChangeEventLogOptionalData OBJECT-TYPE
 	SYNTAX      SaHpiOptionalData
@@ -5338,7 +5316,7 @@ saHpiSensorEnableChangeEventLogOptionalData OBJECT-TYPE
 	"See textual convention SaHpiOptionalData."
 	REFERENCE
 	"See SAI-HPI-B.01.01 section 8.14"
-	::= {saHpiSensorEnableChangeEventLogEntry 9}
+	::= {saHpiSensorEnableChangeEventLogEntry 8}
     
 saHpiSensorEnableChangeEventLogState OBJECT-TYPE
 	SYNTAX      SaHpiEventState
@@ -5346,7 +5324,7 @@ saHpiSensorEnableChangeEventLogState OBJECT-TYPE
 	STATUS      current
 	DESCRIPTION
 	"Current set of asserted Event states."
-	::= {saHpiSensorEnableChangeEventLogEntry 10}
+	::= {saHpiSensorEnableChangeEventLogEntry 9}
 
 
 -- *********************************
@@ -5398,24 +5376,13 @@ saHpiHotSwapEventLogEntry OBJECT-TYPE
         ::= {saHpiHotSwapEventLogTable 1}
 
 SaHpiHotSwapEventLogEntry ::= SEQUENCE {
-        saHpiHotSwapEventEntryId              	   SaHpiEntryId,
-        saHpiHotSwapEventLogTimestamp              SaHpiTimeString,
+        saHpiHotSwapEventLogTimestamp              SaHpiTime,
         saHpiHotSwapEventLogState                  SaHpiHotSwapState,
         saHpiHotSwapEventLogPreviousState          SaHpiHotSwapState
         }
 	
-saHpiHotSwapEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for HotSwap Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiHotSwapEventLogEntry 1}
-
 saHpiHotSwapEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5423,7 +5390,7 @@ saHpiHotSwapEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiHotSwapEventLogEntry 2}
+    ::= {saHpiHotSwapEventLogEntry 1}
 
 saHpiHotSwapEventLogState OBJECT-TYPE
     SYNTAX      SaHpiHotSwapState
@@ -5431,7 +5398,7 @@ saHpiHotSwapEventLogState OBJECT-TYPE
     STATUS      current
     DESCRIPTION 
         "Refer to the textual convention for full details."
-    ::= {saHpiHotSwapEventLogEntry 3}
+    ::= {saHpiHotSwapEventLogEntry 2}
 
 saHpiHotSwapEventLogPreviousState OBJECT-TYPE
     SYNTAX      SaHpiHotSwapState
@@ -5439,7 +5406,7 @@ saHpiHotSwapEventLogPreviousState OBJECT-TYPE
     STATUS      current
     DESCRIPTION 
         "Refer to the textual convention for full details."
-    ::= {saHpiHotSwapEventLogEntry 4}
+    ::= {saHpiHotSwapEventLogEntry 3}
 
 
 -- *********************************
@@ -5492,25 +5459,14 @@ saHpiWatchdogEventLogEntry OBJECT-TYPE
         ::= {saHpiWatchdogEventLogTable 1}
 
 SaHpiWatchdogEventLogEntry ::= SEQUENCE {
-        saHpiWatchdogEventEntryId                  SaHpiEntryId,
-        saHpiWatchdogEventLogTimestamp             SaHpiTimeString,
+        saHpiWatchdogEventLogTimestamp             SaHpiTime,
         saHpiWatchdogEventLogAction                INTEGER,
         saHpiWatchdogEventLogPreTimerAction        SaHpiWatchdogPreTimerAction,
         saHpiWatchdogEventLogUse                   SaHpiWatchdogTimerUse 
         }
 	
-saHpiWatchdogEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for HotSwap Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiWatchdogEventLogEntry 1}
-        
 saHpiWatchdogEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5518,7 +5474,7 @@ saHpiWatchdogEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiWatchdogEventLogEntry 2}
+    ::= {saHpiWatchdogEventLogEntry 1}
 
 
 saHpiWatchdogEventLogAction OBJECT-TYPE
@@ -5535,7 +5491,7 @@ saHpiWatchdogEventLogAction OBJECT-TYPE
         DESCRIPTION     "
         These enumerations represent the possible actions to be taken upon watchdog
         timer timeout and the events that are generated for watchdog actions. "
-        ::= {saHpiWatchdogEventLogEntry 3}
+        ::= {saHpiWatchdogEventLogEntry 2}
 
 saHpiWatchdogEventLogPreTimerAction OBJECT-TYPE
         SYNTAX          SaHpiWatchdogPreTimerAction
@@ -5545,7 +5501,7 @@ saHpiWatchdogEventLogPreTimerAction OBJECT-TYPE
             "These enumerations represent the possible types of interrupts that may be
             triggered by a watchdog pre-timer event. The actual meaning of these
             operations may differ depending on the hardware architecture. "
-        ::= {saHpiWatchdogEventLogEntry 4}
+        ::= {saHpiWatchdogEventLogEntry 3}
 
 saHpiWatchdogEventLogUse OBJECT-TYPE
         SYNTAX          SaHpiWatchdogTimerUse
@@ -5559,7 +5515,7 @@ saHpiWatchdogEventLogUse OBJECT-TYPE
         will be set. Most specific uses for Watchdog timer by users of HPI should 
         indicate smsOs(5)  if the use is to provide an OS-healthy heartbeat, 
         or oem(6) if it is used for some other purpose."
-        ::= {saHpiWatchdogEventLogEntry 5}
+        ::= {saHpiWatchdogEventLogEntry 4}
 
 
 -- *********************************
@@ -5613,8 +5569,7 @@ saHpiSoftwareEventLogEntry OBJECT-TYPE
 
 SaHpiSoftwareEventLogEntry ::= SEQUENCE {
 
-        saHpiSoftwareEventEntryId                  SaHpiEntryId,
-        saHpiSoftwareEventLogTimestamp             SaHpiTimeString,
+        saHpiSoftwareEventLogTimestamp             SaHpiTime,
 
         saHpiSoftwareEventLogManufacturerIdT       SaHpiManufacturerId,
         saHpiSoftwareEventLogType                  INTEGER,
@@ -5623,18 +5578,8 @@ SaHpiSoftwareEventLogEntry ::= SEQUENCE {
         saHpiSoftwareEventLogText                  SaHpiText
         }
 	
-saHpiSoftwareEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for HotSwap Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiSoftwareEventLogEntry 1}
-
 saHpiSoftwareEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString 
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5642,7 +5587,7 @@ saHpiSoftwareEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiSoftwareEventLogEntry 2}
+    ::= {saHpiSoftwareEventLogEntry 1}
 
 
 saHpiSoftwareEventLogManufacturerIdT OBJECT-TYPE
@@ -5651,7 +5596,7 @@ saHpiSoftwareEventLogManufacturerIdT OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSoftwareEventLogEntry 3}
+    ::= {saHpiSoftwareEventLogEntry 2}
 
 
 saHpiSoftwareEventLogType OBJECT-TYPE
@@ -5677,7 +5622,7 @@ saHpiSoftwareEventLogType OBJECT-TYPE
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B spec."
-    ::= {saHpiSoftwareEventLogEntry 4}
+    ::= {saHpiSoftwareEventLogEntry 3}
         
 saHpiSoftwareEventLogTextType OBJECT-TYPE
     SYNTAX      SaHpiTextType
@@ -5685,7 +5630,7 @@ saHpiSoftwareEventLogTextType OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSoftwareEventLogEntry 5}
+    ::= {saHpiSoftwareEventLogEntry 4}
 
 
 saHpiSoftwareEventLogTextLanguage OBJECT-TYPE
@@ -5694,8 +5639,7 @@ saHpiSoftwareEventLogTextLanguage OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSoftwareEventLogEntry 6}
-
+    ::= {saHpiSoftwareEventLogEntry 5}
 
 
 saHpiSoftwareEventLogText OBJECT-TYPE
@@ -5704,7 +5648,7 @@ saHpiSoftwareEventLogText OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiSoftwareEventLogEntry 7}
+    ::= {saHpiSoftwareEventLogEntry 6}
 
 
 -- *********************************
@@ -5758,8 +5702,7 @@ saHpiOEMEventLogEntry OBJECT-TYPE
 
 SaHpiOEMEventLogEntry ::= SEQUENCE {
 
-        saHpiOEMEventEntryId          	   SaHpiEntryId,
-        saHpiOEMEventLogTimestamp          SaHpiTimeString,
+        saHpiOEMEventLogTimestamp          SaHpiTime,
 
         saHpiOEMEventLogManufacturerIdT    SaHpiManufacturerId,
         saHpiOEMEventLogTextType           SaHpiTextType,
@@ -5767,18 +5710,8 @@ SaHpiOEMEventLogEntry ::= SEQUENCE {
         saHpiOEMEventLogText               SaHpiText
         }
 	
-saHpiOEMEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for HotSwap Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiOEMEventLogEntry 1}
-
 saHpiOEMEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
@@ -5786,7 +5719,7 @@ saHpiOEMEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiOEMEventLogEntry 2}
+    ::= {saHpiOEMEventLogEntry 1}
 
 saHpiOEMEventLogManufacturerIdT OBJECT-TYPE
     SYNTAX      SaHpiManufacturerId
@@ -5794,7 +5727,7 @@ saHpiOEMEventLogManufacturerIdT OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiOEMEventLogEntry 3}
+    ::= {saHpiOEMEventLogEntry 2}
 
 saHpiOEMEventLogTextType   OBJECT-TYPE
     SYNTAX      SaHpiTextType
@@ -5802,7 +5735,7 @@ saHpiOEMEventLogTextType   OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiOEMEventLogEntry 4}
+    ::= {saHpiOEMEventLogEntry 3}
 
 saHpiOEMEventLogTextLanguage OBJECT-TYPE
     SYNTAX      SaHpiTextLanguage
@@ -5810,7 +5743,7 @@ saHpiOEMEventLogTextLanguage OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiOEMEventLogEntry 5}
+    ::= {saHpiOEMEventLogEntry 4}
 
 saHpiOEMEventLogText       OBJECT-TYPE
     SYNTAX      SaHpiText
@@ -5818,7 +5751,7 @@ saHpiOEMEventLogText       OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to the textual convention for more details."
-    ::= {saHpiOEMEventLogEntry 6}
+    ::= {saHpiOEMEventLogEntry 5}
 
 
 -- *********************************
@@ -5870,25 +5803,15 @@ saHpiUserEventLogEntry OBJECT-TYPE
 
 SaHpiUserEventLogEntry ::= SEQUENCE {
 
-        saHpiUserEventEntryId           SaHpiEntryId,
+	saHpiUserEventLogTimestamp	SaHpiTime,
         saHpiUserEventLogTextType       SaHpiTextType,
         saHpiUserEventLogTextLanguage   SaHpiTextLanguage,
         saHpiUserEventLogText           SaHpiText,
         saHpiUserEventLogRowStatus	RowStatus
         }
 	
-saHpiUserEventEntryId OBJECT-TYPE
-    SYNTAX      SaHpiEntryId
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "This columnar node is an index for HotSwap Events in the table."
-    REFERENCE
-	"SAI-HPI-B.01.01 section 6.4.1 for further details on EntryId."    
-    ::= {saHpiUserEventLogEntry 1}
-
 saHpiUserEventLogTimestamp OBJECT-TYPE
-    SYNTAX      SaHpiTimeString
+    SYNTAX      SaHpiTime
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
@@ -5896,7 +5819,7 @@ saHpiUserEventLogTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiUserEventLogEntry 2}
+    ::= {saHpiUserEventLogEntry 1}
         
 saHpiUserEventLogTextType OBJECT-TYPE
     SYNTAX      SaHpiTextType
@@ -5904,7 +5827,7 @@ saHpiUserEventLogTextType OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to SaHpiTextType for more details."
-    ::= {saHpiUserEventLogEntry 3}
+    ::= {saHpiUserEventLogEntry 2}
 
 
 saHpiUserEventLogTextLanguage OBJECT-TYPE
@@ -5913,7 +5836,7 @@ saHpiUserEventLogTextLanguage OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to saHpiTextLanguage for more details."
-    ::= {saHpiUserEventLogEntry 4}
+    ::= {saHpiUserEventLogEntry 3}
 
 saHpiUserEventLogText OBJECT-TYPE
     SYNTAX      SaHpiText
@@ -5921,7 +5844,7 @@ saHpiUserEventLogText OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "Refer to saHpiText for more details. "
-    ::= {saHpiUserEventLogEntry 5}
+    ::= {saHpiUserEventLogEntry 4}
 
 saHpiUserEventLogRowStatus OBJECT-TYPE
     SYNTAX      RowStatus
@@ -5959,8 +5882,7 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
 			to start this whole process)."
 	REFERENCE
 	"SAI-hpi-B.01.01 section 6.4.3."			
-
-    ::= {saHpiUserEventLogEntry 6}
+    ::= {saHpiUserEventLogEntry 5}
 
 -- *********************************
 -- **
