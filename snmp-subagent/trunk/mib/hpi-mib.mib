@@ -4558,7 +4558,7 @@ saHpiCtrlState OBJECT-TYPE
                 set to undefined (0).
         "
     REFERENCE 
-        "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
+        "Derived from typedef described in the SAI-HPI-B.01.01 pages 93, 94."
          
         ::= {saHpiCtrlEntry 7}
 
@@ -4622,7 +4622,7 @@ saHpiCtrlData          OBJECT-TYPE
                  octets 14-n    - default state (where max(n) is 270).
         " 
     REFERENCE 
-        "Derived from typedef described in the SAI-HPI-A.01.01 pages 92, 93, 94."
+        "Derived from typedef described in the SAI-HPI-B.01.01 pages 92, 93, 94."
         ::= {saHpiCtrlEntry 8}
 
 saHpiCtrlOem OBJECT-TYPE
@@ -5487,7 +5487,7 @@ saHpiSensorThdLowCriticalIsReadable     OBJECT-TYPE
         '-1' and saHpiSensorThdLowCriticalInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowCriticalEntry 1}
 
 saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
@@ -5501,7 +5501,7 @@ saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
         and saHpiSensorThdLowCriticalInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowCriticalEntry 2}
 
 saHpiSensorThdLowCriticalType           OBJECT-TYPE
@@ -5563,7 +5563,7 @@ saHpiSensorThdLowMajorIsReadable        OBJECT-TYPE
         '-1' and saHpiSensorThdLowMajorInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowMajorEntry 1}
 
 saHpiSensorThdLowMajorIsWritable        OBJECT-TYPE
@@ -5577,7 +5577,7 @@ saHpiSensorThdLowMajorIsWritable        OBJECT-TYPE
         and saHpiSensorThdLowMajorInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowMajorEntry 2}
 
 saHpiSensorThdLowMajorType              OBJECT-TYPE
@@ -5639,7 +5639,7 @@ saHpiSensorThdLowMinorIsReadable        OBJECT-TYPE
         '-1' and saHpiSensorThdLowMinorInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowMinorEntry 1}
 
 saHpiSensorThdLowMinorIsWritable        OBJECT-TYPE
@@ -5653,7 +5653,7 @@ saHpiSensorThdLowMinorIsWritable        OBJECT-TYPE
         and saHpiSensorThdLowMinorInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdLowMinorEntry 2}
         
 saHpiSensorThdLowMinorType              OBJECT-TYPE
@@ -5715,7 +5715,7 @@ saHpiSensorThdUpCriticalIsReadable      OBJECT-TYPE
         '-1' and saHpiSensorThdUpCriticalInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpCriticalEntry 1}
 
 saHpiSensorThdUpCriticalIsWritable      OBJECT-TYPE
@@ -5729,7 +5729,7 @@ saHpiSensorThdUpCriticalIsWritable      OBJECT-TYPE
         and saHpiSensorThdUpCriticalInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpCriticalEntry 2}
         
 saHpiSensorThdUpCriticalType            OBJECT-TYPE
@@ -5791,7 +5791,7 @@ saHpiSensorThdUpMajorIsReadable OBJECT-TYPE
         '-1' and saHpiSensorThdUpMajorInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpMajorEntry 1}
 
 saHpiSensorThdUpMajorIsWritable OBJECT-TYPE
@@ -5805,7 +5805,7 @@ saHpiSensorThdUpMajorIsWritable OBJECT-TYPE
         and saHpiSensorThdUpMajorInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpMajorEntry 2}
         
 saHpiSensorThdUpMajorType               OBJECT-TYPE
@@ -5867,7 +5867,7 @@ saHpiSensorThdUpMinorIsReadable OBJECT-TYPE
         '-1' and saHpiSensorThdUpMinorInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpMinorEntry 1}
 
 saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
@@ -5881,7 +5881,7 @@ saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
         and saHpiSensorThdUpMinorInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdUpMinorEntry 2}
         
 saHpiSensorThdUpMinorType               OBJECT-TYPE
@@ -5943,7 +5943,7 @@ saHpiSensorThdPosHysteresisIsReadable   OBJECT-TYPE
         '-1' and saHpiSensorThdPosHysteresisInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdPosHysteresisEntry 1}
 
 saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
@@ -5957,7 +5957,7 @@ saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
         and saHpiSensorThdPosHysteresisInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdPosHysteresisEntry 2}
         
 saHpiSensorThdPosHysteresisType         OBJECT-TYPE
@@ -6020,7 +6020,7 @@ saHpiSensorThdNegHysteresisIsReadable   OBJECT-TYPE
         '-1' and saHpiSensorThdNegHysteresisInterpreted is set to zero-length
         string."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdNegHysteresisEntry 1}
 
 saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
@@ -6034,7 +6034,7 @@ saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
         and saHpiSensorThdNegHysteresisInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
         ::= {saHpiSensorThdNegHysteresisEntry 2}
         
 saHpiSensorThdNegHysteresisType         OBJECT-TYPE
@@ -6800,7 +6800,7 @@ saHpiSensorNotification NOTIFICATION-TYPE
         DESCRIPTION
         "Sensor event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-A.01.01 pages 101, 102."
+        "Derived from typedefs in SAI-HPI-B.01.01 pages 101, 102."
         ::= { hpiNotifications 1 }
 
 saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
