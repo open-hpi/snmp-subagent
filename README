@@ -48,10 +48,15 @@ in the docs directory.
 RUNNING
 ---------------------------------------------------------
 
-0. Configure your OpenHPI installation to work. Make sure that /etc/openhpi/openhpi.conf
-   lists the correct plugin.
-1. Start the NetSNMP daemon.
-2. Start the hpiSubagent. (either use the runtime script: /etc/init.d/openhpi-subagent,
+1. Configure your OpenHPI installation to work. Make sure that 
+   /etc/openhpi/openhpi.conf lists the desired plugin.
+
+2. Configure your NetSNMP configuration file (snmpd.conf) to include
+   "master  agentx"
+
+3. Start the NetSNMP daemon.
+
+4. Start the hpiSubagent. (either use the runtime script: /etc/init.d/openhpi-subagent,
    or just run it from the terminal).  You should see something similar in the
    syslog log file - /var/log/messages:
 
@@ -61,7 +66,7 @@ RUNNING
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Max Event rows 1024.
    ...
 
-3. Browse the MIB tree. When browsing the MIB tree, make sure you 
+5. Browse the MIB tree. When browsing the MIB tree, make sure you 
    load the MIB with your favorite SNMP browser. If you are using 
    NetSNMP commands, set the MIBS environment variable to ALL:
 
@@ -86,10 +91,12 @@ RUNNING
    HPI-MIB::saHpiResourceEntityPath.0.2.2 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{POWER_SUPPLY,1}"
    ....
 
-4). If you want to receive traps make sure you are running a SNMP trap daemon
-    (NetSNMP provides one - snmptrapd). Furthermore make sure that the SNMP daemon is
-    configured to send traps and specify its destination (man snmpd.conf).
-
+6). If you want to receive traps make sure you are running a SNMP trap daemon
+    (NetSNMP provides one - snmptrapd). 
+    Furthermore make sure that the SNMP daemon is configured to send traps 
+    and specify its destination, such as:
+    "inform2sink <hostname>" in snmpd.conf.
+    Refer to 'man snmpd.conf' for more details.
 
 ---------------------------------------------------------
 CLEANUP
