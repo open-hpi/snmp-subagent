@@ -2136,8 +2136,7 @@ SaHpiAutoTimeoutEntry ::= SEQUENCE {
     
 saHpiHotSwapInsertTimeout OBJECT-TYPE
     SYNTAX      SaHpiTime
---IBMKR: read-create? Why?
-    MAX-ACCESS  read-create
+    MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
         "This function allows the HPI User to configure a timeout for how 
@@ -2170,7 +2169,7 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
         SYNTAX      SaHpiTime
-        MAX-ACCESS  read-create
+        MAX-ACCESS  read-write
         STATUS      current
         DESCRIPTION
         "This function allows the HPI User to configure a timeout for how 
