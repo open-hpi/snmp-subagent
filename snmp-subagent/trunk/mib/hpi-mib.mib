@@ -126,6 +126,7 @@ eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
 
 hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
 hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
+hpiControl		OBJECT IDENTIFIER ::= { hpiResources 3 }
 
 
 -- ************************************************
@@ -4574,54 +4575,49 @@ saHpiRdrIdString OBJECT-TYPE
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-saHpiCtrlEntryCount OBJECT-TYPE
+
+
+saHpiCtrlDigitalEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of control resource data records in the system."
-        ::= {hpiResources 3}
+        DESCRIPTION     "The number of digital control records in the system."
+        ::= {hpiControl 1}
 
-saHpiCtrlTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiCtrlEntry
+saHpiCtrlDigitalTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlDigitalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining Control Resource Data Records."
-        ::= {hpiResources 4}
+        DESCRIPTION     "A table of digital Control Resource Data Records and its states."
+        ::= {hpiControl 2}
                 
 
-saHpiCtrlEntry OBJECT-TYPE
-        SYNTAX          SaHpiCtrlEntry
+saHpiCtrlDigitalEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlDigitalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the control resource data record."
+                "Definition of the digital control resource data record and its states table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
-        ::= {saHpiCtrlTable 1}
+        ::= {saHpiCtrlDigitalTable 1}
 
 
-SaHpiCtrlEntry ::= SEQUENCE {
-        saHpiCtrlNum            SaHpiInstrumentId,
-        saHpiCtrlOutputType     INTEGER,
-        saHpiCtrlType           INTEGER,
- 
-        saHpiCtrlState          OCTET STRING,
-        saHpiCtrlData        	OCTET STRING,
-        
-        saHpiCtrlDefaultMode     INTEGER,        
-        saHpiCtrlDefaultReadOnly TruthValue,      
-	
-        saHpiCtrlMode           INTEGER,        
-        saHpiCtrlReadOnly       TruthValue,      
-                                         
-        saHpiCtrlWriteOnly      TruthValue,
+SaHpiCtrlDigitalEntry ::= SEQUENCE {
+        saHpiCtrlNum            		SaHpiInstrumentId,
+        saHpiCtrlDigitalOutputType		SaHpiCtrlOutputType,
 
-        saHpiCtrlOem            Unsigned32, 
+        saHpiCtrlDigitalMode     		SaHpiCtrlMode,        
+
+        saHpiCtrlDigitalIsReadOnly 		TruthValue,
+
+        saHpiCtrlDigitalIsWriteOnly		TruthValue,
+
+		saHpiCtrlDigitalDefaultState	SaHpiCtrlStateDigital,
+		saHpiCtrlDigitalState			SaHpiCtrlStateDigital,
+
+        saHpiCtrlDigitalOem             Unsigned32, 
    
-        saHpiCtrlTextType       SaHpiTextType,
-        saHpiCtrlTextLanguage   SaHpiTextLanguage,
-        saHpiCtrlText           SaHpiText,
-        
-        saHpiCtrlRDR            RowPointer
+        saHpiCtrlDigitalRDR             RowPointer
 }
 
 
@@ -4630,91 +4626,31 @@ saHpiCtrlNum OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "The control number "
-        ::= {saHpiCtrlEntry 1}
+        ::= {saHpiCtrlDigitalEntry 1}
 
 
 
-saHpiCtrlOutputType OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined (0),
-                                generic (1), 
-                                led (2), 
-                                fanSpeed (3), 
-                                dryContactClosure (4),
-                                powerSupplyInhibit (5),
-                                audible (6), 
-                                frontPanelLockout (7),
-                                powerInterlock (8), 
-                                powerState (9),
-                                lcdDisplay (10), 
-                                oem (11)
-                        }
+saHpiCtrlDigitalOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-	This enumeration defines the what the control's output will be. 
+        DESCRIPTION     
+		"Refer to the textual convention for more details on the
+		enumerations.
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
-        ::= {saHpiCtrlEntry 2}
+        ::= {saHpiCtrlDigitalEntry 2}
 
-saHpiCtrlType OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined (0),
-                                digital(1),
-                                discrete(2),
-                                analog(3),
-                                stream(4),
-                                text(5),
-                                oem(193)
-                        }
+
+saHpiCtrlDigitalMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-	This enumerated type defines the different types of generic controls. 
-
-	Note: Enumerated values are increased by one value compared to
-	SAI-HPI-B.01.01 spec."
-        ::= {saHpiCtrlEntry 3}
-
-saHpiCtrlDefaultMode OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                auto(1),
-                                manual(2)
-                        }
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION "
-	Default stater of control.
-
-	Note: Enumerated values are increased by one value compared to
-	SAI-HPI-B.01.01 spec."
-	
-	REFERENCE "see section 7.3, 7.3.3, 8.7."
-        ::= {saHpiCtrlEntry 4}
-        
-saHpiCtrlDefaultReadOnly OBJECT-TYPE 
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Indicates the default state of mode."
-	
-	REFERENCE "see section 7.3, 7.3.3, 8.7."
-        ::= {saHpiCtrlEntry 5}
-	
-saHpiCtrlMode OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                auto(1),
-                                manual(2)
-                        }
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION "
+        DESCRIPTION 
 	   
-	If this columnar node is written to when the saHpiCtrlReadOnly Flag 
-	is TRUE the an SNMP error of notWritable is returned.  
+	"If this columnar node is written to when the saHpiCtrlDigitalIsReadOnly 
+	flag is TRUE the an SNMP error of notWritable is returned.  
 
 	This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
@@ -4725,7 +4661,7 @@ saHpiCtrlMode OBJECT-TYPE
 	changed.  These static-mode controls are indicated with the 
 	saHpiCtrlReadOnly flag set as part of the default control mode.
 	
-	When the mode is set to SAHPI_CTRL_MODE_AUTO, the state input is 
+	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
 	The CtrlState parameter must be of the correct type for the specified 
 	control.  
@@ -4733,228 +4669,77 @@ saHpiCtrlMode OBJECT-TYPE
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
-	REFERENCE "see section 7.3 and 7.3.3."
-        ::= {saHpiCtrlEntry 6}
+	REFERENCE "See section 7.3 and 7.3.3."
+        ::= {saHpiCtrlDigitalEntry 3}
         
-saHpiCtrlReadOnly OBJECT-TYPE 
+saHpiCtrlDigitalIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if mode is read-only"
-        ::= {saHpiCtrlEntry 7}
+        ::= {saHpiCtrlDigitalEntry 4}
         
-saHpiCtrlWriteOnly  OBJECT-TYPE 
+saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if Control is write-only"
 	
 	REFERENCE "See remarks section 7.3.2."
-        ::= {saHpiCtrlEntry 8}
+        ::= {saHpiCtrlDigitalEntry 5}
 
-saHpiCtrlState OBJECT-TYPE
-        SYNTAX          OCTET STRING (SIZE(1|4|9))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current setting of the control.  It must
-        be interpreted in the context of saHpiCtrlType.
-        If you wish to change the values of the data, this is the object
-        to use.
-	
-	You may not change the state of the control unless the Mode is set to
-	SAHPI_CTRL_MODE_MANUAL.  If a write is attempted when the mode is set to
-	SAHPI_CTRL_MODE_AUTO SNMP will return a notWriteable error code.
-
-        digital  - Unsigned 32bit integer (4 octets) defined as:
-                     off(1)
-                     on(2),
-                     pulseOff(3),
-                     pulseOn(4)
-        discrete - Unsigned 32bit integer  (4 octets)
-
-        analog   - octets 1-4 represent the value specified in
-                   network byte order.
-
-        stream   - A stream control is represented as follows:
-                     octet 1    - repeat flag
-                     octets 2-5 - count of octets of data stored in the stream specified 
-                                  in network byte order.
-                     octets 6-9 - contain the stream data.
-
-        text     - Text control attributes are represented as follows:
-                     octet 1    - Line number (255 indicates all lines).
-                                When reading:
-                                Note that depending on the data type and 
-                                language, the text may be encoded in 2-byte 
-                                Unicode, which requires two bytes of data per
-                                character.
-
-                                When writting:
-                                If less than a full line of data is written, 
-                                the control will clear all spaces beyond 
-                                those written on the line. Thus writing a
-                                zero-length string will clear the addressed line. 
-                                It is also possible to include more characters 
-                                in the text passed in the CtrlState structure 
-                                than will fit on one line; in this case, 
-                                the control will 'wrap' to the next line 
-                                (still clearing the trailing characters on the
-                                last line written).
-
-                The data will be in saHpiCtrlTextType, 
-                saHpiCtrlTextLanguage, and saHpiCtrlText.
-
-
-        oem      - An oem control is represented as follows:
-                     octets 1-4   - manufacturer ID in network byte order
-
-                The oem data is located in saHpiCtrlText.
-                The saHpiCtrlTextType and saHpiCtrlTextLanguage are both
-                set to undefined (0).
-        "
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2., 
-	7.3.3, 8.7 and 8.8."
-         
-        ::= {saHpiCtrlEntry 9}
-
-saHpiCtrlData          OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(4|9|12|262|270))
+saHpiCtrlDigitalDefaultState          OBJECT-TYPE
+        SYNTAX          SaHpiCtrlStateDigital 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
+        This object represents the default resource data records 
+	 	of the digital control.
 
-        This object represents resource data records of the control.
-        It must be interpreted in the context of saHpiCtrlType.
-        This object augments the data in saHpiCtrlState.
-
-        analog  - Analog information is represented as follows:
-
-                     octet 1-4 - Min value in network byte order
-                     octet 5-8 - Max value in network byte order.
-                     octet 9-12 - Default value in network byte order.
-
-        digital  - 4 octet default value in network byte order
-        discrete - 4 octet default value in network byte order
-        stream   - 9 octet default values in network byte order represented as:
-                     octet 1    - repeat flag
-                     octets 2-5 - count of octets of data stored in the stream 
-                                  specified in network byte order.
-                     octets 6-9 - contain the stream data.
-
-        text    - Text control attributes are represented as follows:
-                  octet 1       - max characters        
-                  octet 2       - max lines.
-                  octet 3       - Language.  The possible values are from
-                                  1 to 137. Each values stands for a different
-                                  language. The enumerations are:
-                                  undef(1), afar(2), abkhazian(3),afrikaans(4),
-                                  amharic(5),arabic(6), etc ...
-
-                                  Look in saHpiCtrlTextLanguage object for
-                                  all possible language enumerations.
-
-                  octet 4       - encoding.  The possible values are:
-                                binary(1):
-                                  String of bytes, any values legal
-
-                                bcdplus(2)
-                                  String of 0-9, space, dash, period ONLY
-
-                                ascii6(3)
-                                  Reduced ASCII character set: 0x20-0x5F ONLY
-
-                                language(4)
-                                  ASCII or UNICODE depending on language 
-
-                  octet 5       - line number.
-                  octet 6       - length of data.
-                  octet 7-n     - data to display (where max(n) is 262).
-
-        oem     - An oem control is represented as follows:
-                 octet 1-4      - manufacturer ID in network byte order.
-                 octets 5-14    - configuration data.
-                 octet 15       - body length.
-                 octets 14-n    - default state (where max(n) is 270).
+		Refer to the textual convention for more details on the
+		enumerations.
         " 
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
-        ::= {saHpiCtrlEntry 10}
+        ::= {saHpiCtrlDigitalEntry 6}
 
-saHpiCtrlOem OBJECT-TYPE
+saHpiCtrlDigitalState OBJECT-TYPE
+        SYNTAX          SaHpiCtrlStateDigital
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+        This attribute represents the current setting of the control.  
+        Use this object to change the values of the data.
+	
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code.
+
+		Refer to the textual convention for more details on the
+		enumerations.
+
+        "
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
+	7.3.3, 8.7 and 8.8."
+         
+        ::= {saHpiCtrlDigitalEntry 7}
+
+saHpiCtrlDigitalOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Reserved for OEM use"
-        ::= {saHpiCtrlEntry 11}
+        ::= {saHpiCtrlDigitalEntry 8}
 
-saHpiCtrlTextType OBJECT-TYPE 
-        SYNTAX          SaHpiTextType
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     
-	"This columnar is only used if the saHpiCtrlType is set to text(5) 
-	or oem(193).  And must be interpreted in the context of saHpiCtrlState.
-	See Textual Convention, SaHpiTextType, for syntax definition."
-        ::= {saHpiCtrlEntry 12}
 
-saHpiCtrlTextLanguage OBJECT-TYPE
-        SYNTAX          SaHpiTextLanguage
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     	
-	"This columnar is only used if the saHpiCtrlType is set to text(5) 
-	or oem(193).  And must be interpreted in the context of saHpiCtrlState.
-	See Textual Convention, SaHpiTextType, for syntax definition."
-
-        ::= {saHpiCtrlEntry 13}
-
-saHpiCtrlText OBJECT-TYPE
-        SYNTAX          SaHpiText
-	MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     
-        "This value is only filled if the saHpiCtrlType
-        is set to text(5) or oem(193). 
-
-        if saHpiCtrlType == text(5),
-         
-	This columnar node will contain the text at the line number 
-	specified by the 'text' feild of saHpiCtlState.  If the 'text' field in 
-	in saHpiCtrlstate is 255 then this columnar node will contain the entire text of the node
-	or as much of it that will fit.  (no trimming of trailing blanks).
-               
-        Note that depending on the data type and language, the text may be
-        encoded in 2-byte Unicode, which requires two bytes of data per
-        character. 
-	
-        Note that the number of lines and columns in a text control
-        can be obtained from the saHpiCtrlData.
-        
-        When writing, if less than a full line of data is written, 
-        the control will clear all spaces beyond those written on the line. 
-        Thus writing a zero-length string will clear the addressed line. 
-        It is also possible to include more characters in the text passed 
-        in than will fit on one line; in this case, the control will
-        'wrap' to the next line (still clearing the trailing characters 
-        on the last line written).      
-
-        if saHpiCtrlType == oem(193),
-
-        Contains the OEM specific data. Max length is 255 bytes.
-        "
-        REFERENCE
-        "Derieved from typedef and function calls described in
-        SAI-HPI-B.01.01 sections 8.7 and 8.1."
-        ::= {saHpiCtrlEntry 14}
-
-saHpiCtrlRDR OBJECT-TYPE
+saHpiCtrlDigitalRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
-        ::= {saHpiCtrlEntry 15}
+        ::= {saHpiCtrlDigitalEntry 9}
+
 
 
 --/*******************************************************************************
@@ -7703,24 +7488,20 @@ saHpiRdrGroup OBJECT-GROUP
 		"saHpiRdr table."
 	::= { hpiMIBCompliances 20}
 
-saHpiCtrlGroup OBJECT-GROUP
+saHpiCtrlDigitalGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiCtrlOutputType,
-		saHpiCtrlType,
-		saHpiCtrlState,
-		saHpiCtrlData,
-		saHpiCtrlMode,
-		saHpiCtrlReadOnly,
-		saHpiCtrlWriteOnly,
-		saHpiCtrlOem,
-		saHpiCtrlTextType,
-		saHpiCtrlTextLanguage,
-		saHpiCtrlText,
-		saHpiCtrlRDR
+        saHpiCtrlDigitalOutputType,
+        saHpiCtrlDigitalMode,
+        saHpiCtrlDigitalIsReadOnly,
+        saHpiCtrlDigitalIsWriteOnly,
+		saHpiCtrlDigitalDefaultState,
+		saHpiCtrlDigitalState,
+        saHpiCtrlDigitalOem, 
+        saHpiCtrlDigitalRDR
 	}
 	STATUS	current
 	DESCRIPTION
-		"saHpiCtrl table."
+		"saHpiCtrlDigital table."
 	::= { hpiMIBCompliances 21}
 
 saHpiSensorGroup OBJECT-GROUP
@@ -8036,7 +7817,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiEventLogInfoGroup,
 		saHpiEventLogGroup,
 		saHpiRdrGroup,
-		saHpiCtrlGroup,
+		saHpiCtrlDigitalGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
