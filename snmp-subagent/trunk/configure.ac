@@ -1,9 +1,9 @@
- s#                                               -*- Autoconf -*-
+#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.53)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
-AM_INIT_AUTOMAKE(openhpi-subagent, 0.1)
+AM_INIT_AUTOMAKE(openhpi-subagent, 0.2)
 AC_CONFIG_SRCDIR([include/saHpiTable.h])
 AM_CONFIG_HEADER([config.h])
 
