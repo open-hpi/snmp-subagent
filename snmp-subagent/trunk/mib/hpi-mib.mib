@@ -4526,7 +4526,6 @@ saHpiSensorEntry OBJECT-TYPE
         DESCRIPTION
         " This is the sensor resource data record which
 	describes all of the static  data associated with a sensor."
---IBMKR: How do you set the sensors? 
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorIndex }
         ::= {saHpiSensorTable 1}
 
@@ -4535,13 +4534,15 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorType				INTEGER,
 	saHpiSensorCategory			SaHpiEventCategory,
 	
-	saHpiEnableCtrl	  			TruthValue,
-	saHpiSensorEnable	  		TruthValue,   missed
-	
-	saHpiEventState	  			TruthValue,   missed
- --IBMDJ       
-	saHpiEventMaskAssert	  		TruthValue,   missed... string representation SaHpiEventState
-	saHpiEventMaskAssert	  		TruthValue,   missed... string representation SaHpiEventState
+	saHpiSensorEnableCtrl	  		TruthValue,
+	saHpiSensorEnable	  		TruthValue,  
+	 
+	saHpiSensorEventEnable			TruthValue,       
+	saHpiSensorEventCtrl	  		INTEGER,  
+	saHpiEventState	  			SaHpiEventState,   
+       
+	saHpiAssertEventMask	  		SaHpiEventState,   
+	saHpiDeassertEventMask	  		SaHpiEventState,   
 	
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsSupported		SaHpiEventState,
@@ -4629,13 +4630,81 @@ saHpiSensorType OBJECT-TYPE
 
         ::= {saHpiSensorEntry 2}
 
-saHpiEnableCtrl OBJECT-TYPE
+saHpiSensorEnableCtrl OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "True if HPI User can enable or disable sensor via saHpiSensorEnableSet()."
+        DESCRIPTION     "True if HPI User can enable or disable sensor via 
+	saHpiSensorEnableSet()."
         ::= {saHpiSensorEntry 3}
+	
+saHpiSensorEnable	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"If 'saHpiEnableCtrl' is 'TRUE' used to enable/disbale Sensor.See 
+	saHpiSensorEnableSet().
+	TRUE = sensor enable, FALSE = sensor disabled"
+        ::= {saHpiSensorEntry 4}
 
+saHpiSensorEventEnable	OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"Will be set to TRUE if event generation is enabled, FALSE if EVENT
+	generation is disabled."
+        ::= {saHpiSensorEntry 5}
+
+saHpiSensorEventCtrl	OBJECT-TYPE
+        SYNTAX          INTEGER {
+				undefined(0),
+				per_event(1),	
+				read_only_masks(2), 
+				read_only(3)        
+			}
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"
+	SAHPI_SEC_PER_EVENT = 1,	Event message control per event,
+					or by entire sensor; sensor event enable
+					status can be changed, and assert/deassert
+					masks can be changed.
+					 
+	SAHPI_SEC_READ_ONLY_MASKS,  	Control for entire sensor only; sensor
+					event enable status can be changed, but
+					assert/deassert masks cannot be changed.
+					
+	SAHPI_SEC_READ_ONLY         	Event control not supported; sensor event
+					enable status cannot be changed and
+					assert/deassert masks cannot be changed."
+        ::= {saHpiSensorEntry 6}
+
+saHpiEventState		OBJECT-TYPE
+        SYNTAX          SaHpiEventState
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"Bit mask of event states supported."
+        ::= {saHpiSensorEntry 7}
+	
+saHpiAssertEventMask	OBJECT-TYPE
+        SYNTAX          SaHpiEventState
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"Bit mask of event states supported."
+        ::= {saHpiSensorEntry 8}
+
+saHpiDeassertEventMask	OBJECT-TYPE
+        SYNTAX          SaHpiEventState
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"Bit mask of event states supported."
+        ::= {saHpiSensorEntry 9}
 
 saHpiSensorCategory OBJECT-TYPE
         SYNTAX          SaHpiEventCategory
@@ -4651,7 +4720,7 @@ saHpiSensorCategory OBJECT-TYPE
 	have state meanings other than those identified with other event 
 	categories.
 	"		
-        ::= {saHpiSensorEntry 4}
+        ::= {saHpiSensorEntry 10}
 
 saHpiSensorEventsCategoryControl OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -4673,7 +4742,7 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
 	readOnly - Event control not supported; sensor event    
 	   enable status cannot be changed and          
 	   assert/deassert masks cannot be changed"
-        ::= {saHpiSensorEntry 5}
+        ::= {saHpiSensorEntry 11}
 
 saHpiSensorEventsSupported OBJECT-TYPE
         SYNTAX         	SaHpiEventState
@@ -4681,7 +4750,7 @@ saHpiSensorEventsSupported OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	""
-        ::= {saHpiSensorEntry 6}
+        ::= {saHpiSensorEntry 12}
 
 
 saHpiSensorIsSupported	OBJECT-TYPE
@@ -4689,7 +4758,7 @@ saHpiSensorIsSupported	OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if sensor data readings are supported."
-        ::= {saHpiSensorEntry 7}
+        ::= {saHpiSensorEntry 13}
 	
 
 saHpiSensorReadingType 	OBJECT-TYPE
@@ -4698,7 +4767,7 @@ saHpiSensorReadingType 	OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Type of value for sensor reading."
-	::= {saHpiSensorEntry 8}
+	::= {saHpiSensorEntry 14}
 
 saHpiSensorBaseUnits 	OBJECT-TYPE
 	SYNTAX		SaHpiSensorUnits
@@ -4706,7 +4775,7 @@ saHpiSensorBaseUnits 	OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"See Definition."
-	::= {saHpiSensorEntry 9}
+	::= {saHpiSensorEntry 15}
 	
 saHpiSensorModifierUnits 	OBJECT-TYPE
 	SYNTAX		SaHpiSensorUnits
@@ -4714,7 +4783,7 @@ saHpiSensorModifierUnits 	OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"See Definition."
-	::= {saHpiSensorEntry 10}
+	::= {saHpiSensorEntry 16}
 	
 saHpiSensorModifierUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -4731,14 +4800,14 @@ saHpiSensorModifierUse OBJECT-TYPE
 	base unit == meter, modifier unit == seconds, and
 	 modifier unit use == basicOverModifier(1). 
 	The resulting unit would be meters per second."			
-        ::= {saHpiSensorEntry 11}
+        ::= {saHpiSensorEntry 17}
 
 saHpiSensorPercentage OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Is the value a percentage."
-        ::= {saHpiSensorEntry 12}
+        ::= {saHpiSensorEntry 18}
 
 saHpiSensorRangeFlags 	OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4748,7 +4817,7 @@ saHpiSensorRangeFlags 	OBJECT-TYPE
         "Defines which range flags the sensor supports. They
         can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
         nothing if the sensor does not support any ranges."
-        ::= {saHpiSensorEntry 13}
+        ::= {saHpiSensorEntry 19}
 	
 saHpiAccuracyFactor	OBJECT-TYPE
         SYNTAX          Float64
@@ -4759,7 +4828,7 @@ saHpiAccuracyFactor	OBJECT-TYPE
 	(e.g. 0.05 = 5%) and represents statistically how close the measured 
 	reading is to the actual value. It is an interpreted value that 
 	figures in all sensor accuracies, resolutions, and tolerances."
-        ::= {saHpiSensorEntry 14}
+        ::= {saHpiSensorEntry 20}
 	
 saHpiOem 		OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -4767,7 +4836,7 @@ saHpiOem 		OBJECT-TYPE
         STATUS          current
         DESCRIPTION     " "
 
-        ::= {saHpiSensorEntry 15}
+        ::= {saHpiSensorEntry 21}
 	
 	    
 saHpiSensorRDR OBJECT-TYPE
@@ -4775,7 +4844,7 @@ saHpiSensorRDR OBJECT-TYPE
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 16}
+	::= {saHpiSensorEntry 22}
 
 --
 -- /*******************************************************************************
