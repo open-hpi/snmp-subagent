@@ -1079,7 +1079,7 @@ hpiSubagent_parse_config_traps (const char *token, char *cptr)
 
   if ((x != AGENT_TRUE) && (x != AGENT_FALSE))
     {
-      sprintf (buf, "hpiSubagent: '%s' unrecognized", cptr);
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_traps, '%s' unrecognized", cptr);
       config_perror (buf);
     }
   else
@@ -1097,7 +1097,8 @@ hpiSubagent_parse_config_interval (const char *token, char *cptr)
 
   if (x < -1)
     {
-      sprintf (buf, "hpiSubagent: '%s' unrecognized", cptr);
+
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_interval, '%s' unrecognized", cptr);
       config_perror (buf);
     }
   else
@@ -1115,7 +1116,8 @@ hpiSubagent_parse_config_max_event (const char *token, char *cptr)
 
   if (x < -1)
     {
-      sprintf (buf, "hpiSubagent: '%s' unrecognized", cptr);
+
+	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_max_event, '%s' unrecognized", cptr);
       config_perror (buf);
     }
   else
@@ -1336,7 +1338,9 @@ main (int argc, char **argv)
       rc = agent_check_and_process (1);	/* 0 == don't block */
     }
 stop:
-  closeSaHpiSession();
+
+  dbg("WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!");
+  //closeSaHpiSession();
   /* at shutdown time */
   snmp_log (LOG_INFO, "Stopping %s\n", version);
   snmp_shutdown (AGENT);
