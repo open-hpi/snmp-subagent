@@ -48,9 +48,25 @@ static oid      saHpiRdrCount_oid[] = { hpiResources_OID, SCALAR_COLUMN_SAHPIRDR
   
 
 //  { 1, 3, 6, 1, 3, 90, 4, 7, 0 };
-static oid saHpiResourceDataRecordNotification[] = { hpiNotifications_OID, 7, 0};
+static oid saHpiResourceDataRecordNotification_oid[] = { hpiNotifications_OID, 7, 0};
+
+#define RDR_NOTIF_COUNT 5
+#define RDR_NOTIF_RDRRECORDID 0
+#define RDR_NOTIF_TYPE 1
+#define RDR_NOTIF_ENTITY_PATH 2
+#define RDR_NOTIF_RDR 3
+#define RDR_NOTIF_RDR_RTP 4
+
+static trap_vars saHpiResourceDataRecordNotification[]  = {
+  {COLUMN_SAHPIRDRRECORDID,ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIRDRTYPE, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIRDRENTITYPATH, ASN_OCTET_STR, NULL, 0},
+  {COLUMN_SAHPIRDR, ASN_OBJECT_ID, NULL, 0},
+  {COLUMN_SAHPIRDRRTP, ASN_OBJECT_ID, NULL, 0}};
+
 
 static u_long rdr_count = 0;
+
 
 
 static int  
@@ -59,22 +75,13 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
 			     saHpiRdrTable_context *ctx,
 			     oid* rdr_oid, size_t oid_len,
 			     oid* child_oid, size_t child_oid_len,
-			     unsigned long child_id);
-
-/*
-static void
-make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
-
-static
-  int send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx);
+			     unsigned long child_id,
+			     trap_vars **var,
+			     size_t *var_len,
+			     oid **var_oid);
 
 
-*/
+
 int
 populate_rdr(SaHpiRptEntryT *rpt_entry, 
 	     oid *rpt_oid, size_t rpt_oid_len,
@@ -102,6 +109,12 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 
    netsnmp_index	rdr_index;
    saHpiRdrTable_context	*rdr_context; 
+
+
+  oid *trap_oid;
+  trap_vars *trap = NULL;
+  size_t trap_len;
+  netsnmp_variable_list *trap_var;
 
    DEBUGMSGTL((AGENT,"\n\t--- populate_rdr: Entry.\n"));
   if ((rc = getSaHpiSession(&session_id)) == AGENT_ERR_NOERROR) {
@@ -197,17 +210,43 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 					 rpt_oid_len,
 					 child_oid,
 					 child_oid_len,
-					 child_id)
+					 child_id,
+					 &trap, &trap_len, &trap_oid)
 	    == AGENT_NEW_ENTRY) {
 
 	  CONTAINER_INSERT(cb.container, rdr_context);	  
 	  rdr_count = CONTAINER_SIZE(cb.container);
-	  /*
-	    IBM-KR: TODO
-	  if (send_traps_on_startup == TRUE) {
-	    send_saHpiRdrTable_notification(rdr_context);
-	  }
-	  */
+
+	  if (send_traps_on_startup == AGENT_TRUE) {
+	    if (trap != NULL) {
+	      trap_var = build_notification(&rdr_index,
+					    trap, trap_len,
+					       saHpiResourceDataRecordNotification_oid, 
+					       OID_LENGTH(saHpiResourceDataRecordNotification_oid),
+					       saHpiRdrTable_oid, saHpiRdrTable_oid_len,
+					       rpt_entry->DomainId,
+					       rpt_oid, rpt_oid_len,
+					       rpt_entry->ResourceId,
+					       resource_oid, resource_oid_len);
+		 if (trap_var != NULL) {
+		   // Add some more (entryCount, and entryUpdate)
+		   snmp_varlist_add_variable(&trap_var,
+					     saHpiRdrCount_oid, 
+					     OID_LENGTH(saHpiRdrCount_oid),
+					     ASN_COUNTER,
+					     (u_char *)&rdr_count,
+					     sizeof(rdr_count));
+
+		   DEBUGMSGTL((AGENT,"Sending the TRAP\n"));
+		   send_v2trap(trap_var);
+		   snmp_free_varbind(trap_var);
+		 } else {
+		   DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+		 }
+
+	       }
+	     }
+
 
 	}
       } else { // Bail out.
@@ -264,7 +303,11 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 			     size_t rpt_oid_len,
 			     oid *child_oid, 
 			     size_t child_oid_len,
-			     unsigned long child_id) {
+			     unsigned long child_id,
+			     trap_vars **var,
+			     size_t *var_len,
+			     oid **var_trap_oid) {
+
 
   long hash;
   int len;
@@ -328,117 +371,46 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 
     ctx->saHpiRdrId = child_id;
 
+    // Fix the trap messages
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDRRECORDID].value = 
+      (u_char *) &ctx->saHpiRdrRecordId;
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDRRECORDID].value_len = 
+      sizeof(ctx->saHpiRdrRecordId);
+
+    saHpiResourceDataRecordNotification[RDR_NOTIF_TYPE].value = 
+      (u_char *) &ctx->saHpiRdrType;
+    saHpiResourceDataRecordNotification[RDR_NOTIF_TYPE].value_len = 
+      sizeof(ctx->saHpiRdrType);
+
+
+    saHpiResourceDataRecordNotification[RDR_NOTIF_ENTITY_PATH].value = 
+      (u_char *) &ctx->saHpiRdrEntityPath;
+    saHpiResourceDataRecordNotification[RDR_NOTIF_ENTITY_PATH].value_len = 
+      ctx->saHpiRdrEntityPath_len;
+
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDR].value = 
+      (u_char *) &ctx->saHpiRdr;
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDR].value_len = 
+      ctx->saHpiRdr_len;
+
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDR_RTP].value = 
+      (u_char *) &ctx->saHpiRdrRTP;
+    saHpiResourceDataRecordNotification[RDR_NOTIF_RDR_RTP].value_len = 
+      ctx->saHpiRdrRTP_len;
+    
+      // Point *var to this trap_vars. 
+    *var = (trap_vars *)&saHpiResourceDataRecordNotification;
+      *var_len = RDR_NOTIF_COUNT;
+      *var_trap_oid = (oid *)&saHpiResourceDataRecordNotification_oid;
+
+
+
     return AGENT_NEW_ENTRY;
   }
   
   return AGENT_ERR_NULL_DATA;
 }
-/*
-int
-send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx) {
 
-  netsnmp_variable_list *notification_vars = NULL;
-  oid snmptrap[] = { snmptrap_oid };
-  DEBUGMSGTL((AGENT,"--- send_saHpiRdrTable_notification: Entry.\n"));  
-
-  snmp_varlist_add_variable(&notification_vars,
-			    snmptrap, OID_LENGTH(snmptrap),
-			    ASN_OBJECT_ID,
-			    (u_char *)saHpiResourceDataRecordNotification,
-			    OID_LENGTH(saHpiResourceDataRecordNotification)* sizeof(oid));
-
-
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-			      &ctx->index,
-			      COLUMN_SAHPIRDRRESOURCEID,
-			      ASN_UNSIGNED,
-			      (char *)&ctx->saHpiResourceID,
-			      sizeof(ctx->saHpiResourceID));
-
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-			      &ctx->index,
-			      COLUMN_SAHPIRDRRECORDID,
-			      ASN_UNSIGNED,
-			      (char *)&ctx->saHpiRdrRecordId,
-			      sizeof(ctx->saHpiRdrRecordId));
-  
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDRTYPE,
-		ASN_INTEGER,
-		(char *)&ctx->saHpiRdrType,
-		sizeof(ctx->saHpiRdrType));
-
- make_SaHpiRdrTable_trap_msg(notification_vars,
-	       &ctx->index,
-	       COLUMN_SAHPIRDRENTITYPATH,
-	       ASN_OCTET_STR,
-	       ctx->saHpiRdrEntityPath,
-	       ctx->saHpiRdrEntityPath_len);
-
- make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDR,
-		ASN_OBJECT_ID,
-		(char *)ctx->saHpiRdr,
-		ctx->saHpiRdr_len);
-
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDRRTP,
-		ASN_OBJECT_ID,
-		(char *)ctx->saHpiRdrRTP,
-		ctx->saHpiRdrRTP_len);
-
-  oid rdr_count_oid[] = 
-    {hpiResources_OID , SCALAR_COLUMN_SAHPIRDRCOUNT , 0 };
-
- snmp_varlist_add_variable(&notification_vars,
-			   rdr_count_oid, OID_LENGTH(rdr_count_oid),
-			   ASN_COUNTER,
-			   (char *)&rdr_count,
-			   sizeof(rdr_count));
-
-  send_v2trap(notification_vars);
-
-  snmp_free_varbind(notification_vars);
-  DEBUGMSGTL((AGENT,"--- send_saHpiRdrTable_notification: Exit.\n"));
-  return 0;
-}
-
-void
-make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int col, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len) {
-
-  oid entries[MAX_OID_LEN];
-  int len;
-  oid column[2];
-
-
-  column[0] = 1; // wonder where this comes from? Look at the HPI MIB
-  column[1] = col;
-
-  build_full_oid(saHpiRdrTable_oid, saHpiRdrTable_oid_len,
-		 column, 2,
-		 index,
-		 entries, MAX_OID_LEN, &len);
-  DEBUGMSGTL((AGENT,"\n"));
-  DEBUGMSGOID((AGENT,entries, len));
-  DEBUGMSGTL((AGENT,"\n"));
-
- snmp_varlist_add_variable(&list,
-			   entries, len,
-			   type,
-			   value,
-			   value_len);
-			
-  
-}
-*/
 
 /*
  * the *_extract_index routine
