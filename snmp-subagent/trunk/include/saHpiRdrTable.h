@@ -64,6 +64,7 @@ extern          "C" {
         long            saHpiRdr_len;
 
         /** COUNTER = ASN_COUNTER */
+    // It is  the child_id.
         unsigned long   saHpiRdrId;
 
         /** RowPointer = ASN_OBJECT_ID */

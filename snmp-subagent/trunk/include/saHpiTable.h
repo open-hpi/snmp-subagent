@@ -121,7 +121,12 @@ extern          "C" {
         long            saHpiEventLogState;
         long  hash;
 
-
+      /*
+       * Dirty bit. When set to 0, means this context is not
+       * used anywhere
+       */
+      unsigned int dirty_bit;
+      
     } saHpiTable_context;
 
 /*************************************************************
@@ -159,10 +164,11 @@ extern          "C" {
    * Remvoe the RTP row (from SNMP memory, not SaHPI).
    */
 
-int
+
+int 
 delete_rpt_row(SaHpiDomainIdT domain_id,
 	       SaHpiResourceIdT resource_id,
-	       SaHpiEntryIdT num);
+	       SaHpiEntryIdT num); 
 
 
 int
