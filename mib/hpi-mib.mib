@@ -3881,7 +3881,7 @@ saHpiSensorStatus OBJECT-TYPE
 	The bit flags are:
 	SAHPI_SENSTAT_EVENTS_ENABLED 0x80
 	SAHPI_SENSTAT_SCAN_ENABLED   0x40
-	SAHPI_SENSTAT_BUSY           0x2"
+	SAHPI_SENSTAT_BUSY           0x20
 	::= {saHpiSensorEntry 6}
 
 saHpiSensorAssertEvents OBJECT-TYPE
