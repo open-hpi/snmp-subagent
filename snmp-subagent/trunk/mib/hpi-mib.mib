@@ -1126,7 +1126,7 @@ SaHpiGuid ::= TEXTUAL-CONVENTION
 	version 1 of the GUID format, with a 3-bit variant field of 
 	10x (where x indicates 'don't care')"
 	REFERENCE
-	"Derieved from SAI-HPI-B.01.01 section 8.21."
+	"Derived from SAI-HPI-B.01.01 section 8.21."
         SYNTAX          OCTET STRING(SIZE(0..15))
 
 
@@ -2323,7 +2323,7 @@ saHpiResourceParmControl OBJECT-TYPE
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
         REFERENCE
-        "Derieved from SAI-HPI-B.01.01 section 7.8.and 8.18"
+        "Derived from SAI-HPI-B.01.01 section 7.8.and 8.18"
 	::= {saHpiResourceEntry   20} 
 
 
@@ -2349,7 +2349,7 @@ saHpiAutoInsertTimeoutTable OBJECT-TYPE
 	saHpiAutoExtractTimeoutGet, and
 	saHpiAutoExtractTimeoutGet."
     
-    REFERENCE "Derieved from SAI-HPI-B.01.01 section 7.7."
+    REFERENCE "Derived from SAI-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
 
 saHpiAutoInsertTimeoutEntry OBJECT-TYPE
@@ -2651,7 +2651,7 @@ saHpiHotSwapResetAction OBJECT-TYPE
 	SAI-HPI-B spec."
 
     REFERENCE
-        "Derieved from SAI-HPI-B.01.01 page 164."
+        "Derived from SAI-HPI-B.01.01 page 164."
     ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapPowerAction OBJECT-TYPE
@@ -2686,7 +2686,7 @@ saHpiHotSwapPowerAction OBJECT-TYPE
 Note: Enumerated values are increased by one value compared to
 SAI-HPI-B.01.01 spec."
         REFERENCE
-                "Derieved from SAI-HPI-B.01.01 page 168-169."
+                "Derived from SAI-HPI-B.01.01 page 168-169."
         ::= { saHpiHotSwapEntry 8 }
 	
 saHpiHotSwapRowPointer OBJECT-TYPE
@@ -4443,7 +4443,7 @@ saHpiEventLogInfoDelete OBJECT-TYPE
         reset when this function is called."
 
     REFERENCE
-        "Derieved from SAI-HPI-B.01.01 page 57."
+        "Derived from SAI-HPI-B.01.01 page 57."
 
     ::= {saHpiEventLogInfoEntry 11}
 
@@ -4467,7 +4467,7 @@ saHpiEventLogInfoState OBJECT-TYPE
     on-specific which events are automatically added to any Event Log.
     "
     REFERENCE
-        "Derieved from SAI-HPI-B.01.01 page 61,62."
+        "Derived from SAI-HPI-B.01.01 page 61,62."
     ::= {saHpiEventLogInfoEntry 12}
 
 
