@@ -103,6 +103,31 @@
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
 
+/*
+ * OIDs for subagent
+ */
+//  .iso.org.dod.internet.private.enterprises.saforum.experimental.hpiE.openhpiE
+#define hpi0101_OID 			1,3,6,1,4,1,18568,2,1,1
+
+#define hpiAdministration_OID 	hpi0101_OID,1
+
+#define hpiDomain_OID 			hpi0101_OID,2
+#define hpiHotswap				hpiDomain_OID,11
+
+#define hpiEvents_OID 			hpi0101_OID,3
+#define hpiEvents_events_OID 	hpiEvents_OID,1
+#define hpiEvents_eventlogs_OID	hpiEvents_OID,2
+
+#define hpiResources_OID 		hpi0101_OID,4
+#define hpiControl_OID 			hpiResources_OID,7
+#define hpiInventory_OID 		hpiResources_OID,8
+#define hpiSensor_OID 			hpiResources_OID,9
+
+#define hpiNotifications_OID 	hpi0101_OID,5
+
+// SnmpTrapOID.0
+#define snmptrap_oid 1,3,6,1,6,3,1,1,4,1,0
+
 
 /*
  * Internal data for the sub-agent.
@@ -144,7 +169,6 @@ static RETSIGTYPE stop_server (int a)
 {
   keep_running = 0;
 }
-
 
 void hpiSubagent_parse_config_traps (const char *token, char *cptr)
 {
