@@ -5221,7 +5221,8 @@ SaHpiInventoryFieldEntry ::= SEQUENCE {
 	saHpiIdrNumField	Unsigned32,
 	saHpiFieldTextType    	SaHpiTextType, 
 	saHpiFieldTextLanguage  SaHpiTextLanguage, 
-	saHpiFieldText  	SaHpiText
+	saHpiFieldText  	SaHpiText,
+	saHpiFieldDelete	TruthValue
 	}
 	
 saHpiDataFieldId OBJECT-TYPE
@@ -5298,6 +5299,17 @@ saHpiFieldText	OBJECT-TYPE
 	The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiInventoryFieldEntry 7}
+	
+saHpiFieldDelete	OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"This object provides a method to delete a Data Inventory Field.
+
+	Setting this to true(1) will 'delete the field."
+	::= {saHpiInventoryFieldEntry 8}
+
 
 --
 -- /*******************************************************************************
@@ -5497,7 +5509,7 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
                         implementation-dependent means.
 	
 	Bit flags are:
-
+--IBMDJ  is this the correct values for mask values??????
 	SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
  	SAHPI_WATCHDOG_EXP_BIOS_POST   0x04
  	SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
