@@ -4738,12 +4738,13 @@ saHpiCtrlState OBJECT-TYPE
         oem      - An oem control is represented as follows:
                      octets 1-4   - manufacturer ID in network byte order
 
-                The oem text data is located in saHpiCtrlText.
+                The oem data is located in saHpiCtrlText.
                 The saHpiCtrlTextType and saHpiCtrlTextLanguage are both
                 set to undefined (0).
         "
     REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 pages 93, 94."
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2., 
+	7.3.3, 8.7 and 8.8."
          
         ::= {saHpiCtrlEntry 9}
 
@@ -4763,9 +4764,9 @@ saHpiCtrlData          OBJECT-TYPE
                      octet 5-8 - Max value in network byte order.
                      octet 9-12 - Default value in network byte order.
 
-        digital  - 4 octet value in network byte order
-        discrete - 4 octet value in network byte order
-        stream   - 9 octet values in network byte order represented as:
+        digital  - 4 octet default value in network byte order
+        discrete - 4 octet default value in network byte order
+        stream   - 9 octet default values in network byte order represented as:
                      octet 1    - repeat flag
                      octets 2-5 - count of octets of data stored in the stream 
                                   specified in network byte order.
@@ -4807,7 +4808,7 @@ saHpiCtrlData          OBJECT-TYPE
                  octets 14-n    - default state (where max(n) is 270).
         " 
     REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 pages 92, 93, 94."
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
         ::= {saHpiCtrlEntry 10}
 
 saHpiCtrlOem OBJECT-TYPE
@@ -4821,14 +4822,21 @@ saHpiCtrlTextType OBJECT-TYPE
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "See Definition"
+        DESCRIPTION     
+	"This columnar is only used if the saHpiCtrlType is set to text(5) 
+	or oem(193).  And must be interpreted in the context of saHpiCtrlState.
+	See Textual Convention, SaHpiTextType, for syntax definition."
         ::= {saHpiCtrlEntry 12}
 
 saHpiCtrlTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "See Definition."
+        DESCRIPTION     	
+	"This columnar is only used if the saHpiCtrlType is set to text(5) 
+	or oem(193).  And must be interpreted in the context of saHpiCtrlState.
+	See Textual Convention, SaHpiTextType, for syntax definition."
+
         ::= {saHpiCtrlEntry 13}
 
 saHpiCtrlText OBJECT-TYPE
@@ -4840,21 +4848,18 @@ saHpiCtrlText OBJECT-TYPE
         is set to text(5) or oem(193). 
 
         if saHpiCtrlType == text(5),
-                        
-        The value will contain the line of text (the line
-        number is determined by saHpiCtrlState)  or if the line number
-        passed is 255,  this object will have the entire text of the control, 
-        or as much of it as will fit in this object.
-        
-        This value will consist of the text of all the lines concatenated, 
-        using the maximum number of characters for each line 
-        (no trimming of trailing blanks).
-        
+         
+	This columnar node will contain the text at the line number 
+	specified by the 'text' feild of saHpiCtlState.  If the 'text' field in 
+	in saHpiCtrlstate is 255 then this columnar node will contain the entire text of the node
+	or as much of it that will fit.  (no trimming of trailing blanks).
+               
         Note that depending on the data type and language, the text may be
         encoded in 2-byte Unicode, which requires two bytes of data per
         character. 
+	
         Note that the number of lines and columns in a text control
-        can be obtained from the saHpiCtrlAttributes.
+        can be obtained from the saHpiCtrlData.
         
         When writing, if less than a full line of data is written, 
         the control will clear all spaces beyond those written on the line. 
@@ -4870,7 +4875,7 @@ saHpiCtrlText OBJECT-TYPE
         "
         REFERENCE
         "Derieved from typedef and function calls described in
-        SAI-HPI-B.01.01 pages 84...89."
+        SAI-HPI-B.01.01 sections 8.7 and 8.1."
         ::= {saHpiCtrlEntry 14}
 
 saHpiCtrlRDR OBJECT-TYPE
@@ -5305,7 +5310,7 @@ saHpiSensorReadingCurrentType   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingCurrentEntry 2}
 
 saHpiSensorReadingCurrentValue  OBJECT-TYPE
@@ -5313,7 +5318,7 @@ saHpiSensorReadingCurrentValue  OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingCurrentEntry 3}
         
 saHpiSensorReadingCurrentEventState OBJECT-TYPE
@@ -5368,7 +5373,7 @@ saHpiSensorReadingMaxType       OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingMaxEntry 2}
 
 saHpiSensorReadingMaxValue      OBJECT-TYPE
@@ -5376,7 +5381,7 @@ saHpiSensorReadingMaxValue      OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingMaxEntry 3}
         
 -- *********************************
@@ -5423,7 +5428,7 @@ saHpiSensorReadingMinType       OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingMinEntry 2}
 
 saHpiSensorReadingMinValue      OBJECT-TYPE
@@ -5431,7 +5436,7 @@ saHpiSensorReadingMinValue      OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingMinEntry 3}
         
 -- *********************************
@@ -5478,7 +5483,7 @@ saHpiSensorReadingNominalType   OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNominalEntry 2}
 
 saHpiSensorReadingNominalValue  OBJECT-TYPE
@@ -5486,7 +5491,7 @@ saHpiSensorReadingNominalValue  OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNominalEntry 3}
         
 -- *********************************
@@ -5533,7 +5538,7 @@ saHpiSensorReadingNormalMaxType         OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNormalMaxEntry 2}
 
 saHpiSensorReadingNormalMaxValue        OBJECT-TYPE
@@ -5541,7 +5546,7 @@ saHpiSensorReadingNormalMaxValue        OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNormalMaxEntry 3}
 
 -- *********************************
@@ -5588,7 +5593,7 @@ saHpiSensorReadingNormalMinType         OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNormalMinEntry 2}
 
 saHpiSensorReadingNormalMinValue        OBJECT-TYPE
@@ -5596,7 +5601,7 @@ saHpiSensorReadingNormalMinValue        OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorReadingNormalMinEntry 3}
 
 -- *********************************
@@ -5663,7 +5668,7 @@ saHpiSensorThdLowCriticalType           OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowCriticalEntry 3}
 
 saHpiSensorThdLowCriticalValue          OBJECT-TYPE
@@ -5671,7 +5676,7 @@ saHpiSensorThdLowCriticalValue          OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowCriticalEntry 4}
 
 -- *********************************
@@ -5739,7 +5744,7 @@ saHpiSensorThdLowMajorType              OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMajorEntry 3}
 
 saHpiSensorThdLowMajorValue             OBJECT-TYPE
@@ -5747,7 +5752,7 @@ saHpiSensorThdLowMajorValue             OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMajorEntry 4}
 
 -- *********************************
@@ -5815,7 +5820,7 @@ saHpiSensorThdLowMinorType              OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMinorEntry 3}
 
 saHpiSensorThdLowMinorValue             OBJECT-TYPE
@@ -5823,7 +5828,7 @@ saHpiSensorThdLowMinorValue             OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdLowMinorEntry 4}
 
 -- *********************************
@@ -5891,7 +5896,7 @@ saHpiSensorThdUpCriticalType            OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpCriticalEntry 3}
 
 saHpiSensorThdUpCriticalValue           OBJECT-TYPE
@@ -5899,7 +5904,7 @@ saHpiSensorThdUpCriticalValue           OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpCriticalEntry 4}
 
 -- *********************************
@@ -5967,7 +5972,7 @@ saHpiSensorThdUpMajorType               OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMajorEntry 3}
 
 saHpiSensorThdUpMajorValue              OBJECT-TYPE
@@ -5975,7 +5980,7 @@ saHpiSensorThdUpMajorValue              OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMajorEntry 4}
 
 -- *********************************
@@ -6043,7 +6048,7 @@ saHpiSensorThdUpMinorType               OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMinorEntry 3}
 
 saHpiSensorThdUpMinorValue              OBJECT-TYPE
@@ -6051,7 +6056,7 @@ saHpiSensorThdUpMinorValue              OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdUpMinorEntry 4}
 
 -- *********************************
@@ -6119,7 +6124,7 @@ saHpiSensorThdPosHysteresisType         OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdPosHysteresisEntry 3}
 
 saHpiSensorThdPosHysteresisValue                OBJECT-TYPE
@@ -6127,7 +6132,7 @@ saHpiSensorThdPosHysteresisValue                OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdPosHysteresisEntry 4}
 
 -- *********************************
@@ -6196,7 +6201,7 @@ saHpiSensorThdNegHysteresisType         OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdNegHysteresisEntry 3}
 
 saHpiSensorThdNegHysteresisValue                OBJECT-TYPE
@@ -6204,7 +6209,7 @@ saHpiSensorThdNegHysteresisValue                OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "See Definition in TEXTUAL-CONVENTOIN."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiSensorThdNegHysteresisEntry 4}
 
 --
