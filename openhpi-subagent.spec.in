@@ -53,6 +53,10 @@ then
   rm -rf $RPM_BUILD_ROOT
 fi
 make DESTDIR=$RPM_BUILD_ROOT install
+
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
+cp openhpi-subagent.rc $RPM_BUILD_ROOT/etc/init.d
+
 %post
 
 ###################################################
@@ -64,7 +68,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc docs/*pdf
 %doc docs/subagent-manual/
 %config /etc/snmp/hpiSubagent.conf
-%config /etc/init.d/hpisnmpd
+%config /etc/init.d/openhpi-subagent
 %{prefix}/bin/hpi*
 
 ###################################################
