@@ -6643,7 +6643,7 @@ saHpiSensorReadingNormalMinIsSupported        OBJECT-TYPE
 
 saHpiSensorReadingNormalMinType         OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
@@ -6651,7 +6651,7 @@ saHpiSensorReadingNormalMinType         OBJECT-TYPE
 
 saHpiSensorReadingNormalMinValue        OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
