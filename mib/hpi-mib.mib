@@ -2426,12 +2426,7 @@ saHpiEventCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of events present on this system. 
-	saHpiEventCount represents the total of types currently in the 
-	system.  saHpiDomainEventCount represents the subset of events 
-	that are Domain events.  The same relationship exists for 
-	ResourceEvent,  SensorEvent,  SensorEnableChangeEvent, 
-	HotSwapEvent,  WatchdogEvent,  HpiSwEvent,  OemEvent,  UserEvent."
+        DESCRIPTION     "The number of events present on this system."
         ::= {events 1}
 
 saHpiEventTable OBJECT-TYPE
@@ -2471,7 +2466,7 @@ saHpiEvent OBJECT-TYPE
     MAX-ACCESS  not-accessible
     STATUS      current
     DESCRIPTION
-    "Pointer to the event. Identifies the applicable event table."
+        "Pointer to the event."
     ::= {saHpiEventEntry 1}
 
 saHpiEventSeverity OBJECT-TYPE
@@ -2507,11 +2502,7 @@ saHpiEventQueueStatus OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "  This status word is returned to HPI Users that request it
-        when saHpiEventGet() is called.  It indicates if the event queue
-	status is SAHPI_EVT_QUEUE_OVERFLOW.
-	
-	SAHPI_EVT_QUEUE_OVERFLOW = 0x0001"
-	
+        when saHpiEventGet() is called."
     ::= { saHpiEventEntry 5 }
     
 saHpiEventSaHpiTime     OBJECT-TYPE
@@ -2556,14 +2547,14 @@ saHpiResourceEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of events present on this system."
-        ::= {events 3}
+        ::= {events 5}
 
 saHpiResourceEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiResourceEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 4}
+        ::= {events 6}
 
 saHpiResourceEventEntry OBJECT-TYPE
         SYNTAX          SaHpiResourceEventEntry
@@ -2633,14 +2624,14 @@ saHpiDomainEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of domain events present on this system."
-        ::= {events 5}
+        ::= {events 7}
 
 saHpiDomainEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiDomainEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 6}
+        ::= {events 8}
 
 saHpiDomainEventEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainEventEntry
@@ -2712,14 +2703,14 @@ saHpiSensorEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of sensor events present on this system."
-        ::= {events 7}
+        ::= {events 9}
 
 saHpiSensorEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 8}
+        ::= {events 10}
 
 saHpiSensorEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorEventEntry
@@ -2982,14 +2973,14 @@ saHpiSensorEnableChangeEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of sensor enable events present on this system."
-        ::= {events 9}
+        ::= {events 11}
 
 saHpiSensorEnableChangeEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEnableChangeEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 10}
+        ::= {events 12}
 
 saHpiSensorEnableChangeEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorEnableChangeEventEntry
@@ -3167,14 +3158,14 @@ saHpiHotSwapEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of hot swap events present on this system."
-        ::= {events 11}
+        ::= {events 13}
 
 saHpiHotSwapEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiHotSwapEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 12}
+        ::= {events 14}
 
 saHpiHotSwapEventEntry OBJECT-TYPE
         SYNTAX          SaHpiHotSwapEventEntry
@@ -3247,14 +3238,14 @@ saHpiWatchdogEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of watchdog events present on this system."
-        ::= {events 13}
+        ::= {events 15}
 
 saHpiWatchdogEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 14}
+        ::= {events 16}
 
 saHpiWatchdogEventEntry OBJECT-TYPE
         SYNTAX          SaHpiWatchdogEventEntry
@@ -3356,14 +3347,14 @@ saHpiSoftwareEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of software events present on this system."
-        ::= {events 15}
+        ::= {events 17}
 
 saHpiSoftwareEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSoftwareEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 16}
+        ::= {events 18}
 
 saHpiSoftwareEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSoftwareEventEntry
@@ -3476,14 +3467,14 @@ saHpiOEMEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of OEM events present on this system."
-        ::= {events 17}
+        ::= {events 19}
 
 saHpiOEMEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiOEMEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 18}
+        ::= {events 20}
 
 saHpiOEMEventEntry OBJECT-TYPE
         SYNTAX          SaHpiOEMEventEntry
@@ -3576,14 +3567,14 @@ saHpiUserEventCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of user events present on this system."
-        ::= {events 19}
+        ::= {events 21}
 
 saHpiUserEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiUserEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 20}
+        ::= {events 22}
 
 saHpiUserEventEntry OBJECT-TYPE
         SYNTAX          SaHpiUserEventEntry
@@ -3666,14 +3657,14 @@ saHpiAnnouncementCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of Announcements present on this system."
-        ::= { events 21 }
+        ::= { events 23 }
 
 saHpiAnnouncementTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnouncementEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Table of Announcements."
-        ::= { events 22 }
+        ::= { events 24 }
 
 saHpiAnnouncementEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnouncementEntry
