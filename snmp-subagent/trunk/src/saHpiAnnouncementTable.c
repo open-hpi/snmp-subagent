@@ -261,7 +261,8 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
     snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiDomainId.next_variable = &var_XX;
+       //var_saHpiDomainId.next_variable = &var_XX;
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 #endif
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
@@ -271,7 +272,8 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
     snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiResourceId.next_variable = &var_XX;
+       //var_saHpiResourceId.next_variable = &var_XX;
+       var_saHpiResourceId.next_variable = &var_saHpiDomainAlarmId;
 #endif
 
        memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
@@ -281,7 +283,8 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
     snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiDomainAlarmId.next_variable = &var_XX;
+       //var_saHpiDomainAlarmId.next_variable = &var_XX;
+       var_saHpiDomainAlarmId.next_variable =&var_saHpiEntryId; 
 #endif
 
        memset( &var_saHpiEntryId, 0x00, sizeof(var_saHpiEntryId) );
@@ -291,9 +294,9 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
     snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiEntryId.next_variable = &var_XX;
+       //var_saHpiEntryId.next_variable = &var_XX;
+       var_saHpiEntryId.next_variable = NULL;
 #endif
-
 
     /*
      * parse the oid into the individual index components
@@ -310,36 +313,19 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
               /** skipping external index saHpiDomainAlarmId */
    
               /** skipping external index saHpiEntryId */
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainAlarmId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+  
+	    if(!err)
+		    err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+	    if (!err) 
+		    err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+		    
+	    if(!err) 
+		    err = saHpiDomainAlarmId_check_index(*var_saHpiDomainAlarmId.val.integer);
+	    
+	    if(!err)
+		    err = saHpiEntryId_check_index(*var_saHpiEntryId.val.integer);
+
     }
 
     /*
@@ -949,7 +935,7 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiAnnouncementTable_CAN_MODIFY_ACTIVE_ROW
+#ifndef saHpiAnnouncementTable_CAN_MODIFY_ACTIVE_ROW	
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
             row_err = 1;
