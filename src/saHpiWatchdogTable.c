@@ -40,7 +40,8 @@ static oid saHpiWatchdogCount_oid[] = { hpiResources_OID, 9, 0 };
 static u_long watchdog_count;
 
 static int
-saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
+saHpiWatchdogTable_modify_context (SaHpiEntryIdT rdr_id,
+				   SaHpiWatchdogRecT * entry,
 				   SaHpiRptEntryT * rpt_entry,
 				   SaHpiWatchdogT * wdog,
 				   oid *, size_t,
@@ -50,7 +51,8 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
 
 
 int
-populate_watchdog (SaHpiWatchdogRecT * watchdog,
+populate_watchdog (SaHpiEntryIdT rdr_id,
+		   SaHpiWatchdogRecT * watchdog,
 		   SaHpiRptEntryT * rpt_entry,
 		   oid * rdr_entry_oid, size_t rdr_entry_oid_len,
 		   oid * watchdog_oid, size_t * watchdog_oid_len)
@@ -59,11 +61,14 @@ populate_watchdog (SaHpiWatchdogRecT * watchdog,
   SaHpiWatchdogT wdog;
   SaHpiSessionIdT session_id;
   int rc = AGENT_ERR_NOERROR;
-
+  int i = 0;
   oid index_oid[WATCHDOG_INDEX_NR];
   oid column[2];
 
   netsnmp_index watchdog_index;
+  netsnmp_void_array *array;
+
+  saHpiWatchdogTable_context *ctx;
   saHpiWatchdogTable_context *watchdog_context;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_watchdog: Entry.\n"));
@@ -84,6 +89,41 @@ populate_watchdog (SaHpiWatchdogRecT * watchdog,
       // We are re-populating. Check for existing entries
       watchdog_context = NULL;
       watchdog_context = CONTAINER_FIND (cb.container, &watchdog_index);
+
+      if (!watchdog_context) 
+         {
+	 // Bug # 873961. We use the 'rdr_id' to check to see if
+	 // it is the context. To do so, we have to search for it first.
+	 watchdog_index.len = 1;
+	 //       // re-using the index_oid.
+	 array = CONTAINER_GET_SUBSET (cb.container, &watchdog_index);
+		if (array != NULL) 
+		{
+			if (array->size > 0) 
+			{
+				for (i = 0; i < array->size; i++) 
+				{
+					ctx = array->array[i];
+					if (ctx->rdr_id == rdr_id) 
+					{
+						// Found the duplicate entry!
+						watchdog_context = ctx;
+						index_oid[1] = ctx->resource_id;
+						index_oid[2] = ctx->saHpiWatchdogNum;
+						DEBUGMSGTL((AGENT,
+									"duplicate watchdog entry %d, %d, %d [rdr: %d] found.\n",
+									rpt_entry->DomainId,
+									rpt_entry->ResourceId,
+									watchdog->WatchdogNum,
+									rdr_id));
+						break;
+					}
+				}
+			}
+		}
+		// restoree it to its previous glory.
+		watchdog_index.len =  WATCHDOG_INDEX_NR;
+	}
       // If we don't find it - we create it.
       if (!watchdog_context)
 	{
@@ -135,7 +175,7 @@ populate_watchdog (SaHpiWatchdogRecT * watchdog,
 	  return AGENT_ERR_OPERATION;
 	}
 
-      if (saHpiWatchdogTable_modify_context (watchdog, rpt_entry, &wdog,
+      if (saHpiWatchdogTable_modify_context (rdr_id, watchdog, rpt_entry, &wdog,
 					     rdr_entry_oid, rdr_entry_oid_len,
 					     watchdog_context)
 	  == AGENT_NEW_ENTRY)
@@ -189,7 +229,8 @@ delete_watchdog_row (SaHpiDomainIdT domain_id,
 }
 
 int
-saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
+saHpiWatchdogTable_modify_context (SaHpiEntryIdT rdr_id,
+				   SaHpiWatchdogRecT * entry,
 				   SaHpiRptEntryT * rpt_entry,
 				   SaHpiWatchdogT * wdog,
 				   oid * rdr_entry, size_t rdr_entry_oid_len,
@@ -221,9 +262,10 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
-	  if ((ctx->resource_id == rpt_entry->ResourceId) &&
+	  if (((ctx->resource_id == rpt_entry->ResourceId) &&
 	      (ctx->domain_id == rpt_entry->DomainId) &&
-	      (ctx->saHpiWatchdogNum == entry->WatchdogNum)) {
+	      (ctx->saHpiWatchdogNum == entry->WatchdogNum)) || 
+	      (ctx->rdr_id == rdr_id)) {
 		  update_entry = MIB_TRUE;
 		  DEBUGMSGTL((AGENT,"Updating HotSwap entry. [%d, %d, %d]\n",
 					  rpt_entry->DomainId,
@@ -240,6 +282,7 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
       memcpy (ctx->saHpiWatchdogRDR, rdr_entry, ctx->saHpiWatchdogRDR_len);
       ctx->resource_id = rpt_entry->ResourceId;
       ctx->domain_id = rpt_entry->DomainId;
+      ctx->rdr_id = rdr_id;
       ctx->saHpiWatchdogNum = entry->WatchdogNum;
       ctx->saHpiWatchdogOem = entry->Oem;
       ctx->saHpiWatchdogTimerReset = MIB_FALSE;

@@ -182,46 +182,66 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 	      if (rdr_entry.RdrType == SAHPI_SENSOR_RDR)
 		{
 		  child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
-		  rc = populate_sensor (&rdr_entry.RdrTypeUnion.SensorRec,
+		  DEBUGMSGTL ((AGENT,
+				"Calling populate_sensor; RPT: %d, RDR: %d, SensorRec.Num: %d\n",
+				rpt_entry->ResourceId,
+				rdr_entry.RecordId,
+				child_id));
+		  rc = populate_sensor (rdr_entry.RecordId, &rdr_entry.RdrTypeUnion.SensorRec,
 					rpt_entry,
 					full_oid, full_oid_len,
 					child_oid, &child_oid_len);
 		  DEBUGMSGTL ((AGENT,
-			       "Called populate_sensor(); ID: %d; rc: %d\n",
-			       child_id, rc));
+			       "Called populate_sensor(); rc: %d\n",
+			       rc));
 		}
 	      if (rdr_entry.RdrType == SAHPI_CTRL_RDR)
 		{
 		  child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
-		  rc = populate_control (&rdr_entry.RdrTypeUnion.CtrlRec,
+		  DEBUGMSGTL ((AGENT,
+				"Calling populate_control; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				rpt_entry->ResourceId,
+				rdr_entry.RecordId,
+				child_id));
+		  rc = populate_control (rdr_entry.RecordId,&rdr_entry.RdrTypeUnion.CtrlRec,
 					 rpt_entry,
 					 full_oid, full_oid_len,
 					 child_oid, &child_oid_len);
 		  DEBUGMSGTL ((AGENT,
-			       "Called populate_control(); ID: %d; rc: %d\n",
-			       child_id, rc));
+			       "Called populate_control(); rc: %d\n",
+			       rc));
 		}
 	      if (rdr_entry.RdrType == SAHPI_INVENTORY_RDR)
 		{
 		  child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
+		  DEBUGMSGTL ((AGENT,
+				"Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.EirId: %d\n",
+				rpt_entry->ResourceId,
+				rdr_entry.RecordId,
+				child_id));
 		  rc =
-		    populate_inventory (&rdr_entry.RdrTypeUnion.InventoryRec,
+		    populate_inventory (rdr_entry.RecordId,&rdr_entry.RdrTypeUnion.InventoryRec,
 					rpt_entry, full_oid, full_oid_len,
 					child_oid, &child_oid_len);
 		  DEBUGMSGTL ((AGENT,
-			       "Called populate_inventory(); ID: %d; rc: %d\n",
-			       child_id, rc));
+			       "Called populate_inventory(); rc: %d\n",
+			       rc));
 		}
 	      if (rdr_entry.RdrType == SAHPI_WATCHDOG_RDR)
 		{
 		  child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
-		  rc = populate_watchdog (&rdr_entry.RdrTypeUnion.WatchdogRec,
+		  DEBUGMSGTL ((AGENT,
+				"Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				rpt_entry->ResourceId,
+				rdr_entry.RecordId,
+				child_id));
+		  rc = populate_watchdog (rdr_entry.RecordId,&rdr_entry.RdrTypeUnion.WatchdogRec,
 					  rpt_entry,
 					  full_oid, full_oid_len,
 					  child_oid, &child_oid_len);
 		  DEBUGMSGTL ((AGENT,
-			       "Called populate_watchdog(); ID: %d; rc: %d\n",
-			       child_id, rc));
+			       "Called populate_watchdog(); rc: %d\n",
+			       rc));
 		}
 
 

@@ -51,7 +51,8 @@ update_inventory_data_on_context (SaHpiInventGeneralDataT *,
 				  char *, size_t, size_t *);
 
 static int
-saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
+saHpiInventoryTable_modify_context (SaHpiEntryIdT rdr_id,
+				    SaHpiInventoryRecT * entry,
 				    SaHpiRptEntryT * rpt_entry,
 				    long count,
 				    SaHpiInventoryDataT * inv_data,
@@ -59,7 +60,8 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 				    oid * rdr_entry, size_t rdr_entry_oid_len,
 				    saHpiInventoryTable_context * ctx);
 int
-populate_inventory (SaHpiInventoryRecT * inventory,
+populate_inventory (SaHpiEntryIdT rdr_id,
+		    SaHpiInventoryRecT * inventory,
 		    SaHpiRptEntryT * rpt_entry,
 		    oid * rdr_entry_oid, size_t rdr_entry_oid_len,
 		    oid * inventory_oid, size_t * inventory_oid_len)
@@ -70,7 +72,7 @@ populate_inventory (SaHpiInventoryRecT * inventory,
   size_t initial_size;
 
   int rc = AGENT_ERR_NOERROR;
-
+  int i = 0;
   long stop;
   long count = 0;
   long count_of_items = 0;
@@ -78,8 +80,11 @@ populate_inventory (SaHpiInventoryRecT * inventory,
   oid column[2];
 
   netsnmp_index inventory_index;
+  netsnmp_void_array *array;
+
   saHpiInventoryTable_context *inventory_context;
   saHpiInventoryTable_context *first_context = NULL;
+  saHpiInventoryTable_context *ctx = NULL;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_inventory: Entry.\n"));
 
@@ -161,6 +166,41 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 	  inventory_context = CONTAINER_FIND (cb.container, &inventory_index);
 	  // If we don't find it - create it.
 	  if (!inventory_context)
+	  {
+		  // Bug # 873961. We use the 'rdr_id' to check to see if
+		  //  it is the context. To do so, we have to search fo
+		  inventory_index.len = 1;
+		  array = CONTAINER_GET_SUBSET (cb.container, &inventory_index);
+		if (array != NULL) 
+		{
+			if (array->size > 0) 
+			{
+				for (i = 0; i < array->size; i++) 
+				{
+					ctx = array->array[i];
+					if (ctx->rdr_id == rdr_id) 
+					{
+						// Found the duplicate entry!
+						inventory_context = ctx;
+						index_oid[1] = ctx->resource_id;
+						index_oid[2] = ctx->saHpiInventoryEirId;
+						index_oid[3] = ctx->saHpiInventoryIndex;
+						DEBUGMSGTL((AGENT,
+									"duplicate nventory entry %d, %d, %d, %d [rdr: %d] found.\n",
+									rpt_entry->DomainId,
+									rpt_entry->ResourceId,
+									inventory->EirId,
+									count,
+									rdr_id));
+						break;
+					}
+				}
+			}
+		}
+		// restoree it to its previous glory.
+		inventory_index.len =  INVENTORY_INDEX_NR;
+	  }
+	  if (!inventory_context)
 	    {
 	      // New entry.
 	      inventory_context =
@@ -194,7 +234,7 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 			NULL) ? -1 : data->DataRecords[count]->DataLength,
 		       data->Validity));
 
-	  if (saHpiInventoryTable_modify_context (inventory,
+	  if (saHpiInventoryTable_modify_context (rdr_id,inventory,
 						  rpt_entry,
 						  count,
 						  data, data_len,
@@ -210,8 +250,8 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 
 	  /* Bug 872437 segfault when populating inventory entries using snmp_bc
 	   *
-	   * The line below 
-	  if (data->DataRecords[count+1] == NULL) 
+	   * The line below  */
+	  if (data->DataRecords[count+1] == NULL) /*
 	   * was used as method to stop the loop. Unfortunatly (foruntatly?)
 	   * GCC translates that to a pointer to the count+1 byte in the
 	   * FIRST DataRecords structure. Which means for example
@@ -221,7 +261,9 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 	   * The reason why we check for data->DataRecord is b/c on the utils
 	   * 'hpifru.c' does it too. Bad joss.
 	   */
+	  { 
 	    stop = SAHPI_TRUE;
+	  }
 	}			// End of loop. No more record changing/adding.
 
       // Just finish the data.
@@ -341,7 +383,8 @@ delete_inventory_rows (SaHpiDomainIdT domain_id,
 }
 
 int
-saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
+saHpiInventoryTable_modify_context (SaHpiEntryIdT rdr_id,
+				    SaHpiInventoryRecT * entry,
 				    SaHpiRptEntryT * rpt_entry,
 				    long count,
 				    SaHpiInventoryDataT * inv_data,
@@ -376,10 +419,11 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
-	  if ((ctx->resource_id == rpt_entry->ResourceId) && 
+	  if (((ctx->resource_id == rpt_entry->ResourceId) && 
 	      (ctx->domain_id == rpt_entry->DomainId) &&
 	      (ctx->saHpiInventoryEirId == entry->EirId) &&
-	      (ctx->saHpiInventoryIndex == count)) {
+	      (ctx->saHpiInventoryIndex == count)) || 
+	      (ctx->rdr_id == rdr_id)) {
 		  DEBUGMSGTL((AGENT,"Updating inventory entry [%d, %d, %d, %d]\n",
 					  rpt_entry->DomainId,
 					  rpt_entry->ResourceId,
@@ -395,6 +439,7 @@ saHpiInventoryTable_modify_context (SaHpiInventoryRecT * entry,
 
       ctx->resource_id = rpt_entry->ResourceId;
       ctx->domain_id = rpt_entry->DomainId;
+      ctx->rdr_id = rdr_id;
       ctx->saHpiInventoryRDR_len = rdr_entry_oid_len * sizeof (oid);
       memcpy (ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
       ctx->saHpiInventoryEirId = entry->EirId;

@@ -81,7 +81,8 @@ static sensor_reading_to_mib sensor_reading[] = {
 };
 
 static int
-saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
+saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
+				 SaHpiSensorRecT * entry,
 				 SaHpiSensorThresholdsT * sensor_threshold,
 				 SaHpiSensorEvtEnablesT * enables,
 				 SaHpiRptEntryT * rpt_entry,
@@ -96,20 +97,24 @@ fill_sensor_threshold_info (saHpiSensorTable_context * ctx,
 
 
 int
-populate_sensor (SaHpiSensorRecT * sensor,
+populate_sensor (SaHpiEntryIdT rdr_id,
+		 SaHpiSensorRecT * sensor,
 		 SaHpiRptEntryT * rpt_entry,
 		 oid * rdr_entry_oid, size_t rdr_entry_oid_len,
 		 oid * sensor_oid, size_t * sensor_oid_len)
 {
 
-
+  int i = 0;
   int rc = AGENT_ERR_NOERROR;
 
   oid index_oid[SENSOR_INDEX_NR];
   oid column[2];
 
   netsnmp_index sensor_index;
+  netsnmp_void_array *array;
+
   saHpiSensorTable_context *sensor_context;
+  saHpiSensorTable_context *ctx;
   SaHpiSensorThresholdsT sensor_threshold;
   SaHpiSessionIdT session_id;
   SaHpiSensorEvtEnablesT enables;
@@ -129,6 +134,39 @@ populate_sensor (SaHpiSensorRecT * sensor,
       sensor_context = NULL;
       sensor_context = CONTAINER_FIND (cb.container, &sensor_index);
       // If we don't find it - we create it.
+      if (!sensor_context)
+        {
+	 // Bug # 873961. We use the 'rdr_id' to check to see if
+	 // it is the context. To do so, we have to search for it first.
+	 sensor_index.len = 1;
+	 // re-using the index_oid.
+	 array = CONTAINER_GET_SUBSET (cb.container, &sensor_index);
+		if (array != NULL) 
+		{
+			if (array->size > 0) 
+			{
+				for (i = 0; i < array->size; i++) 
+				{
+					ctx = array->array[i];
+					if (ctx->rdr_id == rdr_id) 
+					{
+						// Found the duplicate entry!
+						sensor_context = ctx;
+						index_oid[1] = ctx->resource_id;
+						index_oid[2] = ctx->saHpiSensorIndex;
+						DEBUGMSGTL((AGENT,"duplicate sensor entry %d, %d, %d [rdr: %d] found.\n",
+									rpt_entry->DomainId,
+									rpt_entry->ResourceId,
+									sensor->Num,
+									rdr_id));
+						break;
+					}
+				}
+			}
+		}
+		// restoree it to its previous glory.
+		sensor_index.len =  SENSOR_INDEX_NR;
+	}
       if (!sensor_context)
 	{
 	  // New entry. Add it
@@ -192,7 +230,7 @@ populate_sensor (SaHpiSensorRecT * sensor,
 	  // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
 	}
 
-      if (saHpiSensorTable_modify_context (sensor,
+      if (saHpiSensorTable_modify_context (rdr_id, sensor,
 					   &sensor_threshold,
 					   &enables,
 					   rpt_entry,
@@ -250,7 +288,8 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 }
 
 int
-saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
+saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
+				 SaHpiSensorRecT * entry,
 				 SaHpiSensorThresholdsT * sensor_threshold,
 				 SaHpiSensorEvtEnablesT * enables,
 				 SaHpiRptEntryT * rpt_entry,
@@ -286,9 +325,10 @@ saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
-	  if ((ctx->domain_id == rpt_entry->DomainId) &&
+	  if (((ctx->domain_id == rpt_entry->DomainId) &&
 	      (ctx->resource_id == rpt_entry->ResourceId) &&
-	      (ctx->saHpiSensorIndex == entry->Num)) {
+	      (ctx->saHpiSensorIndex == entry->Num)) ||
+	      (ctx->rdr_id == rdr_id)){
 		  update_entry = MIB_TRUE;
 		  DEBUGMSGTL((AGENT,"Updating sensor entry. [%d, %d, %d]\n",
 					  rpt_entry->DomainId,
@@ -312,6 +352,7 @@ saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
       // DOAMIN
       ctx->domain_id = rpt_entry->DomainId;
       ctx->resource_id = rpt_entry->ResourceId;
+      ctx->rdr_id = rdr_id;
       // IBM-KR: Adding +1
       ctx->saHpiSensorEventsCategoryControl = entry->EventCtrl + 1;
       // IBM-KR: Revised in the future MIB - more columns possible
