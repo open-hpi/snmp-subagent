@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is internal */
         /** Index saHpiEntryId is internal */
@@ -39,11 +41,11 @@ typedef struct saHpiResourceTable_context_s {
             unsigned long saHpiEntryId;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiResourceEntityPath[65535];
+            unsigned char saHpiResourceEntityPath[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiResourceEntityPath_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiResourceCapabilities[65535];
+            unsigned char saHpiResourceCapabilities[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiResourceCapabilities_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -80,7 +82,7 @@ typedef struct saHpiResourceTable_context_s {
             unsigned long saHpiResourceInfoAuxFirmwareRev;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiResourceInfoGuid[65535];
+            unsigned char saHpiResourceInfoGuid[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiResourceInfoGuid_len;
 
         /** SaHpiTextType = ASN_INTEGER */
@@ -90,7 +92,7 @@ typedef struct saHpiResourceTable_context_s {
             long saHpiResourceTagTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiResourceTag[65535];
+            unsigned char saHpiResourceTag[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiResourceTag_len;
 
         /** INTEGER = ASN_INTEGER */

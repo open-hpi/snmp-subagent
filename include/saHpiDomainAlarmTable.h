@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiDomainAlarmId is internal */
@@ -49,18 +51,18 @@ typedef struct saHpiDomainAlarmTable_context_s {
             long saHpiDomainAlarmCondStatusCondType;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondEntityPath[65535];
+            unsigned char saHpiDomainAlarmCondEntityPath[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondEntityPath_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainAlarmCondSensorNum;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondEventState[65535];
+            unsigned char saHpiDomainAlarmCondEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondEventState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondNameValue[65535];
+            unsigned char saHpiDomainAlarmCondNameValue[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondNameValue_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -73,7 +75,7 @@ typedef struct saHpiDomainAlarmTable_context_s {
             long saHpiDomainAlarmCondTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondText[65535];
+            unsigned char saHpiDomainAlarmCondText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondText_len;
 
         /** RowStatus = ASN_INTEGER */

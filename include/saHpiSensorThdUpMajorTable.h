@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiSensorNum is external */
@@ -42,7 +44,7 @@ typedef struct saHpiSensorThdUpMajorTable_context_s {
             long saHpiSensorThdUpMajorType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdUpMajorValue[65535];
+            unsigned char saHpiSensorThdUpMajorValue[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorThdUpMajorValue_len;
 
 

@@ -18,6 +18,8 @@ extern "C" {
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
+#include "SaHpi.h"
+
 
         /** Index saHpiDomainId is internal */
 
@@ -33,7 +35,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             unsigned long saHpiDomainId;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainCapabilities[65535];
+            unsigned char saHpiDomainCapabilities[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainCapabilities_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -46,7 +48,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             long saHpiDomainTagTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiDomainTag[65535];
+            unsigned char saHpiDomainTag[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainTag_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -89,7 +91,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             long saHpiDomainAlarmOverflow;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainGuid[65535];
+            unsigned char saHpiDomainGuid[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainGuid_len;
 
 

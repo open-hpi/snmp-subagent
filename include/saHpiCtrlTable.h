@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiCtrlNum is internal */
@@ -51,11 +53,11 @@ typedef struct saHpiCtrlTable_context_s {
             long saHpiCtrlWriteOnly;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlState[65535];
+            unsigned char saHpiCtrlState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCtrlState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlData[65535];
+            unsigned char saHpiCtrlData[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCtrlData_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -68,7 +70,7 @@ typedef struct saHpiCtrlTable_context_s {
             long saHpiCtrlTextLanguage;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlText[65535];
+            unsigned char saHpiCtrlText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCtrlText_len;
 
         /** RowPointer = ASN_OBJECT_ID */

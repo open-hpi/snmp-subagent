@@ -18,6 +18,7 @@ extern "C" {
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
+#include "SaHpi.h"
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -51,15 +52,15 @@ typedef struct saHpiSensorTable_context_s {
             long saHpiSensorEventCtrl;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorSupportedStates[65535];
+            unsigned char saHpiSensorSupportedStates[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorSupportedStates_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorAssertEventMask[65535];
+            unsigned char saHpiSensorAssertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorAssertEventMask_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorDeassertEventMask[65535];
+            unsigned char saHpiSensorDeassertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorDeassertEventMask_len;
 
         /** SaHpiEventCategory = ASN_INTEGER */
@@ -69,7 +70,7 @@ typedef struct saHpiSensorTable_context_s {
             long saHpiSensorEventsCategoryControl;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventsSupported[65535];
+            unsigned char saHpiSensorEventsSupported[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventsSupported_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -91,7 +92,7 @@ typedef struct saHpiSensorTable_context_s {
             long saHpiSensorPercentage;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiSensorRangeFlags[65535];
+            unsigned char saHpiSensorRangeFlags[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorRangeFlags_len;
 
         /** Float64 = ASN_OPAQUE */

@@ -18,6 +18,7 @@ extern "C" {
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
+#include "SaHpi.h"
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -54,7 +55,7 @@ typedef struct saHpiWatchdogTable_context_s {
             unsigned long saHpiWatchdogPreTimeoutInterval;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiWatchdogTimerUseExpFlags[65535];
+            unsigned char saHpiWatchdogTimerUseExpFlags[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiWatchdogTimerUseExpFlags_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */

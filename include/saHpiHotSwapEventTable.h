@@ -18,6 +18,7 @@ extern "C" {
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
+#include "SaHpi.h"
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -35,7 +36,7 @@ typedef struct saHpiHotSwapEventTable_context_s {
      */
     /** TODO: add storage for external index(s)! */
         /** SaHpiTimeString = ASN_OCTET_STR */
-            unsigned char saHpiHotSwapEventTimestamp[65535];
+            unsigned char saHpiHotSwapEventTimestamp[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiHotSwapEventTimestamp_len;
 
         /** SaHpiHotSwapState = ASN_INTEGER */
