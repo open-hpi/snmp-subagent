@@ -4784,6 +4784,7 @@ SaHpiCtrlDigitalEntry ::= SEQUENCE {
         saHpiCtrlDigitalNum            	SaHpiInstrumentId,
         saHpiCtrlDigitalOutputType		SaHpiCtrlOutputType,
 
+        saHpiCtrlDigitalDefaultMode     SaHpiCtrlMode,        
         saHpiCtrlDigitalMode     		SaHpiCtrlMode,        
         saHpiCtrlDigitalIsReadOnly 		TruthValue,
         saHpiCtrlDigitalIsWriteOnly		TruthValue,
@@ -4832,10 +4833,32 @@ saHpiCtrlDigitalOutputType OBJECT-TYPE
 	SAI-HPI-B.01.01 spec."
         ::= {saHpiCtrlDigitalEntry 3}
 
+saHpiCtrlDigitalDefaultMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"This object describes the default method the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlDigitalReadOnly flag set as part of the default control mode.
+	
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
+
+        ::= {saHpiCtrlDigitalEntry 5}
 
 saHpiCtrlDigitalMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 	   
@@ -4857,7 +4880,7 @@ saHpiCtrlDigitalMode OBJECT-TYPE
 		REFERENCE 
 	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 4}
+        ::= {saHpiCtrlDigitalEntry 6}
         
 saHpiCtrlDigitalIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -4868,7 +4891,7 @@ saHpiCtrlDigitalIsReadOnly OBJECT-TYPE
 		REFERENCE
     "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 5}
+        ::= {saHpiCtrlDigitalEntry 7}
         
 saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -4880,7 +4903,7 @@ saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE
 		REFERENCE
     "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 	
-        ::= {saHpiCtrlDigitalEntry 6}
+        ::= {saHpiCtrlDigitalEntry 8}
 
 saHpiCtrlDigitalDefaultState          OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital 
@@ -4895,7 +4918,7 @@ saHpiCtrlDigitalDefaultState          OBJECT-TYPE
     	REFERENCE 
 	"See section 7.1.1, 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 7}
+        ::= {saHpiCtrlDigitalEntry 9}
 
 saHpiCtrlDigitalState OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital
@@ -4915,7 +4938,7 @@ saHpiCtrlDigitalState OBJECT-TYPE
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
-        ::= {saHpiCtrlDigitalEntry 8}
+        ::= {saHpiCtrlDigitalEntry 10}
 
 saHpiCtrlDigitalOem OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -4925,7 +4948,7 @@ saHpiCtrlDigitalOem OBJECT-TYPE
 	"Reserved for OEM use"
 		REFERENCE		
 	"See section 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDigitalEntry 9}
+        ::= {saHpiCtrlDigitalEntry 11}
 
 
 saHpiCtrlDigitalRDR OBJECT-TYPE
@@ -4934,7 +4957,7 @@ saHpiCtrlDigitalRDR OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"Pointer to Resource Table for this digital control."
-        ::= {saHpiCtrlDigitalEntry 10}
+        ::= {saHpiCtrlDigitalEntry 12}
 
 ---
 --- Discrete
@@ -4970,6 +4993,7 @@ SaHpiCtrlDiscreteEntry ::= SEQUENCE {
 		saHpiCtrlDiscreteNum 			SaHpiInstrumentId,
         saHpiCtrlDiscreteOutputType		SaHpiCtrlOutputType,
 
+        saHpiCtrlDiscreteDefaultMode    SaHpiCtrlMode,        
         saHpiCtrlDiscreteMode     		SaHpiCtrlMode,        
 
         saHpiCtrlDiscreteIsReadOnly 	TruthValue,
@@ -5018,10 +5042,30 @@ saHpiCtrlDiscreteOutputType OBJECT-TYPE
 	SAI-HPI-B.01.01 spec."
         ::= {saHpiCtrlDiscreteEntry 3}
 
+saHpiCtrlDiscreteDefaultMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	"This object describes the default method the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlDiscreteReadOnly flag set as part of the default control mode.
+	
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlDiscreteEntry 4}
 
 saHpiCtrlDiscreteMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 	"This object describes how the control is managed.  The control may 
@@ -5033,15 +5077,12 @@ saHpiCtrlDiscreteMode OBJECT-TYPE
 	changed.  These static-mode controls are indicated with the 
 	saHpiCtrlDiscreteReadOnly flag set as part of the default control mode.
 	
-	When the mode is set to auto(1), the state input is 
-	ignored. Ignored state inputs are not checked by the implementation. 
-
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
 		REFERENCE 
 	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDiscreteEntry 4}
+        ::= {saHpiCtrlDiscreteEntry 5}
         
 saHpiCtrlDiscreteIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5051,7 +5092,7 @@ saHpiCtrlDiscreteIsReadOnly OBJECT-TYPE
 	"Indicates if mode is read-only"
 		REFERENCE 
     "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDiscreteEntry 5}
+        ::= {saHpiCtrlDiscreteEntry 6}
         
 saHpiCtrlDiscreteIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5062,7 +5103,7 @@ saHpiCtrlDiscreteIsWriteOnly  OBJECT-TYPE
 	
 		REFERENCE 
     "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDiscreteEntry 6}
+        ::= {saHpiCtrlDiscreteEntry 7}
 
 saHpiCtrlDiscreteDefaultState          OBJECT-TYPE
         SYNTAX          Unsigned32 
@@ -5076,7 +5117,7 @@ saHpiCtrlDiscreteDefaultState          OBJECT-TYPE
 	enumerations. " 
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDiscreteEntry 7}
+        ::= {saHpiCtrlDiscreteEntry 8}
 
 saHpiCtrlDiscreteState OBJECT-TYPE
         SYNTAX          Unsigned32 
@@ -5093,7 +5134,7 @@ saHpiCtrlDiscreteState OBJECT-TYPE
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
-        ::= {saHpiCtrlDiscreteEntry 8}
+        ::= {saHpiCtrlDiscreteEntry 9}
 
 saHpiCtrlDiscreteOem OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -5103,7 +5144,7 @@ saHpiCtrlDiscreteOem OBJECT-TYPE
 	"Reserved for OEM use"
 		REFERENCE		
 	"See section 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDiscreteEntry 9}
+        ::= {saHpiCtrlDiscreteEntry 10}
 
 
 saHpiCtrlDiscreteRDR OBJECT-TYPE
@@ -5112,7 +5153,7 @@ saHpiCtrlDiscreteRDR OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"Pointer to Resource Table for this discrete control entry."
-        ::= {saHpiCtrlDiscreteEntry 10}
+        ::= {saHpiCtrlDiscreteEntry 11}
 
 --
 -- Analog
@@ -5148,6 +5189,7 @@ SaHpiCtrlAnalogEntry ::= SEQUENCE {
 		saHpiCtrlAnalogNum 				SaHpiInstrumentId,
         saHpiCtrlAnalogOutputType		SaHpiCtrlOutputType,
 
+        saHpiCtrlAnalogDefaultMode     	SaHpiCtrlMode,        
         saHpiCtrlAnalogMode     		SaHpiCtrlMode,        
 
         saHpiCtrlAnalogIsReadOnly 		TruthValue,
@@ -5200,9 +5242,31 @@ saHpiCtrlAnalogOutputType OBJECT-TYPE
         ::= {saHpiCtrlAnalogEntry 3}
 
 
-saHpiCtrlAnalogMode OBJECT-TYPE 
+saHpiCtrlAnalogDefaultMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
         MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+
+	"This object describes the default method control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlAnalogReadOnly flag set as part of the default control mode.
+	
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3. from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlAnalogEntry 4}
+
+saHpiCtrlAnalogMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 
@@ -5223,7 +5287,7 @@ saHpiCtrlAnalogMode OBJECT-TYPE
 	
 		REFERENCE 
 	"See section 7.3.2 and 7.3.3. from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlAnalogEntry 4}
+        ::= {saHpiCtrlAnalogEntry 5}
         
 saHpiCtrlAnalogIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5347,6 +5411,7 @@ SaHpiCtrlStreamEntry ::= SEQUENCE {
 		saHpiCtrlStreamNum 			SaHpiInstrumentId,
         saHpiCtrlStreamOutputType		SaHpiCtrlOutputType,
 
+        saHpiCtrlStreamDefaultMode     	SaHpiCtrlMode,        
         saHpiCtrlStreamMode     		SaHpiCtrlMode,        
 
         saHpiCtrlStreamIsReadOnly 		TruthValue,
@@ -5398,10 +5463,31 @@ saHpiCtrlStreamOutputType OBJECT-TYPE
 	SAI-HPI-B.01.01 spec."
         ::= {saHpiCtrlStreamEntry 3}
 
+saHpiCtrlStreamDefaultMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	
+	"This object describes the default method the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 
+    "See section 7.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlStreamEntry 4}
 
 saHpiCtrlStreamMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 	
@@ -5422,7 +5508,7 @@ saHpiCtrlStreamMode OBJECT-TYPE
 	
 		REFERENCE 
     "See section 7.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlStreamEntry 4}
+        ::= {saHpiCtrlStreamEntry 5}
         
 saHpiCtrlStreamIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5546,10 +5632,11 @@ saHpiCtrlTextEntry OBJECT-TYPE
 
 
 SaHpiCtrlTextEntry ::= SEQUENCE {
-		saHpiCtrlTextEntryId 		SaHpiEntryId,
-		saHpiCtrlTextNum 			SaHpiInstrumentId,
+		saHpiCtrlTextEntryId 			SaHpiEntryId,
+		saHpiCtrlTextNum 				SaHpiInstrumentId,
         saHpiCtrlTextOutputType			SaHpiCtrlOutputType,
 
+        saHpiCtrlTextDefaultMode     	SaHpiCtrlMode,        
         saHpiCtrlTextMode     			SaHpiCtrlMode,        
 
         saHpiCtrlTextIsReadOnly 		TruthValue,
@@ -5566,9 +5653,9 @@ SaHpiCtrlTextEntry ::= SEQUENCE {
 		saHpiCtrlTextLine				Unsigned8,
 		saHpiCtrlTextState				SaHpiText,
 
-        saHpiCtrlTextOem              Unsigned32, 
+        saHpiCtrlTextOem              	Unsigned32, 
    
-        saHpiCtrlTextRDR              RowPointer
+        saHpiCtrlTextRDR              	RowPointer
 }
 
 saHpiCtrlTextEntryId OBJECT-TYPE 
@@ -5609,10 +5696,34 @@ saHpiCtrlTextOutputType OBJECT-TYPE
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlTextEntry 3}
 
+saHpiCtrlTextDefaultMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+
+	"This object describes the default method the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 4}
 
 saHpiCtrlTextMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 
@@ -5633,7 +5744,7 @@ saHpiCtrlTextMode OBJECT-TYPE
 	
 		REFERENCE 		
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlTextEntry 4}
+        ::= {saHpiCtrlTextEntry 5}
         
 saHpiCtrlTextIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5854,10 +5965,11 @@ saHpiCtrlOemEntry OBJECT-TYPE
 
 
 SaHpiCtrlOemEntry ::= SEQUENCE {
-		saHpiCtrlOemEntryId 		SaHpiEntryId,
-		saHpiCtrlOemNum 			SaHpiInstrumentId,
+		saHpiCtrlOemEntryId 			SaHpiEntryId,
+		saHpiCtrlOemNum 				SaHpiInstrumentId,
         saHpiCtrlOemOutputType			SaHpiCtrlOutputType,
 
+        saHpiCtrlOemDefaultMode     	SaHpiCtrlMode,        
         saHpiCtrlOemMode     			SaHpiCtrlMode,        
 
         saHpiCtrlOemIsReadOnly 			TruthValue,
@@ -5914,10 +6026,34 @@ saHpiCtrlOemOutputType OBJECT-TYPE
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlOemEntry 3}
 
+saHpiCtrlOemDefaultMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"This object describes the default method the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 4}
 
 saHpiCtrlOemMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION 
 	   
@@ -5938,7 +6074,7 @@ saHpiCtrlOemMode OBJECT-TYPE
 	
 		REFERENCE 		
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 4}
+        ::= {saHpiCtrlOemEntry 5}
         
 saHpiCtrlOemIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5948,7 +6084,7 @@ saHpiCtrlOemIsReadOnly OBJECT-TYPE
 	"Indicates if mode is read-only"
 		REFERENCE 		
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 5}
+        ::= {saHpiCtrlOemEntry 6}
         
 saHpiCtrlOemIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -5958,7 +6094,7 @@ saHpiCtrlOemIsWriteOnly  OBJECT-TYPE
 	"Indicates if Control is write-only"
 		REFERENCE 		
 	"See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 6}
+        ::= {saHpiCtrlOemEntry 7}
 
 saHpiCtrlOemManufacturerId          OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
@@ -5971,7 +6107,7 @@ saHpiCtrlOemManufacturerId          OBJECT-TYPE
 	Refer to the textual convention for more details."
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 7}
+        ::= {saHpiCtrlOemEntry 8}
 
 saHpiCtrlOemDefaultConfigData         OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..10))
@@ -5981,9 +6117,7 @@ saHpiCtrlOemDefaultConfigData         OBJECT-TYPE
 	"This object represents the OEM control configuration data." 
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 8}
-
--- IBMKR: Is this trully needed? There can be potential  _three_ ManafacturerID objects.
+        ::= {saHpiCtrlOemEntry 9}
 
 saHpiCtrlOemDefaultMId          OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
@@ -5996,7 +6130,7 @@ saHpiCtrlOemDefaultMId          OBJECT-TYPE
 	Refer to the textual convention for more details."
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 9}
+        ::= {saHpiCtrlOemEntry 10}
 
 saHpiCtrlOemDefaultState OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -6006,7 +6140,7 @@ saHpiCtrlOemDefaultState OBJECT-TYPE
 	"This represents the OEM control state setting."
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 10}
+        ::= {saHpiCtrlOemEntry 11}
 
 saHpiCtrlOemState OBJECT-TYPE
         SYNTAX         	OCTET STRING(SIZE(0..255))
@@ -6021,7 +6155,7 @@ saHpiCtrlOemState OBJECT-TYPE
 
 		REFERENCE
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
-		::= {saHpiCtrlOemEntry 11}
+		::= {saHpiCtrlOemEntry 12}
 
 saHpiCtrlOemValue OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6031,7 +6165,7 @@ saHpiCtrlOemValue OBJECT-TYPE
 	"Reserved for OEM use"
 		REFERENCE		
 	"See section 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlOemEntry 12}
+        ::= {saHpiCtrlOemEntry 13}
 
 
 saHpiCtrlOemRDR OBJECT-TYPE
@@ -6040,7 +6174,7 @@ saHpiCtrlOemRDR OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"Pointer to Resource Table for this OEM control."
-        ::= {saHpiCtrlOemEntry 13}
+        ::= {saHpiCtrlOemEntry 14}
 
 
 --/*******************************************************************************
@@ -8826,6 +8960,7 @@ saHpiCtrlDigitalGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlDigitalNum,
         saHpiCtrlDigitalOutputType,
+        saHpiCtrlDigitalDefaultMode,
         saHpiCtrlDigitalMode,
         saHpiCtrlDigitalIsReadOnly,
         saHpiCtrlDigitalIsWriteOnly,
@@ -8844,6 +8979,7 @@ saHpiCtrlDiscreteGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlDiscreteNum,
         saHpiCtrlDiscreteOutputType,
+        saHpiCtrlDiscreteDefaultMode,
         saHpiCtrlDiscreteMode,
         saHpiCtrlDiscreteIsReadOnly,
         saHpiCtrlDiscreteIsWriteOnly,
@@ -8861,6 +8997,7 @@ saHpiCtrlAnalogGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlAnalogNum,
         saHpiCtrlAnalogOutputType,
+        saHpiCtrlAnalogDefaultMode,
         saHpiCtrlAnalogMode,
         saHpiCtrlAnalogIsReadOnly,
         saHpiCtrlAnalogIsWriteOnly,
@@ -8880,6 +9017,7 @@ saHpiCtrlStreamGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlStreamNum,
         saHpiCtrlStreamOutputType,
+        saHpiCtrlStreamDefaultMode,
         saHpiCtrlStreamMode,
         saHpiCtrlStreamIsReadOnly,
         saHpiCtrlStreamIsWriteOnly,
@@ -8899,6 +9037,7 @@ saHpiCtrlTextGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlTextNum,
         saHpiCtrlTextOutputType,
+        saHpiCtrlTextDefaultMode,
         saHpiCtrlTextMode,
         saHpiCtrlTextIsReadOnly,
         saHpiCtrlTextIsWriteOnly,
@@ -8922,6 +9061,7 @@ saHpiCtrlOemGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlOemNum,
         saHpiCtrlOemOutputType,
+        saHpiCtrlOemDefaultMode,
         saHpiCtrlOemMode,
         saHpiCtrlOemIsReadOnly,
         saHpiCtrlOemIsWriteOnly,
