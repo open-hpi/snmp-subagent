@@ -258,6 +258,85 @@ The following fragment converts between SaHpiTimeT and a struct timeval:
     REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 172-173."
     SYNTAX	Counter64
+    
+SaHpiTimeString ::= TEXTUAL-CONVENTION
+    STATUS       current
+    DESCRIPTION
+	"
+ An HPI time value represents the local time as the number of nanoseconds
+ from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
+ is sufficient to represent times with nano-second resolution from the
+ year 1678 to 2262. Every API which deals with time values must define
+ the timezone used.
+
+ It should be noted that although nano-second resolution is supported
+ in the data type, the actual resolution provided by an implementation
+ may be more limited than this.
+
+ The value -263, which is 0x8000000000000000, is used to indicate
+ 'unknown/unspecified time'.
+
+ Conversion to/from POSIX and other common time representations is
+ relatively straightforward. The following code framgment converts
+ between SaHpiTimeT and time_t:
+
+     time_t tt1, tt2;
+     SaHpiTimeT saHpiTime;
+
+     time(&tt1);
+     saHpiTime = (SaHpiTimeT) tt1  1000000000;
+     tt2 = saHpiTime / 1000000000;
+
+The following fragment converts between SaHpiTimeT and a struct timeval:
+
+     struct timeval tv1, tv2;
+     SaHpiTimeT saHpiTime;
+
+     gettimeofday(&tv1, NULL);
+     saHpiTime = (SaHpiTimeT) tv1.tv_sec  1000000000 + tv1.tv_usec  1000;
+     tv2.tv_sec = saHpiTime / 1000000000;
+     tv2.tv_usec = saHpiTime % 1000000000 / 1000;
+
+ The following fragment converts between SaHpiTimeT and a struct timespec:
+
+     struct timespec ts1, ts2;
+     SaHpiTimeT saHpiTime;
+
+     clock_gettime(CLOCK_REALTIME, &ts1);
+     saHpiTime = (SaHpiTimeT) ts1.tv_sec  1000000000 + ts1.tv_nsec;
+     ts2.tv_sec = saHpiTime / 1000000000;
+     ts2.tv_nsec = saHpiTime % 1000000000;
+
+ Note, however, that since time_t is (effectively) universally 32 bits,
+ all of these conversions will cease to work on January 18, 2038.
+
+ Some subsystems may need the flexibility to report either absolute or
+ relative (eg. to system boot) times. This will typically be in the
+ case of a board which may or may not, depending on the system setup,
+ have an idea of absolute time. For example, some boards may have
+ 'time of day' clocks which start at zero, and never get set to the
+ time of day.
+
+ In these cases, times which represent 'current' time (in events, for
+ example) can be reported based on the clock value, whether it has been
+ set to the actual date/time, or whether it represents the elapsed time
+ since boot. If it is the time since boot, the value will be (for 27
+ years) less than 0x0C00000000000000, which is Mon May 26 16:58:48 1997.
+ If the value is greater than this, then it can be assumed to be an
+ absolute time.
+
+ Every API which can report either absolute or relative times must
+ state this rule clearly in its interface specification.
+
+ SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
+
+ Maximum time that can be specified as relative :
+ SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL
+"
+
+    REFERENCE
+    	"Derived from SAI-HPI-B.00.90 spec, pg 172-173."
+    SYNTAX	OCTET STRING(SIZE(0..255))
 
 
 SaHpiEventCategory ::= TEXTUAL-CONVENTION
@@ -2208,7 +2287,7 @@ SaHpiEventEntry ::= SEQUENCE {
 	saHpiEventSeverity	INTEGER,
 	saHpiEventHistorical	TruthValue,
 	saHpiEventQueueStatus	Unsigned32,
-	saHpiEventSaHpiTime   	SaHpiTime
+	saHpiEventSaHpiTime   	SaHpiTimeString
 	}
 
 saHpiEvent OBJECT-TYPE
@@ -2256,7 +2335,7 @@ saHpiEventQueueStatus OBJECT-TYPE
     ::= {saHpiEventEntry 4}
     
 saHpiEventSaHpiTime	OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -2312,14 +2391,14 @@ saHpiResourceEventEntry OBJECT-TYPE
 
 SaHpiResourceEventEntry ::= SEQUENCE {
 
-	saHpiResourceEventTimestamp		SaHpiTime,
+	saHpiResourceEventTimestamp		SaHpiTimeString,
 	saHpiResourceEventType			INTEGER,
 	saHpiResourceEventDelete		RowStatus
 
 	}
 
 saHpiResourceEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -2390,13 +2469,13 @@ saHpiDomainEventEntry OBJECT-TYPE
 
 SaHpiDomainEventEntry ::= SEQUENCE {
 
-	saHpiDomainEventTimestamp		SaHpiTime,
+	saHpiDomainEventTimestamp		SaHpiTimeString,
 	saHpiDomainEventType			INTEGER,
 	saHpiDomainEventDelete			RowStatus
 	}
 
 saHpiDomainEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -2470,7 +2549,7 @@ saHpiSensorEventEntry OBJECT-TYPE
 SaHpiSensorEventEntry ::= SEQUENCE {
 
 	saHpiSensorNum				SaHpiInstrumentId,
-	saHpiSensorEventTimestamp		SaHpiTime,
+	saHpiSensorEventTimestamp		SaHpiTimeString,
 	saHpiSensorEventType			INTEGER,
 	saHpiSensorEventCategory		SaHpiEventCategory,
 	saHpiSensorEventAssertion		TruthValue,
@@ -2504,7 +2583,7 @@ saHpiSensorNum	OBJECT-TYPE
 
 
 saHpiSensorEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -2722,7 +2801,7 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 
 SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
 	
-	saHpiSensorEnableChangeEventTimestamp	SaHpiTime,
+	saHpiSensorEnableChangeEventTimestamp	SaHpiTimeString,
 	saHpiSensorEnableChangeEventType       	INTEGER,
 	saHpiSensorEnableChangeEventCategory   	SaHpiEventCategory,
 	
@@ -2737,7 +2816,7 @@ SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
 	}
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -2990,7 +3069,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
 
 SaHpiWatchdogEventEntry ::= SEQUENCE {
 	saHpiEventWatchdogNum			SaHpiInstrumentId,
-	saHpiWatchdogEventTimestamp		SaHpiTime,
+	saHpiWatchdogEventTimestamp		SaHpiTimeString,
 -- IBMKR: Add some Textual Convention for these enumerations?
 --IBMKR: Missing 
 	saHpiWatchdogEventAction		INTEGER,
@@ -3008,7 +3087,7 @@ saHpiEventWatchdogNum	OBJECT-TYPE
     ::= { saHpiWatchdogEventEntry 1 }
 
 saHpiWatchdogEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
@@ -3326,7 +3405,7 @@ saHpiUserEventEntry OBJECT-TYPE
 
 SaHpiUserEventEntry ::= SEQUENCE {
 
-	saHpiUserEventTimestamp		SaHpiTime,
+	saHpiUserEventTimestamp		SaHpiTimeString,
 
 -- IBM-DJ User event , writeable.
 	
@@ -3338,7 +3417,7 @@ SaHpiUserEventEntry ::= SEQUENCE {
 	}
 
 saHpiUserEventTimestamp OBJECT-TYPE
-    SYNTAX	SaHpiTime
+    SYNTAX	SaHpiTimeString
     MAX-ACCESS	read-create
     STATUS	current
     DESCRIPTION
