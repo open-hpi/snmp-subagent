@@ -4901,7 +4901,7 @@ saHpiSensorReadingCurrentType	OBJECT-TYPE
 
 saHpiSensorReadingCurrentValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -4909,7 +4909,7 @@ saHpiSensorReadingCurrentValue	OBJECT-TYPE
 	
 saHpiSensorReadingEventState OBJECT-TYPE
 	SYNTAX	SaHpiEventState
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS	current
 	DESCRIPTION
 	""
@@ -4950,7 +4950,7 @@ saHpiReadingMaxIsSupported	OBJECT-TYPE
 
 saHpiSensorReadingMaxType	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -4958,7 +4958,7 @@ saHpiSensorReadingMaxType	OBJECT-TYPE
 
 saHpiSensorReadingMaxValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -4999,7 +4999,7 @@ saHpiReadingMinIsSupported	OBJECT-TYPE
 
 saHpiSensorReadingMinType	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5007,7 +5007,7 @@ saHpiSensorReadingMinType	OBJECT-TYPE
 
 saHpiSensorReadingMinValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5048,7 +5048,7 @@ saHpiReadingNominalIsSupported	OBJECT-TYPE
 
 saHpiSensorReadingNominalType	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5056,7 +5056,7 @@ saHpiSensorReadingNominalType	OBJECT-TYPE
 
 saHpiSensorReadingNominalValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5097,7 +5097,7 @@ saHpiReadingNormalMaxIsSupported	OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5105,7 +5105,7 @@ saHpiSensorReadingNormalMaxType		OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5147,7 +5147,7 @@ saHpiReadingNormalMinIsSupported	OBJECT-TYPE
 
 saHpiSensorReadingNormalMinType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5155,7 +5155,7 @@ saHpiSensorReadingNormalMinType		OBJECT-TYPE
 
 saHpiSensorReadingNormalMinValue	OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5223,7 +5223,7 @@ saHpiSensorThdLowCriticalIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdLowCriticalType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5231,7 +5231,7 @@ saHpiSensorThdLowCriticalType		OBJECT-TYPE
 
 saHpiSensorThdLowCriticalValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5293,7 +5293,7 @@ saHpiSensorThdLowMajorIsWritable	OBJECT-TYPE
 
 saHpiSensorThdLowMajorType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5301,7 +5301,7 @@ saHpiSensorThdLowMajorType		OBJECT-TYPE
 
 saHpiSensorThdLowMajorValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5363,7 +5363,7 @@ saHpiSensorThdLowMinorIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdLowMinorType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5371,7 +5371,7 @@ saHpiSensorThdLowMinorType		OBJECT-TYPE
 
 saHpiSensorThdLowMinorValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5433,7 +5433,7 @@ saHpiSensorThdUpCriticalIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdUpCriticalType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5441,7 +5441,7 @@ saHpiSensorThdUpCriticalType		OBJECT-TYPE
 
 saHpiSensorThdUpCriticalValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5503,7 +5503,7 @@ saHpiSensorThdUpMajorIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdUpMajorType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5511,7 +5511,7 @@ saHpiSensorThdUpMajorType		OBJECT-TYPE
 
 saHpiSensorThdUpMajorValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5573,7 +5573,7 @@ saHpiSensorThdUpMinorIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdUpMinorType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5581,7 +5581,7 @@ saHpiSensorThdUpMinorType		OBJECT-TYPE
 
 saHpiSensorThdUpMinorValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5644,7 +5644,7 @@ saHpiSensorThdPosHysteresisIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdPosHysteresisType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5652,7 +5652,7 @@ saHpiSensorThdPosHysteresisType		OBJECT-TYPE
 
 saHpiSensorThdPosHysteresisValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5715,7 +5715,7 @@ saHpiSensorThdNegHysteresisIsWritable	OBJECT-TYPE
 	
 saHpiSensorThdNegHysteresisType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -5723,7 +5723,7 @@ saHpiSensorThdNegHysteresisType		OBJECT-TYPE
 
 saHpiSensorThdNegHysteresisValue		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
@@ -6255,7 +6255,7 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
                         implementation-dependent means.
 	
 	Bit flags are:
---IBMDJ  is this the correct values for mask values??????
+--IBMDJ  are theses the correct values for mask values??????
 	SAHPI_WATCHDOG_EXP_BIOS_FRB2   0x02
  	SAHPI_WATCHDOG_EXP_BIOS_POST   0x04
  	SAHPI_WATCHDOG_EXP_OS_LOAD     0x08
