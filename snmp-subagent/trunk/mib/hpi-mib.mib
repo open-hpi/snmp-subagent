@@ -6609,7 +6609,7 @@ saHpiSensorReadingNormalMinTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNormalMinEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining current sensor readings."
+        DESCRIPTION     "A table definining normal minimum sensor readings."
         ::= {hpiSensor 6}
 
 saHpiSensorReadingNormalMinEntry OBJECT-TYPE
