@@ -112,7 +112,11 @@ extern          "C" {
   int set_watchdog(saHpiWatchdogTable_context *ctx);
   
  
- 
+ int
+ update_watchdog_row(SaHpiDomainIdT,
+		     SaHpiResourceIdT,
+		     SaHpiWatchdogNumT,
+		     SaHpiWatchdogEventT *);
 
 /*************************************************************
  * oid declarations
