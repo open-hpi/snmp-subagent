@@ -184,6 +184,7 @@ extern "C"
       /** RowPointer = ASN_OBJECT_ID */
     oid saHpiSensorRDR[MAX_OID_LEN];
     long saHpiSensorRDR_len;
+    long rdr_id;
     long resource_id;
     long domain_id;
     long hash;
@@ -220,7 +221,8 @@ extern "C"
 				  netsnmp_table_request_info *);
 
 
-  int populate_sensor (SaHpiSensorRecT * sensor,
+  int populate_sensor (SaHpiEntryIdT rdr_id,
+		       SaHpiSensorRecT * sensor,
 		       SaHpiRptEntryT * rpt_entry,
 		       oid * rdr_oid, size_t rdr_oid_len,
 		       oid * sensor_oid, size_t * sensor_oid_len);

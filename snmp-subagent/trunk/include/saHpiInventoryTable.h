@@ -141,6 +141,7 @@ extern "C"
 
     long domain_id;
     long resource_id;
+    long rdr_id;
     long hash;
 
     long count_of_subitems;
@@ -157,7 +158,8 @@ extern "C"
 				     netsnmp_index *,
 				     netsnmp_table_request_info *);
 
-  int populate_inventory (SaHpiInventoryRecT * control,
+  int populate_inventory (SaHpiEntryIdT rdr_id,
+		  	  SaHpiInventoryRecT * control,
 			  SaHpiRptEntryT * rpt_entry,
 			  oid * rdr_oid, size_t rdr_oid_len,
 			  oid * control_oid, size_t * control_oid_len);
