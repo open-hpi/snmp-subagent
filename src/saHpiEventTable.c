@@ -111,7 +111,7 @@ populate_event(SaHpiSelEntryIdT entry_id,
 
 
   SaHpiSessionIdT session_id;
-  oid event_oid[3];
+  oid event_oid[EVENT_INDEX_NR];
   int rc = AGENT_ERR_NULL_DATA;
   netsnmp_index event_index;
   saHpiEventTable_context *event_context;
@@ -132,7 +132,7 @@ populate_event(SaHpiSelEntryIdT entry_id,
     event_oid[2] = entry_id; // Or perhaps CONTAINER_COUNT(cb.callback);
     
     event_index.oids = (oid *)&event_oid;
-    event_index.len = 3;
+    event_index.len = EVENT_INDEX_NR;
     
     event_context = NULL;
     event_context = CONTAINER_FIND(cb.container, &event_index);
@@ -470,7 +470,7 @@ delete_event_row(SaHpiDomainIdT domain_id,
   saHpiEventTable_context *ctx;
 
   netsnmp_index event_index;
-  oid event_oid[3];
+  oid event_oid[EVENT_INDEX_NR];
   DEBUGMSGTL((AGENT,"-delete_event_row\n"));
 
   event_oid[0] = domain_id;
@@ -478,7 +478,7 @@ delete_event_row(SaHpiDomainIdT domain_id,
   event_oid[2] = num;
     
   event_index.oids = (oid *)&event_oid;
-  event_index.len = 3;
+  event_index.len = EVENT_INDEX_NR;
 
   ctx = CONTAINER_FIND(cb.container, &event_index);
 
@@ -576,56 +576,10 @@ int send_notification(SaHpiDomainIdT domain_id,
 			index);
 
  // Bah, send it.
+ return -1;
 }
 
   
-		      
-/************************************************************
- * keep binary tree to find context by name
- */
-static int      saHpiEventTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-
-static int
-saHpiEventTable_cmp(const void *lhs, const void *rhs)
-{
-    saHpiEventTable_context *context_l = (saHpiEventTable_context *) lhs;
-    saHpiEventTable_context *context_r = (saHpiEventTable_context *) rhs;
-
-    int rc;
-
-    DEBUGMSGTL((AGENT,"saHpiEventTable_cmp: Called\n"));
-    DEBUGMSGTL((AGENT,"Checking: %d.%d ? %d.%d\n",
-		context_l->domain_id, context_l->resource_id,
-		context_r->domain_id, context_r->resource_id));
-    if (context_l->domain_id < context_r->domain_id)
-      return -1;
-
-    rc = (context_l->domain_id == context_r->domain_id) ? 0 : 1;
-
-    if (rc != 0)
-      return 1;
-
-    if (context_l->resource_id < context_r->resource_id)
-      return -1;
-
-    rc = (context_l->resource_id == context_r->resource_id) ? 0 : 1;
-
-    if (rc != 0)
-      return 1;
-
-    if (context_l->saHpiEventIndex < context_r->saHpiEventIndex)
-      return -1;
-
-    return (context_l->saHpiEventIndex == context_r->saHpiEventIndex) ? 0:1;
-}
-
-
-
 
 /************************************************************
  * the *_row_copy routine
@@ -1309,11 +1263,7 @@ initialize_table_saHpiEventTable(void)
                                           "saHpiEventTable:"
                                           "table_container");
 
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiEventTable_secondary:"
-                                 "saHpiEventTable:" "table_container"));
-    cb.container->next->compare = saHpiEventTable_cmp;
+  
 
     cb.create_row = (UserRowMethod *) saHpiEventTable_create_row;
     

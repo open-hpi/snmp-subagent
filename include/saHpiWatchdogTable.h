@@ -110,7 +110,7 @@ extern          "C" {
 		  SaHpiWatchdogNumT num);
 
   int set_watchdog(saHpiWatchdogTable_context *ctx);
-  
+  int set_timer_reset(saHpiWatchdogTable_context *ctx);  
  
  int
  update_watchdog_row(SaHpiDomainIdT,

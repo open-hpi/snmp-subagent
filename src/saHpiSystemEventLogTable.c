@@ -72,7 +72,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
   SaHpiSelEntryIdT prev_entry_id;
   SaHpiSelInfoT info;
   SaHpiSelEntryT sel;
-  oid sel_oid[3];
+  oid sel_oid[SEL_INDEX_NR];
   oid child_oid[MAX_OID_LEN];
   size_t child_oid_len = 0;
   int rc;
@@ -140,7 +140,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 	sel_oid[2] = sel.EntryId;
 
 	sel_index.oids = (oid *) &sel_oid;
-	sel_index.len = 3;
+	sel_index.len = SEL_INDEX_NR;
 	sel_context = NULL;
 	sel_context = CONTAINER_FIND(cb.container, &sel_index);
 
@@ -269,36 +269,6 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
 
 }
 
-/*
-int
-set_timestamp() {
-
-  SaHpiSessionIdT session_id;
-  SaErrorT rc;
-  SaHpiTimeT time = 0;
-  
-
-  DEBUGMSGTL((AGENT,"IBM-KR: DEPRECATED\n"));
-  //time = event_log_current_timestamp;
-      // Get the seesion_id
-    rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
-      return rc;    
-    DEBUGMSGTL((AGENT,"Calling 'saHpiEventLogTimeSet'  with %d\n", time));
-    
-    rc = saHpiEventLogTimeSet(session_id,
-			      timestamp_resource_id,
-			      time);
-
-    if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Error for 'saHpiEventLogTimeSet' is %d\n", rc)); 
-      return AGENT_ERR_OPERATION;
-    }
-    
-    return AGENT_ERR_NOERROR;
-
-}
-*/
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,
@@ -308,7 +278,7 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   saHpiSystemEventLogTable_context *ctx;
   //saHpiSystemEventLogTable_context tmp;
 
-  oid sel_oid[3];
+  oid sel_oid[SEL_INDEX_NR];
   netsnmp_index sel_index;
 
   DEBUGMSGTL((AGENT,"- delete_SEL_row\n"));
@@ -317,7 +287,7 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   sel_oid[1] = resource_id;
   sel_oid[2] = num;
   sel_index.oids = (oid *) &sel_oid;
-  sel_index.len = 3;
+  sel_index.len = SEL_INDEX_NR;
   ctx = CONTAINER_FIND(cb.container, &sel_index);
 
   if (ctx) {
@@ -330,50 +300,6 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   
 }
 
-/************************************************************
- * keep binary tree to find context by name
- */
-static int      saHpiSystemEventLogTable_cmp(const void *lhs,
-                                             const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-static int
-saHpiSystemEventLogTable_cmp(const void *lhs, const void *rhs)
-{
-    saHpiSystemEventLogTable_context *context_l =
-        (saHpiSystemEventLogTable_context *) lhs;
-    saHpiSystemEventLogTable_context *context_r =
-        (saHpiSystemEventLogTable_context *) rhs;
-    int rc;
-    DEBUGMSGTL((AGENT,"saHpiSystemEventLogTable_cmp: Called\n"));
-    DEBUGMSGTL((AGENT,"Checking: %d.%d ? %d.%d\n",
-		context_l->domain_id, context_l->resource_id,
-		context_r->domain_id, context_r->resource_id));
-
-    if (context_l->domain_id < context_r->domain_id)
-      return -1;
-    rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
-    
-    if (rc != 0) 
-	return 1;
-
-    if (context_l->resource_id < context_r->resource_id)
-	return -1;
-
-    rc =(context_l->resource_id == context_r->resource_id) ? 0: 1;
-    
-
-    if (rc != 0)
-      return 1;
-    
-    if (context_l->saHpiSystemEventLogEntryId < context_r->saHpiSystemEventLogEntryId)
-	return -1;
-    return (context_l->saHpiSystemEventLogEntryId == context_r->saHpiSystemEventLogEntryId) ? 0: 1;
-    
-}
 
 
 /************************************************************
@@ -933,14 +859,6 @@ initialize_table_saHpiSystemEventLogTable(void)
         netsnmp_container_find("saHpiSystemEventLogTable_primary:"
                                "saHpiSystemEventLogTable:"
                                "table_container");
-
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiSystemEventLogTable_secondary:"
-                                 "saHpiSystemEventLogTable:"
-                                 "table_container"));
-    cb.container->next->compare = saHpiSystemEventLogTable_cmp;
-
 
 
 

@@ -24,6 +24,9 @@
 #include <net-snmp/library/check_varbind.h>
 #include <SaHpi.h>
 #include <hpiSubagent.h>
+
+
+#include <openhpi.h>
 #include <epath_utils.h>
 
 #include <saHpiTable.h>

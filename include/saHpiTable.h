@@ -134,7 +134,7 @@ extern          "C" {
                                          netsnmp_index *,
                                          netsnmp_table_request_info *);
 
-  int populate_rpt();
+  int populate_rpt( void );
 
   /* 
    * The various SET operations. 
