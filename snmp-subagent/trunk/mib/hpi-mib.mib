@@ -1187,13 +1187,12 @@ saHpiDatEntry OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 	"This table is used to store alarm information."
--- IBMKR: We should take out the saHpiResourceId and stick saHpiAlarmId in
-	INDEX	{ saHpiDomainId, saHpiResourceId }
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiAlarmId }
 	::= {saHpiDatTable 1}
 	
 SaHpiDatEntry ::= SEQUENCE {
 
-	saHpiAlarmId			Unsigned32,    
+	saHpiAlarmId			SaHpiInstrumentId,    
 	saHpiTimestamp			SaHpiTime,  
 	saHpiSeverity   		INTEGER,  
 	saHpiAcknowledged       	TruthValue,
@@ -1209,11 +1208,12 @@ SaHpiDatEntry ::= SEQUENCE {
 	
 	saHpiAlarmCondDataTextType      SaHpiTextType,
 	saHpiAlarmCondDataTextLanguage  SaHpiTextLanguage,
-	saHpiAlarmCondData    		SaHpiText
+	saHpiAlarmCondData    		SaHpiText,
+	saHpiAlarmDelete			RowStatus
 	}
 	
 saHpiAlarmId OBJECT-TYPE 
-	SYNTAX		Unsigned32 
+	SYNTAX		SaHpiInstrumentId		 
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Alarm Id"
@@ -1375,6 +1375,13 @@ saHpiAlarmCondData	OBJECT-TYPE
 	saHpiAlarmCondDataTextLanguage."
 	::= {saHpiDatEntry 13}
 
+saHpiAlarmDelete OBJECT-TYPE
+	SYNTAX		RowStatus
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+	" "
+	::= {saHpiDatEntry 14}
 
 -- IBMKR: A big nice seperator here would be nice.
 
@@ -6008,7 +6015,7 @@ saHpiAnnunciatorOem	OBJECT-TYPE
 	changed by HPI User."
         ::= {saHpiAnnunciatorEntry 6}
 	
-aHpiAnnouncementCount OBJECT-TYPE
+saHpiAnnouncementCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -6029,16 +6036,16 @@ saHpiAnnouncementEntry OBJECT-TYPE
         DESCRIPTION     " "
         INDEX	{ 	saHpiDomainId, 
 			saHpiResourceId, 
-			saHpiAnnunciatorNum, 
-			saHpiAnnuoncementEntryId }
+			saHpiAlarmId, 
+			saHpiEntryId }
         ::= {saHpiAnnouncementTable 1}
 
 SaHpiAnnouncementEntry ::= SEQUENCE {
 
-	saHpiAnnuoncementEntryId	Unsigned32,
+	--saHpiAnnuoncementEntryId	Unsigned32,
 	saHpiAnnuoncementTimestamp  	SaHpiTime,
 	saHpiAnnuoncementAddedByUser	TruthValue,
-	saHpiAnnounementSeverity	INTEGER,
+	saHpiAnnouncementSeverity	INTEGER,
 	saHpiAnnuoncementAcknowledged	TruthValue,
 	
 	saHpiAnnouncementStatusCondType INTEGER,
@@ -6049,16 +6056,18 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
 	saHpiAnnouncementMid		SaHpiManufacturerId,
 	saHpiAnnouncementTextType       SaHpiTextType,
 	saHpiAnnouncementTextLanguage	SaHpiTextLanguage,
-	saHpiAnnouncementText		SaHpiText
+	saHpiAnnouncementText		SaHpiText,
+	saHpiAnnouncementMode		INTEGER,
+	saHpiAnnouncementDelete		RowStatus
 
       }
       
-saHpiAnnuoncementEntryId	OBJECT-TYPE
-	SYNTAX		Unsigned32
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"Announcment Entry Id."
-	::= {saHpiAnnouncementEntry 1}
+--saHpiAnnuoncementEntryId	OBJECT-TYPE
+--	SYNTAX		Unsigned32
+--	MAX-ACCESS	read-only
+--	STATUS		current
+--	DESCRIPTION	"Announcment Entry Id."
+--	::= {saHpiAnnouncementEntry 1}
 
 saHpiAnnuoncementTimestamp	OBJECT-TYPE
 	SYNTAX		SaHpiTime
@@ -6075,7 +6084,7 @@ saHpiAnnuoncementAddedByUser	OBJECT-TYPE
 	automatically by HPI implementation."
 	::= {saHpiAnnouncementEntry 3}
 
-saHpiAnnounementSeverity	OBJECT-TYPE
+saHpiAnnouncementSeverity	OBJECT-TYPE
 	SYNTAX		INTEGER {
 				undefined(0),
 				critical(1),
@@ -6086,7 +6095,7 @@ saHpiAnnounementSeverity	OBJECT-TYPE
 				debug(241),
 				allSeverities(256)
 			}
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Only used with DAT and Annunciator functions.  
 	This is not a valid severity for events or alarms."
@@ -6107,14 +6116,14 @@ saHpiAnnouncementStatusCondType	OBJECT-TYPE
 				oem(3),
 				user(4)
 			}
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Status Condition Type."
 	::= {saHpiAnnouncementEntry 6}
 
 saHpiAnnouncementEntityPath  	OBJECT-TYPE
 	SYNTAX		OCTET STRING
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	 
 	"Entity assoc. with status condition.
@@ -6134,7 +6143,7 @@ saHpiAnnouncementEntityPath  	OBJECT-TYPE
 	
 saHpiAnnouncementSensorNum 	OBJECT-TYPE
 	SYNTAX		Unsigned32
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Sensor associated with status Only valid 
 	if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
@@ -6142,7 +6151,7 @@ saHpiAnnouncementSensorNum 	OBJECT-TYPE
   	
 saHpiAnnouncementEventState 	OBJECT-TYPE
 	SYNTAX		SaHpiEventState
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Sensor event state. Only valid if Type is 
         SAHPI_STATUS_COND_TYPE_SENSOR.."
@@ -6150,7 +6159,7 @@ saHpiAnnouncementEventState 	OBJECT-TYPE
 	    
 saHpiAnnouncementName 	OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
 	"AIS compatible identifier associated with Status condition."
@@ -6158,7 +6167,7 @@ saHpiAnnouncementName 	OBJECT-TYPE
 
 saHpiAnnouncementMid 	OBJECT-TYPE
 	SYNTAX		SaHpiManufacturerId
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Manufacturer Id associated with status condition, 
 	required when type is SAHPI_STATUS_COND_TYPE_OEM."
@@ -6182,13 +6191,33 @@ saHpiAnnouncementTextLanguage	OBJECT-TYPE
 
 saHpiAnnouncementText	OBJECT-TYPE
 	SYNTAX		SaHpiText
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Field Data.
 	The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiAnnouncementEntry 14}
 
+saHpiAnnouncementMode	OBJECT-TYPE
+	SYNTAX		INTEGER {
+					undefined(0),
+					auto(1),
+					user(2),
+					shared(3)
+				}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		" "
+	::= {saHpiAnnouncementEntry 15}
+
+saHpiAnnouncementDelete	OBJECT-TYPE
+	SYNTAX		RowStatus
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+		" "
+	::= {saHpiAnnouncementEntry 16}
 --
 -- /*******************************************************************************
 -- ********************************************************************************
