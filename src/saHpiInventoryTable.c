@@ -267,6 +267,7 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 	  { 
 	    stop = SAHPI_TRUE;
 	  }
+	  DEBUGMSGTL((AGENT,"Nope, no crash. You are fine."));
 	}			// End of loop. No more record changing/adding.
 
       // Just finish the data.
