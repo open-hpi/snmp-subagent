@@ -36,7 +36,10 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiDomainInfoTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -45,8 +48,13 @@ oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
 size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
 
-populate_saHpiDomainInfoTable() 
+void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid) 
 {
+	SaErrorT rv;
+	SaHpiDomainInfoT domain_info;
+
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);	
+
 	DEBUGMSGTL ((AGENT, 
 		"WARNING: populate_saHpiDomainInfoTable: not implemented!"));
 }
@@ -280,7 +288,7 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
       	/*
    		 *Check Index 
          */
-    	err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer)
+    	err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
          
     }
 
@@ -663,17 +671,18 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+/* TODO DMJ doesn't understand why this is here     
 #ifndef saHpiDomainInfoTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
             row_err = 1;
     }
 #endif
-
+*/
     /*
      * check activation/deactivation
      */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
+/*    row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
@@ -682,7 +691,7 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
                                        row_err);
         return;
     }
-
+*/
     /*
      * TODO: if you have dependencies on other tables, this would be
      * a good place to check those, too.
@@ -771,17 +780,18 @@ void saHpiDomainInfoTable_set_free( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-        break;
+        	break;
 
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-        break;
+        	break;
 
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
-        break;
+        	break;
 
-        default: /** We shouldn't get here */
+        default: 
+            break;/** We shouldn't get here */
             /** should have been logged in reserve1 */
         }
     }
@@ -896,8 +906,8 @@ initialize_table_saHpiDomainInfoTable(void)
     /*
      * internal indexes
      */
-        /** index: saHpiDomainId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+   	/** index: saHpiDomainId */
+  	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiDomainInfoTable_COL_MIN;
     table_info->max_column = saHpiDomainInfoTable_COL_MAX;
