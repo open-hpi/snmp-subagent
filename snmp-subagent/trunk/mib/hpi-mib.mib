@@ -7624,11 +7624,12 @@ saHpiInventoryEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "These structures are used to read and write inventory data to entity inventory
-        repositories within a resource.
-                
-        All inventory data contained in an inventory data repository (IDR)
-        must be represented in the RDR repository"
+        "These structures are used to read and write inventory data to 
+	Inventoryentity Data Repository (IDR).  
+	
+	Each table row represents an IDR.  All inventory data contained 
+	in an inventory data repository (IDR) must be represented in the 
+	RDR repository as an RDR record."
         
         INDEX   { 
                 saHpiDomainId, 
