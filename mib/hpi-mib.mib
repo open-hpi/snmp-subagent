@@ -1970,7 +1970,12 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
 
         INDICATOR_SUPPORTED
                 Indicates whether or not the resource has a hot swap 
-		indicator."
+		indicator.
+		
+	See textual convention for futher details."
+	REFERENCE		
+	"See SAI-HPI-B.01.01 sections 6.3, 7.5 and 8.21"
+
 	::=   {saHpiResourceEntry 5 }
 
 
@@ -2025,7 +2030,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
         All of the fields in the following structure may or 
         may not be used by a given resource."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 
 	::=   {saHpiResourceEntry 8 }
 
@@ -2037,7 +2042,7 @@ saHpiResourceInfoSpecificVer OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 9 }
 
 
@@ -2049,7 +2054,7 @@ saHpiResourceInfoDeviceSupport OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 10 }
 
 
@@ -2061,7 +2066,7 @@ saHpiResourceInfoManufacturerId OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 11 }
 
 
@@ -2073,7 +2078,7 @@ saHpiResourceInfoProductId OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 
 	::=   {saHpiResourceEntry 12 }
 
@@ -2086,7 +2091,7 @@ saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 13 }
 
 
@@ -2097,7 +2102,7 @@ saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 14 }
 
 
@@ -2109,7 +2114,7 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
         DESCRIPTION     
 	" See saHpiResourceInfoResourceRev for over view."
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 15 }
 
 
@@ -2126,7 +2131,7 @@ saHpiResourceInfoGuid   OBJECT-TYPE
 	
 	See textial-convention"
 	REFERENCE 
-	"See sections 6.3 and 8.21"
+	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
 	
 
 	::=   {saHpiResourceEntry 16 }
