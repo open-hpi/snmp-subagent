@@ -6462,7 +6462,7 @@ saHpiSensorThdUpMinorIsReadable OBJECT-TYPE
         DESCRIPTION
         "Defines if sensor threshold information can be read.  "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6.  "
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.13.  "
         ::= {saHpiSensorThdUpMinorEntry 1}
 
 saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
@@ -6472,7 +6472,7 @@ saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
         DESCRIPTION
         "Defines if sensor threshold information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7.  "
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.14.  "
         ::= {saHpiSensorThdUpMinorEntry 2}
         
 saHpiSensorThdUpMinorType               OBJECT-TYPE
@@ -6515,8 +6515,7 @@ saHpiSensorThdPosHysteresisTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining hysteresis status at the
-        positive range over a range which a change is accepted in a 
-        sensor that supports raw or interpreted values."
+        positive upper bound for a given sensor"
         ::= {hpiSensor 13}
 
 saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
@@ -6524,9 +6523,8 @@ saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor threshold data which defines hysteresis values
-        at the positive range over a range which a change is accepted in a
-        sensor that supports raw or interpreted values."
+        "This is the sensor hysteresis data which defines hysteresis values
+        at the positive upper bound."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorThdPosHysteresisTable 1}
 
@@ -6543,9 +6541,9 @@ saHpiSensorThdPosHysteresisIsReadable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read." 
+        "Defines if sensor hysteresis information can be read." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.13."
         ::= {saHpiSensorThdPosHysteresisEntry 1}
 
 saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
@@ -6553,9 +6551,9 @@ saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to." 
+        "Defines if sensor hysteresis information can be written to." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.14."
         ::= {saHpiSensorThdPosHysteresisEntry 2}
         
 saHpiSensorThdPosHysteresisType         OBJECT-TYPE
@@ -6598,8 +6596,7 @@ saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining hysteresis values at the
-        negative range over a range which a change is accepted in a 
-        sensor that supports raw or interpreted values."
+        negative lower bound for a given sensor."
         ::= {hpiSensor 14}
 
 saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
@@ -6607,9 +6604,8 @@ saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor threshold data which defines hysteresis values
-        at the negativie range over a range which a change is accepted in a
-        sensor that supports raw or interpreted values."
+        "This is the sensor hysteresis data which defines hysteresis values
+        at the negativie lower bound for a given sensor."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorThdNegHysteresisTable 1}
 
@@ -6627,9 +6623,9 @@ saHpiSensorThdNegHysteresisIsReadable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read."
+        "Defines if sensor hysteresis information can be read."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.13."
         ::= {saHpiSensorThdNegHysteresisEntry 1}
 
 saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
@@ -6637,9 +6633,9 @@ saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. "
+        "Defines if sensor hysteresis information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.14."
         ::= {saHpiSensorThdNegHysteresisEntry 2}
         
 saHpiSensorThdNegHysteresisType         OBJECT-TYPE
