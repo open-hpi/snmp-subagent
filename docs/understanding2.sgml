@@ -220,7 +220,7 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
 		  </listitem>
 		  <listitem>
 		    <para>
-		      Manipulating secondary index.
+		      Manipulating secondary (or more) index tuple.
 		    </para>
 		  </listitem>
 	    </itemizedlist>
@@ -273,7 +273,7 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
 	</listitem>
 	<listitem>
 	  <para>Commenting out <emphasis>netSnmpIETFWGTable_IDX2</emphasis> disables
-	  the handling of secondary index.
+	  the handling of secondary (or more) of index.
 	  </para>
 	 </listitem>
       </itemizedlist>
