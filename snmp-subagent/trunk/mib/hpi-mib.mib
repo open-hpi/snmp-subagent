@@ -19,7 +19,7 @@ IMPORTS
         MODULE-COMPLIANCE, 
         OBJECT-GROUP,
         NOTIFICATION-GROUP      FROM SNMPv2-CONF
-        enterprises             FROM RFC1155-SMI;
+		hpiD					FROM SAF-TC-MIB;
 
 
 hpiB0101 MODULE-IDENTITY
@@ -118,7 +118,7 @@ hpiB0101 MODULE-IDENTITY
     REVISION    "200501140000Z"
     DESCRIPTION
         "HPI MIB for SAF-HPI B."
-        ::= { enterprises 18568 1 1 1 6}
+        ::= { hpiD 1 }
 
 hpiAdministration	OBJECT IDENTIFIER ::= { hpiB0101 1 }
 hpiDomain       	OBJECT IDENTIFIER ::= { hpiB0101 2 }
