@@ -64,6 +64,8 @@ extern          "C" {
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiWatchdogTimerPresentCount;
 
+      /** TruthValue = ASN_INTEGER */
+      long            saHpiWatchdogTimerReset;
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiWatchdogOem;
 
@@ -72,6 +74,7 @@ extern          "C" {
         long            saHpiWatchdogRDR_len;
 
         long resource_id;
+        long domain_id;
 	long hash;
     } saHpiWatchdogTable_context;
 
@@ -97,6 +100,12 @@ extern          "C" {
 			 oid *watchdog_oid, 
 			 size_t *watchdog_oid_len);
   
+
+int
+delete_watchdog(SaHpiDomainIdT domain_id,
+		SaHpiResourceIdT resource_id,
+		SaHpiWatchdogNumT num);
+
   int set_watchdog(saHpiWatchdogTable_context *ctx);
   
   int  
@@ -123,6 +132,7 @@ extern          "C" {
 **************************
  * column number definitions for table saHpiWatchdogTable
  */
+
 #define COLUMN_SAHPIWATCHDOGNUM 1
 #define COLUMN_SAHPIWATCHDOGLOG 2
 #define COLUMN_SAHPIWATCHDOGRUNNING 3
@@ -133,10 +143,11 @@ extern          "C" {
 #define COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS 8
 #define COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT 9
 #define COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT 10
-#define COLUMN_SAHPIWATCHDOGOEM 11
-#define COLUMN_SAHPIWATCHDOGRDR 12
+#define COLUMN_SAHPIWATCHDOGTIMERRESET 11
+#define COLUMN_SAHPIWATCHDOGOEM 12
+#define COLUMN_SAHPIWATCHDOGRDR 13
 #define saHpiWatchdogTable_COL_MIN 1
-#define saHpiWatchdogTable_COL_MAX 12
+#define saHpiWatchdogTable_COL_MAX 13
 
 
     int            
@@ -170,10 +181,10 @@ extern          "C" {
 
 
 
-
+  /*
     saHpiWatchdogTable_context *saHpiWatchdogTable_get(const char *name,
                                                        int len);
-
+  */
 
 #ifdef __cplusplus
 };
