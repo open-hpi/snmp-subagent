@@ -120,6 +120,10 @@ int
 set_table_tag(saHpiTable_context *ctx);
 
 
+int
+delete_rpt_row(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id,
+	       SaHpiEntryIdT num);
 int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
 				saHpiTable_context *ctx
