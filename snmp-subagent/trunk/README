@@ -40,6 +40,10 @@ and then (as root or with proper system install permissions)
 It will generate the subagent code and put the configuration file 
 - hpiSubagent.conf in the NetSNMP configuration directory.
 
+If you want to generate the guide, run:
+        make pdf-m
+
+in the docs directory.
 ---------------------------------------------------------
 RUNNING
 ---------------------------------------------------------
@@ -133,6 +137,9 @@ GENERAL RELEASE NOTES and WHAT'S NEW
 		- Control,
 		- Watchdog
 	- Events and System Event Log
+
+* SGML Guide for writing a sub-agent using NetSNMP API, titled:
+  "NetSNMP subagent development manual."
 
 * Support for notifications/TRAPS as defined in the MIB:
 	- For Events:
