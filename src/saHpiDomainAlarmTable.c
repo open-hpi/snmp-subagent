@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiDomainAlarmTable.h"
+#include "hpiCheckIndice.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -255,33 +256,15 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainAlarmTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainAlarmTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiDomainAlarmId;
 
        memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
        var_saHpiDomainAlarmId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainAlarmTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainAlarmId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainAlarmId.next_variable = NULL;
 
 
     /*
@@ -298,29 +281,15 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
    
                 ctx->saHpiDomainAlarmId = *var_saHpiDomainAlarmId.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainAlarmId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
+	    if(!err)
+		    err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+	    if (!err) 
+		    err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+		    
+	    if(!err) 
+		    err = saHpiDomainAlarmId_check_index(*var_saHpiDomainAlarmId.val.integer);  
+      }
 
     /*
      * parsing may have allocated memory. free it.
