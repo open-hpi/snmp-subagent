@@ -12,11 +12,13 @@ IMPORTS
         DateAndTime,
         RowPointer,
         RowStatus,
+	DisplayString,
         TruthValue              FROM SNMPv2-TC
         MODULE-COMPLIANCE, 
         OBJECT-GROUP,
         NOTIFICATION-GROUP      FROM SNMPv2-CONF
         enterprises             FROM RFC1155-SMI;
+
 
 hpiB MODULE-IDENTITY
     LAST-UPDATED "200410180000Z"
