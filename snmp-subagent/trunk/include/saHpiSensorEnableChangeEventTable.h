@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiSensorNum is external */
@@ -36,7 +38,7 @@ typedef struct saHpiSensorEnableChangeEventTable_context_s {
      */
     /** TODO: add storage for external index(s)! */
         /** SaHpiTimeString = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventTimestamp[65535];
+            unsigned char saHpiSensorEnableChangeEventTimestamp[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventTimestamp_len;
 
         /** INTEGER = ASN_INTEGER */
@@ -52,18 +54,18 @@ typedef struct saHpiSensorEnableChangeEventTable_context_s {
             long saHpiSensorEnableChangeEventsEnabled;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeAssertEvents[65535];
+            unsigned char saHpiSensorEnableChangeAssertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeAssertEvents_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeDeassertEvents[65535];
+            unsigned char saHpiSensorEnableChangeDeassertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeDeassertEvents_len;
 
         /** Unsigned8 = ASN_INTEGER */
             long saHpiSensorEnableChangeOptionalData;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventState[65535];
+            unsigned char saHpiSensorEnableChangeEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventState_len;
 
         /** RowStatus = ASN_INTEGER */

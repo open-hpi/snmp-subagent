@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiSensorNum is external */
@@ -42,7 +44,7 @@ typedef struct saHpiSensorThdNegHysteresisTable_context_s {
             long saHpiSensorThdNegHysteresisType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdNegHysteresisValue[65535];
+            unsigned char saHpiSensorThdNegHysteresisValue[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorThdNegHysteresisValue_len;
 
 

@@ -18,6 +18,7 @@ extern "C" {
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
+#include "SaHpi.h"
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -50,7 +51,7 @@ typedef struct saHpiFieldTable_context_s {
             long saHpiFieldTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiFieldText[65535];
+            unsigned char saHpiFieldText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiFieldText_len;
 
         /** RowStatus = ASN_INTEGER */

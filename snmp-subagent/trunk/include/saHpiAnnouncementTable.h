@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include "SaHpi.h"
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiDomainAlarmId is external */
@@ -50,18 +52,18 @@ typedef struct saHpiAnnouncementTable_context_s {
             long saHpiAnnouncementStatusCondType;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEntityPath[65535];
+            unsigned char saHpiAnnouncementEntityPath[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEntityPath_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiAnnouncementSensorNum;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventState[65535];
+            unsigned char saHpiAnnouncementEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEventState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementName[65535];
+            unsigned char saHpiAnnouncementName[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementName_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
@@ -74,7 +76,7 @@ typedef struct saHpiAnnouncementTable_context_s {
             long saHpiAnnouncementTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementText[65535];
+            unsigned char saHpiAnnouncementText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementText_len;
 
         /** RowStatus = ASN_INTEGER */
