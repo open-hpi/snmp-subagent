@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiDomainReferenceTable.h"
+#include "oh_error.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -828,5 +829,54 @@ saHpiDomainReferenceTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiDomainReferenceTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainReferenceTable support fucntions
+//*******************************************************
+//*******************************************************
+struct sa_domain_table top_drt = {
+	.did = SAHPI_UNSPECIFIED_DOMAIN_ID,
+	.sid = 0
+};
+
+struct sa_resource_table top_rpt = {        
+        .table = NULL,
+        .lock = G_STATIC_REC_MUTEX_INIT
+};
+
+static int populate_drt_call  = FALSE;
+
+
+int populate_drt(void) {
+
+	int rval = 0;
+	SaHpiSessionIdT sid;
+
+	SaHpiDomainInfoT DomainInfo;
+	memset(&DomainInfo, 0, sizeof(SaHpiDomainInfoT));
+
+	if ( SA_OK != saHpiSessionOpen(
+		SAHPI_UNSPECIFIED_DOMAIN_ID, 
+		&sid, NULL) ){
+		dbg("ERROR: populate_drt, saHpiSessionOpen Failed!"); 
+		rval = -1;
+	} else {
+		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
+		top_drt.sid = sid;
+		populate_drt_call  = TRUE;
+	}
+	
+	return rval;
+
+}
+
+SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
+	if (populate_drt_call  == TRUE) 
+		return top_drt.did;
+	else
+		return -1;
+}
+
 
 

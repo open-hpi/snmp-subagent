@@ -21,7 +21,6 @@
 #include <signal.h>
 
 #include "alarm.h"
-#include "hpiDomain.h"
 #include <oh_error.h>
 
 #include <hpiB_columns.h>
@@ -1294,8 +1293,8 @@ main (int argc, char **argv)
 
 	/* after initialization populate tables */
 	populate_domain_info();
-
         populate_drt();
+
 
 	dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
 #if 0 /* TODO DMJ */

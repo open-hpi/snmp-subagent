@@ -12,7 +12,6 @@ hpiSubagent_SOURCES	= alarm.c \
 			hpiB.c \
 			hpiSubagent.c \
 			hpiCheckIndice.c \
-			hpiDomain.c \
 			hpiPopulateRpt.c \
 			hpiPopulateRdr.c \
 			saHpiAnnouncementTable.c \
