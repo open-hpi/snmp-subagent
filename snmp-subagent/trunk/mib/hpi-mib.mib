@@ -866,6 +866,7 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
     DESCRIPTION	
 	"These definitions list the available data types that can be
     used for sensor readings. "
+
     REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 171."
     SYNTAX	INTEGER	{
@@ -876,37 +877,19 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 			buffer(4)    
 		}
 
---IBMKR: Does the description need to have those types?
--- Perhaps it just should say. "All types of data
--- represented as string. for example ... "?   
- 		
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
     STATUS          current
     DESCRIPTION     
- 	"Sensor Reading Type
+ 	"The sensor reading value is represented as one of the 
+	enumerated types listed in SaHpiSensorReadingType.
 
-	These definitions list the available data types that can be
-	used for sensor readings. 
+	This value by itself is of string type and needs to be 
+	evaluated in the context of SaHpiSensorReadingType."
 
-	SAHPI_SENSOR_READING_TYPE_INT64
-		Represented as a string.
-
-	SAHPI_SENSOR_READING_TYPE_UINT64,
-		Represented as a string.
-
-	SAHPI_SENSOR_READING_TYPE_FLOAT64,
-		Represented as a string.
-
-	SAHPI_SENSOR_READING_TYPE_BUFFER
-
-		Represented as a 32 byte array. The format of the buffer is 
-		implementation-specific. Sensors that use this reading type
-		may not have thresholds that are settable or readable."
     REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 181."
     SYNTAX	OCTET STRING(SIZE(0..255))
 	
-
 
 -- *************************************
 -- **
