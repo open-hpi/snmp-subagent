@@ -82,7 +82,7 @@ typedef struct saHpiResourceTable_context_s {
             unsigned long saHpiResourceInfoAuxFirmwareRev;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiResourceInfoGuid[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            unsigned char saHpiResourceInfoGuid[16];
             long saHpiResourceInfoGuid_len;
 
         /** SaHpiTextType = ASN_INTEGER */
@@ -207,5 +207,13 @@ saHpiResourceTable_context * saHpiResourceTable_get( const char *name, int len )
 #ifdef __cplusplus
 };
 #endif
+
+//*******************************************************
+//*******************************************************
+// saHpiResourceTable support fucntions
+//*******************************************************
+//*******************************************************
+#define RESOURCE_INDEX_LEN 3
+int populate_rpt(void);
 
 #endif /** SAHPIRESOURCETABLE_H */
