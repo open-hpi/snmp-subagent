@@ -4,7 +4,7 @@
 AC_PREREQ(2.53)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE(openhpi-subagent, 0.7)
-AC_CONFIG_SRCDIR([include/hpiB.h])
+AC_CONFIG_SRCDIR([include/hpiB0101.h])
 AM_CONFIG_HEADER([config.h])
 
 # Checks for programs.
