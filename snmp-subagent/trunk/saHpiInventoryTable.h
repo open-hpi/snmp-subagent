@@ -98,7 +98,8 @@ extern          "C" {
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiInventoryRDR[MAX_OID_LEN];
         long            saHpiInventoryRDR_len;
-
+      long domain_id;
+      long resource_id;
       long hash;
     } saHpiInventoryTable_context;
 
@@ -134,7 +135,10 @@ update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
                                 saHpiInventoryTable_context *ctx);
 
 
-
+int
+delete_inventory_row(SaHpiDomainIdT domain_id,
+		     SaHpiResourceIdT resource_id,
+		     SaHpiEirIdT num);
 /*************************************************************
  * oid declarations
  */
@@ -170,7 +174,7 @@ update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
     int            
         saHpiInventoryTable_extract_index(saHpiInventoryTable_context *
                                           ctx, netsnmp_index * hdr);
-  /*
+  
     void            saHpiInventoryTable_set_reserve1(netsnmp_request_group
                                                      *);
     void            saHpiInventoryTable_set_reserve2(netsnmp_request_group
@@ -184,24 +188,21 @@ update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
 
     saHpiInventoryTable_context
         *saHpiInventoryTable_duplicate_row(saHpiInventoryTable_context *);
-	*/
+	
     netsnmp_index 
         *saHpiInventoryTable_delete_row(saHpiInventoryTable_context *);
-  /*
+  
     int            
         saHpiInventoryTable_can_delete(saHpiInventoryTable_context *
                                        undo_ctx,
                                        saHpiInventoryTable_context *
                                        row_ctx,
                                        netsnmp_request_group * rg);
-  */
+  
 
     saHpiInventoryTable_context
         *saHpiInventoryTable_create_row(netsnmp_index *);
-  /*
-    saHpiInventoryTable_context *saHpiInventoryTable_get(const char *name,
-                                                         int len);
-  */
+
 
 #ifdef __cplusplus
 };
