@@ -44,7 +44,7 @@ void
 do_alarm (unsigned int clientreg, void *clientarg)
 {
 
-  int rc;
+  int rc = 0;
   DEBUGMSGTL ((AGENT, "--- do_alarm: Entry\n"));
 
   DEBUGMSGTL ((AGENT, "TODO: Call to populate_rpt() returns: %d.\n", rc));
