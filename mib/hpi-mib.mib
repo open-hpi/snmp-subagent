@@ -5941,16 +5941,16 @@ saHpiAnnunciatorEntry OBJECT-TYPE
         ::= {saHpiAnnunciatorTable 1}
 
 SaHpiAnnunciatorEntry ::= SEQUENCE {
-	saHpiAnnunciatorNum		Unsigned32,
+	saHpiAnnunciatorNum		SaHpiInstrumentId,
 	saHpiAnnunciatorType		INTEGER,
 	saHpiAnnunciatorModeReadOnly	TruthValue,
 	saHpiAnnunciatorMaxConditions	Unsigned32,
-	saHpiAnnunciatorMode		INTEGER,
+	--saHpiAnnunciatorMode		INTEGER,
 	saHpiAnnunciatorOem		Unsigned32
       }
       
 saHpiAnnunciatorNum	OBJECT-TYPE
-        SYNTAX          Unsigned32 
+        SYNTAX          SaHpiInstrumentId 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Unique Number identifying each annunciator."
@@ -5988,22 +5988,21 @@ saHpiAnnunciatorMaxConditions	OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"maximum number of conditions that can be held in current 
-        set.  0 means no fixed limit.  if True, Mode may not be 
-	changed by HPI User."
+        set.  0 means no fixed limit.  "
         ::= {saHpiAnnunciatorEntry 4}
 	
-saHpiAnnunciatorMode	OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				auto(1),
-				user(2),
-				shared(3)
-			}
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     
-	""
-        ::= {saHpiAnnunciatorEntry 5}
+--saHpiAnnunciatorMode	OBJECT-TYPE
+--       SYNTAX          INTEGER {
+--				undefined(0),
+--				auto(1),
+--				user(2),
+--				shared(3)
+--			}
+--       MAX-ACCESS      read-write
+--      STATUS          current
+--        DESCRIPTION     
+--	""
+--       ::= {saHpiAnnunciatorEntry 5}
 
 saHpiAnnunciatorOem	OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6013,7 +6012,7 @@ saHpiAnnunciatorOem	OBJECT-TYPE
 	"maximum number of conditions that can be held in current 
         set.  0 means no fixed limit.  if True, Mode may not be 
 	changed by HPI User."
-        ::= {saHpiAnnunciatorEntry 6}
+        ::= {saHpiAnnunciatorEntry 5}
 	
 saHpiAnnouncementCount OBJECT-TYPE
 	SYNTAX		Counter32
