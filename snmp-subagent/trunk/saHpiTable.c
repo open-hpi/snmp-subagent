@@ -309,11 +309,12 @@ int set_table_tag(saHpiTable_context *ctx) {
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
-   
+  	DEBUGMSGTL((AGENT,"Changing for %s, %d, %d\n", tag.Data,
+	tag.DataType, tag.Language));
     rc = saHpiResourceTagSet(session_id,
 			     ctx->resource_id,
 			     &tag);
-
+	DEBUGMSGTL((AGENT,"SET done: %d\n", rc));
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
@@ -821,6 +822,7 @@ saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
 	  break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+	// Not include undefined(0) since its non-compliant.
 	  if ( ((*var->val.integer < 1) || 
 		(*var->val.integer > 4))) {	    
 	    rc = SNMP_ERR_BADVALUE;
