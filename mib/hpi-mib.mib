@@ -2412,10 +2412,8 @@ saHpiAutoInsertTimeoutTable OBJECT-TYPE
     STATUS current
     DESCRIPTION
     "In support of HPI
-	saHpiAutoInsertTimeoutGet,
+	saHpiAutoInsertTimeoutGet, and
 	saHpiAutoInsertTimeoutSet
-	saHpiAutoExtractTimeoutGet, and
-	saHpiAutoExtractTimeoutGet."
     
     REFERENCE "Derived from SAI-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
