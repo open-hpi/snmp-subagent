@@ -3868,8 +3868,6 @@ saHpiUserEventEntry OBJECT-TYPE
             "User events."
         INDEX   { 
                 saHpiDomainId,
-		-- IBMKR: What is the ResourceId set to?
-                saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiUserEventTimestamp
         }
@@ -5586,8 +5584,6 @@ saHpiUserEventLogEntry OBJECT-TYPE
             "User events."
         INDEX   { 
                 saHpiDomainId,
-		-- IBMKR: What is the ResourceId set to?
-                saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiUserEventTimestamp
         }
