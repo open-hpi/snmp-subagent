@@ -1,6 +1,11 @@
 /*
  * 
- * gcc -I/home/konrad/hpi/openhpi/include test-time.c  `net-snmp-config --netsnmp-libs` -o test -ggdb
+  gcc -I/home/konrad/hpi/openhpi/include test-time.c  `net-snmp-config --netsnmp-libs` -o test -ggdb
+  snmpwalk -v2c -c public localhost hpi | grep -i "Time" | awk ' { print $1 } ' > v
+  for a in `cat v`
+  do 
+    ./test $a
+  done
  */
 
 #include <SaHpi.h>
@@ -11,24 +16,29 @@
 #include <net-snmp/net-snmp-includes.h>
 int
 convert (SaHpiTimeT hpi_time) {
-	time_t tt,tt3;
-	struct tm *tt1,*tt4;
-	char time_buf[100];
+	time_t hpi_tt = 0;
+	time_t local_tt= 0;
+	struct tm *hpi_tm,*local_tm;
+	char time_buf[100], time_buf2[100];
+	int rc;
 
-	tt = hpi_time / 10000000000;
-	tt3 = time(&tt3);
+	hpi_tt = hpi_time / 10000000000;
 
-	tt1 = localtime( &tt );
-	tt4 = localtime( &tt3);
+	hpi_tm = gmtime( &hpi_tt);
+	strftime (time_buf, 100, "%c", hpi_tm);	
 
-	strftime (time_buf, 100, "%c ", tt1);	
+	local_tt = localtime( &local_tt);
+	local_tm = gmtime( &local_tt );
+	strftime (time_buf2, 100, "%c", local_tm);	
+
+
 	fprintf(stderr,"Time from SNMP [%s]\n", time_buf);
-	strftime (time_buf, 100, "%c ", tt4);	
-	fprintf(stderr,"Local time:    [%s]\n", time_buf);
-
+	fprintf(stderr,"Local time:    [%s]\n", time_buf2);
+	
+	return (strcmp(time_buf,time_buf2));
 }
 
-int main() {
+main (int argc, char **argv){
 
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;
@@ -40,7 +50,9 @@ int main() {
     struct variable_list *vars;
     int status;
     int count=1;
+	int rc = -1;
 
+	
     /*
      * Initialize the SNMP library
      */
@@ -80,9 +92,12 @@ int main() {
      *   1) We're going to GET the system.sysDescr.0 node.
      */
     pdu = snmp_pdu_create(SNMP_MSG_GET);
+    if (argc < 2)
     read_objid(".1.3.6.1.3.90.1.3.0", anOID, &anOID_len);
-
-
+    else {
+    	snmp_log(LOG_INFO,"GET for %s\n", argv[1]);
+    	read_objid(argv[1], anOID, &anOID_len);
+    }
     snmp_add_null_var(pdu, anOID, anOID_len);
   
     /*
@@ -104,7 +119,11 @@ int main() {
       for(vars = response->variables; vars; vars = vars->next_variable) {
         if (vars->type == ASN_COUNTER64) {
 		memcpy(&time_is, vars->val.counter64, sizeof(SaHpiTimeT));
-		convert(time_is);	
+		rc=		convert(time_is);	
+		if (rc != 0)
+			fprintf(stderr,"+++ test failed\n");
+		else
+			fprintf(stderr,"---- test ok\n");	
 	}
       } 
       /*
@@ -118,7 +137,6 @@ int main() {
         snmp_sess_perror("snmpget", ss);
 
     }
-    fprintf(stderr,"Clean up");
     /*
      * Clean up:
      *  1) free the response.
@@ -129,5 +147,5 @@ int main() {
     snmp_close(ss);
 
     SOCK_CLEANUP;
-    return (0);
+    return (rc);
 } /* main() */
