@@ -156,23 +156,23 @@ Unsigned16 ::= TEXTUAL-CONVENTION
     SYNTAX       INTEGER (0..65535)
 
 Unsigned8 ::= TEXTUAL-CONVENTION
-    STATUS      current
-    DESCRIPTION
+	STATUS      current
+	DESCRIPTION
         "Textual convention for an unsigned 8-bit data type."
-    REFERENCE
+	REFERENCE
         "Derived from SAI-HPI-B.01.01 spec, section 8.1."
-    SYNTAX      INTEGER(0..255)
+	SYNTAX      INTEGER(0..255)
 
 Float64 ::= TEXTUAL-CONVENTION
-    STATUS      current
-    DESCRIPTION
+	STATUS      current
+	DESCRIPTION
         "Textual convention for an 64 bit float number, 
-    8 byte alignment data type."
-    REFERENCE
+	8 byte alignment data type."
+	REFERENCE
         "Derived from SAI-HPI-B.01.01 spec, section 8.1.
         The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
         sign(1)exponent(11)mantissa(52)."
-    SYNTAX      Opaque (SIZE(0..65))
+	SYNTAX      Opaque (SIZE(0..65))
     
 SaHpiEntityPath ::= TEXTUAL-CONVENTION
         STATUS          current
@@ -512,10 +512,10 @@ SaHpiEventCategory ::= TEXTUAL-CONVENTION
                 }
 
 SaHpiEventState ::= TEXTUAL-CONVENTION
-    DISPLAY-HINT "255a"
-    STATUS       current 
-    DESCRIPTION "
- The following event states are available for variables using the saHpiEventCategory 
+	DISPLAY-HINT "255a"
+	STATUS       current 
+	DESCRIPTION "
+	The following event states are available for variables using the saHpiEventCategory 
             textual convention to provide event origin information.
  
         Each set of events is uniquely identified with a label which easily refers back to the 
@@ -1214,7 +1214,15 @@ saHpiHpiVersion OBJECT-TYPE
         DESCRIPTION     
         "This columnar node provides the version of HPI this MIB is based on."
         ::= { hpiAdministration 1 } 
-	
+
+saHpiAgentVersion OBJECT-TYPE
+        SYNTAX          DisplayString
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+        "This columnar node provides the version of HPI this MIB is based on."
+        ::= { hpiAdministration 2 } 
+
 saHpiReourceId OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      read-only
@@ -1225,7 +1233,7 @@ saHpiReourceId OBJECT-TYPE
 	the SNMP service"
 	REFERENCE
 	"See SAI-HPI-B.01.01 section 6.3.5."
-        ::= { hpiAdministration 2 } 
+        ::= { hpiAdministration 3 } 
 	
 saHpiDiscover OBJECT-TYPE
         SYNTAX          TruthValue
@@ -1236,7 +1244,7 @@ saHpiDiscover OBJECT-TYPE
 	domains by the underlying management service."
 	REFERENCE
 	"See SAI-HPI-B.01.01 section 6.1.3."
-        ::= { hpiAdministration 3 } 
+        ::= { hpiAdministration 4 } 
 
 
 -- *************************************
