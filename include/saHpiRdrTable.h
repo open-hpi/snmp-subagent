@@ -84,6 +84,11 @@ typedef struct saHpiRdrTable_context_s {
 /*************************************************************
  * function declarations
  */
+void populate_saHpiRdrTable(void);
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiRdrTable(void);
 void initialize_table_saHpiRdrTable(void);
 const saHpiRdrTable_context * saHpiRdrTable_get_by_idx(netsnmp_index *);

@@ -107,6 +107,11 @@ typedef struct saHpiDomainInfoTable_context_s {
 } saHpiDomainInfoTable_context;
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+void populate_saHpiDomainInfoTable(void);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiDomainInfoTable(void);
