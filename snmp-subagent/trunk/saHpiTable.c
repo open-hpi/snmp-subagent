@@ -59,7 +59,8 @@ oid saHpiResourceNotification[] = { hpiNotifications_OID, 6, 0 };
 static int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
 			  saHpiTable_context *ctx,
-			  SaHpiTimeT *time);
+			  SaHpiTimeT *time,
+			  SaHpiBoolT *state);
 
 
 static void
@@ -86,7 +87,7 @@ populate_rpt() {
    SaHpiEntryIdT	next;
    SaHpiEntryIdT	current;
    SaHpiTimeT           time;
- 
+   SaHpiBoolT state;
    int new_entries;
 
    long backup_count = entry_count;
@@ -124,6 +125,14 @@ populate_rpt() {
 	   err = saHpiEventLogTimeGet(session,
 				      rpt_entry.ResourceId,
 				      &time);
+
+	   err = saHpiEventLogStateGet(session,
+				       rpt_entry.ResourceId,
+				       &state);
+      
+	    // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
+	    if (err != SA_OK)
+	      state = SAHPI_TRUE;
 	   // Construct the index from the entry. Look in the MIB for new index values
 	   // Comment #020 changed the index order.
 	   rpt_oid[0]=rpt_entry.DomainId;
@@ -153,7 +162,8 @@ populate_rpt() {
 
 	   if (saHpiTable_modify_context(&rpt_entry, 
 					 rpt_context,
-					 &time) 
+					 &time,
+					 &state) 
 		   == AGENT_NEW_ENTRY) {
 
 	     CONTAINER_INSERT(cb.container, rpt_context);
@@ -218,7 +228,8 @@ populate_rpt() {
 int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
 			  saHpiTable_context *ctx,
-			  SaHpiTimeT *time) {
+			  SaHpiTimeT *time,
+			  SaHpiBoolT *state) {
 
   long hash;
   int len;
@@ -290,12 +301,45 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
     ctx->saHpiEventLogTime.high = htonl(ctx->saHpiEventLogTime.high);
     ctx->saHpiEventLogTime.low = htonl(ctx->saHpiEventLogTime.low);
    
+    ctx->saHpiEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     DEBUGMSGTL((AGENT,"ResourceTag: [%s]\n", ctx->saHpiResourceTag));
     return AGENT_NEW_ENTRY;
   }
   
   return AGENT_ERR_NULL_DATA;
 }
+
+
+int
+set_logstate(saHpiTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiBoolT enable;
+
+  enable = (ctx->saHpiEventLogState == MIB_TRUE) ? SAHPI_TRUE : SAHPI_FALSE;
+
+  if (ctx) {
+
+      // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    DEBUGMSGTL((AGENT,"Calling 'saHpiEventLogStateSet'  with %d\n", enable));
+    rc = saHpiEventLogStateSet(session_id,
+			       ctx->saHpiResourceID,
+			       enable);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error for 'saHpiEventLogStateSet' is %d\n", rc)); 
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
 
 int set_table_tag(saHpiTable_context *ctx) { 
 
@@ -965,7 +1009,12 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 	                                             saHpiEventLogTime));
 	  
             break;
-
+	case COLUMN_SAHPIEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiEventLogState));
+            break;
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -1008,7 +1057,7 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiTable_set_reserve2(netsnmp_request_group * rg)
 {
-  saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+  //  saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
@@ -1065,6 +1114,12 @@ saHpiTable_set_reserve2(netsnmp_request_group * rg)
         case COLUMN_SAHPIEVENTLOGTIME:           
             break;
 
+	case COLUMN_SAHPIEVENTLOGSTATE:
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 2)) {
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
@@ -1168,9 +1223,19 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 	    if  (set_event_log_time(row_ctx) != AGENT_ERR_NOERROR)
 	      rc=SNMP_ERR_GENERR;
             break;
+	case COLUMN_SAHPIEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiEventLogState = *var->val.integer;
+	    if (set_logstate(row_ctx) != AGENT_ERR_NOERROR) {
+	      rc=  SNMP_ERR_GENERR;
+	    } else {
+	      // IBM-KR: TODO: Send event?
+	    }
+            break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	    break;
         }
 
 	if (rc)	
@@ -1525,6 +1590,12 @@ saHpiTable_get_value(netsnmp_request_info *request,
         snmp_set_var_typed_value(var, ASN_COUNTER64,
                                  (char *) &context->saHpiEventLogTime,
                                  sizeof(context->saHpiEventLogTime));
+        break;
+    case COLUMN_SAHPIEVENTLOGSTATE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->saHpiEventLogState,
+                                 sizeof(context->saHpiEventLogState));
         break;
 
     default:/** We shouldn't get here */

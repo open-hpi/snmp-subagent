@@ -273,7 +273,8 @@ SaHpiEntry ::= SEQUENCE {
 	saHpiResourceTag		OCTET STRING,
 	saHpiParamControl		INTEGER,
 	saHpiClearEvents		RowStatus,
-	saHpiEventLogTime		HpiTimeStamp
+	saHpiEventLogTime		HpiTimeStamp,
+	saHpiEventLogState		INTEGER
 	}
 
 saHpiDomainID OBJECT-TYPE 
@@ -835,6 +836,28 @@ saHpiEventLogTime	OBJECT-TYPE
 	"
 	::= {saHpiEntry 20}
 
+saHpiEventLogState OBJECT-TYPE
+	SYNTAX	INTEGER {
+			undefined(0),
+			enable(1),
+			disable(2)
+		}
+	MAX-ACCESS read-write
+	STATUS	current
+	DESCRIPTION 
+	"The object enables system management software to get (and
+	set) the event log state. If the event log is disable(2), no events
+	generated within the HPI implemention will be added to the event log.
+
+	When the event log is enable(1), events may be automaticlly added to
+	the event log as they are generated in a resource  or a domain.
+
+	Typically, the HPI implementation will provide an appropriate 
+	default value for this parameter, which may vary by resource. 
+	This object is provided so that management software can override 
+	the default value, if desired."
+	::= {saHpiEntry 21}	
+	
 -- /*******************************************************************************
 -- ********************************************************************************
 -- **********                                                            **********
@@ -2305,8 +2328,7 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogEntryId	Unsigned32,
 	saHpiSystemEventLogTimestamp	HpiTimeStamp,
 	saHpiSystemEventLogged		RowPointer,
-	saHpiSystemEventClearEventTable RowStatus,
-	saHpiSystemEventLogState	INTEGER
+	saHpiSystemEventClearEventTable RowStatus
 	}
 
 saHpiSystemEventLogEntryId OBJECT-TYPE
@@ -2358,33 +2380,10 @@ saHpiSystemEventClearEventTable OBJECT-TYPE
 	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Erase the contents of system event rows (and event).
-
-	The deletion is done on the basis of the saHpiResourceId index value -
-	meaning it can erase more than one row."
+	DESCRIPTION	
+	"Erase the contents of system event rows (and event). "
 	::= {saHpiSystemEventLogEntry 4}
 
-saHpiSystemEventLogState OBJECT-TYPE
-	SYNTAX	INTEGER {
-			undefined(0),
-			enable(1),
-			disable(2)
-		}
-	MAX-ACCESS read-write
-	STATUS	current
-	DESCRIPTION "The object enables system management software to get (and
-	set) the event log state. If the event log is disable(2), no events
-	generated within the HPI implemention will be added to the event log.
-
-	When the event log is enable(1), events may be automaticlly added to
-	the event log as they are generated in a resource  or a domain.
-
-	Typically, the HPI implementation will provide an appropriate 
-	default value for this parameter, which may vary by resource. 
-	This object is provided so that management software can override 
-	the default value, if desired."
-	::= {saHpiSystemEventLogEntry 5}	
-	
 --
 -- BILL
 --
@@ -5220,7 +5219,8 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiResourceTag,
 		saHpiParamControl,
 		saHpiClearEvents,
-		saHpiEventLogTime
+		saHpiEventLogTime,
+		saHpiEventLogState
 	}
 	STATUS current
 	DESCRIPTION
@@ -5295,8 +5295,7 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogEntryId,
 		saHpiSystemEventLogTimestamp,
 		saHpiSystemEventLogged,
-		saHpiSystemEventClearEventTable,
-		saHpiSystemEventLogState
+		saHpiSystemEventClearEventTable
 	}
 	STATUS current
 	DESCRIPTION 

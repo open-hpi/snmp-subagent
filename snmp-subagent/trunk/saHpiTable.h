@@ -97,11 +97,13 @@ extern          "C" {
         long            saHpiParamControl;
 
         /** RowStatus = ASN_INTEGER */
-        long            saHpiClearEvents;
+      long            saHpiClearEvents;
 
          /** HpiTimeStamp = ASN_COUNTER64 */
-
         integer64        saHpiEventLogTime;
+
+      /** INTEGER = ASN_INTEGER */
+        long            saHpiEventLogState;
         long  hash;
 
 
@@ -132,10 +134,12 @@ extern          "C" {
 
   int
   set_clear_events(saHpiTable_context *ctx);
-
   
   int 
   set_event_log_time(saHpiTable_context *ctx);
+
+  int
+  set_logstate(saHpiTable_context *ctx);
   /*
    * Remvoe the RTP row (from SNMP memory, not SaHPI).
    */
@@ -198,8 +202,9 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPIPARAMCONTROL 18
 #define COLUMN_SAHPICLEAREVENTS 19
 #define COLUMN_SAHPIEVENTLOGTIME 20
+#define COLUMN_SAHPIEVENTLOGSTATE 21
 #define saHpiTable_COL_MIN 1
-#define saHpiTable_COL_MAX 20
+#define saHpiTable_COL_MAX 21
 
 
 

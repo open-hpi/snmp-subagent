@@ -46,11 +46,12 @@ extern          "C" {
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiSystemEventLogged[MAX_OID_LEN];
         long            saHpiSystemEventLogged_len;
-      /** TruthValue = ASN_INTEGER */
+
+      /** RowStatus = ASN_INTEGER */
         long            saHpiSystemEventClearEventTable;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiSystemEventLogState;
+      // long            saHpiSystemEventLogState;
 
 
       long hash;
@@ -77,7 +78,7 @@ extern          "C" {
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
-					SaHpiBoolT *state,
+					//SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
 					oid *event_entry, 
 					size_t event_entry_oid_len,
@@ -85,8 +86,8 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 		   
   int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
 
-int
-set_logstate(saHpiSystemEventLogTable_context *ctx);
+  //int
+  //set_logstate(saHpiSystemEventLogTable_context *ctx);
 
 int 
 set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
@@ -132,9 +133,9 @@ event_log_entries_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP 2
 #define COLUMN_SAHPISYSTEMEVENTLOGGED 3
 #define COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE 4
-#define COLUMN_SAHPISYSTEMEVENTLOGSTATE 5
+  //#define COLUMN_SAHPISYSTEMEVENTLOGSTATE 5
 #define saHpiSystemEventLogTable_COL_MIN 1
-#define saHpiSystemEventLogTable_COL_MAX 5
+#define saHpiSystemEventLogTable_COL_MAX 4
 
    
    

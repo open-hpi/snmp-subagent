@@ -77,7 +77,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
   int rc;
   netsnmp_index sel_index;
   saHpiSystemEventLogTable_context *sel_context;
-  SaHpiBoolT state;
+  //  SaHpiBoolT state;
   //  long backup_count = event_log_entries;
 
   DEBUGMSGTL((AGENT,"\t--- populate_sel: Entry\n"));
@@ -103,14 +103,15 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
     entry_id = SAHPI_OLDEST_ENTRY;
     while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
-
+      /*
       err = saHpiEventLogStateGet(session_id,
 				  rpt_entry->ResourceId,
 				  &state);
-
+      
       // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
       if (err != SA_OK)
 	state = SAHPI_TRUE;
+      */
 
       err = saHpiEventLogEntryGet(session_id,
 				  rpt_entry->ResourceId,
@@ -146,7 +147,8 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 		       &rdr_entry, 
 		       child_oid, &child_oid_len);
 	
-	if (saHpiSystemEventLogTable_modify_context(&sel, &state,
+	if (saHpiSystemEventLogTable_modify_context(&sel, 
+						    //&state,
 						    rpt_entry,
 						    child_oid, child_oid_len,
 						    sel_context)
@@ -170,7 +172,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
-					SaHpiBoolT *state,
+					//SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
 					oid *event_entry, 
 					size_t event_entry_oid_len,
@@ -200,43 +202,13 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
 
-    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
+    //    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
     ctx->saHpiSystemEventLogTimestamp = sel->Timestamp;
     ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
     return AGENT_NEW_ENTRY;
-  }
-  return AGENT_ERR_NULL_DATA;
-}
-
-int
-set_logstate(saHpiSystemEventLogTable_context *ctx) {
-
-  SaHpiSessionIdT session_id;
-  SaErrorT rc;
-  SaHpiBoolT enable;
-
-  enable = (ctx->saHpiSystemEventLogState == MIB_TRUE) ? SAHPI_TRUE : SAHPI_FALSE;
-
-  if (ctx) {
-
-      // Get the seesion_id
-    rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
-      return rc;    
-    DEBUGMSGTL((AGENT,"Calling 'saHpiEventLogStateSet'  with %d\n", enable));
-    rc = saHpiEventLogStateSet(session_id,
-			       ctx->resource_id,
-			       enable);
-
-    if (rc != SA_OK) {
-      DEBUGMSGTL((AGENT,"Error for 'saHpiEventLogStateSet' is %d\n", rc)); 
-      return AGENT_ERR_OPERATION;
-    }
-    
-    return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
 }
@@ -407,7 +379,7 @@ saHpiSystemEventLogTable_row_copy(saHpiSystemEventLogTable_context * dst,
     dst->saHpiSystemEventLogged_len = src->saHpiSystemEventLogged_len;
 
     dst->saHpiSystemEventClearEventTable = src->saHpiSystemEventClearEventTable;
-    dst->saHpiSystemEventLogState = src->saHpiSystemEventLogState;
+    //    dst->saHpiSystemEventLogState = src->saHpiSystemEventLogState;
     dst->resource_id = src->resource_id;
     dst->hash = src->hash;
     dst->domain_id = src->domain_id;
@@ -624,14 +596,14 @@ saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
                                                 sizeof(row_ctx->
                                                        saHpiSystemEventClearEventTable));
             break;
-
+	    /*
         case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-            /** INTEGER = ASN_INTEGER */
+
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->
                                                        saHpiSystemEventLogState));
             break;
-
+	    */
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -674,13 +646,14 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 					  undo_ctx ? undo_ctx->saHpiSystemEventClearEventTable : 0 );
             break;
 
+	    /*
         case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
 	  if ((*var->val.integer < 1) ||
 	      (*var->val.integer > 2)) {
 	    rc = SNMP_ERR_BADVALUE;
 	  }
 	  break;
-
+	    */
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
@@ -775,9 +748,8 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 	      
 	    }
             break;
-
+	    /*
         case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-            /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiSystemEventLogState = *var->val.integer;
 	    if (set_logstate(row_ctx) != AGENT_ERR_NOERROR) {
 	        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
@@ -786,7 +758,7 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 	      // IBM-KR: TODO: Send event?
 	    }
             break;
-
+	    */
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
@@ -1063,16 +1035,16 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
                                  sizeof(context->
                                         saHpiSystemEventClearEventTable));
         break;
-
+	/*
     case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
-            /** INTEGER = ASN_INTEGER */
+
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->
                                  saHpiSystemEventLogState,
                                  sizeof(context->
                                         saHpiSystemEventLogState));
         break;
-
+	*/
     default:/** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in "
                  "saHpiSystemEventLogTable_get_value\n");
