@@ -37,7 +37,9 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiAutoTimeOutTable.h"
-#include "hpiCheckIndice.h"
+#include "saHpiDomainReferenceTable.h"
+#include "oh_error.h"
+#include "hpiSubagent.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -875,5 +877,58 @@ saHpiAutoTimeOutTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiAutoTimeOutTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+//*******************************************************
+//*******************************************************
+// saHpiAutoTimeoutTable support functions	 
+//*******************************************************
+//*******************************************************
+int populate_auto_time_out(void)
+{
+	oid ato_oids[AUTO_TIME_OUT_INDEX_LEN];
+	netsnmp_index ato_index;
+
+	saHpiAutoTimeOutTable_context  *ato_ctx;
+	int rc = 0;
+
+	SaHpiTimeoutT timeout;
+	memset(&timeout, 0, sizeof(timeout));
+
+	/* get the info of the one and only domain */
+	if (SA_OK != saHpiAutoInsertTimeoutGet(
+			get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
+			&timeout) ) {
+		dbg("ERROR: populate_auto_time_out, saHpiAutoInsertTimeoutGet Failed!"); 
+		rc = -1;
+	} else {
+
+	/* create domain tuple/ index */
+	ato_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID; 
+	ato_index.len =  AUTO_TIME_OUT_INDEX_LEN;
+	ato_index.oids = (oid *) & ato_oids;     
+	/* See if it exists. */
+	ato_ctx = NULL;
+	ato_ctx = CONTAINER_FIND (cb.container, &ato_index);
+	// If we don't find it - we create it.
+
+	if (!ato_ctx) 
+		/* New entry. Add it */
+		ato_ctx = saHpiAutoTimeOutTable_create_row (&ato_index);
+
+	/* fill in values in ctx*/
+	ato_ctx->saHpiAutoTimeoutForInsert = timeout;
+
+	/* commit/add */
+	CONTAINER_INSERT(cb.container, &ato_index);
+
+	}
+
+	DEBUGMSGTL ((AGENT, "populate_auto_time_out. Exit (rc: %d).\n", rc));
+
+	return rc;
+
+
+}
+
 
 
