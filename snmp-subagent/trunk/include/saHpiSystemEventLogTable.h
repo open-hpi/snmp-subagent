@@ -40,6 +40,12 @@ extern          "C" {
    */
 #define SEL_INDEX_NR 3
 
+
+#define SEL_TRIGGER_READING_INTERPRETED_MAX 32
+#define SEL_TRIGGER_READING_EVENT_STATE_MAX 3
+#define SEL_TRIGGER_THRESHOLD_INTERPRETED_MAX 32
+#define SEL_TRIGGER_THRESHOLD_EVENT_STATE_MAX 3
+
         /** Index saHpiDomainID is external */
         /** Index saHpiResourceID is external */
         /** Index saHpiSystemEventLogEntryId is internal */
@@ -51,18 +57,162 @@ extern          "C" {
         unsigned long   saHpiSystemEventLogEntryId;
 
         /** TimeStamp = ASN_TIMETICKS */
-        integer64   saHpiSystemEventLogTimestamp;
+        integer64   saHpiSystemEventLogAddedTimestamp;
 
-        /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiSystemEventLogged[MAX_OID_LEN];
-        long            saHpiSystemEventLogged_len;
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogIndex;
 
-      /** RowStatus = ASN_INTEGER */
-        long            saHpiSystemEventClearEventTable;
 
         /** INTEGER = ASN_INTEGER */
-      // long            saHpiSystemEventLogState;
+        long            saHpiSystemEventLogType;
 
+        /** HpiTimeStamp = ASN_COUNTER64 */
+        integer64           saHpiSystemEventLogTimestamp;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSeverity;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorNum;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorType;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorCategory;
+
+        /** TruthValue = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorAssertion;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryUnspecified;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryThreshold;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryUsage;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryState;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryPredFail;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryLimit;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryPerformance;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategorySeverity;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryPresence;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryEnable;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryAvailability;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryRedundancy;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryUser;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogSensorStateCategoryGeneric;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorOptionalData;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorTriggerReadingType;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorTriggerReadingRaw;
+
+        /** INTEGER = ASN_INTEGER */
+        long           
+            saHpiSystemEventLogSensorTriggerReadingInterpretedType;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char  
+            saHpiSystemEventLogSensorTriggerReadingInterpreted[SEL_TRIGGER_READING_INTERPRETED_MAX];
+        long           
+            saHpiSystemEventLogSensorTriggerReadingInterpreted_len;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char  
+            saHpiSystemEventLogSensorTriggerReadingEventState[SEL_TRIGGER_READING_EVENT_STATE_MAX ];
+        long           
+            saHpiSystemEventLogSensorTriggerReadingEventState_len;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorTriggerThresholdType;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorTriggerThresholdRaw;
+
+        /** INTEGER = ASN_INTEGER */
+        long           
+            saHpiSystemEventLogSensorTriggerThresholdInterpretedType;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char  
+            saHpiSystemEventLogSensorTriggerThresholdInterpreted[SEL_TRIGGER_THRESHOLD_INTERPRETED_MAX];
+        long           
+            saHpiSystemEventLogSensorTriggerThresholdInterpreted_len;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char  
+            saHpiSystemEventLogSensorTriggerThresholdEventState[SEL_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
+        long           
+            saHpiSystemEventLogSensorTriggerThresholdEventState_len;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorPreviousState;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorOem;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogSensorSpecific;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogHotSwapState;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogPreviousHotSwapState;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogWatchdogNum;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogWatchdogAction;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogWatchdogPreTimerAction;
+
+        /** INTEGER = ASN_INTEGER */
+        long            saHpiSystemEventLogWatchdogUse;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        unsigned long   saHpiSystemEventLogOemManufacturerIdT;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char   saHpiSystemEventLogOemEventData[SAHPI_OEM_EVENT_DATA_SIZE];
+        long            saHpiSystemEventLogOemEventData_len;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char   saHpiSystemEventLogUserEventData[SAHPI_USER_EVENT_DATA_SIZE];
+        long            saHpiSystemEventLogUserEventData_len;
+
+        /** RowStatus = ASN_INTEGER */
+        long            saHpiSystemEventLogDelete;
 
       long hash;
       unsigned long resource_id;
@@ -86,13 +236,13 @@ extern          "C" {
 
 
 		   
-  int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
+  //  int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
 
   //int
   //set_logstate(saHpiSystemEventLogTable_context *ctx);
 
 int 
-set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
+set_SEL_delete(saHpiSystemEventLogTable_context *ctx);
 
   //int
   //set_timestamp();
@@ -132,14 +282,56 @@ event_log_entries_handler(netsnmp_mib_handler *handler,
  * column number definitions for table saHpiSystemEventLogTable
  */
 #define COLUMN_SAHPISYSTEMEVENTLOGENTRYID 1
-#define COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP 2
-#define COLUMN_SAHPISYSTEMEVENTLOGGED 3
-#define COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE 4
-  //#define COLUMN_SAHPISYSTEMEVENTLOGSTATE 5
+#define COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP 2
+#define COLUMN_SAHPISYSTEMEVENTLOGINDEX 3
+#define COLUMN_SAHPISYSTEMEVENTLOGTYPE 4
+#define COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP 5
+#define COLUMN_SAHPISYSTEMEVENTLOGSEVERITY 6
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORNUM 7
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTYPE 8
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORCATEGORY 9
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORASSERTION 10
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUNSPECIFIED 11
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYTHRESHOLD 12
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSAGE 13
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSTATE 14
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPREDFAIL 15
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYLIMIT 16
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPERFORMANCE 17
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSEVERITY 18
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPRESENCE 19
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYENABLE 20
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYAVAILABILITY 21
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYREDUNDANCY 22
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSER 23
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYGENERIC 24
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSOROPTIONALDATA 25
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGTYPE 26
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGRAW 27
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETEDTYPE 28
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETED 29
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGEVENTSTATE 30
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDTYPE 31
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDRAW 32
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE 33
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETED 34
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDEVENTSTATE 35
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORPREVIOUSSTATE 36
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSOROEM 37
+#define COLUMN_SAHPISYSTEMEVENTLOGSENSORSPECIFIC 38
+#define COLUMN_SAHPISYSTEMEVENTLOGHOTSWAPSTATE 39
+#define COLUMN_SAHPISYSTEMEVENTLOGPREVIOUSHOTSWAPSTATE 40
+#define COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGNUM 41
+#define COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGACTION 42
+#define COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGPRETIMERACTION 43
+#define COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGUSE 44
+#define COLUMN_SAHPISYSTEMEVENTLOGOEMMANUFACTURERIDT 45
+#define COLUMN_SAHPISYSTEMEVENTLOGOEMEVENTDATA 46
+#define COLUMN_SAHPISYSTEMEVENTLOGUSEREVENTDATA 47
+#define COLUMN_SAHPISYSTEMEVENTLOGDELETE 48
 #define saHpiSystemEventLogTable_COL_MIN 1
-#define saHpiSystemEventLogTable_COL_MAX 4
+#define saHpiSystemEventLogTable_COL_MAX 48
 
-   
    
 
     int            
