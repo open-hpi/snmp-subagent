@@ -106,8 +106,6 @@ hpi MODULE-IDENTITY
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
 
-
-
 HpiTimeStamp ::= TEXTUAL-CONVENTION
     	STATUS       current
     	DESCRIPTION
@@ -232,45 +230,45 @@ saHpiDomainInfoEntry OBJECT-TYPE
 	
 	The GUID is used to uniquely identify a domain. A GUID value of zero is not
 	valid and indicates that the domain does not have an associated GUID."
-	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiDomainInfoEntryID }
+	INDEX	{ saHpiDomainID }
 	::= {saHpiDomainInfoTable 1}
 	
-saHpiDomainInfoEntry ::= SEQUENCE {
+SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiDomainID		Unsigned32,				      
-	SaHpiDomainCapabilities Unsigned32,
-	SaHpiIsPeer		TruthValue,         
+	saHpiID		Unsigned32,				      
+	saHpiDomainCapabilities Unsigned32,
+	saHpiIsPeer		TruthValue,         
 				      				      
 	saHpiDomainTagTextType		INTEGER,	
 	saHpiDomainTagTextLanguage	INTEGER,
 	saHpiDomainTag			OCTET STRING,         
 				      
-	SaHpiDrtUpdateCount	Unsigned32, 				      			      
-	SaHpiDrtUpdateTimestamp	HpiTimeStamp,				      
-	SaHpiRptUpdateCount 	Unsigned32,     		      				      
-	SaHpiRptUpdateTimestamp	HpiTimeStamp,						      
-	SaHpiDatUpdateCount	Unsigned32,			     	      				     				      
-	SaHpiDatUpdateTimestamp	HpiTimeStamp,				      
-	SaHpiActiveAlarms	Unsigned32,    
-	SaHpiCriticalAlarms	Unsigned32,				      
-	SaHpiMajorAlarms	Unsigned32,				      
-	SaHpiMinorAlarms	Unsigned32,				      
-	SaHpiDatUserAlarmLimit 	Unsigned32,				      
-	SaHpiDatOverflow	TruthValue,				  			      
-	SaHpiDomainGuid		OCTET STRING,            
+	saHpiDrtUpdateCount	Unsigned32, 				      			      
+	saHpiDrtUpdateTimestamp	HpiTimeStamp,				      
+	saHpiRptUpdateCount 	Unsigned32,     		      				      
+	saHpiRptUpdateTimestamp	HpiTimeStamp,						      
+	saHpiDatUpdateCount	Unsigned32,			     	      				     				      
+	saHpiDatUpdateTimestamp	HpiTimeStamp,				      
+	saHpiActiveAlarms	Unsigned32,    
+	saHpiCriticalAlarms	Unsigned32,				      
+	saHpiMajorAlarms	Unsigned32,				      
+	saHpiMinorAlarms	Unsigned32,				      
+	saHpiDatUserAlarmLimit 	Unsigned32,				      
+	saHpiDatOverflow	TruthValue,				  			      
+	saHpiDomainGuid		OCTET STRING            
 	}
 	
-saHpiDomainID OBJECT-TYPE 
+saHpiID OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Unique Domain Id associated with domain."
+	DESCRIPTION	"Unique Domain Id associated with domain.
 
 	Note:
  		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
 	::= {saHpiDomainInfoEntry 1}
 
-SaHpiDomainCapabilities OBJECT-TYPE 
+saHpiDomainCapabilities OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -284,13 +282,13 @@ SaHpiDomainCapabilities OBJECT-TYPE
 	SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY	(SaHpiDomainCapabilitiesT)0X00000001
 	  Indicates that the domain auto insert timeout value is read-only
 	  and may not be modified using the saHpiHotSwapAutoInsertTimeoutSet()
-	  function."
+	  function.
 
 	Note:
- 		SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY  (SaHpiDomainCapabilitiesT)0X00000001 0xFFFFFFFF(4294967295) " 
+ 		SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY  (SaHpiDomainCapabilitiesT)0X00000001" 
 	::= {saHpiDomainInfoEntry 2}
 
-SaHpiIsPeer OBJECT-TYPE
+saHpiIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -333,11 +331,11 @@ saHpiDomainTagTextType OBJECT-TYPE
         
          SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
         
-       Note: "ASCII+Latin 1" is derived from the first 256 characters of 
+       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
       	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
-      	and ISO 8859/1 (Latin 1). The Unicode "C0 Controls and Basic Latin"
+      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
       	set defines the first 128 8-bit characters (00h-7Fh) and the 
-      	"C1 Controls and Latin 1 Supplement" defines the second 128 (80h-FFh).
+      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
         
        Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
       	use normal ASCII character encodings, but restrict the allowed
@@ -348,7 +346,7 @@ saHpiDomainTagTextType OBJECT-TYPE
       	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
       	But, regardless of how the data is stored externally, it is 
       	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
-		across the HPI."
+	across the HPI."
 	::= {saHpiDomainInfoEntry 4}
 
 saHpiDomainTagTextLanguage OBJECT-TYPE
@@ -508,14 +506,14 @@ saHpiDomainTag	OBJECT-TYPE
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiDomainInfoEntry 6}
       
-SaHpiDrtUpdateCount OBJECT-TYPE 
+saHpiDrtUpdateCount OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"" 
 	::= {saHpiDomainInfoEntry 7}
 
-SaHpiDrtUpdateTimestamp OBJECT-TYPE
+saHpiDrtUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -539,7 +537,7 @@ SaHpiDrtUpdateTimestamp OBJECT-TYPE
 	via notifications."
 	::= {saHpiDomainInfoEntry 8}	
 
-SaHpiRptUpdateCount OBJECT-TYPE 
+saHpiRptUpdateCount OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -547,7 +545,7 @@ SaHpiRptUpdateCount OBJECT-TYPE
 	 It rolls over to zero when the maximum value is reached " 
 	::= {saHpiDomainInfoEntry 9}
 
-SaHpiRptUpdateTimestamp OBJECT-TYPE
+saHpiRptUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -572,7 +570,7 @@ SaHpiRptUpdateTimestamp OBJECT-TYPE
 	via notifications."
 	::= {saHpiDomainInfoEntry 10}
 
-SaHpiDatUpdateCount OBJECT-TYPE 
+saHpiDatUpdateCount OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -580,7 +578,7 @@ SaHpiDatUpdateCount OBJECT-TYPE
 	It rolls over to zero when the maximum value is reached " 
 	::= {saHpiDomainInfoEntry 11}
 
-SaHpiDatUpdateTimestamp OBJECT-TYPE
+saHpiDatUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -605,35 +603,35 @@ SaHpiDatUpdateTimestamp OBJECT-TYPE
 	via notifications."
 	::= {saHpiDomainInfoEntry 12}
 		
-SaHpiActiveAlarms OBJECT-TYPE 
+saHpiActiveAlarms OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Count of active alarms in the DAT." 
 	::= {saHpiDomainInfoEntry 13}
 	
-SaHpiCriticalAlarms OBJECT-TYPE 
+saHpiCriticalAlarms OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Count of active critical alarms in the DAT." 
 	::= {saHpiDomainInfoEntry 14}
 	
-SaHpiMajorAlarms OBJECT-TYPE 
+saHpiMajorAlarms OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Count of active major alarms in the DAT." 
 	::= {saHpiDomainInfoEntry 15}
 	
-SaHpiMinorAlarms OBJECT-TYPE 
+saHpiMinorAlarms OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Count of active minor alarms in the DAT." 
 	::= {saHpiDomainInfoEntry 16}
 	
-SaHpiDatUserAlarmLimit OBJECT-TYPE 
+saHpiDatUserAlarmLimit OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -641,7 +639,7 @@ SaHpiDatUserAlarmLimit OBJECT-TYPE
 	0=no fixed limit." 
 	::= {saHpiDomainInfoEntry 17}
 	
-SaHpiDatOverflow OBJECT-TYPE
+saHpiDatOverflow OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -649,7 +647,7 @@ SaHpiDatOverflow OBJECT-TYPE
 	that are missing from the DAT because of space limitations."
         ::= {saHpiDomainInfoEntry 18}
 	
-SaHpiDomainGuid 	OBJECT-TYPE 
+saHpiDomainGuid 	OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..15))
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -838,8 +836,8 @@ saHpiResourceCapabilities OBJECT-TYPE
 	This definition defines the capabilities of a given resource. One resource 
 	may support any number of capabilities using the bit mask. Because each entry
 	in an RPT will have the SAHPI_CAPABILITY_RESOURCE bit set, zero is not a
-	valid value for the capability flag, and is thus used to indicate "no RPT
-	entry present" in some function calls.
+	valid value for the capability flag, and is thus used to indicate 'no RPT
+	entry present' in some function calls.
 	
 	SAHPI_CAPABILITY_RESOURCE   	(SaHpiCapabilitiesT)0X40000000       
 	SAHPI_CAPABILITY_EVT_DEASSERTS  (SaHpiCapabilitiesT)0x00008000 
@@ -1158,11 +1156,11 @@ saHpiResourceTagTextType OBJECT-TYPE
         
          SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
         
-       Note: "ASCII+Latin 1" is derived from the first 256 characters of 
+       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
       	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
-      	and ISO 8859/1 (Latin 1). The Unicode "C0 Controls and Basic Latin"
+      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
       	set defines the first 128 8-bit characters (00h-7Fh) and the 
-      	"C1 Controls and Latin 1 Supplement" defines the second 128 (80h-FFh).
+      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
         
        Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
       	use normal ASCII character encodings, but restrict the allowed
