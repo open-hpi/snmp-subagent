@@ -20,6 +20,9 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
 
+#include "alarm.h"
+#include <oh_error.h>
+
 #include <hpiB_columns.h>
 #include <hpiB_enums.h>
 #include <hpiB.h>
@@ -1282,13 +1285,21 @@ main (int argc, char **argv)
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
 
+  dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
+#if 0 /* TODO DMJ */
   if (populate_rpt () != AGENT_ERR_NOERROR)
     {
       snmp_log (LOG_ERR, "Could not retrieve RPT entries. Exiting\n.");
       rc = -1;
       goto stop;
     }
-  populate_event ();
+#endif 
+
+  dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
+#if 0 /* TODO DMJ */
+  //populate_event ();
+#endif 
+
   if (init_alarm () != AGENT_ERR_NOERROR)
     {
       snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
