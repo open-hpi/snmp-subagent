@@ -1149,6 +1149,18 @@ saHpiReourceId OBJECT-TYPE
 	REFERENCE
 	"See SAI-HPI-B.01.01 section 6.3.5."
         ::= { hpiAdministration 2 } 
+	
+saHpiDiscover OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+        "This columnar node forces the discovery of all resources and associated 
+	domains by the underlying management service."
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 6.1.3."
+        ::= { hpiAdministration 3 } 
+
 
 -- *************************************
 -- **
