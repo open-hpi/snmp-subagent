@@ -1288,8 +1288,8 @@ saHpiSensorTable_set_reserve2 (netsnmp_request_group * rg)
               (*var->val.integer != SAHPI_SENSTAT_BUSY) &&
               (*var->val.integer != (SAHPI_SENSTAT_EVENTS_ENABLED &
 	       SAHPI_SENSTAT_SCAN_ENABLED)) &&
-              (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED &
-	       SAHPI_SENSTAT_BUSY) &&
+              (*var->val.integer != (SAHPI_SENSTAT_SCAN_ENABLED &
+	       SAHPI_SENSTAT_BUSY)) &&
               (*var->val.integer != (SAHPI_SENSTAT_BUSY &
 	       SAHPI_SENSTAT_EVENTS_ENABLED)) &&
               (*var->val.integer != (SAHPI_SENSTAT_BUSY &
