@@ -951,7 +951,7 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 -- **
 -- *************************************
 
-saHpiDomainEntryCount OBJECT-TYPE
+saHpiDomainInfoEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -963,8 +963,8 @@ saHpiDomainEntryCount OBJECT-TYPE
         ::= {hpiEntity 1}
 
 
-saHpiDomainTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiDomainEntry
+saHpiDomainInfoTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiDomainInfoEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
@@ -973,8 +973,8 @@ saHpiDomainTable OBJECT-TYPE
          are used to address an entity."
         ::= {hpiEntity 2}
         
-saHpiDomainEntry OBJECT-TYPE
-        SYNTAX          SaHpiDomainEntry
+saHpiDomainInfoEntry OBJECT-TYPE
+        SYNTAX          SaHpiDomainInfoEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
@@ -999,21 +999,21 @@ saHpiDomainEntry OBJECT-TYPE
         is not valid and indicates that the domain does not have an
         associated GUID."
         INDEX   { saHpiDomainId }
-        ::= {saHpiDomainTable 1}
+        ::= {saHpiDomainInfoTable 1}
 
-SaHpiDomainEntry ::= SEQUENCE {
+SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiDomainId			Unsigned32,
-        saHpiDomainCapabilities         OCTET STRING,
-        saHpiDomainIsPeer                     TruthValue,         
+	saHpiDomainId				Unsigned32,
+        saHpiDomainCapabilities         	OCTET STRING,
+        saHpiDomainIsPeer                	TruthValue,         
                                                                       
-        saHpiDomainTagTextType          SaHpiTextType,  
-        saHpiDomainTagTextLanguage      SaHpiTextLanguage,
-        saHpiDomainTag                  SaHpiText,         
+        saHpiDomainTagTextType          	SaHpiTextType,  
+        saHpiDomainTagTextLanguage      	SaHpiTextLanguage,
+        saHpiDomainTag                  	SaHpiText,         
 
                                       
-        saHpiDomainReferenceUpdateCount             Unsigned32,
-	saHpiDomainReferenceUpdateTimestamp         SaHpiTime,
+        saHpiDomainReferenceUpdateCount         Unsigned32,
+	saHpiDomainReferenceUpdateTimestamp     SaHpiTime,
                                       
         saHpiDomainResourcePresenceUpdateCount             Unsigned32,
 	saHpiDomainResourcePresenceUpdateTimestamp         SaHpiTime,
@@ -1021,14 +1021,14 @@ SaHpiDomainEntry ::= SEQUENCE {
         saHpiDomainAlarmUpdateCount             Unsigned32,
 	saHpiDomainAlarmUpdateTimestamp         SaHpiTime,
 
-        saHpiDomainActiveAlarms               Unsigned32,
-        saHpiDomainCriticalAlarms             Unsigned32,
-        saHpiDomainMajorAlarms                Unsigned32,
-        saHpiDomainMinorAlarms                Unsigned32,
-        saHpiDomainAlarmUserLimit          Unsigned32,
+        saHpiDomainActiveAlarms               	Unsigned32,
+        saHpiDomainCriticalAlarms            	Unsigned32,
+        saHpiDomainMajorAlarms                	Unsigned32,
+        saHpiDomainMinorAlarms                	Unsigned32,
+        saHpiDomainAlarmUserLimit          	Unsigned32,
         saHpiDomainAlarmOverflow                TruthValue,
 
-        saHpiDomainGuid                 OCTET STRING            
+        saHpiDomainGuid                 	OCTET STRING            
         }
 
 
@@ -1041,7 +1041,7 @@ saHpiDomainId OBJECT-TYPE
 	    domain.
 
 	    SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) "
-	::=   {saHpiDomainEntry 1 }
+	::=   {saHpiDomainInfoEntry 1 }
 
 
         
@@ -1062,7 +1062,7 @@ saHpiDomainCapabilities OBJECT-TYPE
           columnar object.
 
           "
-	::=   {saHpiDomainEntry 2 }
+	::=   {saHpiDomainInfoEntry 2 }
 
 
 
@@ -1073,7 +1073,7 @@ saHpiDomainIsPeer OBJECT-TYPE
         DESCRIPTION     
         "Indicates that this domain participates in a peer relationship.
         TRUE = Domain is peer.  FALSE = Domain is not peer "
-	::=   {saHpiDomainEntry 3 }
+	::=   {saHpiDomainInfoEntry 3 }
 
 
 
@@ -1083,7 +1083,7 @@ saHpiDomainTagTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Information tag associated with domain. 
         See Definition for SaHpiTextType for more details."
-	::=   {saHpiDomainEntry 4 }
+	::=   {saHpiDomainInfoEntry 4 }
 
 
 
@@ -1093,7 +1093,7 @@ saHpiDomainTagTextLanguage OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Information tag associated with domain.
         See Definition for SaHpiTextLanguage for more details."
-	::=   {saHpiDomainEntry 5 }
+	::=   {saHpiDomainInfoEntry 5 }
 
 
 
@@ -1104,7 +1104,7 @@ saHpiDomainTag  OBJECT-TYPE
         DESCRIPTION     "Information tag associated with domain.
         The type of date is specified
         by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-	::=   {saHpiDomainEntry 6 }
+	::=   {saHpiDomainInfoEntry 6 }
 
 
       
@@ -1116,7 +1116,7 @@ saHpiDomainReferenceUpdateCount OBJECT-TYPE
         "This count is incremented any time the
         table is changed. It rolls over to zero when the maximum 
         value (2^32) is reached." 
-	::=   {saHpiDomainEntry 7 }
+	::=   {saHpiDomainInfoEntry 7 }
 
 
 
@@ -1126,7 +1126,7 @@ saHpiDomainReferenceUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the
         DRT table is changed. Refer to SaHpiTime for full describption."
-	::=   {saHpiDomainEntry 8 }
+	::=   {saHpiDomainInfoEntry 8 }
 
 
 
@@ -1136,7 +1136,7 @@ saHpiDomainResourcePresenceUpdateCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This count is incremented any time the RPT is changed.
          It rolls over to zero when the maximum (2^32) value is reached " 
-	::=   {saHpiDomainEntry 9 }
+	::=   {saHpiDomainInfoEntry 9 }
 
 
 
@@ -1147,7 +1147,7 @@ saHpiDomainResourcePresenceUpdateTimestamp OBJECT-TYPE
         DESCRIPTION     
         "This timestamp is set any time the RPT table is changed.
         Refer to SaHpiTime for full describption."
-	::=   {saHpiDomainEntry 10 }
+	::=   {saHpiDomainInfoEntry 10 }
 
 
 
@@ -1157,7 +1157,7 @@ saHpiDomainAlarmUpdateCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This count is incremented any time the DAT is changed.
         It rolls over to zero when the maximum value (2^32) is reached " 
-	::=   {saHpiDomainEntry 11 }
+	::=   {saHpiDomainInfoEntry 11 }
 
 
 
@@ -1167,7 +1167,7 @@ saHpiDomainAlarmUpdateTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "This timestamp is set any time the DAT is changed.
         Refer to SaHpiTime for full describption."
-	::=   {saHpiDomainEntry 12 }
+	::=   {saHpiDomainInfoEntry 12 }
 
 
                 
@@ -1176,7 +1176,7 @@ saHpiDomainActiveAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active alarms in the DAT." 
-	::=   {saHpiDomainEntry 13 }
+	::=   {saHpiDomainInfoEntry 13 }
 
 
         
@@ -1185,7 +1185,7 @@ saHpiDomainCriticalAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active critical alarms in the DAT." 
-	::=   {saHpiDomainEntry 14 }
+	::=   {saHpiDomainInfoEntry 14 }
 
 
         
@@ -1194,7 +1194,7 @@ saHpiDomainMajorAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active major alarms in the DAT." 
-	::=   {saHpiDomainEntry 15 }
+	::=   {saHpiDomainInfoEntry 15 }
 
 
         
@@ -1203,7 +1203,7 @@ saHpiDomainMinorAlarms OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Count of active minor alarms in the DAT." 
-	::=   {saHpiDomainEntry 16 }
+	::=   {saHpiDomainInfoEntry 16 }
 
 
         
@@ -1213,7 +1213,7 @@ saHpiDomainAlarmUserLimit OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Maximum User Alarms that can be added to DAT.  
         0=no fixed limit." 
-	::=   {saHpiDomainEntry 17 }
+	::=   {saHpiDomainInfoEntry 17 }
 
 
         
@@ -1223,7 +1223,7 @@ saHpiDomainAlarmOverflow OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Set to True if there are one or more non-User Alarms 
         that are missing from the DAT because of space limitations."
-	::=   {saHpiDomainEntry 18 }
+	::=   {saHpiDomainInfoEntry 18 }
 
 
         
@@ -1241,7 +1241,7 @@ saHpiDomainGuid         OBJECT-TYPE
         Management Baseline, Version 2.0 specification.  HPI uses
         version 1 of the GUID format, with a 3-bit variant field of 
         10x (where x indicates 'don't care')"
-	::=   {saHpiDomainEntry 19 }
+	::=   {saHpiDomainInfoEntry 19 }
 
 
 
