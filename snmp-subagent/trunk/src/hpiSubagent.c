@@ -382,8 +382,10 @@ build_state_value (unsigned char *str, size_t len, SaHpiEventStateT * state)
     }
 
   memcpy (s, str, len);
+  s[len] = 0x00;
   memcpy (delim, STATESTRING_VALUE_DELIMITER,
 	  STATESTRING_VALUE_DELIMITER_LENGTH);
+  delim[STATESTRING_VALUE_DELIMITER_LENGTH] = 0x00; 
   tok = strtok (s, delim);
   while (tok != NULL)
     {
