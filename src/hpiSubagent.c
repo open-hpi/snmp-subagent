@@ -1093,7 +1093,7 @@ int
 main (int argc, char **argv)
 {
   int agentx_subagent = AGENT_TRUE;
-  char c;
+  int c;
   int rc = 0;
 
   pid_t child;
