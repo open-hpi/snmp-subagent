@@ -38,7 +38,23 @@ if test "x$found_pkg_config" != "xyes"; then
     OH_CHECK_FAIL(pkg-config,pkg-config)
 fi
 
-HPI_LIBS=`pkg-config --libs openhpi`
+
+GLIB_CFLAGS=`pkg-config --cflags glib`
+GLIB_LIBS=`pkg-config --libs glib`
+
+
+AC_ARG_ENABLE([client-library],
+    [[  --enable-client-library       build with thin client library [default=no]]],
+    [if test "x$enableval" = "xyes"; then
+        OPENHPILIB="openhpiclient"
+     else
+        OPENHPILIB="openhpi"
+     fi
+    ],
+    [OPENHPILIB="openhpi"])
+
+
+HPI_LIBS=`pkg-config --libs $OPENHPILIB`
 if test "x$HPI_LIBS" = "x"; then
     AC_MSG_ERROR([
 *** OpenHPI pkgconfig file wasn't found
@@ -61,13 +77,13 @@ fi
 
 # Checks for libraries
 # FIXME: Replace `main' with a function in `-lopenhpi':
-AC_CHECK_LIB([openhpi], [saHpiInitialize], 
+AC_CHECK_LIB([$OPENHPILIB], [saHpiInitialize], 
     [
         have_hpi=yes
-        HPI_FLAGS=`pkg-config --cflags openhpi`
-        HPI_LIBS=`pkg-config --libs openhpi`
+        HPI_FLAGS=`pkg-config --cflags $OPENHPILIB`
+        HPI_LIBS=`pkg-config --libs $OPENHPILIB`
     ],
-    [OH_CHECK_FAIL(libopenhpi,openhpi-devel)])
+    [OH_CHECK_FAIL(lib$OPENHPILIB,openhpi-devel)])
     
 AC_CHECK_LIB([openhpiutils], [build_reading_strings], 
     [
@@ -132,7 +148,7 @@ if test "x$THREAD_SAFE" = "xyes" ; then
         CFLAGS="$CFLAGS -D_GNU_SOURCE -D_REENTRANT -fexceptions"
 fi
 
-LIBS="$LIBS $SNMPALIBS $HPI_LIBS $HPIUTILS_LIBS -lm"
+LIBS="$LIBS $GLIB_LIBS $SNMPALIBS $HPI_LIBS $HPIUTILS_LIBS -lm"
 if test "x$THREAD_SAFE" = "xyes" ; then
         LIBS="$LIBS -lpthread"
 fi
