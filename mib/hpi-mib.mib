@@ -189,6 +189,9 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
         "Textual convention for the identifier of the manufacturer.
+	
+		SAHPI_MANUFACTURER_ID_UNSPECIFIED == 0
+	is used when no value is assigned.
 
         This is the IANA-assigned private enterprise number for the
         manufacturer of the resource or FRU, or of the manufacturer
@@ -199,10 +202,9 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
         If a manufacturer does not currently have an assigned number, one
         may be obtained by following the instructions located at
-
         http://www.iana.org/cgi-bin/enterprise.pl"
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 152"
+        "Derived from SAI-HPI-B.01.01 spec, pg 8.1"
     SYNTAX Unsigned32
 
 SaHpiCapabilities ::= TEXTUAL-CONVENTION
