@@ -528,6 +528,14 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 				zulu (137)
 			}
 
+SaHpiText ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION
+	    "Text data. The data can be in different languages
+	(represented by SaHpiTextLanguage) and in different
+	encodings (saHpiTextType)."
+    	SYNTAX		OCTET STRING(SIZE(0..255))
+
 SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 	STATUS		current
 	DESCRIPTION	
@@ -667,7 +675,8 @@ saHpiDomainInfoEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The number of DomainInfo entries present in the system. 
+	DESCRIPTION	
+	"The number of DomainInfo entries present in the system. 
 	This field is used to determine if new domains have been added
 	or existing removed. The same functionality is available using
 	notifications."
@@ -695,44 +704,51 @@ saHpiDomainInfoEntry OBJECT-TYPE
 	including information regarding the domain reference table (DRT) and 
 	the resource presence table (RPT).
 
-	The DomainTag field is an informational value that supplies an HPI User  
-	with naming information for the domain.
+	The DomainTag field is an informational value that supplies an
+	HPI User with naming information for the domain.
 
-	NOTE: Regarding timestamps - If the implementation cannot supply an absolute
-	timestamp, then it may supply a timestamp relative to some system-defined 
-	epoch, such as system boot. The value SAHPI_TIME_UNSPECIFIED indicates that
-	the time of the update cannot be determined. Otherwise, If the value is less
+	NOTE: Regarding timestamps - If the implementation cannot supply an 
+	absolute timestamp, then it may supply a timestamp relative to some
+	system-defined  epoch, such as system boot. 
+	The value SAHPI_TIME_UNSPECIFIED indicates that the time of the 
+	update cannot be determined. Otherwise, If the value is less
 	than or equal to SAHPI_TIME_MAX_RELATIVE, then it is relative; if it is
 	greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute. 
 	
-	The GUID is used to uniquely identify a domain. A GUID value of zero is not
-	valid and indicates that the domain does not have an associated GUID."
+	The GUID is used to uniquely identify a domain. A GUID value of zero
+	is not valid and indicates that the domain does not have an
+	associated GUID."
 	INDEX	{ saHpiDomainID }
 	::= {saHpiDomainInfoTable 1}
 	
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiInfoDomainID	Unsigned32,				      
-	saHpiDomainCapabilities Unsigned32,
-	saHpiIsPeer		TruthValue,         
+	saHpiInfoDomainID		Unsigned32,
+	saHpiDomainCapabilities 	OCTET STRING,
+	saHpiIsPeer			TruthValue,         
 				      				      
 	saHpiDomainTagTextType		SaHpiTextType,	
 	saHpiDomainTagTextLanguage	SaHpiTextLanguage,
-	saHpiDomainTag			OCTET STRING,         
+	saHpiDomainTag			SaHpiText,         
 				      
-	saHpiDrtUpdateCount	Unsigned32, 				      			      
-	saHpiDrtUpdateTimestamp	HpiTimeStamp,				      
-	saHpiRptUpdateCount 	Unsigned32,     		      				      
-	saHpiRptUpdateTimestamp	HpiTimeStamp,						      
-	saHpiDatUpdateCount	Unsigned32,			     	      				     				      
-	saHpiDatUpdateTimestamp	HpiTimeStamp,				      
-	saHpiActiveAlarms	Unsigned32,    
-	saHpiCriticalAlarms	Unsigned32,				      
-	saHpiMajorAlarms	Unsigned32,				      
-	saHpiMinorAlarms	Unsigned32,				      
-	saHpiDatUserAlarmLimit 	Unsigned32,				      
-	saHpiDatOverflow	TruthValue,				  			      
-	saHpiDomainGuid		OCTET STRING            
+	saHpiDrtUpdateCount		Unsigned32,
+ 				      			      
+	saHpiDrtUpdateTimestamp		HpiTimeStamp,
+				      
+	saHpiRptUpdateCount 		Unsigned32,
+     		      				      
+	saHpiRptUpdateTimestamp		HpiTimeStamp,
+						      
+	saHpiDatUpdateCount		Unsigned32,
+
+	saHpiDatUpdateTimestamp		HpiTimeStamp,
+	saHpiActiveAlarms		Unsigned32,
+	saHpiCriticalAlarms		Unsigned32,
+	saHpiMajorAlarms		Unsigned32,
+	saHpiMinorAlarms		Unsigned32,
+	saHpiDatUserAlarmLimit 		Unsigned32,
+	saHpiDatOverflow		TruthValue,
+	saHpiDomainGuid			OCTET STRING            
 	}
 	
 saHpiInfoDomainID OBJECT-TYPE 
@@ -746,30 +762,30 @@ saHpiInfoDomainID OBJECT-TYPE
 	::= {saHpiDomainInfoEntry 1}
 
 saHpiDomainCapabilities OBJECT-TYPE 
-	SYNTAX		Unsigned32 
+	SYNTAX		OCTET STRING(SIZE(0..255))
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"This section defines the types associated with the domain controller. */
-
+	DESCRIPTION	"
 	Domain Capabilities
 	
 	This definition defines the capabilities of a given domain. A domain 
-	may support any number of capabilities using the bit mask. 
+	may support any number of capabilities, each capability seperated
+	by a delimeter (,)
 	
-	SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY	(SaHpiDomainCapabilitiesT)0X00000001
+	AUTOINSERT_READ_ONLY
 	  Indicates that the domain auto insert timeout value is read-only
-	  and may not be modified using the saHpiHotSwapAutoInsertTimeoutSet()
-	  function.
+	  and may not be modified using the saHpiHotSwapAutoInsertTimeoutSet
+	  columnar object.
 
-	Note:
- 		SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY  (SaHpiDomainCapabilitiesT)0X00000001" 
+	  "
 	::= {saHpiDomainInfoEntry 2}
 
 saHpiIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates that this domain participates in a peer relationship.
+        DESCRIPTION     
+	"Indicates that this domain participates in a peer relationship.
 	TRUE = Domain is peer.  FALSE = Domain is not peer "
         ::= {saHpiDomainInfoEntry 3}
 
@@ -777,21 +793,24 @@ saHpiDomainTagTextType OBJECT-TYPE
 	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"See Definition"
+	DESCRIPTION	"Information tag associated with domain. 
+	See Definition for SaHpiTextType for more details."
 	::= {saHpiDomainInfoEntry 4}
 
 saHpiDomainTagTextLanguage OBJECT-TYPE
 	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
-	DESCRIPTION     "See Definition"
+	DESCRIPTION     "Information tag associated with domain.
+	See Definition for SaHpiTextLanguage for more details."
 	::= {saHpiDomainInfoEntry 5}
 
 saHpiDomainTag	OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(0..255))
+	SYNTAX		SaHpiText
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Resource tag. The type of date is specified
+	DESCRIPTION	"Information tag associated with domain.
+	The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiDomainInfoEntry 6}
       
@@ -799,14 +818,18 @@ saHpiDrtUpdateCount OBJECT-TYPE
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"" 
+	DESCRIPTION	
+	"This count is incremented any time the
+        table is changed. It rolls over to zero when the maximum 
+	value (2^32) is reached." 
 	::= {saHpiDomainInfoEntry 7}
 
 saHpiDrtUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Refer to SaHpiTimeStamp for full describption."
+	DESCRIPTION	"This timestamp is set any time the
+	DRT table is changed. Refer to SaHpiTimeStamp for full describption."
 	::= {saHpiDomainInfoEntry 8}	
 
 saHpiRptUpdateCount OBJECT-TYPE 
