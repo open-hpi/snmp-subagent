@@ -738,7 +738,7 @@ saHpiHotSwapTable_row_copy (saHpiHotSwapTable_context * dst,
 
   dst->saHpiHotSwapActionRequest = src->saHpiHotSwapActionRequest;
 
-  memcpy (src->saHpiHotSwapRTP, dst->saHpiHotSwapRTP,
+  memcpy (dst->saHpiHotSwapRTP, src->saHpiHotSwapRTP,
 	  src->saHpiHotSwapRTP_len);
   dst->saHpiHotSwapRTP_len = src->saHpiHotSwapRTP_len;
 

@@ -972,7 +972,7 @@ saHpiSensorTable_row_copy (saHpiSensorTable_context * dst,
 
   dst->saHpiSensorOEM = src->saHpiSensorOEM;
 
-  memcpy (src->saHpiSensorRDR, dst->saHpiSensorRDR, src->saHpiSensorRDR_len);
+  memcpy (dst->saHpiSensorRDR, src->saHpiSensorRDR, src->saHpiSensorRDR_len);
   dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
   dst->flags = src->flags;

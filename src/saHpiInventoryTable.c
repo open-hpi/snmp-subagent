@@ -1134,7 +1134,7 @@ saHpiInventoryTable_row_copy (saHpiInventoryTable_context * dst,
 
   dst->saHpiInventoryOEM = src->saHpiInventoryOEM;
 
-  memcpy (src->saHpiInventoryRDR, dst->saHpiInventoryRDR,
+  memcpy (dst->saHpiInventoryRDR, src->saHpiInventoryRDR,
 	  src->saHpiInventoryRDR_len);
   dst->saHpiInventoryRDR_len = src->saHpiInventoryRDR_len;
 
