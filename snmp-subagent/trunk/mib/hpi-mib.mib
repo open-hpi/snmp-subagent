@@ -1628,11 +1628,6 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
         
         Must be set to the same value in every domain which 
         contains this resource.
-
-        This object converts HPI's saHpiEntityPathT structure 
-        and an OpenHPI canonical string. The canonical string is 
-        formed by removing the SAHPI_ENT_ prefix from the 
-        HPI types, and creating tuples for the entity types. 
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -1879,10 +1874,10 @@ saHpiResourceEntityPath OBJECT-TYPE
         Must be set to the same value in every domain which 
         contains this resource.
 
-        This object converts HPI's saHpiEntityPathT structure 
-        and an OpenHPI canonical string. The canonical string is 
-        formed by removing the SAHPI_ENT_ prefix from the 
-        HPI types, and creating tuples for the entity types. 
+        This object converts HPI's saHpiEntityPathT structure. 
+	The canonical string is formed by removing the 
+	SAHPI_ENT_ prefix from the HPI types, and creating 
+	tuples for the entity types. 
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -3904,10 +3899,10 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         DESCRIPTION      
         "Entity assoc. with status condition.
 
-        This object converts HPI's saHpiEntityPathT structure 
-        and an OpenHPI canonical string. The canonical string is 
-        formed by removing the SAHPI_ENT_ prefix from the 
-        HPI types, and creating tuples for the entity types. 
+        This object converts HPI's saHpiEntityPathT structure. 
+	The canonical string is formed by removing the 
+	SAHPI_ENT_ prefix from the HPI types, and creating 
+	tuples for the entity types. 
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -4246,11 +4241,13 @@ saHpiEventLogEntry OBJECT-TYPE
         ::= {saHpiEventLogTable 1}
                                                  
 SaHpiEventLogEntry ::= SEQUENCE {
-        saHpiEventLogIndex            SaHpiEntryId,
+        saHpiEventLogIndex            	SaHpiEntryId,
         saHpiEventLogType               INTEGER,
         saHpiEventLogAddedTimestamp     SaHpiTime,
-
-        saHpiEventLogRowPointer                   RowPointer
+	
+        saHpiEventLogClearRowStatus	TruthValue,
+        saHpiEventLogRowPointer         RowPointer
+	
         }
 
 saHpiEventLogIndex OBJECT-TYPE
@@ -4297,6 +4294,17 @@ saHpiEventLogAddedTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Refer to SaHpiTime for full description."
         ::= {saHpiEventLogEntry 3}
+	
+saHpiEventLogClearRowStatus OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Write value of true will clear the Event log for the 
+	Domain and Resource specified by the index value.  The 
+	saHpiEventLogIndex value is ignore."
+	REFERNCE 
+	" See section 6.4.4 for futher details."
+	::=   {saHpiEventLogEntry 4 }
 
 
 saHpiEventLogRowPointer OBJECT-TYPE
@@ -4305,7 +4313,7 @@ saHpiEventLogRowPointer OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
             "Pointer to the event."
-        ::= {saHpiEventLogEntry 4}
+        ::= {saHpiEventLogEntry 5}
 
 
         
@@ -4355,7 +4363,7 @@ SaHpiRdrEntry ::= SEQUENCE {
         
         saHpiRdrIsFru	        TruthValue,     
 
-        saHpiRdrRowPointer                RowPointer,
+        saHpiRdrRowPointer      RowPointer,
         saHpiRdrId              Counter32,
         saHpiRdrRPT             RowPointer,
         
@@ -4392,15 +4400,12 @@ saHpiRdrEntityPath OBJECT-TYPE
         If resource manages a single entity, entity path of 
         that entity. 
         If resource manages multiple entities, the entity path 
-        of the 'primary' entity managed by the resource.  
-        
-        Must be set to the same value in every domain which 
-        contains this resource.
-
-        This object converts HPI's saHpiEntityPathT structure 
-        and an OpenHPI canonical string. The canonical string is 
-        formed by removing the SAHPI_ENT_ prefix from the 
-        HPI types, and creating tuples for the entity types. 
+        of the 'primary' entity managed by the resource. 
+	
+        This object converts HPI's saHpiEntityPathT structure. 
+	The canonical string is formed by removing the 
+	SAHPI_ENT_ prefix from the HPI types, and creating 
+	tuples for the entity types.
         
         Order of significance is inverted to make entity paths 
         look more like Unix directory structure. It is also assumed 
@@ -6311,7 +6316,7 @@ SaHpiAreaEntry ::= SEQUENCE {
         saHpiAreaType                	INTEGER,
         saHpiAreaIsReadOnly      	TruthValue,
         saHpiAreaRowStatus		RowStatus,
-        saHpiAreaNumDataFields           Unsigned32
+        saHpiAreaNumDataFields          Unsigned32
         }
         
 saHpiAreaId       	OBJECT-TYPE
