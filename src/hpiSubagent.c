@@ -45,7 +45,7 @@ static SaHpiSessionIdT session_id;
 static SaHpiRptInfoT rpt_info;
 static SaErrorT err;
 
-static const char *version = "$Id$\n";
+static const char *version = "$Id$";
 /*
  * Configuration options. Changed by config file.
  */
@@ -513,7 +513,7 @@ main (int argc, char **argv)
       snmp_enable_calllog ();
       snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
     }
-  snmp_log (LOG_INFO, version);
+  snmp_log (LOG_INFO, "Starting %s\n",version);
   /* we're an agentx subagent? */
   if (agentx_subagent)
     {
@@ -611,6 +611,8 @@ main (int argc, char **argv)
     }
 stop:
   /* at shutdown time */
+  snmp_log(LOG_INFO,"Stopping %s\n", version);
   snmp_shutdown (AGENT);
+ 
   return rc;
 }
