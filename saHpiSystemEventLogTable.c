@@ -59,7 +59,130 @@ static int event_log_overflow_action = 0;
 static int event_log_delete_entry_supported = 0;
 
 int populate_sel(SaHpiRptEntryT *rpt_entry){
-  return 0;
+  
+  SaErrorT     err;
+  SaHpiSessionIdT session_id;
+  SaHpiRdrT     rdr_entry;
+  SaHpiSelEntryIdT entry_id;
+  SaHpiSelEntryIdT next_entry_id;
+  SaHpiSelEntryIdT prev_entry_id;
+  SaHpiSelInfoT info;
+  SaHpiSelEntryT sel;
+  oid sel_oid[3];
+  oid child_oid[MAX_OID_LEN];
+  size_t child_oid_len = 0;
+  int rc;
+  netsnmp_index sel_index;
+  saHpiSystemEventLogTable_context *sel_context;
+  //  long backup_count = event_log_entries;
+
+  DEBUGMSGTL((AGENT,"\t--- populate_sel: Entry\n"));
+  if (rpt_entry) {
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;
+    
+    err = saHpiEventLogInfoGet( session_id, rpt_entry->ResourceId, &info);
+    if (err != SA_OK) 
+      return AGENT_ERR_OPERATION;
+
+    //event_log_entries = info.Entries;
+    event_log_size = info.Size;
+    event_log_update_timestamp = info.UpdateTimestamp;
+    event_log_current_timestamp = info.CurrentTime;
+    event_log_enabled = (info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+    event_log_overflow_flag = (info.OverflowFlag == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+    event_log_overflow_action = info.OverflowAction + 1;
+    event_log_delete_entry_supported = info.DeleteEntrySupported;
+    // Fill the data
+
+    entry_id = SAHPI_OLDEST_ENTRY;
+    while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
+      DEBUGMSGTL((AGENT,"Request for: %d, %d\n", session_id, rpt_entry->ResourceId));
+      err = saHpiEventLogEntryGet(session_id,
+				  rpt_entry->ResourceId,
+				  entry_id,
+				  &prev_entry_id,
+				  &next_entry_id,
+				  &sel,
+				  &rdr_entry,
+				  NULL);
+      DEBUGMSGTL((AGENT,"Error code from EventLogEntryGet: %d\n", err));
+      if (err == SA_OK) {
+	// The MIB containst the order of indexes
+	sel_oid[0] = rpt_entry->DomainId;
+	sel_oid[1] = rpt_entry->ResourceId;
+	sel_oid[2] = sel.EntryId;
+	sel_index.oids = (oid *) &sel_oid;
+	
+	sel_context = NULL;
+	sel_context = CONTAINER_FIND(cb.container, &sel_index);
+
+	if (!sel_context) {
+	  // New entry. Add it
+	  sel_context = saHpiSystemEventLogTable_create_row(&sel_index);
+	}
+
+	// Now create the event and get its OID
+	
+	if (saHpiSystemEventLogTable_modify_context(&sel,
+						    rpt_entry,
+						    child_oid, child_oid_len,
+						    sel_context)
+	    == AGENT_NEW_ENTRY) {
+	  DEBUGMSGTL((AGENT,"SEL new entry"));
+	  CONTAINER_INSERT(cb.container, sel_context);
+	  // traps
+	}
+
+	prev_entry_id = entry_id;
+	entry_id = next_entry_id;
+      }
+				  
+    }
+  }
+  DEBUGMSGTL((AGENT,"\t--- populate_sel: Exit\n"));
+  return AGENT_ERR_NOERROR;
+}
+
+
+int
+saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
+					SaHpiRptEntryT *rpt,
+					oid *event_entry, 
+					size_t event_entry_oid_len,
+					saHpiSystemEventLogTable_context *ctx) {
+  long hash;
+
+  if (sel && ctx) {
+    hash = calculate_hash_value(sel, sizeof(SaHpiSelEntryT));
+
+    DEBUGMSGTL((AGENT," Hash value: %d, in ctx: %d\n", hash, ctx->hash));
+
+    if (ctx->hash != 0) {
+      // Only do the check if the hash value is something else than zero.
+      // 'zero' value is only for newly created records, and in some
+      // rare instances when the hash has rolled to zero - in which
+      // case we will just consider the worst-case scenario and update
+      // the record and not trust the hash value.
+      if (hash == ctx->hash) {
+	// The same data. No need to change.
+	return AGENT_ENTRY_EXIST;
+      }
+    }
+
+    ctx->hash = hash;
+
+    ctx->resource_id = rpt->ResourceId;
+    ctx->domain_id = rpt->DomainId;
+    ctx->saHpiSystemEventLogEntryId = sel->EntryId;
+    ctx->saHpiSystemEventLogTimestamp = sel->Timestamp;
+    ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
+    memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
+
+    return AGENT_ENTRY_EXIST;
+  }
+  return AGENT_ERR_NULL_DATA;
 }
 /************************************************************
  * keep binary tree to find context by name

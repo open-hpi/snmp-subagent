@@ -227,7 +227,11 @@ populate_rpt() {
 	   // if (rpt... blah
 	   //
 	   populate_sel(&rpt_entry);
-	 }	        
+	 } // rc != SA_OK
+	 // Try next one ?
+	 else {
+	   err = AGENT_ERR_OPERATION;
+	 }
      } while (next != SAHPI_LAST_ENTRY);
 
        // Now check for deleted entries. 
