@@ -2,6 +2,10 @@
 This is an implementation of the Service Availability Forum's 
 Hardware Platform Interface SNMP sub-agent.
 
+Through this subagent one can includes support for multiple different 
+types of hardware including: IPMI, IBM Blade Center (via SNMP), 
+Linux Watchdog devices, and Sysfs based systems.
+
 ---------------------------------------------------------
 WARNING/NOTE
 ---------------------------------------------------------
@@ -15,7 +19,7 @@ PREREQUISITES
 ---------------------------------------------------------
 The following software is required to build openhpi
 
-any HPI implementation that is based on SAF specification 
+any HPI 1.0 implementation that is based on SAF specification 
 	SAI-HPI-A.01.01. Recommended: openhpi >= 0.4
 autoconf >= 2.50
 automake >= 1.5
@@ -56,8 +60,12 @@ make maintainer-clean
 ---------------------------------------------------------
 GENERAL RELEASE NOTES and WHAT'S NEW
 ---------------------------------------------------------
-Full implementation of the HPI-MIB v1.3. This means
-instrumentation of the:
+
+* First release of the HPI SNMP sub-agent. 
+
+* Support for full implementation of the HPI-MIB v1.3 
+  (included). This means HPI 1.0 instrumentation using 
+  HPI-MIB objects in nine tables:
 	- Resource Presence Table entities,
 		- HotSwap capabilities,
 	- Resource Data Records,
@@ -66,7 +74,17 @@ instrumentation of the:
 		- Control,
 		- Watchdog
 	- Events and System Event Log
+
+* Support for user configurable options:
+	 - update timer for new RPT/RDR/Events ,
+	 - maximum events held in eventw row before they are
+	   automatically removed,
+	 - sending of new found RPT/RDR/Events during startup.
+
+* Example code for retrieving instrumentation information
+  using SNMP.
 	
+Consult the ChangeLog for more details.
 
 ---------------------------------------------------------
 FOR MORE INFO

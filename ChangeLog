@@ -1,8 +1,12 @@
 2003-12-17  konradrzeszutek <konradr AT us DOT ibm DOT com>
-	* First release
+	* First release of the HPI SNMP sub-agent. 
+	Through this subagent one can includes support for multiple 
+	different types of hardware including: IPMI, IBM Blade Center 
+	(via SNMP), Linux Watchdog devices, and Sysfs based systems.
 
 	* Support for full implementation of the HPI-MIB v1.3 
-	 (included). This means instrumentation of:
+	 (included). This means HPI 1.0 instrumentation using 
+	  HPI-MIB objects in nine tables:
 	- Resource Presence Table entities,
 		- HotSwap capabilities,
 	- Resource Data Records,
