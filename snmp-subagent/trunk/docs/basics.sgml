@@ -127,13 +127,13 @@
        this environment variable is:
 	</para>
 	<para>
-   <literal>MIBS=+NET-SNMP-TUTORIAL-MIB</literal>
+   <programlisting role="C">$ export MIBS=+NET-SNMP-TUTORIAL-MIB</programlisting>
 	</para>
 	<para>
           or
 	</para>
 	<para>
-          <literal>MIBS=ALL</literal>
+          <programlisting role="C">$ export MIBS=ALL</programlisting>
         </para>
         <para>
           The  first  example ensures that mib2c finds the NET-SNMP-
@@ -174,8 +174,7 @@
           For example,
         </para>
         <para>
-          <programlisting role="C">
-            % mib2c netSnmpIETFWGTable
+          <programlisting role="C">$ mib2c netSnmpIETFWGTable
           </programlisting>
         </para>
         <para>
@@ -187,13 +186,13 @@
          </para>
         <para>
           <programlisting role="C">
-            mib2c.scalar.conf
-            mib2c.int_watch.conf
-            mib2c.iterate.conf
-            mib2c.create-dataset.conf
-            mib2c.array-user.conf
-            mib2c.column_defines.conf
-            mib2c.column_enums.conf
+mib2c.scalar.conf
+mib2c.int_watch.conf
+mib2c.iterate.conf
+mib2c.create-dataset.conf
+mib2c.array-user.conf
+mib2c.column_defines.conf
+mib2c.column_enums.conf
           </programlisting>
         </para>
 	<sect3>
@@ -203,8 +202,7 @@
           If you're writing code for some scalars, run:
         </para>
         <para>
-          <programlisting role="C">
-            mib2c -c mib2c.scalar.conf MIBNODE
+          <programlisting role="C">$ mib2c -c mib2c.scalar.conf MIBNODE
           </programlisting>
         </para>
         <para>
@@ -212,8 +210,7 @@
             integer scalars, use:
 	</para>
 	<para>
-	  <programlisting role="C">
-	    mib2c -c mib2c.int_watch.conf MIBNODE
+	  <programlisting role="C">$ mib2c -c mib2c.int_watch.conf MIBNODE
 	  </programlisting>
 	</para>
 	</sect3>
@@ -230,8 +227,7 @@
             text.c file for an example:
         </para>
 	<para>
-	  <programlisting role="C">
-            mib2c -c mib2c.iterate.conf MIBNODE
+	  <programlisting role="C">$ mib2c -c mib2c.iterate.conf MIBNODE
           </programlisting>
 	</para>
 	<para> 
@@ -243,8 +239,7 @@
             such a table:
            </para>
 	 <para>
-	   <programlisting role="C">
-            mib2c -c mib2c.create-dataset.conf MIBNODE
+	   <programlisting role="C">$ mib2c -c mib2c.create-dataset.conf MIBNODE
            </programlisting>
 	</para>
 	<para> 
@@ -254,8 +249,7 @@
             need to perform work when a set occurs:
          </para>
 	<para>
-	  <programlisting role="C">
-            mib2c -c mib2c.array-user.conf MIBNODE
+	  <programlisting role="C">$ mib2c -c mib2c.array-user.conf MIBNODE
           </programlisting>
 	</para>
 	</sect3>
@@ -267,8 +261,7 @@
             column number in your table:
          </para>
  	<para>
-	 <programlisting role="C">   
-            mib2c -c mib2c.column_defines.conf MIBNODE
+	 <programlisting role="C">$ mib2c -c mib2c.column_defines.conf MIBNODE
          </programlisting>   
 	</para>
 	<para>
@@ -276,8 +269,7 @@
             enum for any column containing enums:
         </para>
 	<para>
-	  <programlisting role="C">    
-            mib2c -c mib2c.column_enums.conf MIBNODE
+	  <programlisting role="C">$ mib2c -c mib2c.column_enums.conf MIBNODE
 	  </programlisting>
 	</para>
 	</sect3>
@@ -285,8 +277,7 @@
 	<title>Generating code for the 4.x line of code (the older API)
 	</title>
 	<para>
-	  <programlisting role="C">
-            mib2c -c mib2c.old-api.conf MIBNODE
+	  <programlisting role="C">$ mib2c -c mib2c.old-api.conf MIBNODE
 	  </programlisting>
 	</para>
 	</sect3>
