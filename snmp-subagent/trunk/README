@@ -15,12 +15,12 @@ any HPI 1.0 implementation that is based on SAF specification
 	SAI-HPI-A.01.01. Recommended: openhpi >= 0.4
 autoconf >= 2.50
 automake >= 1.5
-net-snmp >= 5.0.8
+net-snmp >= 5.1.0
 	(Don't use earlier versions - the AgentX protocol had some
 	 serious issues).
 	(Don't use 5.0.7 - it has a bug in the CONTAINER operations that 
 	 seg faults the sub-agent).
-GLIB-1.2	(note we may be switching to 2.0 in the next release)
+GLIB-2.1
 
 ---------------------------------------------------------
 BUILD / INSTALLATION
@@ -175,38 +175,6 @@ GENERAL RELEASE NOTES and WHAT'S NEW
   using SNMP.
 
 * Fix many bugs:
-    852223      Definition Conflicts between net-snmp-config.h and config.h
-    861785      missing release files in agent
-    861788      basics.sgml lacks formatting
-    872434      Ugly hexidecimal string in HPI-MIB::saHpiSystemEventLogOemEv
-    872437      segfault when populating inventory entries using snmp_bc
-    872580      Duplicate items are added in all the tables, except one
-    873853      Change the 'hpi' OID from experimental to what SAF ratified
-    873854      Make the 'saHpiSystemEventDelete' and 'saHpiEventDelete' wrt
-    873961      Duplicate control, inventory, sensor, and watchdog tables.
-    876161      Memory consumption > 64MB after 3 days and grows.
-    876166      Too many sensors, control, inventory objects.
-    876241      The saHpiCtrlState OBJECT in the MIB defines wrong length ..
-    876243      saHpiCtrlState object for type analog in description mention
-    876290      The 'SaHpiCtrlAttributes' is missing info about Analog type.
-    876402      saHpiCtrlBool should have a better name, like SaHpiCtrlIgnor
-    876405      saHpiCtrlAttributes for the type 'stream' is missing data.
-    876446      The description in the SaHpiCtrlAttributes is confusing.
-    876904      Missing Data Configuration elements
-    877063      consolodate ..StateCategoryXXXX fields
-    878592      hpiSubagent: SEGMENT FAULT with latest code
-    885081      +1 for all enumerated objects in the MIB.
-    887238      The saHpiInventoryTable is missing an object.
-    887240      saHpiInventoryAttributes is missing information about Oem ty
-    892911      If no startup events is selected, the SNMP daemon never
-    893138      The syslog logging needs to have more information.
-    893142      snmpd: send_trap: Unknown PDU type
-    894664      Missing OEM variable for rdr inventory type
-    904673      Add Sensor Readings Flags to saHpiSensorEntry
-    908543      Add IsThreshold OID to saHpiSensroEntry	
-    908544      Add TholdCapabilities OID to saHpiSensorEntry
-    907712      Problems with SNMP agent & ipmidirect plugin
-    908561      Common sense checks missing
 
 Consult the ChangeLog for more details.
 
@@ -233,13 +201,3 @@ in the #openhpi channel on FreeNode and OFTN network.
 DEFINES
 ---------------------------------------------------------
 
-There is one #define declaration that you can enable during 
-compilation time. Refer to bug [ 876304 ] Make the MIB Sensor 
-reading return dynamic data, for more concrete information. 
-It basicly boils down to querying the 
-HPI-MIB::saHpiSensorReadingCurrentInterpreted
-table and getting the results instantly instead of waiting for
-the HPI Sub-agent to refresh its internal data per 
-"check_hpi_interval"  configuration option. Use 
--DGET_ROUTINE_CALLS_SNMP_GET to enable this option. Be aware that 
-it does not work with the SNMP_BC plugin.
