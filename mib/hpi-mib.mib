@@ -1883,7 +1883,6 @@ saHpiResourceEntry OBJECT-TYPE
 
 SaHpiResourceEntry ::= SEQUENCE {
 
-
         saHpiResourceId                         Unsigned32,
         saHpiResourceEntryId                    SaHpiEntryId,
         saHpiResourceEntityPath                 OCTET STRING,
@@ -1934,7 +1933,7 @@ saHpiResourceId OBJECT-TYPE
 
 saHpiResourceEntryId OBJECT-TYPE 
         SYNTAX          SaHpiEntryId
-        MAX-ACCESS      read-only
+        MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
 	"This index is here to help facilitate browsing a known 
