@@ -30,4 +30,3 @@ q $SNMPGET -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET HPI-MIB::saHpiSensorAssertEven
 cat $0.tmp | grep -v $SNMPSET | grep -v $SNMPGET > $0.result
 rm $0.tmp
 
-stop
