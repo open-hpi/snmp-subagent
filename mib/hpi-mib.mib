@@ -2619,9 +2619,8 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 
 	saHpiHotSwapActionRequest  	INTEGER,
 	saHpiHotSwapPolicyCancel    	INTEGER,
-	saHpiHotSwapResourceRequest 	INTEGER,
+	saHpiHotSwapResourceRequest 	INTEGER
 
-	saHpiHotSwapRowPointer          RowPointer
 	}
 
 
@@ -2794,16 +2793,6 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
 	REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 140-141."
     ::= { saHpiHotSwapEntry 6 }
-
-saHpiHotSwapRowPointer OBJECT-TYPE
-        SYNTAX          RowPointer
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     
-	"OID value points the Entity Entry row, which represents 
-	this hot-swap row."
-        ::= { saHpiHotSwapEntry 8 }
-
 
         
 -- /*******************************************************************************
@@ -10224,8 +10213,7 @@ saHpiHotSwapGroup OBJECT-GROUP
 		saHpiHotSwapExtractTimeout,
 		saHpiHotSwapActionRequest,
 		saHpiHotSwapPolicyCancel,
-		saHpiHotSwapResourceRequest,
-		saHpiHotSwapRowPointer
+		saHpiHotSwapResourceRequest
 	}
 	STATUS	current
 	DESCRIPTION
