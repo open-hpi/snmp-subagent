@@ -17,7 +17,8 @@ Summary: Library that provides SAForum's HPI
 Group: Utilities
 AutoReq: no
 Requires: libc.so.6 libglib-1.2.so.0 libpthread.so.0 
-Requires: libopenhpi.so.0.4 libnetsnmp.so.5 libnetsnmpagent.so.5
+Requires: libnetsnmp.so.5 libnetsnmpagent.so.5
+Requires: openhpi = 0.4
 
 %description 
 This package contains an SNMP subagent for the Service Availability Forum's 
