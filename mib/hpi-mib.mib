@@ -547,6 +547,42 @@ notPresent(5):
 		    extractionPending (4),
 		    notPresent (5)
 		}
+		
+SaHpiEventPreTimerAction ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     
+	"These enumerations represent the possible types of interrupts that may be
+	triggered by a watchdog pre-timer event. The actual meaning of these
+	operations may differ depending on the hardware architecture. "
+        SYNTAX          INTEGER{
+				undefined(0),
+				none (1),
+				smi (2),
+				nmi (3),
+				messageInterrupt (4),
+				oem (16)
+			}
+
+SaHpiEventUse ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     
+	"Watchdog Timer Use 			
+	These enumerations represent the possible watchdog users that may have caused 
+	the watchdog to expire. For instance, if watchdog is being used during power 
+	on self test (POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
+	will be set. Most specific uses for Watchdog timer by users of HPI should 
+	indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
+	or SAHPI_WTU_OEM if it is used for some other purpose."
+        SYNTAX          INTEGER {
+				undefined(0),
+				none (1),
+				biosFrb2 (2),
+				biosPost (3),
+				osLoad (4),
+				smsOs (5),
+				oem (6),
+				unspecified (16)
+			}
 
 SaHpiTextType ::= TEXTUAL-CONVENTION 
 	STATUS		current
@@ -3070,11 +3106,9 @@ saHpiWatchdogEventEntry OBJECT-TYPE
 SaHpiWatchdogEventEntry ::= SEQUENCE {
 	saHpiEventWatchdogNum			SaHpiInstrumentId,
 	saHpiWatchdogEventTimestamp		SaHpiTimeString,
--- IBMKR: Add some Textual Convention for these enumerations?
---IBMKR: Missing 
 	saHpiWatchdogEventAction		INTEGER,
-	saHpiWatchdogEventPreTimerAction	INTEGER,     ??????
-	saHpiWatchdogEventUse			INTEGER,     ??????
+	saHpiWatchdogEventPreTimerAction	SaHpiEventPreTimerAction,
+	saHpiWatchdogEventUse			SaHpiEventUse, 
 	saHpiWatchdogEventDelete		RowStatus
 	}
 	
@@ -3115,14 +3149,7 @@ saHpiWatchdogEventAction OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 3}
 
 saHpiWatchdogEventPreTimerAction OBJECT-TYPE
-        SYNTAX          INTEGER{
-				undefined(0),
-				none (1),
-				smi (2),
-				nmi (3),
-				messageInterrupt (4),
-				oem (16)
-			}
+        SYNTAX          SaHpiEventPreTimerAction
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -3132,17 +3159,8 @@ saHpiWatchdogEventPreTimerAction OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 4}
 
 saHpiWatchdogEventUse OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				none (1),
-				biosFrb2 (2),
-				biosPost (3),
-				osLoad (4),
-				smsOs (5),
-				oem (6),
-				unspecified (16)
-			}
-        MAX-ACCESS      read-only
+        SYNTAX          SaHpiEventUse
+	MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
 	"Watchdog Timer Use 			
@@ -3152,7 +3170,6 @@ saHpiWatchdogEventUse OBJECT-TYPE
 	will be set. Most specific uses for Watchdog timer by users of HPI should 
 	indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 	or SAHPI_WTU_OEM if it is used for some other purpose."
-			
         ::= {saHpiWatchdogEventEntry 5}
 
 
@@ -4519,6 +4536,12 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorCategory			SaHpiEventCategory,
 	
 	saHpiEnableCtrl	  			TruthValue,
+	saHpiSensorEnable	  		TruthValue,   missed
+	
+	saHpiEventState	  			TruthValue,   missed
+ --IBMDJ       
+	saHpiEventMaskAssert	  		TruthValue,   missed... string representation SaHpiEventState
+	saHpiEventMaskAssert	  		TruthValue,   missed... string representation SaHpiEventState
 	
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsSupported		SaHpiEventState,
@@ -4785,7 +4808,9 @@ saHpiSensorReadingCurrentEntry OBJECT-TYPE
 SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
 	saHpiReadingCurrentIsSupported		TruthValue,
 	saHpiSensorReadingCurrentType		SaHpiSensorReadingType,	
-	saHpiSensorReadingCurrentValue	        SaHpiSensorReadingValue
+	saHpiSensorReadingCurrentValue	        SaHpiSensorReadingValue,
+
+--IBMDJ add event states SaHpiEventStateT	
 	}
 
 saHpiReadingCurrentIsSupported	OBJECT-TYPE
@@ -5117,6 +5142,8 @@ saHpiSensorThdLowCriticalIsWritable	OBJECT-TYPE
 	REFERENCE
 	"Object derieved from SAF SAI-HPI-A.01.01 spec page 90 and 91."
 	::= {saHpiSensorThdLowCriticalEntry 2}
+
+--IBMDJ make type and value writeable for all related tables
 	
 saHpiSensorThdLowCriticalType		OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
@@ -6010,9 +6037,9 @@ SaHpiWatchdogEntry ::= SEQUENCE {
 	saHpiWatchdogNum		Unsigned32,
 	saHpiWatchdogLog		TruthValue,
 	saHpiWatchdogRunning		TruthValue,
-	saHpiWatchdogTimerUse		INTEGER,
+	saHpiWatchdogTimerUse		SaHpiEventUse,
 	saHpiWatchdogTimerAction	INTEGER,
-	saHpiWatchdogPretimerInterrupt	INTEGER,
+	saHpiWatchdogPretimerInterrupt	SaHpiEventPreTimerAction,
 	saHpiWatchdogPreTimeoutInterval	Unsigned32,
 	saHpiWatchdogTimerUseExpFlags	Unsigned32,
 	saHpiWatchdogTimerInitialCount	Unsigned32,
@@ -6074,17 +6101,8 @@ saHpiWatchdogRunning OBJECT-TYPE
 	::= {saHpiWatchdogEntry 3}
 
 saHpiWatchdogTimerUse OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				none (1),
-				biosFrb2 (2),
-				biosPost (3),
-				osLoad (4),
-				smsOs (5),
-				oem (6),
-				unspecified (16)
-			}
-        MAX-ACCESS      read-write
+        SYNTAX          SaHpiEventUse
+	MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
 	If you read this object, it means:
@@ -6119,15 +6137,8 @@ saHpiWatchdogTimerAction OBJECT-TYPE
         ::= {saHpiWatchdogEntry 5}
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined(0),
-				none (1),
-				smi (2),
-				nmi (3),
-				messageInterrupt (4),
-				oem (16)
-			}
-        MAX-ACCESS      read-write
+        SYNTAX          SaHpiEventPreTimerAction
+	MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
 	"PretimerInterrupt -  indicates which action will be taken
