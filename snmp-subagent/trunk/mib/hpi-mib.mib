@@ -731,7 +731,7 @@ saHpiEventEntry OBJECT-TYPE
  Specific implementations of HPI may have restrictions on how much data may
  be passed to SaHpiEventLogEntryAdd(). These restrictions should be documented
  by the provider of the HPI interface."
-	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiEntryID}
+	INDEX	{ saHpiDomainID, saHpiResourceID ,saHpiEventIndex}
 	::= {saHpiEventTable 1}
 
 SaHpiEventEntry ::= SEQUENCE {
@@ -742,40 +742,40 @@ SaHpiEventEntry ::= SEQUENCE {
 	saHpiEventSeverity	INTEGER,
 	saHpiEventSensorNum	Unsigned32,
 	saHpiEventSensorType	INTEGER,
-	saHpiEventCategory	INTEGER,
-	saHpiEventAssertion	TruthValue,
+	saHpiEventSensorCategory	INTEGER,
+	saHpiEventSensorAssertion	TruthValue,
 
-        saHpiEventStateCategoryUnspecified INTEGER,
-        saHpiEventStateCategoryThreshold INTEGER,
-        saHpiEventStateCategoryUsage INTEGER,
-        saHpiEventStateCategoryState INTEGER,
-        saHpiEventStateCategoryPredFail INTEGER,
-        saHpiEventStateCategoryLimit INTEGER,
-        saHpiEventStateCategoryPerformance INTEGER,
-        saHpiEventStateCategorySeverity INTEGER,
-        saHpiEventStateCategoryPresence INTEGER,
-        saHpiEventStateCategoryEnable INTEGER,
-        saHpiEventStateCategoryAvailability INTEGER,
-        saHpiEventStateCategoryRedundancy INTEGER,
-        saHpiEventStateCategoryUser INTEGER,
-        saHpiEventStateCategoryGeneric INTEGER,
+        saHpiEventSensorStateCategoryUnspecified INTEGER,
+        saHpiEventSensorStateCategoryThreshold INTEGER,
+        saHpiEventSensorStateCategoryUsage INTEGER,
+        saHpiEventSensorStateCategoryState INTEGER,
+        saHpiEventSensorStateCategoryPredFail INTEGER,
+        saHpiEventSensorStateCategoryLimit INTEGER,
+        saHpiEventSensorStateCategoryPerformance INTEGER,
+        saHpiEventSensorStateCategorySeverity INTEGER,
+        saHpiEventSensorStateCategoryPresence INTEGER,
+        saHpiEventSensorStateCategoryEnable INTEGER,
+        saHpiEventSensorStateCategoryAvailability INTEGER,
+        saHpiEventSensorStateCategoryRedundancy INTEGER,
+        saHpiEventSensorStateCategoryUser INTEGER,
+        saHpiEventSensorStateCategoryGeneric INTEGER,
 
-	saHpiSensorOptionalData	Unsigned32,
+	saHpiEventSensorOptionalData	Unsigned32,
 
-	saHpiEventTriggerReadingType	      Unsigned32,
-	saHpiEventTriggerReadingRaw	      Unsigned32,
-	saHpiEventTriggerReadingInterpretedType INTEGER,
-	saHpiEventTriggerReadingInterpreted   OCTET STRING,
-	saHpiEventTriggerReadingEventState    OCTET STRING,
+	saHpiEventSensorTriggerReadingType	      Unsigned32,
+	saHpiEventSensorTriggerReadingRaw	      Unsigned32,
+	saHpiEventSensorTriggerReadingInterpretedType INTEGER,
+	saHpiEventSensorTriggerReadingInterpreted   OCTET STRING,
+	saHpiEventSensorTriggerReadingEventState    OCTET STRING,
 
-	saHpiEventTriggerThresholdType	      Unsigned32,
-	saHpiEventTriggerThresholdRaw	      Unsigned32,
-	saHpiEventTriggerThresholdInterpretedType INTEGER,
-	saHpiEventTriggerThresholdInterpreted OCTET STRING,
-	saHpiEventTriggerThresholdEventState  OCTET STRING,
+	saHpiEventSensorTriggerThresholdType	      Unsigned32,
+	saHpiEventSensorTriggerThresholdRaw	      Unsigned32,
+	saHpiEventSensorTriggerThresholdInterpretedType INTEGER,
+	saHpiEventSensorTriggerThresholdInterpreted OCTET STRING,
+	saHpiEventSensorTriggerThresholdEventState  OCTET STRING,
 
-	saHpiEventPreviousState		Unsigned32,
-	saHpiEventOem			Unsigned32,
+	saHpiEventSensorPreviousState		Unsigned32,
+	saHpiEventSensorOem			Unsigned32,
 	saHpiEventSensorSpecific	Unsigned32,
 
 	saHpiEventHotSwapState		INTEGER,
@@ -925,7 +925,7 @@ saHpiEventSensorType OBJECT-TYPE
 	Note: This object is only valid if saHpiEventType = sensor(1)"
         ::= {saHpiEventEntry 6}
 
-saHpiEventCategory OBJECT-TYPE
+saHpiEventSensorCategory OBJECT-TYPE
         SYNTAX          INTEGER {
 				unspecified (0),
 				threshold (1),
@@ -953,14 +953,14 @@ saHpiEventCategory OBJECT-TYPE
  	state meanings other than those identified with other event categories."
         ::= {saHpiEventEntry 7}
 
-saHpiEventAssertion OBJECT-TYPE
+saHpiEventSensorAssertion OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
         ::= {saHpiEventEntry 8}
 
-saHpiEventStateCategoryUnspecified OBJECT-TYPE
+saHpiEventSensorStateCategoryUnspecified OBJECT-TYPE
         SYNTAX          INTEGER (0..1)
         MAX-ACCESS      read-only
         STATUS          current
@@ -981,7 +981,7 @@ saHpiEventStateCategoryUnspecified OBJECT-TYPE
 	"		 
         ::= {saHpiEventEntry 9}
 
-saHpiEventStateCategoryThreshold OBJECT-TYPE
+saHpiEventSensorStateCategoryThreshold OBJECT-TYPE
         SYNTAX          INTEGER (0..32)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1009,7 +1009,7 @@ saHpiEventStateCategoryThreshold OBJECT-TYPE
 	"		
         ::= {saHpiEventEntry 10}
 
-saHpiEventStateCategoryUsage OBJECT-TYPE
+saHpiEventSensorStateCategoryUsage OBJECT-TYPE
         SYNTAX          INTEGER (0..4)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1031,7 +1031,7 @@ saHpiEventStateCategoryUsage OBJECT-TYPE
 			 SaHpi_ES_BUSY   0x0004
 	"		
         ::= {saHpiEventEntry 11}
-saHpiEventStateCategoryState OBJECT-TYPE
+saHpiEventSensorStateCategoryState OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1052,7 +1052,7 @@ saHpiEventStateCategoryState OBJECT-TYPE
 			 SaHpi_ES_STATE_ASSERTED   0x0002
 	"
         ::= {saHpiEventEntry 12}
-saHpiEventStateCategoryPredFail OBJECT-TYPE
+saHpiEventSensorStateCategoryPredFail OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1074,7 +1074,7 @@ saHpiEventStateCategoryPredFail OBJECT-TYPE
 	"
         ::= {saHpiEventEntry 13}
 
-saHpiEventStateCategoryLimit OBJECT-TYPE
+saHpiEventSensorStateCategoryLimit OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1096,7 +1096,7 @@ saHpiEventStateCategoryLimit OBJECT-TYPE
 	"
         ::= {saHpiEventEntry 14}
 
-saHpiEventStateCategoryPerformance OBJECT-TYPE
+saHpiEventSensorStateCategoryPerformance OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1118,7 +1118,7 @@ saHpiEventStateCategoryPerformance OBJECT-TYPE
 	"		
         ::= {saHpiEventEntry 15}
 
-saHpiEventStateCategorySeverity OBJECT-TYPE
+saHpiEventSensorStateCategorySeverity OBJECT-TYPE
         SYNTAX          INTEGER (0..256)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1147,7 +1147,7 @@ saHpiEventStateCategorySeverity OBJECT-TYPE
 			 SaHpi_ES_INFORMATIONAL       0x0100
 	"		
         ::= {saHpiEventEntry 16}
-saHpiEventStateCategoryPresence OBJECT-TYPE
+saHpiEventSensorStateCategoryPresence OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1168,7 +1168,7 @@ saHpiEventStateCategoryPresence OBJECT-TYPE
 			 SaHpi_ES_PRESENT 0x0002
 	"			
         ::= {saHpiEventEntry 17}
-saHpiEventStateCategoryEnable OBJECT-TYPE
+saHpiEventSensorStateCategoryEnable OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1189,7 +1189,7 @@ saHpiEventStateCategoryEnable OBJECT-TYPE
 			 SaHpi_ES_ENABLED  0x0002
 	"		
         ::= {saHpiEventEntry 18}
-saHpiEventStateCategoryAvailability OBJECT-TYPE
+saHpiEventSensorStateCategoryAvailability OBJECT-TYPE
         SYNTAX          INTEGER (0..256)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1217,7 +1217,7 @@ saHpiEventStateCategoryAvailability OBJECT-TYPE
 			 SaHpi_ES_INSTALL_ERROR 0x0100
 	"
         ::= {saHpiEventEntry 19}
-saHpiEventStateCategoryRedundancy OBJECT-TYPE
+saHpiEventSensorStateCategoryRedundancy OBJECT-TYPE
         SYNTAX          INTEGER (0..128)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1244,7 +1244,7 @@ saHpiEventStateCategoryRedundancy OBJECT-TYPE
 			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 	"
         ::= {saHpiEventEntry 20}
-saHpiEventStateCategoryUser OBJECT-TYPE
+saHpiEventSensorStateCategoryUser OBJECT-TYPE
         SYNTAX          INTEGER (0..16384)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1280,7 +1280,7 @@ saHpiEventStateCategoryUser OBJECT-TYPE
 			 SaHpi_ES_STATE_13  0x2000
 			 SaHpi_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 21}
-saHpiEventStateCategoryGeneric OBJECT-TYPE
+saHpiEventSensorStateCategoryGeneric OBJECT-TYPE
         SYNTAX          INTEGER (0..16384)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1317,7 +1317,7 @@ saHpiEventStateCategoryGeneric OBJECT-TYPE
 			 SaHpi_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 22}
 
-saHpiSensorOptionalData OBJECT-TYPE
+saHpiEventSensorOptionalData OBJECT-TYPE
         SYNTAX          Unsigned32(1..16)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1337,7 +1337,7 @@ saHpiSensorOptionalData OBJECT-TYPE
         ::= {saHpiEventEntry 23}
 
 
-saHpiEventTriggerReadingType OBJECT-TYPE
+saHpiEventSensorTriggerReadingType OBJECT-TYPE
         SYNTAX          Unsigned32(1..4)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1359,7 +1359,7 @@ saHpiEventTriggerReadingType OBJECT-TYPE
 	"
         ::= {saHpiEventEntry 24}
 
-saHpiEventTriggerReadingRaw OBJECT-TYPE
+saHpiEventSensorTriggerReadingRaw OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -1368,7 +1368,7 @@ saHpiEventTriggerReadingRaw OBJECT-TYPE
 	contains the raw value of the sensor as unsigned 32-bit integer"
 	::= {saHpiEventEntry 25}
 
-saHpiEventTriggerReadingInterpretedType OBJECT-TYPE
+saHpiEventSensorTriggerReadingInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
 				uint8(1),
             			uint16(2),
@@ -1386,7 +1386,7 @@ saHpiEventTriggerReadingInterpretedType OBJECT-TYPE
 	contains the type that saHpiEventTriggerReadingInterpreted is in."
 	::= {saHpiEventEntry 26}
 
-saHpiEventTriggerReadingInterpreted OBJECT-TYPE
+saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
         MAX-ACCESS      read-only
         STATUS          current
@@ -1399,7 +1399,7 @@ saHpiEventTriggerReadingInterpreted OBJECT-TYPE
 	::={saHpiEventEntry 27}
 
 
-saHpiEventTriggerReadingEventState OBJECT-TYPE
+saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
         SYNTAX          OCTET STRING ( SIZE (3))
         MAX-ACCESS      read-only
         STATUS          current
@@ -1539,7 +1539,7 @@ saHpiEventTriggerReadingEventState OBJECT-TYPE
         ::= {saHpiEventEntry 28}
 
 
-saHpiEventTriggerThresholdType OBJECT-TYPE
+saHpiEventSensorTriggerThresholdType OBJECT-TYPE
         SYNTAX          Unsigned32(1..4)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1561,7 +1561,7 @@ saHpiEventTriggerThresholdType OBJECT-TYPE
 	"
         ::= {saHpiEventEntry 29}
 
-saHpiEventTriggerThresholdRaw OBJECT-TYPE
+saHpiEventSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -1570,7 +1570,7 @@ saHpiEventTriggerThresholdRaw OBJECT-TYPE
 	contains the raw value of the sensor as unsigned 32-bit integer"
 	::= {saHpiEventEntry 30}
 
-saHpiEventTriggerThresholdInterpretedType OBJECT-TYPE
+saHpiEventSensorTriggerThresholdInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
 				uint8(1),
             			uint16(2),
@@ -1588,7 +1588,7 @@ saHpiEventTriggerThresholdInterpretedType OBJECT-TYPE
 	contains the type that saHpiEventTriggerReadingInterpreted is in."
 	::= {saHpiEventEntry 31}
 
-saHpiEventTriggerThresholdInterpreted OBJECT-TYPE
+saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
         MAX-ACCESS      read-only
         STATUS          current
@@ -1601,7 +1601,7 @@ saHpiEventTriggerThresholdInterpreted OBJECT-TYPE
 	::={saHpiEventEntry 32}
 
 
-saHpiEventTriggerThresholdEventState OBJECT-TYPE
+saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
         SYNTAX          OCTET STRING ( SIZE (3))
         MAX-ACCESS      read-only
         STATUS          current
@@ -1740,7 +1740,7 @@ saHpiEventTriggerThresholdEventState OBJECT-TYPE
 	"
         ::= {saHpiEventEntry 33}
 
-saHpiEventPreviousState OBJECT-TYPE
+saHpiEventSensorPreviousState OBJECT-TYPE
         SYNTAX          Unsigned32 (0..16384)
         MAX-ACCESS      read-only
         STATUS          current
@@ -1858,7 +1858,7 @@ saHpiEventPreviousState OBJECT-TYPE
 			 SaHpi_ES_STATE_14  0x4000"
         ::= {saHpiEventEntry 34}
 
-saHpiEventOem OBJECT-TYPE
+saHpiEventSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -4481,12 +4481,12 @@ saHpiSensorNotification NOTIFICATION-TYPE
 	OBJECTS {	
 		saHpiEventIndex,
 		saHpiEventSeverity,
-		saHpiEventCategory,
+		saHpiEventSensorCategory,
 		saHpiEventSensorNum,
 		saHpiEventSensorType,
-		saHpiSensorOptionalData,
-		saHpiEventTriggerReadingRaw,
-		saHpiEventOem
+		saHpiEventSensorOptionalData,
+		saHpiEventSensorTriggerReadingRaw,
+		saHpiEventSensorOem
 	}
 	STATUS current
  	DESCRIPTION
@@ -4499,7 +4499,6 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiEventIndex,
 		saHpiEventSeverity,
-		saHpiEventCategory,
 		saHpiEventHotSwapState,
 		saHpiEventPreviousHotSwapState
 	}
@@ -4512,7 +4511,6 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiEventIndex,
 		saHpiEventSeverity,
-		saHpiEventCategory,	
 		saHpiEventWatchdogNum,
 		saHpiEventWatchdogAction,
 		saHpiEventWatchdogPreTimerAction,
@@ -4527,7 +4525,6 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiEventIndex,
 		saHpiEventSeverity,
-		saHpiEventCategory,	
 		saHpiEventOemManufacturerIdT,
 		saHpiEventOemEventData
 	}
@@ -4540,7 +4537,6 @@ saHpiUserNotifications NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiEventIndex,
 		saHpiEventSeverity,
-		saHpiEventCategory,
 		saHpiEventUserEventData
 	}
 	STATUS current
@@ -4622,35 +4618,35 @@ saHpiEventGroup OBJECT-GROUP
 		saHpiEventSeverity,
 		saHpiEventSensorNum,
 		saHpiEventSensorType,
-		saHpiEventCategory,
-		saHpiEventAssertion,
-		saHpiEventStateCategoryUnspecified,
-                saHpiEventStateCategoryThreshold,
-                saHpiEventStateCategoryUsage,
-                saHpiEventStateCategoryState,
-                saHpiEventStateCategoryPredFail,
-                saHpiEventStateCategoryLimit ,
-                saHpiEventStateCategoryPerformance,
-                saHpiEventStateCategorySeverity,
-                saHpiEventStateCategoryPresence,
-                saHpiEventStateCategoryEnable,
-                saHpiEventStateCategoryAvailability,
-                saHpiEventStateCategoryRedundancy,
-                saHpiEventStateCategoryUser,
-                saHpiEventStateCategoryGeneric,
-		saHpiSensorOptionalData,
-		saHpiEventTriggerReadingType,
-		saHpiEventTriggerReadingRaw,
-		saHpiEventTriggerReadingInterpretedType,
-		saHpiEventTriggerReadingInterpreted,
-		saHpiEventTriggerReadingEventState,
-		saHpiEventTriggerThresholdType,
-		saHpiEventTriggerThresholdRaw,
-		saHpiEventTriggerThresholdInterpretedType,
-		saHpiEventTriggerThresholdInterpreted,
-		saHpiEventTriggerThresholdEventState,
-		saHpiEventPreviousState,
-		saHpiEventOem,
+		saHpiEventSensorCategory,
+		saHpiEventSensorAssertion,
+		saHpiEventSensorStateCategoryUnspecified,
+                saHpiEventSensorStateCategoryThreshold,
+                saHpiEventSensorStateCategoryUsage,
+                saHpiEventSensorStateCategoryState,
+                saHpiEventSensorStateCategoryPredFail,
+                saHpiEventSensorStateCategoryLimit ,
+                saHpiEventSensorStateCategoryPerformance,
+                saHpiEventSensorStateCategorySeverity,
+                saHpiEventSensorStateCategoryPresence,
+                saHpiEventSensorStateCategoryEnable,
+                saHpiEventSensorStateCategoryAvailability,
+                saHpiEventSensorStateCategoryRedundancy,
+                saHpiEventSensorStateCategoryUser,
+                saHpiEventSensorStateCategoryGeneric,
+		saHpiEventSensorOptionalData,
+		saHpiEventSensorTriggerReadingType,
+		saHpiEventSensorTriggerReadingRaw,
+		saHpiEventSensorTriggerReadingInterpretedType,
+		saHpiEventSensorTriggerReadingInterpreted,
+		saHpiEventSensorTriggerReadingEventState,
+		saHpiEventSensorTriggerThresholdType,
+		saHpiEventSensorTriggerThresholdRaw,
+		saHpiEventSensorTriggerThresholdInterpretedType,
+		saHpiEventSensorTriggerThresholdInterpreted,
+		saHpiEventSensorTriggerThresholdEventState,
+		saHpiEventSensorPreviousState,
+		saHpiEventSensorOem,
 		saHpiEventSensorSpecific,
 		saHpiEventHotSwapState,
 		saHpiEventPreviousHotSwapState,
