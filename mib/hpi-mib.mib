@@ -5406,7 +5406,6 @@ saHpiFieldDelete	OBJECT-TYPE
 -- *******************************************************************************/
 --
 
-
 saHpiWatchdogCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
@@ -5670,6 +5669,295 @@ saHpiWatchdogRDR OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
 	::= {saHpiWatchdogEntry 13}
+	
+--
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********                  Annunciator Resource Data Records         **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+--
+
+saHpiAnnunciatorCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of annunciators present on this system."
+	::= {hpiResources 12}
+
+saHpiAnnunciatorTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiAnnunciatorEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION	"Table of Annunciator resource data records."
+        ::= {hpiResources 13}
+
+saHpiAnnunciatorEntry OBJECT-TYPE
+        SYNTAX          SaHpiAnnunciatorEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     " "
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiAnnunciatorNum }
+        ::= {saHpiAnnunciatorTable 1}
+
+SaHpiAnnunciatorEntry ::= SEQUENCE {
+	saHpiAnnunciatorNum		Unsigned32,
+	saHpiAnnunciatorType		INTEGER,
+	saHpiAnnunciatorModeReadOnly	TruthValue,
+	saHpiAnnunciatorMaxConditions	Unsigned32,
+	saHpiAnnunciatorMode		INTEGER,
+	saHpiAnnunciatorOem		Unsigned32
+      }
+      
+saHpiAnnunciatorNum	OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Unique Number identifying each annunciator."
+        ::= {saHpiAnnunciatorEntry 1}
+
+saHpiAnnunciatorType	OBJECT-TYPE
+        SYNTAX          INTEGER {
+				undefined(0),
+				led(1),
+				dryContactClosure(2),
+				audible(3),
+				lcdDisplay(4),
+				message(5),
+				composite(6),
+				oem(7)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"The following enumerated type defines the possible output types 
+	which can be associated with an Annunciator Management Instrument."
+        ::= {saHpiAnnunciatorEntry 2}
+	
+saHpiAnnunciatorModeReadOnly	OBJECT-TYPE
+        SYNTAX          TruthValue
+	MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"if True, Mode may not be changed by HPI User."
+        ::= {saHpiAnnunciatorEntry 3}
+
+saHpiAnnunciatorMaxConditions	OBJECT-TYPE
+        SYNTAX          Unsigned32
+	MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"maximum number of conditions that can be held in current 
+        set.  0 means no fixed limit.  if True, Mode may not be 
+	changed by HPI User."
+        ::= {saHpiAnnunciatorEntry 4}
+	
+saHpiAnnunciatorMode	OBJECT-TYPE
+        SYNTAX          INTEGER {
+				undefined(0),
+				auto(1),
+				user(2),
+				shared(3)
+			}
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	""
+        ::= {saHpiAnnunciatorEntry 5}
+
+saHpiAnnunciatorOem	OBJECT-TYPE
+        SYNTAX          Unsigned32
+	MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"maximum number of conditions that can be held in current 
+        set.  0 means no fixed limit.  if True, Mode may not be 
+	changed by HPI User."
+        ::= {saHpiAnnunciatorEntry 6}
+	
+aHpiAnnouncementCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of Announcements present on this system."
+	::= {hpiResources 14}
+
+saHpiAnnouncementTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiAnnouncementEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION	"Table of Announcements."
+        ::= {hpiResources 15}
+
+saHpiAnnouncementEntry OBJECT-TYPE
+        SYNTAX          SaHpiAnnouncementEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     " "
+        INDEX	{ 	saHpiDomainId, 
+			saHpiResourceId, 
+			saHpiAnnunciatorNum, 
+			saHpiAnnuoncementEntryId }
+        ::= {saHpiAnnouncementTable 1}
+
+SaHpiAnnouncementEntry ::= SEQUENCE {
+
+	saHpiAnnuoncementEntryId	Unsigned32,
+	saHpiAnnuoncementTimestamp  	SaHpiTime,
+	saHpiAnnuoncementAddedByUser	TruthValue,
+	saHpiAnnounementSeverity	INTEGER,
+	saHpiAnnuoncementAcknowledged	TruthValue,
+	
+	saHpiAnnouncementStatusCondType INTEGER,
+	saHpiAnnouncementEntityPath 	OCTET STRING,
+	saHpiAnnouncementSensorNum      Unsigned32,
+	saHpiAnnouncementEventState  	SaHpiEventState,
+	saHpiAnnouncementName           OCTET STRING,
+	saHpiAnnouncementMid		SaHpiManufacturerId,
+	saHpiAnnouncementTextType       SaHpiTextType,
+	saHpiAnnouncementTextLanguage	SaHpiTextLanguage,
+	saHpiAnnouncementText		SaHpiText
+
+      }
+      
+saHpiAnnuoncementEntryId	OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Announcment Entry Id."
+	::= {saHpiAnnouncementEntry 1}
+
+saHpiAnnuoncementTimestamp	OBJECT-TYPE
+	SYNTAX		SaHpiTime
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Time when announcement added to set."
+	::= {saHpiAnnouncementEntry 2}
+	
+saHpiAnnuoncementAddedByUser	OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"True if added to set by HPI User, False if added 
+	automatically by HPI implementation."
+	::= {saHpiAnnouncementEntry 3}
+
+saHpiAnnounementSeverity	OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined(0),
+				critical(1),
+				major(2),
+				minor(3),
+				informational(4),
+				ok(5),
+				debug(241),
+				allSeverities(256)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Only used with DAT and Annunciator functions.  
+	This is not a valid severity for events or alarms."
+	::= {saHpiAnnouncementEntry 4}
+	
+saHpiAnnuoncementAcknowledged	OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Acknowledged flag."
+	::= {saHpiAnnouncementEntry 5}
+ 	
+saHpiAnnouncementStatusCondType	OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined(0),
+				sensor(1),
+				resource(2),
+				oem(3),
+				user(4)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Status Condition Type."
+	::= {saHpiAnnouncementEntry 6}
+
+saHpiAnnouncementEntityPath  	OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	 
+	"Entity assoc. with status condition.
+
+	This object converts HPI's saHpiEntityPathT structure 
+	and an OpenHPI canonical string. The canonical string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	Order of significance is inverted to make entity paths 
+	look more like Unix directory structure. It is also assumed 
+	that {ROOT,0} exists implicitly before all of these entries. 
+	
+	For example:
+ 	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        ::= {saHpiAnnouncementEntry 7}  
+	
+saHpiAnnouncementSensorNum 	OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Sensor associated with status Only valid 
+	if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
+	::= {saHpiAnnouncementEntry 8}
+  	
+saHpiAnnouncementEventState 	OBJECT-TYPE
+	SYNTAX		SaHpiEventState
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Sensor event state. Only valid if Type is 
+        SAHPI_STATUS_COND_TYPE_SENSOR.."
+	::= {saHpiAnnouncementEntry 9}
+	    
+saHpiAnnouncementName 	OBJECT-TYPE
+	SYNTAX		OCTET STRING(SIZE(0..255))
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"AIS compatible identifier associated with Status condition."
+	::= {saHpiAnnouncementEntry 10}
+
+saHpiAnnouncementMid 	OBJECT-TYPE
+	SYNTAX		SaHpiManufacturerId
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Manufacturer Id associated with status condition, 
+	required when type is SAHPI_STATUS_COND_TYPE_OEM."
+	::= {saHpiAnnouncementEntry 11}
+
+saHpiAnnouncementTextType OBJECT-TYPE 
+	SYNTAX		SaHpiTextType
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Field Data. 
+	See Definition for SaHpiTextType for more details."
+	::= {saHpiAnnouncementEntry 12}
+	
+saHpiAnnouncementTextLanguage	OBJECT-TYPE
+	SYNTAX		SaHpiTextLanguage
+        MAX-ACCESS      read-write
+	STATUS          current
+	DESCRIPTION     "Field Data.
+	See Definition for SaHpiTextLanguage for more details."
+	::= {saHpiAnnouncementEntry 13}
+
+saHpiAnnouncementText	OBJECT-TYPE
+	SYNTAX		SaHpiText
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Field Data.
+	The type of date is specified
+	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+	::= {saHpiAnnouncementEntry 14}
+
 -- 
 -- Notifications
 --
