@@ -447,7 +447,6 @@ saHpiEventTable_modify_context (unsigned long entry_id,
       ctx->domain_id = rpt_entry->DomainId;
 
       ctx->saHpiEventIndex = entry_id;
-
       ctx->saHpiEventType = event_entry->EventType + 1;
 
 //IBM-KR: Endian
@@ -456,7 +455,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
       ctx->saHpiEventTimestamp.high = event_entry->Timestamp >> 32;
 
       ctx->saHpiEventSeverity = event_entry->Severity + 1;
-
+	
       if (event_entry->EventType == SAHPI_ET_SENSOR)
 	{
 	  sensor = event_entry->EventDataUnion.SensorEvent;
@@ -465,33 +464,16 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	  ctx->saHpiEventSensorCategory = sensor.EventCategory+1;
 	  ctx->saHpiEventSensorAssertion =
 	    (sensor.Assertion == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-	  if (sensor.EventCategory & SAHPI_EC_THRESHOLD)
-	    ctx->saHpiEventSensorStateCategoryThreshold = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_USAGE)
-	    ctx->saHpiEventSensorStateCategoryUsage = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_STATE)
-	    ctx->saHpiEventSensorStateCategoryState = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_PRED_FAIL)
-	    ctx->saHpiEventSensorStateCategoryPredFail = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_LIMIT)
-	    ctx->saHpiEventSensorStateCategoryLimit = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_PERFORMANCE)
-	    ctx->saHpiEventSensorStateCategoryPerformance = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_SEVERITY)
-	    ctx->saHpiEventSensorStateCategorySeverity = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_PRESENCE)
-	    ctx->saHpiEventSensorStateCategoryPresence = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_ENABLE)
-	    ctx->saHpiEventSensorStateCategoryEnable = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_AVAILABILITY)
-	    ctx->saHpiEventSensorStateCategoryAvailability =
-	      sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_REDUNDANCY)
-	    ctx->saHpiEventSensorStateCategoryRedundancy = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_USER)
-	    ctx->saHpiEventSensorStateCategoryUser = sensor.EventState;
-	  if (sensor.EventCategory & SAHPI_EC_GENERIC)
-	    ctx->saHpiEventSensorStateCategoryGeneric = sensor.EventState;
+	
+	  /*
+	   * Generate a string representation of the state
+	   */
+	  build_state_string(sensor.EventCategory, 
+			     sensor.EventState,
+			     (char *)&ctx->saHpiEventSensorState,
+			     &ctx->saHpiEventSensorState_len,
+			     EVENT_SENSOR_STATE_MAX);
+
 	  /*
 	     #define SAHPI_SOD_TRIGGER_READING   (SaHpiSensorOptionalDataT)0x01
 	     #define SAHPI_SOD_TRIGGER_THRESHOLD (SaHpiSensorOptionalDataT)0x02
@@ -606,7 +588,15 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 	    }
 
-	  ctx->saHpiEventSensorPreviousState = sensor.PreviousState;
+	  /*
+	   * Generate a string representation of the state
+	   */
+	  build_state_string(sensor.EventCategory, 
+			     sensor.PreviousState,
+			     (char *)&ctx->saHpiEventSensorPreviousState,
+			     &ctx->saHpiEventSensorPreviousState_len,
+			     EVENT_SENSOR_STATE_MAX);
+
 	  ctx->saHpiEventSensorOem = sensor.Oem;
 	  ctx->saHpiEventSensorSpecific = sensor.SensorSpecific;
 
@@ -888,139 +878,105 @@ saHpiEventTable_row_copy (saHpiEventTable_context * dst,
     }
   dst->index.len = src->index.len;
 
+   dst->saHpiEventIndex = src->saHpiEventIndex;
 
-  dst->saHpiEventIndex = src->saHpiEventIndex;
+    dst->saHpiEventType = src->saHpiEventType;
 
-  dst->saHpiEventType = src->saHpiEventType;
+    dst->saHpiEventTimestamp = src->saHpiEventTimestamp;
 
-  dst->saHpiEventTimestamp = src->saHpiEventTimestamp;
+    dst->saHpiEventSeverity = src->saHpiEventSeverity;
 
-  dst->saHpiEventSeverity = src->saHpiEventSeverity;
+    dst->saHpiEventSensorNum = src->saHpiEventSensorNum;
 
-  dst->saHpiEventSensorNum = src->saHpiEventSensorNum;
+    dst->saHpiEventSensorType = src->saHpiEventSensorType;
 
-  dst->saHpiEventSensorType = src->saHpiEventSensorType;
+    dst->saHpiEventSensorCategory = src->saHpiEventSensorCategory;
 
-  dst->saHpiEventSensorCategory = src->saHpiEventSensorCategory;
+    dst->saHpiEventSensorAssertion = src->saHpiEventSensorAssertion;
 
-  dst->saHpiEventSensorAssertion = src->saHpiEventSensorAssertion;
+    memcpy(dst->saHpiEventSensorState, src->saHpiEventSensorState,
+           src->saHpiEventSensorState_len);
+    dst->saHpiEventSensorState_len = src->saHpiEventSensorState_len;
 
-  dst->saHpiEventSensorStateCategoryUnspecified =
-    src->saHpiEventSensorStateCategoryUnspecified;
+    dst->saHpiEventSensorOptionalData = src->saHpiEventSensorOptionalData;
 
-  dst->saHpiEventSensorStateCategoryThreshold =
-    src->saHpiEventSensorStateCategoryThreshold;
+    dst->saHpiEventSensorTriggerReadingType =
+        src->saHpiEventSensorTriggerReadingType;
 
-  dst->saHpiEventSensorStateCategoryUsage =
-    src->saHpiEventSensorStateCategoryUsage;
+    dst->saHpiEventSensorTriggerReadingRaw =
+        src->saHpiEventSensorTriggerReadingRaw;
 
-  dst->saHpiEventSensorStateCategoryState =
-    src->saHpiEventSensorStateCategoryState;
+    dst->saHpiEventSensorTriggerReadingInterpretedType =
+        src->saHpiEventSensorTriggerReadingInterpretedType;
 
-  dst->saHpiEventSensorStateCategoryPredFail =
-    src->saHpiEventSensorStateCategoryPredFail;
+    memcpy(dst->saHpiEventSensorTriggerReadingInterpreted,
+           src->saHpiEventSensorTriggerReadingInterpreted,
+           src->saHpiEventSensorTriggerReadingInterpreted_len);
+    dst->saHpiEventSensorTriggerReadingInterpreted_len =
+        src->saHpiEventSensorTriggerReadingInterpreted_len;
 
-  dst->saHpiEventSensorStateCategoryLimit =
-    src->saHpiEventSensorStateCategoryLimit;
+    memcpy(dst->saHpiEventSensorTriggerReadingEventState,
+           src->saHpiEventSensorTriggerReadingEventState,
+           src->saHpiEventSensorTriggerReadingEventState_len);
+    dst->saHpiEventSensorTriggerReadingEventState_len =
+        src->saHpiEventSensorTriggerReadingEventState_len;
 
-  dst->saHpiEventSensorStateCategoryPerformance =
-    src->saHpiEventSensorStateCategoryPerformance;
+    dst->saHpiEventSensorTriggerThresholdType =
+        src->saHpiEventSensorTriggerThresholdType;
 
-  dst->saHpiEventSensorStateCategorySeverity =
-    src->saHpiEventSensorStateCategorySeverity;
+    dst->saHpiEventSensorTriggerThresholdRaw =
+        src->saHpiEventSensorTriggerThresholdRaw;
 
-  dst->saHpiEventSensorStateCategoryPresence =
-    src->saHpiEventSensorStateCategoryPresence;
+    dst->saHpiEventSensorTriggerThresholdInterpretedType =
+        src->saHpiEventSensorTriggerThresholdInterpretedType;
 
-  dst->saHpiEventSensorStateCategoryEnable =
-    src->saHpiEventSensorStateCategoryEnable;
+    memcpy(dst->saHpiEventSensorTriggerThresholdInterpreted,
+           src->saHpiEventSensorTriggerThresholdInterpreted,
+           src->saHpiEventSensorTriggerThresholdInterpreted_len);
+    dst->saHpiEventSensorTriggerThresholdInterpreted_len =
+        src->saHpiEventSensorTriggerThresholdInterpreted_len;
 
-  dst->saHpiEventSensorStateCategoryAvailability =
-    src->saHpiEventSensorStateCategoryAvailability;
+    memcpy(dst->saHpiEventSensorTriggerThresholdEventState,
+           src->saHpiEventSensorTriggerThresholdEventState,
+           src->saHpiEventSensorTriggerThresholdEventState_len);
+    dst->saHpiEventSensorTriggerThresholdEventState_len =
+        src->saHpiEventSensorTriggerThresholdEventState_len;
 
-  dst->saHpiEventSensorStateCategoryRedundancy =
-    src->saHpiEventSensorStateCategoryRedundancy;
+    memcpy(dst->saHpiEventSensorPreviousState,
+           src->saHpiEventSensorPreviousState,
+           src->saHpiEventSensorPreviousState_len);
+    dst->saHpiEventSensorPreviousState_len =
+        src->saHpiEventSensorPreviousState_len;
 
-  dst->saHpiEventSensorStateCategoryUser =
-    src->saHpiEventSensorStateCategoryUser;
+    dst->saHpiEventSensorOem = src->saHpiEventSensorOem;
 
-  dst->saHpiEventSensorStateCategoryGeneric =
-    src->saHpiEventSensorStateCategoryGeneric;
+    dst->saHpiEventSensorSpecific = src->saHpiEventSensorSpecific;
 
-  dst->saHpiEventSensorOptionalData = src->saHpiEventSensorOptionalData;
+    dst->saHpiEventHotSwapState = src->saHpiEventHotSwapState;
 
-  dst->saHpiEventSensorTriggerReadingType =
-    src->saHpiEventSensorTriggerReadingType;
+    dst->saHpiEventPreviousHotSwapState =
+        src->saHpiEventPreviousHotSwapState;
 
-  dst->saHpiEventSensorTriggerReadingRaw =
-    src->saHpiEventSensorTriggerReadingRaw;
+    dst->saHpiEventWatchdogNum = src->saHpiEventWatchdogNum;
 
-  dst->saHpiEventSensorTriggerReadingInterpretedType =
-    src->saHpiEventSensorTriggerReadingInterpretedType;
+    dst->saHpiEventWatchdogAction = src->saHpiEventWatchdogAction;
 
-  memcpy (dst->saHpiEventSensorTriggerReadingInterpreted,
-	  src->saHpiEventSensorTriggerReadingInterpreted,
-	  src->saHpiEventSensorTriggerReadingInterpreted_len);
-  dst->saHpiEventSensorTriggerReadingInterpreted_len =
-    src->saHpiEventSensorTriggerReadingInterpreted_len;
+    dst->saHpiEventWatchdogPreTimerAction =
+        src->saHpiEventWatchdogPreTimerAction;
 
-  memcpy (dst->saHpiEventSensorTriggerReadingEventState,
-	  src->saHpiEventSensorTriggerReadingEventState,
-	  src->saHpiEventSensorTriggerReadingEventState_len);
-  dst->saHpiEventSensorTriggerReadingEventState_len =
-    src->saHpiEventSensorTriggerReadingEventState_len;
+    dst->saHpiEventWatchdogUse = src->saHpiEventWatchdogUse;
 
-  dst->saHpiEventSensorTriggerThresholdType =
-    src->saHpiEventSensorTriggerThresholdType;
+    dst->saHpiEventOemManufacturerIdT = src->saHpiEventOemManufacturerIdT;
 
-  dst->saHpiEventSensorTriggerThresholdRaw =
-    src->saHpiEventSensorTriggerThresholdRaw;
+    memcpy(dst->saHpiEventOemEventData, src->saHpiEventOemEventData,
+           src->saHpiEventOemEventData_len);
+    dst->saHpiEventOemEventData_len = src->saHpiEventOemEventData_len;
 
-  dst->saHpiEventSensorTriggerThresholdInterpretedType =
-    src->saHpiEventSensorTriggerThresholdInterpretedType;
+    memcpy(dst->saHpiEventUserEventData, src->saHpiEventUserEventData,
+           src->saHpiEventUserEventData_len);
+    dst->saHpiEventUserEventData_len = src->saHpiEventUserEventData_len;
 
-  memcpy (dst->saHpiEventSensorTriggerThresholdInterpreted,
-	  src->saHpiEventSensorTriggerThresholdInterpreted,
-	  src->saHpiEventSensorTriggerThresholdInterpreted_len);
-  dst->saHpiEventSensorTriggerThresholdInterpreted_len =
-    src->saHpiEventSensorTriggerThresholdInterpreted_len;
-
-  memcpy (dst->saHpiEventSensorTriggerThresholdEventState,
-	  src->saHpiEventSensorTriggerThresholdEventState,
-	  src->saHpiEventSensorTriggerThresholdEventState_len);
-  dst->saHpiEventSensorTriggerThresholdEventState_len =
-    src->saHpiEventSensorTriggerThresholdEventState_len;
-
-  dst->saHpiEventSensorPreviousState = src->saHpiEventSensorPreviousState;
-
-  dst->saHpiEventSensorOem = src->saHpiEventSensorOem;
-
-  dst->saHpiEventSensorSpecific = src->saHpiEventSensorSpecific;
-
-  dst->saHpiEventHotSwapState = src->saHpiEventHotSwapState;
-
-  dst->saHpiEventPreviousHotSwapState = src->saHpiEventPreviousHotSwapState;
-
-  dst->saHpiEventWatchdogNum = src->saHpiEventWatchdogNum;
-
-  dst->saHpiEventWatchdogAction = src->saHpiEventWatchdogAction;
-
-  dst->saHpiEventWatchdogPreTimerAction =
-    src->saHpiEventWatchdogPreTimerAction;
-
-  dst->saHpiEventWatchdogUse = src->saHpiEventWatchdogUse;
-
-  dst->saHpiEventOemManufacturerIdT = src->saHpiEventOemManufacturerIdT;
-
-  memcpy (dst->saHpiEventOemEventData, src->saHpiEventOemEventData,
-	  src->saHpiEventOemEventData_len);
-  dst->saHpiEventOemEventData_len = src->saHpiEventOemEventData_len;
-
-  memcpy (dst->saHpiEventUserEventData, src->saHpiEventUserEventData,
-	  src->saHpiEventUserEventData_len);
-  dst->saHpiEventUserEventData_len = src->saHpiEventUserEventData_len;
-
-  dst->saHpiEventDelete = src->saHpiEventDelete;
+    dst->saHpiEventDelete = src->saHpiEventDelete;
 
   dst->resource_id = src->resource_id;
   dst->domain_id = src->domain_id;
@@ -1241,20 +1197,7 @@ saHpiEventTable_set_reserve1 (netsnmp_request_group * rg)
 	case COLUMN_SAHPIEVENTSENSORTYPE:
 	case COLUMN_SAHPIEVENTSENSORCATEGORY:
 	case COLUMN_SAHPIEVENTSENSORASSERTION:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUNSPECIFIED:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYTHRESHOLD:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSAGE:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSTATE:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPREDFAIL:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYLIMIT:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPERFORMANCE:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSEVERITY:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPRESENCE:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYENABLE:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYAVAILABILITY:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYREDUNDANCY:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSER:
-	case COLUMN_SAHPIEVENTSENSORSTATECATEGORYGENERIC:
+	case COLUMN_SAHPIEVENTSENSORSTATE:
 	case COLUMN_SAHPIEVENTSENSOROPTIONALDATA:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGTYPE:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGRAW:
@@ -1654,131 +1597,14 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 				sizeof (context->saHpiEventSensorAssertion));
       break;
 
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUNSPECIFIED:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryUnspecified,
-				sizeof (context->
-					saHpiEventSensorStateCategoryUnspecified));
-      break;
+    case COLUMN_SAHPIEVENTSENSORSTATE:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->saHpiEventSensorState,
+                                 context->saHpiEventSensorState_len);
+        break;
 
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYTHRESHOLD:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryThreshold,
-				sizeof (context->
-					saHpiEventSensorStateCategoryThreshold));
-      break;
 
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSAGE:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryUsage,
-				sizeof (context->
-					saHpiEventSensorStateCategoryUsage));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSTATE:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryState,
-				sizeof (context->
-					saHpiEventSensorStateCategoryState));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPREDFAIL:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryPredFail,
-				sizeof (context->
-					saHpiEventSensorStateCategoryPredFail));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYLIMIT:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryLimit,
-				sizeof (context->
-					saHpiEventSensorStateCategoryLimit));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPERFORMANCE:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryPerformance,
-				sizeof (context->
-					saHpiEventSensorStateCategoryPerformance));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSEVERITY:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategorySeverity,
-				sizeof (context->
-					saHpiEventSensorStateCategorySeverity));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPRESENCE:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryPresence,
-				sizeof (context->
-					saHpiEventSensorStateCategoryPresence));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYENABLE:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryEnable,
-				sizeof (context->
-					saHpiEventSensorStateCategoryEnable));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYAVAILABILITY:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryAvailability,
-				sizeof (context->
-					saHpiEventSensorStateCategoryAvailability));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYREDUNDANCY:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryRedundancy,
-				sizeof (context->
-					saHpiEventSensorStateCategoryRedundancy));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSER:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryUser,
-				sizeof (context->
-					saHpiEventSensorStateCategoryUser));
-      break;
-
-    case COLUMN_SAHPIEVENTSENSORSTATECATEGORYGENERIC:
-	    /** INTEGER = ASN_INTEGER */
-      snmp_set_var_typed_value (var, ASN_INTEGER,
-				(char *) &context->
-				saHpiEventSensorStateCategoryGeneric,
-				sizeof (context->
-					saHpiEventSensorStateCategoryGeneric));
-      break;
 
     case COLUMN_SAHPIEVENTSENSOROPTIONALDATA:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
@@ -1878,15 +1704,15 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 				context->
 				saHpiEventSensorTriggerThresholdEventState_len);
       break;
-
     case COLUMN_SAHPIEVENTSENSORPREVIOUSSTATE:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-      snmp_set_var_typed_value (var, ASN_UNSIGNED,
-				(char *) &context->
-				saHpiEventSensorPreviousState,
-				sizeof (context->
-					saHpiEventSensorPreviousState));
-      break;
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiEventSensorPreviousState,
+                                 context->
+                                 saHpiEventSensorPreviousState_len);
+        break;
+
 
     case COLUMN_SAHPIEVENTSENSOROEM:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
