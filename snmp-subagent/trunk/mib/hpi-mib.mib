@@ -4124,7 +4124,7 @@ SaHpiEventLogInfoEntry ::= SEQUENCE {
         saHpiEventLogInfoSize               Unsigned32,
         saHpiEventLogInfoUserEventMaxSize   Unsigned32,
         saHpiEventLogInfoUpdateTimestamp    SaHpiTime,
-        saHpiEventLogInfoTime        SaHpiTime,
+        saHpiEventLogInfoTime        	    SaHpiTime,
 
         saHpiEventLogInfoIsEnabled          TruthValue,
         
@@ -4269,7 +4269,7 @@ saHpiEventLogInfoOverflowReset OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-            "This function resets the OverflowFlag in the Event Log info record of the specified Event Log."
+        "This function resets the OverflowFlag in the Event Log info record of the specified Event Log."
 
         ::= {saHpiEventLogInfoEntry 10}
 
@@ -4281,7 +4281,7 @@ saHpiEventLogInfoDelete OBJECT-TYPE
         "This function erases the contents of the specified Event Log.
 
         Set this to destroy(6) or notInService(2) to delete the event 
-log for this resource.
+	log for this resource.
 
         NOTE: The OverflowFlag field in the Event Log info record will be 
         reset when this function is called."
@@ -4293,6 +4293,7 @@ log for this resource.
 
 saHpiEventLogInfoState OBJECT-TYPE
     SYNTAX      TruthValue
+    
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
@@ -4346,7 +4347,6 @@ SaHpiEventLogEntry ::= SEQUENCE {
         saHpiEventLogType               INTEGER,
         saHpiEventLogAddedTimestamp     SaHpiTime,
 	
-        saHpiEventLogClearRowStatus	TruthValue,
         saHpiEventLogRowPointer         RowPointer
 	
         }
@@ -4396,24 +4396,13 @@ saHpiEventLogAddedTimestamp OBJECT-TYPE
         DESCRIPTION     "Refer to SaHpiTime for full description."
         ::= {saHpiEventLogEntry 3}
 	
-saHpiEventLogClearRowStatus OBJECT-TYPE 
-        SYNTAX          TruthValue
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "Write value of true will clear the Event log for the 
-	Domain and Resource specified by the index value.  The 
-	saHpiEventLogIndex value is ignore."
-	REFERENCE " See section 6.4.4 for futher details."
-	::=   {saHpiEventLogEntry 4 }
-
-
 saHpiEventLogRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
             "Pointer to the event."
-        ::= {saHpiEventLogEntry 5}
+        ::= {saHpiEventLogEntry 4}
 
 
         
