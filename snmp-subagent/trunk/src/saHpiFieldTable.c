@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiFieldTable.h"
+#include "hpiCheckIndice.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -240,53 +241,23 @@ saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hd
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiFieldTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiFieldTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiInventoryId;
 
        memset( &var_saHpiInventoryId, 0x00, sizeof(var_saHpiInventoryId) );
        var_saHpiInventoryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiFieldTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiInventoryId.next_variable = &var_XX;
-#endif
+       var_saHpiInventoryId.next_variable = &var_saHpiAreaId;
 
        memset( &var_saHpiAreaId, 0x00, sizeof(var_saHpiAreaId) );
        var_saHpiAreaId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiFieldTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiAreaId.next_variable = &var_XX;
-#endif
+       var_saHpiAreaId.next_variable = &var_saHpiFieldId;
 
        memset( &var_saHpiFieldId, 0x00, sizeof(var_saHpiFieldId) );
        var_saHpiFieldId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiFieldTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiFieldId.next_variable = &var_XX;
-#endif
+       var_saHpiFieldId.next_variable = NULL;
 
 
     /*
@@ -306,43 +277,22 @@ saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hd
               /** skipping external index saHpiAreaId */
    
                 ctx->saHpiFieldId = *var_saHpiFieldId.val.integer;
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiInventoryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiAreaId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiFieldId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if(!err)
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+
+		if(!err)
+			err = saHpiInventoryId_check_index(*var_saHpiInventoryId.val.integer);
+
+		if(!err)
+			err = saHpiAreaId_check_index(*var_saHpiAreaId.val.integer);
+
+		if(!err)
+			err = saHpiFieldId_check_index(*var_saHpiFieldId.val.integer);
+
     }
 
     /*
@@ -776,6 +726,7 @@ void saHpiFieldTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+#if 0 /* TODO DMJ */
 #ifndef saHpiFieldTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
@@ -789,6 +740,7 @@ void saHpiFieldTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmDelete : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmDelete : NULL);
+#endif /* TODO DMJ */
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,

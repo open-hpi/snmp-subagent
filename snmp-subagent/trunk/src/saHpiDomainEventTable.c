@@ -289,7 +289,7 @@ saHpiDomainEventTable_extract_index( saHpiDomainEventTable_context * ctx, netsnm
 			err = saHpiEventHistorical_check_index(*var_saHpiEventHistorical.val.integer);
 
 		if(!err) 
-			err = saHpiDomainEventTimestamp_check_index(var_saHpiDomainEventTimestamp);
+			err = saHpiDomainEventTimestamp_check_index(&var_saHpiDomainEventTimestamp);
     }
 
     /*

@@ -47,7 +47,27 @@ int saHpiDomainAlarmId_check_index(long val);
 /**************************/
 int saHpiEventSeverity_check_index(long val);
 int saHpiEventHistorical_check_index(long val);
-int saHpiDomainEventTimestamp_check_index(netsnmp_variable_list var_saHpiDomainEventTimestamp);
+int saHpiDomainEventTimestamp_check_index(netsnmp_variable_list *var_saHpiDomainEventTimestamp);
+
+/**************************/
+/* saHpiEventTable  */    
+/**************************/
+int saHpiEvent_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
+int saHpiEventQueueStatus_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
+int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
+
+/**************************/
+/* saHpiFeildTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val);
+int saHpiFieldId_check_index(long val);
+
+/***************************/
+/* saHpiHotSwapEventTable  */    
+/***************************/
+int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSwapEventTimestamp);
+
+
  
 
 
