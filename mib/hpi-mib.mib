@@ -235,7 +235,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 	
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiID		Unsigned32,				      
+	saHpiInfoDomainID	Unsigned32,				      
 	saHpiDomainCapabilities Unsigned32,
 	saHpiIsPeer		TruthValue,         
 				      				      
@@ -258,7 +258,7 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 	saHpiDomainGuid		OCTET STRING            
 	}
 	
-saHpiID OBJECT-TYPE 
+saHpiInfoDomainID OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -662,7 +662,76 @@ saHpiDomainGuid 	OBJECT-TYPE
 
 	::= {saHpiDomainInfoEntry 19}
 
-       
+
+saHpiDrtEntryCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of DRT entries present in the system. 
+	This field is used to determine if new resources have been added
+	or existing removed. The same functionality is available using
+	notifications."
+	::= {hpiEntity 3}
+	
+saHpiDrtTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiDrtEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	
+	""
+	::= {hpiEntity 4}
+
+saHpiDrtEntry OBJECT-TYPE
+	SYNTAX		SaHpiDrtEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	""
+	INDEX	{ saHpiDomainID, saHpiDomainID }
+	::= {saHpiDrtTable 1}
+	
+SaHpiDrtEntry ::= SEQUENCE {
+
+	saHpiDrtEntryId		Unsigned32,
+	saHpiDrtDomainId        Unsigned32,
+	saHpiDrtIsPeer		TruthValue
+	           
+	}
+
+saHpiDrtEntryId OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"EntryId - Identifier of the DRT entry to retrieve. Reserved EntryId
+		values:
+		SAHPI_FIRST_ENTRY  Get first entry
+		SAHPI_LAST_ENTRY   Reserved as delimiter for end of list. Not avalid entry identifier.
+	
+		Table Related Type Definitions  
+		SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
+		SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
+		SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
+	::= {saHpiDrtEntry 1}
+
+saHpiDrtDomainId OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Unique Domain Id associated with domain.
+
+	Note:
+ 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+	::= {saHpiDrtEntry 2}
+
+saHpiDrtIsPeer OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates that this domain participates in a peer relationship.
+	TRUE = Domain is peer.  FALSE = Domain is not peer "
+        ::= {saHpiDrtEntry 3}
+
 saHpiEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
@@ -671,7 +740,7 @@ saHpiEntryCount OBJECT-TYPE
 	This field is used to determine if new resources have been added
 	or existing removed. The same functionality is available using
 	notifications."
-	::= {hpiEntity 3}
+	::= {hpiEntity 5}
 
 saHpiEntryUpdateCount OBJECT-TYPE
 	SYNTAX		Unsigned32
@@ -680,7 +749,7 @@ saHpiEntryUpdateCount OBJECT-TYPE
 	DESCRIPTION	"This count is incremented any time the table
 	is changed. It rolls over to zero when the maximum value is reached.
 	The same functionality is available using notifications."
-	::= {hpiEntity 4}
+	::= {hpiEntity 6}
 
 saHpiEntryUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
@@ -704,7 +773,7 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 			 
 	Note: The same functionality - when the table is changed - is available
 	via notifications."
-	::= {hpiEntity 5}
+	::= {hpiEntity 7}
 
 saHpiTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF SaHpiEntry
@@ -714,7 +783,7 @@ saHpiTable OBJECT-TYPE
 	"This table represents the management attributes common to all entities
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-	::= {hpiEntity 6}
+	::= {hpiEntity 8}
 
 saHpiEntry OBJECT-TYPE
 	SYNTAX		SaHpiEntry
