@@ -82,13 +82,53 @@ int saHpiEventHistorical_check_index(long val)
 	return 0;
 }
 
-int saHpiDomainEventTimestamp_check_index(netsnmp_variable_list var_saHpiDomainEventTimestamp)
+int saHpiDomainEventTimestamp_check_index(netsnmp_variable_list *var_saHpiDomainEventTimestamp)
 {
-	snmp_log(LOG_ERR, "saHpiDomainEventTimestamp_check_index NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	snmp_log(LOG_ERR, "saHpiDomainEventTimestamp_check_index OCTET_STR:NEED TO INVESTIGATE A BETTER CHECK!\n" );
 
 	return 0;
 }
 
+/**************************/
+/* saHpiEventTable  */    
+/**************************/
+int saHpiEvent_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime)
+{
+	snmp_log(LOG_ERR, "saHpiEvent_check_index ASN_OBJECT_ID: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	return 0;
+}
+
+int saHpiEventQueueStatus_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime)
+{
+	return 0;
+}
+
+int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime)
+{
+	snmp_log(LOG_ERR, "saHpiEventSaHpiTime_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	return 0;
+}
 
 
- 
+/**************************/
+/* saHpiFeildTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val)
+{
+	return 0;
+}
+
+int saHpiFieldId_check_index(long val)
+{
+	return 0;
+}
+
+/***************************/
+/* saHpiHotSwapEventTable  */    
+/***************************/
+int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSwapEventTimestamp)
+{
+	snmp_log(LOG_ERR, "saHpiHotSwapEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	return 0;
+
+}
