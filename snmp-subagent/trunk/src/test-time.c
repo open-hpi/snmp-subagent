@@ -22,12 +22,12 @@ convert (SaHpiTimeT hpi_time) {
 	char time_buf[100], time_buf2[100];
 	int rc;
 
-	hpi_tt = hpi_time / 10000000000;
+	hpi_tt = (hpi_time / 1000000000);
 
 	hpi_tm = gmtime( &hpi_tt);
 	strftime (time_buf, 100, "%c", hpi_tm);	
 
-	local_tt = localtime( &local_tt);
+	local_tt = time( &local_tt);
 	local_tm = gmtime( &local_tt );
 	strftime (time_buf2, 100, "%c", local_tm);	
 
