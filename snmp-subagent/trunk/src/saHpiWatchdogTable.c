@@ -131,12 +131,7 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
       
       CONTAINER_INSERT(cb.container, watchdog_context);	  
       watchdog_count = CONTAINER_SIZE(cb.container);
-      /*
-	// IBM-KR: TODO notifications
-	if (send_traps_on_startup == AGENT_TRUE) {
-	send_saHpiWatchdogTable_notification(watchdog_context);
-	}      
-      */
+     
     }
     rc = AGENT_ERR_NOERROR;
   } else
@@ -148,13 +143,17 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
 
 
 int
-delete_watchdog(SaHpiDomainIdT domain_id,
+delete_watchdog_row(SaHpiDomainIdT domain_id,
 		SaHpiResourceIdT resource_id,
 		SaHpiWatchdogNumT num) {
 
   saHpiWatchdogTable_context *ctx;
   oid index_oid[WATCHDOG_INDEX_NR];
   netsnmp_index index;
+  int rc = AGENT_ERR_NOT_FOUND;
+
+  DEBUGMSGTL((AGENT,"delete_watchdog_row (%d, %d, %d). Entry.\n",
+  	domain_id, resource_id, num));
 
     // Look at the MIB to find out what the indexs are
   index_oid[0] = domain_id;
@@ -168,10 +167,10 @@ delete_watchdog(SaHpiDomainIdT domain_id,
   if (ctx) {
     CONTAINER_REMOVE(cb.container, ctx);
     watchdog_count = CONTAINER_SIZE(cb.container);
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }
-    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_watchdog_row. Exit (rc: %d).\n", rc));  
+  return rc;
 }
 
 int  

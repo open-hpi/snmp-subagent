@@ -27,6 +27,10 @@
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiHotSwapTable.h>
 #include <saHpiWatchdogTable.h>
+
+
+extern int send_traps;
+
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
@@ -200,10 +204,10 @@ populate_event(SaHpiSelEntryIdT entry_id,
     
       CONTAINER_INSERT(cb.container, event_context);
       event_count = CONTAINER_SIZE(cb.container);
-
-      if (trap != NULL) {
-
-	trap_var = build_notification(&event_index,
+      if (send_traps == AGENT_TRUE) {
+	if (trap != NULL) {
+	  
+	  trap_var = build_notification(&event_index,
 				      trap, trap_len,
 				      trap_oid, TRAPS_OID_LENGTH,
 				      saHpiEventTable_oid, saHpiEventTable_oid_len,
@@ -217,7 +221,7 @@ populate_event(SaHpiSelEntryIdT entry_id,
 	} else {
 	  DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
 	}
-				      
+	}		      
       }
       
     }
@@ -682,10 +686,12 @@ delete_event_row(SaHpiDomainIdT domain_id,
 		 SaHpiSelEntryIdT num)
 {
   saHpiEventTable_context *ctx;
-
+  int rc = AGENT_ERR_NOT_FOUND;
   netsnmp_index event_index;
   oid event_oid[EVENT_INDEX_NR];
-  DEBUGMSGTL((AGENT,"-delete_event_row\n"));
+
+  DEBUGMSGTL((AGENT,"delete_event_row(%d, %d, %d). Entry \n",
+  	domain_id, resource_id, num));
 
   event_oid[0] = domain_id;
   event_oid[1] = resource_id;
@@ -699,10 +705,10 @@ delete_event_row(SaHpiDomainIdT domain_id,
   if (ctx) {
     CONTAINER_REMOVE(cb.container, ctx);
     event_count = CONTAINER_SIZE(cb.container);
-    return AGENT_ERR_NOERROR;
+    rc = AGENT_ERR_NOERROR;
   }
-
-  return AGENT_ERR_NOT_FOUND;  
+  DEBUGMSGTL((AGENT,"delete_event_row. Exit (rc: %d).\n", rc));
+  return rc;
 }
 
   

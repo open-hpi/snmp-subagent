@@ -34,11 +34,11 @@
 #include <saHpiInventoryTable.h>
 #include <saHpiWatchdogTable.h>
 
+extern int send_traps;
+
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
-
-extern  int send_traps_on_startup;
 
 static oid             saHpiRdrTable_oid[] = { saHpiRdrTable_TABLE_OID };
 static size_t          saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
@@ -110,22 +110,25 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
    netsnmp_index	rdr_index;
    saHpiRdrTable_context	*rdr_context; 
 
+   
 
   oid *trap_oid;
   trap_vars *trap = NULL;
   size_t trap_len;
   netsnmp_variable_list *trap_var;
 
-   DEBUGMSGTL((AGENT,"\n\t--- populate_rdr: Entry.\n"));
+  DEBUGMSGTL((AGENT,"\n\t--- populate_rdr: Entry.\n"));
   if ((rc = getSaHpiSession(&session_id)) == AGENT_ERR_NOERROR) {
     rdr_index.len = RDR_INDEX_NR;
     next_rdr= SAHPI_FIRST_ENTRY;
     do {
       current_rdr = next_rdr;
+      memset(&rdr_entry, 0x00, sizeof(SaHpiRdrT));
+
       err = saHpiRdrGet(session_id, rpt_entry->ResourceId,
 			current_rdr, &next_rdr, &rdr_entry);
       
-      if (SA_OK == err) {
+      if (err == SA_OK)   {
 	// Look at the MIB to find out what the indexs are
 	rdr_oid[0]=rpt_entry->DomainId;
 	rdr_oid[1]=rpt_entry->ResourceId;
@@ -197,11 +200,12 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	    DEBUGMSGTL((AGENT,"Called populate_watchdog(); ID: %d; rc: %d\n",
 		      child_id, rc));
 	}
-	
+
 	// By this stage, rdr_context surely has something in it.
 	// '*_modify_context' does a checksum check to see if 
 	// the record needs to be altered, and if so populates with
 	// information from RDR and the OIDs passed.
+
 
 	if (saHpiRdrTable_modify_context(rpt_entry,
 					 &rdr_entry, 
@@ -217,7 +221,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	  CONTAINER_INSERT(cb.container, rdr_context);	  
 	  rdr_count = CONTAINER_SIZE(cb.container);
 
-	  if (send_traps_on_startup == AGENT_TRUE) {
+	  if (send_traps == AGENT_TRUE) {
 	    if (trap != NULL) {
 	      trap_var = build_notification(&rdr_index,
 					    trap, trap_len,
@@ -250,19 +254,108 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 
 	}
       } else { // Bail out.
+	// This can happend if there are no entries for that Resource
 	rc = AGENT_ERR_OPERATION;
 	break;
       }
     } while ( next_rdr != SAHPI_LAST_ENTRY);
+  
     
-    // IBM-KR: TODO
-    // Now check to see if we need to delete any entry.
   }
 
   DEBUGMSGTL((AGENT,"\n\t--- populate_rdr. Exit\n"));
   return rc;
 }
 
+/* int delete_rdr() { */
+/*    SaHpiDomainIdT domain_id; */
+/*    SaHpiResourceIdT resource_id; */
+/*    SaHpiEntryIdT num; */
+/*    SaHpiRdrTypeT type; */
+/*    saHpiRdrTable_context	*rdr_context;  */
+/*    SaHpiSessionIdT session_id; */
+/*    SaHpiRdrT rdr_entry; */
+   
+
+/*    int rc; */
+/*    unsigned int deleted; */
+/*    unsigned int dirty_bit; */
+/*     // IBM-KR: TODO */
+/*    // Q: How do we determine which RDR entry is "fresh" ? */
+/*    // A: We can use 'saHpiRdrGet' to check for valid entries. */
+/*    // A: Any other ways? */
+
+/*    if ((rc = getSaHpiSession(&session_id)) != AGENT_ERR_NOERROR) */
+/*       return rc; */
+       
+/*     rdr_context = CONTAINER_FIRST(cb.container); */
+/*     DEBUGMSGTL((AGENT,"Deleting non-used RDR rows: rdr_context: %X\n", rdr_context)); */
+/*     while (rdr_context != NULL) { */
+/*       rc` = saHpiRdrGet(session_id, rdr_entry->saHpiResourceID, */
+/* 			rdr_context->saHpiRdrRecordId, */
+/* 			NULL, &rdr_entry); */
+/*       if (rc != SA_OK) */
+/* 	// Delete the object. */
+/* 	dirty_bit = AGENT_TRUE: */
+
+
+/*       deleted = AGENT_FALSE; */
+/*       DEBUGMSGTL((AGENT,"Found %d.%d, %d (%X) (child: %d)delete: %s\n", rdr_context->domain_id, */
+/* 		  rdr_context->saHpiResourceID,  */
+/* 		  rdr_context->saHpiRdrRecordId, */
+/* 		  rdr_context->saHpiRdrRecordId, */
+/* 		  rdr_context->saHpiRdrId, */
+/* 		  (dirty_bit == AGENT_TRUE)? "Yes" : "No")); */
+      
+/*       if (rdr_context != NULL) { */
+/* 	if (dirty_bit == AGENT_TRUE) { */
+/* 	  // Copy the values (we are going to remove 'rdr_context' and */
+/* 	  // we need the domain_id, resourcE_id, etc values */
+/* 	  domain_id = rdr_context->domain_id; */
+/* 	  resource_id = rdr_context->saHpiResourceID; */
+/* 	  num = rdr_context->saHpiRdrRecordId; */
+/* 	  type = rdr_context->saHpiRdrType; */
+/* 	  child_id = rdr_context->saHpiRdrId; */
+/* 	  // We are getting the next item here b/c effectivly  the rpt_context */
+/* 	  // will be set to NULL in the 'delete_rpt_row'  */
+/* 	  rdr_context = CONTAINER_NEXT(cb.container, rdr_context); */
+/* 	  deleted = AGENT_TRUE; */
+/* 	  // Delete the RDR row */
+/* 	  rc = delete_rdr_row(domain_id, resource_id, num, type); */
+/* 	  if (rc != AGENT_ERR_NOERROR) */
+/* 	    DEBUGMSGTL((AGENT,"delete_rdr_row failed. Return code: %d.\n", rc)); */
+/* 	  // Delete the other sub-type. Keep in mind that this will delete */
+/* 	  // _only_ the specific subtypes. Therfore other records */
+/* 	  // with the same resource_id, domain_id, and num can still */
+/* 	  // exist. */
+/* 	  switch (type) { */
+/* 	  case SAHPI_NO_RECORD: */
+/* 	    break; */
+/* 	  case SAHPI_CTRL_RDR: */
+/* 	    rc = delete_ctrl_row(domain_id, resource_id, child_id); */
+/* 	    break; */
+/* 	  case SAHPI_SENSOR_RDR: */
+/* 	    rc = delete_sensor_row(domain_id,resource_id, child_id); */
+/* 	    break; */
+/* 	  case SAHPI_INVENTORY_RDR: */
+/* 	    rc = delete_inventory_rows(domain_id,	 resource_id, child_id); */
+/* 	    break; */
+/* 	  case SAHPI_WATCHDOG_RDR: */
+/* 	    rc = delete_watchdog_row(domain_id, resource_id, child_id); */
+/* 	    break; */
+/* 	  default: */
+/* 	    break; */
+/* 	  } */
+/* 	  if (rc != AGENT_ERR_NOERROR)  */
+/* 	    DEBUGMSGTL((AGENT,"Couldn't delete sub-RDR entry (rc: %d)\n",rc)); */
+	  
+/* 	} */
+/*       } */
+/*       // Only get the next item if no deletion has happend. */
+/*       if (deleted == AGENT_FALSE) */
+/* 	rdr_context = CONTAINER_NEXT(cb.container, rdr_context); */
+/*     } */
+/* } */
 
 int
 delete_rdr_row(SaHpiDomainIdT domain_id,
@@ -273,7 +366,10 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
   saHpiRdrTable_context *ctx;
   oid rdr_oid[RDR_INDEX_NR];
   netsnmp_index	rdr_index;
+  int rc = AGENT_ERR_NOT_FOUND;
 
+  DEBUGMSGTL((AGENT,"delete_rdr_row (%d, %d, %d, %d). Entry.\n",
+	      domain_id, resource_id, num, type));
 // Look at the MIB to find out what the indexs are
   rdr_oid[0]=domain_id;
   rdr_oid[1]=resource_id;
@@ -287,12 +383,13 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
   ctx = CONTAINER_FIND(cb.container, &rdr_index);
 
   if (ctx) {
+ 
     CONTAINER_REMOVE(cb.container, ctx);
     rdr_count = CONTAINER_SIZE(cb.container);
-    return AGENT_ERR_NOERROR;
+    rc= AGENT_ERR_NOERROR;
   }
-    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"delete_rdr_row. Exit (rc: %d)\n", rc));    
+  return rc;
 }
 
 int  
@@ -341,6 +438,7 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 
     ctx->hash = hash;
     ctx->domain_id = rpt_entry->DomainId;
+    //ctx->child_id = child_id;
     ctx->saHpiResourceID = rpt_entry->ResourceId;
     ctx->saHpiRdrRecordId = entry->RecordId;
     ctx->saHpiRdrType = entry->RdrType;
@@ -515,6 +613,7 @@ saHpiRdrTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash = 0;
+    //    ctx->dirty_bit = AGENT_TRUE;
     return ctx;
 }
 

@@ -28,7 +28,6 @@
 #include <SaHpi.h>
 #include <netinet/in.h>
 
-extern int send_traps_on_startup;
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
@@ -141,6 +140,38 @@ populate_control(SaHpiCtrlRecT *ctrl,
   return rc;
 }
 
+int
+delete_ctrl_row(SaHpiDomainIdT domain_id,
+		SaHpiResourceIdT resource_id,
+		SaHpiCtrlNumT num) {
+
+  saHpiCtrlTable_context *ctx;
+  oid ctrl_oid[CTRL_INDEX_NR];
+  netsnmp_index	ctrl_index;
+  int rc = AGENT_ERR_NOT_FOUND;
+
+  DEBUGMSGTL((AGENT,"delete_ctrl_row (%d, %d, %d). Entry\n",
+  	domain_id, resource_id, num));
+// Look at the MIB to find out what the indexs are
+  ctrl_oid[0]=domain_id;
+  ctrl_oid[1]=resource_id;
+  ctrl_oid[2]=num;
+
+
+  // Possible more indexs?
+  ctrl_index.oids = (oid *)&ctrl_oid;
+  ctrl_index.len = CTRL_INDEX_NR;
+
+  ctx = CONTAINER_FIND(cb.container, &ctrl_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    control_count = CONTAINER_SIZE(cb.container);
+    rc= AGENT_ERR_NOERROR;
+  }
+  DEBUGMSGTL((AGENT,"delete_ctrl_row. Exit (rc: %d)\n", rc));  
+  return rc;
+}
 
 int
 read_textline(saHpiCtrlTable_context *ctx) {
