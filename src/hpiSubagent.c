@@ -20,19 +20,55 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
 
-#include "alarm.h"
+#include <alarm.h>
 #include <oh_error.h>
 
-#include <hpiB_columns.h>
-#include <hpiB_enums.h>
-#include <hpiB.h>
+#include <hpiB0101_columns.h>
+#include <hpiB0101_enums.h>
+#include <hpiB0101.h>
+
+#include <hpiCheckIndice.h>
+#include <hpiSubagent.h>
 
 #include <saHpiDomainInfoTable.h>
-#include <saHpiDomainReferenceTable.h>
 #include <saHpiDomainAlarmTable.h>
+#include <saHpiDomainReferenceTable.h>
+
 #include <saHpiResourceTable.h>
-#include <saHpiAutoTimeOutTable.h>
+#include <saHpiRdrTable.h>
+
+#include <saHpiAnnunciatorTable.h>
+
+#include <saHpiInventoryTable.h>
+#include <saHpiFieldTable.h>
+#include <saHpiAreaTable.h>
+
+#include <saHpiSensorTable.h>
+#include <saHpiCurrentSensorStateTable.h>
+#include <saHpiSensorReadingMaxTable.h>
+#include <saHpiSensorReadingMinTable.h>
+#include <saHpiSensorReadingNominalTable.h>
+#include <saHpiSensorReadingNormalMaxTable.h>
+#include <saHpiSensorReadingNormalMinTable.h>
+#include <saHpiSensorThdLowCriticalTable.h>
+#include <saHpiSensorThdLowMajorTable.h>
+#include <saHpiSensorThdLowMinorTable.h>
+#include <saHpiSensorThdNegHysteresisTable.h>
+#include <saHpiSensorThdPosHysteresisTable.h>
+#include <saHpiSensorThdUpCriticalTable.h>
+#include <saHpiSensorThdUpMajorTable.h>
+#include <saHpiSensorThdUpMinorTable.h>
+
+#include <saHpiCtrlAnalogTable.h>
+#include <saHpiCtrlDigitalTable.h>
+#include <saHpiCtrlDiscreteTable.h>
+#include <saHpiCtrlOemTable.h>
+#include <saHpiCtrlStreamTable.h>
+#include <saHpiCtrlTextTable.h>
+
+#include <saHpiWatchdogTable.h>
 #include <saHpiHotSwapTable.h>
+#include <saHpiAutoInsertTimeoutTable.h>
 
 #include <saHpiEventTable.h>
 #include <saHpiResourceEventTable.h>
@@ -45,38 +81,20 @@
 #include <saHpiOEMEventTable.h>
 #include <saHpiUserEventTable.h>
 #include <saHpiAnnouncementTable.h>
-			    
+
 #include <saHpiEventLogInfoTable.h>
 #include <saHpiEventLogTable.h>
+#include <saHpiResourceEventLogTable.h>
+#include <saHpiDomainEventLogTable.h>
+#include <saHpiSensorEventLogTable.h>
+#include <saHpiSensorEnableChangeEventLogTable.h>
+#include <saHpiHotSwapEventLogTable.h>
+#include <saHpiWatchdogEventLogTable.h>
+#include <saHpiSoftwareEventLogTable.h>
+#include <saHpiOEMEventLogTable.h>
+#include <saHpiUserEventLogTable.h>
+#include <saHpiAnnouncementEventLogTable.h>
 
-#include <saHpiRdrTable.h>
-#include <saHpiCtrlTable.h>
-#include <saHpiSensorTable.h>
-
-#include <saHpiSensorReadingCurrentTable.h>
-#include <saHpiSensorReadingMaxTable.h>
-#include <saHpiSensorReadingMinTable.h>
-#include <saHpiSensorReadingNominalTable.h>
-#include <saHpiSensorReadingNormalMaxTable.h>
-#include <saHpiSensorReadingNormalMinTable.h>
-
-#include <saHpiSensorThdLowCriticalTable.h>
-#include <saHpiSensorThdLowMajorTable.h>
-#include <saHpiSensorThdLowMinorTable.h>
-#include <saHpiSensorThdNegHysteresisTable.h>
-#include <saHpiSensorThdPosHysteresisTable.h>
-#include <saHpiSensorThdUpCriticalTable.h>
-#include <saHpiSensorThdUpMajorTable.h>
-#include <saHpiSensorThdUpMinorTable.h>
-
-#include <saHpiInventoryTable.h>
-#include <saHpiAreaTable.h>
-#include <saHpiFieldTable.h>
-#include <saHpiWatchdogTable.h>
-#include <saHpiAnnunciatorTable.h>
-
-#include <hpiSubagent.h>
-#include <alarm.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
