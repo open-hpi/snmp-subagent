@@ -361,7 +361,6 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
 				text(3),
 				binary(4)
 			}
-	
 
 SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 	STATUS          current
@@ -3852,14 +3851,22 @@ saHpiCtrlEntry OBJECT-TYPE
 SaHpiCtrlEntry ::= SEQUENCE {
 	saHpiCtrlNum		Unsigned32,
 	saHpiCtrlOutputType	INTEGER,
-	saHpiCtrlIgnore		TruthValue,
 	saHpiCtrlType		INTEGER,
+ 
+	saHpiCtrlMutable	OCTET STRING,
 	saHpiCtrlState		OCTET STRING,
-	saHpiCtrlAttributes	OCTET STRING,
+	
+	saHpiCtrlMode	 	INTEGER,	
+	saHpiCtrlReadOnly 	TruthValue,	 
+					 
+	saHpiCtrlWriteOnly	TruthValue,
+
 	saHpiCtrlOem		Unsigned32, 
+   
 	saHpiCtrlTextType	SaHpiTextType,
 	saHpiCtrlTextLanguage	SaHpiTextLanguage,
 	saHpiCtrlText		OCTET STRING,
+	
 	saHpiCtrlRDR		RowPointer
 }
 
@@ -3894,13 +3901,6 @@ saHpiCtrlOutputType OBJECT-TYPE
 	This enumeration defines the what the control's output will be.  "
 	::= {saHpiCtrlEntry 2}
 
-saHpiCtrlIgnore OBJECT-TYPE 
-	SYNTAX		TruthValue
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"Ignore control completly (entity not present, disabled, etc) "
-	::= {saHpiCtrlEntry 3}
-
 saHpiCtrlType OBJECT-TYPE 
 	SYNTAX		INTEGER {
 				undefined (0),
@@ -3915,10 +3915,35 @@ saHpiCtrlType OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	"This enumerated type defines the different types of
 	generic controls. "
+	::= {saHpiCtrlEntry 3}
+
+saHpiCtrlMode OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				undefined(0),
+				auto(1),
+				manual(2)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Indicates if the control comes up in Auto or Manual mode. 
+	TRUE = AUTO. FALSE = MANUAL"
 	::= {saHpiCtrlEntry 4}
+	
+saHpiCtrlReadOnly OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Indicates if mode is read-only"
+	::= {saHpiCtrlEntry 5}
+	
+saHpiCtrlWriteOnly  OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Indicates if mode is write-only"
+	::= {saHpiCtrlEntry 6}
 
-
-saHpiCtrlState OBJECT-TYPE
+saHpiCtrlMutable OBJECT-TYPE
 	SYNTAX		OCTET STRING (SIZE(1|4|9))
 	MAX-ACCESS	read-write
 	STATUS		current
@@ -3932,8 +3957,7 @@ saHpiCtrlState OBJECT-TYPE
                      off(1)
                      on(2),
                      pulseOff(3),
-                     pulseOn(4),
-                     auto(256)
+                     pulseOn(4)
         discrete - Unsigned 32bit integer  (4 octets)
 
         analog   - octets 1-4 represent the value specified in
@@ -3979,9 +4003,9 @@ saHpiCtrlState OBJECT-TYPE
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
 	 
-	::= {saHpiCtrlEntry 5}
+	::= {saHpiCtrlEntry 7}
 
-saHpiCtrlAttributes	OBJECT-TYPE
+saHpiCtrlState		OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(4|9|12|262|270))
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -4042,28 +4066,28 @@ saHpiCtrlAttributes	OBJECT-TYPE
 	" 
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-A.01.01 pages 92, 93, 94."
-	::= {saHpiCtrlEntry 6}
+	::= {saHpiCtrlEntry 8}
 
 saHpiCtrlOem OBJECT-TYPE
 	SYNTAX		Unsigned32
         MAX-ACCESS      read-only
 	STATUS          current
 	DESCRIPTION     "Reserved for OEM use"
-	::= {saHpiCtrlEntry 7}
+	::= {saHpiCtrlEntry 9}
 
 saHpiCtrlTextType OBJECT-TYPE 
 	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"See Definition"
-	::= {saHpiCtrlEntry 8}
+	::= {saHpiCtrlEntry 10}
 
 saHpiCtrlTextLanguage OBJECT-TYPE
 	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     "See Definition."
-	::= {saHpiCtrlEntry 9}
+	::= {saHpiCtrlEntry 11}
 
 saHpiCtrlText OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4074,29 +4098,29 @@ saHpiCtrlText OBJECT-TYPE
 	is set to text(5) or oem(193). 
 
 	if saHpiCtrlType == text(5),
-		
-The value will contain the line of text (the line
-number is determined by saHpiCtrlState)  or if the line number
-passed is 255,  this object will have the entire text of the control, 
-or as much of it as will fit in this object.
-
-This value will consist of the text of all the lines concatenated, 
-using the maximum number of characters for each line 
-(no trimming of trailing blanks).
-
-Note that depending on the data type and language, the text may be
-encoded in 2-byte Unicode, which requires two bytes of data per
-character. 
-Note that the number of lines and columns in a text control
-can be obtained from the saHpiCtrlAttributes.
-
-When writing, if less than a full line of data is written, 
-the control will clear all spaces beyond those written on the line. 
-Thus writing a zero-length string will clear the addressed line. 
-It is also possible to include more characters in the text passed 
-in than will fit on one line; in this case, the control will
-'wrap' to the next line (still clearing the trailing characters 
-on the last line written).	
+			
+	The value will contain the line of text (the line
+	number is determined by saHpiCtrlState)  or if the line number
+	passed is 255,  this object will have the entire text of the control, 
+	or as much of it as will fit in this object.
+	
+	This value will consist of the text of all the lines concatenated, 
+	using the maximum number of characters for each line 
+	(no trimming of trailing blanks).
+	
+	Note that depending on the data type and language, the text may be
+	encoded in 2-byte Unicode, which requires two bytes of data per
+	character. 
+	Note that the number of lines and columns in a text control
+	can be obtained from the saHpiCtrlAttributes.
+	
+	When writing, if less than a full line of data is written, 
+	the control will clear all spaces beyond those written on the line. 
+	Thus writing a zero-length string will clear the addressed line. 
+	It is also possible to include more characters in the text passed 
+	in than will fit on one line; in this case, the control will
+	'wrap' to the next line (still clearing the trailing characters 
+	on the last line written).	
 
 	if saHpiCtrlType == oem(193),
 
@@ -4104,15 +4128,15 @@ on the last line written).
 	"
 	REFERENCE
 	"Derieved from typedef and function calls described in
-	SAI-HPI-A.01.01 pages 93,94."
-	::= {saHpiCtrlEntry 10}
+	SAI-HPI-B.01.01 pages 92...97."
+	::= {saHpiCtrlEntry 12}
 
 saHpiCtrlRDR OBJECT-TYPE
 	SYNTAX          RowPointer
 	MAX-ACCESS      read-only
 	STATUS          current
 	DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
-	::= {saHpiCtrlEntry 11}
+	::= {saHpiCtrlEntry 13}
 
 
 --/*******************************************************************************
@@ -8226,10 +8250,9 @@ saHpiCtrlGroup OBJECT-GROUP
 		saHpiCtrlCount,
 		saHpiCtrlNum,
 		saHpiCtrlOutputType,
-		saHpiCtrlIgnore,
 		saHpiCtrlType,
+		saHpiCtrlMutable,
 		saHpiCtrlState,
-		saHpiCtrlAttributes,
 		saHpiCtrlOem,
 		saHpiCtrlTextType,
 		saHpiCtrlTextLanguage,
