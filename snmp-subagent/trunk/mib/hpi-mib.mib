@@ -3112,17 +3112,17 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
 
 SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
         
-        saHpiSensorEnableChangeEventTimestamp   SaHpiTimeString,
-        saHpiSensorEnableChangeEventType        SaHpiSensorType,
-        saHpiSensorEnableChangeEventCategory    SaHpiEventCategory,
+        saHpiSensorEnableChangeEventTimestamp   	SaHpiTimeString,
+        saHpiSensorEnableChangeEventType        	SaHpiSensorType,
+        saHpiSensorEnableChangeEventCategory    	SaHpiEventCategory,
         
-        saHpiSensorEnableChangeEventEnabled          TruthValue,
-        saHpiSensorEnableChangeEventEventsEnabled    TruthValue,
-        saHpiSensorEnableChangeEventAssertEvents     SaHpiEventState,
-        saHpiSensorEnableChangeEventDeassertEvents   SaHpiEventState,
-        saHpiSensorEnableChangeEventOptionalData     Unsigned8,
+        saHpiSensorEnableChangeEventEnabled          	TruthValue,
+        saHpiSensorEnableChangeEventEventsEnabled    	TruthValue,
+        saHpiSensorEnableChangeEventAssertEvents     	SaHpiEventState,
+        saHpiSensorEnableChangeEventDeassertEvents   	SaHpiEventState,
+        saHpiSensorEnableChangeEventOptionalData     	SaHpiCapabilities,
 
-        saHpiSensorEnableChangeEventState       SaHpiEventState
+        saHpiSensorEnableChangeEventState       	SaHpiEventState
         }
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
