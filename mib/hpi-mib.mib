@@ -1564,9 +1564,7 @@ saHpiDomainId OBJECT-TYPE
 	Note:
  		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
 	::= {saHpiResourceEntry 1}
---IBMKR: Is this a normal entry ID with the start being 
--- 0x000000 and the last one being 0xFFFFFFFF?
--- if so, perhaps a better name?
+
 saHpiEntryId OBJECT-TYPE 
 	SYNTAX		Unsigned32	
 	MAX-ACCESS	read-only
