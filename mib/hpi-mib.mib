@@ -1208,10 +1208,10 @@ saHpiDrtTable OBJECT-TYPE
 	
 	The DRT contains an entry for each associated domain, and HPI Users may
 	read these entries to discover the presence of additional domains within 
-	a "System". The discovered domains can, in turn, be used to discover
+	a 'System'. The discovered domains can, in turn, be used to discover
 	additional resources and domains. The DRT is automatically built and 
 	maintained by the HPI implementation. Domain entries in the DRT may 
-	change over time if the "System" configuration changes.  The domain
+	change over time if the 'System' configuration changes.  The domain
 	controller generates an event when a domain is added to the DRT 
 	(SAHPI_DOMAIN_REF_ADDED) and when a domain is removed from the DRT 
 	(SAHPI_DOMAIN_REF_REMOVED)."
@@ -2118,9 +2118,27 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
     MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how long to wait before the default auto-insertion policy is invoked on a resource within a specific domain.  This function accepts a parameter instructing each resource to impose a delay before performing its default hot swap policy for auto-insertion.  The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK to prevent auto-insertion from ever occurring.  
-        If the parameter is set to another value, then it defines the number of nanoseconds between the time a hot swap event with saHpiHotSwapState == INSERTION_PENDING is generated, and the time that the auto-insertion policy will be invoked for that resource.  If, during this time period, a saHpiHotSwapPolicyCancel function call is processed, the timer will be stopped, and the auto-insertion policy will not be invoked.  Each domain maintains a single auto-insert timeout value and it is applied to all contained resources upon insertion, which support managed hot swap.
-Once the auto-insertion process begins, the HPI User will not be allowed to take control of the insertion process; hence, the timeout should be set appropriately to allow for this condition.  Note that the timeout period begins when the hot swap event with saHpiHotSwapState == INSERTION_PENDING is initially generated."
+        "This function allows the HPI User to configure a timeout for how 
+	long to wait before the default auto-insertion policy is invoked 
+	on a resource within a specific domain.  This function accepts a 
+	parameter instructing each resource to impose a delay before 
+	performing its default hot swap policy for auto-insertion.  The 
+	parameter may be set to SAHPI_TIMEOUT_IMMEDIATE to direct resources
+	to proceed immediately to auto-insertion, or to SAHPI_TIMEOUT_BLOCK
+	to prevent auto-insertion from ever occurring. If the parameter is
+	set to another value, then it defines the number of nanoseconds 
+	between the time a hot swap event with saHpiHotSwapState == 
+	INSERTION_PENDING is generated, and the time that the auto-insertion 
+	policy will be invoked for that resource.  If, during this time period,
+	a saHpiHotSwapPolicyCancel function call is processed, the timer will 
+	be stopped, and the auto-insertion policy will not be invoked.  Each 
+	domain maintains a single auto-insert timeout value and it is applied 
+	to all contained resources upon insertion, which support managed hot 
+	swap. Once the auto-insertion process begins, the HPI User will not be 
+	allowed to take control of the insertion process; hence, the timeout 
+	should be set appropriately to allow for this condition.  Note that the 
+	timeout period begins when the hot swap event with saHpiHotSwapState 
+	== INSERTION_PENDING is initially generated."
 
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 pages 149-150"
@@ -2713,12 +2731,12 @@ saHpiSensorEventAssertion OBJECT-TYPE
 	"Sensor Events and Sensor Event States
 	Each Event State is a single bit value that may be asserted or 
 	deasserted.  The set of Event States a sensor may support
-	is defined by the sensor's "Event Category."  A particular sensor,
+	is defined by the sensor's 'Event Category.'  A particular sensor,
 	however, does not have to support all the Event States defined for
 	its event category.  The specific Event States that a particular
-	sensor supports are indicated in the "Events" field in the 
+	sensor supports are indicated in the 'Events' field in the 
 	sensor's RDR. A sensor is not required to support any Event States.
-	If no Event States are supported by a sensor, the "Events" field 
+	If no Event States are supported by a sensor, the 'Events' field 
 	will be 0x0000.  A sensor may not support any Event States that 
 	are not defined for its event category. Each Event State is 
 	independent, although in some event categories the meaning assigned
@@ -2730,19 +2748,20 @@ saHpiSensorEventAssertion OBJECT-TYPE
 	however, sensors may have multiple Event States asserted simultaneously.
 	For example, the event category SAHPI_EC_THRESHOLD uses six different
 	event states to report the relationship between the value currently
-	measured by the sensor and up to six different "threshold" values.  
+	measured by the sensor and up to six different 'threshold' values.  
 	Each threshold is independently examined, and each Event State that 
-	represents a threshold that has been "crossed" will be asserted.  
-	Threshold values must be configured so that "Minor", "Major" and 
-	"Critical" thresholds are increasingly extreme readings, such that
-	when a "Major" threshold has been crossed, the corresponding "Minor" 
+	represents a threshold that has been 'crossed' will be asserted.  
+	Threshold values must be configured so that 'Minor', 'Major' and 
+	'Critical' thresholds are increasingly extreme readings, such that
+	when a 'Major' threshold has been crossed, the corresponding 'Minor' 
 	threshold will also have been crossed, and thus both Event States 
 	will be asserted. When a sensor Event State is asserted or 
 	deasserted, an event may be generated by the resource.  
 	The generated event identifies the sensor and the event state 
 	being asserted or deasserted.  The HPI implementation may assign event
 	severity levels for each event state assertion or deassertion on an 
-	individual sensor basis."
+	individual sensor basis."      
+
 
     ::= {saHpiSensorEventEntry 5}
 
@@ -6264,10 +6283,12 @@ saHpiWatchdogEntry OBJECT-TYPE
         SYNTAX          SaHpiWatchdogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     " When the 'Watchdog' capability is set in a resource, a watchdog with an
- identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All watchdogs must be
- represented in the RDR repository with an saHpiWatchdogRecT, including the
- watchdog with an identifier of SAHPI_DEFAULT_WATCHDOG_NUM."
+        DESCRIPTION     
+	"When the 'Watchdog' capability is set in a resource, a watchdog with 
+	an identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All 
+	watchdogs must be represented in the RDR repository with an 
+	saHpiWatchdogRecT, including the watchdog with an identifier of 
+	SAHPI_DEFAULT_WATCHDOG_NUM."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
