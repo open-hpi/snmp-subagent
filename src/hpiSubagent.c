@@ -10,6 +10,7 @@
  *
  * Authors:
  *   Konrad Rzeszutek <konradr@us.ibm.com>
+ *   David Judkovics  <djudkovi@us.ibm.com>
  *
  * $Id$
  *					  
@@ -19,6 +20,13 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <SaHpi.h> 
+#include <oh_utils.h>
 
 #include <alarm.h>
 #include <oh_error.h>
@@ -95,9 +103,7 @@
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
+
 
 /*
  * Internal prototypes
@@ -971,48 +977,50 @@ usage(char *applName)
 int
 main (int argc, char **argv)
 {
-	  int agentx_subagent = AGENT_TRUE;
-	  int c;
-	  int rc = 0;
-	
-	  pid_t child;
-	  /* change this if you want to be a SNMP master agent */
+	  	int agentx_subagent = AGENT_TRUE;
+	  	int c;
+	  	int rc = 0;
+        	  
+	  	SaErrorT 	rv = SA_OK;
+		SaHpiVersionT	hpiVer;
+		SaHpiSessionIdT sessionid;
+		
+	  	pid_t child;
+	  	/* change this if you want to be a SNMP master agent */
 
-	  while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
-	
+	  	while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
 	    switch (c) {
+	   	case 'f':
+			do_fork = AGENT_TRUE;
+		   	break;
 	
-	      case 'f':
-		do_fork = AGENT_TRUE;
-		   break;
+	    case 'd':
+			debug_register_tokens (AGENT);
+			snmp_enable_stderrlog ();
+			snmp_set_do_debugging (1);
+	      	break;
 	
-	      case 'd':
-		debug_register_tokens (AGENT);
-		snmp_enable_stderrlog ();
-		snmp_set_do_debugging (1);
-	      break;
+	  	case 's':
+			do_syslog = AGENT_FALSE;
+	      	break;
 	
-	      case 's':
-		do_syslog = AGENT_FALSE;
-	      break;
-	
-	      case 'C':
-		netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+	   	case 'C':
+			netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
 				       NETSNMP_DS_LIB_DONT_READ_CONFIGS,
 				       1);
-	      break;
+	     	break;
 	
-	      case 'x':
-		netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+	  	case 'x':
+			netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
 				      NETSNMP_DS_AGENT_X_SOCKET,
 				      optarg);
-	      break;
+	      	break;
 	
-	      case 'h':
-	      default:
-		usage(argv[0]);
-		exit(1);
-	      break;
+	 	case 'h':
+	    default:
+			usage(argv[0]);
+			exit(1);
+	      	break;
 	    }
 	  }
 
@@ -1055,19 +1063,80 @@ main (int argc, char **argv)
 					 NULL,
 					 "hpiSubagent MAX number of rows for Events.");
 
-	/* Initialize HPI library*/
-	open_session_unspecified_domain();
-	saHpiDiscover( get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID) );
+	/* 
+	 * Initialize HPI library
+	 */
+	if (fdebug) 
+		printf("saHpiVersionGet\n");
+	hpiVer = saHpiVersionGet();
+	printf("Hpi Version %d Implemented.\n", hpiVer);
+
+	if (fdebug) 
+		printf("saHpiSessionOpen\n");
+	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
+	
+	if (rv != SA_OK) {
+		printf("saHpiSessionOpen returns %s\n",oh_lookup_error(rv));
+		exit(-1);
+	}
+	if (fdebug)
+	       	printf("saHpiSessionOpen returns with SessionId %d\n", sessionid);
+
+	/*
+	 * Resource discovery
+	 */
+	if (fdebug) 
+		printf("saHpiDiscover\n");	
+	rv = saHpiDiscover(sessionid);
+	
+	if (rv != SA_OK) {
+		printf("saHpiDiscover returns %s\n",oh_lookup_error(rv));
+		exit(-1);
+	}
 
 	init_snmp (AGENT);
 
 	/* Initialize subagent tables */
 	init_saHpiDomainInfoTable();
-	init_saHpiDomainReferenceTable();
 	init_saHpiDomainAlarmTable();
+	init_saHpiDomainReferenceTable();
+	
 	init_saHpiResourceTable();
-	init_saHpiAutoTimeOutTable();
+	init_saHpiRdrTable();
+	
+	init_saHpiAnnunciatorTable();
+	
+	init_saHpiInventoryTable();
+	init_saHpiFieldTable();
+	init_saHpiAreaTable();
+	
+	init_saHpiSensorTable();
+	init_saHpiCurrentSensorStateTable();
+	init_saHpiSensorReadingMaxTable();
+	init_saHpiSensorReadingMinTable();
+	init_saHpiSensorReadingNominalTable();
+	init_saHpiSensorReadingNormalMaxTable();
+	init_saHpiSensorReadingNormalMinTable();
+	init_saHpiSensorThdLowCriticalTable();
+	init_saHpiSensorThdLowMajorTable();
+	init_saHpiSensorThdLowMinorTable();
+	init_saHpiSensorThdNegHysteresisTable();
+	init_saHpiSensorThdPosHysteresisTable();
+	init_saHpiSensorThdUpCriticalTable();
+	init_saHpiSensorThdUpMajorTable();
+	init_saHpiSensorThdUpMinorTable();
+	
+	init_saHpiCtrlAnalogTable();
+	init_saHpiCtrlDigitalTable();
+	init_saHpiCtrlDiscreteTable();
+	init_saHpiCtrlOemTable();
+	init_saHpiCtrlStreamTable();
+	init_saHpiCtrlTextTable();
+	
+	init_saHpiWatchdogTable();
 	init_saHpiHotSwapTable();
+	init_saHpiAutoInsertTimeoutTable();
+	
 	init_saHpiEventTable();
 	init_saHpiResourceEventTable();
 	init_saHpiDomainEventTable();
@@ -1078,62 +1147,37 @@ main (int argc, char **argv)
 	init_saHpiSoftwareEventTable();
 	init_saHpiOEMEventTable();
 	init_saHpiUserEventTable();
-	init_saHpiAnnouncementTable();			    
+	init_saHpiAnnouncementTable();
 	
 	init_saHpiEventLogInfoTable();
 	init_saHpiEventLogTable();
-	
-	init_saHpiRdrTable();
-	init_saHpiCtrlTable();
-	init_saHpiSensorTable();
-	
-	init_saHpiSensorReadingCurrentTable();
-	init_saHpiSensorReadingMaxTable();
-	init_saHpiSensorReadingMinTable();
-	
-	init_saHpiSensorReadingNominalTable();
-	init_saHpiSensorReadingNormalMaxTable();
-	init_saHpiSensorReadingNormalMinTable();
-	
-	init_saHpiSensorThdLowCriticalTable();
-	init_saHpiSensorThdLowMajorTable();
-	init_saHpiSensorThdLowMinorTable();
-	init_saHpiSensorThdNegHysteresisTable();
-	init_saHpiSensorThdPosHysteresisTable();
-	init_saHpiSensorThdUpCriticalTable();
-	init_saHpiSensorThdUpMajorTable();
-	init_saHpiSensorThdUpMinorTable();
-	
-	init_saHpiInventoryTable();
-	init_saHpiAreaTable();
-	init_saHpiFieldTable();
-	init_saHpiWatchdogTable();
-	init_saHpiAnnunciatorTable();
-
-	if (send_traps_on_startup == AGENT_TRUE)
-		send_traps = AGENT_TRUE;
-
-	/* after initialization populate tables */
-        populate_drt();
-	populate_domain_info();
-        populate_dat();
-        populate_rpt();
+	init_saHpiResourceEventLogTable();
+	init_saHpiDomainEventLogTable();
+	init_saHpiSensorEventLogTable();
+	init_saHpiSensorEnableChangeEventLogTable();
+	init_saHpiHotSwapEventLogTable();
+	init_saHpiWatchdogEventLogTable();
+	init_saHpiSoftwareEventLogTable();
+	init_saHpiOEMEventLogTable();
+	init_saHpiUserEventLogTable();
+	init_saHpiAnnouncementEventLogTable();	
 
 
-	dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
-#if 0 /* TODO DMJ */
-  if (populate_rpt () != AGENT_ERR_NOERROR)
-    {
-      snmp_log (LOG_ERR, "Could not retrieve RPT entries. Exiting\n.");
-      rc = -1;
-      goto stop;
-    }
-#endif 
+		if (send_traps_on_startup == AGENT_TRUE)
+			send_traps = AGENT_TRUE;
 
-  dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
-#if 0 /* TODO DMJ */
-  //populate_event ();
-#endif 
+		/* after initialization populate tables */
+		populate_saHpiDomainInfoTable();
+		populate_saHpiDomainAlarmTable();
+		poplulate_saHpiDomainReferenceTable();	
+		populate_saHpiResourceTable();
+		populate_saHpiRdrTable();		
+
+
+
+		dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
+  		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
+
 
   if (init_alarm () != AGENT_ERR_NOERROR)
     {
