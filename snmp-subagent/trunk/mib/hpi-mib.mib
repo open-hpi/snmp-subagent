@@ -182,79 +182,82 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
 
 SaHpiTime ::= TEXTUAL-CONVENTION
-    STATUS       current
-    DESCRIPTION
-        "
- An HPI time value represents the local time as the number of nanoseconds
- from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
- is sufficient to represent times with nano-second resolution from the
- year 1678 to 2262. Every API which deals with time values must define
- the timezone used.
+	STATUS       current
+	DESCRIPTION
+	"An HPI time value represents the local time as the number of nanoseconds
+	from 00:00:00, January 1, 1970, in a 64-bit signed integer. This format
+	is sufficient to represent times with nano-second resolution from the
+	year 1678 to 2262. Every API which deals with time values must define
+	the timezone used.
+	
+	It should be noted that although nano-second resolution is supported
+	in the data type, the actual resolution provided by an implementation
+	may be more limited than this.
+	
+	The value -263, which is 0x8000000000000000, is used to indicate
+	'unknown/unspecified time'.
+	
+	Conversion to/from POSIX and other common time representations is
+	relatively straightforward. The following code framgment converts
+	between SaHpiTimeT and time_t:
 
- It should be noted that although nano-second resolution is supported
- in the data type, the actual resolution provided by an implementation
- may be more limited than this.
+	time_t tt1, tt2;
+	SaHpiTimeT saHpiTime;
 
- The value -263, which is 0x8000000000000000, is used to indicate
- 'unknown/unspecified time'.
+	time(&tt1);
+	saHpiTime = (SaHpiTimeT) tt1  1000000000;
+	tt2 = saHpiTime / 1000000000;
 
- Conversion to/from POSIX and other common time representations is
- relatively straightforward. The following code framgment converts
- between SaHpiTimeT and time_t:
+	The following fragment converts between SaHpiTimeT and a struct timeval:
 
-     time_t tt1, tt2;
-     SaHpiTimeT saHpiTime;
+	struct timeval tv1, tv2;
+	SaHpiTimeT saHpiTime;
 
-     time(&tt1);
-     saHpiTime = (SaHpiTimeT) tt1  1000000000;
-     tt2 = saHpiTime / 1000000000;
+	gettimeofday(&tv1, NULL);
+	saHpiTime = (SaHpiTimeT) tv1.tv_sec  1000000000 + tv1.tv_usec  1000;
+	tv2.tv_sec = saHpiTime / 1000000000;
+	tv2.tv_usec = saHpiTime % 1000000000 / 1000;
 
-The following fragment converts between SaHpiTimeT and a struct timeval:
+	The following fragment converts between SaHpiTimeT and a struct timespec:
 
-     struct timeval tv1, tv2;
-     SaHpiTimeT saHpiTime;
+	struct timespec ts1, ts2;
+	SaHpiTimeT saHpiTime;
 
-     gettimeofday(&tv1, NULL);
-     saHpiTime = (SaHpiTimeT) tv1.tv_sec  1000000000 + tv1.tv_usec  1000;
-     tv2.tv_sec = saHpiTime / 1000000000;
-     tv2.tv_usec = saHpiTime % 1000000000 / 1000;
+	clock_gettime(CLOCK_REALTIME, &ts1);
+	saHpiTime = (SaHpiTimeT) ts1.tv_sec  1000000000 + ts1.tv_nsec;
+	ts2.tv_sec = saHpiTime / 1000000000;
+	ts2.tv_nsec = saHpiTime % 1000000000;
 
- The following fragment converts between SaHpiTimeT and a struct timespec:
+	Note, however, that since time_t is (effectively) universally 32 bits,
+	all of these conversions will cease to work on January 18, 2038.
 
-     struct timespec ts1, ts2;
-     SaHpiTimeT saHpiTime;
+	Some subsystems may need the flexibility to report either absolute or
+	relative (eg. to system boot) times. This will typically be in the
+	case of a board which may or may not, depending on the system setup,
+	have an idea of absolute time. For example, some boards may have
+	'time of day' clocks which start at zero, and never get set to the
+	time of day.
 
-     clock_gettime(CLOCK_REALTIME, &ts1);
-     saHpiTime = (SaHpiTimeT) ts1.tv_sec  1000000000 + ts1.tv_nsec;
-     ts2.tv_sec = saHpiTime / 1000000000;
-     ts2.tv_nsec = saHpiTime % 1000000000;
+	In these cases, times which represent 'current' time (in events, for
+	example) can be reported based on the clock value, whether it has been
+	set to the actual date/time, or whether it represents the elapsed time
+	since boot. If it is the time since boot, the value will be (for 27
+	years) less than 0x0C00000000000000, which is Mon May 26 16:58:48 1997.
+	If the value is greater than this, then it can be assumed to be an
+	absolute time.
 
- Note, however, that since time_t is (effectively) universally 32 bits,
- all of these conversions will cease to work on January 18, 2038.
+	Every API which can report either absolute or relative times must
+	state this rule clearly in its interface specification.
 
- Some subsystems may need the flexibility to report either absolute or
- relative (eg. to system boot) times. This will typically be in the
- case of a board which may or may not, depending on the system setup,
- have an idea of absolute time. For example, some boards may have
- 'time of day' clocks which start at zero, and never get set to the
- time of day.
+	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
 
- In these cases, times which represent 'current' time (in events, for
- example) can be reported based on the clock value, whether it has been
- set to the actual date/time, or whether it represents the elapsed time
- since boot. If it is the time since boot, the value will be (for 27
- years) less than 0x0C00000000000000, which is Mon May 26 16:58:48 1997.
- If the value is greater than this, then it can be assumed to be an
- absolute time.
+	Maximum time that can be specified as relative :
+	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL"
 
- Every API which can report either absolute or relative times must
- state this rule clearly in its interface specification.
+	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
 
- SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
-
- Maximum time that can be specified as relative :
- SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL
-"
+	Maximum time that can be specified as relative :
+	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL"
 
     REFERENCE
         "Derived from SAI-HPI-B.00.90 spec, pg 164-165."
@@ -2737,35 +2740,34 @@ saHpiSensorEventAssertion OBJECT-TYPE
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION
-        "Sensor Events and Sensor Event States
-        Each Event State is a single bit value that may be asserted or 
-        deasserted.  The set of Event States a sensor may support
-        is defined by the sensor's 'Event Category.'  A particular sensor,
-        however, does not have to support all the Event States defined for
-        its event category.  The specific Event States that a particular
-        sensor supports are indicated in the 'Events' field in the 
-        sensor's RDR. A sensor is not required to support any Event States.
-        If no Event States are supported by a sensor, the 'Events' field 
-        will be 0x0000.  A sensor may not support any Event States that 
-        are not defined for its event category. Each Event State is 
-        independent, although in some event categories the meaning assigned
-        to the Event States will imply that certain Event States will be 
-        mutually exclusive.  For example, a sensor that uses the 
-        SAHPI_EC_LIMIT event category should only have one of the two Event 
-        States, SAHPI_ES_LIMIT_NOT_EXCEEDED or SAHPI_ES_LIMIT_EXCEEDED
-        asserted at any one time. Except where mutual exclusion is implied,
-        however, sensors may have multiple Event States asserted simultaneously.
-        For example, the event category SAHPI_EC_THRESHOLD uses six different
-        event states to report the relationship between the value currently
-        measured by the sensor and up to six different 'threshold' values.  
-        Each threshold is independently examined, and each Event State that 
-        represents a threshold that has been 'crossed' will be asserted.  
-        Threshold values must be configured so that 'Minor', 'Major' and 
-        'Critical' thresholds are increasingly extreme readings, such that
-        when a 'Major' threshold has been crossed, the corresponding 'Minor' 
-        threshold will also have been crossed, and thus both Event States 
-        will be asserted. When a sensor Event State is asserted or 
-        deasserted, an event may be generated by the resource.  
+        "Sensor Events and Sensor Event States:
+        Each Event State may be asserted or deasserted.  The set of Event
+	States a sensor may support is defined by the sensor's 
+	'Event Category.'  A particular sensor, however, does not have to 
+	support all the Event States defined for its event category.  
+	The specific Event States that a particular sensor supports are 
+	indicated in the 'Events' field in the sensor's RDR. A sensor is 
+	not required to support any Event States. If no Event States are 
+	supported by a sensor, the 'Events' field will be 0x0000.  A sensor 
+	may not support any Event States that are not defined for its event 
+	category. Each Event State is independent, although in some event 
+	categories the meaning assigned to the Event States will imply that 
+	certain Event States will be mutually exclusive.  For example, a 
+	sensor that uses the SAHPI_EC_LIMIT event category should only have 
+	one of the two Event States, SAHPI_ES_LIMIT_NOT_EXCEEDED or 
+	SAHPI_ES_LIMIT_EXCEEDED asserted at any one time. Except where mutual 
+	exclusion is implied, however, sensors may have multiple Event States 
+	asserted simultaneously. For example, the event category 
+	SAHPI_EC_THRESHOLD uses six different event states to report the 
+	relationship between the value currently measured by the sensor and up 
+	to six different 'threshold' values.  Each threshold is independently 
+	examined, and each Event State that represents a threshold that has 
+	been 'crossed' will be asserted.  Threshold values must be configured 
+	so that 'Minor', 'Major' and 'Critical' thresholds are increasingly 
+	extreme readings, such that when a 'Major' threshold has been crossed, 
+	the corresponding 'Minor' threshold will also have been crossed, and 
+	thus both Event States will be asserted. When a sensor Event State is 
+	asserted or deasserted, an event may be generated by the resource.  
         The generated event identifies the sensor and the event state 
         being asserted or deasserted.  The HPI implementation may assign event
         severity levels for each event state assertion or deassertion on an 
