@@ -6585,7 +6585,7 @@ saHpiSensorReadingNormalMaxIsSupported        OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxType         OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
@@ -6593,7 +6593,7 @@ saHpiSensorReadingNormalMaxType         OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxValue        OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
