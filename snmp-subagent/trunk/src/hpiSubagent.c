@@ -791,13 +791,14 @@ main (int argc, char **argv)
       goto stop;
     }
   populate_event ();
-
   if (init_alarm () != AGENT_ERR_NOERROR)
     {
       snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
       rc = -1;
       goto stop;
     }
+  
+  send_traps = AGENT_TRUE;
   /* If we're going to be a snmp master agent, initial the ports */
 
   if (!agentx_subagent)
