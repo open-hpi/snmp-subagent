@@ -13,10 +13,23 @@
  *
  *
  */
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include <net-snmp/library/snmp_assert.h>
+#include <net-snmp/library/check_varbind.h>
+
 #include <SaHpi.h>
 #include <oh_error.h>
 #include <hpiDomain.h>
-			 
+
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainReferenceTable support fucntions
+//*******************************************************
+//*******************************************************
 struct sa_domain_table top_drt = {
 	.did = SAHPI_UNSPECIFIED_DOMAIN_ID,
 	.sid = 0
@@ -26,6 +39,8 @@ struct sa_resource_table top_rpt = {
         .table = NULL,
         .lock = G_STATIC_REC_MUTEX_INIT
 };
+
+static int populate_drt_call  = FALSE;
 
 
 int populate_drt(void) {
@@ -44,24 +59,19 @@ int populate_drt(void) {
 	} else {
 		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
 		top_drt.sid = sid;
+		populate_drt_call  = TRUE;
 	}
-
-	/* get the info of the one and only domain */
-	if (SA_OK != saHpiDomainInfoGet(top_drt.sid, &DomainInfo) ) {
-		dbg("ERROR: populate_drt, saHpiDomainInfoGet Failed!"); 
-		rval = -1;
-	} else {
-add data to rows here!!!!!!!!!
-	}
-
+	
 	return rval;
 
 }
 
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
-	return top_drt.did;
+	if (populate_drt_call  == TRUE) 
+		return top_drt.did;
+	else
+		return -1;
 }
-
 
 
 
