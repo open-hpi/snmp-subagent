@@ -6142,7 +6142,7 @@ saHpiSensorThdLowMajorIsWritable        OBJECT-TYPE
         and saHpiSensorThdLowMajorInterpreted will not change the
         threshold values."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdLowMajorEntry 2}
 
 saHpiSensorThdLowMajorType              OBJECT-TYPE
