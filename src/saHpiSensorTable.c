@@ -237,7 +237,6 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       sensor_threshold.LowCritical.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_INT32;
       sensor_threshold.LowCritical.Interpreted.Value.SensorInt32 = 0xBEAFDEED;
       sensor->ThresholdDefn.IsThreshold = SAHPI_TRUE;
-      sensor->ThresholdDefn.TholdCapabilities = SAHPI_STM_LOW_CRIT | SAHPI_STM_LOW_MINOR | SAHPI_STM_LOW_MAJOR | SAHPI_STM_UP_CRIT | SAHPI_STM_UP_MINOR | SAHPI_STM_UP_MAJOR | SAHPI_STM_UP_HYSTERESIS | SAHPI_STM_LOW_HYSTERESIS;
       sensor->ThresholdDefn.ReadThold = SAHPI_STM_LOW_CRIT | SAHPI_STM_LOW_MINOR | SAHPI_STM_LOW_MAJOR;;
       sensor->ThresholdDefn.ReadThold = SAHPI_STM_LOW_CRIT | SAHPI_STM_LOW_MINOR | SAHPI_STM_LOW_MAJOR | SAHPI_STM_UP_CRIT | SAHPI_STM_UP_MINOR | SAHPI_STM_UP_MAJOR | SAHPI_STM_UP_HYSTERESIS | SAHPI_STM_LOW_HYSTERESIS;
       sensor->ThresholdDefn.WriteThold = SAHPI_STM_UP_CRIT | SAHPI_STM_UP_MINOR | SAHPI_STM_UP_MAJOR | SAHPI_STM_LOW_HYSTERESIS;;
@@ -339,7 +338,8 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       /*
        * Thresholds
        */
-      if (sensor_context->thd_capabilities & SAHPI_STM_LOW_CRIT)
+ 	if (sensor_context->is_threshold == SAHPI_TRUE) {
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_CRIT) */
 	{
 	  rc = populate_ThdLowCritical (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -352,7 +352,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 rc));
 	}
 
-      if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MAJOR)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MAJOR) */
 	{
 	  rc = populate_ThdLowMajor (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -365,7 +365,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 rc));
 	}
       
-      if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MINOR)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MINOR) */
 	{
 	  rc = populate_ThdLowMinor (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -377,7 +377,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 "call to populate_ThdLowMinor failed with rc: %d\n",
 			 rc));
 	}
-      if (sensor_context->thd_capabilities & SAHPI_STM_UP_CRIT)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_CRIT) */
 	{
 	  rc = populate_ThdUpCritical (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -390,7 +390,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 rc));
 	}
 
-      if (sensor_context->thd_capabilities & SAHPI_STM_UP_MAJOR)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MAJOR) */
 	{
 	  rc = populate_ThdUpMajor (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -403,7 +403,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 rc));
 	}
       
-      if (sensor_context->thd_capabilities & SAHPI_STM_UP_MINOR)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MINOR) */
 	{
 	  rc = populate_ThdUpMinor (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -415,7 +415,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 "call to populate_ThdUpMinor failed with rc: %d\n",
 			 rc));
 	}
-      if (sensor_context->thd_capabilities & SAHPI_STM_UP_HYSTERESIS)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_HYSTERESIS) */
 	{
 	  rc = populate_ThdPosHysteresis (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -427,7 +427,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 "call to populate_ThdPosHysteresis failed with rc: %d\n",
 			 rc));
 	}
-      if (sensor_context->thd_capabilities & SAHPI_STM_LOW_HYSTERESIS)
+      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_HYSTERESIS) */
 	{
 	  rc = populate_ThdNegHysteresis (rpt_entry->DomainId,
 					rpt_entry->ResourceId,
@@ -439,6 +439,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 			 "call to populate_ThdNegHysteresis failed with rc: %d\n",
 			 rc));
 	}
+      }
       rc = AGENT_ERR_NOERROR;
     }
   else
@@ -543,8 +544,7 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
       /*
        * Threshold rows
        */
-
-      if (ctx->thd_capabilities & SAHPI_STM_LOW_CRIT) {
+      if (ctx->is_threshold == SAHPI_TRUE) {
 	rc = delete_ThdLowCritical_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -553,9 +553,7 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowCritical failed with rc: %d\n",
 			 rc));
-	}
       
-      if (ctx->thd_capabilities & SAHPI_STM_LOW_MAJOR) {
 	rc = delete_ThdLowMajor_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -564,8 +562,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowMajor failed with rc: %d\n",
 			 rc));
-	}
-      if (ctx->thd_capabilities & SAHPI_STM_LOW_MINOR) {
 	rc = delete_ThdLowMinor_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -574,9 +570,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowMinor failed with rc: %d\n",
 			 rc));
-	}
-
-      if (ctx->thd_capabilities & SAHPI_STM_UP_CRIT) {
 	rc = delete_ThdUpCritical_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -585,9 +578,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpCritical failed with rc: %d\n",
 			 rc));
-	}
-      
-      if (ctx->thd_capabilities & SAHPI_STM_UP_MAJOR) {
 	rc = delete_ThdUpMajor_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -596,8 +586,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpMajor failed with rc: %d\n",
 			 rc));
-	}
-      if (ctx->thd_capabilities & SAHPI_STM_UP_MINOR) {
 	rc = delete_ThdUpMinor_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -606,8 +594,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpMinor failed with rc: %d\n",
 			 rc));
-	}
-      if (ctx->thd_capabilities & SAHPI_STM_UP_HYSTERESIS) {
 	rc = delete_ThdPosHysteresis_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -616,8 +602,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdPosHysteresis failed with rc: %d\n",
 			 rc));
-	}
-      if (ctx->thd_capabilities & SAHPI_STM_LOW_HYSTERESIS) {
 	rc = delete_ThdNegHysteresis_row (ctx->domain_id,
 					ctx->resource_id,
 					ctx->saHpiSensorIndex);
@@ -689,7 +673,7 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 
       data = entry->DataFormat;
       ctx->flags = data.Range.Flags;
-      ctx->thd_capabilities = entry->ThresholdDefn.TholdCapabilities;
+      ctx->is_threshold = entry->ThresholdDefn.IsThreshold;
 
       ctx->saHpiSensorRDR_len = rdr_entry_oid_len * sizeof (oid);
       memcpy (ctx->saHpiSensorRDR, rdr_entry, ctx->saHpiSensorRDR_len);
@@ -946,7 +930,7 @@ saHpiSensorTable_row_copy (saHpiSensorTable_context * dst,
   dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
   dst->flags = src->flags;
-  dst->thd_capabilities = src->thd_capabilities;
+  dst->is_threshold = src->is_threshold;
   dst->rdr_id = src->rdr_id;
   dst->resource_id = src->resource_id;
   dst->domain_id = src->domain_id;

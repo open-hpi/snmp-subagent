@@ -124,7 +124,7 @@ extern "C"
     long domain_id;
     long hash;
     int flags;
-    SaHpiSensorThdCapT thd_capabilities;
+    SaHpiBoolT is_threshold;
 
   } saHpiSensorTable_context;
 
