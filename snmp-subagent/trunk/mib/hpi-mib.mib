@@ -4741,6 +4741,157 @@ saHpiCtrlDigitalRDR OBJECT-TYPE
         ::= {saHpiCtrlDigitalEntry 9}
 
 
+saHpiCtrlDiscreteEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of discrete control records in the system."
+        ::= {hpiControl 3}
+
+saHpiCtrlDiscreteTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlDiscreteEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table of discrete Control Resource Data Records and its states."
+        ::= {hpiControl 4}
+                
+
+saHpiCtrlDiscreteEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlDiscreteEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+                "Definition of the discrete control resource data record and its states table."
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
+        ::= {saHpiCtrlDiscreteTable 1}
+
+
+SaHpiCtrlDiscreteEntry ::= SEQUENCE {
+        saHpiCtrlDiscreteOutputType		SaHpiCtrlOutputType,
+
+        saHpiCtrlDiscreteMode     		SaHpiCtrlMode,        
+
+        saHpiCtrlDiscreteIsReadOnly 		TruthValue,
+
+        saHpiCtrlDiscreteIsWriteOnly		TruthValue,
+
+		saHpiCtrlDiscreteDefaultState	Unsigned32,
+		saHpiCtrlDiscreteState			Unsigned32,
+
+        saHpiCtrlDiscreteOem             Unsigned32, 
+   
+        saHpiCtrlDiscreteRDR             RowPointer
+}
+
+
+saHpiCtrlDiscreteOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+		"Refer to the textual convention for more details on the
+		enumerations.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+        ::= {saHpiCtrlDiscreteEntry 1}
+
+
+saHpiCtrlDiscreteMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"If this columnar node is written to when the saHpiCtrlDiscreteIsReadOnly 
+	flag is TRUE the an SNMP error of notWritable is returned.  
+
+	This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+	The CtrlState parameter must be of the correct type for the specified 
+	control.  
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+	REFERENCE "See section 7.3 and 7.3.3."
+        ::= {saHpiCtrlDiscreteEntry 2}
+        
+saHpiCtrlDiscreteIsReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if mode is read-only"
+        ::= {saHpiCtrlDiscreteEntry 3}
+        
+saHpiCtrlDiscreteIsWriteOnly  OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if Control is write-only"
+	
+	REFERENCE "See remarks section 7.3.2."
+        ::= {saHpiCtrlDiscreteEntry 4}
+
+saHpiCtrlDiscreteDefaultState          OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default value of resource data records 
+	 	of the discrete control.
+
+		Refer to the textual convention for more details on the
+		enumerations.
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlDiscreteEntry 5}
+
+saHpiCtrlDiscreteState OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+        This attribute represents the current discrete setting of the control.  
+        Use this object to change the values of the data.
+	
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code.
+
+        "
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
+	7.3.3, 8.7 and 8.8."
+         
+        ::= {saHpiCtrlDiscreteEntry 6}
+
+saHpiCtrlDiscreteOem OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Reserved for OEM use"
+        ::= {saHpiCtrlDiscreteEntry 7}
+
+
+saHpiCtrlDiscreteRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        ::= {saHpiCtrlDiscreteEntry 8}
+
+
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -7504,6 +7655,23 @@ saHpiCtrlDigitalGroup OBJECT-GROUP
 		"saHpiCtrlDigital table."
 	::= { hpiMIBCompliances 21}
 
+
+saHpiCtrlDiscreteGroup OBJECT-GROUP
+	OBJECTS {
+        saHpiCtrlDiscreteOutputType,
+        saHpiCtrlDiscreteMode,
+        saHpiCtrlDiscreteIsReadOnly,
+        saHpiCtrlDiscreteIsWriteOnly,
+		saHpiCtrlDiscreteDefaultState,
+		saHpiCtrlDiscreteState,
+        saHpiCtrlDiscreteOem, 
+        saHpiCtrlDiscreteRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"saHpiCtrlDiscrete table."
+	::= { hpiMIBCompliances 22}
+
 saHpiSensorGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorType,
@@ -7531,7 +7699,7 @@ saHpiSensorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensor table."
-	::= { hpiMIBCompliances 22}
+	::= { hpiMIBCompliances 27}
 
 saHpiSensorReadingCurrentGroup OBJECT-GROUP
 	OBJECTS {
@@ -7543,7 +7711,7 @@ saHpiSensorReadingCurrentGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingCurrent table."
-	::= { hpiMIBCompliances 23}
+	::= { hpiMIBCompliances 28}
 
 saHpiSensorReadingMaxGroup OBJECT-GROUP
 	OBJECTS {
@@ -7554,7 +7722,7 @@ saHpiSensorReadingMaxGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingMax table."
-	::= { hpiMIBCompliances 24}
+	::= { hpiMIBCompliances 29}
 
 saHpiSensorReadingMinGroup OBJECT-GROUP
 	OBJECTS {
@@ -7565,7 +7733,7 @@ saHpiSensorReadingMinGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingMin table."
-	::= { hpiMIBCompliances 25}
+	::= { hpiMIBCompliances 30}
 
 saHpiSensorReadingNominalGroup OBJECT-GROUP
 	OBJECTS {
@@ -7576,7 +7744,7 @@ saHpiSensorReadingNominalGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingNominal table."
-	::= { hpiMIBCompliances 26}
+	::= { hpiMIBCompliances 31}
 
 saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
 	OBJECTS {
@@ -7587,7 +7755,7 @@ saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingNormalMax table."
-	::= { hpiMIBCompliances 27}
+	::= { hpiMIBCompliances 32}
 
 saHpiSensorReadingNormalMinGroup OBJECT-GROUP
 	OBJECTS {
@@ -7598,7 +7766,7 @@ saHpiSensorReadingNormalMinGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorReadingNormalMin table."
-	::= { hpiMIBCompliances 28}
+	::= { hpiMIBCompliances 33}
 
 saHpiSensorThdLowCriticalGroup OBJECT-GROUP
 	OBJECTS {
@@ -7610,7 +7778,7 @@ saHpiSensorThdLowCriticalGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdLowCritical table."
-	::= { hpiMIBCompliances 29}
+	::= { hpiMIBCompliances 34}
 
 saHpiSensorThdLowMajorGroup OBJECT-GROUP
 	OBJECTS {
@@ -7622,7 +7790,7 @@ saHpiSensorThdLowMajorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdLowMajor table."
-	::= { hpiMIBCompliances 30}
+	::= { hpiMIBCompliances 35}
 
 saHpiSensorThdLowMinorGroup OBJECT-GROUP
 	OBJECTS {
@@ -7634,7 +7802,7 @@ saHpiSensorThdLowMinorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdLowMinor table."
-	::= { hpiMIBCompliances 31}
+	::= { hpiMIBCompliances 36}
 
 saHpiSensorThdUpCriticalGroup OBJECT-GROUP
 	OBJECTS {
@@ -7646,7 +7814,7 @@ saHpiSensorThdUpCriticalGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdUpCritical table."
-	::= { hpiMIBCompliances 32}
+	::= { hpiMIBCompliances 37}
 
 saHpiSensorThdUpMajorGroup OBJECT-GROUP
 	OBJECTS {
@@ -7658,7 +7826,7 @@ saHpiSensorThdUpMajorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdUpMajor table."
-	::= { hpiMIBCompliances 33}
+	::= { hpiMIBCompliances 38}
 
 saHpiSensorThdUpMinorGroup OBJECT-GROUP
 	OBJECTS {
@@ -7670,7 +7838,7 @@ saHpiSensorThdUpMinorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdUpMinor table."
-	::= { hpiMIBCompliances 34}
+	::= { hpiMIBCompliances 39}
 
 saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
 	OBJECTS {
@@ -7682,7 +7850,7 @@ saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdPosHysteresis table."
-	::= { hpiMIBCompliances 35}
+	::= { hpiMIBCompliances 40}
 
 saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
 	OBJECTS {
@@ -7694,7 +7862,7 @@ saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiSensorThdNegHysteresis table."
-	::= { hpiMIBCompliances 36}
+	::= { hpiMIBCompliances 41}
 
 saHpiInventoryGroup OBJECT-GROUP
 	OBJECTS {
@@ -7708,7 +7876,7 @@ saHpiInventoryGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiInventory table."
-	::= { hpiMIBCompliances 37}
+	::= { hpiMIBCompliances 42}
 
 saHpiAreaGroup OBJECT-GROUP
 	OBJECTS {
@@ -7720,7 +7888,7 @@ saHpiAreaGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiArea table."
-	::= { hpiMIBCompliances 38}
+	::= { hpiMIBCompliances 43}
 
 saHpiFieldGroup OBJECT-GROUP
 	OBJECTS {
@@ -7734,7 +7902,7 @@ saHpiFieldGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiField table."
-	::= { hpiMIBCompliances 39}
+	::= { hpiMIBCompliances 44}
 
 saHpiWatchdogGroup OBJECT-GROUP
 	OBJECTS {
@@ -7755,7 +7923,7 @@ saHpiWatchdogGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiWatchdog table."
-	::= { hpiMIBCompliances 40}
+	::= { hpiMIBCompliances 45}
 
 saHpiAnnunciatorGroup OBJECT-GROUP
 	OBJECTS {
@@ -7770,7 +7938,7 @@ saHpiAnnunciatorGroup OBJECT-GROUP
 	STATUS	current
 	DESCRIPTION
 		"saHpiAnnunciator table."
-	::= { hpiMIBCompliances 41}
+	::= { hpiMIBCompliances 46}
 
 
 saHpiNotificationGroup NOTIFICATION-GROUP
@@ -7788,7 +7956,7 @@ saHpiNotificationGroup NOTIFICATION-GROUP
 	STATUS	current
 	DESCRIPTION
 		"Notification group."
-	::= { hpiMIBCompliances 42}
+	::= { hpiMIBCompliances 47}
 
 
 saHpiMIBCompliance MODULE-COMPLIANCE
@@ -7818,6 +7986,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiEventLogGroup,
 		saHpiRdrGroup,
 		saHpiCtrlDigitalGroup,
+		saHpiCtrlDiscreteGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
@@ -7839,5 +8008,5 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiWatchdogGroup,
 		saHpiAnnunciatorGroup
 	}
-	::= { hpiMIBCompliances 43}
+	::= { hpiMIBCompliances 48}
 END
