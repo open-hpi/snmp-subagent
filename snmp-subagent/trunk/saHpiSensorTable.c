@@ -173,22 +173,39 @@ populate_sensor(SaHpiSensorRecT *sensor,
   return rc;
 }
 
+
 int
-delete_sensor(SaHpiDomainIdT domain_id,
+delete_sensor_row(SaHpiDomainIdT domain_id,
 	      SaHpiResourceIdT resource_id,
 	      SaHpiSensorNumT sensor_num) {
 
-   saHpiSensorTable_context *ctx;
-   netsnmp_index index;
+  saHpiSensorTable_context *ctx;
+  oid index_oid[1];
+  netsnmp_index	sensor_index;
 
 
+  // Look at the MIB to find out what the indexs are
+  index_oid[0] = sensor_num;
+  // Possible more indexs?
+  sensor_index.oids = (oid *)&index_oid;
+  sensor_index.len = 1;
+
+  ctx = CONTAINER_FIND(cb.container, &sensor_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    sensor_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
 }
 
 int  
 saHpiSensorTable_modify_context(
 				SaHpiSensorRecT *entry,
 				SaHpiSensorThresholdsT *sensor_threshold,
-				SaHpiResourceIdT resource_id,
+				SaHpiResourceIdT resource_id,	
 				oid *rdr_entry, size_t rdr_entry_oid_len,
 				saHpiSensorTable_context *ctx) {
 
@@ -220,8 +237,10 @@ saHpiSensorTable_modify_context(
 	return AGENT_ENTRY_EXIST;
       }
     }
-
+    if (hash == 0) // Might happend - roll-over
+      hash = 1; // Need this - we consider hash values of '0' uninitialized
     ctx->hash = hash;
+    
     data = entry->DataFormat;
     thd = entry->ThresholdDefn;
     ctx->saHpiSensorRDR_len = rdr_entry_oid_len * sizeof(oid);
@@ -230,6 +249,9 @@ saHpiSensorTable_modify_context(
     ctx->saHpiSensorIndex = entry->Num;
     ctx->saHpiSensorType = entry->Type;
     ctx->saHpiSensorCategory = entry->Category;
+
+    // DOAMIN
+    ctx->domain_id = 0;
     ctx->resource_id = resource_id;
     // IBM-KR: Adding +1
     ctx->saHpiSensorEventsCategoryControl = entry->EventCtrl+1;
@@ -496,7 +518,6 @@ int set_sensor(saHpiSensorTable_context *ctx) {
   SaErrorT rc; 
   int i;
   
-
   DEBUGMSGTL((AGENT,"set_sensor: Entry.\n"));
   if (ctx) {
     // Set up the table
@@ -708,13 +729,13 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 /************************************************************
  * keep binary tree to find context by name
  */
-static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
+//static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
-
+/*
 static int
 saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 {
@@ -746,7 +767,7 @@ saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 
 }
 
-
+*/
 /************************************************************
  * the *_row_copy routine
  */
@@ -1038,8 +1059,6 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     
-    netsnmp_index index;
-    saHpiSensorTable_context *ctx = NULL;
     int             rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve1. Entry\n"));
@@ -1104,35 +1123,17 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
     for (current = rg->list; current; current = current->next) {
-    // Does the row exist?
-      
-	index.oids = current->tri->index_oid;
-	index.len = current->tri->index_oid_len;
-	/*
-	if (rg->existing_row->index.oids) {
-	  DEBUGMSGTL((AGENT,"index exist!"));
-	  DEBUGMSGTL((AGENT,rg->existing_row->index.oids,
-		      rg->existing_row->index->len));
-	  DEBUGMSGTL((AGENT,"\n"));
-	}
-	*/
-	ctx = CONTAINER_FIND(cb.container, &index);
-	if (ctx == NULL) {
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_GENERR);
-	} else {
-	  
-	  // Stick the values in the row_ctx, for next operation needed 
-	  DEBUGMSGTL((AGENT,"There is one, the index is:\n"));
-	  /*
-	  DEBUGMSGTL((AGENT,rg->existing_row->index->oids,
-		      rg->existing_row->index->len));
-	  DEBUGMSGTL((AGENT,"\n"));
-	  */
-	  //	  free (rg->existing_row)
-	  // rg->existing_row 
-	}
-	  
+
+      // The nice thing about this API is that _row_copy() is called
+      // for this row - if the API has matched the index with an
+      // already existing entry. We check the 'hash' value. If its
+      // 0 the API couldn't find the right context.
+
+      if ( ((saHpiSensorTable_context *) rg->existing_row)->hash == 0) {
+	rc = SNMP_ERR_NOSUCHNAME;
+	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
+      } 
     }
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve1: Exit (rc:%d)\n", rc));
 }
@@ -1149,7 +1150,6 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve2: Entry\n"));
     rg->rg_void = rg->list->ri;
 
-    
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -1183,6 +1183,7 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
 	    break;
         }
 
+	// From the MIB: "if false, rest of these objects are not meaningfull."
 	if (row_ctx->saHpiSensorThresholdDefnIsThreshold == MIB_FALSE) {
 		rc = SNMP_ERR_NOACCESS;
 	}
@@ -1352,9 +1353,6 @@ initialize_table_saHpiSensorTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    /*
-     * TODO: add any external indexes here.
-     */
 
     /*
      * internal indexes
@@ -1369,18 +1367,19 @@ initialize_table_saHpiSensorTable(void)
      * registering the table with the master agent
      */
     cb.get_value = saHpiSensorTable_get_value;
+    
     cb.container = netsnmp_container_find("saHpiSensorTable_primary:"
                                           "saHpiSensorTable:"
                                           "table_container");
-    /*
+    /*    
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find
                                 ("saHpiSensorTable_secondary:"
                                  "saHpiSensorTable:" "table_container"));
-				 */
+    			 
     cb.container->next->compare = saHpiSensorTable_cmp;
-
-    cb.can_set = 1;
+    */
+    //    cb.can_set = 1;
 
     cb.create_row = (UserRowMethod *) saHpiSensorTable_create_row;
 
@@ -1604,7 +1603,7 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
 
     case COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES:
 
-        snmp_set_var_typed_value(var, ASN_INTEGER,
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
                                  (char *) &context->
                                  saHpiSensorThresholdDefnTholdCapabilities,
                                  sizeof(context->
@@ -1676,14 +1675,4 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
     return SNMP_ERR_NOERROR;
 }
 
-/************************************************************
- * saHpiSensorTable_get_by_idx
- */
-/*
-const saHpiSensorTable_context *
-saHpiSensorTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiSensorTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
-*/
+
