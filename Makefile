@@ -1,7 +1,7 @@
 CC=gcc
 
 TARGETS=hpiSubagent
-OBJ=saHpiHotSwapTable.o saHpiEventTable.o saHpiSystemEventLogTable.o saHpiWatchdogTable.o saHpiSensorTable.o saHpiInventoryTable.o saHpiCtrlTable.o hpiSubagent.o saHpiTable.o saHpiRdrTable.o epath_utils.o alarm.o
+OBJ=saHpiHotSwapTable.o saHpiEventTable.o saHpiSystemEventLogTable.o saHpiWatchdogTable.o saHpiSensorTable.o saHpiInventoryTable.o saHpiCtrlTable.o hpiSubagent.o saHpiTable.o saHpiRdrTable.o  alarm.o
 
 CFLAGS=-I. `net-snmp-config --cflags` `glib-config --cflags` -ggdb -I/usr/local/include/openhpi
 BUILDAGENTLIBS=`net-snmp-config --agent-libs` `glib-config --libs` -lopenhpi
@@ -17,9 +17,6 @@ hpiSubagent: $(OBJ)
 clean:
 	rm $(TARGETS) $(OBJ)
 
-epath_utils.so: epath_utils.c Makefile
-	$(CC) $(CFLAGS) $(DLFLAGS) -c -o epath_utils.o epath_utils.c
-	$(CC) $(CFLAGS) $(DLFLAGS) -o epath_utils.so epath_utils.o
 
 hpiSubagent.so: hpiSubagent.c Makefile
 	$(CC) $(CFLAGS) $(DLFLAGS) -c -o hpiSubagent.o hpiSubagent.c
