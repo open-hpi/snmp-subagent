@@ -137,6 +137,8 @@ extern "C"
     unsigned char saHpiInventoryCustomField[SAHPI_STRING_MAX];
     long saHpiInventoryCustomField_len;
 
+      /** UNSIGNED32 */
+    unsigned long saHpiInventoryOEM;
 	/** RowPointer = ASN_OBJECT_ID */
     oid saHpiInventoryRDR[MAX_OID_LEN];
     long saHpiInventoryRDR_len;
@@ -200,9 +202,10 @@ extern "C"
 #define COLUMN_SAHPIINVENTORYFILEID 14
 #define COLUMN_SAHPIINVENTORYASSETTAG 15
 #define COLUMN_SAHPIINVENTORYCUSTOMFIELD 16
-#define COLUMN_SAHPIINVENTORYRDR 17
+#define COLUMN_SAHPIINVENTORYOEM 17
+#define COLUMN_SAHPIINVENTORYRDR 18
 #define saHpiInventoryTable_COL_MIN 1
-#define saHpiInventoryTable_COL_MAX 17
+#define saHpiInventoryTable_COL_MAX 18
 
 
 

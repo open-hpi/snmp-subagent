@@ -4618,7 +4618,7 @@ saHpiSensorCategory OBJECT-TYPE
 				availability (11),
 				redundancy (12),
 				user (127),
-				generic (128),
+				generic (128)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -5655,6 +5655,7 @@ SaHpiInventoryEntry ::= SEQUENCE {
 	saHpiInventoryFileId		OCTET STRING,
 	saHpiInventoryAssetTag		OCTET STRING,
 	saHpiInventoryCustomField	OCTET STRING,
+	saHpiInventoryOEM		Unsigned32,
 	saHpiInventoryRDR		RowPointer
 	}
 
@@ -6146,12 +6147,21 @@ saHpiInventoryCustomField OBJECT-TYPE
 	information."
         ::= {saHpiInventoryEntry 16}
 
+saHpiInventoryOEM OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"OEM value for the inventory record. This is
+	manufacturere' specific value."
+	::= {saHpiInventoryEntry 17}
+
 saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 17}
+        ::= {saHpiInventoryEntry 18}
 --
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -6811,6 +6821,7 @@ saHpiInventoryGroup OBJECT-GROUP
 		saHpiInventoryFileId,
 		saHpiInventoryAssetTag,
 		saHpiInventoryCustomField,
+		saHpiInventoryOEM,
 		saHpiInventoryRDR
 	}
 	STATUS current
