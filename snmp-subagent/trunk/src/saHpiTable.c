@@ -158,18 +158,22 @@ populate_rpt ()
 		  // Get more information
 		  err = saHpiEventLogTimeGet (session,
 					      rpt_entry.ResourceId, &time);
-
-		  err = saHpiEventLogStateGet (session,
+		  err = SA_OK;
+		  if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL)
+		  {
+		    err = saHpiEventLogStateGet (session,
 					       rpt_entry.ResourceId, &state);
-
-		  // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
-		  if (err != SA_OK)
-		    {
-		      DEBUGMSGTL ((AGENT,
-				   "Call to saHpiEventLogStateGet failed with rc: %s.\n",
-				   get_error_string (err)));
-		      state = SAHPI_TRUE;
-		    }
+		    
+		    // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
+		    if (err != SA_OK)
+		      {
+			DEBUGMSGTL ((AGENT,
+				     "Call to saHpiEventLogStateGet failed with rc: %s.\n",
+				     get_error_string (err)));
+			state = SAHPI_TRUE;
+		      }
+		    err = SA_OK;
+		  }
 		  // Construct the index from the entry. Look in the MIB for new index values
 		  // Comment #020 changed the index order.
 		  rpt_oid[0] = rpt_entry.DomainId;

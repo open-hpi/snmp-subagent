@@ -733,132 +733,130 @@ static gchar *eshort_names[] = {
 #define ESHORTNAMES_THIRD_JUMP 43
 #define ESHORTNAMES_LAST_JUMP 44
 
-
-static unsigned int
-entitytype2index (unsigned int i)
+static unsigned int eshort_num_names = sizeof( eshort_names ) / sizeof(gchar * );
+static int entitytype2index(unsigned int i)
 {
-  if (i <= ESHORTNAMES_BEFORE_JUMP)
-    {
-      return i;
-    }
-  else if (i == (unsigned int) SAHPI_ENT_CHASSIS_SPECIFIC)
-    {
-      return ESHORTNAMES_FIRST_JUMP;
-    }
-  else if (i == (unsigned int) SAHPI_ENT_BOARD_SET_SPECIFIC)
-    {
-      return ESHORTNAMES_SECOND_JUMP;
-    }
-  else if (i == (unsigned int) SAHPI_ENT_OEM_SYSINT_SPECIFIC)
-    {
-      return ESHORTNAMES_THIRD_JUMP;
-    }
-  else
-    {
-      return (i - (unsigned int) SAHPI_ENT_ROOT + ESHORTNAMES_LAST_JUMP);
-    }
+        if(i <= ESHORTNAMES_BEFORE_JUMP)
+                return i;
+        else if (i == (unsigned int)SAHPI_ENT_CHASSIS_SPECIFIC)
+                return ESHORTNAMES_FIRST_JUMP;
+        else if (i == (unsigned int)SAHPI_ENT_BOARD_SET_SPECIFIC)
+                return ESHORTNAMES_SECOND_JUMP;
+        else if (i == (unsigned int)SAHPI_ENT_OEM_SYSINT_SPECIFIC)
+                return ESHORTNAMES_THIRD_JUMP;
+        else if (i >= (unsigned int)SAHPI_ENT_ROOT && i - (unsigned int)SAHPI_ENT_ROOT
+                   < eshort_num_names - ESHORTNAMES_LAST_JUMP )
+                return i - (unsigned int)SAHPI_ENT_ROOT + ESHORTNAMES_LAST_JUMP;
+
+        return -1;
 }
 
-/***********************************************************************
+/**
  * entitypath2string
- *  
- * Parameters:
- *   epathptr IN   Pointer to HPI's entity path structure
- *   epathstr OUT  Pointer to canonical entity path string
- *   strsize  IN   Canonical string length
+ * @epathptr: IN. Pointer to HPI's entity path structure
+ * @epathstr: OUT. Pointer to canonical entity path string
+ * @strsize: IN. Canonical string length
  *
- * Returns:
- *   >0  Number of characters written to canonical entity path string
- *   -1  Error return
- ***********************************************************************/
-int
-entitypath2string (const SaHpiEntityPathT * epathptr, gchar * epathstr,
-		   const gint strsize)
+ * Converts an entity path structure into its
+ * canonical string version. 
+ *
+ * Returns: >0 Number of characters written to canonical entity path string, 
+ * -1 Error return
+ */
+int entitypath2string(const SaHpiEntityPathT *epathptr, gchar *epathstr, const gint strsize)
 {
+     
+	gchar  *instance_str, *catstr, *tmpstr;
+	gint   err, i, strcount = 0, rtncode = 0;
+        int tidx;
+        gchar *type_str;
+        gchar type_str_buffer[20];
 
-  gchar *instance_str, *catstr, *tmpstr;
-  gint err, i, strcount = 0, rtncode = 0;
-
-  if (epathstr == NULL || strsize <= 0)
-    {
-      DEBUGMSGTL ((AGENT, "Null string or invalid string size"));
-      return (-1);
-    }
-
-  if (epathptr == NULL)
-    {
-      epathstr = "";
-      return 0;
-    }
-
-  instance_str = (gchar *) g_malloc0 (MAX_INSTANCE_DIGITS + 1);
-  tmpstr = (gchar *) g_malloc0 (strsize);
-  if (instance_str == NULL || tmpstr == NULL)
-    {
-      DEBUGMSGTL ((AGENT, "Out of memory"));
-      rtncode = -1;
-      goto CLEANUP;
-    }
-
-  for (i = (SAHPI_MAX_ENTITY_PATH - 1); i >= 0; i--)
-    {
-      guint num_digits, work_instance_num;
-
-      /* Find last element of structure; Current choice not good,
-         since type=instance=0 is valid */
-      if (epathptr->Entry[i].EntityType == 0)
-	{
-	  continue;
+	if (epathstr == NULL || strsize <= 0) { 
+		DEBUGMSGTL((AGENT,"Null string or invalid string size")); 
+		return -1;
 	}
 
-      /* Validate and convert data */
-      work_instance_num = epathptr->Entry[i].EntityInstance;
-      for (num_digits = 1; (work_instance_num = work_instance_num / 10) > 0;
-	   num_digits++);
+        if (epathptr == NULL) {
+                *epathstr = '\0';
+                return 0;
+        }
 
-      if (num_digits > MAX_INSTANCE_DIGITS)
-	{
-	  rtncode = -1;
-	  goto CLEANUP;
+	instance_str = (gchar *)g_malloc0(MAX_INSTANCE_DIGITS + 1);
+	tmpstr = (gchar *)g_malloc0(strsize);
+	if (instance_str == NULL || tmpstr == NULL) { 
+		DEBUGMSGTL((AGENT,"Out of memory")); 
+		rtncode = -1; 
+		goto CLEANUP;
 	}
-      memset (instance_str, 0, MAX_INSTANCE_DIGITS + 1);
-      err = snprintf (instance_str, MAX_INSTANCE_DIGITS + 1,
-		      "%d", epathptr->Entry[i].EntityInstance);
+	
+	for (i = (SAHPI_MAX_ENTITY_PATH - 1); i >= 0; i--) {
+                guint num_digits, work_instance_num;
 
-      strcount = strcount +
-	strlen (EPATHSTRING_START_DELIMITER) +
-	strlen (eshort_names
-		[entitytype2index (epathptr->Entry[i].EntityType)]) +
-	strlen (EPATHSTRING_VALUE_DELIMITER) + strlen (instance_str) +
-	strlen (EPATHSTRING_END_DELIMITER);
+		/* Find last element of structure; Current choice not good,
+		   since type=instance=0 is valid */
+		if (epathptr->Entry[i].EntityType == 0) {
+			continue;
+		}
 
-      if (strcount > strsize - 1)
-	{
-	  rtncode = -1;
-	  goto CLEANUP;
+		/* Validate and convert data */
+                work_instance_num = epathptr->Entry[i].EntityInstance;
+                for (num_digits = 1; (work_instance_num = work_instance_num/10) > 0; num_digits++);
+		
+		if (num_digits > MAX_INSTANCE_DIGITS) { 
+                        DEBUGMSGTL((AGENT,"Instance value too big"));
+                        rtncode = -1; 
+			goto CLEANUP;
+		}
+                memset(instance_str, 0, MAX_INSTANCE_DIGITS + 1);
+                err = snprintf(instance_str, MAX_INSTANCE_DIGITS + 1,
+                               "%d", epathptr->Entry[i].EntityInstance);
+
+                // check if we can convert the entity type to a string
+                tidx = entitytype2index(epathptr->Entry[i].EntityType);
+
+                if ( tidx >= 0 )
+                        type_str = eshort_names[tidx];
+                else {
+                        err = snprintf(type_str_buffer, 20,
+                                       "%d", epathptr->Entry[i].EntityType);
+                        type_str = type_str_buffer;
+                }
+
+		strcount = strcount + 
+			strlen(EPATHSTRING_START_DELIMITER) + 
+			strlen(type_str) + 
+			strlen(EPATHSTRING_VALUE_DELIMITER) + 
+			strlen(instance_str) + 
+			strlen(EPATHSTRING_END_DELIMITER);
+
+		if (strcount > strsize - 1) {
+			DEBUGMSGTL((AGENT,"Not enough space allocated for string"));
+			rtncode = -1;
+			goto CLEANUP;
+		}
+
+		catstr = g_strconcat(EPATHSTRING_START_DELIMITER,
+				     type_str,
+				     EPATHSTRING_VALUE_DELIMITER,
+				     instance_str, 
+				     EPATHSTRING_END_DELIMITER, 
+				     NULL);
+
+		strcat(tmpstr, catstr);
+		g_free(catstr);
 	}
+        rtncode = strcount;
+	/* Write string */
+	memset(epathstr, 0 , strsize);
+	strcpy(epathstr, tmpstr);
 
-      catstr = g_strconcat (EPATHSTRING_START_DELIMITER,
-			    eshort_names[entitytype2index
-					 (epathptr->Entry[i].EntityType)],
-			    EPATHSTRING_VALUE_DELIMITER, instance_str,
-			    EPATHSTRING_END_DELIMITER, NULL);
+ CLEANUP:
+	g_free(instance_str);
+	g_free(tmpstr);
 
-      strcat (tmpstr, catstr);
-      g_free (catstr);
-    }
-  rtncode = strcount;
-  /* Write string */
-  memset (epathstr, 0, strsize);
-  strcpy (epathstr, tmpstr);
-
-CLEANUP:
-  g_free (instance_str);
-  g_free (tmpstr);
-
-  return (rtncode);
-}				/* End entitypath2string */
-
+	return(rtncode);
+} /* End entitypath2string */
 SaErrorT
 rcSaHpi ()
 {
