@@ -1095,6 +1095,18 @@ saHpiHpiVersion OBJECT-TYPE
         DESCRIPTION     
         "This columnar node provides the version of HPI this MIB is based on."
         ::= { hpiAdministration 1 } 
+	
+saHpiReourceId OBJECT-TYPE
+        SYNTAX          SaHpiInstrumentId
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+        "This columnar node provides the reource id of the domain the subagent 
+	is running on.  This is to help prevent powering down the machine providing
+	the SNMP service"
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 6.3.5."
+        ::= { hpiAdministration 2 } 
 
 -- *************************************
 -- **
