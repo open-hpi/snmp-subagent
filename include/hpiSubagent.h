@@ -58,6 +58,9 @@
 #define AGENT_ERR_BUILD_TRAP -247
 
 #define AGENT_ERR_SUBSCRIBE -246
+
+#define AGENT_ERR_WRONG_DELIM -245
+
 /* current sahpi.h missed SA_ERR_INVENT_DATA_TRUNCATED */
 #ifndef SA_ERR_INVENT_DATA_TRUNCATED
 //#warning "No 'SA_ERR_INVENT_DATA_TRUNCATED 'definition in sahpi.h!"
@@ -288,7 +291,7 @@ typedef struct state_category_string_
  *
  * @param category [IN] The category in which this state has to be converted by.
  * @param state [IN] The state of the event.
- * @param str [IN] The new value in string format.
+ * @param str [OUT] The new value in string format.
  * @param len [OUT] length of the new string.
  * @param max_len [IN] max length that can put in data.
  *
@@ -302,3 +305,15 @@ int build_state_string (SaHpiEventCategoryT category,
 			size_t max_len);
 			
 
+/*
+ * Construct from the string value the correct state value.
+ *
+ * @param str [IN] The string value containing the state values.
+ * @param len [IN] Length of the string value.
+ * @param state [OUT] the state value
+ *
+ * @return AGENT_ERR_NOERROR - operation went ok
+ */
+int build_state_value (char *str,
+		       size_t len,
+		       SaHpiEventStateT *state);
