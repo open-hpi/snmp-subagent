@@ -28,7 +28,7 @@
     <sect2>
       <title>Document Scope</title>
       <para>
-        This manual covers the entire process of building a SNMP sub-agent
+        This guide covers the entire process of building a SNMP sub-agent
 	using the NetSNMP 5.0.x API. This includes, but is not limited to,
 	and overview of NetSNMP API function calls, NetSNMP interfaces,
 	and usage scenarios. It is a living document, and as such will
