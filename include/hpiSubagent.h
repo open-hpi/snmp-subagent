@@ -270,3 +270,33 @@ int entitypath2string(const SaHpiEntityPathT *epathptr,
                       gchar *epathstr,
                       gint strsize);
 
+/*
+ * Structure used by build_state_string routine.
+ */
+#ifndef STATE_CATEGORY_STRING_HAVE
+#define STATE_CATEGORY_STRING_HAVE
+typedef struct state_category_string_ 
+{
+    SaHpiEventCategoryT category;
+    SaHpiEventStateT state;
+    char *str;
+} state_category_string;
+#endif
+/*
+ * Construct a string value from a category and state 
+ * parameter.
+ *
+ * @param category [IN] The category in which this state has to be converted by.
+ * @param state [IN] The state of the event.
+ * @param str [OUT] The new value in string format.
+ * @param len [OUT] length of the new string.
+ *
+ * @return AGENT_ERR_NOERROR - operation went ok
+ * @return AGENT_ERR_MEMORY_FAULT - Not enough memory to complete the operation.
+ */
+int build_state_string (SaHpiEventCategoryT category,
+			SaHpiEventStateT state,
+			char **str,
+			size_t *len);
+			
+
