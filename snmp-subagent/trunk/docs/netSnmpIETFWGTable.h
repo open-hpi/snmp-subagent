@@ -90,7 +90,7 @@ extern size_t netSnmpIETFWGTable_oid_len;
 #define netSnmpIETFWGTable_ROW_CREATION
 
 /* comment out the following line if you don't want the secondary index */
-#define netSnmpIETFWGTable_IDX2
+/* #define netSnmpIETFWGTable_IDX2  */
 
 #ifdef netSnmpIETFWGTable_SET_HANDLING
 
