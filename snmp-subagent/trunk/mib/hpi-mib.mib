@@ -6251,7 +6251,7 @@ saHpiCurrentSensorStateEventState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS  current
         DESCRIPTION
-        "See definition in Textual-Convetion for more details."
+        "See Definition in TEXTUAL-CONVENTION."
         ::= {saHpiCurrentSensorStateEntry 4}
 	
 saHpiCurrentSensorStateSensorEnable       OBJECT-TYPE
@@ -7490,10 +7490,10 @@ saHpiAreaType        OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "
-The type of Area.
+	The type of Area.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiAreaEntry 2}
 
 saHpiAreaIsReadOnly OBJECT-TYPE 
@@ -7501,7 +7501,13 @@ saHpiAreaIsReadOnly OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "Describes if an area is read-only.  All area headers in a 
+        "Describes if an area is read-only.  
+
+        If an IDR is read-only then all area headers and fields are as
+        read-only as well.
+	
+
+	All area headers in a 
         read-only IDR are flagged as read-only as well."
         ::= {saHpiAreaEntry 3}
 
