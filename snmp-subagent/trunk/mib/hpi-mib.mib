@@ -6184,12 +6184,16 @@ saHpiAnnouncementText	OBJECT-TYPE
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiAnnouncementEntry 14}
 
--- 
--- Notifications
 --
-
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********                  Notifications				 **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+--
 hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
-
 
 saHpiSensorNotification NOTIFICATION-TYPE
 	OBJECTS {	
@@ -6212,62 +6216,17 @@ saHpiSensorNotification NOTIFICATION-TYPE
 	"Derived from typedefs in SAI-HPI-A.01.01 pages 101, 102."
 	::= { hpiNotifications 1 }
 
-saHpiHotSwapNotification NOTIFICATION-TYPE
-	OBJECTS {
+saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
+	OBJECTS {	
 		saHpiDomainId,
 		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventHotSwapState,
---		saHpiEventPreviousHotSwapState
 	}
 	STATUS current
-	DESCRIPTION
-	"Hot swap notification."
-	::= { hpiNotifications 2}
-
-saHpiWatchdogNotification NOTIFICATION-TYPE
-	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventWatchdogNum,
---		saHpiEventWatchdogAction,
---		saHpiEventWatchdogPreTimerAction,
---		saHpiEventWatchdogUse
-	}
-	STATUS current
-	DESCRIPTION
-	"Watchdog notification."
-	::= { hpiNotifications 3}
-
-saHpiOEMNotifications NOTIFICATION-TYPE
-	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventOemManufacturerIdT,
---		saHpiEventOemEventData
-	}
-	STATUS current
-	DESCRIPTION
-	"OEM event notifications."
-	::= { hpiNotifications 4}
-
-saHpiUserNotifications NOTIFICATION-TYPE
-	OBJECTS {
-		saHpiDomainId,
-		saHpiResourceId
---		saHpiEventIndex,
---		saHpiEventSeverity,
---		saHpiEventUserEventData
-	}
-	STATUS current
-	DESCRIPTION
-	"User event notifications."
-	::= { hpiNotifications 5}
+ 	DESCRIPTION
+	"Sensor event notification."
+	REFERENCE 
+	"Derived from typedefs in SAI-HPI-B.01.01 pages 77..78."
+	::= { hpiNotifications 2 }
 
 saHpiResourceNotifications NOTIFICATION-TYPE
 	OBJECTS {
@@ -6283,24 +6242,104 @@ saHpiResourceNotifications NOTIFICATION-TYPE
 	STATUS current
 	DESCRIPTION
 	"Resource (RPT) change event notifications."
-	::= { hpiNotifications 6}
-
-saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
+	::= { hpiNotifications 3 }
+	
+saHpiDomainNotifications NOTIFICATION-TYPE
 	OBJECTS {
 		saHpiDomainId,
-		saHpiResourceId,
---		saHpiRdrRecordId,
---		saHpiRdrType,
-		saHpiRdrEntityPath,
-		saHpiRdr,
-		saHpiRdrRTP,
-		saHpiRdrCount
+		saHpiResourceId
 	}
 	STATUS current
 	DESCRIPTION
-	"Resource  Data Record change event notifications."
-	::= { hpiNotifications 7}
+	"Domain events are used to announce the addition of domain 
+	references and the removal of domain references to the DRT."
+	::= { hpiNotifications 4 }
 
+saHpiWatchdogNotification NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId
+--		saHpiEventIndex,
+--		saHpiEventSeverity,
+--		saHpiEventWatchdogNum,
+--		saHpiEventWatchdogAction,
+--		saHpiEventWatchdogPreTimerAction,
+--		saHpiEventWatchdogUse
+	}
+	STATUS current
+	DESCRIPTION
+	"Watchdog notification."
+	::= { hpiNotifications 5 }
+
+
+saHpiHotSwapNotification NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId
+--		saHpiEventIndex,
+--		saHpiEventSeverity,
+--		saHpiEventHotSwapState,
+--		saHpiEventPreviousHotSwapState
+	}
+	STATUS current
+	DESCRIPTION
+	"Hot swap notification."
+	::= { hpiNotifications 6 }
+
+
+saHpiSoftwareNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId
+	}
+	STATUS current
+	DESCRIPTION
+	"Audit events report a discrepancy in the audit process.  Audits are 
+	typically performed by HA software to detect problems.  Audits may 
+	look for such things as corrupted data stores, inconsistent RPT 
+	information, or improperly managed queues.  Startup events report a 
+	failure to start-up properly, or inconsistencies in persisted data."
+	::= { hpiNotifications 7 }
+
+
+saHpiOEMNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId
+--		saHpiEventIndex,
+--		saHpiEventSeverity,
+--		saHpiEventOemManufacturerIdT,
+--		saHpiEventOemEventData
+	}
+	STATUS current
+	DESCRIPTION
+	"OEM event notifications."
+	::= { hpiNotifications 8 }
+
+saHpiUserNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiDomainId,
+		saHpiResourceId
+--		saHpiEventIndex,
+--		saHpiEventSeverity,
+--		saHpiEventUserEventData
+	}
+	STATUS current
+	DESCRIPTION
+	"User events may be used for storing custom events created by an HPI 
+	User when injecting events into the Event Log using 
+	saHpiEventLogEntryAdd()."
+	::= { hpiNotifications 9 }
+	
+--
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********   OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2	 **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+--
 -- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----       
 --      OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2
 -- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
@@ -6634,12 +6673,14 @@ saHpiWatchdogGroup OBJECT-GROUP
 saHpiNotificationGroup NOTIFICATION-GROUP
 	NOTIFICATIONS {
 		saHpiSensorNotification,
-		saHpiHotSwapNotification,
-		saHpiWatchdogNotification,
-		saHpiOEMNotifications,
-		saHpiUserNotifications,
+		saHpiSensorEnableChangeNotification,
 		saHpiResourceNotifications,
-		saHpiResourceDataRecordNotifications
+		saHpiDomainNotifications,
+		saHpiWatchdogNotification,
+		saHpiHotSwapNotification,
+		saHpiSoftwareNotifications,
+		saHpiOEMNotifications,
+		saHpiUserNotifications
 	}
 	STATUS	current
 	DESCRIPTION
