@@ -448,6 +448,7 @@ saHpiInventoryTable_modify_context (SaHpiEntryIdT rdr_id,
       memcpy (ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
       ctx->saHpiInventoryEirId = entry->EirId;
       ctx->saHpiInventoryIndex = count;
+      ctx->saHpiInventoryOEM = entry->Oem;
 
       ctx->saHpiInventoryAttributes_len = 0;
       memset (ctx->saHpiInventoryAttributes, 0x00,
@@ -1130,6 +1131,8 @@ saHpiInventoryTable_row_copy (saHpiInventoryTable_context * dst,
 	  src->saHpiInventoryCustomField_len);
   dst->saHpiInventoryCustomField_len = src->saHpiInventoryCustomField_len;
 
+  dst->saHpiInventoryOEM = src->saHpiInventoryOEM;
+
   memcpy (src->saHpiInventoryRDR, dst->saHpiInventoryRDR,
 	  src->saHpiInventoryRDR_len);
   dst->saHpiInventoryRDR_len = src->saHpiInventoryRDR_len;
@@ -1365,6 +1368,7 @@ saHpiInventoryTable_set_reserve1 (netsnmp_request_group * rg)
 	case COLUMN_SAHPIINVENTORYINDEX:
 	case COLUMN_SAHPIINVENTORYRECORDTYPE:
 	case COLUMN_SAHPIINVENTORYVALIDITY:
+	case COLUMN_SAHPIINVENTORYOEM:
 	case COLUMN_SAHPIINVENTORYRDR:
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
@@ -2014,6 +2018,13 @@ saHpiInventoryTable_get_value (netsnmp_request_info * request,
 				(char *) &context->
 				saHpiInventoryCustomField,
 				context->saHpiInventoryCustomField_len);
+      break;
+
+    case COLUMN_SAHPIINVENTORYOEM:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiInventoryOEM,
+				sizeof (context->saHpiInventoryOEM));
       break;
 
     case COLUMN_SAHPIINVENTORYRDR:
