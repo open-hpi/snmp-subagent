@@ -5412,22 +5412,24 @@ saHpiSensorEventCtrl    OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "
-        perEvent(1)		        Event message control per event,
-                                        or by entire sensor; sensor event enable
-                                        status can be changed, and assert/deassert
-                                        masks can be changed.
-                                         
-        readOnlyMasks(2):	      Control for entire sensor only; sensor
-                                        event enable status can be changed, but
-                                        assert/deassert masks cannot be changed.
-                                        
-        readOnly(3):	             Event control not supported; sensor event
-                                        enable status cannot be changed and
-                                        assert/deassert masks cannot be changed.
+        "This columnar node represents the sensor category
+	control of events. The possible states are:
+
+	perEvent - Event message control per event,             
+           or by entire sensor; sensor event enable     
+           status can be changed, and assert/deassert   
+           masks can be changed      
+	   
+	readOnlyMasks - Control for entire sensor only; sensor       
+           event enable status can be changed, but      
+           assert/deassert masks cannot be changed 
+	   
+	readOnly - Event control not supported; sensor event    
+           enable status cannot be changed and          
+           assert/deassert masks cannot be changed.
 
 	Note: Enumerated values are increased by one value compared to
-	SAI-HPI-B.01.01 spec."
+	SAI-HPI-B.01.01 section 8.5."
         ::= {saHpiSensorEntry 6}
 
 saHpiSensorSupportedStates         OBJECT-TYPE
@@ -5532,21 +5534,23 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "This columnar node represents the sensor category
-control of events. The possible states are:
+	control of events. The possible states are:
 
-perEvent - Event message control per event,             
+	perEvent - Event message control per event,             
            or by entire sensor; sensor event enable     
            status can be changed, and assert/deassert   
            masks can be changed      
-readOnlyMasks - Control for entire sensor only; sensor       
+	   
+	readOnlyMasks - Control for entire sensor only; sensor       
            event enable status can be changed, but      
            assert/deassert masks cannot be changed 
-readOnly - Event control not supported; sensor event    
+	   
+	readOnly - Event control not supported; sensor event    
            enable status cannot be changed and          
            assert/deassert masks cannot be changed.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiSensorEntry 11}
 
 saHpiSensorEventsSupported OBJECT-TYPE
@@ -5579,7 +5583,8 @@ saHpiSensorBaseUnits    OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "See Definition."
+        "This columnar node provides the sensor data base units,
+	(meters, etc.)"
         ::= {saHpiSensorEntry 15}
         
 saHpiSensorModifierUnits        OBJECT-TYPE
@@ -5587,7 +5592,13 @@ saHpiSensorModifierUnits        OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "See Definition."
+        "This columnar node provides the sensor data modifier unit(s).
+	Example unit = second, etc.
+	
+	Also see modifier use columnar node saHpiSensorModifierUse for 
+	futher insite. "
+	REFERENCE
+	"SAI-HPI-B.01.01 section 8.5."	
         ::= {saHpiSensorEntry 16}
         
 saHpiSensorModifierUse OBJECT-TYPE
