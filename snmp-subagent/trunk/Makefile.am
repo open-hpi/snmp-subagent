@@ -66,11 +66,6 @@ include_HEADERS	= $(shell find include -name '*.h')
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
 
-clean: am_config_clean
-	$(MAKE) -C examples clean
-am_config_clean:
-	rm -fr $(PACKAGE)-*.tar.gz
-
 tags:   $(ALL_SOURCES)
 	@echo making tags		
 	@echo $(ALL_SOURCES) | xargs ctags
