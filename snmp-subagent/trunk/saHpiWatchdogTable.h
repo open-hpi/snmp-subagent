@@ -83,11 +83,13 @@ extern          "C" {
  */
    
     void            initialize_table_saHpiWatchdogTable(void);
-  
+  /*
     const saHpiWatchdogTable_context
         *saHpiWatchdogTable_get_by_idx(netsnmp_index *);
+
     const saHpiWatchdogTable_context
         *saHpiWatchdogTable_get_by_idx_rs(netsnmp_index *, int row_status);
+*/
     int             saHpiWatchdogTable_get_value(netsnmp_request_info *,
                                                  netsnmp_index *,
                                                  netsnmp_table_request_info

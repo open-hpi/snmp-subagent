@@ -1,7 +1,7 @@
 CC=gcc
 
 TARGETS=hpiSubagent
-OBJ=saHpiEventTable.o saHpiSystemEventLogTable.o saHpiWatchdogTable.o saHpiSensorTable.o saHpiInventoryTable.o saHpiCtrlTable.o hpiSubagent.o saHpiTable.o saHpiRdrTable.o epath_utils.o alarm.o
+OBJ=saHpiHotSwapTable.o saHpiEventTable.o saHpiSystemEventLogTable.o saHpiWatchdogTable.o saHpiSensorTable.o saHpiInventoryTable.o saHpiCtrlTable.o hpiSubagent.o saHpiTable.o saHpiRdrTable.o epath_utils.o alarm.o
 
 CFLAGS=-I. `net-snmp-config --cflags` `glib-config --cflags` -ggdb -I/usr/local/include/openhpi
 BUILDAGENTLIBS=`net-snmp-config --agent-libs` `glib-config --libs` -lopenhpi
@@ -24,6 +24,10 @@ epath_utils.so: epath_utils.c Makefile
 hpiSubagent.so: hpiSubagent.c Makefile
 	$(CC) $(CFLAGS) $(DLFLAGS) -c -o hpiSubagent.o hpiSubagent.c
 	$(CC) $(CFLAGS) $(DLFLAGS) -o hpiSubagent.so hpiSubagent.o
+
+saHpiHotSwapTable.so: saHpiHotSwapTable.c Makefile
+	$(CC) $(CFLAGS) $(DLFLAGS) -c -o saHpiHotSwapTable.o saHpiHotSwapTable.c
+	$(CC) $(CFLAGS) $(DLFLAGS) -o saHpiHotSwapTable.so saHpiHotSwapTable.o
 
 saHpiEventTable.so: saHpiEventTable.c Makefile
 	$(CC) $(CFLAGS) $(DLFLAGS) -c -o saHpiEventTable.o saHpiEventTable.c
