@@ -179,8 +179,8 @@ extern "C"
  */
 //    extern oid      saHpiInventoryTable_oid[];
 //    extern size_t   saHpiInventoryTable_oid_len;
-// 1,3,6,1,3,90,3,8
-#define saHpiInventoryTable_TABLE_OID hpiResources_OID,8
+
+#define saHpiInventoryTable_TABLE_OID hpiResources_OID,9
 
 /*************************************************************
  * column number definitions for table saHpiInventoryTable

@@ -123,7 +123,7 @@ extern "C"
   //  extern oid      saHpiWatchdogTable_oid[];
   // extern size_t   saHpiWatchdogTable_oid_len;
 //1,3,6,1,3,90,3,10
-#define saHpiWatchdogTable_TABLE_OID hpiResources_OID, 10
+#define saHpiWatchdogTable_TABLE_OID hpiResources_OID, 11
 
 
 /***********************************

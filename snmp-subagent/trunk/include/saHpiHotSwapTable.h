@@ -117,7 +117,7 @@ extern "C"
 //    extern oid      saHpiHotSwapTable_oid[];
   //   extern size_t   saHpiHotSwapTable_oid_len;
 //1,3,6,1,3,90,3,11
-#define saHpiHotSwapTable_TABLE_OID hpiResources_OID,11
+#define saHpiHotSwapTable_TABLE_OID hpiResources_OID,12
 
 
 /*************************************************************
