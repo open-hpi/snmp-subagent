@@ -1306,6 +1306,7 @@ saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
 
 saHpiEventSensorTriggerReadingEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined (0),
 				enabled(129),
 				scanEnabled(65),
 				busy(33)
@@ -1467,6 +1468,7 @@ saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
 
 saHpiEventSensorTriggerThresholdEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined (0),
 				enabled(129),
 				scanEnabled(65),
 				busy(33)
@@ -2360,6 +2362,7 @@ saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
 
 saHpiSystemEventLogSensorTriggerReadingEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined (0),
 				enabled(129),
 				scanEnabled(65),
 				busy(33)
@@ -2521,6 +2524,7 @@ saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
 
 saHpiSystemEventLogSensorTriggerThresholdEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined (0),
 				enabled(129),
 				scanEnabled(65),
 				busy(33)

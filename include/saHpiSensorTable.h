@@ -92,11 +92,14 @@ extern "C"
 	/** UNSIGNED32 = ASN_UNSIGNED */
     unsigned long saHpiSensorStatus;
 
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorAssertEvents;
 
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorDeassertEvents;
+    /** OCTETSTR = ASN_OCTET_STR */
+    unsigned char   saHpiSensorAssertEvents[SENSOR_EVENTS_SUPPORTED_MAX];
+    size_t            saHpiSensorAssertEvents_len;
+
+    /** OCTETSTR = ASN_OCTET_STR */
+    unsigned char   saHpiSensorDeassertEvents[SENSOR_EVENTS_SUPPORTED_MAX];
+    size_t            saHpiSensorDeassertEvents_len;
 
 	/** TruthValue = ASN_INTEGER */
     long saHpiSensorIgnore;
@@ -252,7 +255,7 @@ extern "C"
 #define COLUMN_SAHPISENSORTYPE 2
 #define COLUMN_SAHPISENSORCATEGORY 3
 #define COLUMN_SAHPISENSOREVENTSCATEGORYCONTROL 4
-#define COLUMN_SAHPISENSOREVENTSSTATE 5
+#define COLUMN_SAHPISENSOREVENTSSUPPORTED 5
 #define COLUMN_SAHPISENSORSTATUS 6
 #define COLUMN_SAHPISENSORASSERTEVENTS 7
 #define COLUMN_SAHPISENSORDEASSERTEVENTS 8
