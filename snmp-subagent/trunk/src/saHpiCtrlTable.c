@@ -60,15 +60,17 @@ populate_control (SaHpiEntryIdT rdr_id,
 {
 
   int rc = AGENT_ERR_NOERROR;
-  int i = 0;
   oid index_oid[CTRL_INDEX_NR];
   oid column[2];
   SaHpiSessionIdT session_id;
+#ifdef BUG_873961
+  int i = 0;
+  netsnmp_void_array *array;
+  saHpiCtrlTable_context *ctx;
+#endif
   netsnmp_index ctrl_index;
   saHpiCtrlTable_context *ctrl_context;
-  saHpiCtrlTable_context *ctx;
   SaHpiCtrlStateT ctrl_state;
-  netsnmp_void_array *array;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_ctrl: Entry.\n"));
 

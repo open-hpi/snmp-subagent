@@ -61,14 +61,14 @@ populate_watchdog (SaHpiEntryIdT rdr_id,
   SaHpiWatchdogT wdog;
   SaHpiSessionIdT session_id;
   int rc = AGENT_ERR_NOERROR;
-  int i = 0;
   oid index_oid[WATCHDOG_INDEX_NR];
   oid column[2];
-
   netsnmp_index watchdog_index;
+#ifdef BUG_873961
+  int i = 0;
   netsnmp_void_array *array;
-
   saHpiWatchdogTable_context *ctx;
+#endif
   saHpiWatchdogTable_context *watchdog_context;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_watchdog: Entry.\n"));

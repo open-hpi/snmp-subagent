@@ -72,7 +72,6 @@ populate_inventory (SaHpiEntryIdT rdr_id,
   size_t initial_size;
 
   int rc = AGENT_ERR_NOERROR;
-  int i = 0;
   long stop;
   long count = 0;
   long count_of_items = 0;
@@ -80,11 +79,13 @@ populate_inventory (SaHpiEntryIdT rdr_id,
   oid column[2];
 
   netsnmp_index inventory_index;
+#ifdef BUG_873961
   netsnmp_void_array *array;
-
+  int i = 0;
+  saHpiInventoryTable_context *ctx = NULL;
+#endif
   saHpiInventoryTable_context *inventory_context;
   saHpiInventoryTable_context *first_context = NULL;
-  saHpiInventoryTable_context *ctx = NULL;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_inventory: Entry.\n"));
 
