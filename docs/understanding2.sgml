@@ -1,5 +1,5 @@
 <!-- ...................................................................... -->
-<!-- $Id$ ................................................ -->
+<!-- $Id$ -->
 <!-- 
         This material may be distributed only subject to the terms and 
         conditions set forth in the Open Publication License, v1.0 or later 
@@ -45,19 +45,19 @@
 	  </listitem>
 	  <listitem>
 	  	<para>
-		Different #define enabling/disabling different functions of the 
+		 #define enabling/disabling different functions of the 
 		sub-agent table manipulations.
 		</para>
 	  </listitem>
 	</itemizedlist>
-    <sect2>
+    <sect2 id="context_structure">
       <title>Context structure</title>
       <para>
       The <emphasis>context</emphasis> structure is used exclusivly by the NetSNMP API
       for manipulating rows of leaf nodes (columnar objects).
       </para>
       <para>
-      The first named variables of the structure is
+      The first named variables of the structure is the <emphasis>index</emphasis> variable.
 	<programlisting role='C'>
       typedef struct netSnmpIETFWGTable_context_s {
     	netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -73,13 +73,13 @@
 	</programlisting>
        <para>
        	The <emphasis>oid</emphasis> is defined as unsigned long  (look in net-snmp/library/asn1.h).
-	The <emphasis>len</emphasis> is the number of entries in the array at *oids, 
+	The <emphasis>len</emphasis> is the number of entries in the *oids array, 
 	<emphasis>not</emphasis> the length of the OID in the bytes.
        </para>
        <para>
        	This <emphasis>netsnmp_index</emphasis> structure is used to place the index tuple
 	of the row. Not the full OID (as in fully expanded OID of the table), but just 
-	the sub-set of numbers uniquely defining the row.
+	the sub-set of numbers uniquely defining the row alsa known as index value.
        </para> 
        <sect3>
         <title>Example of using netsnmp_index</title>
@@ -103,20 +103,47 @@
 	</programlisting>	
 	<para>
 	This example will generate the index tuple, nothing else. 
+	</para>
+	</sect3>
+	<sect3>
+		<title>Rest of context structure</title>
+
+	<para>
 	The rest of the generated structure contains  columnar
 	(leaf nodes) mapped to C types. The generator assumes the most
-	general type - therefore a <emphasis>TruthValue</emphasis> textual 
+	general type of the object - therefore a <emphasis>TruthValue</emphasis> textual 
 	convention in a MIB will map to an ASN_INTEGER type - in C language
-	this will be <emphasis>unsigned long</emphasis>. 
+	this will be <emphasis>unsigned long</emphasis>. If you don't remember what
+	textual conventions are and what their basics data types are, consult the
+	SNMP-v2-TC MIB file. 
 	</para>
+	<note>
 	<para>
 	The length of the data (if the columnar node is defined as <emphasis>
 	OCTET STRING(SIZE(1..10))</emphasis> is NOT taken under consideration
-	and has to be manually changed from the maximum length.
+	and has to be manually changed from the maximum length. As in with :
+	<programlisting role='C'>
+       /** OCTETSTR = ASN_OCTET_STR */
+            char nsIETFWGName[65535];
+            long nsIETFWGName_len;
+	</programlisting>
+	Where <emphasis>nsIETFWGName</emphasis> is mapped to the columnar node <emphasis>nsIETFWGName</emphasis>
+	of string size greater than one but less than thirty-two. 
+	<programlisting role='C'>
+nsIETFWGName OBJECT-TYPE
+    SYNTAX      OCTET STRING (SIZE(1..32))
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "The name of the IETF Working Group this table describes."
+    ::= { netSnmpIETFWGEntry 1 }
+</programlisting>
+	Please consult <emphasis>NET-SNMP-EXAMPLES-MIB.txt</emphasis> for the rest of the object if interested.
 	</para>
+	</note>
 	<para>
 	Subsequent examples will demonstrate how to fully leverage the rest of 
-	the context structure.
+	the context structure. Please consult <xref linkend="developer_row_creation">.
 	</para>
        </sect3>
       </sect2>
@@ -141,26 +168,21 @@ int netSnmpIETFWGTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 	   <listitem>
 	   	<para>
 		  Initialize the table. This function will be fully explained 
-		  in the subsequent sections.
+		  in <xref linkend="initialize_table">
 		</para>
 	   </listitem>
 	   <listitem>
 	   	<para>
-		  Helper functions for retrieving the index value. This might sound 
-		  like an oxymoron - does not the first value of the <emphasis>
-		  context</emphasis> structure contain the index value? Yes, but what
-		  if that value is dynamic and depends on external data-sources? 
+		  Helper functions for retrieving the secondary index value. What is 
+		  a secondary index value? It is the second index in a index tuple.
+		  For detail information, please look in <xref linkend="n_tuple_indexes">
+		 and <xref linkend="developer_row_creation">.
 		 </para>
 		 <para>
 		   This function allows for the sub-agent to check 
 		   (or reshape) of the column objects in a row before delievering
 		   to the user.
 		 </para>
-		 <warning>
-		   <para>
-		   This function will not be discussed in this tutorial.
-		   </para>
-		 </warning>
 	    </listitem>
 	    <listitem>
 	    	 <para>
@@ -173,7 +195,7 @@ int netSnmpIETFWGTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 	   <para>
 	    The next set of functions are controlled by a set of #define statements. 
 	    These operations are for writing, deleting, creating, and retrieving secondary index 
-	    off rows. 
+	    of rows. 
 <programlisting role='C'>
 #ifdef netSnmpIETFWGTable_SET_HANDLING
 
@@ -210,17 +232,19 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
 		<listitem>
 		  <para>
 		     For SNMP SET operations. These operations are used to write and delete
-		     (if appropiate) rows.
+		     (if appropiate) rows. Consult <xref linkend="delete_rows"> and 
+		   <xref linkend="write_row"> for more details.
 		  </para>
 		 </listitem>
 		 <listitem>
 		   <para>
-		     For creation of rows.
+		     For creation of rows. Consult <xref linkend="create_rows"> for more details.
 		   </para>
 		  </listitem>
 		  <listitem>
 		    <para>
-		      Manipulating secondary (or more) index tuple.
+		      Manipulating secondary (or more) index tuple. Consult
+		      <xref linkend="n_tuple_indexes">.
 		    </para>
 		  </listitem>
 	    </itemizedlist>
@@ -228,7 +252,7 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
       <title>Object IDentifier of the table</title>
       <para>
        The 'mib2c' tool also extracts the OID of the table. This sequence of numbers
-       is when the sub-agent registers the table.
+       is used by the sub-agent when registering the table.
       </para>
      </sect2>
 
@@ -251,12 +275,12 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
       </programlisting>
       <para>
       	These textual names are used in the generated C source code instead of 
-	just the numerical values.
+	the numerical values for developer convenience.
       </para>
      </sect2>
 
      <sect2>
-      <title>Enabling and disabling of operations</title>
+      <title>Enabling and disabling operations</title>
       <para>
        The three set of #define statements disable or enable sub-agent operations.
       </para>
@@ -279,7 +303,9 @@ netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len )
       </itemizedlist>
 	<para>These #define statements also exist in the generated C source code
 	to properly disable/enable certain functions. For the purpose of this
-	tutorial assume that all of the #define have to be in place.
+	tutorial assume that all of the #define have to be enabled except
+	<emphasis>netSnmpIETFWGTable_IDX2</emphasis> (consult <xref linkend="netSnmpIETFWGTable_IDX2"> 
+	for details on the usage of this switch). 
 	</para>
     </sect2>
   </sect1>	
