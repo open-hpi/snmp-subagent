@@ -2770,8 +2770,8 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 	SAI-HPI-B spec."
 
 	REFERENCE 
-	"Derived from function prototype in the SAI-HPI-B.01.01 page 7.7, 7.7.5 
-	and 8.13."
+	"Derived from function prototype in the SAI-HPI-B.01.01 sections 7.7, 
+	7.7.5 and 8.13."
     ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
@@ -4348,7 +4348,7 @@ SaHpiEventLogInfoEntry ::= SEQUENCE {
         saHpiEventLogInfoOverflowReset      INTEGER,
 
 -- Event Log operations:
-        saHpiEventLogInfoDelete             RowStatus,
+        saHpiEventLogInfoClear              TruthValue,
 
         saHpiEventLogInfoState              TruthValue
 
@@ -4394,13 +4394,13 @@ saHpiEventLogInfoUpdateTimestamp OBJECT-TYPE
         ::= {saHpiEventLogInfoEntry 4}
 
 saHpiEventLogInfoTime OBJECT-TYPE
-    SYNTAX      SaHpiTime
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION 
+	SYNTAX      SaHpiTime
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION 
         "The Time entry denotes the Event Log's idea of the 
-    current time; i.e the timestamp that would be placed on an
-    entry if it was added now. 
+	current time; i.e the timestamp that would be placed on an
+	entry if it was added now. 
 
         Remarks:
 
@@ -4430,8 +4430,8 @@ saHpiEventLogInfoTime OBJECT-TYPE
 
 	Refer to SaHpiTime for full description."
 
-    REFERENCE
-        "Derived from typedefs in SAI-HPI-B.01.01 page 51."
+	REFERENCE
+        "Derived from typedefs in SAI-HPI-B.01.01 section 8.23."
         ::= {saHpiEventLogInfoEntry 5}
 
 saHpiEventLogInfoIsEnabled OBJECT-TYPE
@@ -4504,21 +4504,22 @@ saHpiEventLogInfoOverflowReset OBJECT-TYPE
 
         ::= {saHpiEventLogInfoEntry 10}
 
-saHpiEventLogInfoDelete OBJECT-TYPE
-        SYNTAX          RowStatus
+saHpiEventLogInfoClear OBJECT-TYPE
+        SYNTAX          TruthValue
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION
         "This function erases the contents of the specified Event Log.
 
-        Set this to destroy(6) or notInService(2) to delete the event 
-	log for this resource.
+        TRUE clears the event log of the resource specified.
+	
+	FALSE has no effect.
 
         NOTE: The OverflowFlag field in the Event Log info record will be 
         reset when this function is called."
 
-    REFERENCE
-        "Derived from SAI-HPI-B.01.01 page 57."
+	REFERENCE
+        "Derived from SAI-HPI-B.01.01 page 6.4.4."
 
     ::= {saHpiEventLogInfoEntry 11}
 
@@ -10403,7 +10404,7 @@ saHpiEventLogInfoGroup OBJECT-GROUP
 		saHpiEventLogInfoOverflowResetable,
 		saHpiEventLogInfoOverflowAction,
 		saHpiEventLogInfoOverflowReset,
-		saHpiEventLogInfoDelete,
+		saHpiEventLogInfoClear,
 		saHpiEventLogInfoState
 	}
 	STATUS	current
