@@ -25,7 +25,10 @@
  */
 #define AGENT "hpiSubagent"
 
-
+/*
+ * Max amount of memory to allocate when using saHpiInventoryEntityDataRead
+ */
+#define MAXBUF (1024*16)
 /*
  * Error codes for all of the functions.
  */

@@ -3,7 +3,7 @@ CC=gcc
 TARGETS=hpiSubagent
 OBJ=saHpiHotSwapTable.o saHpiEventTable.o saHpiSystemEventLogTable.o saHpiWatchdogTable.o saHpiSensorTable.o saHpiInventoryTable.o saHpiCtrlTable.o hpiSubagent.o saHpiTable.o saHpiRdrTable.o  alarm.o
 
-CFLAGS=-I. `net-snmp-config --cflags` `glib-config --cflags` -ggdb -I/usr/local/include/openhpi
+CFLAGS=-I. `net-snmp-config --cflags` `glib-config --cflags` -ggdb -Wall -I/usr/local/include/openhpi
 BUILDAGENTLIBS=`net-snmp-config --agent-libs` `glib-config --libs` -lopenhpi
 
 # shared library flags (assumes gcc)

@@ -30,15 +30,43 @@ extern          "C" {
 #include <SaHpi.h>
 
   /*
-   * Max values are defined in the MIB
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define INVENTORY_INDEX_NR 4
+  /*
+   * Max values of saHpiInventoryAttributes. In the MIB its set to 5, but
+   * the SAF spec uses 'Variable length opaque data' - which can mean
+   * pretty much anything. We set the limit to 1000.
    */
 
-#define SAHPI_INVENTORY_ATTRIBUTES_MAX SNMP_MAX_MSG_SIZE
+#define SAHPI_INVENTORY_ATTRIBUTES_MAX 1000
+
+  /*
+   * Max length of Manufacturer, ProductName, ProductVersion, etc ..
+   */
 #define SAHPI_STRING_MAX 255
+
+  /* 
+   * Numerical values for saHpiInventoryValidity as defined per HPI-MIB
+   */
 #define MIB_VALID 1
 #define MIB_INVALID 0
 #define MIB_OVERFLOW 2
-#define MAXBUF (1024*16)
+
+  /*
+   * Number of SaHpiTextBufferT pointers in the SaHpiInventDataRecordT
+   */
+#define TEXT_BUFFER_NUMBER 9
+
+
+  /*
+   * Max number of fields the SaHpiInventoryAttributes can have
+   * per different type of data.
+   */
 #define SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX 1
 #define SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX 5
 #define SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX 4
@@ -52,6 +80,7 @@ extern          "C" {
         unsigned long   saHpiInventoryEirId;
       /** UNSIGNED32 */
       unsigned long saHpiInventoryIndex;
+
         /** INTEGER = ASN_INTEGER */
         long            saHpiInventoryRecordType;
 
@@ -107,6 +136,7 @@ extern          "C" {
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiInventoryRDR[MAX_OID_LEN];
         long            saHpiInventoryRDR_len;
+
       long domain_id;
       long resource_id;
       long hash;
@@ -119,50 +149,31 @@ extern          "C" {
  */
 
     void            initialize_table_saHpiInventoryTable(void);
-    const saHpiInventoryTable_context
-        *saHpiInventoryTable_get_by_idx(netsnmp_index *);
-    const saHpiInventoryTable_context
-        *saHpiInventoryTable_get_by_idx_rs(netsnmp_index *,
-                                           int row_status);
+
+
     int             saHpiInventoryTable_get_value(netsnmp_request_info *,
                                                   netsnmp_index *,
                                                   netsnmp_table_request_info
                                                   *);
 
-int  populate_inventory(
-		      SaHpiInventoryRecT *control,
-		      SaHpiRptEntryT *rpt_entry,
-		       oid *rdr_oid, size_t rdr_oid_len,
-		       oid *control_oid, 
-		       size_t *control_oid_len);
-
-
-
-void
-update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
-                                saHpiInventoryTable_context *ctx);
-
-int
- update_inventory_data_on_context(SaHpiInventGeneralDataT *gen_data,
-				  saHpiInventoryTable_context *ctx,
-				  //size_t sahpi_length,
-				  char *out,
-				  size_t max_octets,
-				  size_t *length);
-
-
-int
-delete_inventory_rows(SaHpiDomainIdT domain_id,
+  int  populate_inventory(SaHpiInventoryRecT *control,
+			  SaHpiRptEntryT *rpt_entry,
+			  oid *rdr_oid, size_t rdr_oid_len,
+			  oid *control_oid, 
+			  size_t *control_oid_len);
+  int
+  delete_inventory_rows(SaHpiDomainIdT domain_id,
 		     SaHpiResourceIdT resource_id,
 		     SaHpiEirIdT num);
-int set_inventory(saHpiInventoryTable_context *ctx);
+
+  int set_inventory(saHpiInventoryTable_context *ctx);
 
 
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiInventoryTable_oid[];
-    extern size_t   saHpiInventoryTable_oid_len;
+//    extern oid      saHpiInventoryTable_oid[];
+//    extern size_t   saHpiInventoryTable_oid_len;
 // 1,3,6,1,3,90,3,8
 #define saHpiInventoryTable_TABLE_OID hpiResources_OID,8
 

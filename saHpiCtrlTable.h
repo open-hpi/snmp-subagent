@@ -31,11 +31,37 @@ extern          "C" {
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
 
+  /*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define CTRL_INDEX_NR 3
+  /*
+   * Max string value for SaHpiCtrlText. 
+   * Look in the HPI-MIB
+   */
 #define SAHPI_TEXT_MAX 255
-#define SAHPI_CTRL_STATE_MAX 7//sizeof(SaHpiCtrlStateStreamT)
+
+  /*
+   * The max for the CtrlState. Modeled after
+   * saHpiCtrlStateT
+   */
+#define SAHPI_CTRL_STATE_MAX 7
+
+  /*
+   * Max length of data in saHpiCtrlAttributes object.
+   * Look in the HPI-MIB
+   */
 #define SAHPI_CTRL_ATTR_MAX 269
-#define POS_DIGITAL 0
-#define POS_DISCRETE 1
+
+  /*
+   * Deprectated?
+   */
+  //#define POS_DIGITAL 0
+  //#define POS_DISCRETE 1
 
 
     typedef struct saHpiCtrlTable_context_s {
@@ -101,18 +127,16 @@ int  populate_control(SaHpiCtrlRecT *ctrl,
   
 
 
-int 
-set_ctrl_state(saHpiCtrlTable_context *ctx);
+  int 
+  set_ctrl_state(saHpiCtrlTable_context *ctx);
 
-
-
-int 
-read_ctrl_state(saHpiCtrlTable_context *ctx);
+  int 
+  read_textline(saHpiCtrlTable_context *ctx);
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiCtrlTable_oid[];
-    extern size_t   saHpiCtrlTable_oid_len;
+//    extern oid      saHpiCtrlTable_oid[];
+//    extern size_t   saHpiCtrlTable_oid_len;
 //1,3,6,1,3,90,3,4
 #define saHpiCtrlTable_TABLE_OID hpiResources_OID,4
 
