@@ -91,6 +91,12 @@ set_logstate(saHpiSystemEventLogTable_context *ctx);
 int 
 set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
 
+
+int
+delete_SEL_row(SaHpiDomainIdT domain_id,
+	      SaHpiResourceIdT resource_id,
+	      SaHpiSelEntryIdT num);
+
 int
 event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_handler_registration *reginfo,
@@ -98,6 +104,13 @@ event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_request_info *requests);
 int
 event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
+			 netsnmp_handler_registration *reginfo,
+			 netsnmp_agent_request_info *reqinfo,
+			 netsnmp_request_info *requests);
+
+
+int
+event_log_entries_handler(netsnmp_mib_handler *handler,
 			 netsnmp_handler_registration *reginfo,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests);
