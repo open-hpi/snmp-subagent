@@ -156,6 +156,8 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
       }
     }
 
+    if (hash == 0) 
+      hash = 1;
     ctx->hash = hash;
     ctx->resource_id = rpt_entry->ResourceId;
     ctx->domain_id = rpt_entry->DomainId;
