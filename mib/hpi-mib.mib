@@ -3076,7 +3076,8 @@ SaHpiRdrEntry ::= SEQUENCE {
 	saHpiRdrEntityPath	OCTET STRING,
 	saHpiRdr		RowPointer,
 	saHpiRdrId		Counter32,
-	saHpiRdrRTP		RowPointer
+	saHpiRdrRTP		RowPointer,
+	saHpiRdrIdString	OCTET STRING
 	}
 
 saHpiRdrRecordId OBJECT-TYPE
@@ -3154,6 +3155,13 @@ saHpiRdrRTP OBJECT-TYPE
 	DESCRIPTION     "Forward pointer to the RTP entry. Another method to match 
 	the RPT and RDR is to compare the EntityPath, but this is much easier. "
 	::= {saHpiRdrEntry 6}
+
+saHpiRdrIdString OBJECT-TYPE
+        SYNTAX          OCTET STRING
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "ID String of the RDR entry."
+        ::= {saHpiRdrEntry 7}
 
 --/*******************************************************************************
 -- * ********************************************************************************

@@ -50,19 +50,21 @@ static oid saHpiRdrCount_oid[] =
 static oid saHpiResourceDataRecordNotification_oid[] =
   { hpiNotifications_OID, 7, 0 };
 
-#define RDR_NOTIF_COUNT 5
+#define RDR_NOTIF_COUNT 6
 #define RDR_NOTIF_RDRRECORDID 0
 #define RDR_NOTIF_TYPE 1
 #define RDR_NOTIF_ENTITY_PATH 2
 #define RDR_NOTIF_RDR 3
 #define RDR_NOTIF_RDR_RTP 4
+#define RDR_NOTIF_ID_STRING 5
 
 static trap_vars saHpiResourceDataRecordNotification[] = {
   {COLUMN_SAHPIRDRRECORDID, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIRDRTYPE, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIRDRENTITYPATH, ASN_OCTET_STR, NULL, 0},
   {COLUMN_SAHPIRDR, ASN_OBJECT_ID, NULL, 0},
-  {COLUMN_SAHPIRDRRTP, ASN_OBJECT_ID, NULL, 0}
+  {COLUMN_SAHPIRDRRTP, ASN_OBJECT_ID, NULL, 0},
+  {COLUMN_SAHPIRDRIDSTRING, ASN_OCTET_STR, NULL, 0}
 };
 
 
@@ -584,6 +586,15 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
       DEBUGMSGTL ((AGENT, "EntityPath: %s\n", ctx->saHpiRdrEntityPath));
       ctx->saHpiRdrEntityPath_len = len;
 
+      ctx->saHpiRdrIdString_len = entry->IdString.DataLength;
+      if( ctx->saHpiRdrIdString_len < 0 || 
+          ctx->saHpiRdrIdString_len > SNMP_MAX_MSG_SIZE )
+      {
+        ctx->saHpiRdrIdString_len = 0;
+      }
+      memcpy (ctx->saHpiRdrIdString, entry->IdString.Data,
+	      ctx->saHpiRdrIdString_len);
+
       ctx->saHpiRdr_len = child_oid_len * sizeof (oid);
       memcpy (ctx->saHpiRdr, child_oid, ctx->saHpiRdr_len);
 
@@ -619,6 +630,11 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	(u_char *) & ctx->saHpiRdrRTP;
       saHpiResourceDataRecordNotification[RDR_NOTIF_RDR_RTP].value_len =
 	ctx->saHpiRdrRTP_len;
+
+      saHpiResourceDataRecordNotification[RDR_NOTIF_ID_STRING].value =
+	(u_char *) & ctx->saHpiRdrIdString;
+      saHpiResourceDataRecordNotification[RDR_NOTIF_ID_STRING].value_len =
+	ctx->saHpiRdrIdString_len;
 
       // Point *var to this trap_vars. 
       *var = (trap_vars *) & saHpiResourceDataRecordNotification;
@@ -892,10 +908,18 @@ saHpiRdrTable_get_value (netsnmp_request_info * request,
       break;
 
     case COLUMN_SAHPIRDRRTP:
-	    /** RowPointer = ASN_OBJECT_ID */
+	    /** OCTETSTR = ASN_OCTET_STR */
       snmp_set_var_typed_value (var, ASN_OBJECT_ID,
 				(char *) &context->saHpiRdrRTP,
 				context->saHpiRdrRTP_len);
+      break;
+
+    case COLUMN_SAHPIRDRIDSTRING:
+	    /** RowPointer = ASN_OBJECT_ID */
+	    /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value (var, ASN_OCTET_STR,
+                (char *) &context->saHpiRdrIdString,
+                context->saHpiRdrIdString_len);
       break;
 
     default:
