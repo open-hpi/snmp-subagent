@@ -2310,7 +2310,7 @@ saHpiEventType 		OBJECT-TYPE
 				watchdog(6),
 				hpiSw(7),
 				oem(8),
-				user(10)
+				user(9)
 			}
         MAX-ACCESS      read-only
         STATUS          current
