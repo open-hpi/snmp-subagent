@@ -428,8 +428,11 @@ build_reading_strings (SaHpiSensorReadingT * reading,
   char format[SENSOR_READING_MAX_LEN];
 
 
-  if (values_present) 
+  if (values_present) {
     *values_present = reading->ValuesPresent + 1;
+    if (*values_present == 1) 
+	*values_present = 0;
+  }
   if (raw_reading) {
     if (reading->ValuesPresent & SAHPI_SRF_RAW)
       *raw_reading = reading->Raw;
