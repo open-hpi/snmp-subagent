@@ -18,9 +18,7 @@
 /* saHpiAnnouncementTable */    
 /**************************/
 int saHpiDomainId_check_index(long val);
-int saHpiResourceId_check_index(long val);
 int saHpiDomainAlarmId_check_index(long val);
-int saHpiEntryId_check_index(long val);
   
 /**************************/
 /* saHpiAnnunciatorTable */    
@@ -59,7 +57,6 @@ int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTi
 /**************************/
 /* saHpiFeildTable  */    
 /**************************/
-int saHpiInventoryId_check_index(long val);
 int saHpiFieldId_check_index(long val);
 
 /***************************/
@@ -67,6 +64,31 @@ int saHpiFieldId_check_index(long val);
 /***************************/
 int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSwapEventTimestamp);
 
+/**************************/
+/* saHpiInventoryTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val);
+
+/**************************/
+/* saHpiOEMEventTable  */    
+/**************************/
+int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventTimestamp);
+
+/**************************/
+/* saHpiRdrTable  */    
+/**************************/
+int saHpiRdrType_check_index(long val);
+
+/**************************/
+/* saHpResourceEventTable  */    
+/**************************/
+int saHpiResourceEventTimestamp_check_index( netsnmp_variable_list *var_saHpiResourceEventTimestamp);
+
+/**************************/
+/* saHpResourceTable  */    
+/**************************/
+int saHpiResourceId_check_index(long val);
+int saHpiEntryId_check_index(long val);
 
  
 

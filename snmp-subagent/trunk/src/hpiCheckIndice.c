@@ -22,21 +22,11 @@ int saHpiDomainId_check_index(long val)
 	return 0;
 }
 
-int saHpiResourceId_check_index(long val)
-{
-	return 0;
-}
-
 int saHpiDomainAlarmId_check_index(long val)
 {
 	return 0;
 }
 
-int saHpiEntryId_check_index(long val)
-{
-	return 0;
-}
-  
 /**************************/
 /* saHpiAnnunciatorTable */    
 /**************************/
@@ -113,11 +103,6 @@ int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTi
 /**************************/
 /* saHpiFeildTable  */    
 /**************************/
-int saHpiInventoryId_check_index(long val)
-{
-	return 0;
-}
-
 int saHpiFieldId_check_index(long val)
 {
 	return 0;
@@ -132,3 +117,53 @@ int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSw
 	return 0;
 
 }
+
+/**************************/
+/* saHpiInventoryTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpiOEMEventTable  */    
+/**************************/
+int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list &var_saHpiOEMEventTimestamp)
+{
+	snmp_log(LOG_ERR, "saHpiOEMEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	return 0;
+
+}
+
+/**************************/
+/* saHpiRdrTable  */    
+/**************************/
+int saHpiRdrType_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpResourceEventTable  */    
+/**************************/
+int saHpiResourceEventTimestamp_check_index( netsnmp_variable_list *var_saHpiResourceEventTimestamp)
+{
+	snmp_log(LOG_ERR, "saHpiResourceEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	return 0;
+
+}
+
+/**************************/
+/* saHpResourceTable  */    
+/**************************/
+int saHpiResourceId_check_index(long val)
+{
+	return 0;
+}
+
+int saHpiEntryId_check_index(long val)
+{
+	return 0;
+}
+  
