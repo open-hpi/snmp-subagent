@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiAnnunciatorTable.h"
+#include "hpiCheckIndice.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -243,7 +244,7 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
     snmp_log(LOG_ERR, "saHpiAnnunciatorTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiDomainId.next_variable = &var_XX;
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 #endif
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
@@ -253,7 +254,7 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
     snmp_log(LOG_ERR, "saHpiAnnunciatorTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiResourceId.next_variable = &var_XX;
+       var_saHpiResourceId.next_variable = &var_saHpiAnnunciatorNum;
 #endif
 
        memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
@@ -263,7 +264,7 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
     snmp_log(LOG_ERR, "saHpiAnnunciatorTable_extract_index index list not implemented!\n" );
     return 0;
 #else
-       var_saHpiAnnunciatorNum.next_variable = &var_XX;
+       var_saHpiAnnunciatorNum.next_variable = NULL;
 #endif
 
 
@@ -281,28 +282,14 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
    
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiAnnunciatorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if (!err) 
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+
+		if (!err)
+			err = saHpiAnnunciatorNum_check_index(*var_saHpiAnnunciatorNum.val.integer);
     }
 
     /*
@@ -631,6 +618,7 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+#if 0 /* TODO DMJ */
 #ifndef saHpiAnnunciatorTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
@@ -644,6 +632,7 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmDelete : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmDelete : NULL);
+#endif  /* TODO DMJ */
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
