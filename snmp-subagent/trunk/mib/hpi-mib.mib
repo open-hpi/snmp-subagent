@@ -6841,8 +6841,7 @@ saHpiSensorThdLowMinorEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor threshold data which defines the degraded status
-        at the lower end of the range that impacts the functional status of the sensor."
+        "Sensor threshold data for lower minor thresholds."
 
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorThdLowMinorTable 1}
