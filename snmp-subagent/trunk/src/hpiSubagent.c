@@ -206,7 +206,47 @@ didSaHpiChanged(int *answer, SaHpiRptInfoT *info ) {
 }
 
 
+void
+hpiSubagent_parse_config_traps(const char *token, char *cptr)
+{
+  int x = -1;
+  char buf[BUFSIZ];
 
+  if (!strncasecmp(cptr,"on",2) || 
+      !strncasecmp(cptr,"yes", 3) || 
+      !strncasecmp(cptr, "true", 4)) {
+    x = AGENT_TRUE;
+    snmp_log(LOG_INFO,"Sending EVENTS during startup.\n");
+  } else if (!strncasecmp(cptr,"off",3) ||
+	     !strncasecmp(cptr,"no",2) ||
+	     !strncasecmp(cptr,"false",5)) {
+    x = AGENT_FALSE;
+    snmp_log(LOG_INFO,"No sending events during startup.\n");
+  }
+
+  if ((x != AGENT_TRUE) && (x != AGENT_FALSE)) {
+    sprintf(buf, "hpiSubagent: '%s' unrecognized", cptr);
+    config_perror(buf); 
+  } else {
+
+    send_traps_on_startup = x;
+  }
+}
+
+void
+hpiSubagent_parse_config_interval(const char *token, char *cptr)
+{
+  int x = atoi(cptr);
+  char buf[BUFSIZ];
+  
+  if (x < -1) {
+    sprintf(buf, "hpiSubagent: '%s' unrecognized", cptr);
+    config_perror(buf);
+  } else {
+    snmp_log(LOG_INFO,"Checking HPI infrastructure every %d seconds.\n", x);
+    alarm_interval = x;
+  }
+}
 
 
 
@@ -232,7 +272,17 @@ main (int argc, char **argv) {
 
 
   /* Read configuration information here, before we initialize */
+  
+  snmpd_register_config_handler(TRAPS_TOKEN,
+				hpiSubagent_parse_config_traps,
+				NULL,
+				"hpiSubagent on/off switch for sending events upon startup");
 
+  snmpd_register_config_handler(INTERVAL_TOKEN,
+				hpiSubagent_parse_config_interval,
+				NULL,
+				"hpiSubagent time in seconds before HPI API is queried for information.");
+  init_snmp(AGENT);
   /* initialize mib code here */
   /* Initialize tables */
   initialize_table_saHpiTable();
@@ -245,10 +295,11 @@ main (int argc, char **argv) {
 
   initialize_table_saHpiSystemEventLogTable();
   initialize_table_saHpiEventTable();
-
+  /*
   if (populate_rpt() != AGENT_ERR_NOERROR) {
     //goto stop;
-  } /*
+    } 
+
   if (init_alarm() != AGENT_ERR_NOERROR) {
     goto stop;
   } */
