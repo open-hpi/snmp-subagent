@@ -112,20 +112,21 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
       event_log_size = info.Size;
       memcpy (&event_log_update_timestamp,
 	      &info.UpdateTimestamp, sizeof (SaHpiTimeT));
+#ifdef ENDIAN_FIX
       event_log_update_timestamp.low = htonl (event_log_update_timestamp.low);
 
       event_log_update_timestamp.high =
 	htonl (event_log_update_timestamp.high);
-
+#endif 
       memcpy (&event_log_current_timestamp,
 	      &info.CurrentTime, sizeof (SaHpiTimeT));
-
+#ifdef ENDIAN_FIX
       event_log_current_timestamp.low =
 	htonl (event_log_current_timestamp.low);
 
       event_log_current_timestamp.high =
 	htonl (event_log_current_timestamp.high);
-
+#endif
       event_log_enabled = (info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
       event_log_overflow_flag =
 	(info.OverflowFlag == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
@@ -242,11 +243,12 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
       memcpy (&ctx->saHpiSystemEventLogAddedTimestamp,
 	      &sel->Timestamp, sizeof (SaHpiTimeT));
+#ifdef ENDIAN_FIX
       ctx->saHpiSystemEventLogAddedTimestamp.low =
 	htonl (ctx->saHpiSystemEventLogAddedTimestamp.low);
       ctx->saHpiSystemEventLogAddedTimestamp.high =
 	htonl (ctx->saHpiSystemEventLogAddedTimestamp.high);
-
+#endif
 
       ctx->saHpiSystemEventLogIndex = sel->EntryId;
 
@@ -259,13 +261,13 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
 	  memcpy (&ctx->saHpiSystemEventLogTimestamp,
 		  &event_entry->Timestamp, sizeof (SaHpiTimeT));
-
+#ifdef ENDIAN_FIX
 	  ctx->saHpiSystemEventLogTimestamp.low =
 	    htonl (ctx->saHpiSystemEventLogTimestamp.low);
 
 	  ctx->saHpiSystemEventLogTimestamp.high =
 	    htonl (ctx->saHpiSystemEventLogTimestamp.high);
-
+#endif
 	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity;
 
 	  if (event_entry->EventType == SAHPI_ET_SENSOR)

@@ -140,7 +140,12 @@ populate_rpt ()
 
 	  memcpy (&update_timestamp,
 		  &rpt_info.UpdateTimestamp, sizeof (SaHpiTimeT));
-	  //update_timestamp = rpt_info.UpdateTimestamp;
+
+	#ifdef ENDIAN_FIX
+	 update_timestamp.low = htonl(update_timestamp.low);
+	 update_timestamp.high = htonl(update_timestamp.high);
+        #endif
+
 	  update_entry_count = rpt_info.UpdateCount;
 	  // Yes, something new.
 	  next = SAHPI_FIRST_ENTRY;
@@ -545,8 +550,10 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       // IBM-KR: TODO , test this code. Make sure the time is right.
       memcpy (&ctx->saHpiEventLogTime, time, sizeof (SaHpiTimeT));
 
+     #ifdef ENDIAN_FIX
       ctx->saHpiEventLogTime.high = htonl (ctx->saHpiEventLogTime.high);
       ctx->saHpiEventLogTime.low = htonl (ctx->saHpiEventLogTime.low);
+     #endif 
 
       ctx->saHpiEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
@@ -677,9 +684,10 @@ set_event_log_time (saHpiTable_context * ctx)
   integer64 t;
   if (ctx)
     {
-
+      #ifdef ENDIAN_FIX
       t.low = ntohl (ctx->saHpiEventLogTime.low);
       t.high = ntohl (ctx->saHpiEventLogTime.high);
+      #endif
       memcpy (&time, &t, sizeof (SaHpiTimeT));
       DEBUGMSGTL ((AGENT, "Time is %d; was: %d, %d\n",
 		   time, ctx->saHpiEventLogTime.low,

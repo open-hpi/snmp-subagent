@@ -439,12 +439,12 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
       memcpy (&ctx->saHpiEventTimestamp,
 	      &event_entry->Timestamp, sizeof (SaHpiTimeT));
-
+#ifdef ENDIAN_FIX
       ctx->saHpiEventTimestamp.low = htonl (ctx->saHpiEventTimestamp.low);
 
       ctx->saHpiEventTimestamp.high = htonl (ctx->saHpiEventTimestamp.high);
-
-      ctx->saHpiEventSeverity = event_entry->Severity;
+#endif
+      ctx->saHpiEventSeverity = event_entry->Severity+1;
 
       if (event_entry->EventType == SAHPI_ET_SENSOR)
 	{
