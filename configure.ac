@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.53)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
-AM_INIT_AUTOMAKE(openhpi-subagent, 0.7)
+AM_INIT_AUTOMAKE(openhpi-subagent, 1.9.0)
 AC_CONFIG_SRCDIR([include/hpiB0101.h])
 AM_CONFIG_HEADER([config.h])
 
@@ -38,9 +38,9 @@ if test "x$found_pkg_config" != "xyes"; then
     OH_CHECK_FAIL(pkg-config,pkg-config)
 fi
 
-
-GLIB_CFLAGS=`pkg-config --cflags glib`
-GLIB_LIBS=`pkg-config --libs glib`
+# TODO: need to add checks for glib2.0
+GLIB_CFLAGS=`pkg-config --cflags glib-2.0 gthread-2.0`
+GLIB_LIBS=`pkg-config --libs glib-2.0 gthread-2.0`
 
 
 AC_ARG_ENABLE([client-library],
@@ -74,7 +74,7 @@ fi
 # ])
 # fi
 
-
+LIBS=$HPI_LIBS
 # Checks for libraries
 # FIXME: Replace `main' with a function in `-lopenhpi':
 AC_CHECK_LIB([$OPENHPILIB], [saHpiSessionOpen], 
