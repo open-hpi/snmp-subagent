@@ -102,8 +102,8 @@
  * OIDs for subagent
  */
 
-// 'experimental.90'
-#define hpi_OID 1,3,6,1,3,90
+//  .iso.org.dod.internet.private.enterprises.saforum.experimental.hpi
+#define hpi_OID 1,3,6,1,4,1,18568,1,1 
 #define hpiEntity_OID hpi_OID,1
 #define hpiEvents_OID hpi_OID,2
 #define hpiResources_OID hpi_OID,3

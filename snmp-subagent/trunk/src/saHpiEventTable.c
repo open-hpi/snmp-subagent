@@ -1978,7 +1978,7 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 				(char *) &context->saHpiEventDelete,
 				sizeof (context->saHpiEventDelete));
 	*/
-      return NULL;
+      return (int)NULL;
       break;
 
     default:

@@ -7,14 +7,6 @@ types of hardware including: IPMI, IBM Blade Center (via SNMP),
 Linux Watchdog devices, and Sysfs based systems.
 
 ---------------------------------------------------------
-WARNING/NOTE
----------------------------------------------------------
-
-*NOTE*: The OID of the HPI-MIB v1.3 is 'experimental.90'
-This MIB branch location *WILL* change in the next
-release. Consider this a technology review code.
-
----------------------------------------------------------
 PREREQUISITES
 ---------------------------------------------------------
 The following software is required to build openhpi
@@ -51,7 +43,7 @@ RUNNING
 1. Start the NetSNMP daemon.
 2. Start the hpiSubagent. You should see something similar in the
    syslog log file - /var/log/messages:
-   Feb  6 10:53:37 konrad hpiSubagent[9890]: Starting $Id$
+   ...
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Not sending events during startup.
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Checking HPI infrastructure every 4 seconds.
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Max Event rows 1024.
@@ -99,9 +91,9 @@ make maintainer-clean
 GENERAL RELEASE NOTES and WHAT'S NEW
 ---------------------------------------------------------
 
-* First release of the HPI SNMP sub-agent. 
+* Second release of the HPI SNMP sub-agent. 
 
-* Support for full implementation of the HPI-MIB v1.3 
+* Support for full implementation of the HPI-MIB v1.4
   (included). This means HPI 1.0 instrumentation using 
   HPI-MIB objects in nine tables:
 	- Resource Presence Table entities,
