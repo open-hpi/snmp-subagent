@@ -13,16 +13,22 @@
  *
  *
  */
+#ifndef _HPI_CHECK_INDICE_
+#define  _HPI_CHECK_INDICE_
+
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+#include <net-snmp/library/snmp_assert.h>
+
+
+#include "hpiCheckIndice.h"
 
 /**************************/
 /* saHpiAnnouncementTable */    
 /**************************/
 int saHpiDomainId_check_index(long val) 
-{
-	return 0;
-}
-
-int saHpiDomainAlarmId_check_index(long val)
 {
 	return 0;
 }
@@ -129,7 +135,7 @@ int saHpiInventoryId_check_index(long val)
 /**************************/
 /* saHpiOEMEventTable  */    
 /**************************/
-int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list &var_saHpiOEMEventTimestamp)
+int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventTimestamp)
 {
 	snmp_log(LOG_ERR, "saHpiOEMEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
 	return 0;
@@ -192,6 +198,8 @@ int saHpiWatchdogNum_check_index(long val)
 {
 	return 0;
 }
+
+#endif /* _HPI_CHECK_INDICE_ */
 
 
 
