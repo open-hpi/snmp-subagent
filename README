@@ -15,9 +15,11 @@ any HPI 1.0 implementation that is based on SAF specification
 	SAI-HPI-A.01.01. Recommended: openhpi >= 0.4
 autoconf >= 2.50
 automake >= 1.5
-net-snmp >= 5.0.7
+net-snmp >= 5.0.8
 	(Don't use earlier versions - the AgentX protocol had some
 	 serious issues).
+	(Don't use 5.0.7 - it has a bug in the CONTAINER operations that 
+	 seg faults the sub-agent).
 GLIB-1.2	(note we may be switching to 2.0 in the next release)
 
 ---------------------------------------------------------
