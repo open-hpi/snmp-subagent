@@ -37,6 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiHotSwapEventTable.h"
+#include "hpiCheckIndice.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -234,53 +235,23 @@ saHpiHotSwapEventTable_extract_index( saHpiHotSwapEventTable_context * ctx, nets
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiEventSeverity;
 
        memset( &var_saHpiEventSeverity, 0x00, sizeof(var_saHpiEventSeverity) );
        var_saHpiEventSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventSeverity.next_variable = &var_XX;
-#endif
+       var_saHpiEventSeverity.next_variable = &var_saHpiEventHistorical;
 
        memset( &var_saHpiEventHistorical, 0x00, sizeof(var_saHpiEventHistorical) );
        var_saHpiEventHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiEventHistorical.next_variable = &var_saHpiHotSwapEventTimestamp;
 
        memset( &var_saHpiHotSwapEventTimestamp, 0x00, sizeof(var_saHpiHotSwapEventTimestamp) );
        var_saHpiHotSwapEventTimestamp.type = ASN_OCTET_STR; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiHotSwapEventTimestamp.next_variable = &var_XX;
-#endif
+       var_saHpiHotSwapEventTimestamp.next_variable = NULL;
 
 
     /*
@@ -305,42 +276,22 @@ saHpiHotSwapEventTable_extract_index( saHpiHotSwapEventTable_context * ctx, nets
                     memcpy( ctx->saHpiHotSwapEventTimestamp, var_saHpiHotSwapEventTimestamp.val.string, var_saHpiHotSwapEventTimestamp.val_len );
                 ctx->saHpiHotSwapEventTimestamp_len = var_saHpiHotSwapEventTimestamp.val_len;
    
+
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if(!err)
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+
+		if(!err)
+			err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
+
+		if(!err)
+			err = saHpiEventHistorical_check_index(*var_saHpiEventHistorical.val.integer);
+
+		if(!err)
+			err = saHpiHotSwapEventTimestamp_check_index(&var_saHpiHotSwapEventTimestamp);
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventSeverity.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( XXX_check_value( var_saHpiHotSwapEventTimestamp.val.string, XXX ) ) {
-          *    err = -1;
-          * }
-          */
     }
 
     /*
@@ -669,6 +620,7 @@ void saHpiHotSwapEventTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+#if 0 /* TODO DMJ */
 #ifndef saHpiHotSwapEventTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
@@ -682,6 +634,7 @@ void saHpiHotSwapEventTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmDelete : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmDelete : NULL);
+#endif /* TODO DMJ */
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
