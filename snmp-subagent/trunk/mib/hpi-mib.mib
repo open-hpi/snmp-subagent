@@ -16,7 +16,7 @@ IMPORTS
 	experimental		FROM RFC1155-SMI;
 
 hpi MODULE-IDENTITY
-    LAST-UPDATED "200310291800Z"
+    LAST-UPDATED "200311061800Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
 		Sean Dague
@@ -308,7 +308,7 @@ saHpiResourceSeverity OBJECT-TYPE
         			ok(5),
         			debug(80)
 			}
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	" Indicates the criticality that should be 
 	raised when the resource is not responding.
@@ -516,7 +516,7 @@ saHpiResourceTagTextType OBJECT-TYPE
 				ascii6(3),
 				language(4)
 			}
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
 	encoded as:
@@ -674,7 +674,7 @@ saHpiResourceTagTextLanguage OBJECT-TYPE
 				chinese(135),
 				zulu(136)
 			}
-        MAX-ACCESS      read-only
+        MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     "
 	This enumeration lists all of the languages that can be 
@@ -684,7 +684,7 @@ saHpiResourceTagTextLanguage OBJECT-TYPE
 
 saHpiResourceTag	OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..255))
-	MAX-ACCESS	read-only	
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"Resource tag. The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
