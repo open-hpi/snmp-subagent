@@ -3721,6 +3721,7 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorFactorsLinearization	INTEGER,
 	saHpiSensorPercentage 			TruthValue,
 
+	saHpiSensorRangeFlags			OCTET STRING,
 	saHpiSensorOEM				Unsigned32,
 	saHpiSensorRDR				RowPointer
 	}
@@ -4305,19 +4306,29 @@ saHpiSensorPercentage OBJECT-TYPE
         DESCRIPTION     "Is the value a percentage."
         ::= {saHpiSensorEntry 19}
 
+saHpiSensorRangeFlags OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"Defines which range flags the sensor supports. They
+	can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
+	nothing if the sensor does not support any ranges."
+	::= {saHpiSensorEntry 20}
+
 saHpiSensorOEM OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " Reserved for OEM use."
-        ::= {saHpiSensorEntry 20}
+        ::= {saHpiSensorEntry 21}
 
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 21}
+	::= {saHpiSensorEntry 22}
 
 --
 -- /*******************************************************************************
@@ -7688,6 +7699,7 @@ saHpiSensorGroup	OBJECT-GROUP
 		saHpiSensorFactors,
 		saHpiSensorFactorsLinearization,
 		saHpiSensorPercentage,
+		saHpiSensorRangeFlags,
 		saHpiSensorOEM,
 		saHpiSensorRDR
 	}
