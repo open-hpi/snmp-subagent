@@ -4456,7 +4456,7 @@ on the last line written).
 
 	if saHpiCtrlType == oem(193),
 
-	The OEM data is restricted to 255.
+	Contains the OEM specific data. Max length is 255 bytes.
 	"
 	REFERENCE
 	"Derieved from typedef and function calls described in
