@@ -97,7 +97,7 @@ extern "C"
   extern oid saHpiSensorReadingNormalMinTable_oid[];
   extern size_t saHpiSensorReadingNormalMinTable_oid_len;
 
-#define saHpiSensorReadingNormalMinTable_TABLE_OID hpiSensor_OID,7
+#define saHpiSensorReadingNormalMinTable_TABLE_OID hpiSensor_OID,6
 
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNormalMinTable
