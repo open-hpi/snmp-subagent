@@ -6913,8 +6913,7 @@ saHpiSensorThdUpCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpCriticalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining  catastrophic status at the
-        upper end of critical threshold values for a given sensor."
+        DESCRIPTION     "A table defining upper critical threshold values."
         ::= {hpiSensor 10}
 
 saHpiSensorThdUpCriticalEntry OBJECT-TYPE
