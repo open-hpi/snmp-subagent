@@ -250,77 +250,6 @@ build_notification (const netsnmp_index * index,
   return notification_vars;
 
 }
-static state_category_string state_string[] = {
-  {SAHPI_EC_UNSPECIFIED, SAHPI_ES_UNSPECIFIED, "UNSPECIFIED"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_LOWER_MINOR, "LOWER_MINOR"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_LOWER_MAJOR, "LOWER_MAJOR"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_LOWER_CRIT, "LOWER_CRIT"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_UPPER_MINOR, "UPPER_MINOR"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_UPPER_MAJOR, "UPPER_MAJOR"},
-  {SAHPI_EC_THRESHOLD, SAHPI_ES_UPPER_CRIT, "UPPER_CRIT"},
-  {SAHPI_EC_USAGE, SAHPI_ES_IDLE, "IDLE"},
-  {SAHPI_EC_USAGE, SAHPI_ES_ACTIVE, "ACTIVE"},
-  {SAHPI_EC_USAGE, SAHPI_ES_BUSY, "BUSY"},
-  {SAHPI_EC_STATE, SAHPI_ES_STATE_DEASSERTED, "STATE_DEASSERTED"},
-  {SAHPI_EC_STATE, SAHPI_ES_STATE_ASSERTED, "STATE_ASSERTED"},
-  {SAHPI_EC_PRED_FAIL, SAHPI_ES_PRED_FAILURE_DEASSERT,
-   "PRED_FAILURE_DEASSERT"},
-  {SAHPI_EC_PRED_FAIL, SAHPI_ES_PRED_FAILURE_ASSERT, "PRED_FAILURE_ASSERT"},
-  {SAHPI_EC_LIMIT, SAHPI_ES_LIMIT_NOT_EXCEEDED, "LIMIT_NOT_EXCEEDED"},
-  {SAHPI_EC_LIMIT, SAHPI_ES_LIMIT_EXCEEDED, "LIMIT_EXCEEDED"},
-  {SAHPI_EC_PERFORMANCE, SAHPI_ES_PERFORMANCE_MET, "PERFORMANCE_MET"},
-  {SAHPI_EC_PERFORMANCE, SAHPI_ES_PERFORMANCE_LAGS, "PERFORMANCE_LAGS"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_OK, "OK"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_MINOR_FROM_OK, "MINOR_FROM_OK"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_MAJOR_FROM_LESS, "MAJOR_FROM_LESS"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_CRITICAL_FROM_LESS, "CRITICAL_FROM_LESS"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_MINOR_FROM_MORE, "MINOR_FROM_MORE"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_MAJOR_FROM_CRITICAL, "MAJOR_FROM_CRITICAL"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_CRITICAL, "CRITICAL"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_MONITOR, "MONITOR"},
-  {SAHPI_EC_SEVERITY, SAHPI_ES_INFORMATIONAL, "INFORMATIONAL"},
-  {SAHPI_EC_PRESENCE, SAHPI_ES_ABSENT, "ABSENT"},
-  {SAHPI_EC_PRESENCE, SAHPI_ES_PRESENT, "PRESENT"},
-  {SAHPI_EC_ENABLE, SAHPI_ES_DISABLED, "DISABLED"},
-  {SAHPI_EC_ENABLE, SAHPI_ES_ENABLED, "ENABLED"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_RUNNING, "RUNNING"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_TEST, "TEST"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_POWER_OFF, "POWER_OFF"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_ON_LINE, "ON_LINE"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_OFF_LINE, "OFF_LINE"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_OFF_DUTY, "OFF_DUTY"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_DEGRADED, "DEGRADED"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_POWER_SAVE, "POWER_SAVE"},
-  {SAHPI_EC_AVAILABILITY, SAHPI_ES_INSTALL_ERROR, "INSTALL_ERROR"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_FULLY_REDUNDANT, "FULLY_REDUNDANT"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_LOST, "REDUNDANCY_LOST"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_DEGRADED, "REDUNDANCY_DEGRADED"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
-   "REDUNDANCY_LOST_SUFFICIENT_RESOURCES"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
-   "NON_REDUNDANT_SUFFICIENT_RESOURCES"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
-   "NON_REDUNDANT_INSUFFICIENT_RESOURCES"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
-   "REDUNDANCY_DEGRADED_FROM_FULL"},
-  {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON,
-   "REDUNDANCY_DEGRADED_FROM_NON"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_00, "STATE_00"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_01, "STATE_01"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_02, "STATE_02"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_03, "STATE_03"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_04, "STATE_04"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_05, "STATE_05"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_06, "STATE_06"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_07, "STATE_07"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_08, "STATE_08"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_09, "STATE_09"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_10, "STATE_10"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_11, "STATE_11"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_12, "STATE_12"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_13, "STATE_13"},
-  {SAHPI_EC_GENERIC, SAHPI_ES_STATE_14, "STATE_14"}
-};
 
 #define STATESTRING_VALUE_DELIMITER ", "
 #define STATESTRING_VALUE_DELIMITER_LENGTH 2
@@ -778,129 +707,7 @@ static gchar *eshort_names[] = {
 #define ESHORTNAMES_LAST_JUMP 44
 
 static unsigned int eshort_num_names = sizeof( eshort_names ) / sizeof(gchar * );
-static int entitytype2index(unsigned int i)
-{
-        if(i <= ESHORTNAMES_BEFORE_JUMP)
-                return i;
-        else if (i == (unsigned int)SAHPI_ENT_CHASSIS_SPECIFIC)
-                return ESHORTNAMES_FIRST_JUMP;
-        else if (i == (unsigned int)SAHPI_ENT_BOARD_SET_SPECIFIC)
-                return ESHORTNAMES_SECOND_JUMP;
-        else if (i == (unsigned int)SAHPI_ENT_OEM_SYSINT_SPECIFIC)
-                return ESHORTNAMES_THIRD_JUMP;
-        else if (i >= (unsigned int)SAHPI_ENT_ROOT && i - (unsigned int)SAHPI_ENT_ROOT
-                   < eshort_num_names - ESHORTNAMES_LAST_JUMP )
-                return i - (unsigned int)SAHPI_ENT_ROOT + ESHORTNAMES_LAST_JUMP;
 
-        return -1;
-}
-
-/**
- * entitypath2string
- * @epathptr: IN. Pointer to HPI's entity path structure
- * @epathstr: OUT. Pointer to canonical entity path string
- * @strsize: IN. Canonical string length
- *
- * Converts an entity path structure into its
- * canonical string version. 
- *
- * Returns: >0 Number of characters written to canonical entity path string, 
- * -1 Error return
- */
-int entitypath2string(const SaHpiEntityPathT *epathptr, gchar *epathstr, const gint strsize)
-{
-     
-	gchar  *instance_str, *catstr, *tmpstr;
-	gint   err, i, strcount = 0, rtncode = 0;
-        int tidx;
-        gchar *type_str;
-        gchar type_str_buffer[20];
-
-	if (epathstr == NULL || strsize <= 0) { 
-		DEBUGMSGTL((AGENT,"Null string or invalid string size")); 
-		return -1;
-	}
-
-        if (epathptr == NULL) {
-                *epathstr = '\0';
-                return 0;
-        }
-
-	instance_str = (gchar *)g_malloc0(MAX_INSTANCE_DIGITS + 1);
-	tmpstr = (gchar *)g_malloc0(strsize);
-	if (instance_str == NULL || tmpstr == NULL) { 
-		DEBUGMSGTL((AGENT,"Out of memory")); 
-		rtncode = -1; 
-		goto CLEANUP;
-	}
-	
-	for (i = (SAHPI_MAX_ENTITY_PATH - 1); i >= 0; i--) {
-                guint num_digits, work_instance_num;
-
-		/* Find last element of structure; Current choice not good,
-		   since type=instance=0 is valid */
-		if (epathptr->Entry[i].EntityType == 0) {
-			continue;
-		}
-
-		/* Validate and convert data */
-                work_instance_num = epathptr->Entry[i].EntityInstance;
-                for (num_digits = 1; (work_instance_num = work_instance_num/10) > 0; num_digits++);
-		
-		if (num_digits > MAX_INSTANCE_DIGITS) { 
-                        DEBUGMSGTL((AGENT,"Instance value too big"));
-                        rtncode = -1; 
-			goto CLEANUP;
-		}
-                memset(instance_str, 0, MAX_INSTANCE_DIGITS + 1);
-                err = snprintf(instance_str, MAX_INSTANCE_DIGITS + 1,
-                               "%d", epathptr->Entry[i].EntityInstance);
-
-                // check if we can convert the entity type to a string
-                tidx = entitytype2index(epathptr->Entry[i].EntityType);
-
-                if ( tidx >= 0 )
-                        type_str = eshort_names[tidx];
-                else {
-                        err = snprintf(type_str_buffer, 20,
-                                       "%d", epathptr->Entry[i].EntityType);
-                        type_str = type_str_buffer;
-                }
-
-		strcount = strcount + 
-			strlen(EPATHSTRING_START_DELIMITER) + 
-			strlen(type_str) + 
-			strlen(EPATHSTRING_VALUE_DELIMITER) + 
-			strlen(instance_str) + 
-			strlen(EPATHSTRING_END_DELIMITER);
-
-		if (strcount > strsize - 1) {
-			DEBUGMSGTL((AGENT,"Not enough space allocated for string"));
-			rtncode = -1;
-			goto CLEANUP;
-		}
-
-		catstr = g_strconcat(EPATHSTRING_START_DELIMITER,
-				     type_str,
-				     EPATHSTRING_VALUE_DELIMITER,
-				     instance_str, 
-				     EPATHSTRING_END_DELIMITER, 
-				     NULL);
-
-		strcat(tmpstr, catstr);
-		g_free(catstr);
-	}
-        rtncode = strcount;
-	/* Write string */
-	memset(epathstr, 0 , strsize);
-	strcpy(epathstr, tmpstr);
-
- CLEANUP:
-	g_free(instance_str);
-	g_free(tmpstr);
-
-	return(rtncode);
-} /* End entitypath2string */
 SaErrorT
 rcSaHpi ()
 {
@@ -1292,8 +1099,9 @@ main (int argc, char **argv)
 		send_traps = AGENT_TRUE;
 
 	/* after initialization populate tables */
-	populate_domain_info();
         populate_drt();
+	populate_domain_info();
+        populate_dat();
 
 
 	dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
