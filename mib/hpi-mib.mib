@@ -3409,9 +3409,9 @@ SaHpiOEMEventEntry ::= SEQUENCE {
         saHpiOEMEventTimestamp          SaHpiTime,
 
         saHpiOEMEventManufacturerIdT    Unsigned32,
-        saHpiOemEventTextType           SaHpiTextType,
-        saHpiOemEventTextLanguage       SaHpiTextLanguage,
-        saHpiOemEventText               SaHpiText,
+        saHpiOEMEventTextType           SaHpiTextType,
+        saHpiOEMEventTextLanguage       SaHpiTextLanguage,
+        saHpiOEMEventText               SaHpiText,
         saHpiOEMEventDelete             RowStatus
         }
 
@@ -3434,7 +3434,7 @@ saHpiOEMEventManufacturerIdT OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 2}
 
-saHpiOemEventTextType   OBJECT-TYPE
+saHpiOEMEventTextType   OBJECT-TYPE
     SYNTAX      SaHpiTextType
     MAX-ACCESS  read-only
     STATUS      current
@@ -3442,7 +3442,7 @@ saHpiOemEventTextType   OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 3}
 
-saHpiOemEventTextLanguage OBJECT-TYPE
+saHpiOEMEventTextLanguage OBJECT-TYPE
     SYNTAX      SaHpiTextLanguage
     MAX-ACCESS  read-only
     STATUS      current
@@ -3450,7 +3450,7 @@ saHpiOemEventTextLanguage OBJECT-TYPE
         " "
     ::= {saHpiOEMEventEntry 4}
 
-saHpiOemEventText       OBJECT-TYPE
+saHpiOEMEventText       OBJECT-TYPE
     SYNTAX      SaHpiText
     MAX-ACCESS  read-only
     STATUS      current
@@ -4979,7 +4979,7 @@ SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
         saHpiReadingCurrentIsSupported          TruthValue,
         saHpiSensorReadingCurrentType           SaHpiSensorReadingType, 
         saHpiSensorReadingCurrentValue          SaHpiSensorReadingValue,
-        saHpiSensorReadingEventState            SaHpiEventState
+        saHpiSensorReadingCurrentEventState            SaHpiEventState
         }
 
 saHpiReadingCurrentIsSupported  OBJECT-TYPE
@@ -5008,7 +5008,7 @@ saHpiSensorReadingCurrentValue  OBJECT-TYPE
         "See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingCurrentEntry 3}
         
-saHpiSensorReadingEventState OBJECT-TYPE
+saHpiSensorReadingCurrentEventState OBJECT-TYPE
         SYNTAX  SaHpiEventState
         MAX-ACCESS      read-only
         STATUS  current
@@ -6722,9 +6722,9 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
 
 saHpiOEMNotifications NOTIFICATION-TYPE
         OBJECTS {
-                saHpiOemEventTextType,
-                saHpiOemEventTextLanguage,
-                saHpiOemEventText
+                saHpiOEMEventTextType,
+                saHpiOEMEventTextLanguage,
+                saHpiOEMEventText
         }
         STATUS current
         DESCRIPTION
@@ -6760,82 +6760,349 @@ saHpiUserNotifications NOTIFICATION-TYPE
 
 hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
 
-saHpiEntityGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEntryCount,
-                saHpiEntryUpdateCount,
-                saHpiEntryUpdateTimestamp,
-                saHpiDomainId ,
-                saHpiEntryId ,
-                saHpiResourceId ,
-                saHpiResourceEntityPath ,
-                saHpiResourceCapabilities ,
-                saHpiResourceSeverity ,
-                saHpiResourceInfoResourceRev ,
-                saHpiResourceInfoSpecificVer ,
-                saHpiResourceInfoDeviceSupport ,
-                saHpiResourceInfoManufacturerId ,
-                saHpiResourceInfoProductId ,
-                saHpiResourceInfoFirmwareMajorRev ,
-                saHpiResourceInfoFirmwareMinorRev ,
-                saHpiResourceInfoAuxFirmwareRev ,
-                saHpiResourceTagTextType ,
-                saHpiResourceTagTextLanguage,
-                saHpiResourceTag,
-                saHpiParamControl
-                --saHpiClearEvents,
-                --saHpiEventLogTime,
-                --saHpiEventLogState
-        }
-        STATUS current
-        DESCRIPTION
-                "Entity group"
-        ::=  { hpiMIBCompliances 1}
+saHpiDomainGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiDomainCapabilities,
+		saHpiIsPeer,
+		saHpiDomainTagTextType,
+		saHpiDomainTagTextLanguage,
+		saHpiDomainTag,
+		saHpiDrtUpdateCount,
+		saHpiDrtUpdateTimestamp,
+		saHpiRptUpdateCount,
+		saHpiRptUpdateTimestamp,
+		saHpiDatUpdateCount,
+		saHpiDatUpdateTimestamp,
+		saHpiActiveAlarms,
+		saHpiCriticalAlarms,
+		saHpiMajorAlarms,
+		saHpiMinorAlarms,
+		saHpiDatUserAlarmLimit,
+		saHpiDatOverflow,
+		saHpiDomainGuid
+	}
+	STATUS current
+	DESCRIPTION
+		"Domain Table"
+	::= { hpiMIBCompliances 1}
+
+saHpiDrtGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiDrtIsPeer
+	}
+	STATUS current
+	DESCRIPTION
+		"Domain Resource Table."
+	::= { hpiMIBCompliances 2}
+
+saHpiDatGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiAlarmId,
+		saHpiTimestamp,
+		saHpiSeverity,
+		saHpiAcknowledged,
+		saHpiAlarmCondStatusCondType,
+		saHpiAlarmCondEntityPath,
+		saHpiAlarmCondSensorNum,
+		saHpiAlarmCondEventState,
+		saHpiAlarmCondNameValue,
+		saHpiAlarmCondMid,
+		saHpiAlarmCondDataTextType,
+		saHpiAlarmCondDataTextLanguage,
+		saHpiAlarmCondData,
+		saHpiAlarmDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Domain Alarm Table."
+	::= { hpiMIBCompliances 3}
 
 
-saHpiEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEventLogEntries
-        }
-        STATUS current
-        DESCRIPTION 
-                "System event group"
-        ::=  { hpiMIBCompliances 3}
+saHpiResourceGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiDomainId,
+		saHpiEntryId,
+		saHpiResourceId,
+		saHpiResourceEntityPath,
+		saHpiResourceCapabilities,
+		saHpiResourceHotSwapCapabilities,
+		saHpiResourceSeverity,
+		saHpiResourceFailed,
+		saHpiResourceInfoResourceRev,
+		saHpiResourceInfoSpecificVer,
+		saHpiResourceInfoDeviceSupport,
+		saHpiResourceInfoManufacturerId,
+		saHpiResourceInfoProductId,
+		saHpiResourceInfoFirmwareMajorRev,
+		saHpiResourceInfoFirmwareMinorRev,
+		saHpiResourceInfoAuxFirmwareRev,
+		saHpiResourceInfoGuid,
+		saHpiResourceTagTextType,
+		saHpiResourceTagTextLanguage,
+		saHpiResourceTag,
+		saHpiParamControl
+	}
+	STATUS	current
+	DESCRIPTION
+		"Resource table - RPT"
+	::= { hpiMIBCompliances 4}
 
 saHpiHotSwapGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHotSwapIndicator,
---              saHpiHotSwapState,
---              saHpiHotSwapPreviousState,
-                saHpiHotSwapInsertTimeout,
-                saHpiHotSwapExtractTimeout,
-                saHpiHotSwapActionRequest,
-                saHpiHotSwapRTP
-        }
-        STATUS current
-        DESCRIPTION
-                "Hotswap group"
-        ::=  { hpiMIBCompliances 4}
+	OBJECTS {
+		saHpiHotSwapIndicator,
+		saHpiHotSwapInsertTimeout,
+		saHpiHotSwapExtractTimeout,
+		saHpiHotSwapActionRequest,
+		saHpiHotSwapPolicyCancel,
+		saHpiHotSwapResourceRequest,
+		saHpiHotSwapResetAction,
+		saHpiHotSwapPowerAction,
+		saHpiHotSwapRTP
+	}
+	STATUS	current
+	DESCRIPTION
+		"Hot swap table."
+	::= { hpiMIBCompliances 5}
 
-saHpiResourceDataRecordGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiRdrCount,
---              saHpiRdrRecordId,
---              saHpiRdrType,
-                saHpiRdrEntityPath,
-                saHpiRdr,
-                saHpiRdrId,
-                saHpiRdrRTP
-        }
-        STATUS current
-        DESCRIPTION
-                "Resource Data Record group"
-        ::=  { hpiMIBCompliances 5}
+saHpiEventGroup OBJECT-GROUP
+	OBJECTS {
+--		saHpiEvent,
+		saHpiEventType,
+		saHpiEventSeverity,
+		saHpiEventHistorical,
+		saHpiEventQueueStatus,
+		saHpiEventSaHpiTime
+	}
+	STATUS	current
+	DESCRIPTION
+		"Event table."
+	::= {hpiMIBCompliances 6}
+
+saHpiResourceEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiResourceEventTimestamp,
+		saHpiResourceEventType,
+		saHpiResourceEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Resource event table"
+	::= {hpiMIBCompliances 7}
+
+saHpiResourceDomainEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiDomainEventTimestamp,
+		saHpiDomainEventType,
+		saHpiDomainEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Domain event table."
+	::= {hpiMIBCompliances 8}	
+
+saHpiSensorEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiSensorNum,
+		saHpiSensorEventTimestamp,
+		saHpiSensorEventType,
+		saHpiSensorEventCategory,
+		saHpiSensorEventAssertion,
+		saHpiSensorEventState,
+		saHpiEventSensorOptionalData,
+		saHpiEventSensorTriggerReadingType,
+		saHpiEventSensorTriggerReading,
+		saHpiEventSensorTriggerThresholdType,
+		saHpiEventSensorTriggerThreshold,
+		saHpiEventSensorPreviousState,
+		saHpiEventSensorCurrentState,
+		saHpiEventSensorOem,
+		saHpiEventSensorSpecific,
+		saHpiEventSensorDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sensor event table."
+	::= {hpiMIBCompliances 9}
+
+saHpiSensorEnableChangeEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiSensorEnableChangeEventTimestamp,
+		saHpiSensorEnableChangeEventType,
+		saHpiSensorEnableChangeEventCategory,
+		saHpiSensorEnableChangeEnabled,
+		saHpiSensorEnableChangeEventsEnabled,
+		saHpiSensorEnableChangeAssertEvents,
+		saHpiSensorEnableChangeDeassertEvents,
+		saHpiSensorEnableChangeOptionalData,
+		saHpiSensorEnableChangeEventState,
+		saHpiSensorEnableChangeDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Sensor Enable change table."
+	::= {hpiMIBCompliances 10}
+
+saHpiHotSwapEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiHotSwapEventTimestamp,
+		saHpiHotSwapEventState,
+		saHpiHotSwapEventPreviousState,
+		saHpiHotSwapEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"HotSwap event table."
+	::= {hpiMIBCompliances 11}
+
+saHpiWatchdogEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiEventWatchdogNum,
+		saHpiWatchdogEventTimestamp,
+		saHpiWatchdogEventAction,
+		saHpiWatchdogEventPreTimerAction,
+		saHpiWatchdogEventUse,
+		saHpiWatchdogEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Watchdog event table."
+	::= {hpiMIBCompliances 12}
+
+saHpiSoftwareEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiSoftwareEventTimestamp,
+		saHpiSoftwareEventManufacturerIdT,
+		saHpiSoftwareEventType,
+		saHpiSoftwareEventTextType,
+		saHpiSoftwareEventTextLanguage,
+		saHpiSoftwareEventText,
+		saHpiSoftwareEventDelete
+	}
+	STATUS current
+	DESCRIPTION
+		"Software event group."
+	::= {hpiMIBCompliances 13}
+
+saHpiOEMEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiOEMEventTimestamp,
+		saHpiOEMEventManufacturerIdT,
+		saHpiOEMEventTextType,
+		saHpiOEMEventTextLanguage,
+		saHpiOEMEventText,
+		saHpiOEMEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"OEM event group."
+	::= {hpiMIBCompliances 14}
+
+saHpiUserEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiUserEventTimestamp,
+		saHpiUserEventTextType,
+		saHpiUserEventTextLanguage,
+		saHpiUserEventText,
+		saHpiUserEventDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"User Event group."
+	::= {hpiMIBCompliances 15}
+
+saHpiAnnouncementGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiAnnuoncementTimestamp,
+		saHpiAnnuoncementAddedByUser,
+		saHpiAnnouncementSeverity,
+		saHpiAnnuoncementAcknowledged,
+		saHpiAnnouncementStatusCondType,
+		saHpiAnnouncementEntityPath,
+		saHpiAnnouncementSensorNum,
+		saHpiAnnouncementEventState,
+		saHpiAnnouncementName,
+		saHpiAnnouncementMid,
+		saHpiAnnouncementTextType,
+		saHpiAnnouncementTextLanguage,
+		saHpiAnnouncementText,
+		saHpiAnnouncementDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Announcement table."
+	::= {hpiMIBCompliances 16}
+
+saHpiEventLogInfoGroup OBJECT-GROUP
+	OBJECTS {	
+		saHpiEventLogEntries,
+		saHpiEventLogSize,
+		saHpiEventLogUserEventMaxSize,
+		saHpiEventLogUpdateTimestamp,
+		saHpiEventLogCurrentTime,
+		saHpiEventLogIsEnabled,
+		saHpiEventLogOverflowFlag,
+		saHpiEventLogOverflowAction,
+		saHpiEventLogOverflowReset,
+		saHpiEventLogDelete,
+		saHpiEventLogState
+	}
+	STATUS	current
+	DESCRIPTION
+		"Event log information table."
+	::= {hpiMIBCompliances 17}
+
+saHpiEventLogGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiEventLogType,
+		saHpiEventLogAddedTimestamp,
+		saHpiEventLog
+	}
+	STATUS	current
+	DESCRIPTION
+		"Event log table."
+	::= {hpiMIBCompliances 18}
+
+saHpiRdrGroup OBJECT-GROUP
+	OBJECTS {
+	--	saHpiRdrType,
+		saHpiRdrEntityPath,
+		saHpiIsFru,
+		saHpiRdr,
+		saHpiRdrId,
+		saHpiRdrRTP,
+		saHpiRdrTextType,
+		saHpiRdrTextLanguage,
+		saHpiRdrIdString
+	}
+	STATUS	current
+	DESCRIPTION
+		"RDR table."
+	::= {hpiMIBCompliances 19}
+
+saHpiCtrlGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiCtrlNum,
+		saHpiCtrlOutputType,
+		saHpiCtrlType,
+		saHpiCtrlMode,
+		saHpiCtrlReadOnly,
+		saHpiCtrlWriteOnly,
+		saHpiCtrlState,
+		saHpiCtrlData,
+		saHpiCtrlOem,
+		saHpiCtrlTextType,
+		saHpiCtrlTextLanguage,
+		saHpiCtrlText,
+		saHpiCtrlRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"Control table."
+	::= {hpiMIBCompliances 20}
 
 saHpiSensorGroup        OBJECT-GROUP
         OBJECTS {
                 saHpiSensorCount,
---              saHpiSensorIndex,
                 saHpiSensorType,
                 saHpiSensorCategory,
                 saHpiSensorEventsCategoryControl,
@@ -6850,18 +7117,19 @@ saHpiSensorGroup        OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Sensors groups."
-        ::=  { hpiMIBCompliances 6}
+        ::=  { hpiMIBCompliances 21}
 
 saHpiSensorReadingCurrentGroup OBJECT-GROUP
         OBJECTS {
                 saHpiReadingCurrentIsSupported,
                 saHpiSensorReadingCurrentType, 
-                saHpiSensorReadingCurrentValue  
+                saHpiSensorReadingCurrentValue,
+		saHpiSensorReadingCurrentEventState
         }
         STATUS current
         DESCRIPTION
                 "Current (dynamic) sensor reading."
-        ::= { hpiMIBCompliances 7}
+        ::= { hpiMIBCompliances 22}
 
 saHpiSensorReadingMaxGroup OBJECT-GROUP
         OBJECTS {
@@ -6872,7 +7140,7 @@ saHpiSensorReadingMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer maximum sensor reading."
-        ::= { hpiMIBCompliances 8}
+        ::= { hpiMIBCompliances 23}
 
 saHpiSensorReadingMinGroup OBJECT-GROUP
         OBJECTS {
@@ -6883,7 +7151,7 @@ saHpiSensorReadingMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer minimum sensor reading."
-        ::= { hpiMIBCompliances 9}
+        ::= { hpiMIBCompliances 24}
 
 saHpiSensorReadingNominalGroup OBJECT-GROUP
         OBJECTS {
@@ -6894,7 +7162,7 @@ saHpiSensorReadingNominalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer nominal sensor reading."
-        ::= { hpiMIBCompliances 10}
+        ::= { hpiMIBCompliances 25}
 
 
 saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
@@ -6906,7 +7174,7 @@ saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer normal maximum sensor reading."
-        ::= { hpiMIBCompliances 11}
+        ::= { hpiMIBCompliances 26}
 
 saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         OBJECTS {
@@ -6917,7 +7185,7 @@ saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "Manufacturer normal minimum sensor reading."
-        ::= { hpiMIBCompliances 12}
+        ::= { hpiMIBCompliances 27}
         
 saHpiSensorThdLowCriticalGroup OBJECT-GROUP
         OBJECTS {
@@ -6925,13 +7193,14 @@ saHpiSensorThdLowCriticalGroup OBJECT-GROUP
                 saHpiSensorThdLowCriticalIsWritable,   
                 saHpiSensorThdLowCriticalType,         
                 saHpiSensorThdLowCriticalValue        
+
         }
         STATUS current
         DESCRIPTION
                 "Threshold values for catastrophic sensor reading at 
                 the lower end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 13}
+        ::= { hpiMIBCompliances 28}
 
 saHpiSensorThdLowMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -6945,7 +7214,7 @@ saHpiSensorThdLowMajorGroup OBJECT-GROUP
                 "Threshold values for severely degraded sensor reading
                 at the lower end of the range that does not impact
                 the functional status."
-        ::= { hpiMIBCompliances 14}
+        ::= { hpiMIBCompliances 29}
 
 saHpiSensorThdLowMinorGroup OBJECT-GROUP
         OBJECTS {
@@ -6959,7 +7228,7 @@ saHpiSensorThdLowMinorGroup OBJECT-GROUP
                 "Threshold values for degraded sensor reading at the 
                 lower end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 15}
+        ::= { hpiMIBCompliances 30}
 
 
 saHpiSensorThdUpCriticalGroup OBJECT-GROUP
@@ -6974,7 +7243,7 @@ saHpiSensorThdUpCriticalGroup OBJECT-GROUP
                 "Threshold values for catastrophic sensor reading at
                 the upper end of the range that does not impact the
                 functional status."
-        ::= { hpiMIBCompliances 16}
+        ::= { hpiMIBCompliances 31}
 
 saHpiSensorThdUpMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -6988,7 +7257,7 @@ saHpiSensorThdUpMajorGroup OBJECT-GROUP
                 "Threshold values for severely degraded sensor reading
                 at the upper end of the range that does not impact the
                 functional status of the sensor."
-        ::= { hpiMIBCompliances 17}
+        ::= { hpiMIBCompliances 32}
 
 
 saHpiSensorThdUpMinorGroup OBJECT-GROUP 
@@ -7003,7 +7272,7 @@ saHpiSensorThdUpMinorGroup OBJECT-GROUP
                 "Threshold values for degraded sensor reading at the
                 upper end of the range that does not impact the
                 functional status of the sensor."
-        ::= { hpiMIBCompliances 18}
+        ::= { hpiMIBCompliances 33}
 
 
 saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
@@ -7017,7 +7286,7 @@ saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
         DESCRIPTION
                 "Threshold values for hysteresis which is the positive
                 range over which a change is accepted."
-        ::= { hpiMIBCompliances 19}
+        ::= { hpiMIBCompliances 34}
 
 
 saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
@@ -7031,58 +7300,87 @@ saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
         DESCRIPTION
                 "Threshold values for hysteresis which is the negative
                 range over which a change is accepted."
-        ::= { hpiMIBCompliances 20}
+        ::= { hpiMIBCompliances 35}
 
-saHpiCtrlGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlCount,
-                saHpiCtrlNum,
-                saHpiCtrlOutputType,
-                saHpiCtrlType,
-                saHpiCtrlState,
-                saHpiCtrlData,
-                saHpiCtrlOem,
-                saHpiCtrlTextType,
-                saHpiCtrlTextLanguage,
-                saHpiCtrlText,
-                saHpiCtrlRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Control group."
-        ::=  { hpiMIBCompliances 21}
 
 saHpiInventoryGroup OBJECT-GROUP
         OBJECTS {
-                saHpiInventoryCount,
-                saHpiInventoryRDR
+		saHpiInstrumentId,
+		saHpiIdrPersistent,
+		saHpiInventoryOEM,
+		saHpiIdrUpdateCount,
+		saHpiIdrIsReadOnly,
+		saHpiIdrNumAreas,
+		saHpiInventoryRDR
         }
         STATUS current
         DESCRIPTION
                 "Inventory group."
-        ::=  { hpiMIBCompliances 22}
+        ::=  { hpiMIBCompliances 37}
+
+saHpiInventoryDataAreaGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiIdrAreaType,
+		saHpiIdrDataAreaIsReadOnly,
+		saHpiIdrDataAreaDelete,
+		saHpiIdrNumDataFields
+	}
+	STATUS	current
+	DESCRIPTION
+		"Inventory Data Record."
+	::= {hpiMIBCompliances 40}
+
+saHpiInventoryFieldGroup	OBJECT-GROUP
+	OBJECTS {
+		saHpiFieldType,
+		saHpiFieldIsReadOnly,
+		saHpiFieldTextType,
+		saHpiFieldTextLanguage,
+		saHpiFieldText,
+		saHpiFieldDelete
+	}
+	STATUS	current
+	DESCRIPTION
+		"Inventory field table."
+	::= {hpiMIBCompliances 41}
 
 saHpiWatchdogGroup OBJECT-GROUP
         OBJECTS {
-                saHpiWatchdogCount,
-                saHpiWatchdogNum,
-                saHpiWatchdogLog ,
-                saHpiWatchdogRunning ,
-                saHpiWatchdogTimerUse,
-                saHpiWatchdogTimerAction,
-                saHpiWatchdogPretimerInterrupt,
-                saHpiWatchdogPreTimeoutInterval,
-                saHpiWatchdogTimerUseExpFlags,
-                saHpiWatchdogTimerInitialCount,
-                saHpiWatchdogTimerPresentCount,
-                saHpiWatchdogTimerReset,
-                saHpiWatchdogOem,
-                saHpiWatchdogRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Watchdog group."
-        ::=  { hpiMIBCompliances 23}
+		saHpiWatchdogCount,
+		saHpiWatchdogNum,
+		saHpiWatchdogLog,
+		saHpiWatchdogRunning,
+		saHpiWatchdogTimerUse,
+		saHpiWatchdogTimerAction,
+		saHpiWatchdogPretimerInterrupt,
+		saHpiWatchdogPreTimeoutInterval,
+		saHpiWatchdogTimerUseExpFlags,
+		saHpiWatchdogTimerInitialCount,
+		saHpiWatchdogTimerPresentCount,
+		saHpiWatchdogTimerReset,
+		saHpiWatchdogOem,
+		saHpiWatchdogRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"Watchdog table."
+	::= {hpiMIBCompliances 42}
+
+saHpiAnnunciatorGroup OBJECT-GROUP
+	OBJECTS {	
+		saHpiAnnunciatorCount,
+		saHpiAnnunciatorNum,
+		saHpiAnnunciatorType,
+		saHpiAnnunciatorModeReadOnly,
+		saHpiAnnunciatorMaxConditions,
+		saHpiAnnunciatorMode,
+		saHpiAnnunciatorOem
+	}
+	STATUS	current
+	DESCRIPTION
+		"Announicator table."
+	::= {hpiMIBCompliances 43}
+
 
 saHpiNotificationGroup NOTIFICATION-GROUP
         NOTIFICATIONS {
@@ -7099,7 +7397,7 @@ saHpiNotificationGroup NOTIFICATION-GROUP
         STATUS  current
         DESCRIPTION
         "Notification group"
-        ::=  { hpiMIBCompliances 24}
+        ::=  { hpiMIBCompliances 50}
         
 saHpiMIBCompliance MODULE-COMPLIANCE
         STATUS current
@@ -7107,11 +7405,9 @@ saHpiMIBCompliance MODULE-COMPLIANCE
         "The compliance statement for SMIv2 compliance of Platform MIB."
         MODULE
         MANDATORY-GROUPS {
-                saHpiEntityGroup,
 --              saHpiEventGroup,
                 saHpiEventGroup,
                 saHpiHotSwapGroup,
-                saHpiResourceDataRecordGroup,
                 saHpiSensorGroup,
                 saHpiSensorReadingCurrentGroup,
                 saHpiSensorReadingMaxGroup,
@@ -7132,5 +7428,5 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                 saHpiWatchdogGroup,
                 saHpiNotificationGroup
         }
-        ::=  { hpiMIBCompliances 25}
+        ::=  { hpiMIBCompliances 60}
 END
