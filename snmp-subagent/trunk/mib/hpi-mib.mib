@@ -1773,8 +1773,8 @@ saHpiResourceTable OBJECT-TYPE
         DESCRIPTION     
         "The logical domain ID and the Resource ID are used to address a 
 	Resource."
-	 REFERNECE 
-	 "See SAI-HPI-B.01.01 section 6.3"
+	REFERENCE 
+	"See SAI-HPI-B.01.01 section 6.3"
         ::= {hpiDomain 8}
 
 saHpiResourceEntry OBJECT-TYPE
@@ -1789,7 +1789,7 @@ saHpiResourceEntry OBJECT-TYPE
 	of the resource.  This field must be non-zero for all valid
         resources.   The ResourceTag field is an informational value."
 		
-	REFERNECE 
+	REFERENCE
 	"See SAI-HPI-B.01.01 section 6.3"
 		
         INDEX   { saHpiDomainId, 
@@ -1948,7 +1948,6 @@ saHpiResourceCapabilities OBJECT-TYPE
         SENSOR
 	
 	See textual-convention for further definition."
-        "
 	::=   {saHpiResourceEntry 4 }
 
         
@@ -1956,9 +1955,9 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
         SYNTAX          SaHpiCapabilities
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        This definition defines the managed hot swap capabilities of 
-	a given resource. 
+        DESCRIPTION     
+	"This definition defines the managed hot swap capabilities of a given 
+	resource. 
 
         AUTOEXTRACT_READ_ONLY
                 This capability indicates if the hot swap autoextract
@@ -2313,7 +2312,7 @@ saHpiAutoInsertTimeoutTable OBJECT-TYPE
     ::= { hpiHotSwap 1 }
 
 saHpiAutoInsertTimeoutEntry OBJECT-TYPE
-	SYNTAX 		SaHpiAutoTimeoutEntry
+	SYNTAX 		SaHpiAutoInsertTimeoutEntry
 	MAX-ACCESS 	not-accessible
 	STATUS 		current
 	DESCRIPTION
@@ -3814,18 +3813,50 @@ saHpiAnnouncementEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "The table of announcements is used to provide
-a common interface to varied mechanisms for announcing conditions.
+	a common interface to varied mechanisms for announcing conditions.
 
-Each announcement in an Annunciator's current set contains a severity level, details describing the specific condition that is being reported, an Acknowledged flag, a timestamp indicating when the announcement was added to the set, and an EntryId that uniquely identifies the particular status item within the set.
+	Each announcement in an Annunciator's current set contains a severity
+	level, details describing the specific condition that is being reported, 
+	an Acknowledged flag, a timestamp indicating when the announcement was 
+	added to the set, and an EntryId that uniquely identifies the particular 
+	status item within the set.
 
-EntryIds are assigned to announcements as they are added to the set as well as a Timestamp.  After an announcement is deleted from the current set, its EntryId may be reused for a newly added announcement as long as the new announcement will have a different timestamp than any previously deleted announcement using the same EntryId.  Thus, the EntryId and Timestamp together will uniquely identify any announcement, which was ever present in the Annunciator's set.
+	EntryIds are assigned to announcements as they are added to the set as 
+	well as a Timestamp.  After an announcement is deleted from the current 
+	set, its EntryId may be reused for a newly added announcement as long 
+	as the new announcement will have a different timestamp than any 
+	previously deleted announcement using the same EntryId.  Thus, the 
+	EntryId and Timestamp together will uniquely identify any announcement, 
+	which was ever present in the Annunciator's set.
 
-The actual meaning of the Acknowledged flag is arbitrary, and the actions taken by the platform when announcements are flagged as 'acknowledged' or 'unacknowledged' are implementation-specific.  The intended use of the flag is to indicate whether a particular announcement in the current set has been recognized by whomever or whatever is inspecting the LEDs, displays, etc., that are being driven by the Annunciator management instrument.  Thus, when announcements are added to the current set, generally the flag should be set to indicate that the condition is 'unacknowledged'.  Later, either as the result of an HPI User function call, or due to some implementation-dependent action (such as pressing an 'acknowledge' button on a front-panel display), the flag can be changed to indicate that the announcement is now 'acknowledged.'
+	The actual meaning of the Acknowledged flag is arbitrary, and the 
+	actions taken by the platform when announcements are flagged as 
+	'acknowledged' or 'unacknowledged' are implementation-specific.  
+	The intended use of the flag is to indicate whether a particular 
+	announcement in the current set has been recognized by whomever or 
+	whatever is inspecting the LEDs, displays, etc., that are being 
+	driven by the Annunciator management instrument.  Thus, when 
+	announcements are added to the current set, generally the flag 
+	should be set to indicate that the condition is 'unacknowledged'.  
+	Later, either as the result of an HPI User function call, or due 
+	to some implementation-dependent action (such as pressing an 
+	'acknowledge' button on a front-panel display), the flag can be 
+	changed to indicate that the announcement is now 'acknowledged.'
 
-The ability to acknowledge announcements is not controlled by the Annunciator 'mode' setting (Auto, User, or Shared).  Any announcement may be acknowledged by the HPI implementation, or via the saHpiAnnunciatorAcknowledge() function call, regardless of the current mode setting for the Annunciator.
+	The ability to acknowledge announcements is not controlled 
+	by the Annunciator 'mode' setting (Auto, User, or Shared).  
+	Any announcement may be acknowledged by the HPI implementation, 
+	or via the saHpiAnnunciatorAcknowledge() function call, regardless 
+	of the current mode setting for the Annunciator.
 
-Over time, announcements are added to and deleted from an Annunciator`s current set of announcements. This may be done automatically by the HPI implementation to reflect platform fault conditions, or by the HPI User via the HPI interface.  When announcements are added or deleted automatically by the HPI implementation, it is implementation-specific which announcements are added or removed.
-"
+	Over time, announcements are added to and deleted from an 
+	Annunciator`s current set of announcements. This may be done 
+	automatically by the HPI implementation to reflect platform fault 
+	conditions, or by the HPI User via the HPI interface.  When 
+	announcements are added or deleted automatically by the HPI 
+	implementation, it is implementation-specific which announcements 
+	are added or removed.
+	"
         INDEX   {       saHpiDomainId, 
                         saHpiResourceId, 
                         saHpiDomainAlarmId, 
@@ -7285,7 +7316,6 @@ saHpiDomainReferenceGroup OBJECT-GROUP
 
 saHpiDomainAlarmGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiDomainAlarmId,
 		saHpiDomainAlarmTimestamp,
 		saHpiDomainAlarmSeverity,
 		saHpiDomainAlarmAcknowledged,
@@ -7333,7 +7363,7 @@ saHpiResourceGroup OBJECT-GROUP
 
 saHpiAutoTimeOutGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiAutoTimeoutForInsert
+		saHpiAutoInsertTimeoutForInsert
 	}
 	STATUS	current
 	DESCRIPTION
