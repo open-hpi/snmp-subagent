@@ -72,7 +72,7 @@ hpiB MODULE-IDENTITY
         management of entities on a variety of hardware platforms.  The  
         abstractions presented in this MIB are derived from the 
         Service Availability Forum Hardware Platform Interface 
-        specification version 01.01.
+        specification version SAI-HPI-B.01.01.
            
         The MIB views a hardware platform as a collection of physical 
                   entities that can be managed individually.  A logical 
@@ -174,10 +174,10 @@ SaHpiInstrumentId ::= TEXTUAL-CONVENTION
 SaHpiEntryId ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-             "Textual convention for the entry ID of an record. This
-     value is used to enumerate the indexes of records. There three
-     different unique values to denote the first, last, and
-     unspecified entry:
+        "Textual convention for the entry ID of an record. This
+	value is used to enumerate the indexes of records. There three
+	different unique values to denote the first, last, and
+	unspecified entry:
 
                 SAHPI_FIRST_ENTRY 0x00000000
                 SAHPI_LAST_ENTRY  0xFFFFFFFF
@@ -2721,9 +2721,8 @@ saHpiEventSeverity OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Severity of event. 
-
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiEventEntry 3}
 
 
@@ -2763,7 +2762,7 @@ saHpiEventType          OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Event type. 
         Note: The enumerated named have +1 added as opposed to the 
-        SA HPI spec for the same constants.  "
+        SAI-HPI-B.01.01 spec for the same constants.  "
         ::= { saHpiEventEntry 6 }
 
 -- *********************************
@@ -2837,7 +2836,7 @@ used to announce the addition of a non-FRU resource to the RPT table.
 Note: Enumerated values are increased by one value compared to
 SAI-HPI-B spec."
      REFERENCE
-	"Refer to HPI B.01.01 section 3.8 for more information on Resource Failures."
+	"Refer to SAI-HPI-B.01.01 section 3.8 for more information on Resource Failures."
     ::= {saHpiResourceEventEntry 2}
 
 
@@ -2852,7 +2851,7 @@ saHpiDomainEventEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"saHpiDomainEventEntryCount represents the subset of events 
+	"This Columnar node represents the subset of events 
 	that are Domain events."
         ::= {events 5}
 
@@ -2871,10 +2870,8 @@ saHpiDomainEventEntry OBJECT-TYPE
             "Domain events."
         INDEX   { 
                 saHpiDomainId,
-	-- IBMKR: No need for ResourceId?
-                saHpiResourceId, 
+		saHpiEntryId
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiDomainEventTimestamp
         }
         ::= {saHpiDomainEventTable 1}
@@ -4360,7 +4357,7 @@ SaHpiRdrEntry ::= SEQUENCE {
 
         saHpiRdrRowPointer                RowPointer,
         saHpiRdrId              Counter32,
-        saHpiRdrRTP             RowPointer,
+        saHpiRdrRPT             RowPointer,
         
         saHpiRdrTextType        SaHpiTextType,
         saHpiRdrTextLanguage    SaHpiTextLanguage,
@@ -4445,12 +4442,13 @@ saHpiRdrId OBJECT-TYPE
 	::=   {saHpiRdrEntry 5 }
 
 
-saHpiRdrRTP OBJECT-TYPE
+saHpiRdrRPT OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Forward pointer to the RTP entry. Another method to match 
-        the RPT and RDR is to compare the EntityPath, but this is much easier. "
+        DESCRIPTION     "Forward pointer to the Resource Presence Table (RPT) 
+	entry. Another method to match the RPT and RDR is to compare the 
+	EntityPath, but this is much easier. "
 	::=   {saHpiRdrEntry 6 }
 
 
@@ -7011,9 +7009,9 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         }
         STATUS current
         DESCRIPTION
-        "Sensor event notification."
+        "Sensor enable change event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-B.01.01 pages 77..78."
+        "Derived from typedefs in SAI-HPI-B.01.01 pages 7.2.9 and 7.2.10."
         ::= { hpiNotifications 2 }
 
 saHpiResourceNotifications NOTIFICATION-TYPE
@@ -7433,7 +7431,7 @@ saHpiRdrGroup OBJECT-GROUP
 		saHpiRdrIsFru,
 		saHpiRdrRowPointer,
 		saHpiRdrId,
-		saHpiRdrRTP,
+		saHpiRdrRPT,
 		saHpiRdrTextType,
 		saHpiRdrTextLanguage,
 		saHpiRdrIdString
