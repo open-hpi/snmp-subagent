@@ -2326,7 +2326,7 @@ saHpiResourceEventType OBJECT-TYPE
 
 saHpiResourceEventDelete OBJECT-TYPE
     SYNTAX		RowStatus
-    MAX-ACCESS	read-write
+    MAX-ACCESS		read-write
     STATUS		current
     DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
@@ -6246,7 +6246,9 @@ saHpiDomainNotifications NOTIFICATION-TYPE
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiWatchdogEventAction
+		saHpiWatchdogEventAction,
+		saHpiWatchdogEventPreTimerAction,
+		saHpiWatchdogEventUse
 	}
 	STATUS current
 	DESCRIPTION
@@ -6256,7 +6258,8 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiHotSwapEventState
+		saHpiHotSwapEventState,
+		saHpiHotSwapEventPreviousState
 	}
 	STATUS current
 	DESCRIPTION
@@ -6288,6 +6291,9 @@ saHpiOEMNotifications NOTIFICATION-TYPE
 
 saHpiUserNotifications NOTIFICATION-TYPE
 	OBJECTS {
+		saHpiUserEventTextType,
+		saHpiUserEventTextLanguage,
+		saHpiUserEventText,
 		saHpiUserEventTimestamp
 	}
 	STATUS current
