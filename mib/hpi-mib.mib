@@ -6378,14 +6378,42 @@ saHpiCtrlDigitalState OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"This object represents the current digital state of the control.  
-    Write to this object to change the digital state..
+    Write to this object to change the digital state.
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
 	auto(1) SNMP will return a notWriteable error code.
 
 	Refer to the textual convention for more details on the
-	enumerations."
+	enumerations.
+
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
 
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -6581,7 +6609,34 @@ saHpiCtrlDiscreteState OBJECT-TYPE
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code."
+	auto(1) SNMP will return a notWriteable error code.
+
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	"
 
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -6803,7 +6858,34 @@ saHpiCtrlAnalogState OBJECT-TYPE
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code."
+	auto(1) SNMP will return a notWriteable error code.
+
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	"
 
     	REFERENCE 
     "See section 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -7012,7 +7094,35 @@ saHpiCtrlStreamRepeat          OBJECT-TYPE
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code." 
+	auto(1) SNMP will return a notWriteable error code. 
+
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
     	REFERENCE 
     "See section 7.3.2, 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 10}
@@ -7027,8 +7137,35 @@ saHpiCtrlStreamState OBJECT-TYPE
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code."
+	auto(1) SNMP will return a notWriteable error code.
 
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
     	REFERENCE 
     "See section 7.3.2, 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 11}
@@ -7321,8 +7458,35 @@ saHpiCtrlTextLine OBJECT-TYPE
 	Unicode, which requires two bytes of data per character. 
 
 	Note that the number of lines and columns in a text control can be obtained from 
-	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. "
+	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. 
 
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
 		REFERENCE
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 		::= {saHpiCtrlTextEntry 14}
@@ -7360,7 +7524,35 @@ saHpiCtrlTextState OBJECT-TYPE
 	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. 
 
 	Note that the saHpiCtrlTextLanguage object has the language setting and 
-	saHpiCtrlTextType objecthas the text type."
+	saHpiCtrlTextType objecthas the text type.
+
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
 
 		REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -7603,8 +7795,35 @@ saHpiCtrlOemState OBJECT-TYPE
 
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code."
+	auto(1) SNMP will return a notWriteable error code.
 
+	Note that the SNMP errors that are returned are mapped to the
+	HPI errors that could be returned (errors above the value 6
+	are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
+	protocol).
+
+	SA_ERR_HPI_ERROR				genErr(5)
+	SA_ERR_HPI_UNSUPPORTED_API		genErr(5)
+	SA_ERR_HPI_BUSY					genErr(5)
+	SA_ERR_HPI_INTERNAL_ERROR		genErr(5)
+	SA_ERR_HPI_INVALID_CMD			genErr(5)
+	SA_ERR_HPI_TIMEOUT				resourceUnavailable(13)
+	SA_ERR_HPI_OUT_OF_SPACE			tooBig(1)
+	SA_ERR_HPI_OUT_OF_MEMORY		tooBig(1)
+	SA_ERR_HPI_INVALID_PARAMS		inconsistentValue(12)
+	SA_ERR_HPI_INVALID_DATA			wrongValue(10)
+	SA_ERR_HPI_NOT_PRESENT			noSuchName(2)	
+	SA_ERR_HPI_NO_RESPONSE			resourceUnavailable(13)
+	SA_ERR_HPI_DUPLICATE			inconsistentName(18)
+	SA_ERR_HPI_INVALID_SESSION		inconsistentName(18)
+	SA_ERR_HPI_INVALID_DOMAIN		inconsistentName(18)
+	SA_ERR_HPI_INVALID_RESOURCE		inconsistentName(18)	
+	SA_ERR_HPI_INVALID_REQUEST		badValue(3)
+	SA_ERR_HPI_ENTITY_NOT_PRESENT	resourceUnavailable(13)	
+	SA_ERR_HPI_READ_ONLY			readOnly(4)
+	SA_ERR_HPI_CAPABILITY			noAccess(6)
+	SA_ERR_HPI_UNKNOWN				genErr(5)	
+	"
 		REFERENCE
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 		::= {saHpiCtrlOemEntry 12}
