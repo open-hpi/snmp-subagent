@@ -113,9 +113,9 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 
 // IBM-KR: Endian
       event_log_update_timestamp.low = info.UpdateTimestamp & 0xffffffff;
-      event_log_update_timestamp.high =info.UpdateTimestamp >> 32;
+      event_log_update_timestamp.high = info.UpdateTimestamp >> 32;
 
-      event_log_current_timestamp.low =info.CurrentTime & 0xffffffff;
+      event_log_current_timestamp.low = info.CurrentTime & 0xffffffff;
       event_log_current_timestamp.high = info.CurrentTime >> 32;
 
       event_log_enabled = (info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
@@ -232,7 +232,8 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
       ctx->domain_id = rpt->DomainId;
 
 // IBM-KR: Endian
-      ctx->saHpiSystemEventLogAddedTimestamp.low =sel->Timestamp & 0xffffffff;
+      ctx->saHpiSystemEventLogAddedTimestamp.low =
+	sel->Timestamp & 0xffffffff;
       ctx->saHpiSystemEventLogAddedTimestamp.high = sel->Timestamp >> 32;
 
       ctx->saHpiSystemEventLogIndex = sel->EntryId;
@@ -245,10 +246,12 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	  ctx->saHpiSystemEventLogType = event_entry->EventType + 1;
 
 // IBM-KR: Endian
-	  ctx->saHpiSystemEventLogTimestamp.low = event_entry->Timestamp & 0xffffffff;
-	  ctx->saHpiSystemEventLogTimestamp.high = event_entry->Timestamp >> 32;
+	  ctx->saHpiSystemEventLogTimestamp.low =
+	    event_entry->Timestamp & 0xffffffff;
+	  ctx->saHpiSystemEventLogTimestamp.high =
+	    event_entry->Timestamp >> 32;
 
-	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity+1;
+	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity + 1;
 
 	  if (event_entry->EventType == SAHPI_ET_SENSOR)
 	    {
@@ -312,8 +315,9 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
 	      if (reading.ValuesPresent & SAHPI_SRF_RAW)
 		{
-		  ctx->saHpiSystemEventLogSensorTriggerReadingRaw =reading.Raw;
-		    //IBM-KR:htonl (reading.Raw);
+		  ctx->saHpiSystemEventLogSensorTriggerReadingRaw =
+		    reading.Raw;
+		  //IBM-KR:htonl (reading.Raw);
 		}
 	      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 		{
@@ -371,8 +375,9 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
 	      if (reading.ValuesPresent & SAHPI_SRF_RAW)
 		{
-		  ctx->saHpiSystemEventLogSensorTriggerThresholdRaw = reading.Raw;
-		    //IBM-KR:htonl (reading.Raw);
+		  ctx->saHpiSystemEventLogSensorTriggerThresholdRaw =
+		    reading.Raw;
+		  //IBM-KR:htonl (reading.Raw);
 		}
 	      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 		{

@@ -43,18 +43,12 @@ static integer64 update_timestamp;
 
 oid saHpiTable_oid[] = { saHpiTable_TABLE_OID };
 size_t saHpiTable_oid_len = OID_LENGTH (saHpiTable_oid);
-// { 1, 3, 6, 1, 3, 90, 1, 3, 0 };
 static oid saHpiEntryUpdateTimestamp_oid[] =
   { hpiEntity_OID, SCALAR_COLUMN_SAHPIENTRYUPDATETIMESTAMP, 0 };
-//      { 1, 3, 6, 1, 3, 90, 1, 2, 0 };
 static oid saHpiEntryUpdateCount_oid[] =
   { hpiEntity_OID, SCALAR_COLUMN_SAHPIENTRYUPDATECOUNT, 0 };
-//        { 1, 3, 6, 1, 3, 90, 1, 1, 0 };
 static oid saHpiEntryCount_oid[] =
   { hpiEntity_OID, SCALAR_COLUMN_SAHPIENTRYCOUNT, 0 };
-
-//    { 1, 3, 6, 1, 3, 90, 4, 6, 0 };
-//static oid saHpiResourceNotification[] = { hpiNotifications_OID, 6, 0 };
 
 static oid saHpiResourceNotification_oid[] = { hpiNotifications_OID, 6, 0 };
 
@@ -138,9 +132,9 @@ populate_rpt ()
       if (rpt_mutex == AGENT_TRUE)
 	{
 
-	// IBM-KR: Endian	
-	 update_timestamp.low = rpt_info.UpdateTimestamp  & 0xffffffff;
-	 update_timestamp.high = rpt_info.UpdateTimestamp  >> 32;
+	  // IBM-KR: Endian       
+	  update_timestamp.low = rpt_info.UpdateTimestamp & 0xffffffff;
+	  update_timestamp.high = rpt_info.UpdateTimestamp >> 32;
 
 	  update_entry_count = rpt_info.UpdateCount;
 	  // Yes, something new.
@@ -152,13 +146,11 @@ populate_rpt ()
 	      current = next;
 
 	      err = saHpiRptEntryGet (session, current, &next, &rpt_entry);
-	      DEBUGMSGTL((AGENT,"Current: %d, Next: %d\n",
-			current, next));
+	      DEBUGMSGTL ((AGENT, "Current: %d, Next: %d\n", current, next));
 	      if (SA_OK == err)
 		{
-		  DEBUGMSGTL((AGENT,"ResourceID: %d, EntryId: %d\n",
-				rpt_entry.ResourceId,
-				rpt_entry.EntryId));
+		  DEBUGMSGTL ((AGENT, "ResourceID: %d, EntryId: %d\n",
+			       rpt_entry.ResourceId, rpt_entry.EntryId));
 		  // Get more information
 		  err = saHpiEventLogTimeGet (session,
 					      rpt_entry.ResourceId, &time);
@@ -522,11 +514,15 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       ctx->saHpiResourceInfoResourceRev = entry->ResourceInfo.ResourceRev;
       ctx->saHpiResourceInfoSpecificVer = entry->ResourceInfo.SpecificVer;
       ctx->saHpiResourceInfoDeviceSupport = entry->ResourceInfo.DeviceSupport;
-      ctx->saHpiResourceInfoManufacturerId = entry->ResourceInfo.ManufacturerId;
+      ctx->saHpiResourceInfoManufacturerId =
+	entry->ResourceInfo.ManufacturerId;
       ctx->saHpiResourceInfoProductId = entry->ResourceInfo.ProductId;
-      ctx->saHpiResourceInfoFirmwareMajorRev = entry->ResourceInfo.FirmwareMajorRev;
-      ctx->saHpiResourceInfoFirmwareMinorRev = entry->ResourceInfo.FirmwareMinorRev;
-      ctx->saHpiResourceInfoAuxFirmwareRev = entry->ResourceInfo.AuxFirmwareRev;
+      ctx->saHpiResourceInfoFirmwareMajorRev =
+	entry->ResourceInfo.FirmwareMajorRev;
+      ctx->saHpiResourceInfoFirmwareMinorRev =
+	entry->ResourceInfo.FirmwareMinorRev;
+      ctx->saHpiResourceInfoAuxFirmwareRev =
+	entry->ResourceInfo.AuxFirmwareRev;
       ctx->saHpiResourceTagTextType = entry->ResourceTag.DataType + 1;
       ctx->saHpiResourceTagTextLanguage = entry->ResourceTag.Language;
       len = entry->ResourceTag.DataLength;
@@ -539,7 +535,7 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE;
       ctx->saHpiParamControl = PARAM_UNDEFINED;
 
-	// IBM-KR: Endian
+      // IBM-KR: Endian
       ctx->saHpiEventLogTime.low = *time & 0xffffffff;
       ctx->saHpiEventLogTime.high = *time >> 32;
 
@@ -671,11 +667,11 @@ set_event_log_time (saHpiTable_context * ctx)
   SaHpiTimeT time;
   if (ctx)
     {
-	//IBM-KR: Endian
+      //IBM-KR: Endian
 
-	time = ctx->saHpiEventLogTime.high;
-	time = time << 32;
-	time += ctx->saHpiEventLogTime.low;
+      time = ctx->saHpiEventLogTime.high;
+      time = time << 32;
+      time += ctx->saHpiEventLogTime.low;
 
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);

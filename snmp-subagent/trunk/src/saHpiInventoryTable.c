@@ -1462,7 +1462,7 @@ saHpiInventoryTable_set_action (netsnmp_request_group * rg)
   //    saHpiInventoryTable_context *undo_ctx =
   //  (saHpiInventoryTable_context *) rg->undo_info;
   netsnmp_request_group_item *current;
-
+  int err = AGENT_ERR_NOERROR;
   int rc = SNMP_ERR_NOERROR;
   DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_action. Entry\n"));
   for (current = rg->list; current; current = current->next)
@@ -1558,7 +1558,10 @@ saHpiInventoryTable_set_action (netsnmp_request_group * rg)
 	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
 	}
 
-      if (set_inventory (row_ctx) != AGENT_ERR_NOERROR)
+      err = set_inventory (row_ctx);
+      if (err == AGENT_ERR_MEMORY_FAULT)
+	rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+      else if (err != AGENT_ERR_NOERROR)
 	rc = SNMP_ERR_GENERR;
 
       if (rc)

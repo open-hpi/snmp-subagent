@@ -1,7 +1,5 @@
-Add another argument for 'getSaHpiSession' - domain_id. 
-Write RFE  for the UNSUPPORTED function. - Tags in RPT
-Update the MIB to reflect the fact that SaHpiHsStateT is also in the event - perhpas remove PreviousHotSwapState ?
-Replace in set_action 'SNMP_ERR_GENERR' with SNMP_ERR_INCONSISTENTVALUE
-Check all Manufacture ID ('long') use 'htonl'
-The Event row might be shortnened? Perhaps have the OID to the resource, and some of the information?
-Perhaps write a struct for the saHpiDomainID, saHpiResourceIdT, oids, and such to pass that instead of individual entries?
+ - Figure out if the saHpiAutoInsertTimeoutGet/Set and saHpiAutoExtractionTimeoutGet/Set return value (SaHpTimeT) is fully SahpiTimeT complaint (division by a billion). 
+ - The Event row might be shortnened? Perhaps have the OID to the resource, and some of the information?
+ - Perhaps write a struct for the saHpiDomainID, saHpiResourceIdT, oids, and such to pass that instead of individual entries?
+ - Add another argument for 'getSaHpiSession' - domain_id. 
+ - Do all of those IBM-KR comments left behind and make sure they are (not)valid.

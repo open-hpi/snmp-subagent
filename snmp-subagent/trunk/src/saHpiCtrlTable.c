@@ -1066,13 +1066,13 @@ saHpiCtrlTable_set_action (netsnmp_request_group * rg)
 	      if (read_textline (row_ctx) != AGENT_ERR_NOERROR)
 		{
 		  // Would be nice to have : "Wrong line error"
-		  rc = SNMP_ERR_GENERR;
+		  rc = SNMP_ERR_BADVALUE;
 		}
 	    }
 	  else
 	    {
 	      if (set_ctrl_state (row_ctx) != AGENT_ERR_NOERROR)
-		rc = SNMP_ERR_GENERR;
+		rc = SNMP_ERR_INCONSISTENTVALUE;
 	    }
 	  break;
 
@@ -1092,7 +1092,7 @@ saHpiCtrlTable_set_action (netsnmp_request_group * rg)
 	  row_ctx->saHpiCtrlText_len = var->val_len;
 
 	  if (set_ctrl_state (row_ctx) != AGENT_ERR_NOERROR)
-	    rc = SNMP_ERR_GENERR;
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
 
 	  break;
 
