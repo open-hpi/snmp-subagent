@@ -40,20 +40,39 @@ static netsnmp_table_array_callbacks cb;
 
 extern  int send_traps_on_startup;
 
-oid             saHpiRdrTable_oid[] = { saHpiRdrTable_TABLE_OID };
-size_t          saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
+static oid             saHpiRdrTable_oid[] = { saHpiRdrTable_TABLE_OID };
+static size_t          saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 //   { 1, 3, 6, 1, 3, 90, 3, 1, 0 };
-oid      saHpiRdrCount_oid[] = { hpiResources_OID, SCALAR_COLUMN_SAHPIRDRCOUNT, 0 };
+static oid      saHpiRdrCount_oid[] = { hpiResources_OID, SCALAR_COLUMN_SAHPIRDRCOUNT, 0 };
 
 //  { 1, 3, 6, 1, 3, 90, 4, 7, 0 };
-oid saHpiResourceDataRecordNotification[] = { hpiNotifications_OID, 7, 0};
+static oid saHpiResourceDataRecordNotification[] = { hpiNotifications_OID, 7, 0};
 
 static u_long rdr_count = 0;
 
 
+static int  
+saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
+			     SaHpiRdrT *entry, 
+			     saHpiRdrTable_context *ctx,
+			     oid* rdr_oid, size_t oid_len,
+			     oid* child_oid, size_t child_oid_len,
+			     unsigned long child_id);
+
+/*
+static void
+make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list, 
+	      netsnmp_index *index,
+	      int column, 
+	      u_char type,
+	      const u_char *value, 
+	      const size_t value_len);
+
+static
+  int send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx);
 
 
-
+*/
 int
 populate_rdr(SaHpiRptEntryT *rpt_entry, 
 	     oid *rpt_oid, size_t rpt_oid_len) 
@@ -62,16 +81,16 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
   SaErrorT       err;
   SaHpiEntryIdT  current_rdr;
   SaHpiEntryIdT  next_rdr;
-  SaHpiRdrT      rdr_entry;
+  SaHpiRdrT rdr_entry;
   SaHpiSessionIdT session_id;
 
   long backup_count = rdr_count;
   int rc = AGENT_ERR_NOERROR;
 
-   oid			rdr_oid[3];
+   oid	         rdr_oid[RDR_INDEX_NR];
    oid                  full_oid[MAX_OID_LEN];
    oid                  child_oid[MAX_OID_LEN];
-   size_t                  child_oid_len;
+   size_t              child_oid_len;
    oid                  column[2];
    int                  column_len = 2;
    int                  full_oid_len;
@@ -83,7 +102,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 
    DEBUGMSGTL((AGENT,"\n\t--- populate_rdr: Entry.\n"));
   if (getSaHpiSession(&session_id) == AGENT_ERR_NOERROR) {
-    rdr_index.len = 3;
+    rdr_index.len = RDR_INDEX_NR;
     next_rdr= SAHPI_FIRST_ENTRY;
     do {
       current_rdr = next_rdr;
@@ -92,21 +111,16 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
       
       if (SA_OK == err) {
 	// Look at the MIB to find out what the indexs are
-	rdr_oid[0]=rpt_entry->ResourceId;
-	rdr_oid[1]=rdr_entry.RecordId;
-	rdr_oid[2]=rdr_entry.RdrType;
+	rdr_oid[0]=rpt_entry->DomainId;
+	rdr_oid[1]=rpt_entry->ResourceId;
+	rdr_oid[2]=rdr_entry.RecordId;
+	rdr_oid[3]=rdr_entry.RdrType;
 	
 	rdr_index.oids = (oid *)&rdr_oid;	
-	DEBUGMSGTL((AGENT,"\nIndex for this entry is: \n"));
-	DEBUGMSGOID((AGENT,rdr_oid, rdr_index.len));
+
 	if (backup_count == 0) {
 	  rdr_context = saHpiRdrTable_create_row(&rdr_index);
 	} else {
-	  // We are re-populating. Check for existing entries
-	   DEBUGMSGTL((AGENT,"Searching for index: %d.%d\n", 
-		       rdr_entry.RecordId,
-		       rdr_entry.RdrType));
-	   DEBUGMSGTL((AGENT,"\n"));	 
 	   // See if it exists.
 	   rdr_context = NULL;
 	   rdr_context = CONTAINER_FIND(cb.container, &rdr_index);
@@ -114,12 +128,15 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 	     
 	   if (!rdr_context) {
 	     // New entry. Add it
-	     DEBUGMSGTL((AGENT,"Couldn't find it\n"));
 	     rdr_context = saHpiRdrTable_create_row(&rdr_index);
 	   } 
+
+	   if (!rdr_context) {
+	     snmp_log(LOG_ERR,"Not enough memory for a RDR row!");
+	     return AGENT_ERR_INTERNAL_ERROR;
+	   }
 	}
-      
-	
+      	
 	column[0] = 1;
 	column[1] =  COLUMN_SAHPIRDRRESOURCEID;	     
 	build_full_oid(saHpiRdrTable_oid, saHpiRdrTable_oid_len,
@@ -127,24 +144,24 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 		       &rdr_index,
 		       full_oid, MAX_OID_LEN, &full_oid_len);
 			    
-	DEBUGMSGTL((AGENT,"Our first OBJECT OID for RDR row is: "));
-	DEBUGMSGOID((AGENT, full_oid, full_oid_len));
-	// IBM-KR: Just pass the RPT entry - that way the domainID can
-	// be extracted as well.
+	child_oid_len = 0;	
 	if (rdr_entry.RdrType == SAHPI_SENSOR_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
 	  rc = populate_sensor(&rdr_entry.RdrTypeUnion.SensorRec, 
 			       rpt_entry,
 			       full_oid, full_oid_len, 
 			       child_oid, &child_oid_len);
+	  DEBUGMSGTL((AGENT,"Called populate_sensor(); ID: %d; rc: %d\n",
+		      child_id, rc));
 	}
 	if (rdr_entry.RdrType == SAHPI_CTRL_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
-
 	  rc =populate_control(&rdr_entry.RdrTypeUnion.CtrlRec,
 			       rpt_entry,
 			       full_oid, full_oid_len,
 			       child_oid, &child_oid_len);
+	    DEBUGMSGTL((AGENT,"Called populate_control(); ID: %d; rc: %d\n",
+		      child_id, rc));
 	}
 	if (rdr_entry.RdrType == SAHPI_INVENTORY_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
@@ -152,6 +169,8 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 				 rpt_entry,
 				 full_oid, full_oid_len,
 				 child_oid, &child_oid_len);
+	    DEBUGMSGTL((AGENT,"Called populate_inventory(); ID: %d; rc: %d\n",
+		      child_id, rc));
 	}
 	if (rdr_entry.RdrType == SAHPI_WATCHDOG_RDR) {
 	  child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
@@ -159,11 +178,9 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 				rpt_entry,
 				full_oid, full_oid_len,
 				child_oid, &child_oid_len);
+	    DEBUGMSGTL((AGENT,"Called populate_watchdog(); ID: %d; rc: %d\n",
+		      child_id, rc));
 	}
-	
-	DEBUGMSGTL((AGENT,"rc is %d", rc));
-	if (rc != AGENT_ERR_NOERROR)
-	  break;
 	
 	// By this stage, rdr_context surely has something in it.
 	// '*_modify_context' does a checksum check to see if 
@@ -182,10 +199,12 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 
 	  CONTAINER_INSERT(cb.container, rdr_context);	  
 	  rdr_count = CONTAINER_SIZE(cb.container);
-
+	  /*
+	    IBM-KR: TODO
 	  if (send_traps_on_startup == TRUE) {
 	    send_saHpiRdrTable_notification(rdr_context);
 	  }
+	  */
 
 	}
       } else { // Bail out.
@@ -194,6 +213,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
       }
     } while ( next_rdr != SAHPI_LAST_ENTRY);
     
+    // IBM-KR: TODO
     // Now check to see if we need to delete any entry.
   }
 
@@ -209,17 +229,18 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
 	       SaHpiRdrTypeT type) {
 
   saHpiRdrTable_context *ctx;
-  oid rdr_oid[3];
+  oid rdr_oid[RDR_INDEX_NR];
   netsnmp_index	rdr_index;
 
 // Look at the MIB to find out what the indexs are
-  rdr_oid[0]=resource_id;
-  rdr_oid[1]=num;
-  rdr_oid[2]=type;
+  rdr_oid[0]=domain_id;
+  rdr_oid[1]=resource_id;
+  rdr_oid[2]=num;
+  rdr_oid[3]=type;
 
   // Possible more indexs?
   rdr_index.oids = (oid *)&rdr_oid;
-  rdr_index.len = 3;
+  rdr_index.len = RDR_INDEX_NR;
 
   ctx = CONTAINER_FIND(cb.container, &rdr_index);
 
@@ -273,7 +294,7 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
       hash = -1;
 
     ctx->hash = hash;
-
+    ctx->domain_id = rpt_entry->DomainId;
     ctx->saHpiResourceID = rpt_entry->ResourceId;
     ctx->saHpiRdrRecordId = entry->RecordId;
     ctx->saHpiRdrType = entry->RdrType;
@@ -282,6 +303,7 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 			    &entry->Entity, 
 			    ctx->saHpiRdrEntityPath, 
 			    SNMP_MAX_MSG_SIZE);
+    // Try to get it from rpt_entry.
     if (len == 0) {
     	len = entitypath2string(&rpt_entry->ResourceEntity,
 				ctx->saHpiRdrEntityPath,
@@ -292,7 +314,6 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
       len = 0;
     }
     DEBUGMSGTL((AGENT,"EntityPath: %s\n", ctx->saHpiRdrEntityPath));
-    // Possible buffer overflow here?
     ctx->saHpiRdrEntityPath_len = len;
 
     ctx->saHpiRdr_len = child_oid_len*sizeof(oid);
@@ -309,7 +330,7 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
   
   return AGENT_ERR_NULL_DATA;
 }
-
+/*
 int
 send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx) {
 
@@ -381,6 +402,7 @@ send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx) {
   DEBUGMSGTL((AGENT,"--- send_saHpiRdrTable_notification: Exit.\n"));
   return 0;
 }
+
 void
 make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list, 
 	      netsnmp_index *index,
@@ -413,51 +435,8 @@ make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list,
 			
   
 }
-
-
-/************************************************************
- * keep binary tree to find context by name
- */
-//static int      saHpiRdrTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- *
- * IBM-KR: We only need to modify this code if we want to change the
- * order of comparing the indexes.
- */
-/*
-static int
-saHpiRdrTable_cmp(const void *lhs, const void *rhs)
-{
-
-    saHpiRdrTable_context *context_l = (saHpiRdrTable_context *) lhs;
-    saHpiRdrTable_context *context_r = (saHpiRdrTable_context *) rhs;
-   
-    int             rc;
-    DEBUGMSGTL((AGENT,"saHpiRdrTable_cmp\n"));
-    if (context_l->saHpiResourceID < context_r->saHpiResourceID) 
-      return -1;
-
-    rc = (context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0 : 1;
-
-    if (rc!=0)
-      return 1;
-
-    if (context_l->saHpiRdrRecordId < context_r->saHpiRdrRecordId)
-      return -1;
-    rc = (context_l->saHpiRdrRecordId == context_r->saHpiRdrRecordId) ? 0 : 1;
-
-    if (rc!=0)
-      return 1;
-
-    if (context_l->saHpiRdrType < context_r->saHpiRdrType)
-      return -1;
-    return (context_l->saHpiRdrType == context_r->saHpiRdrType) ? 0 : 1;
-
-}
 */
+
 /*
  * the *_extract_index routine
  */
@@ -468,6 +447,7 @@ saHpiRdrTable_extract_index(saHpiRdrTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
+  netsnmp_variable_list var_saHpiDomainID;
     netsnmp_variable_list var_saHpiResourceID;
     netsnmp_variable_list var_saHpiRdrRecordId;
     netsnmp_variable_list var_saHpiRdrType;
@@ -488,6 +468,11 @@ saHpiRdrTable_extract_index(saHpiRdrTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
+
+    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
+    var_saHpiDomainID.type = ASN_UNSIGNED;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
     memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
     var_saHpiResourceID.type = ASN_UNSIGNED;
     var_saHpiResourceID.next_variable = &var_saHpiRdrRecordId;
@@ -503,23 +488,21 @@ saHpiRdrTable_extract_index(saHpiRdrTable_context * ctx,
     /*
      * parse the oid into the individual components
      */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiResourceID);
+    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
-         */
+         */      
       ctx->saHpiResourceID = *var_saHpiResourceID.val.integer;
-        ctx->saHpiRdrRecordId = *var_saHpiRdrRecordId.val.integer;
-
-        ctx->saHpiRdrType = *var_saHpiRdrType.val.integer;
-
+      ctx->saHpiRdrRecordId = *var_saHpiRdrRecordId.val.integer;      
+      ctx->saHpiRdrType = *var_saHpiRdrType.val.integer;
        
     }
 
     /*
      * parsing may have allocated memory. free it.
      */
-    snmp_reset_var_buffers(&var_saHpiRdrRecordId);
+    snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }
@@ -604,6 +587,7 @@ initialize_table_saHpiRdrTable(void)
         /** index: saHpiRdrRecordId */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiRdrType */
     netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
 
@@ -617,13 +601,7 @@ initialize_table_saHpiRdrTable(void)
     cb.container = netsnmp_container_find("saHpiRdrTable_primary:"
                                           "saHpiRdrTable:"
                                           "table_container");
-    /*
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiRdrTable_secondary:"
-                                 "saHpiRdrTable:" "table_container"));
-     cb.container->next->compare = saHpiRdrTable_cmp;
-    */
+   
     cb.create_row = (UserRowMethod *) saHpiRdrTable_create_row;
 
       

@@ -356,7 +356,7 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
     }
 
  // Notify RPT table that we are active.
-    update_clear_event(rpt_entry->DomainId,
+    update_event_status_flag(rpt_entry->DomainId,
 		       rpt_entry->ResourceId,
 		       entry_id,
 		       SNMP_ROW_ACTIVE);
@@ -1019,7 +1019,7 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 			 row_ctx->saHpiEventIndex);
 
 	  // Update our RPT table
-	  update_clear_event(row_ctx->domain_id,
+	  update_event_status_flag(row_ctx->domain_id,
 			     row_ctx->resource_id,
 			     row_ctx->saHpiEventIndex,
 			     SNMP_ROW_NOTINSERVICE);
