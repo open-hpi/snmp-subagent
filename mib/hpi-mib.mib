@@ -3689,7 +3689,7 @@ saHpiRdrEntry OBJECT-TYPE
         INDEX   { 
 		saHpiDomainId, 
 		saHpiResourceId, 
-		saHpiRdrRecordId, 
+		saHpiEntryId, 
 		saHpiRdrType 
 	}
 
@@ -3698,7 +3698,7 @@ saHpiRdrEntry OBJECT-TYPE
 SaHpiRdrEntry ::= SEQUENCE {
 
 -- IBMLR: Can this be replaced with saHpiRdrEntryId?
-	saHpiRdrRecordId	Unsigned32,
+	--saHpiRdrRecordId	Unsigned32,
 	saHpiRdrType		INTEGER,
 	saHpiRdrEntityPath	OCTET STRING,
 	
@@ -3713,12 +3713,12 @@ SaHpiRdrEntry ::= SEQUENCE {
 	saHpiRdrIdString	OCTET STRING
 	}
 
-saHpiRdrRecordId OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      not-accessible
-        STATUS          current
-        DESCRIPTION     "Record Id for the RDR entry."
-        ::= {saHpiRdrEntry 1}
+--saHpiRdrRecordId OBJECT-TYPE
+--        SYNTAX          Unsigned32
+--        MAX-ACCESS      not-accessible
+--        STATUS          current
+--        DESCRIPTION     "Record Id for the RDR entry."
+--        ::= {saHpiRdrEntry 1}
 
 saHpiRdrType OBJECT-TYPE
         SYNTAX          INTEGER {
