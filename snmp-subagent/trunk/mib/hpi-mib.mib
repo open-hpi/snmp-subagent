@@ -115,6 +115,7 @@ hpi MODULE-IDENTITY
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
 
+
 HpiTimeStamp ::= TEXTUAL-CONVENTION
     	STATUS       current
     	DESCRIPTION
@@ -2895,7 +2896,7 @@ saHpiEventHistorical OBJECT-TYPE
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-eventLog	OBJECT IDENTIFIER ::= {events 4}
+eventLog	OBJECT IDENTIFIER ::= {hpiEvents 2}
 
 saHpiEventLogEntries OBJECT-TYPE
 	SYNTAX		Unsigned32
