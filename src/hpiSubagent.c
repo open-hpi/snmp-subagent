@@ -323,7 +323,7 @@ int build_state_string (SaHpiEventCategoryT category,
    memcpy(str, temp, idx);
    *len = idx;
 
-   free(temp);
+   free(temp); temp = NULL;
    return rc;
 }
 
@@ -368,6 +368,7 @@ int build_state_value (char *str,
   }
   
   free (s);
+  free (delim);
   return rc;
 }
 long
