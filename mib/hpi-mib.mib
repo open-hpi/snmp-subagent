@@ -142,8 +142,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
         "Textual convention for an unsigned 16-bit data, 
     2-byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
-     see typedef unsigned short    SaHpiUint16T;"
+        "Derived from SAI-HPI-B.01.01 spec, section 8.1."
     SYNTAX       INTEGER (0..65535)
 
 Unsigned8 ::= TEXTUAL-CONVENTION
@@ -151,8 +150,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
     DESCRIPTION
         "Textual convention for an unsigned 8-bit data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
-        see typedef unsigned char SaHpiUint8T;"
+        "Derived from SAI-HPI-B.01.01 spec, section 8.1."
     SYNTAX      INTEGER(0..255)
 
 Float64 ::= TEXTUAL-CONVENTION
@@ -212,9 +210,9 @@ SaHpiCapabilities ::= TEXTUAL-CONVENTION
         DESCRIPTION     " 
         This texual definition defines the capabilities of a given 
         resource.
-        One resource may support any number of capabilities using this
-        string (each capability is seperated by a delimeter a 
-	comma ',' or semicolon ';'). 
+	
+	Each capability is seperated by a delimeter a comma 
+	',' or semicolon ';'. 
 
 	There are some additional capabilties that are unique
 	to the table. They explained in more details in the columnar
@@ -663,7 +661,7 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
         "This textual convention defines the enumeration
-type of text value. 
+	type of text value. 
 
         The encoding of the SaHpiText type is defined by this enumeration.
         The following table describes the various encodings:
@@ -700,9 +698,9 @@ type of text value.
         encoded as 8-bit ASCII in the SaHpiText structure passed 
         across the HPI.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
-    REFERENCE
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	REFERENCE
         "Derived from SAI-HPI-B.01.01 spec, pg 166-167."
         SYNTAX          INTEGER {
                                 undefined(0),
@@ -1897,13 +1895,14 @@ saHpiResourceCapabilities OBJECT-TYPE
         SYNTAX          SaHpiCapabilities
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        Resource Capabilities
-        
-        This definition defines the capabilities of a given resource.
-        One resource may support any number of capabilities using this
-        string (each capability is seperated by a delimeter, See 
-	textual-convention for further definition.). 
+        DESCRIPTION     
+	"Resource Capabilities
+	
+        This definition defines the capabilities of a given resource by 
+	using a string(s) delimited by a seperator.  One resource may 
+	support any number of capabilities using this string 
+	(each capability is seperated by a delimeter, See textual-convention
+	for further definition.). 
 
         Because each entry in an RPT will have the 
         RESOURCE string, no value  is not a valid value for the 
@@ -2322,7 +2321,6 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 	saHpiHotSwapIndicator      	INTEGER,
 
 	saHpiHotSwapState          	SaHpiHotSwapState,
-	saHpiHotSwapPreviousState  	SaHpiHotSwapState,
     
 	saHpiHotSwapExtractTimeout  	SaHpiTime,
 
@@ -2354,12 +2352,16 @@ saHpiHotSwapIndicator OBJECT-TYPE
         state of this indicator. 
 
         When retrieving the values, the valid states are either 
-        SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
+		SAHPI_HS_INDICATOR_OFF == off(1)
+	or 
+		SAHPI_HS_INDICATOR_ON == on(2).
         This columnar node will return information, regardless of 
 	what hot swap state the resource is in.
 
         When setting the values,  valid states include
-        SAHPI_HS_INDICATOR_OFF or SAHPI_HS_INDICATOR_ON. 
+		SAHPI_HS_INDICATOR_OFF == off(1)
+	or 
+		SAHPI_HS_INDICATOR_ON == on(2). 
         This function will set the indicator regardless of what hot swap 
         state the resource is in, though it is recommended that this
         function be used only in conjunction with moving the resource to 
@@ -2377,15 +2379,6 @@ saHpiHotSwapState 	OBJECT-TYPE
         DESCRIPTION
 	"Refer to the textual convention for full details."
         ::= { saHpiHotSwapEntry 2 }
-
-saHpiHotSwapPreviousState	OBJECT-TYPE
-        SYNTAX         	SaHpiHotSwapState        
-	MAX-ACCESS  	read-write
-        STATUS      	current
-        DESCRIPTION
-	"The previous hot swap state. Refer to the textual convention
-for full details."
-        ::= { saHpiHotSwapEntry 3 }
 	
 saHpiHotSwapExtractTimeout OBJECT-TYPE
         SYNTAX      SaHpiTime
@@ -2418,7 +2411,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 pages 145,146"
     
-        ::= {saHpiHotSwapEntry 4}
+        ::= { saHpiHotSwapEntry 3 }
 
 saHpiHotSwapActionRequest OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2438,12 +2431,12 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         This columnar node allows the HPI User to invoke an insertion or 
         extraction process via software.
 
-    Note: Enumerated values are increased by one value compared to
-    SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
 
         REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 149."
-        ::= { saHpiHotSwapEntry 5 }
+        ::= { saHpiHotSwapEntry 4 }
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
         SYNTAX      INTEGER {
@@ -2478,31 +2471,39 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 139."
-    ::= { saHpiHotSwapEntry 6 }
+    ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
-    SYNTAX      INTEGER {
+	SYNTAX      INTEGER {
                     undefined(0),
                     setActive(1),
                     setInActive(2)
                 }
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION
         "Depending on the values, the user can:
 
- - use this function to request a resource to return to the ACTIVE state from the EXTRACTION PENDING state in order to reject an extraction request.
-Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources.
+	- use this function to request a resource to return to the ACTIVE
+	 state from the EXTRACTION PENDING state in order to reject an 
+	 extraction request.  Because a resource that supports the simplified 
+	 hot swap model will never transition into INSERTION PENDING or
+	 EXTRACTION PENDING states, this function is not applicable to 
+	 those resources.
 
- - use this function to request a resource to return to the INACTIVE state from the INSERTION PENDING state to abort a hot-swap insertion action.
-Because a resource that supports the simplified hot swap model will never transition into INSERTION PENDING or EXTRACTION PENDING states, this function is not applicable to those resources.
+	- use this function to request a resource to return to the INACTIVE 
+	state from the INSERTION PENDING state to abort a hot-swap insertion 
+	action.  Because a resource that supports the simplified hot swap 
+	model will never transition into INSERTION PENDING or 
+	EXTRACTION PENDING states, this function is not applicable to those 
+	resources.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
 
-    REFERENCE 
+	REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 140-141."
-    ::= { saHpiHotSwapEntry 7 }
+    ::= { saHpiHotSwapEntry 6 }
 
 saHpiHotSwapResetAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2532,31 +2533,42 @@ saHpiHotSwapResetAction OBJECT-TYPE
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
-    ::= { saHpiHotSwapEntry 8 }
+    ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapPowerAction OBJECT-TYPE
-    SYNTAX      INTEGER {
+	SYNTAX      INTEGER {
                     undefined(0),
                     off(1),
                     on(2),
                     cycle(3)
                 }
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION
-        "This function gets the power state of an entity, allowing the HPI User to determine if the entity is currently powered on or off. If a resource manages multiple entities, this function will address the entity which is identified in the RPT entry for the resource.
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION
+	"This function gets the power state of an entity, allowing the HPI User 
+	to determine if the entity is currently powered on or off. If a resource 
+	manages multiple entities, this function will address the entity which is 
+	identified in the RPT entry for the resource.
 
-cycle(3) is a pulsed power operation and is not a valid return for the power state.
+	cycle(3) is a pulsed power operation and is not a valid return for the 
+	power state.
 
-This function controls the hardware power on a FRU entity regardless of what hot-swap state the resource is in. For example, it is legal (and may be desirable) to cycle power on the FRU even while it is in ACTIVE state in order to attempt to clear a fault condition. Similarly, a resource could be instructed to power on a FRU even while it is in INACTIVE state, for example, in order to run off-line diagnostics.
-Not all resources supporting hot swap will necessarily support this function. In particular, resources that use the simplified hot swap model may not have the ability to control FRU power. 
-This function may also be supported for non-FRU entities if power control is available for those entities.
+	This function controls the hardware power on a FRU entity regardless 
+	of what hot-swap state the resource is in. For example, it is legal 
+	(and may be desirable) to cycle power on the FRU even while it is in 
+	ACTIVE state in order to attempt to clear a fault condition. Similarly, 
+	a resource could be instructed to power on a FRU even while it is in 
+	INACTIVE state, for example, in order to run off-line diagnostics.
+	Not all resources supporting hot swap will necessarily support this function. 
+	In particular, resources that use the simplified hot swap model may not have
+	 the ability to control FRU power. This function may also be supported 
+	 for non-FRU entities if power control is available for those entities.
 
 Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+SAI-HPI-B.01.01 spec."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 168-169."
-        ::= { saHpiHotSwapEntry 9 }
+        ::= { saHpiHotSwapEntry 8 }
 	
 saHpiHotSwapRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
@@ -2565,7 +2577,7 @@ saHpiHotSwapRowPointer OBJECT-TYPE
         DESCRIPTION     
 	"OID value points the Entity Entry row, which represents 
 	this hot-swap row."
-        ::= { saHpiHotSwapEntry 10 }
+        ::= { saHpiHotSwapEntry 9 }
 
 
         
@@ -7427,7 +7439,6 @@ saHpiHotSwapGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiHotSwapIndicator,
 		saHpiHotSwapState,
-		saHpiHotSwapPreviousState,
 		saHpiHotSwapExtractTimeout,
 		saHpiHotSwapActionRequest,
 		saHpiHotSwapPolicyCancel,
