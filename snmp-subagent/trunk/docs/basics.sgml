@@ -16,25 +16,176 @@
   <sect1>
     <title>Generation of skeleton code</title>
     <para>
-    
+     In order to implement a new sub-agent, three files are necessary:
+
+	      <itemizedlist mark='opencircle'>
+	 	<listitem>
+		  <para>
+                MIB definition file.
+                  </para>
+		</listitem>
+		<listitem>
+              <para>
+                C header file
+              </para>
+		</listitem>
+		<listitem>
+              <para>
+                C implementation file
+              </para>
+            </listitem>
+          </itemizedlist>
+	The MIB definition file we refer to in this tutorial is the <literal>
+	NET-SNMP-TUTORIAL-MIB.txt</literal>.
+	  
     </para>
     <sect2>
       <title>mib2c</title>
       <para>
-        This document is intended to serve as the developer
-        manual for writting SNMP sub-agents using NetSNMP 5.0.x API. 
+	From the <literal>mib2c</literal> manpage. The  <literal>mib2c</literal> tool is designed 
+	to take a portion  of  the  MIB tree  (as defined by a MIB file) 
+	and generate the template C code necessary to implement the 
+	corresponding  MIB  module.
+	</para>
+	<para>
+       The mib2c tool uses the MIB definition file to produce the
+       two  C  code  files. Thus, mib2c generates a template that
+       you can edit to add logic necessary to obtain  information
+       from  the  operating system or application to complete the
+       module.
+	</para>
+	<para>
+       <literal>MIBNODE</literal> is the top level mib node  you  want  to  generate
+       code for.  You must give mib2c a mib node (e.g., ifTable),
+       not a mib file on the command line.   (this  is  the  most
+       common mistake).
+	</para>
+	<para>
+       The mib2c tool accepts both SMIv1 and SMIv2 MIBs.
+	</para>
+	<para>
+       mib2c  needs  to  be  able  to find and load a MIB file in
+       order to generate C code for the MIB. To enable  mib2c  to
+       find  the  MIB  file, set the MIBS environment variable to
+       include the MIB file you are using.  An example of setting
+       this environment variable is:
+	</para>
+	<para>
+  <literal>MIBS=+NET-SNMP-TUTORIAL-MIB</literal>
+	</para>
+	<para>
+          or
+	</para>
+	<para>
+          <literal>MIBS=ALL</literal>
+	</para>
+	<para>
+       The  first  example ensures that mib2c finds the NET-SNMP-
+       TUTORIAL-MIB mib, in addition to the default MIB  modules.
+       The  default  list of MIB modules is set when the suite is
+       first configured and built and  basically  corresponds  to
+       the  list  of modules that the agent supports.  The second
+       example ensures that mib2c finds all MIBs  in  the  search
+       location  for  MIB  files. The default search location for
+       MIB files is /usr/share/snmp/mibs.  This  search  location
+       can be modified by the <literal>MIBDIRS</literal> environment variable.
+	</para>
+	<para>
+       Both  the  MIB  files to be loaded and the MIB file search
+       location can also be configured  in  the  snmp.conf  file.
+       Please see snmp.conf(5) for more information.
+	</para>
+	<para>
+       The  generated  *.c  and  *.h files will be created in the
+       current working directory.
+
       </para>
     </sect2>
     <sect2>
-      <title>Document Scope</title>
+      <title>Which configuration file?</title>
       <para>
-        This manual covers the entire process of building a SNMP sub-agent
-	using the NetSNMP 5.0.x API. This includes, but is not limited to,
-	and overview of NetSNMP API function calls, NetSNMP interfaces,
-	and usage scenarios. It is a living document, and as such will
-	evolve.
+  Use CONFIGFILE when generating code.   These  files
+              will be searched for first in the current directory
+              and then in  the  /usr/share  directory  (which  is
+              where  the default mib2c configuration files can be
+              found).  Running mib2c without  the  -c  CONFIGFILE
+              option will display a description of the valid val­
+              ues for CONFIGFILE, that is, the  available  config
+              files, including new ones that you might author.
+
+              For example,
+
+              % mib2c ifTable
+
+              will  display a description of the currently avail­
+              able values for CONFIGFILE.
+
+              The following values are supported for CONFIGFILE:
+
+              mib2c.scalar.conf
+              mib2c.int_watch.conf
+              mib2c.iterate.conf
+              mib2c.create-dataset.conf
+              mib2c.array-user.conf
+              mib2c.column_defines.conf
+              mib2c.column_enums.conf
+
+              GENERATING CODE FOR SCALAR OBJECTS:
+
+              If you're writing code for some scalars, run:
+
+                   mib2c -c mib2c.scalar.conf MIBNODE
+
+              If you want to magically "tie" integer variables to
+              integer scalars, use:
+
+              GENERATING CODE FOR TABLES:
+
+              If  your  table  data  is kept somewhere else (e.g.
+              it's in the kernel and not in  the  memory  of  the
+              agent  itself) and you need to "iterate" over it to
+              find  the  right  data  for  the  SNMP  row   being
+              accessed.   See  the agent/mibgroup/mibII/vacm_con­
+              text.c file for an example:
+
+                   mib2c -c mib2c.iterate.conf MIBNODE
+
+              If your table data is kept in the agent (i.e.  it's
+              not  located  in  an external source) and is purely
+              data driven (i.e. you do not need  to  perform  any
+              work  when  a  set  occurs).   See  the  agent/mib­
+              group/examples/data_set.c file for  an  example  of
+              such a table:
+
+                   mib2c -c mib2c.create-dataset.conf MIBNODE
+
+              If  your table data is kept in the agent (i.e. it's
+              not located in an external  source),  and  you  can
+              keep your data sorted by the table index but you do
+              need to perform work when a set occurs:
+
+                   mib2c -c mib2c.array-user.conf MIBNODE
+
+              GENERATING HEADER FILE DEFINITIONS
+
+              To generate just a header with a  define  for  each
+              column number in your table:
+
+                   mib2c -c mib2c.column_defines.conf MIBNODE
+
+              To  generate  just  a header with a define for each
+              enum for any column containing enums:
+
+                   mib2c -c mib2c.column_enums.conf MIBNODE
+        GENERATING CODE FOR THE 4.X LINE OF CODE  (THE
+              OLDER API)
+
+                   mib2c -c mib2c.old-api.conf MIBNODE
+
 
       </para>
+	<programlisting role="C">
+	</programlisting>
     </sect2>
   </sect1>
 </chapter>
