@@ -2677,11 +2677,12 @@ saHpiEventEntryCountTotal OBJECT-TYPE
 	system is restarted this count is reset.  Use this node to 
 	determine table activity.
 
-	saHpiEventEntryCountTotal represents the total of types currently 
-	in the system.  saHpiDomainEventCount represents the subset of 
-	events that are Domain events.  The same relationship exists for 
-	ResourceEvent,  SensorEvent,  SensorEnableChangeEvent, 
-	HotSwapEvent,  WatchdogEvent,  HpiSwEvent,  OemEvent,  UserEvent."
+	saHpiEventEntryCountTotal represents the sum of all events of all 
+	supported types that have occur in the system.  
+	Note saHpiDomainEventCountTotal represents the subset of events that 
+	are Domain events.  The same relationship exists for ResourceEvent,
+	SensorEvent,  SensorEnableChangeEvent, HotSwapEvent, WatchdogEvent,
+	HpiSwEvent,  OemEvent,  UserEvent."
         ::= {events 1}
 
 
