@@ -223,7 +223,7 @@ set_logstate(saHpiSystemEventLogTable_context *ctx) {
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
-    
+    DEBUGMSGTL((AGENT,"Calling 'saHpiEventLogStateSet'  with %d\n", enable));
     rc = saHpiEventLogStateSet(session_id,
 			       ctx->resource_id,
 			       enable);
