@@ -483,11 +483,14 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	   */
 	  ctx->saHpiEventSensorOptionalData = sensor.OptionalDataPresent;
 	  reading = sensor.TriggerReading;
+	  /*
+	   * IBM-KR: Perhaps turn this in an enumerated integer type?
+	   */
 	  ctx->saHpiEventSensorTriggerReadingType = reading.ValuesPresent;
 
 	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
 	    {
-	      ctx->saHpiEventSensorTriggerReadingRaw = reading.Raw;	//IBM-KR:htonl (reading.Raw);
+	      ctx->saHpiEventSensorTriggerReadingRaw = reading.Raw;
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 	    {
@@ -524,14 +527,21 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE)
 	    {
-	      ctx->saHpiEventSensorTriggerReadingEventState[0] =
-		reading.EventStatus.SensorStatus;
-	      reading.EventStatus.SensorStatus =
-		htons (reading.EventStatus.EventStatus);
-	      memcpy (ctx->saHpiEventSensorTriggerReadingEventState + 1,
-		      &reading.EventStatus.EventStatus, 2);
-	      ctx->saHpiEventSensorTriggerReadingEventState_len =
-		EVENT_TRIGGER_READING_EVENT_STATE_MAX;
+	      /* 
+	       * Put SensorStatus information in the flag.
+	       */
+	      ctx->saHpiEventSensorTriggerThresholdEventStateFlag =
+		reading.EventStatus.SensorStatus+1;
+
+
+	      /*
+	       * Generate a string representation of the state
+	       */
+	      build_state_string(sensor.EventCategory, 
+				 reading.EventStatus.SensorStatus,
+				 (char *)&ctx->saHpiEventSensorTriggerReadingEventState,
+				 &ctx->saHpiEventSensorTriggerReadingEventState_len,
+				 EVENT_SENSOR_STATE_MAX);
 	    }
 
 
@@ -577,15 +587,22 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE)
 	    {
-	      ctx->saHpiEventSensorTriggerThresholdEventState[0] =
-		reading.EventStatus.SensorStatus;
-	      reading.EventStatus.SensorStatus =
-		htons (reading.EventStatus.EventStatus);
-	      memcpy (ctx->saHpiEventSensorTriggerThresholdEventState + 1,
-		      &reading.EventStatus.EventStatus, 2);
-	      ctx->saHpiEventSensorTriggerThresholdEventState_len =
-		EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX;
 
+	      /* 
+	       * Put SensorStatus information in the flag.
+	       */
+	      ctx->saHpiEventSensorTriggerThresholdEventStateFlag =
+		reading.EventStatus.SensorStatus+1;
+
+
+	      /*
+	       * Generate a string representation of the state
+	       */
+	      build_state_string(sensor.EventCategory, 
+				 reading.EventStatus.SensorStatus,
+				 (char *)&ctx->saHpiEventSensorTriggerThresholdEventState,
+				 &ctx->saHpiEventSensorTriggerThresholdEventState_len,
+				 EVENT_SENSOR_STATE_MAX);
 	    }
 
 	  /*
@@ -878,7 +895,7 @@ saHpiEventTable_row_copy (saHpiEventTable_context * dst,
     }
   dst->index.len = src->index.len;
 
-   dst->saHpiEventIndex = src->saHpiEventIndex;
+     dst->saHpiEventIndex = src->saHpiEventIndex;
 
     dst->saHpiEventType = src->saHpiEventType;
 
@@ -915,6 +932,9 @@ saHpiEventTable_row_copy (saHpiEventTable_context * dst,
     dst->saHpiEventSensorTriggerReadingInterpreted_len =
         src->saHpiEventSensorTriggerReadingInterpreted_len;
 
+    dst->saHpiEventSensorTriggerReadingEventStateFlag =
+        src->saHpiEventSensorTriggerReadingEventStateFlag;
+
     memcpy(dst->saHpiEventSensorTriggerReadingEventState,
            src->saHpiEventSensorTriggerReadingEventState,
            src->saHpiEventSensorTriggerReadingEventState_len);
@@ -935,6 +955,9 @@ saHpiEventTable_row_copy (saHpiEventTable_context * dst,
            src->saHpiEventSensorTriggerThresholdInterpreted_len);
     dst->saHpiEventSensorTriggerThresholdInterpreted_len =
         src->saHpiEventSensorTriggerThresholdInterpreted_len;
+
+    dst->saHpiEventSensorTriggerThresholdEventStateFlag =
+        src->saHpiEventSensorTriggerThresholdEventStateFlag;
 
     memcpy(dst->saHpiEventSensorTriggerThresholdEventState,
            src->saHpiEventSensorTriggerThresholdEventState,
@@ -1203,11 +1226,13 @@ saHpiEventTable_set_reserve1 (netsnmp_request_group * rg)
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGRAW:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETEDTYPE:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETED:
+	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATEFLAG:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATE:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDTYPE:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDRAW:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETED:
+	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATEFLAG:
 	case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATE:
 	case COLUMN_SAHPIEVENTSENSORPREVIOUSSTATE:
 	case COLUMN_SAHPIEVENTSENSOROEM:
@@ -1651,6 +1676,15 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 				saHpiEventSensorTriggerReadingInterpreted_len);
       break;
 
+    case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATEFLAG:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiEventSensorTriggerReadingEventStateFlag,
+                                 sizeof(context->
+                                        saHpiEventSensorTriggerReadingEventStateFlag));
+        break;
+
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATE:
 	    /** OCTETSTR = ASN_OCTET_STR */
       snmp_set_var_typed_value (var, ASN_OCTET_STR,
@@ -1695,6 +1729,15 @@ saHpiEventTable_get_value (netsnmp_request_info * request,
 				context->
 				saHpiEventSensorTriggerThresholdInterpreted_len);
       break;
+
+    case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATEFLAG:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiEventSensorTriggerThresholdEventStateFlag,
+                                 sizeof(context->
+                                        saHpiEventSensorTriggerThresholdEventStateFlag));
+        break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATE:
 	    /** OCTETSTR = ASN_OCTET_STR */
