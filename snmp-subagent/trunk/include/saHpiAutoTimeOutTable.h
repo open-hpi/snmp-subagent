@@ -122,6 +122,15 @@ saHpiAutoTimeOutTable_context * saHpiAutoTimeOutTable_create_row( netsnmp_index*
 saHpiAutoTimeOutTable_context * saHpiAutoTimeOutTable_get( const char *name, int len );
 #endif
 
+//*******************************************************
+//*******************************************************
+// saHpiAutoTimeoutTable support functions	 
+//*******************************************************
+//*******************************************************
+#define AUTO_TIME_OUT_INDEX_LEN 1
+int populate_auto_time_out(void);
+
+
 #ifdef __cplusplus
 };
 #endif
