@@ -143,7 +143,7 @@ delete_watchdog(SaHpiDomainIdT domain_id,
   index_oid[0] = num;
     // Possible more indexes?
   index.oids = (oid *)&index_oid;
-
+  index.len = 1;
   ctx = CONTAINER_FIND(cb.container, &index);
 
   if (ctx) {
