@@ -47,6 +47,18 @@ if test "x$HPI_LIBS" = "x"; then
 ])
 fi
 
+# uncomment the section below when libopenhpiutils
+# has its own pkgconfig file 'openhpiutils.pc'
+# HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
+# if test "x$HPIUTILS_LIBS" = "x"; then
+#     AC_MSG_ERROR([
+# *** OpenHpiUtils pkgconfig file wasn't found
+# *** we can't determine proper build flags without it
+# *** please check your installation
+# ])
+# fi
+
+
 # Checks for libraries
 # FIXME: Replace `main' with a function in `-lopenhpi':
 AC_CHECK_LIB([openhpi], [saHpiInitialize], 
@@ -56,6 +68,17 @@ AC_CHECK_LIB([openhpi], [saHpiInitialize],
         HPI_LIBS=`pkg-config --libs openhpi`
     ],
     [OH_CHECK_FAIL(libopenhpi,openhpi-devel)])
+    
+AC_CHECK_LIB([openhpiutils], [build_reading_strings], 
+    [
+        have_hpiutils=yes
+# uncomment the 2 lines below when openhpiutils
+# has its own pkgconfig file 'openhpiutils.pc'
+#        HPIUTILS_FLAGS=`pkg-config --cflags openhpiutils`
+#        HPIUTILS_LIBS=`pkg-config --libs openhpiutils`
+    ],
+    [OH_CHECK_FAIL(libopenhpiutils,openhpiutils-devel)])
+
 
 OH_CHECK_NETSNMP
 
@@ -104,12 +127,12 @@ CC_WARNINGS="-Wall -Wmissing-prototypes \
 	-Wcast-qual -Wcast-align "
 #	-Werror"
 
-CFLAGS="$CFLAGS $GLIB_CFLAGS $SNMPFLAGS $HPI_FLAGS $CC_WARNINGS"
+CFLAGS="$CFLAGS $GLIB_CFLAGS $SNMPFLAGS $HPI_FLAGS $HPIUTILS_FLAGS $CC_WARNINGS"
 if test "x$THREAD_SAFE" = "xyes" ; then
         CFLAGS="$CFLAGS -D_GNU_SOURCE -D_REENTRANT -fexceptions"
 fi
 
-LIBS="$LIBS $SNMPALIBS $HPI_LIBS -lm"
+LIBS="$LIBS $SNMPALIBS $HPI_LIBS $HPIUTILS_LIBS -lm"
 if test "x$THREAD_SAFE" = "xyes" ; then
         LIBS="$LIBS -lpthread"
 fi
