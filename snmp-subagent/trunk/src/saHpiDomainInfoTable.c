@@ -77,70 +77,95 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 		snmp_log (LOG_ERR, "Not enough memory for a RPT row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}	
-			
 
 	/** SaHpiDomainId = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainId;
+    domain_info_context->saHpiDomainId;
 
-        /** BITS = ASN_OCTET_STR */
-            domain_info_context->saHpiDomainCapabilities[65535];
-            domain_info_context->saHpiDomainCapabilities_len;
+    /** BITS = ASN_OCTET_STR */
+    memset(saHpiDomainCapabilities, 0, sizeof(saHpiDomainCapabilities));
+    if(domain_info.DomainCapabilities == (SaHpiDomainCapabilitiesT)0X00000001) {
+    	memcpy(domain_info_context->saHpiDomainCapabilities,
+    		"SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY",
+    		sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");
+     	domain_info_context->saHpiDomainCapabilities_len = 
+    		sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");   		
+    else {
+    	domain_info_context->saHpiDomainCapabilities_len = 0;
+    }
 
-        /** TruthValue = ASN_INTEGER */
-            domain_info_context->saHpiDomainIsPeer;
+    /** TruthValue = ASN_INTEGER */
+    domain_info_context->saHpiDomainIsPeer =
+    	(domain_info.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-        /** SaHpiTextType = ASN_INTEGER */
-            domain_info_context->saHpiDomainTagTextType;
+    /** SaHpiTextType = ASN_INTEGER */
+    domain_info_context->saHpiDomainTagTextType =
+    	domain_info.DomainTag.DataType;
 
-        /** SaHpiTextLanguage = ASN_INTEGER */
-            domain_info_context->saHpiDomainTagTextLanguage;
+   	/** SaHpiTextLanguage = ASN_INTEGER */
+    domain_info_context->saHpiDomainTagTextLanguage =
+    	domain_infoDomainTag.Language;
 
-        /** SaHpiText = ASN_OCTET_STR */
-            domain_info_context->saHpiDomainTag[65535];
-            domain_info_context->saHpiDomainTag_len;
+    /** SaHpiText = ASN_OCTET_STR */
+	memcpy(domain_info_context->saHpiDomainTag, 
+		domain_info.DomainInfo.Data,
+		domain_info.DomainInfo.DataLength);
+    domain_info_context->saHpiDomainTag_len =
+    	domain_info.DomainInfo.DataLength;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainReferenceUpdateCount;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainReferenceUpdateCount =
+    	domain_info.DrtUpdateCount;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            domain_info_context->saHpiDomainReferenceUpdateTimestamp;
+    /** SaHpiTime = ASN_COUNTER64 */
+    domain_info_context->saHpiDomainReferenceUpdateTimestamp =
+    	domain_info.DrtUpdateTimestamp;
+    	
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainResourcePresenceUpdateCount =
+    	domain_info.RptUpdateCount;
+    	
+    /** SaHpiTime = ASN_COUNTER64 */
+    domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp =
+    	domain_info.RptUpdateTimestamp;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainResourcePresenceUpdateCount;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainAlarmUpdateCount =
+    	domain_info.DatUpdateCount.
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp;
+    /** SaHpiTime = ASN_COUNTER64 */
+    domain_info_context->saHpiDomainAlarmUpdateTimestamp =
+    	domain_info.DatUpdateTimestamp;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainAlarmUpdateCount;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainActiveAlarms =
+    	domain_info.ActiveAlarms;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-           domain_info_context->saHpiDomainAlarmUpdateTimestamp;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainCriticalAlarms =
+    	domain_info.CriticalAlarms;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainActiveAlarms;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainMajorAlarms = 
+    	domain_info.MajorAlarms;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainCriticalAlarms;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainMinorAlarms =
+    	domain_info.MinorAlarms;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainMajorAlarms;
+    /** UNSIGNED32 = ASN_UNSIGNED */
+    domain_info_context->saHpiDomainAlarmUserLimit =
+    	domain_info.DatUserAlarmLimit;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainMinorAlarms;
+    /** TruthValue = ASN_INTEGER */
+    domain_info_context->saHpiDomainAlarmOverflow =
+    	(domain_infoDatOverflow == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            domain_info_context->saHpiDomainAlarmUserLimit;
-
-        /** TruthValue = ASN_INTEGER */
-            domain_info_context->saHpiDomainAlarmOverflow;
-
-        /** SaHpiGuid = ASN_OCTET_STR */
-            domain_info_context->saHpiDomainGuid[65535];
-            domain_info_context->saHpiDomainGuid_len;
+    /** SaHpiGuid = ASN_OCTET_STR */
+    /* typedef SaHpiUint8T    SaHpiGuidT[16]; */
+	memcpy(domain_info_context->saHpiDomainGuid, 
+		domain_info.Guid,
+		16);
+    domain_info_context->saHpiDomainGuid_len = 16;
 	
 	CONTAINER_INSERT (cb.container, rpt_context);
 	
