@@ -1,0 +1,72 @@
+<!-- ...................................................................... -->
+<!-- $Id$ ................................................ -->
+<!-- 
+        This material may be distributed only subject to the terms and 
+        conditions set forth in the Open Publication License, v1.0 or later 
+        (the latest version is currently available at 
+        http://www.opencontent.org/openpub/).  Distribution of substantively 
+        modified version of this document is prohibited without the explicit 
+        permission of the copyright holder.
+
+        Other company, product, or service names may be trademarks or service 
+        marks of others.
+-->
+<chapter>
+  <title>Introduction</title>
+  <sect1>
+    <title>The Basics</title>
+    <para>
+    
+    </para>
+    <sect2>
+      <title>Purpose of this Document</title>
+      <para>
+        This document is intended to serve as the developer
+        manual for writting SNMP sub-agents using NetSNMP 5.0.x API. 
+      </para>
+    </sect2>
+    <sect2>
+      <title>Document Scope</title>
+      <para>
+        This manual covers the entire process of building a SNMP sub-agent
+	using the NetSNMP 5.0.x API. This includes, but is not limited to,
+	and overview of NetSNMP API function calls, NetSNMP interfaces,
+	and usage scenarios. It is a living document, and as such will
+	evolve.
+
+	<!--
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/set-actions.jpg">
+        </imageobject>
+      </mediaobject>
+	-->
+      </para>
+    </sect2>
+    <sect2>
+      <title>Terminology</title>
+      <para>
+        <informaltable frame="all">
+          <tgroup cols="2">
+            <thead>
+              <row>
+                <entry>Acronym</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>HPI</entry>
+                <entry>Hardware Platform Interface</entry>
+              </row>
+              <row>
+                <entry>Sub-agent</entry>
+                <entry>The SNMP backend.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </para>
+    </sect2>
+  </sect1>
+</chapter>
