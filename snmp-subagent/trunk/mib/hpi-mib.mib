@@ -1947,8 +1947,8 @@ saHpiResourceCapabilities OBJECT-TYPE
         Indicates that a resource data record (RDR) repository is supplied
         by the resource. Since the existence of an RDR is mandatory for all
         management instruments, this capability must be asserted if the 
-        resource contains any sensors, controls, watchdog timers, or inventory
-        data repositories.         
+        resource contains any annunciators, sensors, controls, watchdog timers
+	, or inventory data repositories.         
         
         SENSOR
 	
