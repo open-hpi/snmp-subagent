@@ -5259,7 +5259,7 @@ saHpiSensorReadingNormalMinTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining current sensor readings."
-        ::= {hpiSensor 7}
+        ::= {hpiSensor 6}
 
 saHpiSensorReadingNormalMinEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorReadingNormalMinEntry
@@ -5460,7 +5460,7 @@ saHpiSensorThdLowCriticalTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "A table definining lower critical threshold values for
 	sensor that supports raw or interpreted values."
-        ::= {hpiSensor 8}
+        ::= {hpiSensor 7}
 
 saHpiSensorThdLowCriticalEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdLowCriticalEntry
@@ -5589,7 +5589,7 @@ saHpiSensorThdLowMajorTable OBJECT-TYPE
         DESCRIPTION     "A table definining severely degraded status at the
 	lower end of critical threshold values for sensor that supports raw or 
 	interpreted values."
-        ::= {hpiSensor 9}
+        ::= {hpiSensor 8}
 
 saHpiSensorThdLowMajorEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdLowMajorEntry
@@ -5717,7 +5717,7 @@ saHpiSensorThdLowMinorTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "A table definining lower minor threshold values for a sensor 
 	that supports raw or interpreted values."
-        ::= {hpiSensor 10}
+        ::= {hpiSensor 9}
 
 saHpiSensorThdLowMinorEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdLowMinorEntry
@@ -5849,7 +5849,7 @@ saHpiSensorThdUpCriticalTable OBJECT-TYPE
         DESCRIPTION     "A table definining  catastrophic status at the
 	upper end of critical threshold values for sensor that supports raw or 
 	interpreted values."
-        ::= {hpiSensor 11}
+        ::= {hpiSensor 10}
 
 saHpiSensorThdUpCriticalEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdUpCriticalEntry
@@ -5980,7 +5980,7 @@ saHpiSensorThdUpMajorTable OBJECT-TYPE
         DESCRIPTION     "A table definining severely degraded status at the
 	upper end of critical threshold values for sensor that supports raw or 
 	interpreted values."
-        ::= {hpiSensor 12}
+        ::= {hpiSensor 11}
 
 saHpiSensorThdUpMajorEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdUpMajorEntry
@@ -6111,7 +6111,7 @@ saHpiSensorThdUpMinorTable OBJECT-TYPE
         DESCRIPTION     "A table definining  degraded status at the
 	upper end of critical threshold values for sensor that supports raw or 
 	interpreted values."
-        ::= {hpiSensor 13}
+        ::= {hpiSensor 12}
 
 saHpiSensorThdUpMinorEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdUpMinorEntry
@@ -6245,7 +6245,7 @@ saHpiSensorThdPosHysteresisTable OBJECT-TYPE
         DESCRIPTION     "A table definining hysteresis status at the
 	positive range over a range which a change is accepted in a 
 	sensor that supports raw or interpreted values."
-        ::= {hpiSensor 14}
+        ::= {hpiSensor 13}
 
 saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdPosHysteresisEntry
@@ -6374,7 +6374,7 @@ saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         DESCRIPTION     "A table definining hysteresis values at the
 	negative range over a range which a change is accepted in a 
 	sensor that supports raw or interpreted values."
-        ::= {hpiSensor 15}
+        ::= {hpiSensor 14}
 
 saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
 	SYNTAX		SaHpiSensorThdNegHysteresisEntry
