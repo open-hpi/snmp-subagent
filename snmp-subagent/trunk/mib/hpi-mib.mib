@@ -4149,7 +4149,7 @@ saHpiCtrlState OBJECT-TYPE
 	::= {saHpiCtrlEntry 5}
 
 saHpiCtrlAttributes	OBJECT-TYPE
-	SYNTAX		OCTET STRING(SIZE(4|12|260|269))
+	SYNTAX		OCTET STRING(SIZE(4|12|262|270))
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"
@@ -4171,12 +4171,15 @@ saHpiCtrlAttributes	OBJECT-TYPE
 		  octet 4 	- encoding. Consult saHpiCtrlTextType for
 				  values.
 
-		  octet 5-n	- Text to display (where max(n) is 260).
+		  octet 5	- line number.
+		  octet 6	- length of data.
+		  octet 7-n	- data to display (where max(n) is 262).
 
 	oem	- An oem control is represented as follows:
 		 octet 1-4	- manufacturer ID in network byte order.
 		 octets 5-14	- configuration data.
-		 octets 14-n	- default state (where max(n) is 269).
+		 octet 15	- body length.
+		 octets 14-n	- default state (where max(n) is 270).
 	" 
 	::= {saHpiCtrlEntry 6}
 saHpiCtrlOem OBJECT-TYPE
