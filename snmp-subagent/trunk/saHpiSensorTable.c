@@ -173,6 +173,16 @@ populate_sensor(SaHpiSensorRecT *sensor,
   return rc;
 }
 
+int
+delete_sensor(SaHpiDomainIdT domain_id,
+	      SaHpiResourceIdT resource_id,
+	      SaHpiSensorNumT sensor_num) {
+
+   saHpiSensorTable_context *ctx;
+   netsnmp_index index;
+
+
+}
 
 int  
 saHpiSensorTable_modify_context(
@@ -698,13 +708,13 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 /************************************************************
  * keep binary tree to find context by name
  */
-//static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
+static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
-/*
+
 static int
 saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 {
@@ -713,6 +723,21 @@ saHpiSensorTable_cmp(const void *lhs, const void *rhs)
     saHpiSensorTable_context *context_r =
         (saHpiSensorTable_context *) rhs;
 
+    int rc;
+    if (context_l->domain_id < context_r->domain_id)
+          return -1;
+     rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
+
+     if (rc != 0)
+		return 1;
+
+     if (context_l->resource_id < context_r->resource_id)
+		return -1;
+
+     rc = (context_l->resource_id == context_r->resource_id) ? 0: 1;
+
+     if (rc != 0)
+		return 1;
 
     if (context_l->saHpiSensorIndex < context_r->saHpiSensorIndex) 
       return -1;
@@ -721,7 +746,7 @@ saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 
 }
 
-*/
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -1348,14 +1373,12 @@ initialize_table_saHpiSensorTable(void)
                                           "saHpiSensorTable:"
                                           "table_container");
     /*
-#ifdef saHpiSensorTable_IDX2
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find
                                 ("saHpiSensorTable_secondary:"
                                  "saHpiSensorTable:" "table_container"));
+				 */
     cb.container->next->compare = saHpiSensorTable_cmp;
-#endif
-    */
 
     cb.can_set = 1;
 
