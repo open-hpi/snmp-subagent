@@ -5558,6 +5558,195 @@ saHpiCtrlTextRDR OBJECT-TYPE
 	"Pointer to RDR for this Control Resource Data Record."
         ::= {saHpiCtrlTextEntry 14}
 
+saHpiCtrlOemEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"The number of OEM control records in the system."
+        ::= {hpiControl 12}
+
+saHpiCtrlOemTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlOemEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     
+	"A table of OEM Control Resource Data Records and its states."
+        ::= {hpiControl 13}
+                
+
+saHpiCtrlOemEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlOemEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+    "Definition of the OEM control resource data record and its states table."
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
+        ::= {saHpiCtrlOemTable 1}
+
+
+SaHpiCtrlOemEntry ::= SEQUENCE {
+        saHpiCtrlOemOutputType			SaHpiCtrlOutputType,
+
+        saHpiCtrlOemMode     			SaHpiCtrlMode,        
+
+        saHpiCtrlOemIsReadOnly 			TruthValue,
+        saHpiCtrlOemIsWriteOnly			TruthValue,
+
+		saHpiCtrlOemManufacturerId		SaHpiManufacturerId,
+		saHpiCtrlOemDefaultConfigData	OCTET STRING,
+
+		saHpiCtrlOemDefaultMId			SaHpiManufacturerId,
+		saHpiCtrlOemDefaultState		OCTET STRING,
+
+		saHpiCtrlOemState				OCTET STRING,
+
+        saHpiCtrlOemValue              	Unsigned32, 
+   
+        saHpiCtrlOemRDR              	RowPointer
+}
+
+
+saHpiCtrlOemOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Refer to the textual convention for more details on the
+	enumerations.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 1}
+
+
+saHpiCtrlOemMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 2}
+        
+saHpiCtrlOemIsReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 3}
+        
+saHpiCtrlOemIsWriteOnly  OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Indicates if Control is write-only"
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 4}
+
+saHpiCtrlOemManufacturerId          OBJECT-TYPE
+        SYNTAX          SaHpiManufacturerId
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+    "This object represents the OEM's manufacturer ID for
+	this oem control resource. 
+
+	Refer to the textual convention for more details."
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 5}
+
+saHpiCtrlOemDefaultConfigData         OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0..10))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This object represents the OEM control configuration data." 
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 6}
+
+saHpiCtrlOemDefaultMId          OBJECT-TYPE
+        SYNTAX          SaHpiManufacturerId
+        MAX-ACCESS      read-only 
+        STATUS          current
+        DESCRIPTION     
+    "This object represents the OEM's manufacturer ID for
+	this oem control resource. 
+
+	Refer to the textual convention for more details."
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 7}
+
+saHpiCtrlOemDefaultState OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This represents the OEM control state setting."
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 8}
+
+saHpiCtrlOemState OBJECT-TYPE
+        SYNTAX         	OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+        "This object allows to write to the OEM control state setting.
+
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code."
+
+		REFERENCE
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+		::= {saHpiCtrlOemEntry 9}
+
+saHpiCtrlOemValue OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlOemEntry 10}
+
+
+saHpiCtrlOemRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Pointer to RDR for this Control Resource Data Record."
+        ::= {saHpiCtrlOemEntry 11}
 
 
 --/*******************************************************************************
@@ -8397,6 +8586,25 @@ saHpiCtrlTextGroup OBJECT-GROUP
 		"saHpiCtrlText table."
 	::= { hpiMIBCompliances 25}
 
+saHpiCtrlOemGroup OBJECT-GROUP
+	OBJECTS {
+        saHpiCtrlOemOutputType,
+        saHpiCtrlOemMode,
+        saHpiCtrlOemIsReadOnly,
+        saHpiCtrlOemIsWriteOnly,
+		saHpiCtrlOemManufacturerId,
+  		saHpiCtrlOemDefaultConfigData,
+        saHpiCtrlOemDefaultMId,
+        saHpiCtrlOemDefaultState,
+        saHpiCtrlOemState,
+        saHpiCtrlOemValue,
+        saHpiCtrlOemRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"saHpiCtrlOem table."
+	::= { hpiMIBCompliances 26}
+
 saHpiSensorGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorType,
@@ -8715,6 +8923,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiCtrlAnalogGroup,
 		saHpiCtrlStreamGroup,
 		saHpiCtrlTextGroup,
+		saHpiCtrlOemGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
