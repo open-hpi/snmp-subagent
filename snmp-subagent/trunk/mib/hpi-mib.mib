@@ -252,7 +252,11 @@ SaHpiTime ::= TEXTUAL-CONVENTION
 	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
 
 	Maximum time that can be specified as relative :
+	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL
 
+	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
+
+	Maximum time that can be specified as relative :
 	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL"
 
     REFERENCE
@@ -2033,6 +2037,13 @@ saHpiParamControl OBJECT-TYPE
 -- * *****************************************************************************
 -- * ******************************************************************************/
 
+saHpiHotSwapCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of HotSwap entries present in the system." 
+        ::= {hpiEntity 11}
+
 saHpiHotSwapTable OBJECT-TYPE
     SYNTAX SEQUENCE OF SaHpiHotSwapEntry
     MAX-ACCESS not-accessible
@@ -2042,7 +2053,7 @@ saHpiHotSwapTable OBJECT-TYPE
          entities in the managed platform.  The entries in this table are 
          straight from the HPI spec.  This table builds upon information present 
          in the Entity Table."
-    ::= { hpiEntity 11 }
+    ::= { hpiEntity 12 }
 
 
 saHpiHotSwapEntry OBJECT-TYPE
@@ -2060,8 +2071,8 @@ SaHpiHotSwapEntry ::= SEQUENCE {
     saHpiHotSwapIndicator      INTEGER,
 
 
---    saHpiHotSwapState          INTEGER,
---    saHpiHotSwapPreviousState  INTEGER,
+    saHpiHotSwapState          INTEGER,
+    saHpiHotSwapPreviousState  INTEGER,
 
 
     saHpiHotSwapInsertTimeout   SaHpiTime,
@@ -2069,13 +2080,13 @@ SaHpiHotSwapEntry ::= SEQUENCE {
     saHpiHotSwapExtractTimeout  SaHpiTime,
 
 
-    saHpiHotSwapActionRequest  INTEGER,
+    saHpiHotSwapActionRequest  	INTEGER,
     saHpiHotSwapPolicyCancel    INTEGER,
     saHpiHotSwapResourceRequest INTEGER,
 
     saHpiHotSwapResetAction     INTEGER,
     saHpiHotSwapPowerAction     INTEGER,
-    saHpiHotSwapRTP            RowPointer
+    saHpiHotSwapRTP            	RowPointer
     }
 
 
@@ -2111,6 +2122,35 @@ saHpiHotSwapIndicator OBJECT-TYPE
         "Derived from typedef in the SAI-HPI-B.00.90 page 150-151."
     ::= {saHpiHotSwapEntry 1}
 
+saHpiHotSwapState 	OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                undefined(0),
+				inactive(1),
+				insertionPending(2),
+				active(3),
+				extractionPending(4),
+				notPresent(5)
+                        }
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
+	""
+        ::= { saHpiHotSwapEntry 2 }
+
+saHpiHotSwapPreviousState	OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                undefined(0),
+				inactive(1),
+				insertionPending(2),
+				active(3),
+				extractionPending(4),
+				notPresent(5)
+                        }
+        MAX-ACCESS  read-create
+        STATUS      current
+        DESCRIPTION
+	""
+        ::= { saHpiHotSwapEntry 3 }
 
 saHpiHotSwapInsertTimeout OBJECT-TYPE
     SYNTAX      SaHpiTime
@@ -2142,7 +2182,7 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.00.90 pages 141-142"
 
-    ::= {saHpiHotSwapEntry 2}
+    ::= { saHpiHotSwapEntry 4 }
 
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
@@ -2176,7 +2216,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
     
-        ::= {saHpiHotSwapEntry 3}
+        ::= {saHpiHotSwapEntry 5}
 
 
 saHpiHotSwapActionRequest OBJECT-TYPE
@@ -2199,7 +2239,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
 
         REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 149."
-        ::= {saHpiHotSwapEntry 4}
+        ::= {saHpiHotSwapEntry 6}
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
         SYNTAX      INTEGER {
@@ -2231,7 +2271,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 139."
-    ::= {saHpiHotSwapEntry 5}
+    ::= {saHpiHotSwapEntry 7}
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2252,7 +2292,7 @@ Because a resource that supports the simplified hot swap model will never transi
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 140-141."
-    ::= {saHpiHotSwapEntry 6}
+    ::= {saHpiHotSwapEntry 8}
 
 saHpiHotSwapResetAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2273,7 +2313,7 @@ coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be 
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
-    ::= {saHpiHotSwapEntry 7}
+    ::= {saHpiHotSwapEntry 9}
 
 saHpiHotSwapPowerAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2294,13 +2334,13 @@ Not all resources supporting hot swap will necessarily support this function. In
 This function may also be supported for non-FRU entities if power control is available for those entities."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 168-169."
-        ::= {saHpiHotSwapEntry 8}
+        ::= {saHpiHotSwapEntry 10}
 saHpiHotSwapRTP OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "OID for RTP"
-        ::= {saHpiHotSwapEntry 9}
+        ::= {saHpiHotSwapEntry 11}
 
 
         
@@ -4246,23 +4286,24 @@ saHpiCtrlEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the control resource data record and
-	operations to change the state of a control."
+                "Definition of the control resource data record."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlTable 1}
 
 
 SaHpiCtrlEntry ::= SEQUENCE {
-        saHpiCtrlNum            SaHpiInstrumentId,
+        saHpiCtrlNum            Unsigned32,
         saHpiCtrlOutputType     INTEGER,
         saHpiCtrlType           INTEGER,
-        saHpiCtrlMode           INTEGER,        
-        saHpiCtrlReadOnly       TruthValue,      
-        saHpiCtrlWriteOnly      TruthValue,
  
         saHpiCtrlState        OCTET STRING,
         saHpiCtrlData          OCTET STRING,
         
+        saHpiCtrlMode           INTEGER,        
+        saHpiCtrlReadOnly       TruthValue,      
+                                         
+        saHpiCtrlWriteOnly      TruthValue,
+
         saHpiCtrlOem            Unsigned32, 
    
         saHpiCtrlTextType       SaHpiTextType,
@@ -4274,7 +4315,7 @@ SaHpiCtrlEntry ::= SEQUENCE {
 
 
 saHpiCtrlNum OBJECT-TYPE 
-        SYNTAX          SaHpiInstrumentId      
+        SYNTAX          Unsigned32      
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The control number "
