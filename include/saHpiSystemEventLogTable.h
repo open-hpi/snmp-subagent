@@ -230,9 +230,10 @@ extern          "C" {
                                                        *, netsnmp_index *,
                                                        netsnmp_table_request_info
                                                        *);
-  int populate_sel(SaHpiRptEntryT *rpt_entry,
-		   	  oid *DomainID_oid, const size_t DomainID_oid_len,
-			  oid *ResourceID_oid, const size_t ResourceID_oid_len);
+
+  int populate_sel(SaHpiRptEntryT *rpt_entry);
+  //		   	  oid *DomainID_oid, const size_t DomainID_oid_len,
+  //			  oid *ResourceID_oid, const size_t ResourceID_oid_len);
 
 
 		   
@@ -241,15 +242,15 @@ extern          "C" {
   //int
   //set_logstate(saHpiSystemEventLogTable_context *ctx);
 
-int 
-set_SEL_delete(saHpiSystemEventLogTable_context *ctx);
+  int 
+  set_SEL_delete(saHpiSystemEventLogTable_context *ctx);
 
   //int
   //set_timestamp();
 
-int
-delete_SEL_row(SaHpiDomainIdT domain_id,
-	       SaHpiResourceIdT resource_id);
+  int
+  delete_SEL_row(SaHpiDomainIdT domain_id,
+		 SaHpiResourceIdT resource_id);
 
 
 int

@@ -304,9 +304,9 @@ populate_rpt() {
 	   if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
-	     rc = populate_sel(&rpt_entry,
-			       DomainID_oid, DomainID_oid_len,
-			       ResourceID_oid, ResourceID_oid_len);
+	     rc = populate_sel(&rpt_entry);
+	     //DomainID_oid, DomainID_oid_len,
+	     //	       ResourceID_oid, ResourceID_oid_len);
 	   }
 	 } // rc != SA_OK
 	 // Try next one ?
