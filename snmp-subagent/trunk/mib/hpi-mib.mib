@@ -6786,7 +6786,7 @@ saHpiSensorThdLowMajorIsWritable        OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
+        "Defines if sensor threshold information can be written. 
 
         If set to 'false(2)' writting to saHpiSensorThdLowMajorRaw 
         and saHpiSensorThdLowMajorInterpreted will not change the
