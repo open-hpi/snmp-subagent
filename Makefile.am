@@ -59,10 +59,14 @@ ALLSOURCES = $(shell \
 
 includedir=$(base_includedir)/openhpi
 
+# note, strictly speaking we don't need the spec file here, but it makes
+# it nicer to rebuild
 EXTRA_DIST	= $(shell find include -name '*.h') \
-	hpiSubagent.conf mib/hpi-mib.mib
+	hpiSubagent.conf mib/hpi-mib.mib openhpi-subagent.spec
 
-
+install-data-local:
+	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/snmp
+	$(INSTALL_DATA) hpiSubagent.conf $(DESTDIR)$(sysconfdir)/snmp
 
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;

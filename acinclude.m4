@@ -56,7 +56,8 @@ AC_DEFUN(OH_CHECK_NETSNMP,
         have_netsnmp=yes
         SNMPFLAGS=`net-snmp-config --cflags`
         SNMPALIBS=`net-snmp-config --agent-libs`
-        SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=(\S+).*/$1/'`
+        # the following seems to work... thankfully.
+        SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=(\S+).*/\1/'`
         AC_MSG_RESULT(yes)
     ],
     [AC_MSG_RESULT(no.  No SNMP based plugins can be built!)])

@@ -40,8 +40,8 @@ and Sysfs based systems.
 ./configure @ac_configure_args@ --sysconfdir=@SNMPCONFDIR@ \
     --prefix=%{prefix}
 make
-make -C docs/hld pdf-am
-make -C docs/hld openhpi-manual/book1.html
+make -C docs pdf-am
+make -C docs subagent-manual/book1.html
 
 ###################################################
 %install
