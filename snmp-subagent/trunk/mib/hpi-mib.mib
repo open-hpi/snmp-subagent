@@ -2186,7 +2186,7 @@ saHpiEventUserEventData OBJECT-TYPE
 
 saHpiEventDelete OBJECT-TYPE
 	SYNTAX		RowStatus
-	MAX-ACCESS	read-write
+	MAX-ACCESS	write-only
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
@@ -3641,7 +3641,7 @@ saHpiSystemEventLogUserEventData OBJECT-TYPE
 
 saHpiSystemEventLogDelete OBJECT-TYPE
 	SYNTAX		RowStatus
-	MAX-ACCESS	read-write
+	MAX-ACCESS	write-only
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
