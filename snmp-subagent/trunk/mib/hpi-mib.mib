@@ -1316,7 +1316,7 @@ saHpiDomainReferenceIsPeer OBJECT-TYPE
 -- *************************************
         
 
-saHpiAlarmEntryCount OBJECT-TYPE
+saHpiDomainAlarmEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -1328,8 +1328,8 @@ saHpiAlarmEntryCount OBJECT-TYPE
         ::= {hpiEntity 5}
 
 
-saHpiAlarmTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiAlarmEntry
+saHpiDomainAlarmTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiDomainAlarmEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
@@ -1338,54 +1338,54 @@ saHpiAlarmTable OBJECT-TYPE
          are used to address an entity."
         ::= {hpiEntity 6}
         
-saHpiAlarmEntry OBJECT-TYPE
-        SYNTAX          SaHpiAlarmEntry
+saHpiDomainAlarmEntry OBJECT-TYPE
+        SYNTAX          SaHpiDomainAlarmEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         "This table is used to store alarm information."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiAlarmId }
-        ::= {saHpiAlarmTable 1}
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiDomainAlarmId }
+        ::= {saHpiDomainAlarmTable 1}
         
-SaHpiAlarmEntry ::= SEQUENCE {
+SaHpiDomainAlarmEntry ::= SEQUENCE {
 
-        saHpiAlarmId                    SaHpiInstrumentId,    
-        saHpiAlarmTimestamp                  SaHpiTime,  
-        saHpiAlarmSeverity                   INTEGER,  
-        saHpiAlarmAcknowledged               TruthValue,
+        saHpiDomainAlarmId                    SaHpiInstrumentId,    
+        saHpiDomainAlarmTimestamp                  SaHpiTime,  
+        saHpiDomainAlarmSeverity                   INTEGER,  
+        saHpiDomainAlarmAcknowledged               TruthValue,
         
-        saHpiAlarmCondStatusCondType    INTEGER,
-        saHpiAlarmCondEntityPath        OCTET STRING,
-        saHpiAlarmCondSensorNum         Unsigned32, 
-        saHpiAlarmCondEventState        SaHpiEventState,
+        saHpiDomainAlarmCondStatusCondType    INTEGER,
+        saHpiDomainAlarmCondEntityPath        OCTET STRING,
+        saHpiDomainAlarmCondSensorNum         Unsigned32, 
+        saHpiDomainAlarmCondEventState        SaHpiEventState,
           
-        saHpiAlarmCondNameValue         OCTET STRING,
+        saHpiDomainAlarmCondNameValue         OCTET STRING,
                
-        saHpiAlarmCondMid               Unsigned32,
+        saHpiDomainAlarmCondMid               Unsigned32,
         
-        saHpiAlarmCondAlarmaTextType      SaHpiTextType,
-        saHpiAlarmCondAlarmaTextLanguage  SaHpiTextLanguage,
-        saHpiAlarmCondAlarma              SaHpiText,
-        saHpiAlarmDelete                        RowStatus
+        saHpiDomainAlarmCondDomainAlarmaTextType      SaHpiTextType,
+        saHpiDomainAlarmCondDomainAlarmaTextLanguage  SaHpiTextLanguage,
+        saHpiDomainAlarmCondDomainAlarma              SaHpiText,
+        saHpiDomainAlarmDelete                        RowStatus
         }
         
-saHpiAlarmId OBJECT-TYPE 
+saHpiDomainAlarmId OBJECT-TYPE 
         SYNTAX          SaHpiInstrumentId                
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION     "Alarm Id"
+        DESCRIPTION     "DomainAlarm Id"
 
-        ::= {saHpiAlarmEntry 1}
+        ::= {saHpiDomainAlarmEntry 1}
         
-saHpiAlarmTimestamp OBJECT-TYPE
+saHpiDomainAlarmTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Time when alarm was added to the DAT table.
         Refer to SaSaHpiTime for full describption."
-        ::= {saHpiAlarmEntry 2}
+        ::= {saHpiDomainAlarmEntry 2}
 
-saHpiAlarmSeverity OBJECT-TYPE 
+saHpiDomainAlarmSeverity OBJECT-TYPE 
         SYNTAX          INTEGER {
                                 undefined(0),
                                 critical(1),
@@ -1403,9 +1403,9 @@ saHpiAlarmSeverity OBJECT-TYPE
         (Only used with DAT and Annunciator
         functions.  This is not a valid
         severity for events or alarms)" 
-        ::= {saHpiAlarmEntry 3}
+        ::= {saHpiDomainAlarmEntry 3}
         
-saHpiAlarmAcknowledged OBJECT-TYPE
+saHpiDomainAlarmAcknowledged OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-create
         STATUS          current
@@ -1420,29 +1420,29 @@ saHpiAlarmAcknowledged OBJECT-TYPE
         An acknowledged alarm will have the Acknowledged field in the alarm entry   
         set to True.                                                                
                                                                                     
-        Alarms are acknowledged by one of two ways: a single alarm entry by AlarmId 
+        DomainAlarms are acknowledged by one of two ways: a single alarm entry by DomainAlarmId 
         regardless of severity or as a group of alarm entries by Severity           
-        regardless of AlarmId.                                                      
+        regardless of DomainAlarmId.                                                      
                                                                                     
         To acknowledge all alarms contained within the DAT, set the Severity        
-        parameter to allSeverities(256), and set the AlarmId parameter to         
+        parameter to allSeverities(256), and set the DomainAlarmId parameter to         
         SAHPI_ENTRY_UNSPECIFIED.                                                    
                                                                                     
         To acknowledge all alarms of a specific severity contained within the DAT,  
-        set the Severity parameter to the appropriate value, and set the AlarmId    
+        set the Severity parameter to the appropriate value, and set the DomainAlarmId    
         parameter to SAHPI_ENTRY_UNSPECIFIED.                                       
                                                                                     
-        To acknowledge a single alarm entry, set the AlarmId parameter to a value   
-        other than SAHPI_ENTRY_UNSPECIFIED.  The AlarmId must be a valid identifier 
+        To acknowledge a single alarm entry, set the DomainAlarmId parameter to a value   
+        other than SAHPI_ENTRY_UNSPECIFIED.  The DomainAlarmId must be a valid identifier 
         for an alarm entry present in the DAT at the time of the function call.     
                                                                                     
         If an alarm has been previously acknowledged, acknowledging it again has no 
         effect.  However, this is not an error.                                     
                                                                                     
-        If the AlarmId parameter has a value other than SAHPI_ENTRY_UNSPECIFIED,    
+        If the DomainAlarmId parameter has a value other than SAHPI_ENTRY_UNSPECIFIED,    
         the Severity parameter is ignored.                                          
                                                                                     
-        If the AlarmId parameter is passed as SAHPI_ENTRY_UNSPECIFIED, and no       
+        If the DomainAlarmId parameter is passed as SAHPI_ENTRY_UNSPECIFIED, and no       
         alarms are present that meet the requested Severity, this function will     
         have no effect.  However, this is not an error.                             
                                                                                     
@@ -1450,9 +1450,9 @@ saHpiAlarmAcknowledged OBJECT-TYPE
         so using either symbol will have the same effect.  However,                 
         SAHPI_ENTRY_UNSPECIFIED should be used with this function for clarity.      
         "
-        ::= {saHpiAlarmEntry 4}
+        ::= {saHpiDomainAlarmEntry 4}
         
-saHpiAlarmCondStatusCondType OBJECT-TYPE 
+saHpiDomainAlarmCondStatusCondType OBJECT-TYPE 
         SYNTAX          INTEGER {
                                 undefined(0),
                                 sensor(1),
@@ -1464,9 +1464,9 @@ saHpiAlarmCondStatusCondType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Enumeration of status condition type." 
-        ::= {saHpiAlarmEntry 5}   
+        ::= {saHpiDomainAlarmEntry 5}   
 
-saHpiAlarmCondEntityPath OBJECT-TYPE 
+saHpiDomainAlarmCondEntityPath OBJECT-TYPE 
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-create
         STATUS          current
@@ -1493,27 +1493,27 @@ saHpiAlarmCondEntityPath OBJECT-TYPE
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
-        ::= {saHpiAlarmEntry 6}
+        ::= {saHpiDomainAlarmEntry 6}
 
-saHpiAlarmCondSensorNum OBJECT-TYPE 
+saHpiDomainAlarmCondSensorNum OBJECT-TYPE 
         SYNTAX          Unsigned32
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
         "Sensor associated with status Only valid if Type is
          SAHPI_STATUS_COND_TYPE_SENSOR"
-        ::= {saHpiAlarmEntry 7}
+        ::= {saHpiDomainAlarmEntry 7}
         
-saHpiAlarmCondEventState OBJECT-TYPE
+saHpiDomainAlarmCondEventState OBJECT-TYPE
         SYNTAX          SaHpiEventState
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
-        "Sensor event state.  Only valid if saHpiAlarmCondStatusCondType is 
+        "Sensor event state.  Only valid if saHpiDomainAlarmCondStatusCondType is 
         sensor(1)."
-        ::= {saHpiAlarmEntry 8}
+        ::= {saHpiDomainAlarmEntry 8}
         
-saHpiAlarmCondNameValue OBJECT-TYPE 
+saHpiDomainAlarmCondNameValue OBJECT-TYPE 
         SYNTAX          OCTET STRING(SIZE(0..255))
         MAX-ACCESS      read-create
         STATUS          current
@@ -1524,51 +1524,51 @@ saHpiAlarmCondNameValue OBJECT-TYPE
         Specification standardizes the interface between Service 
         Availability(TM) Forum compliant High Availability (HA) 
         middleware and service applications. http://www.saforum.org"
-        ::= {saHpiAlarmEntry 9}
+        ::= {saHpiDomainAlarmEntry 9}
         
-saHpiAlarmCondMid OBJECT-TYPE 
+saHpiDomainAlarmCondMid OBJECT-TYPE 
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
         "Manufacturer Id associated with status condition, 
-        required when saHpiAlarmCondStatusCondType is oem(3)."
-        ::= {saHpiAlarmEntry 10}
+        required when saHpiDomainAlarmCondStatusCondType is oem(3)."
+        ::= {saHpiDomainAlarmEntry 10}
         
-saHpiAlarmCondAlarmaTextType OBJECT-TYPE 
+saHpiDomainAlarmCondDomainAlarmaTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Optional data associated with status 
         condition. For more details, see textual definition"
-        ::= {saHpiAlarmEntry 11}
+        ::= {saHpiDomainAlarmEntry 11}
 
-saHpiAlarmCondAlarmaTextLanguage OBJECT-TYPE
+saHpiDomainAlarmCondDomainAlarmaTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status 
         condition. For more details, see textual definition"
-        ::= {saHpiAlarmEntry 12}
+        ::= {saHpiDomainAlarmEntry 12}
 
-saHpiAlarmCondAlarma      OBJECT-TYPE
+saHpiDomainAlarmCondDomainAlarma      OBJECT-TYPE
         SYNTAX          SaHpiText
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status condition.
-        The type of date is specified by saHpiAlarmCondAlarmaTextType and 
-        saHpiAlarmCondAlarmaTextLanguage."
-        ::= {saHpiAlarmEntry 13}
+        The type of date is specified by saHpiDomainAlarmCondDomainAlarmaTextType and 
+        saHpiDomainAlarmCondDomainAlarmaTextLanguage."
+        ::= {saHpiDomainAlarmEntry 13}
 
-saHpiAlarmDelete OBJECT-TYPE
+saHpiDomainAlarmDelete OBJECT-TYPE
         SYNTAX          RowStatus
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION
         " "
-        ::= {saHpiAlarmEntry 14}
+        ::= {saHpiDomainAlarmEntry 14}
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -3285,7 +3285,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId,
                 saHpiResourceId, 
-                saHpiEventWatchdogNum, 
+                saHpiWatchdogEventNum, 
                 saHpiEventSeverity,
                 saHpiEventHistorical,
                 saHpiWatchdogEventTimestamp
@@ -3293,7 +3293,7 @@ saHpiWatchdogEventEntry OBJECT-TYPE
         ::= {saHpiWatchdogEventTable 1}
 
 SaHpiWatchdogEventEntry ::= SEQUENCE {
-        saHpiEventWatchdogNum                   SaHpiInstrumentId,
+        saHpiWatchdogEventNum                   SaHpiInstrumentId,
         saHpiWatchdogEventTimestamp             SaHpiTimeString,
         saHpiWatchdogEventAction                INTEGER,
         saHpiWatchdogEventPreTimerAction        SaHpiWatchdogPreTimerAction,
@@ -3301,7 +3301,7 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
         saHpiWatchdogEventDelete                RowStatus
         }
         
-saHpiEventWatchdogNum   OBJECT-TYPE
+saHpiWatchdogEventNum   OBJECT-TYPE
     SYNTAX      SaHpiInstrumentId
     MAX-ACCESS  not-accessible
     STATUS      current
@@ -3708,7 +3708,7 @@ saHpiAnnouncementEntry OBJECT-TYPE
         DESCRIPTION     " "
         INDEX   {       saHpiDomainId, 
                         saHpiResourceId, 
-                        saHpiAlarmId, 
+                        saHpiDomainAlarmId, 
                         saHpiEntryId }
         ::= {saHpiAnnouncementTable 1}
 
