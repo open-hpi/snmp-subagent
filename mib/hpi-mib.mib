@@ -173,6 +173,31 @@ Float64 ::= TEXTUAL-CONVENTION
         The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
         sign(1)exponent(11)mantissa(52)."
     SYNTAX      Opaque (SIZE(0..65))
+    
+SaHpiEntityPath ::= TEXTUAL-CONVENTION
+        STATUS          current
+	DESCRIPTION      
+        "Entity Path associated with Announcement.
+	
+        This object converts HPI's saHpiEntityPathT structure 
+        to a canonical string.  This string is 
+	formed by removing the SAHPI_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	If an entity path contains entity types implemented
+	from the reserved ranges, such as ATCA, then if those 
+	types contain SAHPI_ENT_ prefixes they too shall be 
+	removed.
+        
+        Order of significance is inverted to make entity paths 
+        look more like Unix directory structure. It is also assumed 
+        that {ROOT,0} exists implicitly before all of these entries. 
+        
+        For example:
+         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.2"
+        SYNTAX          OCTET STRING(SIZE(0..255))
 
 SaHpiDomainId ::= TEXTUAL-CONVENTION
 	STATUS      current
@@ -1629,7 +1654,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
         saHpiDomainAlarmAcknowledged          	TruthValue,
         
         saHpiDomainAlarmCondStatusCondType    	INTEGER,
-        saHpiDomainAlarmCondEntityPath        	OCTET STRING,
+        saHpiDomainAlarmCondEntityPath        	SaHpiEntityPath,
         saHpiDomainAlarmCondSensorNum         	Unsigned32, 
         saHpiDomainAlarmCondEventState        	SaHpiEventState,
           
@@ -1744,28 +1769,11 @@ saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
         ::= {saHpiDomainAlarmEntry 5}   
 
 saHpiDomainAlarmCondEntityPath OBJECT-TYPE 
-        SYNTAX          OCTET STRING
+        SYNTAX          SaHpiEntityPath
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION     
-        "Entity Path associated with alarm condition.
-	
-        This object converts HPI's saHpiEntityPathT structure 
-        to a canonical string.  This string is 
-	formed by removing the SAHPI_ENT_ prefix from the 
-	HPI types, and creating tuples for the entity types. 
-	
-	If an entity path contains entity types implemented
-	from the reserved ranges, such as ATCA, then if those 
-	types contain SAHPI_ENT_ prefixes they too shall be 
-	removed.
-        
-        Order of significance is inverted to make entity paths 
-        look more like Unix directory structure. It is also assumed 
-        that {ROOT,0} exists implicitly before all of these entries. 
-        
-        For example:
-         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        DESCRIPTION  
+	"See Textual-Convention for details."
         ::= {saHpiDomainAlarmEntry 6}
 
 saHpiDomainAlarmCondSensorNum OBJECT-TYPE 
@@ -1943,7 +1951,7 @@ SaHpiResourceEntry ::= SEQUENCE {
 
         saHpiResourceId                         Unsigned32,
         saHpiResourceEntryId                    SaHpiEntryId,
-        saHpiResourceEntityPath                 OCTET STRING,
+        saHpiResourceEntityPath                 SaHpiEntityPath,
         saHpiResourceCapabilities               SaHpiCapabilities,
         
         saHpiResourceHotSwapCapabilities        SaHpiCapabilities,     
@@ -2004,29 +2012,11 @@ saHpiResourceEntryId OBJECT-TYPE
 	::=   {saHpiResourceEntry 2}
 
 saHpiResourceEntityPath OBJECT-TYPE 
-        SYNTAX          OCTET STRING
+        SYNTAX          SaHpiEntityPath
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "Entity Path associated with Resource.
-	
-        This object converts HPI's saHpiEntityPathT structure 
-        to a canonical string.  This string is 
-	formed by removing the SAHPI_ENT_ prefix from the 
-	HPI types, and creating tuples for the entity types. 
-	
-	If an entity path contains entity types implemented
-	from the reserved ranges, such as ATCA, then if those 
-	types contain SAHPI_ENT_ prefixes they too shall be 
-	removed.
-        
-        Order of significance is inverted to make entity paths 
-        look more like Unix directory structure. It is also assumed 
-        that {ROOT,0} exists implicitly before all of these entries. 
-        
-        For example:
-         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-
+	"See Texual-Convention for details."
 	::=   {saHpiResourceEntry 3 }
 
 
@@ -4056,7 +4046,7 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
         saHpiAnnouncementAcknowledged   TruthValue,
         
         saHpiAnnouncementStatusCondType INTEGER,
-        saHpiAnnouncementEntityPath     OCTET STRING,
+        saHpiAnnouncementEntityPath     SaHpiEntityPath,
         saHpiAnnouncementSensorNum      Unsigned32,
         saHpiAnnouncementEventState     SaHpiEventState,
         saHpiAnnouncementName           OCTET STRING,
@@ -4136,28 +4126,11 @@ saHpiAnnouncementStatusCondType OBJECT-TYPE
 
 
 saHpiAnnouncementEntityPath     OBJECT-TYPE
-        SYNTAX          OCTET STRING
+        SYNTAX          SaHpiEntityPath
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION      
-        "Entity Path associated with Announcement.
-	
-        This object converts HPI's saHpiEntityPathT structure 
-        to a canonical string.  This string is 
-	formed by removing the SAHPI_ENT_ prefix from the 
-	HPI types, and creating tuples for the entity types. 
-	
-	If an entity path contains entity types implemented
-	from the reserved ranges, such as ATCA, then if those 
-	types contain SAHPI_ENT_ prefixes they too shall be 
-	removed.
-        
-        Order of significance is inverted to make entity paths 
-        look more like Unix directory structure. It is also assumed 
-        that {ROOT,0} exists implicitly before all of these entries. 
-        
-        For example:
-         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        DESCRIPTION  
+	"See Textual-Convention for details."
 	::=   {saHpiAnnouncementEntry 7 }
         
 saHpiAnnouncementSensorNum      OBJECT-TYPE
@@ -5775,7 +5748,7 @@ SaHpiAnnouncementEventLogEntry ::= SEQUENCE {
         saHpiAnnouncementEventLogAcknowledged   TruthValue,
         
         saHpiAnnouncementEventLogStatusCondType INTEGER,
-        saHpiAnnouncementEventLogEntityPath     OCTET STRING,
+        saHpiAnnouncementEventLogEntityPath     SaHpiEntityPath,
         saHpiAnnouncementEventLogSensorNum      Unsigned32,
         saHpiAnnouncementEventLogEventState     SaHpiEventState,
         saHpiAnnouncementEventLogName           OCTET STRING,
@@ -5855,28 +5828,11 @@ saHpiAnnouncementEventLogStatusCondType OBJECT-TYPE
 
 
 saHpiAnnouncementEventLogEntityPath     OBJECT-TYPE
-        SYNTAX          OCTET STRING
+        SYNTAX          SaHpiEntityPath
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION      
-        "Entity Path associated with Announcement.
-	
-        This object converts HPI's saHpiEntityPathT structure 
-        to a canonical string.  This string is 
-	formed by removing the SAHPI_ENT_ prefix from the 
-	HPI types, and creating tuples for the entity types. 
-	
-	If an entity path contains entity types implemented
-	from the reserved ranges, such as ATCA, then if those 
-	types contain SAHPI_ENT_ prefixes they too shall be 
-	removed.
-        
-        Order of significance is inverted to make entity paths 
-        look more like Unix directory structure. It is also assumed 
-        that {ROOT,0} exists implicitly before all of these entries. 
-        
-        For example:
-         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        DESCRIPTION  
+	"See Textual-Convention for details."
 	::=   {saHpiAnnouncementEventLogEntry 7 }
         
 saHpiAnnouncementEventLogSensorNum      OBJECT-TYPE
@@ -5999,7 +5955,7 @@ SaHpiRdrEntry ::= SEQUENCE {
         saHpiRdrEntryId         Counter32,
 	saHpiRdrNextEntryId	Counter32,
         saHpiRdrType            INTEGER,
-        saHpiRdrEntityPath      OCTET STRING,
+        saHpiRdrEntityPath      SaHpiEntityPath,
         
         saHpiRdrIsFru	        TruthValue,     
 
@@ -6053,28 +6009,11 @@ saHpiRdrType OBJECT-TYPE
 
 
 saHpiRdrEntityPath OBJECT-TYPE
-        SYNTAX          OCTET STRING
+        SYNTAX          SaHpiEntityPath
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     
-        "Entity Path associated with RDR.
-	
-        This object converts HPI's saHpiEntityPathT structure 
-        to a canonical string.  This string is 
-	formed by removing the SAHPI_ENT_ prefix from the 
-	HPI types, and creating tuples for the entity types. 
-	
-	If an entity path contains entity types implemented
-	from the reserved ranges, such as ATCA, then if those 
-	types contain SAHPI_ENT_ prefixes they too shall be 
-	removed.
-        
-        Order of significance is inverted to make entity paths 
-        look more like Unix directory structure. It is also assumed 
-        that {ROOT,0} exists implicitly before all of these entries. 
-        
-        For example:
-         {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        DESCRIPTION  
+	"See Textual-Convention for details."
 	::=   {saHpiRdrEntry 4 }
 
         
