@@ -161,6 +161,14 @@ saHpiHotSwapTable_context * saHpiHotSwapTable_create_row( netsnmp_index* );
 saHpiHotSwapTable_context * saHpiHotSwapTable_get( const char *name, int len );
 #endif
 
+//*******************************************************
+//*******************************************************
+// saHpiHotsSwapTable support functions	 
+//*******************************************************
+//*******************************************************
+#define HOT_SWAP_INDEX_LEN  2
+int populate_hot_swap(SaHpiRptEntryT *rpt_entry);
+
 #ifdef __cplusplus
 };
 #endif
