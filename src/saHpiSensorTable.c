@@ -711,7 +711,8 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
        */  
       if (entry->EventCtrl != SAHPI_SEC_NO_EVENTS)
 	{
-	  ctx->saHpiSensorStatus = enables->SensorStatus;
+	  /* we are treating this as an enumeration */
+	  ctx->saHpiSensorStatus = enables->SensorStatus +1;
 
 	  build_state_string (entry->Category,
 			      enables->AssertEvents,
@@ -811,7 +812,8 @@ set_sensor_event (saHpiSensorTable_context * ctx)
   if (ctx)
     {
       memset (&enables, 0x00, sizeof (SaHpiSensorEvtEnablesT));
-      enables.SensorStatus = ctx->saHpiSensorStatus;
+      /* we are treating this as an enumeration */
+      enables.SensorStatus = ctx->saHpiSensorStatus -1;
 
       rc = build_state_value (ctx->saHpiSensorAssertEvents,
 			      ctx->saHpiSensorAssertEvents_len,
