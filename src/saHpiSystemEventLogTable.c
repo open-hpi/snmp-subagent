@@ -61,6 +61,8 @@ static int event_log_overflow_action = 0;
 static int event_log_delete_entry_supported = 0;
 
 static SaHpiResourceIdT timestamp_resource_id;
+
+
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					//SaHpiBoolT *state,
@@ -68,6 +70,7 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					oid *event_entry, 
 					size_t event_entry_oid_len,
 					saHpiSystemEventLogTable_context *ctx);
+
 
 int populate_sel(SaHpiRptEntryT *rpt_entry,
 		 oid *DomainID_oid, const size_t DomainID_oid_len,
@@ -168,6 +171,10 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 
 	// Now create the 'event' and get its OID to be copied to our
 	// SystemEventLogged OID
+	
+	/*
+	  // NEW MIB change.
+	  // IBM-KR: Add new rows.
 
 	populate_event(sel.EntryId,
 		       &sel.Event, 
@@ -176,7 +183,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 		       child_oid, &child_oid_len,
 		       DomainID_oid, DomainID_oid_len,
 		       ResourceID_oid, ResourceID_oid_len);
-	
+	*/
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,
 						    rpt_entry,

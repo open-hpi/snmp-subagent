@@ -375,10 +375,11 @@ main (int argc, char **argv) {
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
 
+  send_traps = AGENT_TRUE;
   if (populate_rpt() != AGENT_ERR_NOERROR) {
     //goto stop;
     } 
-  send_traps = AGENT_TRUE;
+  populate_event();
   /*
   if (init_alarm() != AGENT_ERR_NOERROR) {
     goto stop;

@@ -121,9 +121,11 @@ static oid      saHpiEventCount_oid[] =
         { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
 
 static u_long event_count = 0;
- 
+static SaHpiTimeoutT timeout = SAHPI_TIMEOUT_IMMEDIATE;
+static u_long index_nr = 0;
+
 static int
-saHpiEventTable_modify_context(SaHpiSelEntryIdT,
+saHpiEventTable_modify_context(unsigned long,
 			       SaHpiEventT *,
 			       SaHpiRptEntryT *t,
 			       SaHpiRdrT *,
@@ -132,106 +134,183 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT,
 			       size_t *var_len,
 			       oid **var_oid);
 
-int
-populate_event(SaHpiSelEntryIdT entry_id,
-	       SaHpiEventT *event_entry,
-	       SaHpiRptEntryT *rpt_entry,
-	       SaHpiRdrT *rdr_entry,
-	       oid *child_oid, 
-	       size_t *child_oid_len,
-	       oid *domain_oid, const size_t domain_oid_len,
-	       oid *resource_oid, const size_t resource_oid_len) {
-
-
+/*
+ * Checks for all SEL and EVENTs
+ */
+int populate_event() {
+ 
+  SaErrorT     err;
   SaHpiSessionIdT session_id;
-  oid event_oid[EVENT_INDEX_NR];
-  int rc = AGENT_ERR_NULL_DATA;
-  netsnmp_index event_index;
-  saHpiEventTable_context *event_context;
-  oid column[2];
 
+  SaHpiEventT event;
+  SaHpiRdrT rdr;
+  SaHpiRptEntryT rpt;
+
+  oid domain_oid[MAX_OID_LEN];
+  oid resource_oid[MAX_OID_LEN];
+  oid column[2];
+  oid event_oid[EVENT_INDEX_NR];
+
+  size_t domain_oid_len;
+  size_t resource_oid_len;
+
+  oid rpt_oid[RPT_INDEX_NR];
+  netsnmp_index rpt_index;
+  netsnmp_index event_index;
+
+  unsigned int user_oem_event_type = AGENT_FALSE;
+  unsigned int eventflag = AGENT_TRUE;
+  int rc = AGENT_ERR_NOERROR;
+
+  // For TRAP/EVENTs
   oid *trap_oid;
   trap_vars *trap = NULL;
   size_t trap_len;
   netsnmp_variable_list *trap_var;
 
+  saHpiEventTable_context *event_context;
+
   DEBUGMSGTL((AGENT,"\t--- populate_event. Entry\n"));
-  if (rpt_entry && event_entry) {
 
-    rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) {
-      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
-      return rc;
-    }
+  rc = getSaHpiSession(&session_id);
+  if (rc != AGENT_ERR_NOERROR) {
+    DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+    return rc;
+  }
 
-    event_oid[0] = rpt_entry->DomainId;
-    event_oid[1] = rpt_entry->ResourceId;
-    event_oid[2] = entry_id; // Or perhaps CONTAINER_COUNT(cb.callback);
-    
-    event_index.oids = (oid *)&event_oid;
-    event_index.len = EVENT_INDEX_NR;
-    
-    event_context = NULL;
-    event_context = CONTAINER_FIND(cb.container, &event_index);
+  //Subscribe to the Events
 
-    if (!event_context) {
-      // New entry. Add it
-      event_context = saHpiEventTable_create_row(&event_index);
-    }
+  err = saHpiSubscribe( session_id, SAHPI_FALSE);
 
-    // Generate our full OID.
-    column[0] = 1;
-    column[1] = COLUMN_SAHPIEVENTINDEX;
-    // and write it to event_oid and event_oid_len for the caller to use.
-    build_full_oid(saHpiEventTable_oid, saHpiEventTable_oid_len,
-		   column, 2,
-		   &event_index,
-		   child_oid, MAX_OID_LEN, child_oid_len);
+  while ( eventflag == AGENT_TRUE ) {
+    err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
+    if (err == SA_OK) {
 
-    // By this stage, event_context surely has something in it.
-    // '*_modify_context' does a checksum check to see if 
-    // the record needs to be altered, and if so populates with
-    // information from RDR and the OIDs passed.
-    if (saHpiEventTable_modify_context(entry_id,
-				       event_entry,
-				       rpt_entry,
-				       rdr_entry,
-				       event_context,
-				       &trap, &trap_len, &trap_oid)
-	    == AGENT_NEW_ENTRY) {
 
-    
-    
-      CONTAINER_INSERT(cb.container, event_context);
-      event_count = CONTAINER_SIZE(cb.container);
-      if (send_traps == AGENT_TRUE) {
-	if (trap != NULL) {
-	  
-	  trap_var = build_notification(&event_index,
-				      trap, trap_len,
-				      trap_oid, TRAPS_OID_LENGTH,
-				      saHpiEventTable_oid, saHpiEventTable_oid_len,
-				      rpt_entry->DomainId,
-				      domain_oid, domain_oid_len,
-				      rpt_entry->ResourceId,
-				      resource_oid, resource_oid_len);
-	if (trap_var != NULL) {
-	  send_v2trap(trap_var);
-	  snmp_free_varbind(trap_var);
-	} else {
-	  DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
-	}
-	}		      
+      if (rpt.ResourceCapabilities == 0) { // OEM or USER type event
+	rpt.ResourceId = 0;
+	rpt.DomainId = 0;
+	rpt.EntryId = 0;
+	user_oem_event_type = AGENT_TRUE;
       }
       
-    }
-  }
-  DEBUGMSGTL((AGENT,"\t --- populate_event. Exit\n"));
+      // 1). Generate the domain_oid and resource_oid
+      //     Only do it when its necessary
+
+      if ((rpt_oid[0] != rpt.DomainId) ||
+	  (rpt_oid[1] != rpt.ResourceId) ||
+	  (rpt_oid[2] != rpt.EntryId)) {
+	
+	// Make the RPT index value.
+	rpt_oid[0] = rpt.DomainId;
+	rpt_oid[1] = rpt.ResourceId;
+	rpt_oid[2] = rpt.EntryId;
+
+	rpt_index.len = RPT_INDEX_NR;
+	rpt_index.oids = (oid *)&rpt_oid;
+
+	// This is copied from saHpiTable.c:197
+	// Generate our full OID for the DomainID
+	column[0] = 1;
+	// Point to first object.
+	column[1] = COLUMN_SAHPIDOMAINID;
+	
+	build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
+		       column, 2,
+		       &rpt_index,
+		       domain_oid, MAX_OID_LEN, &domain_oid_len);
+	
+	column[1] = COLUMN_SAHPIRESOURCEID;
+	
+	build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
+		       column, 2,
+		       &rpt_index,
+		       resource_oid, MAX_OID_LEN, &resource_oid_len);
+
+	DEBUGMSGTL((AGENT,"Our OIDS in Event are:\n"));
+	DEBUGMSGOID((AGENT,domain_oid, domain_oid_len));
+	DEBUGMSGOID((AGENT,resource_oid, resource_oid_len));
+	DEBUGMSGTL((AGENT,"Values are: %d.%d.%d\n",
+		    rpt.DomainId,
+		    rpt.ResourceId,
+		    rpt.EntryId));
+
+	if (user_oem_event_type == AGENT_TRUE) {	  
+	  domain_oid_len = 0;
+	  resource_oid_len = 0;
+	  user_oem_event_type = AGENT_FALSE;
+	}
+      }
+      // 2). Create our index value
+
+      event_oid[0] = rpt.DomainId;
+      event_oid[1] = rpt.ResourceId;
+      event_oid[2] = index_nr;
+    
+      event_index.oids = (oid *)&event_oid;
+      event_index.len = EVENT_INDEX_NR;
+    
+      event_context = NULL;
+      event_context = CONTAINER_FIND(cb.container, &event_index);
+
+      if (!event_context) {
+	// New entry. Add it
+	event_context = saHpiEventTable_create_row(&event_index);
+      }
+      
+      // By this stage, event_context surely has something in it.
+
+      // And since this is a queue, only NEW entries are seen.
+      // Thus we don't need to check to see if this value already exist      
+
+      saHpiEventTable_modify_context(index_nr,
+				     &event,
+				     &rpt,
+				     &rdr,
+				     event_context,
+				     &trap, &trap_len, &trap_oid);
+      
+      CONTAINER_INSERT(cb.container, event_context);
+      event_count = CONTAINER_SIZE(cb.container);
+      // Update our third undex value.
+      index_nr++;
+      if (send_traps == AGENT_TRUE) {
+	if (trap != NULL) {	  
+	  trap_var = build_notification(&event_index,
+					trap, trap_len,
+					trap_oid, TRAPS_OID_LENGTH,
+					saHpiEventTable_oid, saHpiEventTable_oid_len,
+					rpt.DomainId,
+					domain_oid, domain_oid_len,
+					rpt.ResourceId,
+					resource_oid, resource_oid_len);
+	  if (trap_var != NULL) {
+	    send_v2trap(trap_var);
+	    snmp_free_varbind(trap_var);
+	  } else {
+	    DEBUGMSGTL((AGENT,"Coudln't built the TRAP message!"));
+	  }
+	}
+      }
+    } else 
+      //    if (err != SA_OK) 
+      {
+	DEBUGMSGTL((AGENT,"%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ? 
+		    "No more EVENT  entries. " : 
+		    "Call to saHpiEventGet failed.", err));
+	eventflag = AGENT_FALSE;
+      }
+
+  } // while loop
+
+  err = saHpiUnsubscribe( session_id);
+
   return rc;
-  
 }
+  
+
 int
-saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
+saHpiEventTable_modify_context(unsigned long  entry_id,
 			       SaHpiEventT *event_entry,
 			       SaHpiRptEntryT *rpt_entry,
 			       SaHpiRdrT *rdr_entry,

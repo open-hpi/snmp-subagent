@@ -44,8 +44,8 @@ static u_long entry_count = 0;
 static u_long update_entry_count = -1;
 static integer64  update_timestamp;
 
-static oid             saHpiTable_oid[] = { saHpiTable_TABLE_OID };
-static size_t          saHpiTable_oid_len = OID_LENGTH(saHpiTable_oid);
+oid             saHpiTable_oid[] = { saHpiTable_TABLE_OID };
+size_t          saHpiTable_oid_len = OID_LENGTH(saHpiTable_oid);
 // { 1, 3, 6, 1, 3, 90, 1, 3, 0 };
 static oid      saHpiEntryUpdateTimestamp_oid[] = 
   { hpiEntity_OID, SCALAR_COLUMN_SAHPIENTRYUPDATETIMESTAMP, 0 };
@@ -84,7 +84,13 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
 			  oid **var_oid);
 
 
-
+/*
+ * Populates FOUR different rows:
+ *  - RPT
+ *  - RDR (by calling 'populate_rdr()'
+ *  - HotSwap (by calling 'populate_hotswap()'
+ *  - SEL (by calling 'populate_sel()')
+ */
 int
 populate_rpt() {
 
@@ -98,7 +104,6 @@ populate_rpt() {
    SaHpiTimeT           time;
    SaHpiBoolT state;
    int new_entries;
-   unsigned int deleted;
   
    int rc;
    long backup_count = entry_count;
@@ -111,10 +116,7 @@ populate_rpt() {
    size_t              DomainID_oid_len;
    size_t              ResourceID_oid_len;
    
-   SaHpiDomainIdT domain_id;
-   SaHpiResourceIdT resource_id;
-   SaHpiEntryIdT num;
-   SaHpiCapabilitiesT capabilities;
+
 
    netsnmp_index	rpt_index;
    saHpiTable_context	*rpt_context; 
@@ -281,16 +283,24 @@ populate_rpt() {
 	     //			      ResourceID_oid, ResourceID_oid_len);
 	     
 	     }
-	   // SEL and EVENTs MUST be the last to be populated. The reason
-	   // is b/c it calls entries in hotswap, rdr, and rpt rows - and if they
-	   // don't exist before this populate_sel is called - then the information
-	   // will be lost.
-	     if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
+
+	   // Reminder: The SEL are "historical" events that are
+	   // ResourceID driven, not event-driven. Thus we populate them
+	   // here.
+
+	   // SEL and EVENTs (SEL corresponding Event information to be
+	   // specific) MUST be the last to be populated. The reason 
+ 	   // is b/c it calls entries in hotswap, rdr, and rpt rows - and
+	   // if they don't exist before this populate_sel is called - 
+	   // then the information (updating the HotSwap row with State and
+	   // PreviousState) will be lost.
+
+	   if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
 	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
-	       rc = populate_sel(&rpt_entry,
-			    DomainID_oid, DomainID_oid_len,
-			    ResourceID_oid, ResourceID_oid_len);
+	     rc = populate_sel(&rpt_entry,
+			       DomainID_oid, DomainID_oid_len,
+			       ResourceID_oid, ResourceID_oid_len);
 	   }
 	 } // rc != SA_OK
 	 // Try next one ?
@@ -300,69 +310,6 @@ populate_rpt() {
      } while (next != SAHPI_LAST_ENTRY);
 
        // Now check for deleted entries. 
-
-       rpt_context = CONTAINER_FIRST(cb.container);       
-       DEBUGMSGTL((AGENT,"Deleting not-used rows. rpt_context: %X\n", rpt_context));
-       while (rpt_context != NULL) {
-	 
-	 deleted = AGENT_FALSE;
-	 DEBUGMSGTL((AGENT,"Found %d.%d d: %d\n", rpt_context->saHpiDomainID,
-		     rpt_context->saHpiResourceID, rpt_context->dirty_bit));
-
-	 if (rpt_context != NULL) {
-	   if (rpt_context->dirty_bit == AGENT_FALSE) {
-	     // Making it dirty again.
-	     rpt_context->dirty_bit = AGENT_TRUE;
-	   } else {
-	     domain_id = rpt_context->saHpiDomainID;
-	     resource_id = rpt_context->saHpiResourceID;
-	     num = rpt_context->saHpiEntryID;
-	     capabilities = rpt_context->saHpiResourceCapabilities;
-	     // We are getting the next item here b/c effectivly the the rpt_context
-	     // will be set to NULL in the 'delete_rpt_row' 
-	     rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
-	     deleted = AGENT_TRUE;
-	     // Delete the RPT (the 'delete_rpt' will delete the rest of corresponding rows)
-	     rc = delete_rpt_row(domain_id,
-				 resource_id,
-				 num);
-	     if (rc != AGENT_ERR_NOERROR)
-	       DEBUGMSGTL((AGENT,"delete_rpt_row failed. return code: %d\n", rc));
-	     
- /* 	     if (capabilities & SAHPI_CAPABILITY_RDR) {  */
-/* 	       rc = AGENT_ERR_NOTFOUND; */
-/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_NO_RECORD) == AGENT_NO_ERROR) */
-/* 		 rc = AGENT_NO_ERROR; */
-	       
-/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_CTRL_RECORD) == AGENT_NO_ERROR) */
-/* 		 rc = AGENT_NO_ERROR; */
-	       
-/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_SENSOR_RECORD) == AGENT_NO_ERROR) */
-/* 		 rc = AGENT_NO_ERROR; */
-	       
-/* 	       if (delete_rdr_row(domain_id, resource_id, num, SAHPI_INVENTORY_RECORD) == AGENT_NO_ERROR) */
-/* 		 rc = AGENT_NO_ERROR; */
-	       
-/* 	       if ( delete_rdr_row(domain_id, resource_id, num, SAHPI_WATCHDOG_RECORD) == AGENT_NO_ERROR) */
-/* 		 rc = AGENT_NO_ERROR; */
-	       
-	       
-/* 	       if (rc != AGENT_ERR_NOERROR) */
-/* 		 DEBUGMSGTL((AGENT,"delete_rdr_rows failed. return code: %d\n", rc)); */
-/* 	     } */
-
-/* 	     if (capabilities & SAHPI_CAPABILITY_HOTSWAP) { */
-/* 	       rc = delete_hotswap_row(domain_id, resource_id); */
-/* 	       if (rc != AGENT_ERR_NOERROR) */
-/* 		 DEBUGMSGTL((AGENt,"delete_hotswap_row failed. Return code: %d\n", rc)); */
-/* 	     } */
-
-	   }
-	 }
-	 // Only get the next item if no deletion has happend.
-	 if (deleted == AGENT_FALSE)
-	   rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
-       }
      }  // if new_entries ...    
      
    }
@@ -373,7 +320,72 @@ populate_rpt() {
    DEBUGMSGTL((AGENT,"--- populate_rpt: Exit.\n"));
    return err;
 }
-   
+
+/*
+ * Purges up to TWO rows:
+ *  - RPT
+ *  - HotSwap
+ */
+int purge_rpt ( void ) {
+
+  SaHpiDomainIdT domain_id;
+  SaHpiResourceIdT resource_id;
+  SaHpiEntryIdT num;
+  SaHpiCapabilitiesT capabilities;
+  saHpiTable_context	*rpt_context; 
+  int count = 0;
+  unsigned int deleted;
+  int rc;
+
+  rpt_context = CONTAINER_FIRST(cb.container);       
+  DEBUGMSGTL((AGENT,"purge_rpt: Entry\n"));
+  while (rpt_context != NULL) {
+	 
+    deleted = AGENT_FALSE;
+    DEBUGMSGTL((AGENT,"Found %d.%d.%d purge: %s\n", 
+		rpt_context->saHpiDomainID,
+		rpt_context->saHpiResourceID,
+		rpt_context->saHpiEntryID,
+		(rpt_context->dirty_bit == AGENT_TRUE)? "Yes" : "No"));
+	 
+    if (rpt_context != NULL) {
+      if (rpt_context->dirty_bit == AGENT_FALSE) {
+	// Making it dirty again.
+	rpt_context->dirty_bit = AGENT_TRUE;
+      } else {
+	domain_id = rpt_context->saHpiDomainID;
+	resource_id = rpt_context->saHpiResourceID;
+	num = rpt_context->saHpiEntryID;
+	capabilities = rpt_context->saHpiResourceCapabilities;
+	// We are getting the next item here b/c effectivly the the rpt_context
+	// will be set to NULL in the 'delete_rpt_row' 
+	rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
+	deleted = AGENT_TRUE;
+	count++;
+	// Delete the RPT row
+	rc = delete_rpt_row(domain_id,
+			    resource_id,
+			    num);
+	if (rc != AGENT_ERR_NOERROR)
+	  DEBUGMSGTL((AGENT,"delete_rpt_row failed. return code: %d\n", rc));
+	     
+
+	if (capabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
+	  rc = delete_hotswap_row(domain_id, resource_id);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL((AGENT,"delete_hotswap_row failed. Return code: %d\n", rc));
+	}
+	
+      }
+    }        
+    // Only get the next item if no deletion has happend.
+    if (deleted == AGENT_FALSE)
+	   rpt_context = CONTAINER_NEXT(cb.container, rpt_context);
+       
+  }
+  DEBUGMSGTL((AGENT,"purge_rpt. Exit (count: %d).\n", count));
+  return count;
+}   
 
 int  
 saHpiTable_modify_context(SaHpiRptEntryT *entry, 
@@ -441,8 +453,9 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
     ctx->saHpiResourceInfoAuxFirmwareRev = entry->ResourceInfo.AuxFirmwareRev;
     ctx->saHpiResourceTagTextType = entry->ResourceTag.DataType+1;
     ctx->saHpiResourceTagTextLanguage = entry->ResourceTag.Language;
-    len = (entry->ResourceTag.DataLength > SAHPI_RESOURCE_TAG_MAX) ? 
-      SAHPI_RESOURCE_TAG_MAX : entry->ResourceTag.DataLength;
+    len = entry->ResourceTag.DataLength;
+      //(entry->ResourceTag.DataLength > SAHPI_RESOURCE_TAG_MAX) ? 
+      //SAHPI_RESOURCE_TAG_MAX : entry->ResourceTag.DataLength;
     strncpy(ctx->saHpiResourceTag, entry->ResourceTag.Data, len);
     ctx->saHpiResourceTag_len = len;
 
@@ -481,8 +494,8 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
     
       // Point *var to this trap_vars. 
     *var = (trap_vars *)&saHpiResourceNotification;
-      *var_len = RPT_NOTIF_COUNT;
-      *var_trap_oid = (oid *)&saHpiResourceNotification_oid;
+    *var_len = RPT_NOTIF_COUNT;
+    *var_trap_oid = (oid *)&saHpiResourceNotification_oid;
 
 
     return AGENT_NEW_ENTRY;

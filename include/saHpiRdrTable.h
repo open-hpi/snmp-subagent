@@ -16,8 +16,6 @@
  *
  * $Id$
  *
- * Yes, there is lots of code here that you might not use. But it is much
- * easier to remove code than to add it!
  */
 #ifndef SAHPIRDRTABLE_H
 #define SAHPIRDRTABLE_H
@@ -75,6 +73,7 @@ extern          "C" {
 
       long hash;
 
+    unsigned int dirty_bit;
     } saHpiRdrTable_context;
 
 /*************************************************************
@@ -91,6 +90,7 @@ extern          "C" {
 		  oid *rpt_oid, size_t rpt_oid_len,
 		  oid *resource_oid, size_t resource_oid_len);
 
+  int purge_rdr( void );
 int
 delete_rdr_row(SaHpiDomainIdT domain_id,
 	       SaHpiResourceIdT resource_id,
