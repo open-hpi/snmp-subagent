@@ -580,6 +580,7 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	    case SAHPI_CTRL_TYPE_OEM:
 	      oem = entry->TypeUnion.Oem;
 	      oem.MId = htonl (oem.MId);
+	      // manufacture id.+ OEM config data
 	      ctx->saHpiCtrlAttributes_len =
 		SAHPI_CTRL_OEM_CONFIG_LENGTH + sizeof (SaHpiManufacturerIdT);
 	      memcpy (ctx->saHpiCtrlAttributes, &oem,
