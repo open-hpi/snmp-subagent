@@ -7622,12 +7622,9 @@ saHpiSensorNum OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "The sensor number. 
-
-        The following specifies the named range for standard sensor numbers.
-
-        SAHPI_STANDARD_SENSOR_MIN   0x0001.010
-        SAHPI_STANDARD_SENSOR_MAX   0x000001FF"
+        DESCRIPTION     "The sensor number."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 8.4." 
         ::= {saHpiSensorEntry 1}
 
 
