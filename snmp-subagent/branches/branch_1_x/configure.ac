@@ -9,6 +9,8 @@ AM_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CC
+AC_LIBTOOL_DLOPEN
+AM_PROG_LIBTOOL
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
