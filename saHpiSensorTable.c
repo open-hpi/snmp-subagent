@@ -147,9 +147,6 @@ populate_sensor(SaHpiSensorRecT *sensor,
 				  sensor->Num,
 				  &sensor_threshold);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
-    DEBUGMSGTL((AGENT,"%x, %x\n", &sensor_threshold, sensor_threshold.LowCritical.Raw));
-
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
@@ -217,11 +214,8 @@ saHpiSensorTable_modify_context(
     ctx->hash = hash;
     data = entry->DataFormat;
     thd = entry->ThresholdDefn;
-    DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->Num));
-
     ctx->saHpiSensorRDR_len = rdr_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiSensorRDR, rdr_entry, ctx->saHpiSensorRDR_len);
-
 
     ctx->saHpiSensorIndex = entry->Num;
     ctx->saHpiSensorType = entry->Type;
@@ -372,8 +366,7 @@ saHpiSensorTable_modify_context(
     
     ctx->saHpiSensorThresholdDefnIsThreshold = (thd.IsThreshold == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-    ctx->saHpiSensorThresholdDefnTholdCapabilities = 
-      thd.TholdCapabilities;
+    ctx->saHpiSensorThresholdDefnTholdCapabilities = thd.TholdCapabilities;
 
     ctx->saHpiSensorThresholdDefnReadThold = thd.ReadThold;
     ctx->saHpiSensorThresholdDefnWriteThold = thd.WriteThold;
@@ -518,7 +511,8 @@ int set_sensor(saHpiSensorTable_context *ctx) {
     // values can be put in 'thd' and only put those in
     for (i = 0; i < SENSOR_THD_COUNT;i++) {
       if (ctx->saHpiSensorThresholdDefnWriteThold & sensor_thd[i].bit) {
-	DEBUGMSGTL((AGENT,"%d: %X is writeable\n", i, sensor_thd[i].bit));
+	DEBUGMSGTL((AGENT,"%d: %X is writeable (loc: %d)\n", i, sensor_thd[i].bit, sensor_thd[i].pos));
+
 	if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) {
 	  // Put the data in the SaHpiSensorThresholdsT.<name>.Raw	  
 	  memcpy(&sensor_thd[i].reading->Raw,
@@ -527,8 +521,9 @@ int set_sensor(saHpiSensorTable_context *ctx) {
 		 SIZEOF_UINT32);
 	  // Convert back to our platform type.
 	  sensor_thd[i].reading->Raw = ntohl(sensor_thd[i].reading->Raw);
-	  DEBUGMSGTL((AGENT,"SAHPI_STC_RAW: %X\n", sensor_thd[i].reading->Raw));
+	  DEBUGMSGTL((AGENT," Copied SAHPI_STC_RAW is: 0x%X\n", sensor_thd[i].reading->Raw));
 	}
+
 	if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_INTERPRETED) {
 	  // Put the data in the SaHpiSensor.<name>.Intepreted		
 	  memcpy (&sensor_thd[i].reading->Interpreted.Value.SensorBuffer,
@@ -568,12 +563,12 @@ int set_sensor(saHpiSensorTable_context *ctx) {
 				ctx->saHpiSensorIndex,
 				&thd);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
 
-    // Re-read the data. Should be exactly the same.      
+    // Re-read the data. Might be different, so we will need
+    // to populate the ctx.
     DEBUGMSGTL((AGENT,"Calling SensorThresholdGet\n"));
     memset(&thd, 0x00, sizeof(SaHpiSensorThresholdsT));
     rc = saHpiSensorThresholdsGet(session_id,
@@ -581,13 +576,13 @@ int set_sensor(saHpiSensorTable_context *ctx) {
 				  ctx->saHpiSensorIndex,
 				  &thd);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
-    // Put the latest data.
+    // Update the latest data.
     fill_sensor_threshold_info(ctx, &thd);
 
+    DEBUGMSGTL((AGENT,"set_sensor: Exit.\n"));
     return AGENT_ERR_NOERROR;
   }
   DEBUGMSGTL((AGENT,"set_sensor: Exit.\n"));
@@ -916,7 +911,6 @@ saHpiSensorTable_can_delete(saHpiSensorTable_context * undo_ctx,
                              saHpiSensorTable_context * row_ctx,
                              netsnmp_request_group * rg)
 {
-  DEBUGMSGTL((AGENT,"can_delete\n"));
     return 1;
 }
 
@@ -962,7 +956,6 @@ saHpiSensorTable_context *
 saHpiSensorTable_duplicate_row(saHpiSensorTable_context * row_ctx)
 {
     saHpiSensorTable_context *dup;
-    DEBUGMSGTL((AGENT,"duplicate_row\n"));
     if (!row_ctx)
         return NULL;
 
@@ -984,7 +977,6 @@ saHpiSensorTable_duplicate_row(saHpiSensorTable_context * row_ctx)
 netsnmp_index  *
 saHpiSensorTable_delete_row(saHpiSensorTable_context * ctx)
 {
-  DEBUGMSGTL((AGENT,"delete_row"));
     if (ctx->index.oids)
         free(ctx->index.oids);
 
@@ -1036,11 +1028,41 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
             rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
 						THRESHOLD_INTERPRETED_MAX);
             break;
-
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorTable_set_reserve1\n");
+	case COLUMN_SAHPISENSORINDEX:
+	case COLUMN_SAHPISENSORTYPE:
+	case COLUMN_SAHPISENSORCATEGORY:
+	case COLUMN_SAHPISENSOREVENTSCATEGORYCONTROL:
+	case COLUMN_SAHPISENSOREVENTSSTATE:
+	case COLUMN_SAHPISENSORIGNORE:
+	case COLUMN_SAHPISENSORREADINGFORMATS:
+	case COLUMN_SAHPISENSORISNUMERIC:
+	case COLUMN_SAHPISENSORSIGNFORMAT:
+	case COLUMN_SAHPISENSORBASEUNITS:
+	case COLUMN_SAHPISENSORMODIFIERUNITS:
+	case COLUMN_SAHPISENSORMODIFIERUSE:
+	case COLUMN_SAHPISENSORFACTORSSTATIC:
+	case COLUMN_SAHPISENSORFACTORS:
+	case COLUMN_SAHPISENSORFACTORSLINEARIZATION:
+	case COLUMN_SAHPISENSORPERCENTAGE:
+	case COLUMN_SAHPISENSORRANGEFLAGS:
+	case COLUMN_SAHPISENSORRANGEREADINGVALUESPRESENT:
+	case COLUMN_SAHPISENSORRANGEREADINGRAW:
+	case COLUMN_SAHPISENSORRANGEREADINGINTERPRETED:
+	case COLUMN_SAHPISENSORRANGEREADINGEVENTSENSOR:
+	case COLUMN_SAHPISENSORTHRESHOLDDEFNISTHRESHOLD:
+	case COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES:
+	case COLUMN_SAHPISENSORTHRESHOLDDEFNREADTHOLD:
+	case COLUMN_SAHPISENSORTHRESHOLDDEFNWRITETHOLD:
+	case COLUMN_SAHPISENSORTHRESHOLDDEFNFIXEDTHOLD:
+	// The COLUMN_SAHPISENSORTHRESHOLDRAW and 
+	// COLUMN_SAHPISENSORTHRESHOLDINTERPRETED are writeable
+	case COLUMN_SAHPISENSOROEM:
+	case COLUMN_SAHPISENSORRDR:
+            rc = SNMP_ERR_NOTWRITABLE;
+	    break;
+        default: // Trying to write to read-only objects or to unknown columns?
+	    rc = SNMP_ERR_GENERR;
+	    break;
         }
 
         if (rc)
@@ -1055,14 +1077,12 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
 {
-  saHpiSensorTable_context *row_ctx =
-    (saHpiSensorTable_context *) rg->existing_row;
-  saHpiSensorTable_context *undo_ctx =
-    (saHpiSensorTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
-    int             rc = SNMP_ERR_NOERROR;
-    int i;
+    saHpiSensorTable_context *row_ctx =
+        (saHpiSensorTable_context *) rg->existing_row;
+    int rc =SNMP_ERR_NOERROR;
+ 
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve2: Entry\n"));
     rg->rg_void = rg->list->ri;
 
@@ -1070,63 +1090,41 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
 
         switch (current->tri->colnum) {
 
         case COLUMN_SAHPISENSORTHRESHOLDRAW:
+	// Check to see if this can be set.
+	if  (row_ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_INTERPRETED) { 
+		rc =  SNMP_ERR_NOACCESS;
+	}
 	  // If not defined as writeable, check to make sure its not modified
+	/*
 	  for (i=0; i< SENSOR_THD_COUNT;i++) {
 	    if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & sensor_thd[i].bit)) { 
-	      // The data for which the write bit is not SET, is set to \0
-	      DEBUGMSGTL((AGENT,"%d: Setting %X to ZERO\n", i, var->val.string));
 	      memset(var->val.string + (sensor_thd[i].pos * SIZEOF_UINT32),
 		     0x00, SIZEOF_UINT32);
 	    }
 	  }
+	*/
 	  break;
 
         case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
-	  /*
-	   if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MINOR)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_LOW_MINOR);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_MAJOR)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_LOW_MAJOR);
-	  }
-	  
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_CRIT)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_LOW_CRITICAL);
-	  }
-
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MINOR)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_UP_MINOR);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_MAJOR)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_UP_MAJOR);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_CRIT)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_UP_CRITICAL);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_UP_HYSTERESIS)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx, POS_POS_THD_HYSTERESIS);
-	  }
-	  if (!(row_ctx->saHpiSensorThresholdDefnWriteThold & SAHPI_STM_LOW_HYSTERESIS)) {
-	    CHECK_THRESHOLD_INTERPRETED(row_ctx, undo_ctx,  POS_NEG_THD_HYSTERESIS);
-	  }
-	  */	  
+	if  (row_ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) { 
+		rc = SNMP_ERR_NOACCESS;
+	}
 	      break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
         }
-
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+	if (rc) {
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                         rc);
+	}
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve2: Exit (rc: %d)\n", rc));
+    DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve2: Exit\n"));
 }
 
 /************************************************************
@@ -1174,7 +1172,8 @@ saHpiSensorTable_set_action(netsnmp_request_group * rg)
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
         }
-	DEBUGMSGTL((AGENT,"saHpiSensorTable_set_action: Loop\n"));
+
+	// Tada! This is where the change will be done (or not)
 	if (set_sensor(row_ctx) != AGENT_ERR_NOERROR) {
 	  DEBUGMSGTL((AGENT,"saHpiSensorTable_set_action: Error: SNMP_ERR_GENERR"));
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
@@ -1205,37 +1204,6 @@ saHpiSensorTable_set_action(netsnmp_request_group * rg)
 void
 saHpiSensorTable_set_commit(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPISENSORTHRESHOLDRAW:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-        case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    break;
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-    DEBUGMSGTL((AGENT,"saHpiSensorTable_set_commit: Entry & Exit\n"));
 }
 
 /************************************************************
@@ -1249,35 +1217,6 @@ saHpiSensorTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiSensorTable_set_free(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-    /*    saHpiSensorTable_context *row_ctx =
-        (saHpiSensorTable_context *) rg->existing_row;
-    saHpiSensorTable_context *undo_ctx =
-    (saHpiSensorTable_context *) rg->undo_info;*/
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPISENSORTHRESHOLDRAW:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-        case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-
-            
-        }
-    }
-    DEBUGMSGTL((AGENT,"saHpiSensorTable_set_free: Entry & Exit\n"));
 }
 
 /************************************************************
@@ -1301,38 +1240,6 @@ saHpiSensorTable_set_free(netsnmp_request_group * rg)
 void
 saHpiSensorTable_set_undo(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-    /*    saHpiSensorTable_context *row_ctx =
-        (saHpiSensorTable_context *) rg->existing_row;
-    saHpiSensorTable_context *undo_ctx =
-    (saHpiSensorTable_context *) rg->undo_info;*/
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        case COLUMN_SAHPISENSORTHRESHOLDRAW:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-        case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            break;
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    break;
-        }
-    }
-
-  
-    DEBUGMSGTL((AGENT,"saHpiSensorTable_set_undo: Entry & Exit\n"));
 }
 
 
