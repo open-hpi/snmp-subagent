@@ -6126,12 +6126,9 @@ saHpiSensorThdLowMajorIsReadable        OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdLowMajorRaw is set to
-        '-1' and saHpiSensorThdLowMajorInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdLowMajorEntry 1}
 
 saHpiSensorThdLowMajorIsWritable        OBJECT-TYPE
