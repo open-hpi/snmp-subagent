@@ -4025,7 +4025,7 @@ saHpiCtrlEntry OBJECT-TYPE
 SaHpiCtrlEntry ::= SEQUENCE {
 	saHpiCtrlNum		Unsigned32,
 	saHpiCtrlOutputType	INTEGER,
-	saHpiCtrlBool		TruthValue,
+	saHpiCtrlIgnore		TruthValue,
 	saHpiCtrlType		INTEGER,
 	saHpiCtrlState		OCTET STRING,
 	saHpiCtrlAttributes	OCTET STRING,
@@ -4066,7 +4066,7 @@ saHpiCtrlOutputType OBJECT-TYPE
 	This enumeration defines the what the control's output will be.  "
 	::= {saHpiCtrlEntry 2}
 
-saHpiCtrlBool OBJECT-TYPE 
+saHpiCtrlIgnore OBJECT-TYPE 
 	SYNTAX		TruthValue
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -6738,10 +6738,10 @@ saHpiSensorGroup	OBJECT-GROUP
 saHpiCtrlGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiCtrlCount,
-		saHpiCtrlNum ,
-		saHpiCtrlOutputType ,
-		saHpiCtrlBool ,
-		saHpiCtrlType ,
+		saHpiCtrlNum,
+		saHpiCtrlOutputType,
+		saHpiCtrlIgnore,
+		saHpiCtrlType,
 		saHpiCtrlState,
 		saHpiCtrlAttributes,
 		saHpiCtrlOem,
