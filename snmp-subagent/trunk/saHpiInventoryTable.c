@@ -1037,7 +1037,7 @@ saHpiInventoryTable_extract_index(saHpiInventoryTable_context * ctx,
     /*
      * parsing may have allocated memory. free it.
      */
-    snmp_reset_var_buffers(&var_saHpiInventoryEirId);
+    snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }

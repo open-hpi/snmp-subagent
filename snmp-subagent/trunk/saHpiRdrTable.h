@@ -33,6 +33,14 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
+   /*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define RDR_INDEX_NR 4
 
   
   typedef struct saHpiRdrTable_context_s {
@@ -62,6 +70,7 @@ extern          "C" {
           oid             saHpiRdrRTP[MAX_OID_LEN];
         long            saHpiRdrRTP_len;
 
+    long domain_id;
 
       long hash;
 
@@ -85,31 +94,13 @@ delete_rdr_row(SaHpiDomainIdT domain_id,
 	       SaHpiResourceIdT resource_id,
 	       SaHpiEntryIdT num,
 	       SaHpiRdrTypeT type);
-int  
-saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
-			     SaHpiRdrT *entry, 
-			     saHpiRdrTable_context *ctx,
-			     oid* rdr_oid, size_t oid_len,
-			     oid* child_oid, size_t child_oid_len,
-			     unsigned long child_id);
-
-
-  int send_saHpiRdrTable_notification(saHpiRdrTable_context *ctx);
-
-void
-make_SaHpiRdrTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
 
 
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiRdrTable_oid[];
-    extern size_t   saHpiRdrTable_oid_len;
+//    extern oid      saHpiRdrTable_oid[];
+  //   extern size_t   saHpiRdrTable_oid_len;
 //1,3,6,1,3,90,3,2
 #define saHpiRdrTable_TABLE_OID hpiResources_OID,2
 

@@ -30,11 +30,26 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
+   /*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define RPT_INDEX_NR 3
+  /*
+   * Different options for saving/restoring 
+   * Consult the MIB
+   */
 #define PARAM_UNDEFINED 0
 #define PARAM_RESTORE_DEFAULT_PARM 1
 #define PARAM_SAVE_PARM 2
 #define PARAM_RESTORE_PARM 3
 
+  /*
+   * Max size of OCTET STRING. Consult HPI-MIB
+   */
 #define SAHPI_RESOURCE_TAG_MAX 255
 
     typedef struct saHpiTable_context_s {
@@ -151,7 +166,7 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
 
 
 int
-update_clear_event(SaHpiDomainIdT domain_id,
+update_event_status_flag(SaHpiDomainIdT domain_id,
 			     SaHpiResourceIdT resource_id,
 			     SaHpiEntryIdT num,
 			     long event_status);
@@ -167,8 +182,8 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiTable_oid[];
-    extern size_t   saHpiTable_oid_len;
+  //   extern oid      saHpiTable_oid[];
+  // extern size_t   saHpiTable_oid_len;
 
   //1,3,6,1,3,90,1,4
 
@@ -228,7 +243,7 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 
     saHpiTable_context *saHpiTable_create_row(netsnmp_index *);
 
-    saHpiTable_context *saHpiTable_get(const char *name, int len);
+
 
 #ifdef __cplusplus
 };

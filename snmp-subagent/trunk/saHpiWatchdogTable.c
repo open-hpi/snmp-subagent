@@ -31,8 +31,8 @@
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
-oid             saHpiWatchdogTable_oid[] = { saHpiWatchdogTable_TABLE_OID };
-size_t          saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
+static oid             saHpiWatchdogTable_oid[] = { saHpiWatchdogTable_TABLE_OID };
+static size_t          saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
 
 //{ 1, 3, 6, 1, 3, 90, 3, 9, 0 }; 
 static oid      saHpiWatchdogCount_oid[] = { hpiResources_OID, 9, 0 };    
@@ -59,7 +59,7 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
   SaHpiSessionIdT session_id;
   int rc = AGENT_ERR_NOERROR;
 
-  oid index_oid[1];
+  oid index_oid[WATCHDOG_INDEX_NR];
   oid column[2];
 
   netsnmp_index	watchdog_index;
@@ -70,10 +70,12 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
   if (watchdog) {
 
     rc = AGENT_ERR_NOERROR;
-    watchdog_index.len = 1;
+    watchdog_index.len = WATCHDOG_INDEX_NR;
 
     // Look at the MIB to find out what the indexs are
-    index_oid[0] = watchdog->WatchdogNum;
+    index_oid[0] = rpt_entry->DomainId;
+    index_oid[1] = rpt_entry->ResourceId;
+    index_oid[2] = watchdog->WatchdogNum;
     // Possible more indexes?
 
     watchdog_index.oids = (oid *)&index_oid;
@@ -85,9 +87,10 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
       // New entry. Add it
       watchdog_context = saHpiWatchdogTable_create_row(&watchdog_index);
     } 
-    if (!watchdog_context) 
+    if (!watchdog_context) {
+      snmp_log(LOG_ERR,"Not enough memory for a watchdog row!");
       return AGENT_ERR_INTERNAL_ERROR;
-    
+    }
     // Generate our full OID
     column[0] = 1;
     column[1] = COLUMN_SAHPIWATCHDOGNUM;
@@ -103,18 +106,22 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
     // the record needs to be altered, and if so populates with
     // information from RDR and the OIDs passed.
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-     
+    }
+
     DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerGet with %d\n", watchdog->WatchdogNum ));
     
     rc = saHpiWatchdogTimerGet (session_id, rpt_entry->ResourceId,
 				watchdog->WatchdogNum,
 				&wdog);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiWatchdogTimerGet failed with return code: %d.\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiWatchdogTimerGet failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
     
     if (saHpiWatchdogTable_modify_context(watchdog, rpt_entry, &wdog,
@@ -125,6 +132,7 @@ populate_watchdog(SaHpiWatchdogRecT *watchdog,
       CONTAINER_INSERT(cb.container, watchdog_context);	  
       watchdog_count = CONTAINER_SIZE(cb.container);
       /*
+	// IBM-KR: TODO notifications
 	if (send_traps_on_startup == AGENT_TRUE) {
 	send_saHpiWatchdogTable_notification(watchdog_context);
 	}      
@@ -145,14 +153,16 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 		SaHpiWatchdogNumT num) {
 
   saHpiWatchdogTable_context *ctx;
-  oid index_oid[1];
+  oid index_oid[WATCHDOG_INDEX_NR];
   netsnmp_index index;
 
     // Look at the MIB to find out what the indexs are
-  index_oid[0] = num;
+  index_oid[0] = domain_id;
+  index_oid[1] = resource_id;
+  index_oid[2] = num;
     // Possible more indexes?
   index.oids = (oid *)&index_oid;
-  index.len = 1;
+  index.len = WATCHDOG_INDEX_NR;
   ctx = CONTAINER_FIND(cb.container, &index);
 
   if (ctx) {
@@ -165,15 +175,14 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 }
 
 int  
-saHpiWatchdogTable_modify_context(
-				  SaHpiWatchdogRecT *entry,
+saHpiWatchdogTable_modify_context(SaHpiWatchdogRecT *entry,
 				  SaHpiRptEntryT *rpt_entry,
 				  SaHpiWatchdogT *wdog,
 				  oid *rdr_entry, size_t rdr_entry_oid_len,
 				  saHpiWatchdogTable_context *ctx) {
 
   long hash;
-
+  
   // Make sure they are valid.
   if (entry && ctx) {
     
@@ -200,9 +209,6 @@ saHpiWatchdogTable_modify_context(
       hash = 1;
     ctx->hash = hash;
 
-    DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->WatchdogNum));
-
-   
     ctx->saHpiWatchdogRDR_len = rdr_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiWatchdogRDR, rdr_entry, ctx->saHpiWatchdogRDR_len);
     ctx->resource_id = rpt_entry->ResourceId; 
@@ -237,9 +243,11 @@ int set_timer_reset(saHpiWatchdogTable_context *ctx) {
 
        // Get the seesion_id
       rc = getSaHpiSession(&session_id);
-      if (rc != AGENT_ERR_NOERROR) 
+      if (rc != AGENT_ERR_NOERROR) {
+	DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));	
 	return rc;
-      
+      }
+
       DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerReset with %d\n", ctx->saHpiWatchdogNum ));
       
       rc = saHpiWatchdogTimerReset (session_id, 
@@ -247,7 +255,7 @@ int set_timer_reset(saHpiWatchdogTable_context *ctx) {
 				    ctx->saHpiWatchdogNum);
       
       if (rc != SA_OK) {
-	DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+	DEBUGMSGTL((AGENT,"Call to saHpiWatchdogTimerReset failed with rc: %d\n", rc));	
 	return AGENT_ERR_OPERATION;
       }
       // Get the new changes.
@@ -258,7 +266,7 @@ int set_timer_reset(saHpiWatchdogTable_context *ctx) {
 				  ctx->saHpiWatchdogNum,
 				  &wdog);
       if (rc != SA_OK) {
-	DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+	DEBUGMSGTL((AGENT,"Call to saHpiWatchdogTimerGet failed with rc: %d\n", rc));	
 	return AGENT_ERR_OPERATION;
       }
       DEBUGMSGTL((AGENT,"log: %d, Run: %d\n", wdog.Log, wdog.Running));
@@ -299,36 +307,38 @@ int set_watchdog(saHpiWatchdogTable_context *ctx) {
     wdog.InitialCount = ctx->saHpiWatchdogTimerInitialCount;
     wdog.PresentCount = ctx->saHpiWatchdogTimerPresentCount;    
 
-    DEBUGMSGTL((AGENT,"log: %d, Run: %d\n", wdog.Log, wdog.Running));
-    DEBUGMSGTL((AGENT,"initial: %d, presentcount: %d\n", wdog.InitialCount, wdog.PresentCount));
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-     
+    }
     DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerSet with %d\n", ctx->saHpiWatchdogNum ));
-   
     rc = saHpiWatchdogTimerSet (session_id, 
 				ctx->resource_id,
 				ctx->saHpiWatchdogNum,
 				&wdog);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiWatchdogTimerSet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call saHpiWatchdogTimerSet failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
 
     DEBUGMSGTL((AGENT,"Calling saHpiWatchdogTimerGet with %d\n", ctx->saHpiWatchdogNum ));
-    
+ 
     rc = saHpiWatchdogTimerGet (session_id, ctx->resource_id,
 				ctx->saHpiWatchdogNum,
 				&wdog);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+ 
     if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
+      snmp_log(LOG_ERR,"Call to saHpiWatchdogTimerGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiWatchdogTimerGet failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
-    DEBUGMSGTL((AGENT,"log: %d, Run: %d\n", wdog.Log, wdog.Running));
+
     ctx->saHpiWatchdogLog = (wdog.Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;      
     ctx->saHpiWatchdogRunning = (wdog.Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
     ctx->saHpiWatchdogTimerUse = wdog.TimerUse;
@@ -418,6 +428,8 @@ saHpiWatchdogTable_extract_index(saHpiWatchdogTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
+   netsnmp_variable_list var_saHpiDomainID;
+   netsnmp_variable_list var_saHpiResourceID;
     netsnmp_variable_list var_saHpiWatchdogNum;
     int             err;
 
@@ -436,16 +448,23 @@ saHpiWatchdogTable_extract_index(saHpiWatchdogTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
+
+    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
+    var_saHpiDomainID.type = ASN_UNSIGNED;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
+    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
+    var_saHpiResourceID.type = ASN_UNSIGNED;
+    var_saHpiResourceID.next_variable = &var_saHpiWatchdogNum;
+
     memset(&var_saHpiWatchdogNum, 0x00, sizeof(var_saHpiWatchdogNum));
     var_saHpiWatchdogNum.type = ASN_UNSIGNED;     
     var_saHpiWatchdogNum.next_variable = NULL;
 
-
-
     /*
      * parse the oid into the individual components
      */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiWatchdogNum);
+    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
@@ -457,7 +476,7 @@ saHpiWatchdogTable_extract_index(saHpiWatchdogTable_context * ctx,
     /*
      * parsing may have allocated memory. free it.
      */
-    snmp_reset_var_buffers(&var_saHpiWatchdogNum);
+    snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }
@@ -715,7 +734,7 @@ saHpiWatchdogTable_set_reserve2(netsnmp_request_group * rg)
         rc = SNMP_ERR_NOERROR;
 
         switch (current->tri->colnum) {
-	case COLUMN_SAHPIWATCHDOGTIMERRESET: 
+        case COLUMN_SAHPIWATCHDOGTIMERRESET: 
         case COLUMN_SAHPIWATCHDOGLOG:
         case COLUMN_SAHPIWATCHDOGRUNNING:
             /** TruthValue = ASN_INTEGER */
@@ -875,7 +894,7 @@ saHpiWatchdogTable_set_action(netsnmp_request_group * rg)
 	    rc = SNMP_ERR_GENERR;
 	  }
 	}
-
+	
 	if (rc)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 rc);
@@ -997,6 +1016,8 @@ initialize_table_saHpiWatchdogTable(void)
      */
         /** index: saHpiWatchdogNum */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiWatchdogTable_COL_MIN;
     table_info->max_column = saHpiWatchdogTable_COL_MAX;
@@ -1008,15 +1029,7 @@ initialize_table_saHpiWatchdogTable(void)
     cb.container = netsnmp_container_find("saHpiWatchdogTable_primary:"
                                           "saHpiWatchdogTable:"
                                           "table_container");
-#ifdef saHpiWatchdogTable_IDX2
-    /*
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiWatchdogTable_secondary:"
-                                 "saHpiWatchdogTable:" "table_container"));
-     cb.container->next->compare = saHpiWatchdogTable_cmp;
-    */
-#endif
+
 
     cb.can_set = 1;
 

@@ -29,7 +29,14 @@ extern          "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
-  
+  /*
+   * Number of index values in this table.
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this 
+   * define, and make sure to add/remove the new index value(s).
+   */
+#define WATCHDOG_INDEX_NR 3
 
     typedef struct saHpiWatchdogTable_context_s {
         netsnmp_index   index;
@@ -83,13 +90,7 @@ extern          "C" {
  */
    
     void            initialize_table_saHpiWatchdogTable(void);
-  /*
-    const saHpiWatchdogTable_context
-        *saHpiWatchdogTable_get_by_idx(netsnmp_index *);
-
-    const saHpiWatchdogTable_context
-        *saHpiWatchdogTable_get_by_idx_rs(netsnmp_index *, int row_status);
-*/
+ 
     int             saHpiWatchdogTable_get_value(netsnmp_request_info *,
                                                  netsnmp_index *,
                                                  netsnmp_table_request_info
@@ -103,10 +104,10 @@ extern          "C" {
 			 size_t *watchdog_oid_len);
   
 
-int
-delete_watchdog(SaHpiDomainIdT domain_id,
-		SaHpiResourceIdT resource_id,
-		SaHpiWatchdogNumT num);
+  int
+  delete_watchdog(SaHpiDomainIdT domain_id,
+		  SaHpiResourceIdT resource_id,
+		  SaHpiWatchdogNumT num);
 
   int set_watchdog(saHpiWatchdogTable_context *ctx);
   
@@ -116,8 +117,8 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 /*************************************************************
  * oid declarations
  */
-    extern oid      saHpiWatchdogTable_oid[];
-    extern size_t   saHpiWatchdogTable_oid_len;
+  //  extern oid      saHpiWatchdogTable_oid[];
+  // extern size_t   saHpiWatchdogTable_oid_len;
 //1,3,6,1,3,90,3,10
 #define saHpiWatchdogTable_TABLE_OID hpiResources_OID, 10
 
@@ -175,10 +176,7 @@ delete_watchdog(SaHpiDomainIdT domain_id,
 
 
 
-  /*
-    saHpiWatchdogTable_context *saHpiWatchdogTable_get(const char *name,
-                                                       int len);
-  */
+ 
 
 #ifdef __cplusplus
 };

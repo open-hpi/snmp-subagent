@@ -158,7 +158,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 	}
 
 	// Notify RPT table that this row is active.
-	update_clear_event(rpt_entry->DomainId,
+	update_event_status_flag(rpt_entry->DomainId,
 			   rpt_entry->ResourceId,
 			   sel.EntryId,
 			   SNMP_ROW_ACTIVE);
@@ -234,7 +234,7 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
     // Notify RPT table that we are active.
-    update_clear_event(rpt->DomainId,
+    update_event_status_flag(rpt->DomainId,
 		       rpt->ResourceId,
 		       sel->EntryId,
 		       SNMP_ROW_ACTIVE);
@@ -268,13 +268,13 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
 
 }
 
-
+/*
 int
 set_timestamp() {
 
   SaHpiSessionIdT session_id;
   SaErrorT rc;
-  SaHpiTimeT time;
+  SaHpiTimeT time = 0;
   
 
   DEBUGMSGTL((AGENT,"IBM-KR: DEPRECATED\n"));
@@ -297,7 +297,7 @@ set_timestamp() {
     return AGENT_ERR_NOERROR;
 
 }
-
+*/
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,
@@ -774,7 +774,7 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 			       row_ctx->resource_id,
 			       row_ctx->saHpiSystemEventLogEntryId);
 	      // Notify the RPT table.
-	      update_clear_event(row_ctx->domain_id,
+	      update_event_status_flag(row_ctx->domain_id,
 				 row_ctx->resource_id,
 				 row_ctx->saHpiSystemEventLogEntryId,
 				 SNMP_ROW_NOTINSERVICE);

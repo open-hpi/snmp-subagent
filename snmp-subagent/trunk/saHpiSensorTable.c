@@ -1020,7 +1020,7 @@ saHpiSensorTable_extract_index(saHpiSensorTable_context * ctx,
     /*
      * parsing may have allocated memory. free it.
      */
-    snmp_reset_var_buffers(&var_saHpiSensorIndex);
+    snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }
