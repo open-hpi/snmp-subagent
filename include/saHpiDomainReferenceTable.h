@@ -10,6 +10,9 @@
 #ifndef SAHPIDOMAINREFERENCETABLE_H
 #define SAHPIDOMAINREFERENCETABLE_H
 
+#include "SaHpi.h"
+#include <glib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -119,6 +122,26 @@ saHpiDomainReferenceTable_context * saHpiDomainReferenceTable_create_row( netsnm
 #ifdef saHpiDomainReferenceTable_IDX2
 saHpiDomainReferenceTable_context * saHpiDomainReferenceTable_get( const char *name, int len );
 #endif
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainReferenceTable support fucntions
+//*******************************************************
+//*******************************************************
+struct sa_domain_table {
+	SaHpiDomainIdT 	did;
+	SaHpiSessionIdT sid;
+};
+			
+
+struct sa_resource_table {
+        GHashTable *table;
+        GStaticRecMutex lock;
+};
+
+int populate_drt(void);
+SaHpiSessionIdT get_session_id(SaHpiDomainIdT did);
+
 
 #ifdef __cplusplus
 };
