@@ -359,15 +359,31 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->rdr_id = rdr_id;
       // IBM-KR: Adding +1
       ctx->saHpiSensorEventsCategoryControl = entry->EventCtrl + 1;
-      // IBM-KR: Revised in the future MIB - more columns possible
-      ctx->saHpiSensorEventsState = entry->Events;
-      // TRUE=1 -> true(1), FALSE=0, false(2)
+
+      /*
+       * Generate a string representation of the state
+       */
+
+      build_state_string(entry->Category, 
+			 entry->Events,
+			 (char *)&ctx->saHpiSensorEventsSupported,
+			 &ctx->saHpiSensorEventsSupported_len,
+			 SENSOR_EVENTS_SUPPORTED_MAX);
 
       ctx->saHpiSensorStatus = enables->SensorStatus;
 
-      ctx->saHpiSensorAssertEvents = enables->AssertEvents;
+      build_state_string(entry->Category, 
+			 enables->AssertEvents,
+			 (char *)&ctx->saHpiSensorAssertEvents,
+			 &ctx->saHpiSensorAssertEvents_len,
+			 SENSOR_EVENTS_SUPPORTED_MAX);
 
-      ctx->saHpiSensorDeassertEvents = enables->DeassertEvents;
+      build_state_string(entry->Category, 
+			 enables->DeassertEvents,
+			 (char *)&ctx->saHpiSensorDeassertEvents,
+			 &ctx->saHpiSensorDeassertEvents_len,
+			 SENSOR_EVENTS_SUPPORTED_MAX);
+
 
 
       ctx->saHpiSensorIgnore =
@@ -800,6 +816,7 @@ set_sensor_event (saHpiSensorTable_context * ctx)
   if (ctx)
     {
 
+      
       enables.SensorStatus = ctx->saHpiSensorStatus;
       enables.AssertEvents = ctx->saHpiSensorAssertEvents;
       enables.DeassertEvents = ctx->saHpiSensorDeassertEvents;
@@ -863,103 +880,113 @@ saHpiSensorTable_row_copy (saHpiSensorTable_context * dst,
   /*
    * copy components into the context structure
    */
-  dst->saHpiSensorIndex = src->saHpiSensorIndex;
+    dst->saHpiSensorIndex = src->saHpiSensorIndex;
 
-  dst->saHpiSensorType = src->saHpiSensorType;
+    dst->saHpiSensorType = src->saHpiSensorType;
 
-  dst->saHpiSensorCategory = src->saHpiSensorCategory;
+    dst->saHpiSensorCategory = src->saHpiSensorCategory;
 
-  dst->saHpiSensorEventsCategoryControl =
-    src->saHpiSensorEventsCategoryControl;
+    dst->saHpiSensorEventsCategoryControl =
+        src->saHpiSensorEventsCategoryControl;
 
-  dst->saHpiSensorEventsState = src->saHpiSensorEventsState;
+    memcpy(dst->saHpiSensorEventsSupported,
+           src->saHpiSensorEventsSupported,
+           src->saHpiSensorEventsSupported_len);
+    dst->saHpiSensorEventsSupported_len =
+        src->saHpiSensorEventsSupported_len;
 
-  dst->saHpiSensorStatus = src->saHpiSensorStatus;
+    dst->saHpiSensorStatus = src->saHpiSensorStatus;
 
-  dst->saHpiSensorAssertEvents = src->saHpiSensorAssertEvents;
+    memcpy(dst->saHpiSensorAssertEvents, src->saHpiSensorAssertEvents,
+           src->saHpiSensorAssertEvents_len);
+    dst->saHpiSensorAssertEvents_len = src->saHpiSensorAssertEvents_len;
 
-  dst->saHpiSensorDeassertEvents = src->saHpiSensorDeassertEvents;
+    memcpy(dst->saHpiSensorDeassertEvents, src->saHpiSensorDeassertEvents,
+           src->saHpiSensorDeassertEvents_len);
+    dst->saHpiSensorDeassertEvents_len =
+        src->saHpiSensorDeassertEvents_len;
 
-  dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
+    dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
 
-  dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
+    dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
 
-  dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
+    dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
 
-  dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
+    dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
 
-  dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
+    dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
 
-  dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
+    dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
 
-  dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
+    dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
 
-  dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
+    dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
 
-  memcpy (dst->saHpiSensorFactors, src->saHpiSensorFactors,
-	  src->saHpiSensorFactors_len);
-  dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
+    memcpy(dst->saHpiSensorFactors, src->saHpiSensorFactors,
+           src->saHpiSensorFactors_len);
+    dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
 
-  dst->saHpiSensorFactorsLinearization = src->saHpiSensorFactorsLinearization;
+    dst->saHpiSensorFactorsLinearization =
+        src->saHpiSensorFactorsLinearization;
 
-  dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
+    dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
 
-  dst->saHpiSensorRangeFlags = src->saHpiSensorRangeFlags;
+    dst->saHpiSensorRangeFlags = src->saHpiSensorRangeFlags;
 
-  memcpy (dst->saHpiSensorRangeReadingValuesPresent,
-	  src->saHpiSensorRangeReadingValuesPresent,
-	  src->saHpiSensorRangeReadingValuesPresent_len);
-  dst->saHpiSensorRangeReadingValuesPresent_len =
-    src->saHpiSensorRangeReadingValuesPresent_len;
+    memcpy(dst->saHpiSensorRangeReadingValuesPresent,
+           src->saHpiSensorRangeReadingValuesPresent,
+           src->saHpiSensorRangeReadingValuesPresent_len);
+    dst->saHpiSensorRangeReadingValuesPresent_len =
+        src->saHpiSensorRangeReadingValuesPresent_len;
 
-  memcpy (dst->saHpiSensorRangeReadingRaw,
-	  src->saHpiSensorRangeReadingRaw,
-	  src->saHpiSensorRangeReadingRaw_len);
-  dst->saHpiSensorRangeReadingRaw_len = src->saHpiSensorRangeReadingRaw_len;
+    memcpy(dst->saHpiSensorRangeReadingRaw,
+           src->saHpiSensorRangeReadingRaw,
+           src->saHpiSensorRangeReadingRaw_len);
+    dst->saHpiSensorRangeReadingRaw_len =
+        src->saHpiSensorRangeReadingRaw_len;
 
-  memcpy (dst->saHpiSensorRangeReadingInterpreted,
-	  src->saHpiSensorRangeReadingInterpreted,
-	  src->saHpiSensorRangeReadingInterpreted_len);
-  dst->saHpiSensorRangeReadingInterpreted_len =
-    src->saHpiSensorRangeReadingInterpreted_len;
+    memcpy(dst->saHpiSensorRangeReadingInterpreted,
+           src->saHpiSensorRangeReadingInterpreted,
+           src->saHpiSensorRangeReadingInterpreted_len);
+    dst->saHpiSensorRangeReadingInterpreted_len =
+        src->saHpiSensorRangeReadingInterpreted_len;
 
-  memcpy (dst->saHpiSensorRangeReadingEventSensor,
-	  src->saHpiSensorRangeReadingEventSensor,
-	  src->saHpiSensorRangeReadingEventSensor_len);
-  dst->saHpiSensorRangeReadingEventSensor_len =
-    src->saHpiSensorRangeReadingEventSensor_len;
+    memcpy(dst->saHpiSensorRangeReadingEventSensor,
+           src->saHpiSensorRangeReadingEventSensor,
+           src->saHpiSensorRangeReadingEventSensor_len);
+    dst->saHpiSensorRangeReadingEventSensor_len =
+        src->saHpiSensorRangeReadingEventSensor_len;
 
-  dst->saHpiSensorThresholdDefnIsThreshold =
-    src->saHpiSensorThresholdDefnIsThreshold;
+    dst->saHpiSensorThresholdDefnIsThreshold =
+        src->saHpiSensorThresholdDefnIsThreshold;
 
-  dst->saHpiSensorThresholdDefnTholdCapabilities =
-    src->saHpiSensorThresholdDefnTholdCapabilities;
+    dst->saHpiSensorThresholdDefnTholdCapabilities =
+        src->saHpiSensorThresholdDefnTholdCapabilities;
 
+    dst->saHpiSensorThresholdDefnReadThold =
+        src->saHpiSensorThresholdDefnReadThold;
 
-  dst->saHpiSensorThresholdDefnReadThold =
-    src->saHpiSensorThresholdDefnReadThold;
+    dst->saHpiSensorThresholdDefnWriteThold =
+        src->saHpiSensorThresholdDefnWriteThold;
 
-  dst->saHpiSensorThresholdDefnWriteThold =
-    src->saHpiSensorThresholdDefnWriteThold;
+    dst->saHpiSensorThresholdDefnFixedThold =
+        src->saHpiSensorThresholdDefnFixedThold;
 
-  dst->saHpiSensorThresholdDefnFixedThold =
-    src->saHpiSensorThresholdDefnFixedThold;
+    memcpy(dst->saHpiSensorThresholdRaw, src->saHpiSensorThresholdRaw,
+           src->saHpiSensorThresholdRaw_len);
+    dst->saHpiSensorThresholdRaw_len = src->saHpiSensorThresholdRaw_len;
 
-  memcpy (dst->saHpiSensorThresholdRaw, src->saHpiSensorThresholdRaw,
-	  src->saHpiSensorThresholdRaw_len);
-  dst->saHpiSensorThresholdRaw_len = src->saHpiSensorThresholdRaw_len;
+    memcpy(dst->saHpiSensorThresholdInterpreted,
+           src->saHpiSensorThresholdInterpreted,
+           src->saHpiSensorThresholdInterpreted_len);
+    dst->saHpiSensorThresholdInterpreted_len =
+        src->saHpiSensorThresholdInterpreted_len;
 
-  memcpy (dst->saHpiSensorThresholdInterpreted,
-	  src->saHpiSensorThresholdInterpreted,
-	  src->saHpiSensorThresholdInterpreted_len);
-  dst->saHpiSensorThresholdInterpreted_len =
-    src->saHpiSensorThresholdInterpreted_len;
+    dst->saHpiSensorOEM = src->saHpiSensorOEM;
 
-  dst->saHpiSensorOEM = src->saHpiSensorOEM;
-
-  dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
-
-  memcpy (src->saHpiSensorRDR, dst->saHpiSensorRDR, src->saHpiSensorRDR_len);
+    memcpy(src->saHpiSensorRDR, dst->saHpiSensorRDR,
+           src->saHpiSensorRDR_len);
+    dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
 
   dst->resource_id = src->resource_id;
@@ -1077,8 +1104,8 @@ saHpiSensorTable_create_row (netsnmp_index * hdr)
       return NULL;
     }
   ctx->saHpiSensorStatus = 0;
-  ctx->saHpiSensorAssertEvents = 0;
-  ctx->saHpiSensorDeassertEvents = 0;
+  ctx->saHpiSensorAssertEvents_len = 0;
+  ctx->saHpiSensorDeassertEvents_len = 0;
   ctx->saHpiSensorThresholdRaw_len = 0;
   ctx->saHpiSensorThresholdInterpreted_len = 0;
   ctx->hash = 0;
@@ -1180,14 +1207,14 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 
 	case COLUMN_SAHPISENSORASSERTEVENTS:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_OCTET_STR,
 					       sizeof (row_ctx->
 						       saHpiSensorAssertEvents));
 	  break;
 
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_OCTET_STR,
 					       sizeof (row_ctx->
 						       saHpiSensorDeassertEvents));
 	  break;
@@ -1195,7 +1222,7 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 	case COLUMN_SAHPISENSORTYPE:
 	case COLUMN_SAHPISENSORCATEGORY:
 	case COLUMN_SAHPISENSOREVENTSCATEGORYCONTROL:
-	case COLUMN_SAHPISENSOREVENTSSTATE:
+	case COLUMN_SAHPISENSOREVENTSSUPPORTED:
 	case COLUMN_SAHPISENSORIGNORE:
 	case COLUMN_SAHPISENSORREADINGFORMATS:
 	case COLUMN_SAHPISENSORISNUMERIC:
@@ -1363,15 +1390,17 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
 	  break;
 
 	case COLUMN_SAHPISENSORASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  row_ctx->saHpiSensorAssertEvents = *var->val.integer;
+	  memcpy ( row_ctx->saHpiSensorAssertEvents,
+		   var->val.string, var->val_len);
+	  row_ctx->saHpiSensorAssertEvents_len = var->val_len;
 	  if (set_sensor_event (row_ctx) != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
 	  break;
 
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  row_ctx->saHpiSensorDeassertEvents = *var->val.integer;
+	  memcpy(  row_ctx->saHpiSensorDeassertEvents,
+		   var->val.string, var->val_len);
+	  row_ctx->saHpiSensorDeassertEvents_len = var->val_len;
 	  if (set_sensor_event (row_ctx) != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
 	  break;
@@ -1606,13 +1635,13 @@ saHpiSensorTable_get_value (netsnmp_request_info * request,
 				sizeof (context->
 					saHpiSensorEventsCategoryControl));
       break;
-
-    case COLUMN_SAHPISENSOREVENTSSTATE:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-      snmp_set_var_typed_value (var, ASN_UNSIGNED,
-				(char *) &context->saHpiSensorEventsState,
-				sizeof (context->saHpiSensorEventsState));
-      break;
+    case COLUMN_SAHPISENSOREVENTSSUPPORTED:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSensorEventsSupported,
+                                 context->saHpiSensorEventsSupported_len);
+        break;
 
     case COLUMN_SAHPISENSORSTATUS:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
@@ -1622,20 +1651,20 @@ saHpiSensorTable_get_value (netsnmp_request_info * request,
       break;
 
     case COLUMN_SAHPISENSORASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-      snmp_set_var_typed_value (var, ASN_UNSIGNED,
-				(char *) &context->
-				saHpiSensorAssertEvents,
-				sizeof (context->saHpiSensorAssertEvents));
-      break;
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSensorAssertEvents,
+                                 context->saHpiSensorAssertEvents_len);
+        break;
 
     case COLUMN_SAHPISENSORDEASSERTEVENTS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-      snmp_set_var_typed_value (var, ASN_UNSIGNED,
-				(char *) &context->
-				saHpiSensorDeassertEvents,
-				sizeof (context->saHpiSensorDeassertEvents));
-      break;
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSensorDeassertEvents,
+                                 context->saHpiSensorDeassertEvents_len);
+        break;
 
     case COLUMN_SAHPISENSORIGNORE:
 	    /** TruthValue = ASN_INTEGER */
