@@ -1059,7 +1059,8 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
                                 int64(1),
                                 uint64(2),
                                 float64(3),
-                                buffer(4)    
+                                buffer(4),
+				notSupported(5)    
                         }
 
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
@@ -3089,7 +3090,7 @@ saHpiSensorEventOptionalData OBJECT-TYPE
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION
-        ""
+        "DMJ - KR"
         ::= {saHpiSensorEventEntry 6}
 
 
@@ -3098,7 +3099,7 @@ saHpiSensorEventTriggerReadingType OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Refer to the textual convention for more details."
+    "Refer to the textual convention for more details."
     ::= {saHpiSensorEventEntry 7}
 
 saHpiSensorEventTriggerReading OBJECT-TYPE
@@ -3157,7 +3158,7 @@ saHpiSensorEventSpecific OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+    "DMJ, Charlene knows it KR"
     ::= {saHpiSensorEventEntry 14}
 
 
@@ -6224,7 +6225,7 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
         ::= {saHpiSensorReadingMaxTable 1}
 
 SaHpiSensorReadingMaxEntry ::= SEQUENCE {
-        saHpiSensorReadingMaxIsSupported              TruthValue,
+        saHpiSensorReadingMaxIsSupported        TruthValue,
         saHpiSensorReadingMaxType               SaHpiSensorReadingType, 
         saHpiSensorReadingMaxValue              SaHpiSensorReadingValue
         }
