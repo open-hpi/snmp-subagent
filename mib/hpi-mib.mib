@@ -66,7 +66,11 @@ hpiB MODULE-IDENTITY
                         
         "
     DESCRIPTION
-        "This MIB defines the HPI instrumentation based on
+    
+        For security reasons it is recommend to use a SNMP v2 or v3c 
+	SNMP daemon.
+	
+	This MIB defines the HPI instrumentation based on
         'Service Availability Forum Hardware Platform Interface'
         (SA-HPI-B.01.01).
 
