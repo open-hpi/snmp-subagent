@@ -15,9 +15,9 @@ IMPORTS
 	MODULE-COMPLIANCE, 
 	OBJECT-GROUP,
 	NOTIFICATION-GROUP	FROM SNMPv2-CONF
-	experimental		FROM RFC1155-SMI;
+	enterprises		FROM RFC1155-SMI;
 
-hpi MODULE-IDENTITY
+saforum MODULE-IDENTITY
     LAST-UPDATED "200311111800Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
@@ -99,7 +99,13 @@ hpi MODULE-IDENTITY
     REVISION	"200401190000Z"
     DESCRIPTION
 	"Changed saHpiCtrlAttributes to be less confusing."
-	::= { experimental 90 }
+    REVISION	"200402080000Z"
+    DESCRIPTION
+	"Changed HPI MIB OID to the one SAF ratified."
+	::= { enterprises 18568 }
+
+experimental	OBJECT IDENTIFIER ::= { saforum 1 }
+hpi		OBJECT IDENTIFIER ::= { experimental 1 }
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
 
