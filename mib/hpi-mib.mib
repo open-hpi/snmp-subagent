@@ -4166,9 +4166,9 @@ saHpiCtrlState OBJECT-TYPE
         oem      - An oem control is represented as follows:
                      octets 1-4   - manufacturer ID in network byte order
 
-		The data will be put in saHpiCtrlTextType, 
-		saHpiCtrlTextLanguage, and saHpiCtrlText.
-		
+		The oem text data is located in saHpiCtrlText.
+		The saHpiCtrlTextType and saHpiCtrlTextLanguage are both
+		set to undefined (0).
 	"
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
@@ -5704,15 +5704,14 @@ saHpiInventoryValidity OBJECT-TYPE
         ::= {saHpiInventoryEntry 4}
 
 saHpiInventoryAttributes OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(8|12|260|1004))
+	SYNTAX		OCTET STRING (SIZE(8|12|260|1000))
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
   	"This attribute represents the current setting of the inventory.  It must
          be interpreted in the context of saHpiInventoryRecordType.
 
-        internalUse  - The first four octets will define tbe variable length 
-		       of the opaque data. The rest represents the data. Max length
+        internalUse  - Variable length opaque data. Max length
 		       of data is 1000 octets. 
 
         chassisInfo  - Chassis informations are represented as follows:
