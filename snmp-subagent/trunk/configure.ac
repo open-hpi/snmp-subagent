@@ -5,7 +5,7 @@ AC_PREREQ(2.57)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE(openhpi-subagent, 0.1)
 AC_CONFIG_SRCDIR([include/saHpiTable.h])
-AC_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([config.h])
 
 # Checks for programs.
 AC_PROG_CC
