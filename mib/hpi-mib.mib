@@ -4809,8 +4809,7 @@ SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
 	saHpiReadingCurrentIsSupported		TruthValue,
 	saHpiSensorReadingCurrentType		SaHpiSensorReadingType,	
 	saHpiSensorReadingCurrentValue	        SaHpiSensorReadingValue,
-
---IBMDJ add event states SaHpiEventStateT	
+	saHpiSensorReadingEventState		SaHpiEventState
 	}
 
 saHpiReadingCurrentIsSupported	OBJECT-TYPE
@@ -4838,6 +4837,14 @@ saHpiSensorReadingCurrentValue	OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingCurrentEntry 3}
+	
+saHpiSensorReadingEventState OBJECT-TYPE
+	SYNTAX	SaHpiEventState
+	MAX-ACCESS	read-only
+	STATUS	current
+	DESCRIPTION
+	""
+	::= {saHpiSensorReadingCurrentEntry 4}
 
 saHpiSensorReadingMaxTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMaxEntry
