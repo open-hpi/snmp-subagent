@@ -204,6 +204,7 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
      */
     /** TODO: add storage for external index(s)! */
     netsnmp_variable_list var_saHpiDomainId;
+    netsnmp_variable_list var_saHpiDomainId2;
     int err;
 
     /*
@@ -226,8 +227,11 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       var_saHpiDomainId.next_variable = NULL;
+       var_saHpiDomainId.next_variable = &var_saHpiDomainId2;
 
+       memset( &var_saHpiDomainId2, 0x00, sizeof(var_saHpiDomainId2) );
+       var_saHpiDomainId2.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+       var_saHpiDomainId2.next_variable = NULL;
 
     /*
      * parse the oid into the individual index components
@@ -857,7 +861,6 @@ int populate_drt(void) {
 
 	saHpiDomainReferenceTable_context  *domain_ref_ctx;
 	int rc = 0;
-	SaHpiSessionIdT sid;
 
 	SaHpiEntryIdT 	EntryId;
 	SaHpiEntryIdT 	NextEntryId;
@@ -865,6 +868,9 @@ int populate_drt(void) {
 
 	memset(&DrtEntry, 0, sizeof(DrtEntry));
 
+#if 0
+	SaHpiSessionIdT sid;
+	
 	if ( SA_OK != saHpiSessionOpen(
 		SAHPI_UNSPECIFIED_DOMAIN_ID, 
 		&sid, NULL) ){
@@ -875,10 +881,11 @@ int populate_drt(void) {
 		top_drt.sid = sid;
 		populate_drt_call  = TRUE;
 	}
+#endif
 
 	EntryId = SAHPI_FIRST_ENTRY;
 	do {
-		saHpiDrtEntryGet(sid, 
+		saHpiDrtEntryGet(top_drt.sid, 
 				 EntryId,
 				 &NextEntryId,
 				 &DrtEntry);
@@ -920,9 +927,12 @@ int populate_drt(void) {
 }
 
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
+
 	if (populate_drt_call  == TRUE) {
-		return top_drt.did;
+		dbg("returning sessionId");
+		return top_drt.sid;
 	} else {
+		dbg("FAILED: returning sessionId");
 		exit(-1);
 		return -1;
 	}
@@ -930,4 +940,22 @@ SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
 
 
 
+SaErrorT open_session_unspecified_domain(void) {
 
+	int rc = SA_OK;
+
+	SaHpiSessionIdT sid;
+
+	if ( SA_OK != saHpiSessionOpen(
+		SAHPI_UNSPECIFIED_DOMAIN_ID, 
+		&sid, NULL) ){
+		dbg("ERROR: populate_drt, saHpiSessionOpen Failed!"); 
+		rc = -1;
+	} else {
+		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
+		top_drt.sid = sid;
+		populate_drt_call  = TRUE;
+	}
+
+	return rc;
+}
