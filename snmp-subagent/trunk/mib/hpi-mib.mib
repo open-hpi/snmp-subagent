@@ -22,7 +22,7 @@ IMPORTS
 
 hpiB0101 MODULE-IDENTITY
     LAST-UPDATED "200410180000Z"
-    ORGANIZATION "OpenHPI"
+    ORGANIZATION "www.saforum.org"
     CONTACT-INFO "
                 Sean Dague
                         Postal: IBM
@@ -2773,7 +2773,6 @@ saHpiEventEntry OBJECT-TYPE
 SaHpiEventEntry ::= SEQUENCE {
         saHpiEventRowPointer    RowPointer,
         saHpiEventSeverity      INTEGER,
-        saHpiEventHistorical    TruthValue,
         saHpiEventSaHpiTime     SaHpiTime,
         saHpiEventType          INTEGER
         }
@@ -2811,15 +2810,6 @@ saHpiEventSeverity OBJECT-TYPE
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
         ::= {saHpiEventEntry 3}
-
-
-saHpiEventHistorical OBJECT-TYPE
-    SYNTAX      TruthValue
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "True if event log."
-    ::= { saHpiEventEntry 4 }
     
 saHpiEventSaHpiTime     OBJECT-TYPE
     SYNTAX      SaHpiTime
@@ -2830,7 +2820,7 @@ saHpiEventSaHpiTime     OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= { saHpiEventEntry 5 }
+    ::= { saHpiEventEntry 4 }
 
 saHpiEventType          OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2850,7 +2840,7 @@ saHpiEventType          OBJECT-TYPE
         DESCRIPTION     "Event type. 
         Note: The enumerated named have +1 added as opposed to the 
         SAI-HPI-B.01.01 spec for the same constants.  "
-        ::= { saHpiEventEntry 6 }
+        ::= { saHpiEventEntry 5 }
 
 -- *********************************
 -- **
@@ -2896,7 +2886,6 @@ saHpiResourceEventEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiResourceEventTimestamp
         }
         ::= { saHpiResourceEventTable 1 }
@@ -3076,7 +3065,6 @@ saHpiSensorEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiSensorNum, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSensorEventTimestamp
         }
         ::= {saHpiSensorEventTable 1}
@@ -3305,7 +3293,6 @@ saHpiSensorEnableChangeEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiSensorNum,
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSensorEnableChangeEventTimestamp
         }
         ::= {saHpiSensorEnableChangeEventTable 1}
@@ -3451,7 +3438,6 @@ saHpiHotSwapEventEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiHotSwapEventTimestamp
         }
         ::= {saHpiHotSwapEventTable 1}
@@ -3536,7 +3522,6 @@ saHpiWatchdogEventEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiWatchdogNum, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiWatchdogEventTimestamp
         }
         ::= {saHpiWatchdogEventTable 1}
@@ -3649,7 +3634,6 @@ saHpiSoftwareEventEntry OBJECT-TYPE
 		--IBMKR: Do you need ResourceId for a software event?
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSoftwareEventTimestamp
         }
         ::= {saHpiSoftwareEventTable 1}
@@ -3783,7 +3767,6 @@ saHpiOEMEventEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiOEMEventTimestamp
 
         }
@@ -3888,7 +3871,6 @@ saHpiUserEventEntry OBJECT-TYPE
 		-- IBMKR: What is the ResourceId set to?
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiUserEventTimestamp
         }
         ::= {saHpiUserEventTable 1}
@@ -4622,7 +4604,6 @@ saHpiResourceEventLogEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiResourceEventTimestamp
         }
         ::= { saHpiResourceEventLogTable 1 }
@@ -4802,7 +4783,6 @@ saHpiSensorEventLogEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiSensorNum, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSensorEventTimestamp
         }
         ::= {saHpiSensorEventLogTable 1}
@@ -5031,7 +5011,6 @@ saHpiSensorEnableChangeEventLogEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiSensorNum,
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSensorEnableChangeEventTimestamp
         }
         ::= {saHpiSensorEnableChangeEventLogTable 1}
@@ -5177,7 +5156,6 @@ saHpiHotSwapEventLogEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiHotSwapEventTimestamp
         }
         ::= {saHpiHotSwapEventLogTable 1}
@@ -5262,7 +5240,6 @@ saHpiWatchdogEventLogEntry OBJECT-TYPE
                 saHpiResourceId, 
                 saHpiWatchdogNum, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiWatchdogEventTimestamp
         }
         ::= {saHpiWatchdogEventLogTable 1}
@@ -5375,7 +5352,6 @@ saHpiSoftwareEventLogEntry OBJECT-TYPE
 		--IBMKR: Do you need ResourceId for a software event?
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiSoftwareEventTimestamp
         }
         ::= {saHpiSoftwareEventLogTable 1}
@@ -5509,7 +5485,6 @@ saHpiOEMEventLogEntry OBJECT-TYPE
                 saHpiDomainId,
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiOEMEventTimestamp
 
         }
@@ -5614,7 +5589,6 @@ saHpiUserEventLogEntry OBJECT-TYPE
 		-- IBMKR: What is the ResourceId set to?
                 saHpiResourceId, 
                 saHpiEventSeverity,
-                saHpiEventHistorical,
                 saHpiUserEventTimestamp
         }
         ::= {saHpiUserEventLogTable 1}
@@ -9966,7 +9940,7 @@ saHpiSensorNotification NOTIFICATION-TYPE
         DESCRIPTION
         "Sensor event notification."
         REFERENCE 
-        "Derived from typedefs in SAI-HPI-B.01.01 pages 101, 102."
+        "Derived from typedefs in SAI-HPI-B.01.01 sections 7.2 and 7.2.1."
         ::= { hpiNotifications 1 }
 
 saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
