@@ -4348,9 +4348,9 @@ SaHpiEventLogInfoEntry ::= SEQUENCE {
         saHpiEventLogInfoOverflowReset      INTEGER,
 
 -- Event Log operations:
-        saHpiEventLogInfoClear              TruthValue,
+        saHpiEventLogClear              TruthValue,
 
-        saHpiEventLogInfoState              TruthValue
+        saHpiEventLogState              TruthValue
 
         }
 
@@ -4504,7 +4504,7 @@ saHpiEventLogInfoOverflowReset OBJECT-TYPE
 
         ::= {saHpiEventLogInfoEntry 10}
 
-saHpiEventLogInfoClear OBJECT-TYPE
+saHpiEventLogClear OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-write
         STATUS          current
@@ -4519,11 +4519,11 @@ saHpiEventLogInfoClear OBJECT-TYPE
         reset when this function is called."
 
 	REFERENCE
-        "Derived from SAI-HPI-B.01.01 page 6.4.4."
+        "Derived from SAI-HPI-B.01.01 section 6.4.4."
 
     ::= {saHpiEventLogInfoEntry 11}
 
-saHpiEventLogInfoState OBJECT-TYPE
+saHpiEventLogState OBJECT-TYPE
     SYNTAX      TruthValue
     
     MAX-ACCESS  read-write
@@ -4543,7 +4543,7 @@ saHpiEventLogInfoState OBJECT-TYPE
     on-specific which events are automatically added to any Event Log.
     "
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 page 61,62."
+        "Derived from SAI-HPI-B.01.01 sections 6.4.7 and 6.4.8."
     ::= {saHpiEventLogInfoEntry 12}
 
 
@@ -10404,8 +10404,8 @@ saHpiEventLogInfoGroup OBJECT-GROUP
 		saHpiEventLogInfoOverflowResetable,
 		saHpiEventLogInfoOverflowAction,
 		saHpiEventLogInfoOverflowReset,
-		saHpiEventLogInfoClear,
-		saHpiEventLogInfoState
+		saHpiEventLogClear,
+		saHpiEventLogState
 	}
 	STATUS	current
 	DESCRIPTION
