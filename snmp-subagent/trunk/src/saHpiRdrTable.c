@@ -44,6 +44,10 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiRdrTable_oid[] = { saHpiRdrTable_TABLE_OID };
 size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 
+void populate_saHpiRdrTable(void)
+{
+	dbg("WARNING: populate_saHpiRdrTable: not implemented!");
+}
 
 #ifdef saHpiRdrTable_IDX2
 /************************************************************
