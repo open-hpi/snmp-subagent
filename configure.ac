@@ -45,7 +45,7 @@ AC_CHECK_LIB([openhpi], [saHpiInitialize],
 OH_CHECK_NETSNMP
 
 if test "x" != "x$have_netsnmp"; then
-    SNMPLIBS=`net-snmp-config --netsnmp-agent-libs`
+    SNMPLIBS=`net-snmp-config --agent-libs`
 else
     OH_CHECK_FAIL(net-snmp,net-snmp-devel,http://net-snmp.sourceforge.net/,
                 Can not build HPI agent without net-snmp)
