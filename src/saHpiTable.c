@@ -204,17 +204,22 @@ populate_rpt() {
 			  full_oid, full_oid_len);
 	   }
 	   // if (rpt... blah
-	   if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
-	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
-	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
-	     populate_sel(&rpt_entry);
-	   }
+	 
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
 	     
 	     populate_hotswap(&rpt_entry, 
 			      full_oid, full_oid_len);
 	     
 	     }
+	   // SEL and EVENTs MUST be the last to be populated. The reason
+	   // is b/c it calls entries in hotswap, rdr, and rpt rows - and if they
+	   // don't exist before this populate_sel is called - then the information
+	   // will be lost.
+	     if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL) || 
+	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS) || 
+	       (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)) {	     
+	     populate_sel(&rpt_entry);
+	   }
 	 } // rc != SA_OK
 	 // Try next one ?
 	 else {

@@ -121,15 +121,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
     entry_id = SAHPI_OLDEST_ENTRY;
     while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
-      /* Moved to RPT table.
-      err = saHpiEventLogStateGet(session_id,
-				  rpt_entry->ResourceId,
-				  &state);
-      
-      // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
-      if (err != SA_OK)
-	state = SAHPI_TRUE;
-      */
+  
 
       err = saHpiEventLogEntryGet(session_id,
 				  rpt_entry->ResourceId,
@@ -229,7 +221,13 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 
     //    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
-    ctx->saHpiSystemEventLogTimestamp = sel->Timestamp;
+
+    memcpy(&ctx->saHpiSystemEventLogTimestamp,
+	   &sel->Timestamp,
+	   sizeof(SaHpiTimeT));
+    ctx->saHpiSystemEventLogTimestamp.low = htonl(ctx->saHpiSystemEventLogTimestamp.low);
+    ctx->saHpiSystemEventLogTimestamp.high = htonl(ctx->saHpiSystemEventLogTimestamp.high);
+
     ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
@@ -238,6 +236,9 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 		       rpt->ResourceId,
 		       sel->EntryId,
 		       SNMP_ROW_ACTIVE);
+
+
+
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
@@ -1050,7 +1051,7 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
 
     case COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP:
             /** TimeStamp = ASN_TIMETICKS */
-        snmp_set_var_typed_value(var, ASN_TIMETICKS,
+        snmp_set_var_typed_value(var, ASN_COUNTER64,
                                  (char *) &context->
                                  saHpiSystemEventLogTimestamp,
                                  sizeof(context->
