@@ -749,18 +749,18 @@ saHpiDatCount OBJECT-TYPE
 	This field is used to determine if new domains have been added
 	or existing removed. The same functionality is available using
 	notifications."
-	::= {hpiEntity 4}
+	::= {hpiEntity 5}
 
 
 saHpiDatTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF SaHpiDomainInfoEntry
+	SYNTAX		SEQUENCE OF SaHpiDatEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION	
 	"This table represents the management attributes common to all Domains
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-	::= {hpiEntity 5}
+	::= {hpiEntity 6}
 	
 saHpiDatEntry OBJECT-TYPE
 	SYNTAX		SaHpiDatEntry
@@ -935,10 +935,10 @@ saHpiAlarmCondResourceId OBJECT-TYPE
 
 saHpiAlarmCondSensorNum OBJECT-TYPE 
 	SYNTAX		INTEGER {
-				sahpi_status_cond_type_sensor(0),
-				sahpi_status_cond_type_resource(1),
-				sahpi_status_cond_type_oem(2),
-				sahpi_status_cond_type_user(3)
+				sensor(0),
+				resource(1),
+				oem(2),
+				user(3)
 			}
 	MAX-ACCESS	read-create
 	STATUS		current
@@ -1200,7 +1200,7 @@ saHpiEntryCount OBJECT-TYPE
 	This field is used to determine if new resources have been added
 	or existing removed. The same functionality is available using
 	notifications."
-	::= {hpiEntity 6}
+	::= {hpiEntity 7}
 
 saHpiEntryUpdateCount OBJECT-TYPE
 	SYNTAX		Unsigned32
@@ -1209,7 +1209,7 @@ saHpiEntryUpdateCount OBJECT-TYPE
 	DESCRIPTION	"This count is incremented any time the table
 	is changed. It rolls over to zero when the maximum value is reached.
 	The same functionality is available using notifications."
-	::= {hpiEntity 7}
+	::= {hpiEntity 8}
 
 saHpiEntryUpdateTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
@@ -1233,7 +1233,7 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 			 
 	Note: The same functionality - when the table is changed - is available
 	via notifications."
-	::= {hpiEntity 8}
+	::= {hpiEntity 9}
 
 saHpiTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF SaHpiEntry
@@ -1243,7 +1243,7 @@ saHpiTable OBJECT-TYPE
 	"This table represents the management attributes common to all entities
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-	::= {hpiEntity 9}
+	::= {hpiEntity 10}
 
 saHpiEntry OBJECT-TYPE
 	SYNTAX		SaHpiEntry
