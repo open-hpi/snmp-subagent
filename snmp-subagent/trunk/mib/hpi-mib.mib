@@ -474,6 +474,39 @@ SaHpiTimeString ::= TEXTUAL-CONVENTION
     REFERENCE
         "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
     SYNTAX      OCTET STRING(SIZE(0..255))
+    
+
+SaHpiSeverity ::= TEXTUAL-CONVENTION
+        STATUS      current
+        DESCRIPTION     
+        "                       
+                Note these are the SAI-HPI-B.01.01 values, SNMP requires that
+                they are offset by +1.
+                                
+                SAHPI_CRITICAL = 0,
+                SAHPI_MAJOR,    
+                SAHPI_MINOR,    
+                SAHPI_INFORMATIONAL,
+                SAHPI_OK,
+                SAHPI_DEBUG = 0xF0,
+               
+                Only used with DAT and Annunciator functions.  This is not a
+                valid severity for events or alarms. 
+                SAHPI_ALL_SEVERITIES = 0xFF
+        "
+        REFERENCE
+        "Derived from SAI-HPI-B.01.01 section 8.14." 
+        SYNTAX  INTEGER {
+                        undefined(0),
+                        critical (1),
+                        major (2),
+                        minor (3),
+                        informational (4),
+                        ok (5),
+                        debug (6),
+                        allseverities (7)
+                }
+
 
 SaHpiStatusCondType ::= TEXTUAL-CONVENTION
 	STATUS      current
@@ -659,45 +692,107 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
     SYNTAX              OCTET STRING(SIZE(0..255))
 
 SaHpiHotSwapState ::= TEXTUAL-CONVENTION
-    STATUS      current
-    DESCRIPTION
+	STATUS      current
+	DESCRIPTION
         "This textual convention defines the enumeration of states
-    specific to Hot Swap records.
+	specific to Hot Swap records.
 
         inactive(1):
 
-        The INACTIVE state indicates that the FRU, which supports the full hot swap model, is no longer active in the system, and that it has completed the extraction process. When a FRU completes the hardware disconnection process, it is logically and electrically disconnected or isolated from the platform but still physically located in the platform, so the associated resource remains in the domain. Typically, a FRU will be powered off or held in reset when in this state. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource is transitioning to an INACTIVE state.
+        The INACTIVE state indicates that the FRU, which supports the 
+	full hot swap model, is no longer active in the system, and that 
+	it has completed the extraction process. When a FRU completes the 
+	hardware disconnection process, it is logically and electrically 
+	disconnected or isolated from the platform but still physically 
+	located in the platform, so the associated resource remains in the 
+	domain. Typically, a FRU will be powered off or held in reset when 
+	in this state. The HPI implementation should generate a hot swap 
+	event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource 
+	is transitioning to an INACTIVE state.
 
         insertionPending(2):
 
-        The INSERTION PENDING state is entered after a resource that supports the full hot swap model has been added to the domain, as a result of the associated FRU being physically inserted into the system. This state indicates the resource is transitioning from a NOT PRESENT state or INACTIVE state into the ACTIVE state. When transitioning into the INSERTION PENDING state, the resource should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event can be generated when the ejector latch is shut (cPCI) or the device is seated in a slot. 
-        Upon receiving the event, the HPI User has the opportunity to discover the capabilities of the resource before allowing the FRU associated with the resource to power on and become an active component in the system. During this state, the FRU can be commanded to power on or de-assert reset.
+        The INSERTION PENDING state is entered after a resource that supports 
+	the full hot swap model has been added to the domain, as a result of 
+	the associated FRU being physically inserted into the system. This 
+	state indicates the resource is transitioning from a NOT PRESENT 
+	state or INACTIVE state into the ACTIVE state. When transitioning into 
+	the INSERTION PENDING state, the resource should generate a hot swap 
+	event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event 
+	can be generated when the ejector latch is shut (cPCI) or the device 
+	is seated in a slot. 
+        Upon receiving the event, the HPI User has the opportunity to discover 
+	the capabilities of the resource before allowing the FRU associated with 
+	the resource to power on and become an active component in the system. 
+	During this state, the FRU can be commanded to power on or de-assert reset.
 
 
         active(3):
 
-        The ACTIVE state indicates that a resource is now an active member of the domain.
+        The ACTIVE state indicates that a resource is now an active member of 
+	the domain.
 
-        After a FRU completes the hardware connection process, the associated resource enters the ACTIVE state. This does not mean that the FRU is now active at the software level, but merely indicates that the FRU is now active in the system and that it should not be abruptly removed. The HPI implementation generates a hot swap event with HotSwapState = SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
+        After a FRU completes the hardware connection process, the associated 
+	resource enters the ACTIVE state. This does not mean that the FRU is 
+	now active at the software level, but merely indicates that the FRU 
+	is now active in the system and that it should not be abruptly removed. 
+	The HPI implementation generates a hot swap event with HotSwapState = 
+	SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
 
         extractionPending(4):
 
-        The EXTRACTION PENDING state indicates that the resource, which supports the full hot swap model, has requested extraction of the associated FRU. Typically, a resource enters an EXTRACTION PENDING state when an ejector latch is opened (PICMG 2.1) or when a hot swap button is pressed. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that supports Managed Hot Swap requests extraction. 
-        Upon receiving the event, the HPI User has the opportunity to unload software drivers, relocate processes, or unmount file systems (software disconnect) before allowing a FRU to power down and disconnect from the system.
+        The EXTRACTION PENDING state indicates that the resource, which supports 
+	the full hot swap model, has requested extraction of the associated FRU.
+	 Typically, a resource enters an EXTRACTION PENDING state when an ejector 
+	 latch is opened (PICMG 2.1) or when a hot swap button is pressed. The 
+	 HPI implementation should generate a hot swap event with 
+	 HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that 
+	 supports Managed Hot Swap requests extraction. 
+        Upon receiving the event, the HPI User has the opportunity to unload 
+	software drivers, relocate processes, or unmount file systems 
+	(software disconnect) before allowing a FRU to power down and disconnect 
+	from the system.
 
         notPresent(5):
 
-         The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
+         The NOT PRESENT state is actually a virtual state that represents 
+	 a resource that is not currently present in the domain, because the 
+	 FRU associated with that resource is not currently present in the system. 
+	 A resource is in this state before the FRU is physically inserted into 
+	 the system or if it has been removed from the system. A resource that 
+	 supports the full Hot Swap model typically transitions to this state 
+	 from the INACTIVE state, but a resource can transition to this state 
+	 from any state due to a surprise extraction of the FRU. The HPI 
+	 implementation should generate a hot swap event with 
+	 HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions 
+	 from any state to the NOT PRESENT state.
 
-         The event can indicate a normal transition from INACTIVE to the NOT PRESENT state or a surprise extraction from any other state.  Normal transition events are issued with a severity of SAHPI_INFORMATIONAL. A resource following the simplified hot swap model always indicates the transition to the NOT PRESENT state as a surprise extraction.
-         When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry.
+         The event can indicate a normal transition from INACTIVE to the 
+	 NOT PRESENT state or a surprise extraction from any other state.  
+	 Normal transition events are issued with a severity of SAHPI_INFORMATIONAL.
+	  A resource following the simplified hot swap model always indicates the 
+	  transition to the NOT PRESENT state as a surprise extraction.
+         When a resource associated with a FRU fails, many systems will detect 
+	 this as a NOT PRESENT state for the FRU, and report it as a transition 
+	 to the NOT PRESENT state (a normal transition if the resource was in the 
+	 INACTIVE state, or a surprise extraction if it was in a different state).  
+	 If the resource is subsequently restored to functionality, these systems 
+	 will then detect the presence of the FRU, and report another state 
+	 transition from the NOT PRESENT state to the current hot swap state for 
+	 the restored resource.  If the current hot swap state is not the normal 
+	 ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING 
+	 for a resource that uses the full hot swap model or ACTIVE for a resource 
+	 that uses the simplified hot swap model), then the severity of the 
+	 ~unusual~ hot swap event showing a transition from NOT PRESENT to a 
+	 different state should be the severity contained in the ResourceSeverity 
+	 field in the resource~s RPT entry.
 
-    Note: Enumerated values are increased by one value compared to
-    SAI-HPI-B spec."
-    REFERENCE 
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B spec."
+	REFERENCE 
         "Derived from states described in the SAI-HPI-B.01.01 pages 136,137."
 
-    SYNTAX      INTEGER {
+	SYNTAX      INTEGER {
                     undefined(0),
                     inactive (1),
                     insertionPending (2),
@@ -1675,7 +1770,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
 
         saHpiDomainAlarmId                    	SaHpiEntryId,    
         saHpiDomainAlarmTimestamp             	SaHpiTime,  
-        saHpiDomainAlarmSeverity              	INTEGER,  
+        saHpiDomainAlarmSeverity              	SaHpiSeverity,  
         saHpiDomainAlarmAcknowledged          	TruthValue,
         
         saHpiDomainAlarmCondStatusCondType    	INTEGER,
@@ -1710,16 +1805,7 @@ saHpiDomainAlarmTimestamp OBJECT-TYPE
         ::= {saHpiDomainAlarmEntry 2}
 
 saHpiDomainAlarmSeverity OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                critical(1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(241),
-                                allSeverities(256)                      
-                        } 
+        SYNTAX          SaHpiSeverity
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
@@ -1981,7 +2067,7 @@ SaHpiResourceEntry ::= SEQUENCE {
         
         saHpiResourceHotSwapCapabilities        SaHpiCapabilities,     
 
-        saHpiResourceSeverity                   INTEGER,
+        saHpiResourceSeverity                   SaHpiSeverity,
         
         saHpiResourceFailed                     TruthValue,
 
@@ -2137,15 +2223,7 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
 
 
 saHpiResourceSeverity OBJECT-TYPE 
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                critical (1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(81)
-                        }
+        SYNTAX          SaHpiSeverity
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     " Indicates the criticality that should be 
@@ -2801,7 +2879,7 @@ saHpiEventEntry OBJECT-TYPE
 
 SaHpiEventEntry ::= SEQUENCE {
         saHpiEventRowPointer    RowPointer,
-        saHpiEventSeverity      INTEGER,
+        saHpiEventSeverity      SaHpiSeverity,
         saHpiEventSaHpiTime     SaHpiTime,
         saHpiEventType          INTEGER
         }
@@ -2824,15 +2902,7 @@ saHpiEventRowPointer OBJECT-TYPE
     ::= {saHpiEventEntry 1}
 
 saHpiEventSeverity OBJECT-TYPE
-        SYNTAX          INTEGER{
-                                undefined (0),
-                                critical(1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(241)
-                        }
+        SYNTAX          SaHpiSeverity
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Severity of event. 
@@ -4067,7 +4137,7 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
 	saHpiAnnouncementEntryId	SaHpiEntryId,
         saHpiAnnouncementTimestamp      SaHpiTime,
         saHpiAnnouncementAddedByUser    TruthValue,
-        saHpiAnnouncementSeverity       INTEGER,
+        saHpiAnnouncementSeverity       SaHpiSeverity,
         saHpiAnnouncementAcknowledged   TruthValue,
         
         saHpiAnnouncementStatusCondType INTEGER,
@@ -4111,16 +4181,7 @@ saHpiAnnouncementAddedByUser    OBJECT-TYPE
 
 
 saHpiAnnouncementSeverity       OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                critical(1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(241),
-                                allSeverities(256)
-                        }
+        SYNTAX          SaHpiSeverity
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Only used with DAT and Annunciator functions.  
@@ -5769,7 +5830,7 @@ SaHpiAnnouncementEventLogEntry ::= SEQUENCE {
 	saHpiAnnouncementEventLogEntryId	SaHpiEntryId,
         saHpiAnnouncementEventLogTimestamp      SaHpiTime,
         saHpiAnnouncementEventLogAddedByUser    TruthValue,
-        saHpiAnnouncementEventLogSeverity       INTEGER,
+        saHpiAnnouncementEventLogSeverity       SaHpiSeverity,
         saHpiAnnouncementEventLogAcknowledged   TruthValue,
         
         saHpiAnnouncementEventLogStatusCondType INTEGER,
@@ -5813,16 +5874,7 @@ saHpiAnnouncementEventLogAddedByUser    OBJECT-TYPE
 
 
 saHpiAnnouncementEventLogSeverity       OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined(0),
-                                critical(1),
-                                major(2),
-                                minor(3),
-                                informational(4),
-                                ok(5),
-                                debug(241),
-                                allSeverities(256)
-                        }
+        SYNTAX          SaHpiSeverity
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "Only used with DAT and Annunciator functions.  
