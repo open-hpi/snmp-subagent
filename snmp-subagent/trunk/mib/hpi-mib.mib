@@ -310,6 +310,206 @@ SaHpiEventStates ::= TEXTUAL-CONVENTION
 	SAHPI_ES_STATE_13  (SaHpiEventStateT)0x2000
 	SAHPI_ES_STATE_14  (SaHpiEventStateT)0x4000"
 	SYNTAX		OCTET STRING(SIZE(0..255))
+	
+SaHpiTextType ::= TEXTUAL-CONVENTION 
+	STATUS		current
+	DESCRIPTION	"Text Buffers
+
+	These structures are used for defining the type of data in the text buffer 
+	and the length of the buffer. Text buffers are used in the inventory data,
+	RDR, RPT, etc. for variable length strings of data.
+        
+	The encoding of the Data field in the SaHpiTextBufferT structure is defined
+	by the value of the DataType field in the buffer.  The following table
+	describes the various encodings:
+        
+          DataType                     Encoding
+          --------                     --------
+        
+         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
+      				 Buffer must contain even number of bytes.
+        
+         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
+      				 colon, comma, or underscore only.
+        
+         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
+        
+         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
+        
+         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
+        
+       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
+      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
+      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
+      	set defines the first 128 8-bit characters (00h-7Fh) and the 
+      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
+        
+       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
+      	use normal ASCII character encodings, but restrict the allowed
+      	characters to a subset of the entire ASCII character set. These
+      	encodings are used when the target device contains restrictions
+      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
+      	data may be stored externally as 4-bit values, and 
+      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
+      	But, regardless of how the data is stored externally, it is 
+      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
+	across the HPI."
+	SYNTAX		INTEGER {
+				undefined(0),
+				bcdplus(1), 
+				ascii6(2), 
+				text(3),
+				binary(4)
+			}
+	
+
+SaHpiTextLanguage ::= TEXTUAL-CONVENTION
+	STATUS          current
+	DESCRIPTION     
+	"This enumeration lists all of the languages that can be 
+	associated with text.  undefined (0) indicates that 
+	the language is unspecified or unknown.  "
+	SYNTAX		INTEGER {
+				undefined (0),
+				unknown (1),
+				afar (2),
+				abkhazian (3),
+				afrikaans (4),
+				amharic (5),
+				arabic (6),
+				assamese (7),
+				aymara (8),
+				azerbaijani (9),
+				bashkir (10),
+				byelorussian (11),
+				bulgarian (12),
+				bihari (13),
+				bislama (14),
+				bengali (15),
+				tibetan (16),
+				breton (17),
+				catalan (18),
+				corsican (19),
+				czech (20),
+				welsh (21),
+				danish (22),
+				german (23),
+				bhutani (24),
+				greek (25),
+				english (26),
+				esperanto (27),
+				spanish (28),
+				estonian (29),
+				basque (30),
+				persian (31),
+				finnish (32),
+				fiji (33),
+				faeroese (34),
+				french (35),
+				frisian (36),
+				irish (37),
+				scotsgaelic (38),
+				galician (39),
+				guarani (40),
+				gujarati (41),
+				hausa (42),
+				hindi (43),
+				croatian (44),
+				hungarian (45),
+				armenian (46),
+				interlingua (47),
+				interlingue (48),
+				inupiak (49),
+				indonesian (50),
+				icelandic (51),
+				italian (52),
+				hebrew (53),
+				japanese (54),
+				yiddish (55),
+				javanese (56),
+				georgian (57),
+				kazakh (58),
+				greenlandic (59),
+				cambodian (60),
+				kannada (61),
+				korean (62),
+				kashmiri (63),
+				kurdish (64),
+				kirghiz (65),
+				latin (66),
+				lingala (67),
+				laothian (68),
+				lithuanian (69),
+				latvianlettish (70),
+				malagasy (71),
+				maori (72),
+				macedonian (73),
+				malayalam (74),
+				mongolian (75),
+				moldavian (76),
+				marathi (77),
+				malay (78),
+				maltese (79),
+				burmese (80),
+				nauru (81),
+				nepali (82),
+				dutch (83),
+				norwegian (84),
+				occitan (85),
+				afanoromo (86),
+				oriya (87),
+				punjabi (88),
+				polish (89),
+				pashtopushto (90),
+				portuguese (91),
+				quechua (92),
+				rhaetoromance (93),
+				kirundi (94),
+				romanian (95),
+				russian (96),
+				kinyarwanda (97),
+				sanskrit (98),
+				sindhi (99),
+				sangro (100),
+				serbocroatian (101),
+				singhalese (102),
+				slovak (103),
+				slovenian (104),
+				samoan (105),
+				shona (106),
+				somali (107),
+				albanian (108),
+				serbian (109),
+				siswati (110),
+				sesotho (111),
+				sudanese (112),
+				swedish (113),
+				swahili (114),
+				tamil (115),
+				telugu (116),
+				tajik (117),
+				thai (118),
+				tigrinya (119),
+				turkmen (120),
+				tagalog (121),
+				setswana (122),
+				tonga (123),
+				turkish (124),
+				tsonga (125),
+				tatar (126),
+				twi (127),
+				ukrainian (128),
+				urdu (129),
+				uzbek (130),
+				vietnamese (131),
+				volapuk (132),
+				wolof (133),
+				xhosa (134),
+				yoruba (135),
+				chinese (136),
+				zulu (137)
+			}
+
 
 --
 -- DomainInfo, DRT, DAT, and RPT Entry
@@ -4060,9 +4260,15 @@ SaHpiRdrEntry ::= SEQUENCE {
 	saHpiRdrRecordId	Unsigned32,
 	saHpiRdrType		INTEGER,
 	saHpiRdrEntityPath	OCTET STRING,
+	
+	saHpiIsFru  		TruthValue,    	
+
 	saHpiRdr		RowPointer,
 	saHpiRdrId		Counter32,
 	saHpiRdrRTP		RowPointer,
+	
+	saHpiRdrTextType	SaHpiTextType,
+	saHpiRdrTextLanguage	SaHpiTextLanguage,
 	saHpiRdrIdString	OCTET STRING
 	}
 
@@ -4075,12 +4281,13 @@ saHpiRdrRecordId OBJECT-TYPE
 
 saHpiRdrType OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined (0),
-              			noRecord (1),
-				ctrlRdr (2),
-        			sensorRdr (3),
-              			inventoryRdr (4),
-        	      		watchdogRdr (5)
+				undefined(0),
+				noRecord(1),
+				ctrlRdr(2),
+				sensorRdr(3),
+				inventoryRdr(4),
+				watchdogRdr(5),
+				annunciatorRdr(6)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -4113,7 +4320,15 @@ saHpiRdrEntityPath OBJECT-TYPE
 	For example:
  	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
         ::= {saHpiRdrEntry 3}
-
+	
+saHpiIsFru OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Entity is a FRU.  This field is Only valid if the 
+	Entity path given in the 'Entity' field is different from the Entity 
+	path in the RPT entry for the resource."
+	::= {saHpiRdrEntry 4}
 
 saHpiRdr OBJECT-TYPE
 	SYNTAX		RowPointer
@@ -4125,14 +4340,14 @@ saHpiRdr OBJECT-TYPE
 	     saHpiSensorRec
 	     saHpiInventoryRec
 	     saHpiWatchdogRec"
-	::= {saHpiRdrEntry 4}
+	::= {saHpiRdrEntry 5}
 
 saHpiRdrId OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Id of the RDR entry. "
-        ::= {saHpiRdrEntry 5}
+        ::= {saHpiRdrEntry 6}
 
 saHpiRdrRTP OBJECT-TYPE
 	SYNTAX          RowPointer
@@ -4140,14 +4355,30 @@ saHpiRdrRTP OBJECT-TYPE
 	STATUS          current
 	DESCRIPTION     "Forward pointer to the RTP entry. Another method to match 
 	the RPT and RDR is to compare the EntityPath, but this is much easier. "
-	::= {saHpiRdrEntry 6}
+	::= {saHpiRdrEntry 7}
+
+saHpiRdrTextType OBJECT-TYPE
+	SYNTAX		SaHpiTextType
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"See definition"
+	::= {saHpiRdrEntry 8}
+
+saHpiRdrTextLanguage OBJECT-TYPE
+	SYNTAX		SaHpiTextLanguage
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"See definition"
+	::= {saHpiRdrEntry 9}
 
 saHpiRdrIdString OBJECT-TYPE
         SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "ID String of the RDR entry."
-        ::= {saHpiRdrEntry 7}
+        ::= {saHpiRdrEntry 10}
 
 --/*******************************************************************************
 -- * ********************************************************************************
