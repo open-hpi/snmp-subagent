@@ -1248,10 +1248,7 @@ saHpiDomainId OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-	    "The SAHPI_UNSPECIFIED_DOMAIN_ID value is used to specify the default 
-	    domain.
-
-	    SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) "
+	"Each domain identifier is unique within the system."
 	::=   {saHpiDomainInfoEntry 1 }
 
 
