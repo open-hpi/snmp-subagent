@@ -5680,19 +5680,21 @@ saHpiWatchdogRDR OBJECT-TYPE
 -- *******************************************************************************/
 --
 
+hpiAnnunciator	OBJECT IDENTIFIER ::= { hpiResources 12 }
+
 saHpiAnnunciatorCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"The number of annunciators present on this system."
-	::= {hpiResources 12}
+	::= {hpiAnnunciator 1}
 
 saHpiAnnunciatorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnunciatorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION	"Table of Annunciator resource data records."
-        ::= {hpiResources 13}
+        ::= {hpiAnnunciator 2}
 
 saHpiAnnunciatorEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnunciatorEntry
@@ -5782,14 +5784,14 @@ aHpiAnnouncementCount OBJECT-TYPE
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"The number of Announcements present on this system."
-	::= {hpiResources 14}
+	::= {hpiAnnunciator 3}
 
 saHpiAnnouncementTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnouncementEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION	"Table of Announcements."
-        ::= {hpiResources 15}
+        ::= {hpiAnnunciator 4}
 
 saHpiAnnouncementEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnouncementEntry
