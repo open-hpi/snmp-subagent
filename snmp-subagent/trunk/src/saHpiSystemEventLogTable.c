@@ -268,7 +268,7 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	  ctx->saHpiSystemEventLogTimestamp.high =
 	    htonl (ctx->saHpiSystemEventLogTimestamp.high);
 #endif
-	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity;
+	  ctx->saHpiSystemEventLogSeverity = event_entry->Severity+1;
 
 	  if (event_entry->EventType == SAHPI_ET_SENSOR)
 	    {
