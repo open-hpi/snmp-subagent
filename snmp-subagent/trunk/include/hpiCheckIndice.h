@@ -80,16 +80,24 @@ int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventT
 int saHpiRdrType_check_index(long val);
 
 /**************************/
-/* saHpResourceEventTable  */    
+/* saHpiResourceEventTable  */    
 /**************************/
 int saHpiResourceEventTimestamp_check_index( netsnmp_variable_list *var_saHpiResourceEventTimestamp);
 
 /**************************/
-/* saHpResourceTable  */    
+/* saHpiResourceTable  */    
 /**************************/
 int saHpiResourceId_check_index(long val);
 int saHpiEntryId_check_index(long val);
 
- 
+/********************************/
+/* saHpiEnableChangeEventTable  */    
+/********************************/
+int saHpiSensorNum_check_index(long val);
+int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiSensorEnableChangeEventTimestamp);
+
+
+
+	       
 
 
