@@ -44,6 +44,10 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiDomainAlarmTable_oid[] = { saHpiDomainAlarmTable_TABLE_OID };
 size_t saHpiDomainAlarmTable_oid_len = OID_LENGTH(saHpiDomainAlarmTable_oid);
 
+void populate_saHpiDomainAlarmTable()
+{
+	dbg("WARNING: populate_saHpiDomainAlarmTable: not implemented!");
+}
 
 #ifdef saHpiDomainAlarmTable_IDX2
 /************************************************************

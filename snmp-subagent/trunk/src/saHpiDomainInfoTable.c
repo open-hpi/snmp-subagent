@@ -45,6 +45,11 @@ oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
 size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
 
+populate_saHpiDomainInfoTable() 
+{
+	dbg("WARNING: populate_saHpiDomainInfoTable: not implemented!");
+}
+
 #ifdef saHpiDomainInfoTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
