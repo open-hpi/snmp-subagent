@@ -397,7 +397,8 @@ static SaHpiTextBufferT *copy_data( saHpiInventoryTable_context *ctx,
   buf->DataLength = length;
   memcpy(buf->Data, data, length);
   *new_size += length;
-  
+  DEBUGMSGTL((AGENT,"-- Allocated at %X (size: %d), l: %d\n",
+	buf, sizeof(SaHpiTextBufferT), *new_size)); 
   return buf;
 }
 int
@@ -427,7 +428,7 @@ int set_inventory(saHpiInventoryTable_context *ctx) {
   SaHpiUint32T length = 0;
   SaHpiInventGeneralDataT *general_data = NULL;
   SaErrorT rc = SA_OK;
-  
+   
 
   if (ctx) {
     memset(&data, 0x00, sizeof(SaHpiInventDataRecordT));
@@ -487,13 +488,15 @@ int set_inventory(saHpiInventoryTable_context *ctx) {
     inv.Validity = ctx->saHpiInventoryValidity;
     inv.DataRecords[0] = &data;
     // Get the seesion_id
+    DEBUGMSGTL((AGENT,"Data is type: %d, l: %d, at %X\n",
+	data.RecordType, data.DataLength, inv.DataRecords[0]));
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
    
     DEBUGMSGTL((AGENT,"Calling 'saHpiEntityInventoryDataWrite' with %d\n",
 		ctx->resource_id));
-
+	
     rc = saHpiEntityInventoryDataWrite(session_id,
 				       ctx->resource_id,
 				       ctx->saHpiInventoryEirId,
@@ -518,15 +521,25 @@ int set_inventory(saHpiInventoryTable_context *ctx) {
      }
      if (general_data != NULL) {
        DEBUGMSGTL((AGENT,"De-allocating memory\n"));
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->Manufacturer));
        free(general_data->Manufacturer);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ProductName));
        free(general_data->ProductName);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ProductVersion));
        free(general_data->ProductVersion);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ModelNumber));
        free(general_data->ModelNumber);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->SerialNumber));
        free(general_data->SerialNumber);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->PartNumber));
        free(general_data->PartNumber);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->FileId));
        free(general_data->FileId);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->AssetTag));
        free(general_data->AssetTag);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->CustomField[0]));
        free(general_data->CustomField[0]);
+	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->Manufacturer));
      }
     return AGENT_ERR_NOERROR;
   }
