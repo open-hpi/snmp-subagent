@@ -115,14 +115,24 @@ hpi MODULE-IDENTITY
         ::= { enterprises 18568 1 1 1 }
 
 hpiEntity       OBJECT IDENTIFIER ::= { hpi 1 }
-
--- The Events tables:
 hpiEvents       OBJECT IDENTIFIER ::= { hpi 2 }
+hpiResources    OBJECT IDENTIFIER ::= { hpi 3 }
+hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
+hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
+
+-- The hotswap table:
+hpiHotSwap	OBJECT IDENTIFIER ::= { hpiEntity 11 }
+-- The events tables:
 events          OBJECT IDENTIFIER ::= { hpiEvents 1 }
 eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
 
 -- The resource tables.
-hpiResources    OBJECT IDENTIFIER ::= { hpi 3 }
+
+hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
+hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
+hpiAnnunciator  OBJECT IDENTIFIER ::= { hpiResources 12 }
+
+
 
 -- ************************************************
 -- **
@@ -1340,9 +1350,9 @@ saHpiDatEntry OBJECT-TYPE
 SaHpiDatEntry ::= SEQUENCE {
 
         saHpiAlarmId                    SaHpiInstrumentId,    
-        saHpiTimestamp                  SaHpiTime,  
-        saHpiSeverity                   INTEGER,  
-        saHpiAcknowledged               TruthValue,
+        saHpiAlarmTimestamp                  SaHpiTime,  
+        saHpiAlarmSeverity                   INTEGER,  
+        saHpiAlarmAcknowledged               TruthValue,
         
         saHpiAlarmCondStatusCondType    INTEGER,
         saHpiAlarmCondEntityPath        OCTET STRING,
@@ -1367,7 +1377,7 @@ saHpiAlarmId OBJECT-TYPE
 
         ::= {saHpiDatEntry 1}
         
-saHpiTimestamp OBJECT-TYPE
+saHpiAlarmTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
         MAX-ACCESS      read-create
         STATUS          current
@@ -1375,7 +1385,7 @@ saHpiTimestamp OBJECT-TYPE
         Refer to SaSaHpiTime for full describption."
         ::= {saHpiDatEntry 2}
 
-saHpiSeverity OBJECT-TYPE 
+saHpiAlarmSeverity OBJECT-TYPE 
         SYNTAX          INTEGER {
                                 undefined(0),
                                 critical(1),
@@ -1395,7 +1405,7 @@ saHpiSeverity OBJECT-TYPE
         severity for events or alarms)" 
         ::= {saHpiDatEntry 3}
         
-saHpiAcknowledged OBJECT-TYPE
+saHpiAlarmAcknowledged OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-create
         STATUS          current
@@ -2107,7 +2117,7 @@ saHpiParamControl OBJECT-TYPE
 -- * *****************************************************************************
 -- * ******************************************************************************/
 
-hpiHotSwap	OBJECT IDENTIFIER ::= { hpiEntity 11 }
+
 
 saHpiAutoTimeOutTable OBJECT-TYPE
     SYNTAX SEQUENCE OF SaHpiAutoTimeoutEntry
@@ -2130,10 +2140,10 @@ saHpiAutoTimeoutEntry OBJECT-TYPE
 	::= { saHpiAutoTimeOutTable 1 }
 
 SaHpiAutoTimeoutEntry ::= SEQUENCE {
-	saHpiHotSwapInsertTimeout   SaHpiTime
+	saHpiAutoTimeoutForInsert   SaHpiTime
     }
     
-saHpiHotSwapInsertTimeout OBJECT-TYPE
+saHpiAutoTimeoutForInsert OBJECT-TYPE
     SYNTAX      SaHpiTime
     MAX-ACCESS  read-write
     STATUS      current
@@ -2747,20 +2757,20 @@ SaHpiSensorEventEntry ::= SEQUENCE {
 
         saHpiSensorEventState                   SaHpiEventState,
 
-        saHpiEventSensorOptionalData            Unsigned8,
+        saHpiSensorEventOptionalData            Unsigned8,
         
-        saHpiEventSensorTriggerReadingType      SaHpiSensorReadingType,
-        saHpiEventSensorTriggerReading          SaHpiSensorReadingValue,
+        saHpiSensorEventTriggerReadingType      SaHpiSensorReadingType,
+        saHpiSensorEventTriggerReading          SaHpiSensorReadingValue,
 
-        saHpiEventSensorTriggerThresholdType    SaHpiSensorReadingType,
-        saHpiEventSensorTriggerThreshold        SaHpiSensorReadingValue,
+        saHpiSensorEventTriggerThresholdType    SaHpiSensorReadingType,
+        saHpiSensorEventTriggerThreshold        SaHpiSensorReadingValue,
 
-        saHpiEventSensorPreviousState           SaHpiEventState,
-        saHpiEventSensorCurrentState            SaHpiEventState,
+        saHpiSensorEventPreviousState           SaHpiEventState,
+        saHpiSensorEventCurrentState            SaHpiEventState,
 
-        saHpiEventSensorOem                     Unsigned32,
-        saHpiEventSensorSpecific                Unsigned32,
-        saHpiEventSensorDelete                  RowStatus
+        saHpiSensorEventOem                     Unsigned32,
+        saHpiSensorEventSpecific                Unsigned32,
+        saHpiSensorEventDelete                  RowStatus
         }
         
 saHpiSensorNum  OBJECT-TYPE
@@ -2895,7 +2905,7 @@ saHpiSensorEventState OBJECT-TYPE
         ""
         ::= {saHpiSensorEventEntry 6}
 
-saHpiEventSensorOptionalData OBJECT-TYPE
+saHpiSensorEventOptionalData OBJECT-TYPE
         SYNTAX      Unsigned8
         MAX-ACCESS  read-only
         STATUS      current
@@ -2903,9 +2913,8 @@ saHpiEventSensorOptionalData OBJECT-TYPE
         ""
         ::= {saHpiSensorEventEntry 7}
 
--- SaHpiSensorReading 
 
-saHpiEventSensorTriggerReadingType OBJECT-TYPE
+saHpiSensorEventTriggerReadingType OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingType
     MAX-ACCESS  read-only
     STATUS      current
@@ -2913,7 +2922,7 @@ saHpiEventSensorTriggerReadingType OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 8}
 
-saHpiEventSensorTriggerReading OBJECT-TYPE
+saHpiSensorEventTriggerReading OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingValue
     MAX-ACCESS  read-only
     STATUS      current
@@ -2922,7 +2931,7 @@ saHpiEventSensorTriggerReading OBJECT-TYPE
     ::= {saHpiSensorEventEntry 9}
 
 
-saHpiEventSensorTriggerThresholdType OBJECT-TYPE
+saHpiSensorEventTriggerThresholdType OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingType
     MAX-ACCESS  read-only
     STATUS      current
@@ -2930,7 +2939,7 @@ saHpiEventSensorTriggerThresholdType OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 10}
 
-saHpiEventSensorTriggerThreshold OBJECT-TYPE
+saHpiSensorEventTriggerThreshold OBJECT-TYPE
     SYNTAX      SaHpiSensorReadingValue
     MAX-ACCESS  read-only
     STATUS      current
@@ -2939,7 +2948,7 @@ saHpiEventSensorTriggerThreshold OBJECT-TYPE
     ::= {saHpiSensorEventEntry 11}
 
 
-saHpiEventSensorPreviousState OBJECT-TYPE
+saHpiSensorEventPreviousState OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
     STATUS      current
@@ -2947,7 +2956,7 @@ saHpiEventSensorPreviousState OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 12}
 
-saHpiEventSensorCurrentState OBJECT-TYPE
+saHpiSensorEventCurrentState OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
     STATUS      current
@@ -2956,7 +2965,7 @@ saHpiEventSensorCurrentState OBJECT-TYPE
     ::= {saHpiSensorEventEntry 13}
 
 
-saHpiEventSensorOem OBJECT-TYPE
+saHpiSensorEventOem OBJECT-TYPE
     SYNTAX      Unsigned32
     MAX-ACCESS  read-only
     STATUS      current
@@ -2964,7 +2973,7 @@ saHpiEventSensorOem OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 14}
 
-saHpiEventSensorSpecific OBJECT-TYPE
+saHpiSensorEventSpecific OBJECT-TYPE
     SYNTAX      Unsigned32
     MAX-ACCESS  read-only
     STATUS      current
@@ -2972,7 +2981,7 @@ saHpiEventSensorSpecific OBJECT-TYPE
     ""
     ::= {saHpiSensorEventEntry 15}
 
-saHpiEventSensorDelete OBJECT-TYPE
+saHpiSensorEventDelete OBJECT-TYPE
     SYNTAX      RowStatus
     MAX-ACCESS  read-write
     STATUS      current
@@ -4233,7 +4242,7 @@ SaHpiRdrEntry ::= SEQUENCE {
         saHpiRdrType            INTEGER,
         saHpiRdrEntityPath      OCTET STRING,
         
-        saHpiIsFru              TruthValue,     
+        saHpiRdrIsFru	        TruthValue,     
 
         saHpiRdr                RowPointer,
         saHpiRdrId              Counter32,
@@ -4288,7 +4297,7 @@ saHpiRdrEntityPath OBJECT-TYPE
 	::=   {saHpiRdrEntry 2 }
 
         
-saHpiIsFru OBJECT-TYPE 
+saHpiRdrIsFru OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -4721,10 +4730,10 @@ SaHpiSensorEntry ::= SEQUENCE {
          
         saHpiSensorEventEnable                  TruthValue,       
         saHpiSensorEventCtrl                    INTEGER,  
-        saHpiEventState                         SaHpiEventState,   
+        saHpiSensorSupportedStates                         SaHpiEventState,   
        
-        saHpiAssertEventMask                    SaHpiEventState,   
-        saHpiDeassertEventMask                  SaHpiEventState,   
+        saHpiSensorAssertEventMask                    SaHpiEventState,   
+        saHpiSensorDeassertEventMask                  SaHpiEventState,   
         
         saHpiSensorEventsCategoryControl        INTEGER,
         saHpiSensorEventsSupported              SaHpiEventState,
@@ -4738,9 +4747,9 @@ SaHpiSensorEntry ::= SEQUENCE {
         saHpiSensorPercentage                   TruthValue,
                 
         saHpiSensorRangeFlags                   OCTET STRING,                                           
-        saHpiAccuracyFactor                     Float64,
+        saHpiSensorAccuracyFactor                     Float64,
         
-        saHpiOem                                Unsigned32,
+        saHpiSensorOem                                Unsigned32,
         
         saHpiSensorRDR                          RowPointer
         }
@@ -4869,7 +4878,7 @@ saHpiSensorEventCtrl    OBJECT-TYPE
                                         assert/deassert masks cannot be changed."
         ::= {saHpiSensorEntry 6}
 
-saHpiEventState         OBJECT-TYPE
+saHpiSensorSupportedStates         OBJECT-TYPE
         SYNTAX          SaHpiEventState
         MAX-ACCESS      read-write
         STATUS          current
@@ -4878,7 +4887,7 @@ saHpiEventState         OBJECT-TYPE
 	refer to SaHpiEventState."
         ::= {saHpiSensorEntry 7}
         
-saHpiAssertEventMask    OBJECT-TYPE
+saHpiSensorAssertEventMask    OBJECT-TYPE
         SYNTAX          SaHpiEventState
         MAX-ACCESS      read-write
         STATUS          current
@@ -4911,7 +4920,7 @@ saHpiAssertEventMask    OBJECT-TYPE
 
         ::= {saHpiSensorEntry 8}
 
-saHpiDeassertEventMask  OBJECT-TYPE
+saHpiSensorDeassertEventMask  OBJECT-TYPE
         SYNTAX          SaHpiEventState
         MAX-ACCESS      read-write
         STATUS          current
@@ -5056,7 +5065,7 @@ saHpiSensorRangeFlags   OBJECT-TYPE
         nothing if the sensor does not support any ranges."
         ::= {saHpiSensorEntry 19}
         
-saHpiAccuracyFactor     OBJECT-TYPE
+saHpiSensorAccuracyFactor     OBJECT-TYPE
         SYNTAX          Float64
         MAX-ACCESS      read-only
         STATUS          current
@@ -5067,7 +5076,7 @@ saHpiAccuracyFactor     OBJECT-TYPE
         figures in all sensor accuracies, resolutions, and tolerances."
         ::= {saHpiSensorEntry 20}
         
-saHpiOem                OBJECT-TYPE
+saHpiSensorOem                OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -5092,7 +5101,7 @@ saHpiSensorRDR OBJECT-TYPE
 -- ********************************************************************************
 -- *******************************************************************************/
 
-hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
+
 
 saHpiSensorReadingCurrentTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingCurrentEntry
@@ -5112,13 +5121,13 @@ saHpiSensorReadingCurrentEntry OBJECT-TYPE
         ::= {saHpiSensorReadingCurrentTable 1}
 
 SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
-        saHpiReadingCurrentIsSupported          TruthValue,
+        saHpiSensorReadingCurrentIsSupported          TruthValue,
         saHpiSensorReadingCurrentType           SaHpiSensorReadingType, 
         saHpiSensorReadingCurrentValue          SaHpiSensorReadingValue,
         saHpiSensorReadingCurrentEventState            SaHpiEventState
         }
 
-saHpiReadingCurrentIsSupported  OBJECT-TYPE
+saHpiSensorReadingCurrentIsSupported  OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -5176,12 +5185,12 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
         ::= {saHpiSensorReadingMaxTable 1}
 
 SaHpiSensorReadingMaxEntry ::= SEQUENCE {
-        saHpiReadingMaxIsSupported              TruthValue,
+        saHpiSensorReadingMaxIsSupported              TruthValue,
         saHpiSensorReadingMaxType               SaHpiSensorReadingType, 
         saHpiSensorReadingMaxValue              SaHpiSensorReadingValue
         }
         
-saHpiReadingMaxIsSupported      OBJECT-TYPE
+saHpiSensorReadingMaxIsSupported      OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -5231,12 +5240,12 @@ saHpiSensorReadingMinEntry OBJECT-TYPE
         ::= {saHpiSensorReadingMinTable 1}
 
 SaHpiSensorReadingMinEntry ::= SEQUENCE {
-        saHpiReadingMinIsSupported              TruthValue,
+        saHpiSensorReadingMinIsSupported              TruthValue,
         saHpiSensorReadingMinType               SaHpiSensorReadingType, 
         saHpiSensorReadingMinValue              SaHpiSensorReadingValue
         }
 
-saHpiReadingMinIsSupported      OBJECT-TYPE
+saHpiSensorReadingMinIsSupported      OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -5286,12 +5295,12 @@ saHpiSensorReadingNominalEntry OBJECT-TYPE
         ::= {saHpiSensorReadingNominalTable 1}
 
 SaHpiSensorReadingNominalEntry ::= SEQUENCE {
-        saHpiReadingNominalIsSupported          TruthValue,
+        saHpiSensorReadingNominalIsSupported          TruthValue,
         saHpiSensorReadingNominalType           SaHpiSensorReadingType, 
         saHpiSensorReadingNominalValue          SaHpiSensorReadingValue
         }
         
-saHpiReadingNominalIsSupported  OBJECT-TYPE
+saHpiSensorReadingNominalIsSupported  OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -5341,12 +5350,12 @@ saHpiSensorReadingNormalMaxEntry OBJECT-TYPE
         ::= {saHpiSensorReadingNormalMaxTable 1}
 
 SaHpiSensorReadingNormalMaxEntry ::= SEQUENCE {
-        saHpiReadingNormalMaxIsSupported        TruthValue,
+        saHpiSensorReadingNormalMaxIsSupported        TruthValue,
         saHpiSensorReadingNormalMaxType         SaHpiSensorReadingType, 
         saHpiSensorReadingNormalMaxValue        SaHpiSensorReadingValue
         }
 
-saHpiReadingNormalMaxIsSupported        OBJECT-TYPE
+saHpiSensorReadingNormalMaxIsSupported        OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -5396,12 +5405,12 @@ saHpiSensorReadingNormalMinEntry OBJECT-TYPE
         ::= {saHpiSensorReadingNormalMinTable 1}
 
 SaHpiSensorReadingNormalMinEntry ::= SEQUENCE {
-        saHpiReadingNormalMinIsSupported        TruthValue,
+        saHpiSensorReadingNormalMinIsSupported        TruthValue,
         saHpiSensorReadingNormalMinType         SaHpiSensorReadingType, 
         saHpiSensorReadingNormalMinValue        SaHpiSensorReadingValue
         }
 
-saHpiReadingNormalMinIsSupported        OBJECT-TYPE
+saHpiSensorReadingNormalMinIsSupported        OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -6044,7 +6053,7 @@ saHpiSensorThdNegHysteresisValue                OBJECT-TYPE
 -- ********************************************************************************
 -- *******************************************************************************/
 
-hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
+
 
 saHpiInventoryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -6074,21 +6083,21 @@ saHpiInventoryEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiIdrId
+                saHpiInventoryId
         }
         ::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
-        saHpiIdrId	                SaHpiInstrumentId,
-        saHpiIdrPersistent              TruthValue,
+        saHpiInventoryId	                SaHpiInstrumentId,
+        saHpiInventoryPersistent              TruthValue,
         saHpiInventoryOEM               Unsigned32,
-        saHpiIdrUpdateCount             Unsigned32,
-        saHpiIdrIsReadOnly              TruthValue,
-        saHpiIdrNumAreas                Unsigned32,
+        saHpiInventoryUpdateCount             Unsigned32,
+        saHpiInventoryIsReadOnly              TruthValue,
+        saHpiInventoryNumAreas                Unsigned32,
         saHpiInventoryRDR               RowPointer
         }
         
-saHpiIdrId       	OBJECT-TYPE
+saHpiInventoryId       	OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      read-only
         STATUS          current
@@ -6097,7 +6106,7 @@ saHpiIdrId       	OBJECT-TYPE
         ::= {saHpiInventoryEntry 1}
 
         
-saHpiIdrPersistent OBJECT-TYPE 
+saHpiInventoryPersistent OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
@@ -6119,7 +6128,7 @@ saHpiInventoryOEM OBJECT-TYPE
         specific value."
         ::= {saHpiInventoryEntry 3}
 
-saHpiIdrUpdateCount OBJECT-TYPE
+saHpiInventoryUpdateCount OBJECT-TYPE
     SYNTAX      Unsigned32
     MAX-ACCESS  read-only
     STATUS      current
@@ -6128,7 +6137,7 @@ saHpiIdrUpdateCount OBJECT-TYPE
 
     ::= {saHpiInventoryEntry 4}
 
-saHpiIdrIsReadOnly OBJECT-TYPE
+saHpiInventoryIsReadOnly OBJECT-TYPE
     SYNTAX      TruthValue
     MAX-ACCESS  read-only
     STATUS      current
@@ -6140,7 +6149,7 @@ saHpiIdrIsReadOnly OBJECT-TYPE
     ::= {saHpiInventoryEntry 5}
 
 
-saHpiIdrNumAreas OBJECT-TYPE
+saHpiInventoryNumAreas OBJECT-TYPE
     SYNTAX      Unsigned32
     MAX-ACCESS  read-only
     STATUS      current
@@ -6200,7 +6209,7 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiIdrId, 
+                saHpiInventoryId, 
                 saHpiAreaId
         }
         ::= {saHpiInventoryDataAreaTable 1}
@@ -6312,7 +6321,7 @@ saHpiInventoryFieldEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId,
-                saHpiIdrId,
+                saHpiInventoryId,
                 saHpiAreaId,
                 saHpiFieldId
         }
@@ -7148,7 +7157,6 @@ saHpiWatchdogRDR 	OBJECT-TYPE
 -- *******************************************************************************/
 --
 
-hpiAnnunciator  OBJECT IDENTIFIER ::= { hpiResources 12 }
 
 saHpiAnnunciatorCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -7271,17 +7279,16 @@ saHpiAnnunciatorRDR OBJECT-TYPE
 -- ********************************************************************************
 -- *******************************************************************************/
 --
-hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
 
 saHpiSensorNotification NOTIFICATION-TYPE
         OBJECTS {       
                 saHpiSensorEventType,
                 saHpiSensorEventCategory,
                 saHpiSensorEventState,
-                saHpiEventSensorTriggerReadingType,
-                saHpiEventSensorTriggerReading,
-                saHpiEventSensorTriggerThresholdType,
-                saHpiEventSensorTriggerThreshold
+                saHpiSensorEventTriggerReadingType,
+                saHpiSensorEventTriggerReading,
+                saHpiSensorEventTriggerThresholdType,
+                saHpiSensorEventTriggerThreshold
         }
         STATUS current
         DESCRIPTION
@@ -7399,375 +7406,4 @@ saHpiUserNotifications NOTIFICATION-TYPE
 --      OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2
 -- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
-
-saHpiEntityGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEntryCount,
-                saHpiEntryUpdateCount,
-                saHpiEntryUpdateTimestamp,
-                saHpiResourceEntityPath ,
-                saHpiResourceCapabilities ,
-                saHpiResourceSeverity ,
-                saHpiResourceInfoResourceRev ,
-                saHpiResourceInfoSpecificVer ,
-                saHpiResourceInfoDeviceSupport ,
-                saHpiResourceInfoManufacturerId ,
-                saHpiResourceInfoProductId ,
-                saHpiResourceInfoFirmwareMajorRev ,
-                saHpiResourceInfoFirmwareMinorRev ,
-                saHpiResourceInfoAuxFirmwareRev ,
-                saHpiResourceTagTextType ,
-                saHpiResourceTagTextLanguage,
-                saHpiResourceTag,
-                saHpiParamControl
-                --saHpiClearEvents,
-                --saHpiEventLogTime,
-                --saHpiEventLogState
-        }
-        STATUS current
-        DESCRIPTION
-                "Entity group"
-        ::=  { hpiMIBCompliances 1}
-
-
-saHpiEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEventLogEntries
-        }
-        STATUS current
-        DESCRIPTION 
-                "System event group"
-        ::=  { hpiMIBCompliances 3}
-
-saHpiHotSwapGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHotSwapIndicator,
---              saHpiHotSwapState,
---              saHpiHotSwapPreviousState,
-                saHpiHotSwapInsertTimeout,
-                saHpiHotSwapExtractTimeout,
-                saHpiHotSwapActionRequest,
-                saHpiHotSwapRTP
-        }
-        STATUS current
-        DESCRIPTION
-                "Hotswap group"
-        ::=  { hpiMIBCompliances 4}
-
-saHpiResourceDataRecordGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiRdrCount,
---              saHpiRdrRecordId,
---              saHpiRdrType,
-                saHpiRdrEntityPath,
-                saHpiRdr,
-                saHpiRdrId,
-                saHpiRdrRTP
-        }
-        STATUS current
-        DESCRIPTION
-                "Resource Data Record group"
-        ::=  { hpiMIBCompliances 5}
-
-saHpiSensorGroup        OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorCount,
---              saHpiSensorIndex,
-                saHpiSensorType,
-                saHpiSensorCategory,
-                saHpiSensorEventsCategoryControl,
-                saHpiSensorEventsSupported,
-                saHpiSensorBaseUnits,
-                saHpiSensorModifierUnits,
-                saHpiSensorModifierUse,
-                saHpiSensorPercentage,
-                saHpiSensorRangeFlags,
-                saHpiSensorRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Sensors groups."
-        ::=  { hpiMIBCompliances 6}
-
-saHpiSensorReadingCurrentGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingCurrentIsSupported,
-                saHpiSensorReadingCurrentType, 
-                saHpiSensorReadingCurrentValue  
-        }
-        STATUS current
-        DESCRIPTION
-                "Current (dynamic) sensor reading."
-        ::= { hpiMIBCompliances 7}
-
-saHpiSensorReadingMaxGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingMaxIsSupported,
-                saHpiSensorReadingMaxType, 
-                saHpiSensorReadingMaxValue      
-        }
-        STATUS current
-        DESCRIPTION
-                "Manufacturer maximum sensor reading."
-        ::= { hpiMIBCompliances 8}
-
-saHpiSensorReadingMinGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingMinIsSupported,     
-                saHpiSensorReadingMinType,
-                saHpiSensorReadingMinValue  
-        }
-        STATUS current
-        DESCRIPTION
-                "Manufacturer minimum sensor reading."
-        ::= { hpiMIBCompliances 9}
-
-saHpiSensorReadingNominalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingNominalIsSupported,         
-                saHpiSensorReadingNominalType,     
-                saHpiSensorReadingNominalValue
-        }
-        STATUS current
-        DESCRIPTION
-                "Manufacturer nominal sensor reading."
-        ::= { hpiMIBCompliances 10}
-
-
-saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingNormalMaxIsSupported,       
-                saHpiSensorReadingNormalMaxType,   
-                saHpiSensorReadingNormalMaxValue  
-        }
-        STATUS current
-        DESCRIPTION
-                "Manufacturer normal maximum sensor reading."
-        ::= { hpiMIBCompliances 11}
-
-saHpiSensorReadingNormalMinGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiReadingNormalMinIsSupported,       
-                saHpiSensorReadingNormalMinType,    
-                saHpiSensorReadingNormalMinValue   
-        }
-        STATUS current
-        DESCRIPTION
-                "Manufacturer normal minimum sensor reading."
-        ::= { hpiMIBCompliances 12}
-        
-saHpiSensorThdLowCriticalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowCriticalIsReadable,    
-                saHpiSensorThdLowCriticalIsWritable,   
-                saHpiSensorThdLowCriticalType,         
-                saHpiSensorThdLowCriticalValue        
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for catastrophic sensor reading at 
-                the lower end of the range that does not impact the
-                functional status."
-        ::= { hpiMIBCompliances 13}
-
-saHpiSensorThdLowMajorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowMajorIsReadable,           
-                saHpiSensorThdLowMajorIsWritable,    
-                saHpiSensorThdLowMajorType,          
-                saHpiSensorThdLowMajorValue         
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for severely degraded sensor reading
-                at the lower end of the range that does not impact
-                the functional status."
-        ::= { hpiMIBCompliances 14}
-
-saHpiSensorThdLowMinorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowMinorIsReadable,       
-                saHpiSensorThdLowMinorIsWritable,  
-                saHpiSensorThdLowMinorType,        
-                saHpiSensorThdLowMinorValue       
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for degraded sensor reading at the 
-                lower end of the range that does not impact the
-                functional status."
-        ::= { hpiMIBCompliances 15}
-
-
-saHpiSensorThdUpCriticalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdUpCriticalIsReadable,
-                saHpiSensorThdUpCriticalIsWritable,  
-                saHpiSensorThdUpCriticalType,         
-                saHpiSensorThdUpCriticalValue        
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for catastrophic sensor reading at
-                the upper end of the range that does not impact the
-                functional status."
-        ::= { hpiMIBCompliances 16}
-
-saHpiSensorThdUpMajorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdUpMajorIsReadable,        
-                saHpiSensorThdUpMajorIsWritable,     
-                saHpiSensorThdUpMajorType,           
-                saHpiSensorThdUpMajorValue          
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for severely degraded sensor reading
-                at the upper end of the range that does not impact the
-                functional status of the sensor."
-        ::= { hpiMIBCompliances 17}
-
-
-saHpiSensorThdUpMinorGroup OBJECT-GROUP 
-        OBJECTS {
-                saHpiSensorThdUpMinorIsReadable,   
-                saHpiSensorThdUpMinorIsWritable,   
-                saHpiSensorThdUpMinorType,         
-                saHpiSensorThdUpMinorValue              
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for degraded sensor reading at the
-                upper end of the range that does not impact the
-                functional status of the sensor."
-        ::= { hpiMIBCompliances 18}
-
-
-saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdPosHysteresisIsReadable,   
-                saHpiSensorThdPosHysteresisIsWritable,          
-                saHpiSensorThdPosHysteresisType,         
-                saHpiSensorThdPosHysteresisValue    
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for hysteresis which is the positive
-                range over which a change is accepted."
-        ::= { hpiMIBCompliances 19}
-
-
-saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdNegHysteresisIsReadable,          
-                saHpiSensorThdNegHysteresisIsWritable,   
-                saHpiSensorThdNegHysteresisType,         
-                saHpiSensorThdNegHysteresisValue        
-        }
-        STATUS current
-        DESCRIPTION
-                "Threshold values for hysteresis which is the negative
-                range over which a change is accepted."
-        ::= { hpiMIBCompliances 20}
-
-saHpiCtrlGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlCount,
-                saHpiCtrlNum,
-                saHpiCtrlOutputType,
-                saHpiCtrlType,
-                saHpiCtrlState,
-                saHpiCtrlOem,
-                saHpiCtrlTextType,
-                saHpiCtrlTextLanguage,
-                saHpiCtrlText,
-                saHpiCtrlRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Control group."
-        ::=  { hpiMIBCompliances 21}
-
-saHpiInventoryGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiInventoryCount,
-                saHpiInventoryRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Inventory group."
-        ::=  { hpiMIBCompliances 22}
-
-saHpiWatchdogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiWatchdogCount,
-                saHpiWatchdogNum,
-                saHpiWatchdogLog ,
-                saHpiWatchdogRunning ,
-                saHpiWatchdogTimerUse,
-                saHpiWatchdogTimerAction,
-                saHpiWatchdogPretimerInterrupt,
-                saHpiWatchdogPreTimeoutInterval,
-                saHpiWatchdogTimerUseExpFlags,
-                saHpiWatchdogTimerInitialCount,
-                saHpiWatchdogTimerPresentCount,
-                saHpiWatchdogTimerReset,
-                saHpiWatchdogOem,
-                saHpiWatchdogRDR
-        }
-        STATUS current
-        DESCRIPTION
-                "Watchdog group."
-        ::=  { hpiMIBCompliances 23}
-
-saHpiNotificationGroup NOTIFICATION-GROUP
-        NOTIFICATIONS {
-                saHpiSensorNotification,
-                saHpiSensorEnableChangeNotification,
-                saHpiResourceNotifications,
-                saHpiDomainNotifications,
-                saHpiWatchdogNotification,
-                saHpiHotSwapNotification,
-                saHpiSoftwareNotifications,
-                saHpiOEMNotifications,
-                saHpiUserNotifications
-        }
-        STATUS  current
-        DESCRIPTION
-        "Notification group"
-        ::=  { hpiMIBCompliances 24}
-        
-saHpiMIBCompliance MODULE-COMPLIANCE
-        STATUS current
-        DESCRIPTION
-        "The compliance statement for SMIv2 compliance of Platform MIB."
-        MODULE
-        MANDATORY-GROUPS {
-                saHpiEntityGroup,
---              saHpiEventGroup,
-                saHpiEventGroup,
-                saHpiHotSwapGroup,
-                saHpiResourceDataRecordGroup,
-                saHpiSensorGroup,
-                saHpiSensorReadingCurrentGroup,
-                saHpiSensorReadingMaxGroup,
-                saHpiSensorReadingMinGroup,
-                saHpiSensorReadingNominalGroup,
-                saHpiSensorReadingNormalMaxGroup,
-                saHpiSensorReadingNormalMinGroup,
-                saHpiSensorThdLowCriticalGroup,
-                saHpiSensorThdLowMajorGroup,
-                saHpiSensorThdLowMinorGroup,
-                saHpiSensorThdUpCriticalGroup,
-                saHpiSensorThdUpMajorGroup,
-                saHpiSensorThdUpMinorGroup,
-                saHpiSensorThdPosHysteresisGroup,
-                saHpiSensorThdNegHysteresisGroup,
-                saHpiCtrlGroup,
-                saHpiInventoryGroup,
-                saHpiWatchdogGroup,
-                saHpiNotificationGroup
-        }
-        ::=  { hpiMIBCompliances 25}
 END
