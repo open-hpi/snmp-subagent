@@ -5653,6 +5653,7 @@ saHpiInventoryEntry OBJECT-TYPE
 	::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
+	saHpiInstrumentId		SaHpiInstrumentId,
 	saHpiIdrPersistent              TruthValue,
 	saHpiInventoryOEM		Unsigned32,
 	saHpiIdrUpdateCount		Unsigned32,
@@ -5660,6 +5661,15 @@ SaHpiInventoryEntry ::= SEQUENCE {
 	saHpiIdrNumAreas		Unsigned32,
 	saHpiInventoryRDR		RowPointer
 	}
+	
+saHpiInstrumentId 	OBJECT-TYPE
+	SYNTAX		SaHpiInstrumentId
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+	::= {saHpiInventoryEntry 1}
+
 	
 saHpiIdrPersistent OBJECT-TYPE 
 	SYNTAX		TruthValue
@@ -5672,7 +5682,7 @@ saHpiIdrPersistent OBJECT-TYPE
         defined in implementation documentation."
     	REFERENCE
 		""
-	::= {saHpiInventoryEntry 1}
+	::= {saHpiInventoryEntry 2}
 
 saHpiInventoryOEM OBJECT-TYPE
 	SYNTAX		Unsigned32
@@ -5681,7 +5691,7 @@ saHpiInventoryOEM OBJECT-TYPE
 	DESCRIPTION
 	"OEM value for the inventory record. This is manufacturere' 
 	specific value."
-	::= {saHpiInventoryEntry 2}
+	::= {saHpiInventoryEntry 3}
 
 saHpiIdrUpdateCount OBJECT-TYPE
     SYNTAX	Unsigned32
@@ -5690,7 +5700,7 @@ saHpiIdrUpdateCount OBJECT-TYPE
     DESCRIPTION
 	"The count is incremented any time the IDR is changed."
 
-    ::= {saHpiInventoryEntry 3}
+    ::= {saHpiInventoryEntry 4}
 
 saHpiIdrIsReadOnly OBJECT-TYPE
     SYNTAX	TruthValue
@@ -5701,7 +5711,7 @@ saHpiIdrIsReadOnly OBJECT-TYPE
 	headers and fields are flagged as well."
     REFERENCE
     	" "
-    ::= {saHpiInventoryEntry 4}
+    ::= {saHpiInventoryEntry 5}
 
 
 saHpiIdrNumAreas OBJECT-TYPE
@@ -5712,7 +5722,7 @@ saHpiIdrNumAreas OBJECT-TYPE
 	"Number of area containted in IDR"
     REFERENCE
     	" "
-    ::= {saHpiInventoryEntry 5}
+    ::= {saHpiInventoryEntry 6}
 
 
 saHpiInventoryRDR OBJECT-TYPE
@@ -5720,7 +5730,7 @@ saHpiInventoryRDR OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 6}
+        ::= {saHpiInventoryEntry 7}
 	
 -- **************************************
 -- **
