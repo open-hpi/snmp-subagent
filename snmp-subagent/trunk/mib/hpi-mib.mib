@@ -6215,12 +6215,9 @@ saHpiSensorThdLowMinorIsReadable        OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdLowMinorRaw is set to
-        '-1' and saHpiSensorThdLowMinorInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdLowMinorEntry 1}
 
 saHpiSensorThdLowMinorIsWritable        OBJECT-TYPE
@@ -6228,13 +6225,9 @@ saHpiSensorThdLowMinorIsWritable        OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdLowMinorRaw 
-        and saHpiSensorThdLowMinorInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdLowMinorEntry 2}
         
 saHpiSensorThdLowMinorType              OBJECT-TYPE
@@ -6304,12 +6297,9 @@ saHpiSensorThdUpCriticalIsReadable      OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdUpCriticalRaw is set to
-        '-1' and saHpiSensorThdUpCriticalInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read. " 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdUpCriticalEntry 1}
 
 saHpiSensorThdUpCriticalIsWritable      OBJECT-TYPE
@@ -6317,13 +6307,9 @@ saHpiSensorThdUpCriticalIsWritable      OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdUpCriticalRaw 
-        and saHpiSensorThdUpCriticalInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdUpCriticalEntry 2}
         
 saHpiSensorThdUpCriticalType            OBJECT-TYPE
@@ -6393,12 +6379,9 @@ saHpiSensorThdUpMajorIsReadable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdUpMajorRaw is set to
-        '-1' and saHpiSensorThdUpMajorInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read". 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdUpMajorEntry 1}
 
 saHpiSensorThdUpMajorIsWritable OBJECT-TYPE
@@ -6406,13 +6389,9 @@ saHpiSensorThdUpMajorIsWritable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdUpMajorRaw 
-        and saHpiSensorThdUpMajorInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdUpMajorEntry 2}
         
 saHpiSensorThdUpMajorType               OBJECT-TYPE
@@ -6483,12 +6462,9 @@ saHpiSensorThdUpMinorIsReadable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdUpMinorRaw is set to
-        '-1' and saHpiSensorThdUpMinorInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdUpMinorEntry 1}
 
 saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
@@ -6496,13 +6472,9 @@ saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdUpMinorRaw 
-        and saHpiSensorThdUpMinorInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdUpMinorEntry 2}
         
 saHpiSensorThdUpMinorType               OBJECT-TYPE
@@ -6573,12 +6545,9 @@ saHpiSensorThdPosHysteresisIsReadable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdPosHysteresisRaw is set to
-        '-1' and saHpiSensorThdPosHysteresisInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdPosHysteresisEntry 1}
 
 saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
@@ -6586,13 +6555,9 @@ saHpiSensorThdPosHysteresisIsWritable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdPosHysteresisRaw 
-        and saHpiSensorThdPosHysteresisInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdPosHysteresisEntry 2}
         
 saHpiSensorThdPosHysteresisType         OBJECT-TYPE
@@ -6664,12 +6629,9 @@ saHpiSensorThdNegHysteresisIsReadable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdNegHysteresisRaw is set to
-        '-1' and saHpiSensorThdNegHysteresisInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdNegHysteresisEntry 1}
 
 saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
@@ -6677,13 +6639,9 @@ saHpiSensorThdNegHysteresisIsWritable   OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdNegHysteresisRaw 
-        and saHpiSensorThdNegHysteresisInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdNegHysteresisEntry 2}
         
 saHpiSensorThdNegHysteresisType         OBJECT-TYPE
