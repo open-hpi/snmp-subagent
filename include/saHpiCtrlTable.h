@@ -126,6 +126,11 @@ int  populate_control(SaHpiCtrlRecT *ctrl,
 		      oid *ctrl_oid, size_t *ctrl_oid_len);
   
 
+ int
+   delete_ctrl_row(SaHpiDomainIdT domain_id,
+		   SaHpiResourceIdT resource_id,
+		   SaHpiCtrlNumT num);
+
 
   int 
   set_ctrl_state(saHpiCtrlTable_context *ctx);

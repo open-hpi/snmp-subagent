@@ -105,7 +105,7 @@ extern          "C" {
   
 
   int
-  delete_watchdog(SaHpiDomainIdT domain_id,
+  delete_watchdog_row(SaHpiDomainIdT domain_id,
 		  SaHpiResourceIdT resource_id,
 		  SaHpiWatchdogNumT num);
 
