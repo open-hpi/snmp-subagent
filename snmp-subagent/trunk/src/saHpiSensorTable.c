@@ -1177,8 +1177,8 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 	{
 
 	case COLUMN_SAHPISENSORSTATUS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
-	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+	    /** ENUM requires ASN_INTEGER */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_INTEGER,
 					       sizeof (row_ctx->
 						       saHpiSensorStatus));
 	  break;
@@ -1281,6 +1281,24 @@ saHpiSensorTable_set_reserve2 (netsnmp_request_group * rg)
 
       switch (current->tri->colnum)
 	{
+      case COLUMN_SAHPISENSORSTATUS:             
+          *var->val.integer --;
+          if ((*var->val.integer != SAHPI_SENSTAT_EVENTS_ENABLED) &&
+              (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED) &&
+              (*var->val.integer != SAHPI_SENSTAT_BUSY) &&
+              (*var->val.integer != (SAHPI_SENSTAT_EVENTS_ENABLED &
+	       SAHPI_SENSTAT_SCAN_ENABLED)) &&
+              (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED &
+	       SAHPI_SENSTAT_BUSY) &&
+              (*var->val.integer != (SAHPI_SENSTAT_BUSY &
+	       SAHPI_SENSTAT_EVENTS_ENABLED)) &&
+              (*var->val.integer != (SAHPI_SENSTAT_BUSY &
+	       SAHPI_SENSTAT_EVENTS_ENABLED & SAHPI_SENSTAT_SCAN_ENABLED)))
+	  {              
+		  rc= SNMP_ERR_BADVALUE;
+	  }
+           *var->val.integer++; 
+/*	
 	case COLUMN_SAHPISENSORSTATUS:
 	  if ((*var->val.integer != SAHPI_SENSTAT_EVENTS_ENABLED) &&
 	      (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED) &&
@@ -1288,6 +1306,7 @@ saHpiSensorTable_set_reserve2 (netsnmp_request_group * rg)
 	    {
 	      rc = SNMP_ERR_BADVALUE;
 	    }
+*/	    
 	  break;
 	case COLUMN_SAHPISENSORASSERTEVENTS:
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
@@ -1304,7 +1323,7 @@ saHpiSensorTable_set_reserve2 (netsnmp_request_group * rg)
 	  netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
 	}
     }
-  DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_reserve2: Exit\n"));
+  DEBUGMSGTL((AGENT,"saHpiTable_reserve2. Exit (rc: %d)", rc));
 }
 
 /************************************************************
@@ -1337,7 +1356,7 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
       switch (current->tri->colnum)
 	{
 	case COLUMN_SAHPISENSORSTATUS:
-	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  /** ENUM requires ASN_INTEGER */
 	  row_ctx->saHpiSensorStatus = *var->val.integer;
 	  rc2 = set_sensor_event (row_ctx);
 	  if (rc2 != AGENT_ERR_NOERROR)
@@ -1593,7 +1612,7 @@ saHpiSensorTable_get_value (netsnmp_request_info * request,
 
     case COLUMN_SAHPISENSORSTATUS:
 	    /** UNSIGNED32 = ASN_UNSIGNED */
-      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+      snmp_set_var_typed_value (var, ASN_INTEGER,
 				(char *) &context->saHpiSensorStatus,
 				sizeof (context->saHpiSensorStatus));
       break;
