@@ -5782,7 +5782,7 @@ saHpiSensorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining Sensors records."
+        DESCRIPTION     "A table defining Sensor records."
         ::= {hpiResources 6}
 
 saHpiSensorEntry OBJECT-TYPE
@@ -6180,10 +6180,10 @@ saHpiSensorReadingCurrentEntry OBJECT-TYPE
         ::= {saHpiSensorReadingCurrentTable 1}
 
 SaHpiSensorReadingCurrentEntry ::= SEQUENCE {
-        saHpiSensorReadingCurrentIsSupported          TruthValue,
-        saHpiSensorReadingCurrentType           SaHpiSensorReadingType, 
-        saHpiSensorReadingCurrentValue          SaHpiSensorReadingValue,
-        saHpiSensorReadingCurrentEventState            SaHpiEventState
+        saHpiSensorReadingCurrentIsSupported          	TruthValue,
+        saHpiSensorReadingCurrentType           	SaHpiSensorReadingType, 
+        saHpiSensorReadingCurrentValue          	SaHpiSensorReadingValue,
+        saHpiSensorReadingCurrentEventState            	SaHpiEventState
         }
 
 saHpiSensorReadingCurrentIsSupported  OBJECT-TYPE
