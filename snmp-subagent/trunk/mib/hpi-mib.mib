@@ -148,9 +148,10 @@ Float64	::= TEXTUAL-CONVENTION
     DESCRIPTION
 	"a 64 bit float number, 8 byte alignment"
     REFERENCE
-    	"Derived from SAI-HPI-B.00.90 spec, pg 160."
-    SYNTAX	Opaque (SIZE(0..255))
---IBMKR: Figure out the right length of the Float64
+    	"Derived from SAI-HPI-B.00.90 spec, pg 160.
+	The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
+	sign(1)exponent(11)mantissa(52)."
+    SYNTAX	Opaque (SIZE(0..65))
 
 SaHpiInstrumentId ::= TEXTUAL-CONVENTION
     STATUS	current
