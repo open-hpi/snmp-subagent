@@ -31,6 +31,9 @@
 DIAGRAMS = $(shell ls  images/*jpg) 
 
 
+SERVER = shell1.sourceforge.net
+HLDDIR = /home/groups/o/op/openhpi/htdocs/subagent-manual
+
 MAINTAINERCLEANFILES 	= Makefile.in  
 
 subagent_docsdir		= $(datadir)/subagent/docs
