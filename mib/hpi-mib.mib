@@ -4977,7 +4977,7 @@ saHpiSensorEnable       OBJECT-TYPE
 
 	When writing this object sets the sensor enable status for an addressed sensor.  If a sensor is disabled, the rows in saHpiSensorReadingCurrent for that sensor will not be present, and no events will be generated for the sensor."
 	REFERENCE
-	"Derieved from SAI-HPI-B.01.01 sections 7.2.9, and 7.2.10."
+	"Derived from SAI-HPI-B.01.01 sections 7.2.9, and 7.2.10."
         ::= {saHpiSensorEntry 4}
 
 saHpiSensorEventEnable  OBJECT-TYPE
@@ -5016,8 +5016,8 @@ saHpiSensorEventCtrl    OBJECT-TYPE
                                         enable status cannot be changed and
                                         assert/deassert masks cannot be changed.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         ::= {saHpiSensorEntry 6}
 
 saHpiSensorSupportedStates         OBJECT-TYPE
