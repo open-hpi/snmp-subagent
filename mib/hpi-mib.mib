@@ -2018,11 +2018,12 @@ saHpiParamControl OBJECT-TYPE
 
     	
 --/*******************************************************************************
--- * ********************************************************************************
--- * ********** ********** ********** Hot Swap table ********** **********
--- * **********
--- * ********************************************************************************
--- * *******************************************************************************/
+-- * *****************************************************************************
+-- * ********** 							********** 
+-- * ********** 		Hot Swap table 				********** 
+-- * **********								**********
+-- * *****************************************************************************
+-- * ******************************************************************************/
 
 saHpiHotSwapTable OBJECT-TYPE
     SYNTAX SEQUENCE OF SaHpiHotSwapEntry
@@ -3888,10 +3889,10 @@ saHpiEventLogOverflowReset OBJECT-TYPE
 	::= {saHpiEventLogInfoEntry 10}
 
 saHpiEventLogDelete OBJECT-TYPE
-    SYNTAX	RowStatus
-    MAX-ACCESS	read-write
-    STATUS	current
-    DESCRIPTION
+	SYNTAX		RowStatus
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
 	"This function erases the contents of the specified Event Log.
 
 	Set this to destory(6) or notInService(2) to delete the event log for
@@ -4498,11 +4499,12 @@ saHpiCtrlRDR OBJECT-TYPE
 
 
 --/*******************************************************************************
--- * ********************************************************************************
--- * ********** ********** ********** Sensor Resource Data Records **********
--- * ********** **********
--- * ********************************************************************************
--- * *******************************************************************************/
+-- * *****************************************************************************
+-- * ********** 							********** 
+-- * ********** 	Sensor Resource Data Records 			**********
+-- * ********** 							**********
+-- * *****************************************************************************
+-- * *****************************************************************************/
 
 
 saHpiSensorCount OBJECT-TYPE
@@ -4914,6 +4916,12 @@ saHpiSensorReadingEventState OBJECT-TYPE
 	DESCRIPTION
 	""
 	::= {saHpiSensorReadingCurrentEntry 4}
+	
+-- *********************************
+-- **
+-- **     SensorReadingMaxTable
+-- **
+-- *********************************
 
 saHpiSensorReadingMaxTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMaxEntry
@@ -4963,6 +4971,12 @@ saHpiSensorReadingMaxValue	OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingMaxEntry 3}
+	
+-- *********************************
+-- **
+-- **     saHpiSensorReadingMinTable
+-- **
+-- *********************************
 
 saHpiSensorReadingMinTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingMinEntry
@@ -5012,6 +5026,12 @@ saHpiSensorReadingMinValue	OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingMinEntry 3}
+	
+-- *********************************
+-- **
+-- **     saHpiSensorReadingNominalTable
+-- **
+-- *********************************
 
 saHpiSensorReadingNominalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNominalEntry
@@ -5061,6 +5081,12 @@ saHpiSensorReadingNominalValue	OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingNominalEntry 3}
+	
+-- *********************************
+-- **
+-- **     saHpiSensorReadingNormalMaxTable
+-- **
+-- *********************************
 
 saHpiSensorReadingNormalMaxTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNormalMaxEntry
@@ -5111,6 +5137,11 @@ saHpiSensorReadingNormalMaxValue	OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingNormalMaxEntry 3}
 
+-- *********************************
+-- **
+-- **     saHpiSensorReadingNormalMinTable
+-- **
+-- *********************************
 
 saHpiSensorReadingNormalMinTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorReadingNormalMinEntry
@@ -5161,10 +5192,11 @@ saHpiSensorReadingNormalMinValue	OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorReadingNormalMinEntry 3}
 
---
--- Threshold values
---
-
+-- *********************************
+-- **
+-- **     Threshold values
+-- **
+-- *********************************
 
 saHpiSensorThdLowCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowCriticalEntry
@@ -5234,6 +5266,12 @@ saHpiSensorThdLowCriticalValue		OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdLowCriticalEntry 4}
+
+-- *********************************
+-- **
+-- **     saHpiSensorThdLowMajorTable
+-- **
+-- *********************************
 
 saHpiSensorThdLowMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMajorEntry
@@ -5305,6 +5343,12 @@ saHpiSensorThdLowMajorValue		OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdLowMajorEntry 4}
 
+-- *********************************
+-- **
+-- **     saHpiSensorThdLowMinorTable
+-- **
+-- *********************************
+
 saHpiSensorThdLowMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMinorEntry
         MAX-ACCESS      not-accessible
@@ -5374,6 +5418,12 @@ saHpiSensorThdLowMinorValue		OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdLowMinorEntry 4}
+
+-- *********************************
+-- **
+-- **     saHpiSensorThdUpCriticalTable
+-- **
+-- *********************************
 
 saHpiSensorThdUpCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpCriticalEntry
@@ -5445,6 +5495,12 @@ saHpiSensorThdUpCriticalValue		OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdUpCriticalEntry 4}
 
+-- *********************************
+-- **
+-- **     saHpiSensorThdUpMajorTable
+-- **
+-- *********************************
+
 saHpiSensorThdUpMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMajorEntry
         MAX-ACCESS      not-accessible
@@ -5514,6 +5570,12 @@ saHpiSensorThdUpMajorValue		OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdUpMajorEntry 4}
+
+-- *********************************
+-- **
+-- **     saHpiSensorThdUpMinorTable
+-- **
+-- *********************************
 
 saHpiSensorThdUpMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMinorEntry
@@ -5585,6 +5647,11 @@ saHpiSensorThdUpMinorValue		OBJECT-TYPE
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdUpMinorEntry 4}
 
+-- *********************************
+-- **
+-- **     saHpiSensorThdPosHysteresisTable
+-- **
+-- *********************************
 
 saHpiSensorThdPosHysteresisTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdPosHysteresisEntry
@@ -5655,6 +5722,12 @@ saHpiSensorThdPosHysteresisValue		OBJECT-TYPE
         DESCRIPTION     
 	"See Definition in TEXTUAL-CONVENTOIN."
         ::= {saHpiSensorThdPosHysteresisEntry 4}
+
+-- *********************************
+-- **
+-- **     saHpiSensorThdNegHysteresisTable
+-- **
+-- *********************************
 
 saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdNegHysteresisEntry
