@@ -174,6 +174,16 @@ int getSaHpiSession (SaHpiSessionIdT * out);
 int didSaHpiChanged (int *answer, SaHpiRptInfoT * info);
 
 /*
+ * Convert the decimal SAHPI error codes into character
+ * strings.
+ *
+ * @param d error code
+ *
+ * @return textual representation of the error.
+ */
+const char * get_error_string(SaErrorT error);
+
+/*
  * Return the latest return code for the SAHPI library operation.
  * This value is not mutexed, so if you perform more than one SAHPI
  * library operation - only the latest will available.
