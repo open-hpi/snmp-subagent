@@ -70,6 +70,11 @@ hpiB MODULE-IDENTITY
         For security reasons it is recommend to use a SNMP v2 or v3c 
 	SNMP daemon.
 	
+	Additionally  if fine grain access configuration is desired, for 
+	example managed access to indiviual columnar nodes, the SNMP 
+	configuration should use VACM (View Based Access Control Model 
+	- RFC 2275).
+	
 	This MIB defines the HPI instrumentation based on
         'Service Availability Forum Hardware Platform Interface'
         (SA-HPI-B.01.01).
