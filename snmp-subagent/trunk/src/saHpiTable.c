@@ -83,18 +83,6 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
 			  size_t *var_len,
 			  oid **var_oid);
 
-/*
-static void
-make_SaHpiTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
-
-static int 
-  send_saHpiTable_notification(saHpiTable_context *ctx);
-*/
 
 
 int
@@ -690,108 +678,6 @@ int set_table_severity(saHpiTable_context *ctx) {
   return AGENT_ERR_NULL_DATA;
 }
 
-/*
-int
-send_saHpiTable_notification(saHpiTable_context *ctx) {
-
-  netsnmp_variable_list *notification_vars = NULL;
-  oid snmptrap[] = { snmptrap_oid };
-  DEBUGMSGTL((AGENT,"--- send_saHpiTable_notification: Entry.\n"));  
-
-  snmp_varlist_add_variable(&notification_vars,
-			    snmptrap, OID_LENGTH(snmptrap),
-			    ASN_OBJECT_ID,
-			    (u_char *)saHpiResourceNotification,
-			    OID_LENGTH(saHpiResourceNotification)* sizeof(oid));
-
-  make_SaHpiTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIENTRYID,
-		ASN_UNSIGNED,
-		(char *)&ctx->saHpiEntryID,
-		sizeof(ctx->saHpiEntryID));
-  
-  make_SaHpiTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRESOURCEID,
-		ASN_UNSIGNED,
-		(char *)&ctx->saHpiResourceID,
-		sizeof(ctx->saHpiResourceID));
-
- make_SaHpiTable_trap_msg(notification_vars,
-	       &ctx->index,
-	       COLUMN_SAHPIRESOURCEENTITYPATH,
-	       ASN_OCTET_STR,
-	       ctx->saHpiResourceEntityPath,
-	       ctx->saHpiResourceEntityPath_len);
-
- make_SaHpiTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRESOURCECAPABILITIES,
-		ASN_UNSIGNED,
-		(char *)&ctx->saHpiResourceCapabilities,
-		sizeof(ctx->saHpiResourceCapabilities));
-
-  make_SaHpiTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRESOURCESEVERITY,
-		ASN_INTEGER,
-		(char *)&ctx->saHpiResourceSeverity,
-		sizeof(ctx->saHpiResourceSeverity));
-
-
- snmp_varlist_add_variable(&notification_vars,
-			   saHpiEntryCount_oid, OID_LENGTH( saHpiEntryCount_oid),
-			   ASN_COUNTER,
-			   (char *)&entry_count,
-			   sizeof(entry_count));
-
- snmp_varlist_add_variable(&notification_vars,
-			   saHpiEntryUpdateCount_oid,
-			   OID_LENGTH(saHpiEntryUpdateCount_oid),
-			   ASN_UNSIGNED,
-			   (char *)&update_entry_count,
-			   sizeof(update_entry_count));
-
-  
-  send_v2trap(notification_vars);
-
-  snmp_free_varbind(notification_vars);
-  DEBUGMSGTL((AGENT,"--- send_saHpiTable_notification: Exit.\n"));
-  return 0;
-}
-void
-make_SaHpiTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int col, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len) {
-
-  oid entries[MAX_OID_LEN];
-  int len;
-  oid column[2];
-
-  column[0] = 1; // wonder where this comes from? Look at the HPI MIB
-  column[1] = col;
-
-  build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
-		 column, 2,
-		 index,
-		 entries, MAX_OID_LEN, &len);
-  DEBUGMSGTL((AGENT,"\n"));
-  DEBUGMSGOID((AGENT,entries, len));
-  DEBUGMSGTL((AGENT,"\n"));
-
- snmp_varlist_add_variable(&list,
-			   entries, len,
-			   type,
-			   value,
-			   value_len);
-			
-  
-}
-*/
 
 /************************************************************
  * the *_row_copy routine

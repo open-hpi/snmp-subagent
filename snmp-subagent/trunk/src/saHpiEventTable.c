@@ -151,10 +151,12 @@ populate_event(SaHpiSelEntryIdT entry_id,
   size_t trap_len;
   netsnmp_variable_list *trap_var;
 
+  DEBUGMSGTL((AGENT,"\t--- populate_event. Entry\n"));
   if (rpt_entry && event_entry) {
 
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
     }
 
@@ -186,7 +188,6 @@ populate_event(SaHpiSelEntryIdT entry_id,
     // '*_modify_context' does a checksum check to see if 
     // the record needs to be altered, and if so populates with
     // information from RDR and the OIDs passed.
-    trap_oid = NULL;
     if (saHpiEventTable_modify_context(entry_id,
 				       event_entry,
 				       rpt_entry,
@@ -199,6 +200,7 @@ populate_event(SaHpiSelEntryIdT entry_id,
     
       CONTAINER_INSERT(cb.container, event_context);
       event_count = CONTAINER_SIZE(cb.container);
+
       if (trap != NULL) {
 
 	trap_var = build_notification(&event_index,

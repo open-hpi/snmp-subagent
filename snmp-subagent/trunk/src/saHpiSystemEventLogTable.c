@@ -91,19 +91,18 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
   //  long backup_count = event_log_entries;
 
   DEBUGMSGTL((AGENT,"\t--- populate_sel: Entry\n"));
-  DEBUGMSGTL((AGENT,"Got %d,  and %d\n", DomainID_oid_len, ResourceID_oid_len));
-  DEBUGMSGOID((AGENT,DomainID_oid, DomainID_oid_len));
-  DEBUGMSGTL((AGENT,"\n"));
-  DEBUGMSGOID((AGENT,ResourceID_oid, ResourceID_oid_len));
+
   if (rpt_entry) {
     rc = getSaHpiSession(&session_id);
-    if (rc != AGENT_ERR_NOERROR) 
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
       return rc;
-    
+    }
     err = saHpiEventLogInfoGet( session_id, rpt_entry->ResourceId, &info);
-    if (err != SA_OK) 
+    if (err != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiEventLogInfoGet failed with rc: %d.\n", err));
       return AGENT_ERR_OPERATION;
-
+    }
     //event_log_entries = info.Entries;
     event_log_size = info.Size;
     memcpy(&event_log_update_timestamp,
@@ -145,7 +144,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 				  &rdr_entry,
 				  NULL);
       
-      if (entry_id == prev_entry_id) return AGENT_ERR_OPERATION;
       if (err == SA_OK) {
 	// The MIB containst the order of indexes
 	sel_oid[0] = rpt_entry->DomainId;
@@ -178,7 +176,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 		       child_oid, &child_oid_len,
 		       DomainID_oid, DomainID_oid_len,
 		       ResourceID_oid, ResourceID_oid_len);
-
 	
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,
@@ -194,8 +191,14 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 
 	prev_entry_id = entry_id;
 	entry_id = next_entry_id;
+	
       }
-				  
+
+      if (entry_id == prev_entry_id) {
+	DEBUGMSGTL((AGENT,"entry == prev_entry. \n"));
+	break;
+      }
+
     }
   }
   DEBUGMSGTL((AGENT,"\t--- populate_sel: Exit\n"));

@@ -41,7 +41,7 @@ static size_t          saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oi
 static oid      saHpiSensorCount_oid[] = { hpiResources_OID, 5, 0 };
 
 //  { 1, 3, 6, 1, 3, 90, 4, 1, 0 }; 
-static oid      saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
+//static oid      saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
 
 static u_long sensor_count = 0;
 
@@ -91,23 +91,11 @@ saHpiSensorTable_modify_context( SaHpiSensorRecT *entry,
 				 oid *, size_t,
 				 saHpiSensorTable_context *ctx);
 
-//static
-//int send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx);
 
 static void 
  fill_sensor_threshold_info(saHpiSensorTable_context *ctx, 
 			    SaHpiSensorThresholdsT *sensor_threshold);
 
-/*
-static
-void
-make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
-*/
 
 
 int
@@ -719,113 +707,6 @@ set_sensor_event(saHpiSensorTable_context *ctx) {
   }
   return AGENT_ERR_NULL_DATA;
 }
-
-
-/*
-int
-send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx) {
-
-  netsnmp_variable_list *notification_vars = NULL;
-  oid snmptrap[] = { snmptrap_oid };
-
-  DEBUGMSGTL((AGENT,"--- send_saHpiSensorTable_notification: Entry.\n"));  
-
-  snmp_varlist_add_variable(&notification_vars,
-			    snmptrap, OID_LENGTH(snmptrap),
-			    ASN_OBJECT_ID,
-			    (u_char *)saHpiSensorNotification_oid,
-			    OID_LENGTH(saHpiSensorNotification_oid)* sizeof(oid));
-
-  
-  make_SaHpiSensorTable_trap_msg(notification_vars,
-			      &ctx->index,
-			      COLUMN_SAHPIRDRRESOURCEID,
-			      ASN_UNSIGNED,
-			      (char *)&ctx->saHpiResourceID,
-			      sizeof(ctx->saHpiResourceID));
-
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-			      &ctx->index,
-			      COLUMN_SAHPIRDRRECORDID,
-			      ASN_UNSIGNED,
-			      (char *)&ctx->saHpiRdrRecordId,
-			      sizeof(ctx->saHpiRdrRecordId));
-  
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDRTYPE,
-		ASN_INTEGER,
-		(char *)&ctx->saHpiRdrType,
-		sizeof(ctx->saHpiRdrType));
-
- make_SaHpiRdrTable_trap_msg(notification_vars,
-	       &ctx->index,
-	       COLUMN_SAHPIRDRENTITYPATH,
-	       ASN_OCTET_STR,
-	       ctx->saHpiRdrEntityPath,
-	       ctx->saHpiRdrEntityPath_len);
-
- make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDR,
-		ASN_OBJECT_ID,
-		(char *)ctx->saHpiRdr,
-		sizeof(oid)*ctx->saHpiRdr_len);
-
-  make_SaHpiRdrTable_trap_msg(notification_vars,
-		&ctx->index,
-		COLUMN_SAHPIRDRRTP,
-		ASN_OBJECT_ID,
-		(char *)ctx->saHpiRdrRTP,
-		sizeof(oid)*ctx->saHpiRdrRTP_len);
-  
-
- snmp_varlist_add_variable(&notification_vars,
-			   saHpiSensorCount_oid, OID_LENGTH(saHpiSensorCount_oid),
-			   ASN_COUNTER,
-			   (char *)&sensor_count,
-			   sizeof(sensor_count));
-
-  send_v2trap(notification_vars);
-
-  snmp_free_varbind(notification_vars);
-  DEBUGMSGTL((AGENT,"--- send_saHpiSensorTable_notification: Exit.\n"));
-  return 0;
-}
-void
-make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int col, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len) {
-
-  oid entries[MAX_OID_LEN];
-  int len;
-  oid column[2];
-
-
-  column[0] = 1; // wonder where this comes from? Look at the HPI MIB
-  column[1] = col;
-
-  build_full_oid(saHpiSensorTable_oid, saHpiSensorTable_oid_len,
-		 column, 2,
-		 index,
-		 entries, MAX_OID_LEN, &len);
-  DEBUGMSGTL((AGENT,"\n"));
-  DEBUGMSGOID((AGENT,entries, len));
-  DEBUGMSGTL((AGENT,"\n"));
-
- snmp_varlist_add_variable(&list,
-			   entries, len,
-			   type,
-			   value,
-			   value_len);
-			
-  
-}
-*/
-
 
 
 /************************************************************
