@@ -726,31 +726,38 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
 int
 update_event_status_flag(SaHpiDomainIdT domain_id,
 		   SaHpiResourceIdT resource_id,
-		   SaHpiEntryIdT num,
 		   long event_status) {
 
   saHpiTable_context *ctx;
-  oid rpt_oid[RPT_INDEX_NR];
+  oid rpt_oid[RPT_INDEX_NR-1];
   netsnmp_index	rpt_index;
+  netsnmp_void_array *array;
+  int rc = AGENT_ERR_NOT_FOUND;
+  unsigned long i = 0;
+
+  DEBUGMSGTL((AGENT,"update_event_status_flag (%d, %d, %d).\n",
+	      domain_id, resource_id, event_status));
 
   rpt_oid[0]=domain_id;
   rpt_oid[1]=resource_id;	
-  // Ignore the 'num' - its different value than expected
-  // IBM-KR: FIX THIS
-  rpt_oid[2]=resource_id;
 
   // Possible more indexs?
   rpt_index.oids = (oid *)&rpt_oid;
-  rpt_index.len = RPT_INDEX_NR;
+  rpt_index.len = RPT_INDEX_NR-1;
 
-  ctx = CONTAINER_FIND(cb.container, &rpt_index);
-
-  if (ctx) {
-    ctx->saHpiClearEvents = event_status;
-    return AGENT_ERR_NOERROR;
+  array = CONTAINER_GET_SUBSET(cb.container, &rpt_index);
+  if (array != NULL) {
+    if (array->size > 0) {
+      for (i = 0; i < array->size; i++) {
+	ctx = array->array[i];	
+	ctx->saHpiClearEvents = event_status;
+      }
+      rc = AGENT_ERR_NOERROR;
+    }
   }
-    
-  return AGENT_ERR_NOT_FOUND;
+  DEBUGMSGTL((AGENT,"update_event_status_flag (rc: %d, updated: %d).\n",
+	      rc, i));
+  return rc;
 }
 
 int set_table_severity(saHpiTable_context *ctx) {
