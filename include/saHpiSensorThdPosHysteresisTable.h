@@ -103,7 +103,7 @@ extern "C"
   extern oid saHpiSensorThdPosHysteresisTable_oid[];
   extern size_t saHpiSensorThdPosHysteresisTable_oid_len;
 
-#define saHpiSensorThdPosHysteresisTable_TABLE_OID hpiSensor_OID,15
+#define saHpiSensorThdPosHysteresisTable_TABLE_OID hpiSensor_OID,13
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdPosHysteresisTable
