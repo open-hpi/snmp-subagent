@@ -5499,7 +5499,7 @@ saHpiSensorDeassertEventMask  OBJECT-TYPE
 	which values to set or clear in both the assert event mask 
 	and deassert event mask for the sensor. 
 
-	If the sensor assert event masks change as a result of 
+	If the sensor deassert event masks change as a result of 
 	writing to this object , an event will be generated."
 	REFERENCE
 	"Derived from SAI-HPI-B.01.01 page 7.2.13 and 7.2.14."
