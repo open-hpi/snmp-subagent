@@ -22,6 +22,7 @@ extern "C" {
 #include <SaHpi.h>
 
         /** Index saHpiDomainId is internal */
+#define DOMAIN_INFO_INDEX_NR 1        
 
 typedef struct saHpiDomainInfoTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -111,7 +112,7 @@ typedef struct saHpiDomainInfoTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid);
+int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * function declarations
