@@ -345,17 +345,17 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
           DataType                     Encoding
           --------                     --------
         
-         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
-      				 Buffer must contain even number of bytes.
+         UNICODE         16-bit Unicode, least significant byte first.
+      			 Buffer must contain even number of bytes.
         
-         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
-      				 colon, comma, or underscore only.
+         BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
+      			 colon, comma, or underscore only.
         
-         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
+         ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
         
-         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
+         TEXT            8-bit ASCII+Latin 1
         
-         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
+         BINARY          8-bit bytes, any values legal
         
        Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
       	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
@@ -363,22 +363,23 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
       	set defines the first 128 8-bit characters (00h-7Fh) and the 
       	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
         
-       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
+       Note: The BCDPLUS and ASCII6 encodings
       	use normal ASCII character encodings, but restrict the allowed
       	characters to a subset of the entire ASCII character set. These
       	encodings are used when the target device contains restrictions
-      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
+      	on which characters it can store or display.  BCDPLUS 
       	data may be stored externally as 4-bit values, and 
-      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
+      	ASCII6 may be stored externally as 6-bit values. 
       	But, regardless of how the data is stored externally, it is 
       	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
 	across the HPI."
 	SYNTAX		INTEGER {
 				undefined(0),
-				bcdplus(1), 
-				ascii6(2), 
-				text(3),
-				binary(4)
+				unicode(1),
+				bcdplus(2), 
+				ascii6(3), 
+				text(4),
+				binary(5)
 			}
 
 SaHpiTextLanguage ::= TEXTUAL-CONVENTION
