@@ -24,6 +24,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include "saHpiSystemEventLogTable.h"
+#include <saHpiEventTable.h>
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
@@ -98,7 +99,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
     entry_id = SAHPI_OLDEST_ENTRY;
     while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
-      DEBUGMSGTL((AGENT,"Request for: %d, %d\n", session_id, rpt_entry->ResourceId));
+
       err = saHpiEventLogEntryGet(session_id,
 				  rpt_entry->ResourceId,
 				  entry_id,
@@ -107,14 +108,17 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 				  &sel,
 				  &rdr_entry,
 				  NULL);
-      DEBUGMSGTL((AGENT,"Error code from EventLogEntryGet: %d\n", err));
+
       if (err == SA_OK) {
 	// The MIB containst the order of indexes
 	sel_oid[0] = rpt_entry->DomainId;
 	sel_oid[1] = rpt_entry->ResourceId;
 	sel_oid[2] = sel.EntryId;
+	DEBUGMSGTL((AGENT,"Request for %d, %d, %d\n",
+		    sel_oid[0], sel_oid[1], sel_oid[2]));
+
 	sel_index.oids = (oid *) &sel_oid;
-	
+	sel_index.len = 3;
 	sel_context = NULL;
 	sel_context = CONTAINER_FIND(cb.container, &sel_index);
 
@@ -122,16 +126,23 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 	  // New entry. Add it
 	  sel_context = saHpiSystemEventLogTable_create_row(&sel_index);
 	}
+	// Now create the 'event' and get its OID to be copied to our
+	// SystemEventLogged OID
 
-	// Now create the event and get its OID
+	populate_event(sel.EntryId,
+		       &sel.Event, 
+		       rpt_entry, 
+		       &rdr_entry, 
+		       child_oid, &child_oid_len);
 	
 	if (saHpiSystemEventLogTable_modify_context(&sel,
 						    rpt_entry,
 						    child_oid, child_oid_len,
 						    sel_context)
 	    == AGENT_NEW_ENTRY) {
-	  DEBUGMSGTL((AGENT,"SEL new entry"));
+	  
 	  CONTAINER_INSERT(cb.container, sel_context);
+	  event_log_entries = CONTAINER_SIZE(cb.container);
 	  // traps
 	}
 
@@ -172,7 +183,6 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     }
 
     ctx->hash = hash;
-
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
@@ -180,7 +190,7 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
-    return AGENT_ENTRY_EXIST;
+    return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
 }
@@ -298,9 +308,11 @@ saHpiSystemEventLogTable_extract_index(saHpiSystemEventLogTable_context *
     memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
     var_saHpiDomainID.type = ASN_UNSIGNED;
     var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
     memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
     var_saHpiResourceID.type = ASN_UNSIGNED;
     var_saHpiResourceID.next_variable = &var_saHpiSystemEventLogEntryId;
+
     memset(&var_saHpiSystemEventLogEntryId, 0x00,
            sizeof(var_saHpiSystemEventLogEntryId));
     var_saHpiSystemEventLogEntryId.type = ASN_UNSIGNED;
@@ -311,6 +323,7 @@ saHpiSystemEventLogTable_extract_index(saHpiSystemEventLogTable_context *
      * parse the oid into the individual components
      */
     err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
+
     if (err == SNMP_ERR_NOERROR) {
        
               /** skipping external index saHpiDomainID */
@@ -369,12 +382,10 @@ saHpiSystemEventLogTable_create_row(netsnmp_index * hdr)
 {
     saHpiSystemEventLogTable_context *ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSystemEventLogTable_context);
+
     if (!ctx)
         return NULL;
 
-    /*
-     * TODO: check indexes, if necessary.
-     */
     if (saHpiSystemEventLogTable_extract_index(ctx, hdr)) {
         free(ctx->index.oids);
         free(ctx);
@@ -713,6 +724,7 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
     saHpiSystemEventLogTable_context *context =
         (saHpiSystemEventLogTable_context *) item;
 
+    DEBUGMSGTL((AGENT,"get_value\n"));
     switch (table_info->colnum) {
 
     case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
