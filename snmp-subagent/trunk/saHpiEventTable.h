@@ -223,6 +223,13 @@ populate_event(SaHpiSelEntryIdT,
 
 
   int delete_entry(saHpiEventTable_context *ctx);
+
+
+int
+delete_event_row(SaHpiDomainIdT domain_id,
+		 SaHpiResourceIdT resource_id,
+		 SaHpiSelEntryIdT num);
+  
 int
 saHpiEventTable_modify_context(SaHpiSelEntryIdT,
 			       SaHpiEventT *,
@@ -230,7 +237,11 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT,
 			       SaHpiRdrT *,
 			       saHpiEventTable_context *ctx);
 				
-  
+  int
+event_count_entries_handler(netsnmp_mib_handler *handler,
+			    netsnmp_handler_registration *reginfo,
+			    netsnmp_agent_request_info *reqinfo,
+			    netsnmp_request_info *requests);
 /*************************************************************
  * oid declarations
  */
