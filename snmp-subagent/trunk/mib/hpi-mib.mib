@@ -1515,7 +1515,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
           
         saHpiDomainAlarmCondNameValue         	OCTET STRING,
                
-        saHpiDomainAlarmCondMid               	Unsigned32,
+        saHpiDomainAlarmCondMid               	SaHpiManufacturerId,
         
         saHpiDomainAlarmCondTextType      	SaHpiTextType,
         saHpiDomainAlarmCondTextLanguage  	SaHpiTextLanguage,
@@ -1671,7 +1671,7 @@ saHpiDomainAlarmCondNameValue OBJECT-TYPE
         ::= {saHpiDomainAlarmEntry 9}
         
 saHpiDomainAlarmCondMid OBJECT-TYPE 
-        SYNTAX          Unsigned32 
+        SYNTAX          SaHpiManufacturerId 
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
