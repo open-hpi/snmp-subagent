@@ -33,6 +33,9 @@
 #include <hpiSubagent.h>
 #include <alarm.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 /*
  * Internal data for the sub-agent.
  */
@@ -42,6 +45,7 @@ static SaHpiSessionIdT session_id;
 static SaHpiRptInfoT rpt_info;
 static SaErrorT err;
 
+static const char *version = "$Id$\n";
 /*
  * Configuration options. Changed by config file.
  */
@@ -54,6 +58,12 @@ int alarm_interval = 5;
 
 // Max EVENT rows.
 int MAX_EVENT_ENTRIES = 512;
+
+//Use syslog 
+static int do_syslog = AGENT_TRUE;
+
+static int do_fork = AGENT_TRUE;
+
 
 static RETSIGTYPE
 stop_server (int a)
@@ -132,7 +142,7 @@ build_notification (const netsnmp_index * index,
   snmp_varlist_add_variable (&notification_vars,
 			     snmptrap, OID_LENGTH (snmptrap),
 			     ASN_OBJECT_ID,
-			     (u_char *) (oid *)notification_oid,
+			     (u_char *) (oid *) notification_oid,
 			     notification_oid_len * sizeof (oid));
 
   // Next the DomainID
@@ -195,65 +205,67 @@ calculate_hash_value (void *data, int len)
 }
 
 
-const char * get_error_string(SaErrorT error)
+const char *
+get_error_string (SaErrorT error)
 {
-        switch(error) {
-                case SA_ERR_HPI_ERROR:
-                        return "SA_ERR_HPI_ERROR";
-                case SA_ERR_HPI_UNSUPPORTED_API:
-                        return "SA_ERR_UNSUPPORTED_API";
-                case SA_ERR_HPI_BUSY:
-                        return "SA_ERR_HPI_BUSY";
-                case SA_ERR_HPI_INVALID:
-                        return "SA_ERR_HPI_INVALID";
-                case SA_ERR_HPI_INVALID_CMD:
-                        return "SA_ERR_HPI_INVALID_CMD";
-                case SA_ERR_HPI_TIMEOUT:
-                        return "SA_ERR_HPI_TIMEOUT";
-                case SA_ERR_HPI_OUT_OF_SPACE:
-                        return "SA_ERR_HPI_OUT_OF_SPACE";
-                case SA_ERR_HPI_DATA_TRUNCATED:
-                        return "SA_ERR_HPI_DATA_TRUNCATED";
-                case SA_ERR_HPI_DATA_LEN_INVALID:
-                        return "SA_ERR_HPI_DATA_LEN_INVALID";
-                case SA_ERR_HPI_DATA_EX_LIMITS:
-                        return "SA_ERR_HPI_DATA_EX_LIMITS";
-                case SA_ERR_HPI_INVALID_PARAMS:
-                        return "SA_ERR_HPI_INVALID_PARAMS";
-                case SA_ERR_HPI_INVALID_DATA:
-                        return "SA_ERR_HPI_INVALID_DATA";
-                case SA_ERR_HPI_NOT_PRESENT:
-                        return "SA_ERR_HPI_NOT_PRESENT";
-                case SA_ERR_HPI_INVALID_DATA_FIELD:
-                        return "SA_ERR_HPI_INVALID_DATA_FIELD";
-                case SA_ERR_HPI_INVALID_SENSOR_CMD:
-                        return "SA_ERR_HPI_INVALID_SENSOR_CMD";
-                case SA_ERR_HPI_NO_RESPONSE:
-                        return "SA_ERR_HPI_NO_RESPONSE";
-                case SA_ERR_HPI_DUPLICATE:
-                        return "SA_ERR_HPI_DUPLICATE";
-                case SA_ERR_HPI_UPDATING:
-                        return "SA_ERR_HPI_UPDATING";
-                case SA_ERR_HPI_INITIALIZING:
-                        return "SA_ERR_HPI_INITIALIZING";
-                case SA_ERR_HPI_UNKNOWN:
-                        return "SA_ERR_HPI_UNKNOWN";
-                case SA_ERR_HPI_INVALID_SESSION:
-                        return "SA_ERR_HPI_INVALID_SESSION";
-                case SA_ERR_HPI_INVALID_DOMAIN:
-                        return "SA_ERR_HPI_INVALID_DOMAIN";
-                case SA_ERR_HPI_INVALID_RESOURCE:
-                        return "SA_ERR_HPI_INVALID_RESOURCE";
-                case SA_ERR_HPI_INVALID_REQUEST:
-                        return "SA_ERR_HPI_INVALID_REQUEST";
-                case SA_ERR_HPI_ENTITY_NOT_PRESENT:
-                        return "SA_ERR_HPI_ENTITY_NOT_PRESENT";
-                case SA_ERR_HPI_UNINITIALIZED:
-                        return "SA_ERR_HPI_UNINITIALIZED";
-                default:
-			DEBUGMSGTL((AGENT,"Invalid error code=%d\n", error));
-                        return "(Invalid error code)";
-        }
+  switch (error)
+    {
+    case SA_ERR_HPI_ERROR:
+      return "SA_ERR_HPI_ERROR";
+    case SA_ERR_HPI_UNSUPPORTED_API:
+      return "SA_ERR_UNSUPPORTED_API";
+    case SA_ERR_HPI_BUSY:
+      return "SA_ERR_HPI_BUSY";
+    case SA_ERR_HPI_INVALID:
+      return "SA_ERR_HPI_INVALID";
+    case SA_ERR_HPI_INVALID_CMD:
+      return "SA_ERR_HPI_INVALID_CMD";
+    case SA_ERR_HPI_TIMEOUT:
+      return "SA_ERR_HPI_TIMEOUT";
+    case SA_ERR_HPI_OUT_OF_SPACE:
+      return "SA_ERR_HPI_OUT_OF_SPACE";
+    case SA_ERR_HPI_DATA_TRUNCATED:
+      return "SA_ERR_HPI_DATA_TRUNCATED";
+    case SA_ERR_HPI_DATA_LEN_INVALID:
+      return "SA_ERR_HPI_DATA_LEN_INVALID";
+    case SA_ERR_HPI_DATA_EX_LIMITS:
+      return "SA_ERR_HPI_DATA_EX_LIMITS";
+    case SA_ERR_HPI_INVALID_PARAMS:
+      return "SA_ERR_HPI_INVALID_PARAMS";
+    case SA_ERR_HPI_INVALID_DATA:
+      return "SA_ERR_HPI_INVALID_DATA";
+    case SA_ERR_HPI_NOT_PRESENT:
+      return "SA_ERR_HPI_NOT_PRESENT";
+    case SA_ERR_HPI_INVALID_DATA_FIELD:
+      return "SA_ERR_HPI_INVALID_DATA_FIELD";
+    case SA_ERR_HPI_INVALID_SENSOR_CMD:
+      return "SA_ERR_HPI_INVALID_SENSOR_CMD";
+    case SA_ERR_HPI_NO_RESPONSE:
+      return "SA_ERR_HPI_NO_RESPONSE";
+    case SA_ERR_HPI_DUPLICATE:
+      return "SA_ERR_HPI_DUPLICATE";
+    case SA_ERR_HPI_UPDATING:
+      return "SA_ERR_HPI_UPDATING";
+    case SA_ERR_HPI_INITIALIZING:
+      return "SA_ERR_HPI_INITIALIZING";
+    case SA_ERR_HPI_UNKNOWN:
+      return "SA_ERR_HPI_UNKNOWN";
+    case SA_ERR_HPI_INVALID_SESSION:
+      return "SA_ERR_HPI_INVALID_SESSION";
+    case SA_ERR_HPI_INVALID_DOMAIN:
+      return "SA_ERR_HPI_INVALID_DOMAIN";
+    case SA_ERR_HPI_INVALID_RESOURCE:
+      return "SA_ERR_HPI_INVALID_RESOURCE";
+    case SA_ERR_HPI_INVALID_REQUEST:
+      return "SA_ERR_HPI_INVALID_REQUEST";
+    case SA_ERR_HPI_ENTITY_NOT_PRESENT:
+      return "SA_ERR_HPI_ENTITY_NOT_PRESENT";
+    case SA_ERR_HPI_UNINITIALIZED:
+      return "SA_ERR_HPI_UNINITIALIZED";
+    default:
+      DEBUGMSGTL ((AGENT, "Invalid error code=%d\n", error));
+      return "(Invalid error code)";
+    }
 }
 
 SaErrorT
@@ -269,16 +281,18 @@ closeSaHpiSession ()
   DEBUGMSGTL ((AGENT, "--- closeSaHpiSession: Entry. "));
   if (session_avail == AGENT_TRUE)
     {
-     err= saHpiUnsubscribe(session_id);
-     if (SA_OK != err)
+      err = saHpiUnsubscribe (session_id);
+      if (SA_OK != err)
 	{
-	 snmp_log (LOG_ERR,"saHpiUnsubscirbe error: %s.\n", get_error_string(err));
-	return AGENT_ERR_SESSION_CLOSE;
-      }
+	  snmp_log (LOG_ERR, "saHpiUnsubscirbe error: %s.\n",
+		    get_error_string (err));
+	  return AGENT_ERR_SESSION_CLOSE;
+	}
       err = saHpiFinalize ();
       if (SA_OK != err)
 	{
-	  snmp_log (LOG_ERR, "saHpiFinalize error: %s\n", get_error_string(err));
+	  snmp_log (LOG_ERR, "saHpiFinalize error: %s\n",
+		    get_error_string (err));
 	  return AGENT_ERR_SESSION_CLOSE;
 	}
       session_avail = AGENT_FALSE;
@@ -301,20 +315,23 @@ getSaHpiSession (SaHpiSessionIdT * out)
       err = saHpiInitialize (&version);
       if (SA_OK != err)
 	{
-	  snmp_log (LOG_ERR, "saHpiInitialize error: %s\n", get_error_string(err));
+	  snmp_log (LOG_ERR, "saHpiInitialize error: %s\n",
+		    get_error_string (err));
 	  return AGENT_ERR_INIT;
 	}
       err = saHpiSessionOpen (SAHPI_DEFAULT_DOMAIN_ID, &session_id, NULL);
       if (SA_OK != err)
 	{
-	  snmp_log (LOG_ERR, "saHpiSessionOpen error: %s\n", get_error_string(err));
+	  snmp_log (LOG_ERR, "saHpiSessionOpen error: %s\n",
+		    get_error_string (err));
 	  return AGENT_ERR_SESSION_OPEN;
 	}
       // Discover 
       err = saHpiResourcesDiscover (session_id);
       if (SA_OK != err)
 	{
-	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n", get_error_string(err));
+	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
+		    get_error_string (err));
 	  return AGENT_ERR_DISCOVER;
 	}
       //Subscribe to the Events
@@ -322,7 +339,8 @@ getSaHpiSession (SaHpiSessionIdT * out)
       err = saHpiSubscribe (session_id, SAHPI_FALSE);
       if (SA_OK != err)
 	{
-	  snmp_log (LOG_ERR, "saHpiSubscribe failed. error: %s\n", get_error_string(err));
+	  snmp_log (LOG_ERR, "saHpiSubscribe failed. error: %s\n",
+		    get_error_string (err));
 	  return AGENT_ERR_SUBSCRIBE;
 	}
       session_avail = AGENT_TRUE;
@@ -357,7 +375,8 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
   err = saHpiRptInfoGet (session_id, &rpt_info_new);
   if (SA_OK != err)
     {
-      snmp_log (LOG_ERR, "saHpiRptInfoGet error: %s\n",get_error_string(err) );
+      snmp_log (LOG_ERR, "saHpiRptInfoGet error: %s\n",
+		get_error_string (err));
       return AGENT_ERR_RPTGET;
     }
 
@@ -463,33 +482,53 @@ main (int argc, char **argv)
 {
   int agentx_subagent = AGENT_TRUE;
   char c;
+  pid_t child;
+  int rc = 0;
   /* change this if you want to be a SNMP master agent */
 
-   while ( (c = getopt( argc, argv,"d?")) != EOF )
-                switch(c) {
-                case 'd': debug_register_tokens (AGENT); 
-  snmp_enable_stderrlog ();
-  snmp_set_do_debugging (1);
+  while ((c = getopt (argc, argv, "dfs?")) != EOF)
+    switch (c)
+      {
+      case 'd':
+	debug_register_tokens (AGENT);
+	snmp_enable_stderrlog ();
+	snmp_set_do_debugging (1);
 	break;
-                default:
-                        printf("Usage %s [-d]\n",argv[0]);
-                        printf("where -c clears the event log\n");
-                        exit(1);
-                }
-
-  /* print log errors to AGENT );stderr */
+      case 'f':
+	do_fork = AGENT_FALSE;
+	break;
+      case 's':
+	do_syslog = AGENT_FALSE;
+	break;
+      default:
+	printf ("Usage %s [-dfs]\n", argv[0]);
+	printf ("where -d enables debug mode\n");
+	printf ("where -f no forking\n");
+	printf ("where -s disables logging via syslog facility.\n");
+	exit (1);
+      }
+  init_snmp_logging ();
+  if (do_syslog == AGENT_TRUE)
+    {
+      snmp_enable_calllog ();
+      snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
+    }
+  snmp_log (LOG_INFO, version);
   /* we're an agentx subagent? */
   if (agentx_subagent)
     {
       /* make us a agentx client. */
-      netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
+      rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
 			      NETSNMP_DS_AGENT_ROLE, 1);
     }
 
   /* initialize the agent library */
-  init_agent (AGENT);
-
-
+  rc = init_agent (AGENT);
+  if (rc != 0) {
+	snmp_log(LOG_ERR,"Could not initialize connection to SNMP daemon. \n" \
+	"Perhaps you are running %s as non-root?\n", argv[0]);
+	exit(rc);
+  }
 
   /* Read configuration information here, before we initialize */
 
@@ -508,7 +547,7 @@ main (int argc, char **argv)
 				 NULL,
 				 "hpiSubagent MAX number of rows for Events.");
 
-  init_snmp (AGENT);
+   init_snmp (AGENT);
   /* Initialize tables */
   initialize_table_saHpiTable ();
   initialize_table_saHpiRdrTable ();
@@ -526,14 +565,16 @@ main (int argc, char **argv)
 
   if (populate_rpt () != AGENT_ERR_NOERROR)
     {
-      snmp_log (LOG_ERR,"Could not retrieve RPT entries. Exiting\n.");
+      snmp_log (LOG_ERR, "Could not retrieve RPT entries. Exiting\n.");
+      rc = -1;
       goto stop;
     }
   populate_event ();
 
   if (init_alarm () != AGENT_ERR_NOERROR)
     {
-      snmp_log (LOG_ERR,"Could not start our internal loop . Exiting\n.");
+      snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
+      rc = -1;
       goto stop;
     }
   /* If we're going to be a snmp master agent, initial the ports */
@@ -541,6 +582,19 @@ main (int argc, char **argv)
   if (!agentx_subagent)
     init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
 
+
+  // Fork here
+  if (do_fork == AGENT_TRUE)
+    {
+
+      if ((child = fork ()) < 0)
+	{
+	  snmp_log (LOG_ERR, " Could not fork!");
+	  exit (-1);
+	}
+      if (child != 0)
+	exit (0);
+    }
 
   /* In case we recevie a request to stop (kill -TERM or kill -INT) */
   keep_running = 1;
@@ -552,10 +606,11 @@ main (int argc, char **argv)
     {
       /* if you use select(), see snmp_select_info() in snmp_api(3) */
       /*     --- OR ---  */
-      agent_check_and_process (1);	/* 0 == don't block */
+      rc = agent_check_and_process (1);	/* 0 == don't block */
+	printf("KONRAD: %d\n", rc);
     }
 stop:
   /* at shutdown time */
   snmp_shutdown (AGENT);
-  return 1;
+  return rc;
 }
