@@ -156,10 +156,13 @@ nsIETFWGName OBJECT-TYPE
 	<programlisting role='C'>
 void init_netSnmpIETFWGTable(void);
 void initialize_table_netSnmpIETFWGTable(void);
-const netSnmpIETFWGTable_context * netSnmpIETFWGTable_get_by_idx(netsnmp_index *);
-const netSnmpIETFWGTable_context * netSnmpIETFWGTable_get_by_idx_rs(netsnmp_index *,
+const netSnmpIETFWGTable_context * 
+	netSnmpIETFWGTable_get_by_idx(netsnmp_index *);
+const netSnmpIETFWGTable_context * 
+	netSnmpIETFWGTable_get_by_idx_rs(netsnmp_index *,
                                         int row_status);
-int netSnmpIETFWGTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
+int netSnmpIETFWGTable_get_value(netsnmp_request_info *, 
+	netsnmp_index *, netsnmp_table_request_info *);
 	</programlisting>
 	<para>
 	  The first set of declared functions are used to:
@@ -208,8 +211,11 @@ void netSnmpIETFWGTable_set_commit( netsnmp_request_group * );
 void netSnmpIETFWGTable_set_free( netsnmp_request_group * );
 void netSnmpIETFWGTable_set_undo( netsnmp_request_group * );
 
-netSnmpIETFWGTable_context * netSnmpIETFWGTable_duplicate_row( netSnmpIETFWGTable_context* );
-netsnmp_index * netSnmpIETFWGTable_delete_row( netSnmpIETFWGTable_context* );
+netSnmpIETFWGTable_context * 
+	netSnmpIETFWGTable_duplicate_row( netSnmpIETFWGTable_context* );
+
+netsnmp_index * 
+	netSnmpIETFWGTable_delete_row( netSnmpIETFWGTable_context* );
 
 int netSnmpIETFWGTable_can_delete(netSnmpIETFWGTable_context *undo_ctx,
                     netSnmpIETFWGTable_context *row_ctx,
@@ -217,12 +223,14 @@ int netSnmpIETFWGTable_can_delete(netSnmpIETFWGTable_context *undo_ctx,
     
     
 #ifdef netSnmpIETFWGTable_ROW_CREATION
-netSnmpIETFWGTable_context * netSnmpIETFWGTable_create_row( netsnmp_index* );
+netSnmpIETFWGTable_context * 
+	netSnmpIETFWGTable_create_row( netsnmp_index* );
 #endif
 #endif
 
 #ifdef netSnmpIETFWGTable_IDX2
-netSnmpIETFWGTable_context * netSnmpIETFWGTable_get( const char *name, int len );
+netSnmpIETFWGTable_context * 
+	netSnmpIETFWGTable_get( const char *name, int len );
 #endif
 </programlisting>
 	   <para>

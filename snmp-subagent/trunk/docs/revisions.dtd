@@ -31,6 +31,6 @@
 <!ENTITY subagent-revisions "
 <revhistory>
   &subagent-rev-0_1;
-  &subagent-rev-1_1;
+  &subagent-rev-1_0;
 </revhistory>
 ">

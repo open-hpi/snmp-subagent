@@ -33,7 +33,8 @@
 	<programlisting role="C">
 /************************************************************
  *
- * Initialize the netSnmpIETFWGTable table by defining its contents and how it's structured
+ * Initialize the netSnmpIETFWGTable table by defining its contents 
+	and how it's structured
  */
 void
 initialize_table_netSnmpIETFWGTable(void)
@@ -41,7 +42,8 @@ initialize_table_netSnmpIETFWGTable(void)
     netsnmp_table_registration_info *table_info;
 
     if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_netSnmpIETFWGTable_handler called again\n");
+        snmp_log(LOG_ERR, 
+	"initialize_table_netSnmpIETFWGTable_handler called again\n");
         return;
     }
 
@@ -52,11 +54,12 @@ initialize_table_netSnmpIETFWGTable(void)
 
     /* if your table is read only, it's easiest to change the
        HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("netSnmpIETFWGTable",
-                                             netsnmp_table_array_helper_handler,
-                                             netSnmpIETFWGTable_oid,
-                                             netSnmpIETFWGTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
+    my_handler = netsnmp_create_handler_registration(
+				 "netSnmpIETFWGTable",
+                                 netsnmp_table_array_helper_handler,
+                                 netSnmpIETFWGTable_oid,
+                                 netSnmpIETFWGTable_oid_len,
+                                 HANDLER_CAN_RWRITE);
             
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
@@ -89,9 +92,9 @@ initialize_table_netSnmpIETFWGTable(void)
                                           "table_container");
 #ifdef netSnmpIETFWGTable_IDX2
     netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("netSnmpIETFWGTable_secondary:"
-                                                       "netSnmpIETFWGTable:"
-                                                       "table_container"));
+     netsnmp_container_find("netSnmpIETFWGTable_secondary:"
+                            "netSnmpIETFWGTable:"
+                            "table_container"));
     cb.container->next->compare = netSnmpIETFWGTable_cmp;
 #endif
 #ifdef netSnmpIETFWGTable_SET_HANDLING
@@ -101,12 +104,16 @@ initialize_table_netSnmpIETFWGTable(void)
 #endif
     cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)netSnmpIETFWGTable_row_copy;
+    cb.row_copy = (Netsnmp_User_Row_Operation *)
+			netSnmpIETFWGTable_row_copy;
 /*
-    cb.can_activate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_deactivate;
+    cb.can_activate = (Netsnmp_User_Row_Action *)
+			netSnmpIETFWGTable_can_activate;
+    cb.can_deactivate = (Netsnmp_User_Row_Action *)
+			netSnmpIETFWGTable_can_deactivate;
 */
-    cb.can_delete = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_delete;
+    cb.can_delete = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_delete;
 
     cb.set_reserve1 = netSnmpIETFWGTable_set_reserve1;
     cb.set_reserve2 = netSnmpIETFWGTable_set_reserve2;
@@ -131,10 +138,10 @@ initialize_table_netSnmpIETFWGTable(void)
     /* if your table is read only, it's easiest to change the
        HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
     my_handler = netsnmp_create_handler_registration("netSnmpIETFWGTable",
-                                             netsnmp_table_array_helper_handler,
-                                             netSnmpIETFWGTable_oid,
-                                             netSnmpIETFWGTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
+                             netsnmp_table_array_helper_handler,
+                             netSnmpIETFWGTable_oid,
+                             netSnmpIETFWGTable_oid_len,
+                             HANDLER_CAN_RWRITE);
 </programlisting>
 	    <para>Create a handler which contains the OID of the table,
 	make it writeable, and which (if any) if the
@@ -194,9 +201,9 @@ initialize_table_netSnmpIETFWGTable(void)
 <programlisting role="C">
 #ifdef netSnmpIETFWGTable_IDX2
     netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("netSnmpIETFWGTable_secondary:"
-                                                       "netSnmpIETFWGTable:"
-                                                       "table_container"));
+            netsnmp_container_find("netSnmpIETFWGTable_secondary:"
+                                   "netSnmpIETFWGTable:"
+                                   "table_container"));
     cb.container->next->compare = netSnmpIETFWGTable_cmp;
 #endif
 </programlisting>
@@ -300,9 +307,12 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
 	<programlisting role="C">
     cb.duplicate_row = (UserRowMethod*)netSnmpIETFWGTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)netSnmpIETFWGTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)netSnmpIETFWGTable_row_copy;
-    cb.can_activate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_deactivate;
+    cb.row_copy = (Netsnmp_User_Row_Operation *)
+		netSnmpIETFWGTable_row_copy;
+    cb.can_activate = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_activate;
+    cb.can_deactivate = (Netsnmp_User_Row_Action *)
+		netSnmpIETFWGTable_can_deactivate;
     cb.can_delete = (Netsnmp_User_Row_Action *)netSnmpIETFWGTable_can_delete;
 	</programlisting>
 	</sect2>
@@ -460,14 +470,15 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
      /**
       * Create variable to hold each component of the index
       */
-        memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
-        var_nsIETFWGName.type = ASN_OCTET_STR;
-        /** TODO: link this index to the next, or NULL for the last one */
+    memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
+    var_nsIETFWGName.type = ASN_OCTET_STR;
+    /** TODO: link this index to the next, or NULL for the last one */
  #ifdef TABLE_CONTAINER_TODO
-     snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index list not implemented        !\n" );
-     return 0;
+    snmp_log(LOG_ERR, "netSnmpIETFWGTable_extract_index index 
+		list not implemented        !\n" );
+    return 0;
  #else
-        var_nsIETFWGName.next_variable = &amp var_XX;
+    var_nsIETFWGName.next_variable = &amp var_XX;
  #endif
 	</programlisting>
 	<para>
@@ -538,17 +549,17 @@ nsIETFWGIsWorking OBJECT-TYPE
     netsnmp_variable_list var_nsIETFWGProgress;
     netsnmp_variable_list var_nsIETFWGIsWorking;
 
-       memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
-       var_nsIETFWGName.type = ASN_OCTET_STR;
-       var_nsIETFWGName.next_variable = &amp var_nsIETFWGProgress;
+    memset( &amp var_nsIETFWGName, 0x00, sizeof(var_nsIETFWGName) );
+    var_nsIETFWGName.type = ASN_OCTET_STR;
+    var_nsIETFWGName.next_variable = &amp var_nsIETFWGProgress;
 
-       memset( &amp var_nsIETFWGProgress, 0x00, sizeof(var_nsIETFWGProgress) );
-       var_nsIETFWGProgress.type = ASN_INTEGER;
-       var_nsIETFWGProgress.next_variable = &amp var_nsIETFWGIsWorking;
+    memset( &amp var_nsIETFWGProgress, 0x00, sizeof(var_nsIETFWGProgress) );
+    var_nsIETFWGProgress.type = ASN_INTEGER;
+    var_nsIETFWGProgress.next_variable = &amp var_nsIETFWGIsWorking;
 
-       memset( &amp var_nsIETFWGIsWorking, 0x00, sizeof(var_nsIETFWGIsWorking) );
-       var_nsIETFWGIsWorking.type = ASN_INTEGER;
-       var_nsIETFWGIsWorking.next_variable = NULL;
+    memset( &amp var_nsIETFWGIsWorking, 0x00, sizeof(var_nsIETFWGIsWorking));
+    var_nsIETFWGIsWorking.type = ASN_INTEGER;
+    var_nsIETFWGIsWorking.next_variable = NULL;
 </programlisting>
 	<para>
 	The <emphasis>parse_oid_indexes</emphasis> parses the linked
@@ -573,7 +584,9 @@ nsIETFWGIsWorking OBJECT-TYPE
                 if(var_nsIETFWGName.val_len > sizeof(ctx->nsIETFWGName))
                    err = -1;
                 else
-                    memcpy( ctx->nsIETFWGName, var_nsIETFWGName.val.string, var_nsIETFWGName.val_len );
+                    memcpy( ctx->nsIETFWGName, 
+			   var_nsIETFWGName.val.string, 
+			   var_nsIETFWGName.val_len );
                 ctx->nsIETFWGName_len = var_nsIETFWGName.val_len;
     } 
 </programlisting>
@@ -821,7 +834,8 @@ init_netSnmpIETFWGTable(void)
 {
    netsnmp_index index;
    oid index_oid[MAX_OID_LEN];
-   char *index_char[] = {"hickory","joe","hickory","bob","new orleans","help"};
+   char *index_char[] = {"hickory","joe","hickory",
+			 "bob","new orleans","help"};
    int i,j;
    netSnmpIETFWGTable_context *ctx;
 
@@ -1034,7 +1048,7 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
         case COLUMN_NSIETFWGCHAIR1:
             /** OCTETSTR = ASN_OCTET_STR */
             rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->nsIETFWGChair1));
+                                    sizeof(row_ctx->nsIETFWGChair1));
         break;
 </programlisting>
 	<para>
