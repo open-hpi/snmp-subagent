@@ -60,7 +60,7 @@ AC_DEFUN(OH_CHECK_NETSNMP,
 			if ( $[1] >= 5 ) { \
   				if ( $[2] > 0 ) print "OK"; \
  			if ( $[2] == 0) { \
-   				if ( $[3] == 7) print "OK"; \
+   				if ( $[3] > 7) print "OK"; \
  			} \
 		} \
 	}'`
