@@ -252,11 +252,7 @@ SaHpiTime ::= TEXTUAL-CONVENTION
 	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
 
 	Maximum time that can be specified as relative :
-	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL
 
-	SAHPI_TIME_UNSPECIFIED     0x8000000000000000LL
-
-	Maximum time that can be specified as relative :
 	SAHPI_TIME_MAX_RELATIVE     0x0C00000000000000LL"
 
     REFERENCE
@@ -4271,24 +4267,23 @@ saHpiCtrlEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the control resource data record."
+                "Definition of the control resource data record and
+	operations to change the state of a control."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlTable 1}
 
 
 SaHpiCtrlEntry ::= SEQUENCE {
-        saHpiCtrlNum            Unsigned32,
+        saHpiCtrlNum            SaHpiInstrumentId,
         saHpiCtrlOutputType     INTEGER,
         saHpiCtrlType           INTEGER,
+        saHpiCtrlMode           INTEGER,        
+        saHpiCtrlReadOnly       TruthValue,      
+        saHpiCtrlWriteOnly      TruthValue,
  
         saHpiCtrlMutable        OCTET STRING,
         saHpiCtrlState          OCTET STRING,
         
-        saHpiCtrlMode           INTEGER,        
-        saHpiCtrlReadOnly       TruthValue,      
-                                         
-        saHpiCtrlWriteOnly      TruthValue,
-
         saHpiCtrlOem            Unsigned32, 
    
         saHpiCtrlTextType       SaHpiTextType,
@@ -4300,7 +4295,7 @@ SaHpiCtrlEntry ::= SEQUENCE {
 
 
 saHpiCtrlNum OBJECT-TYPE 
-        SYNTAX          Unsigned32      
+        SYNTAX          SaHpiInstrumentId      
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The control number "
