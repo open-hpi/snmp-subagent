@@ -1867,6 +1867,8 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
 	deleted. To delete a single, specific alarm, set the 
 	saHpiDomainAlarmId parameter to a value representing an 
 	actual User Alarm in the DAT."
+	REFERENCE
+	"SAI-HPI-B.01.01 section 6.6."
         ::= {saHpiDomainAlarmEntry 14}
 
 --/*******************************************************************************
@@ -3936,25 +3938,25 @@ saHpiUserEventRowStatus OBJECT-TYPE
           conceptual row (but not make it available for use by
           the managed device). This function is used to add a 
           User Alarm  to this User Event Table and also to the
-          to the Domain Alarm Table; When creating this row,
-          the value of saHpiEventSeverity indice must not be one of
-          these minor(3), major(2), and critical(3). The effect of
-          creating a new row will also be reflected in the DAT - with
-          a new row there.
+          to the Domain Alarm Table; The effect of creating a new 
+	  row will also be reflected in the DAT - with a new 
+	  row there.
 	  
 	  Developers Note:
 	  
 	  Avoid creating duplicate entries here! 
-		(1) a manager would add an event to the User Event Table, 
-		(2) the Sub-agent would see this and call saHpiEventAdd(), 
-		(3) the event would go thru the HPI system and would be 
+		1. a manager would add an event to the User Event Table, 
+		2. the Sub-agent would see this and call saHpiEventAdd(), 
+		3. the event would go thru the HPI system and would be 
 			added to the HPI event queue, 
-		(4) the sub-agent would read the event queue as part of 
+		4. the sub-agent would read the event queue as part of 
 			its normal operations, and when it sees this event 
 			it would know to ignore it, since it is already in 
 			the table (because the manager added it to the table 
 			to start this whole process).    
 	  "
+	  REFERENCE
+	  "SAI-HPI-B.01.01 section 6.5.4."
     ::= {saHpiUserEventEntry 5}
 
 -- *********************************
@@ -5655,21 +5657,24 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
           conceptual row (but not make it available for use by
           the managed device). This function is used to add a 
           User Alarm  to this User Event Table and also to the
-          to the Domain Alarm Table; When creating this row,
-          the value of saHpiEventSeverity indice must not be one of
-          these minor(3), major(2), and critical(3). The effect of
-          creating a new row will also be reflected in the DAT - with
+          to the Domain Alarm Table; The effect of creating a 
+	  new row will also be reflected in the DAT - with
           a new row there.
-
-        - `destroy(6)', which is supplied by a management station
-          wishing to delete all of the instances associated with
-          an existing conceptual row. This function allows the 
-          HPI MIB User to delete a single User Alarm from the 
-          User Event Table and Domain Alarm Table. 
-          Only User Alarms added to the DAT and User Event Table can 
-	  be deleted. To delete a single, specific alarm, set the 
-          saHpiDomainAlarmId parameter to a value representing an 
-          actual User Alarm in the User Event Table."
+	  
+	  Developers Note:
+	  
+	  Avoid creating duplicate entries here! 
+		1. a manager would add an event to the User Event Table, 
+		2. the Sub-agent would see this and call saHpiEventLogAdd(), 
+		3. the event would go thru the HPI system and would be 
+			added to the HPI event queue, 
+		4. the sub-agent would read the event queue as part of 
+			its normal operations, and when it sees this event 
+			it would know to ignore it, since it is already in 
+			the table (because the manager added it to the table 
+			to start this whole process)."
+	REFERENCE
+	"SAI-hpi-B.01.01 section 6.4.3."			
 
     ::= {saHpiUserEventLogEntry 5}
 
