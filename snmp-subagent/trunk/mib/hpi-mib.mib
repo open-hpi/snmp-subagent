@@ -2071,7 +2071,8 @@ saHpiResourceEntry OBJECT-TYPE
 	"See SAI-HPI-B.01.01 section 6.3"
 		
         INDEX   { saHpiDomainId, 
-		saHpiResourceEntryId 
+		saHpiResourceEntryId,
+		saHpiResourceIsHistorical 
 		}
         ::= {saHpiResourceTable 1}
 
@@ -2105,9 +2106,10 @@ SaHpiResourceEntry ::= SEQUENCE {
         
         saHpiResourceParmControl                INTEGER,
 	
-	saHpiHotSwapResetAction     		INTEGER,
-	saHpiHotSwapPowerAction     	        INTEGER
+		saHpiResourceResetAction     			INTEGER,
+		saHpiResourcePowerAction     	        INTEGER,
 
+		saHpiResourceIsHistorical				TruthValue
         }
 
         
@@ -2477,7 +2479,7 @@ saHpiResourceParmControl OBJECT-TYPE
         "Derived from SAI-HPI-B.01.01 section 7.8.and 8.18"
 	::= {saHpiResourceEntry   20} 
 	
-saHpiHotSwapResetAction OBJECT-TYPE
+saHpiResourceResetAction OBJECT-TYPE
     SYNTAX      INTEGER {
                     undefined(0),
                     coldReset(1),
@@ -2507,7 +2509,7 @@ saHpiHotSwapResetAction OBJECT-TYPE
         "Derived from SAI-HPI-B.01.01 sections 7.9, 7.9.1 and 7.9.2."
     ::= { saHpiResourceEntry 21 }
 
-saHpiHotSwapPowerAction OBJECT-TYPE
+saHpiResourcePowerAction OBJECT-TYPE
 	SYNTAX      INTEGER {
                     undefined(0),
                     off(1),
@@ -2542,7 +2544,21 @@ saHpiHotSwapPowerAction OBJECT-TYPE
         "Derived from SAI-HPI-B.01.01 sections 7.10, 7.10.1 and 7.10.2."
         ::= { saHpiResourceEntry 22 }
 
+saHpiResourceIsHistorical OBJECT-TYPE
+	SYNTAX      TruthValue
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"This columnar node, which is part of the index for every resource,
+	determines if this resource is historical. Historical meaning not
+	present in the system anymore, but only present in the event and
+	as part of that.
 
+
+	Note that this means that the implementation must in some way
+	control how much data is persisted. Check with the implementation
+	documentation for more details.  "
+        ::= { saHpiResourceEntry 23 }
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -2645,7 +2661,7 @@ saHpiHotSwapEntry OBJECT-TYPE
     STATUS current
     DESCRIPTION
         "An entry describing a particular hot swappable entity."
-    INDEX { saHpiDomainId, saHpiResourceId }
+    INDEX { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical }
     ::= { saHpiHotSwapTable 1 }
 
 
@@ -3767,7 +3783,6 @@ saHpiSoftwareEventEntry OBJECT-TYPE
             "Software events."
         INDEX   { 
                 saHpiDomainId,
-		--IBMKR: Do you need ResourceId for a software event?
                 saHpiResourceId, 
                 saHpiEventSeverity,
                 saHpiSoftwareEventTimestamp
@@ -6060,7 +6075,8 @@ saHpiRdrEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-		saHpiRdrEntryId
+				saHpiResourceIsHistorical,
+				saHpiRdrEntryId
         }
 
         ::= {saHpiRdrTable 1} 
@@ -6226,7 +6242,7 @@ saHpiCtrlDigitalEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 "Definition of the digital control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlDigitalEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiCtrlDigitalEntryId }
         ::= {saHpiCtrlDigitalTable 1}
 
 
@@ -6464,7 +6480,7 @@ saHpiCtrlDiscreteEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 "Definition of the discrete control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlDiscreteEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiCtrlDiscreteEntryId }
         ::= {saHpiCtrlDiscreteTable 1}
 
 
@@ -6687,7 +6703,7 @@ saHpiCtrlAnalogEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 "Definition of the analog control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlAnalogEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiCtrlAnalogEntryId }
         ::= {saHpiCtrlAnalogTable 1}
 
 
@@ -6936,7 +6952,7 @@ saHpiCtrlStreamEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
                 "Definition of the stream control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlStreamEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiCtrlStreamEntryId }
         ::= {saHpiCtrlStreamTable 1}
 
 
@@ -7216,7 +7232,7 @@ saHpiCtrlTextEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
     "Definition of the text control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlTextEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical,saHpiCtrlTextEntryId }
         ::= {saHpiCtrlTextTable 1}
 
 
@@ -7604,7 +7620,7 @@ saHpiCtrlOemEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
     "Definition of the OEM control table."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlOemEntryId }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiCtrlOemEntryId }
         ::= {saHpiCtrlOemTable 1}
 
 
@@ -7877,7 +7893,7 @@ saHpiSensorEntry OBJECT-TYPE
         DESCRIPTION
         " This is the sensor resource data record which
         describes all of the static data associated with a sensor. "
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorTable 1}
 
 SaHpiSensorEntry ::= SEQUENCE {
@@ -8334,7 +8350,7 @@ saHpiSensorReadingMaxEntry OBJECT-TYPE
 	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorReadingMaxTable 1}
 
 SaHpiSensorReadingMaxEntry ::= SEQUENCE {
@@ -8395,7 +8411,7 @@ saHpiSensorReadingMinEntry OBJECT-TYPE
 	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorReadingMinTable 1}
 
 SaHpiSensorReadingMinEntry ::= SEQUENCE {
@@ -8455,7 +8471,7 @@ saHpiSensorReadingNominalEntry OBJECT-TYPE
 	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorReadingNominalTable 1}
 
 SaHpiSensorReadingNominalEntry ::= SEQUENCE {
@@ -8513,7 +8529,7 @@ saHpiSensorReadingNormalMaxEntry OBJECT-TYPE
 	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorReadingNormalMaxTable 1}
 
 SaHpiSensorReadingNormalMaxEntry ::= SEQUENCE {
@@ -8571,7 +8587,7 @@ saHpiSensorReadingNormalMinEntry OBJECT-TYPE
 	found in the SAI-HPI-B.01.01 sensor RDR records."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.1.1, 7.2, and 8.5."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorReadingNormalMinTable 1}
 
 SaHpiSensorReadingNormalMinEntry ::= SEQUENCE {
@@ -8630,7 +8646,7 @@ saHpiSensorThdLowCriticalEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "This is the sensor threshold data for lower critical thresholds."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdLowCriticalTable 1}
 
 SaHpiSensorThdLowCriticalEntry ::= SEQUENCE {
@@ -8714,7 +8730,7 @@ saHpiSensorThdLowMajorEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "This is the sensor threshold data for lower major thresholds."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdLowMajorTable 1}
 
 SaHpiSensorThdLowMajorEntry ::= SEQUENCE {
@@ -8801,7 +8817,7 @@ saHpiSensorThdLowMinorEntry OBJECT-TYPE
         DESCRIPTION
         "Sensor threshold data for lower minor thresholds."
 
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdLowMinorTable 1}
 
 SaHpiSensorThdLowMinorEntry ::= SEQUENCE {
@@ -8883,7 +8899,7 @@ saHpiSensorThdUpCriticalEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "Sensor threshold data for upper critical thresholds."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdUpCriticalTable 1}
 
 SaHpiSensorThdUpCriticalEntry ::= SEQUENCE {
@@ -8964,7 +8980,7 @@ saHpiSensorThdUpMajorEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "Sensor threshold data for upper major thresholds."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdUpMajorTable 1}
 
 SaHpiSensorThdUpMajorEntry ::= SEQUENCE {
@@ -9046,7 +9062,7 @@ saHpiSensorThdUpMinorEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "Sensor threshold data for upper minor thresholds."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdUpMinorTable 1}
 
 SaHpiSensorThdUpMinorEntry ::= SEQUENCE {
@@ -9127,7 +9143,7 @@ saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
         DESCRIPTION
         "This is the sensor hysteresis data which defines hysteresis values
         at the positive upper bound."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdPosHysteresisTable 1}
 
 SaHpiSensorThdPosHysteresisEntry ::= SEQUENCE {
@@ -9208,7 +9224,7 @@ saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
         DESCRIPTION
         "This is the sensor hysteresis data which defines hysteresis values
         at the negativie lower bound for a given sensor."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiSensorNum }
         ::= {saHpiSensorThdNegHysteresisTable 1}
 
 SaHpiSensorThdNegHysteresisEntry ::= SEQUENCE {
@@ -9309,6 +9325,7 @@ saHpiInventoryEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
+				saHpiResourceIsHistorical,
                 saHpiInventoryId
         }
         ::= {saHpiInventoryTable 1}
@@ -9437,6 +9454,7 @@ saHpiAreaEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
+				saHpiResourceIsHistorical,
                 saHpiInventoryId, 
                 saHpiAreaId
         }
@@ -9621,6 +9639,7 @@ saHpiFieldEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId,
+				saHpiResourceIsHistorical,
                 saHpiInventoryId,
                 saHpiAreaId,
                 saHpiFieldId
@@ -9786,7 +9805,7 @@ saHpiWatchdogEntry OBJECT-TYPE
 	is required. All watchdogs shall be represented with an entry in in 
 	saHpiWatchdogTable, including the initial watchdog with an identifier of 
         SAHPI_DEFAULT_WATCHDOG_NUM(0)."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiWatchdogNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
 
 SaHpiWatchdogEntry ::= SEQUENCE {
@@ -10465,8 +10484,9 @@ saHpiResourceGroup OBJECT-GROUP
 		saHpiResourceTagTextLanguage,
 		saHpiResourceTag,
 		saHpiResourceParmControl,
-		saHpiHotSwapResetAction,
-		saHpiHotSwapPowerAction     	
+		saHpiResourceResetAction,
+		saHpiResourcePowerAction,
+		saHpiResourceIsHistorical
 	}
 	STATUS	current
 	DESCRIPTION
