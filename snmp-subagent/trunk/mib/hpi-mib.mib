@@ -885,7 +885,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiInfoDomainID		Unsigned32,
+--	saHpiInfoDomainID		Unsigned32,
 	saHpiDomainCapabilities 	OCTET STRING,
 	saHpiIsPeer			TruthValue,         
 				      				      
@@ -913,15 +913,15 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 	saHpiDomainGuid			OCTET STRING            
 	}
 	
-saHpiInfoDomainID OBJECT-TYPE 
-	SYNTAX		Unsigned32 
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"Unique Domain Id associated with domain.
-
-	Note:
- 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
-	::= {saHpiDomainInfoEntry 1}
+--saHpiInfoDomainID OBJECT-TYPE 
+--	SYNTAX		Unsigned32 
+--	MAX-ACCESS	read-only
+--	STATUS		current
+--	DESCRIPTION	"Unique Domain Id associated with domain.
+--
+--	Note:
+-- 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+--	::= {saHpiDomainInfoEntry 1}
 
 saHpiDomainCapabilities OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..255))
@@ -1112,42 +1112,42 @@ saHpiDrtEntry OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 	""
-	INDEX	{ saHpiDomainId, saHpiDomainId }
+	INDEX	{ 
+				saHpiDomainId, 
+				saHpiDomainId, 
+				saHpiEntryId 
+			}
 	::= {saHpiDrtTable 1}
 	
 SaHpiDrtEntry ::= SEQUENCE {
 
-	saHpiDrtEntryId		Unsigned32,
-	saHpiDrtDomainId        Unsigned32,
+	--saHpiDrtEntryId		Unsigned32,
+	--saHpiDrtDomainId        Unsigned32,
 	saHpiDrtIsPeer		TruthValue
 	           
 	}
 -- Add this object to the index values or delte it.
-saHpiDrtEntryId OBJECT-TYPE 
-	SYNTAX		Unsigned32 
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	
-	"EntryId - Identifier of the DRT entry to retrieve. Reserved EntryId
-		values:
-		SAHPI_FIRST_ENTRY  Get first entry
-		SAHPI_LAST_ENTRY   Reserved as delimiter for end of list. Not avalid entry identifier.
+--saHpiDrtEntryId OBJECT-TYPE 
+--	SYNTAX		Unsigned32 
+--	MAX-ACCESS	read-only
+--	STATUS		current
+--	DESCRIPTION	
+--	"EntryId - Identifier of the DRT entry to retrieve. Reserved EntryId
+--		values:
+--		SAHPI_FIRST_ENTRY  Get first entry
+--		SAHPI_LAST_ENTRY   Reserved as delimiter for end of list. Not avalid entry identifier.
 	
-		Table Related Type Definitions  
-		SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
-		SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
-		SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
-	::= {saHpiDrtEntry 1}
+--	::= {saHpiDrtEntry 1}
 
 -- IBMKR: Delete this object
-saHpiDrtDomainId OBJECT-TYPE 
-	SYNTAX		Unsigned32 
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	"Unique Domain Id associated with domain.
-	Note:
- 		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
-	::= {saHpiDrtEntry 2}
+--saHpiDrtDomainId OBJECT-TYPE 
+--	SYNTAX		Unsigned32 
+--	MAX-ACCESS	read-only
+--	STATUS		current
+--	DESCRIPTION	"Unique Domain Id associated with domain.
+--	Note:
+--		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+--	::= {saHpiDrtEntry 2}
 
 saHpiDrtIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
@@ -1490,7 +1490,11 @@ saHpiEntryId OBJECT-TYPE
 	SYNTAX		Unsigned32	
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Entry ID for record"
+	DESCRIPTION	"Entry ID for record
+		Table Related Type Definitions  
+		SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
+		SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
+		SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
 	::= {saHpiResourceEntry 2}
 
 
