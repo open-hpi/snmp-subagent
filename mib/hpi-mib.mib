@@ -1913,11 +1913,12 @@ saHpiEventWatchdogNum OBJECT-TYPE
 
 saHpiEventWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
-				noAction (0),
-				reset (1),
-				powerDown (2),
-				powerCycle (3),
-				timerInt (8)
+				undefined(0),
+				noAction (1),
+				reset (2),
+				powerDown (3),
+				powerCycle (4),
+				timerInt (9)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -1928,11 +1929,12 @@ saHpiEventWatchdogAction OBJECT-TYPE
 
 saHpiEventWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
-				none (0),
-				smi (1),
-				nmi (2),
-				messageInterrupt (3),
-				oem (15)
+				undefined(0),
+				none (1),
+				smi (2),
+				nmi (3),
+				messageInterrupt (4),
+				oem (16)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -1943,13 +1945,14 @@ saHpiEventWatchdogPreTimerAction OBJECT-TYPE
 
 saHpiEventWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
-				none (0),
-				biosFrb2 (1),
-				biosPost (2),
-				osLoad (3),
-				smsOs (4),
-				oem (5),
-				unspecified (15)
+				undefined(0),
+				none (1),
+				biosFrb2 (2),
+				biosPost (3),
+				osLoad (4),
+				smsOs (5),
+				oem (6),
+				unspecified (16)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -1988,7 +1991,7 @@ saHpiEventOemManufacturerIdT OBJECT-TYPE
         ::= {saHpiEventEntry 43}
 
 saHpiEventOemEventData OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..32))
+        SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
@@ -1996,7 +1999,7 @@ saHpiEventOemEventData OBJECT-TYPE
 
 
 saHpiEventUserEventData OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(1..32))
+        SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "User events may be used for storing custom events 
