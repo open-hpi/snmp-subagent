@@ -508,28 +508,28 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
     DESCRIPTION
 	"Hot Swap states.
 
-inactive(1):
+	inactive(1):
 
 	The INACTIVE state indicates that the FRU, which supports the full hot swap model, is no longer active in the system, and that it has completed the extraction process. When a FRU completes the hardware disconnection process, it is logically and electrically disconnected or isolated from the platform but still physically located in the platform, so the associated resource remains in the domain. Typically, a FRU will be powered off or held in reset when in this state. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource is transitioning to an INACTIVE state.
 
-insertionPending(2):
+	insertionPending(2):
 
 	The INSERTION PENDING state is entered after a resource that supports the full hot swap model has been added to the domain, as a result of the associated FRU being physically inserted into the system. This state indicates the resource is transitioning from a NOT PRESENT state or INACTIVE state into the ACTIVE state. When transitioning into the INSERTION PENDING state, the resource should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event can be generated when the ejector latch is shut (cPCI) or the device is seated in a slot. 
 	Upon receiving the event, the HPI User has the opportunity to discover the capabilities of the resource before allowing the FRU associated with the resource to power on and become an active component in the system. During this state, the FRU can be commanded to power on or de-assert reset.
 
 
-active(3):
+	active(3):
 
 	The ACTIVE state indicates that a resource is now an active member of the domain.
 
 	After a FRU completes the hardware connection process, the associated resource enters the ACTIVE state. This does not mean that the FRU is now active at the software level, but merely indicates that the FRU is now active in the system and that it should not be abruptly removed. The HPI implementation generates a hot swap event with HotSwapState = SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
 
-extractionPending(4):
+	extractionPending(4):
 
 	The EXTRACTION PENDING state indicates that the resource, which supports the full hot swap model, has requested extraction of the associated FRU. Typically, a resource enters an EXTRACTION PENDING state when an ejector latch is opened (PICMG 2.1) or when a hot swap button is pressed. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that supports Managed Hot Swap requests extraction. 
 	Upon receiving the event, the HPI User has the opportunity to unload software drivers, relocate processes, or unmount file systems (software disconnect) before allowing a FRU to power down and disconnect from the system.
 
-notPresent(5):
+	notPresent(5):
 
 	 The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
 
@@ -610,13 +610,13 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
         
          BINARY          8-bit bytes, any values legal
         
-       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
-      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
+	Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
+	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
       	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
       	set defines the first 128 8-bit characters (00h-7Fh) and the 
       	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
         
-       Note: The BCDPLUS and ASCII6 encodings
+	Note: The BCDPLUS and ASCII6 encodings
       	use normal ASCII character encodings, but restrict the allowed
       	characters to a subset of the entire ASCII character set. These
       	encodings are used when the target device contains restrictions
@@ -787,14 +787,14 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 	}
 
 SaHpiText ::= TEXTUAL-CONVENTION
-    STATUS	current
-    DESCRIPTION
+	STATUS	current
+	DESCRIPTION
 	"Text data. The data can be in different languages
 	(represented by SaHpiTextLanguage) and in different
 	encodings (saHpiTextType)."
-    REFERENCE
+	REFERENCE
 	"Derived from SAI-HPI-B.00.90 spec, pg 174."
-    SYNTAX	OCTET STRING(SIZE(0..255))
+	SYNTAX	OCTET STRING(SIZE(0..255))
 
 SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 	STATUS		current
@@ -898,33 +898,33 @@ SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 			} 
 
 SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
-    STATUS	current
-    DESCRIPTION	
+	STATUS		current
+	DESCRIPTION	
 	"These definitions list the available data types that can be
-    used for sensor readings. "
+	used for sensor readings. "
 
-    REFERENCE
+	REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 171."
-    SYNTAX	INTEGER	{
-    			undefined(0),  
-			int64(1),
-			uint64(2),
-			float64(3),
-			buffer(4)    
-		}
+	SYNTAX		INTEGER	{
+				undefined(0),  
+				int64(1),
+				uint64(2),
+				float64(3),
+				buffer(4)    
+			}
 
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
-    STATUS          current
-    DESCRIPTION     
+	STATUS          current
+	DESCRIPTION     
  	"The sensor reading value is represented as one of the 
 	enumerated types listed in SaHpiSensorReadingType.
 
 	This value by itself is of string type and needs to be 
 	evaluated in the context of SaHpiSensorReadingType."
 
-    REFERENCE
+	REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 181."
-    SYNTAX	OCTET STRING(SIZE(0..255))
+	SYNTAX		OCTET STRING(SIZE(0..255))
 	
 
 -- *************************************
