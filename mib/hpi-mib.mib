@@ -211,7 +211,8 @@ SaHpiCapabilities ::= TEXTUAL-CONVENTION
         This texual definition defines the capabilities of a given 
         resource.
         One resource may support any number of capabilities using this
-        string (each capability is seperated by a delimeter). 
+        string (each capability is seperated by a delimeter a 
+	comma ',' or semicolon ';'). 
 
 	There are some additional capabilties that are unique
 	to the table. They explained in more details in the columnar
@@ -1770,27 +1771,27 @@ saHpiResourceTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
-        "This table represents the management attributes common to all entities
-         within the managed platform.  The logical domain ID and the entity ID
-         are used to address an entity."
+        "The logical domain ID and the Resource ID are used to address a 
+	Resource."
+	 REFERNECE 
+	 "See SAI-HPI-B.01.01 section 6.3"
         ::= {hpiDomain 8}
 
 saHpiResourceEntry OBJECT-TYPE
         SYNTAX          SaHpiResourceEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION
-                "This structure is used to store the RPT entry information.
-                The ResourceCapabilities field definies the capabilities of
-                the resource.  This field must be non-zero for all valid
-                resources.   The ResourceTag field is an informational value
-                that supplies the caller with naming  information for the
-                resource. This should be set to the  user-visible  name for a
-                resource, which can be used to identify the resource in
-                messages to a human operator.  For example, it could be set to
-                match a physical printed label attached to the primary  entity
-                which the resource manages. See section 5.2.6,
-                SaHpiResourceTagSet(), on page 33."
+        DESCRIPTION 
+	"A User access the Resource Presence Table (RPT) for each domain 
+	in the system. This table represents up-to-date information on 
+	the resources currently present in the domain with which it is 
+	associated. The ResourceCapabilities field defines the capabilities
+	of the resource.  This field must be non-zero for all valid
+        resources.   The ResourceTag field is an informational value."
+		
+	REFERNECE 
+	"See SAI-HPI-B.01.01 section 6.3"
+		
         INDEX   { saHpiDomainId, 
 		saHpiResourceId ,
 		saHpiResourceEntryId 
@@ -1852,11 +1853,8 @@ saHpiResourceEntryId OBJECT-TYPE
         SYNTAX          SaHpiEntryId
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Entry ID for record
-                Table Related Type Definitions  
-                SAHPI_FIRST_ENTRY 0x00000000
-                SAHPI_LAST_ENTRY  0xFFFFFFFF
-                SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
+        DESCRIPTION     
+	"Entry ID for record. See textual-convention for further details."
 	::=   {saHpiResourceEntry 2}
 
 saHpiResourceEntityPath OBJECT-TYPE 
@@ -1948,6 +1946,8 @@ saHpiResourceCapabilities OBJECT-TYPE
         data repositories.         
         
         SENSOR
+	
+	See textual-convention for further definition."
         "
 	::=   {saHpiResourceEntry 4 }
 
@@ -1986,8 +1986,8 @@ saHpiResourceSeverity OBJECT-TYPE
         DESCRIPTION     " Indicates the criticality that should be 
         raised when the resource is not responding.
         
-        Note: The enumerated named have +1 added as opposed to the SA HPI 
-        spec for the same constants.  "
+        Note: The enumerated named have +1 added as opposed to the 
+	SAI-HPI-B.01.01 spec for the same constants.  "
 	::=   {saHpiResourceEntry 6 }
 
 
@@ -2206,7 +2206,9 @@ saHpiResourceInfoGuid   OBJECT-TYPE
 
         The format if the ID follows that specified by the Wired for Management 
         Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
-        format, with a 3-bit variant field of 10x (where x indicates 'don't care')"
+        format, with a 3-bit variant field of 10x (where x indicates 'don't care')
+	
+	See textial-convention"
 
 	::=   {saHpiResourceEntry 16 }
 
@@ -2232,8 +2234,9 @@ saHpiResourceTag        OBJECT-TYPE
         SYNTAX          SaHpiText
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "Resource tag. The type of date is specified
-        by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+        DESCRIPTION     
+	"Resource tag. The type of data is specified by 
+	saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::=   {saHpiResourceEntry 19 }
 
 
@@ -2242,7 +2245,8 @@ saHpiResourceParamControl OBJECT-TYPE
                                 undefined(0),
                                 restoreDefaultParm(1),
                                 saveParm(2),
-                                restoreParm(3)
+                                restoreParm(3),
+				unsupported(4)
                         }
         MAX-ACCESS      read-write
         STATUS          current
@@ -2251,13 +2255,13 @@ saHpiResourceParamControl OBJECT-TYPE
         associated with a specific resource. Valid actions for this 
         function include:
 
-        undefined(0)    - resource has no concept of    configurations.
+        undefined(0)    - resource has no concept of configurations.
 
         restoreDefaultParm(1) - Restores the factory default settings 
                         for a specific resource. Factory defaults 
                         include sensor thresholds and configurations, 
-                        and resource- specific configuration parameters.
-        savaParm(2) - Stores the resource configuration parameters in 
+                        and resource-specific configuration parameters.
+        saveParm(2) - Stores the resource configuration parameters in 
                         non-volatile storage. Resource configuration 
                         parameters stored in non-volatile storage will 
                         survive power cycles and resource resets.
@@ -2265,12 +2269,21 @@ saHpiResourceParamControl OBJECT-TYPE
                         from non-volatile storage. Resource
                         configuration parameters include sensor 
                         thresholds and sensor configurations, as well 
-                        as resource-specific.
+                        as resource-specific parameters.
+			
+	unsupported(4)	- Specifies if the resource does not support parameter 
+			control.  This value is not written but is read only.  
+			And states the above actions when written are not 
+			supported and if written a SNMP error code 
+			'notWritable' will be generated.
+			
+	SNMP error codes should be checked to see of action written succeeded.
+	
 
-    Note: Enumerated values are increased by one value compared to
-    SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
         REFERENCE
-                "Derieved from SA-HPI-B.01.01 page 162."
+        "Derieved from SA-HPI-B.01.01 section 7.8.and 8.18"
 	::= {saHpiResourceEntry   20} 
 
 
@@ -2285,8 +2298,8 @@ saHpiResourceParamControl OBJECT-TYPE
 
 
 
-saHpiAutoTimeoutTable OBJECT-TYPE
-    SYNTAX SEQUENCE OF SaHpiAutoTimeoutEntry
+saHpiAutoInsertTimeoutTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF SaHpiAutoInsertTimeoutEntry
     MAX-ACCESS not-accessible
     STATUS current
     DESCRIPTION
@@ -2299,7 +2312,7 @@ saHpiAutoTimeoutTable OBJECT-TYPE
     REFERENCE "Derieved from SA-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
 
-saHpiAutoTimeoutEntry OBJECT-TYPE
+saHpiAutoInsertTimeoutEntry OBJECT-TYPE
 	SYNTAX 		SaHpiAutoTimeoutEntry
 	MAX-ACCESS 	not-accessible
 	STATUS 		current
@@ -2308,13 +2321,13 @@ saHpiAutoTimeoutEntry OBJECT-TYPE
 	the default auto-insertion policy is invoked on a resource within 
 	a specific domain."
 	INDEX { saHpiDomainId }
-	::= { saHpiAutoTimeoutTable 1 }
+	::= { saHpiAutoInsertTimeoutTable 1 }
 
-SaHpiAutoTimeoutEntry ::= SEQUENCE {
-	saHpiAutoTimeoutForInsert   SaHpiTime
+SaHpiAutoInsertTimeoutEntry ::= SEQUENCE {
+	saHpiAutoInsertTimeoutForInsert   SaHpiTime
     }
     
-saHpiAutoTimeoutForInsert OBJECT-TYPE
+saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
 	SYNTAX      SaHpiTime
 	MAX-ACCESS  read-write
 	STATUS      current
@@ -2350,7 +2363,7 @@ saHpiAutoTimeoutForInsert OBJECT-TYPE
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 section  7.7.9"
 
-    ::= { saHpiAutoTimeoutEntry 1 }
+    ::= { saHpiAutoInsertTimeoutEntry 1 }
 
 saHpiHotSwapEntryCount OBJECT-TYPE
         SYNTAX          Counter32
