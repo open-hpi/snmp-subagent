@@ -1710,7 +1710,7 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
 	
 	If an entity path contains entity types implemented
 	from the reserved ranges, such as ATCA, then if those 
-	types contains SAHPI_ENT_ prefixes they too cshall be 
+	types contain SAHPI_ENT_ prefixes they too shall be 
 	removed.
         
         Order of significance is inverted to make entity paths 
@@ -1965,7 +1965,7 @@ saHpiResourceEntityPath OBJECT-TYPE
 	
 	If an entity path contains entity types implemented
 	from the reserved ranges, such as ATCA, then if those 
-	types contains SAHPI_ENT_ prefixes they too cshall be 
+	types contain SAHPI_ENT_ prefixes they too shall be 
 	removed.
         
         Order of significance is inverted to make entity paths 
@@ -4138,7 +4138,7 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
 	
 	If an entity path contains entity types implemented
 	from the reserved ranges, such as ATCA, then if those 
-	types contains SAHPI_ENT_ prefixes they too cshall be 
+	types contain SAHPI_ENT_ prefixes they too shall be 
 	removed.
         
         Order of significance is inverted to make entity paths 
@@ -4657,7 +4657,7 @@ saHpiRdrEntityPath OBJECT-TYPE
 	
 	If an entity path contains entity types implemented
 	from the reserved ranges, such as ATCA, then if those 
-	types contains SAHPI_ENT_ prefixes they too cshall be 
+	types contain SAHPI_ENT_ prefixes they too shall be 
 	removed.
         
         Order of significance is inverted to make entity paths 
