@@ -392,12 +392,13 @@ saHpiResourceCapabilities OBJECT-TYPE
 
 saHpiResourceSeverity OBJECT-TYPE 
 	SYNTAX		INTEGER {
+				undefined(0),
         			critical (1),
         			major(2),
-        			minor(4),
+        			minor(3),
         			informational(4),
         			ok(5),
-        			debug(80)
+        			debug(81)
 			}
 	MAX-ACCESS	read-write
 	STATUS		current
@@ -976,9 +977,10 @@ saHpiEventIndex OBJECT-TYPE
 
 saHpiEventType OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				sensor(1),
 				hotswap(2),
-				watchdog(4),
+				watchdog(3),
 				oem(4),
 				user(5)
 			}
@@ -2430,9 +2432,10 @@ saHpiSystemEventLogAddedTimestamp OBJECT-TYPE
 
 saHpiSystemEventLogType OBJECT-TYPE
         SYNTAX          INTEGER {
+				undefined(0),
 				sensor(1),
 				hotswap(2),
-				watchdog(4),
+				watchdog(3),
 				oem(4),
 				user(5)
 			}
