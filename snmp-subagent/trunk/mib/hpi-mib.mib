@@ -1199,7 +1199,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
         the resource presence table (RPT).
 
         The DomainTag field is an informational value that supplies an
-        HPI User with naming information for the domain.
+        HPI SNMP Manager with naming information for the domain.
 
         NOTE: Regarding timestamps - If the implementation cannot supply an 
         absolute timestamp, then it may supply a timestamp relative to some
@@ -1630,7 +1630,7 @@ saHpiDomainAlarmAcknowledged OBJECT-TYPE
         MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "
-        An HPI User acknowledges an alarm to indicate that it is aware of the alarm 
+        An HPI SNMP Manager acknowledges an alarm to indicate that it is aware of the alarm 
         and to influence platform-specific alarm annunciation that may be provided  
         by the implementation.  Typically, an implementation ignores acknowledged   
         alarms when announcing an alarm on annunciation devices such as audible     
@@ -1986,7 +1986,7 @@ saHpiResourceCapabilities OBJECT-TYPE
         guaranteed that the deassertion of that event will also
         trigger an event. 
         
-        Thus, an HPI User may track the state of sensors on the
+        Thus, an HPI SNMP Manager may track the state of sensors on the
         resource by monitoring events rather than polling for state changes.
 
         AGGREGATE_STATUS
@@ -2092,7 +2092,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
         entity (or multiple entities) - NOT the entities for 
         which the resource provides management. The purpose of the 
         saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
+        that the HPI SNMP Manager may need in order to interact 
         correctly with the resource (e.g., recognize a 
         specific management controller which may have defined 
         OEM fields in sensors, OEM controls, etc.
@@ -2321,7 +2321,7 @@ saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
 	MAX-ACCESS  read-write
 	STATUS      current
 	DESCRIPTION
-	"This function allows the HPI User to configure a timeout for 
+	"This function allows the HPI SNMP Manager to configure a timeout for 
 	how long to wait before the default auto-insertion policy is invoked
 	on a resource within a specific domain.  
 
@@ -2343,7 +2343,7 @@ saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
 	policy will not be invoked.  Each domain maintains a single 
 	auto-insert timeout value and it is applied to all contained resources 
 	upon insertion, which support managed hot swap. Once the auto-insertion 
-	process begins, the HPI User will not be allowed to take control of 
+	process begins, the HPI SNMP Manager will not be allowed to take control of 
 	the insertion process; hence, the timeout should be set appropriately 
 	to allow for this condition.  Note that the timeout period begins 
 	when the hot swap event with saHpiHotSwapState == INSERTION_PENDING 
@@ -2416,7 +2416,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
         a hot swap indicator such as a blue LED. This indicator signifies 
         that the FRU is ready for removal. 
 
-        This columnar node allows the HPI User to retrieve and set the
+        This columnar node allows the HPI SNMP Manager to retrieve and set the
         state of this indicator. 
 
         When retrieving the values, the valid states are either 
@@ -2453,7 +2453,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         MAX-ACCESS  read-write
         STATUS      current
         DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how 
+        "This function allows the HPI SNMP Manager to configure a timeout for how 
         long to wait before the default auto-extraction policy is invoked. 
         This function accepts a parameter instructing the resource to impose
         a delay before performing its default hot swap policy for 
@@ -2468,7 +2468,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
         function call is processed, the timer will be stopped, and the 
         auto-extraction policy will not be invoked. 
 
-        Once the auto-extraction process begins, the HPI User will not be 
+        Once the auto-extraction process begins, the HPI SNMP Manager will not be 
         allowed to take control of the extraction process; hence, the 
         timeout should be set appropriately to allow for this condition. 
 
@@ -2496,7 +2496,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
         the FRU into a chassis. Physically opening an ejector latch or 
         pressing a button invokes the extraction process. 
 
-        This columnar node allows the HPI User to invoke an insertion or 
+        This columnar node allows the HPI SNMP Manager to invoke an insertion or 
         extraction process via software.
 
 	Note: Enumerated values are increased by one value compared to
@@ -2520,7 +2520,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
         the resource to turn the associated FRU~s local power on and to 
         de-assert reset. On extraction, the default policy may be for the 
         resource to immediately power off the FRU and turn on a hot swap 
-        indicator. This function allows an HPI User, after receiving a hot 
+        indicator. This function allows an HPI SNMP Manager, after receiving a hot 
         swap event with saHpiHotSwapState equal to INSERTION_PENDING or 
         EXTRACTION_PENDING, to prevent the default policy from being executed.  
 
@@ -2584,7 +2584,7 @@ saHpiHotSwapResetAction OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-        "This function gets the reset state of an entity, allowing the HPI User
+        "This function gets the reset state of an entity, allowing the HPI SNMP Manager
 	 to determine if the entity is being held with its reset asserted. If 
 	 a resource manages multiple entities, this function will address the 
 	 entity which is identified in the RPT entry for the resource.
@@ -2613,7 +2613,7 @@ saHpiHotSwapPowerAction OBJECT-TYPE
 	MAX-ACCESS  read-write
 	STATUS      current
 	DESCRIPTION
-	"This function gets the power state of an entity, allowing the HPI User 
+	"This function gets the power state of an entity, allowing the HPI SNMP Manager 
 	to determine if the entity is currently powered on or off. If a resource 
 	manages multiple entities, this function will address the entity which is 
 	identified in the RPT entry for the resource.
@@ -3863,7 +3863,7 @@ saHpiAnnouncementEntry OBJECT-TYPE
 	driven by the Annunciator management instrument.  Thus, when 
 	announcements are added to the current set, generally the flag 
 	should be set to indicate that the condition is 'unacknowledged'.  
-	Later, either as the result of an HPI User function call, or due 
+	Later, either as the result of an HPI SNMP Manager function call, or due 
 	to some implementation-dependent action (such as pressing an 
 	'acknowledge' button on a front-panel display), the flag can be 
 	changed to indicate that the announcement is now 'acknowledged.'
@@ -3877,7 +3877,7 @@ saHpiAnnouncementEntry OBJECT-TYPE
 	Over time, announcements are added to and deleted from an 
 	Annunciator`s current set of announcements. This may be done 
 	automatically by the HPI implementation to reflect platform fault 
-	conditions, or by the HPI User via the HPI interface.  When 
+	conditions, or by the HPI SNMP Manager via the HPI interface.  When 
 	announcements are added or deleted automatically by the HPI 
 	implementation, it is implementation-specific which announcements 
 	are added or removed.
@@ -3932,7 +3932,7 @@ saHpiAnnouncementAddedByUser    OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "True if added to set by HPI User, False if added 
+        DESCRIPTION     "True if added to set by HPI SNMP Manager, False if added 
         automatically by HPI implementation."
 	::=   {saHpiAnnouncementEntry 3 }
 
@@ -4066,7 +4066,7 @@ saHpiAnnouncementDelete OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION
-        "This function allows the HPI User to delete a single 
+        "This function allows the HPI SNMP Manager to delete a single 
 announcement. Announcements may be deleted individually by specifying 
 a specific index and setting this columnar node to destroy(6).
 "
@@ -4152,7 +4152,7 @@ saHpiEventLogInfoUserEventMaxSize OBJECT-TYPE
     STATUS      current
     DESCRIPTION
         "The UserEventMaxSize entry indicates the maximum size of the 
-        text buffer data field in an HPI User event that is supported 
+        text buffer data field in an HPI SNMP Manager event that is supported 
         by the Event Log implementation.  If the implementation does 
         not enforce a more restrictive data length, it should be set
         to SAHPI_MAX_TEXT_BUFFER_LENGTH (255)."
@@ -4285,13 +4285,18 @@ saHpiEventLogInfoState OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-        "When reading this value, true indicates that the Event Log is enabled; 
+    "When reading this value, true indicates that the Event Log is enabled; 
     False indicates that it is disabled.
 
     When writing this value, true indicates that the Event Log is to be enabled; 
     False indicates that it is to be disabled.
 
-    This node enables an HPI User to set/get the Event Log state. If the Event Log is disabled no events generated within the HPI implementation will be added to the Event Log. Events may still be added to the Event Log. When the Event Log is enabled events may be automatically added to the Event Log as they are generated in a resource or a domain, however, it is implementation-specific which events are automatically added to any Event Log.
+    This node enables an HPI SNMP Manager to set/get the Event Log state. If the 
+    Event Log is disabled no events generated within the HPI implementation will 
+    be added to the Event Log. Events may still be added to the Event Log. When 
+    the Event Log is enabled events may be automatically added to the Event Log 
+    as they are generated in a resource or a domain, however, it is implementati
+    on-specific which events are automatically added to any Event Log.
     "
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 61,62."
@@ -4666,8 +4671,8 @@ saHpiCtrlDigitalMode OBJECT-TYPE
 
 	This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
-	may be managed by the HPI User (manual mode).  Some controls allow 
-	their modes to be changed, allowing the HPI User to determine if they 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
@@ -4820,8 +4825,8 @@ saHpiCtrlDiscreteMode OBJECT-TYPE
 
 	This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
-	may be managed by the HPI User (manual mode).  Some controls allow 
-	their modes to be changed, allowing the HPI User to determine if they 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
@@ -4974,8 +4979,8 @@ saHpiCtrlAnalogMode OBJECT-TYPE
 
 	This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
-	may be managed by the HPI User (manual mode).  Some controls allow 
-	their modes to be changed, allowing the HPI User to determine if they 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
@@ -5152,8 +5157,8 @@ saHpiCtrlStreamMode OBJECT-TYPE
 
 	This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
-	may be managed by the HPI User (manual mode).  Some controls allow 
-	their modes to be changed, allowing the HPI User to determine if they 
+	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
@@ -5358,7 +5363,7 @@ saHpiSensorEnableCtrl OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "True if HPI User can enable or disable sensor via 
+        DESCRIPTION     "True if HPI SNMP Manager can enable or disable sensor via 
         saHpiSensorEnableSet."
         ::= {saHpiSensorEntry 3}
         
@@ -7427,15 +7432,51 @@ saHpiAnnunciatorEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "
-The Annunciator table is used to control the set of annunciators associated with a resource.
+	The Annunciator table is used to control the set of annunciators 
+	associated with a resource.
 
-An Annunciator management instrument holds a set of individual announcements.  The function of the Annunciator is to communicate the contents of its current set via whatever platform-specific mechanism is associated with that particular Annunciator management instrument.  For example, if announcements are to be communicated via lighting a set of LEDs on a front-panel display, the Annunciator management instrument may analyze its current set of announcements and turn on a single LED reflecting the most severe condition found, or turn on a 'System Ok' LED if there are currently no items in the set.  A different Annunciator may continuously scroll each announcement in its set on a text display, as well as turning on LEDs and setting dry-contact relays to reflect the severity of conditions present.  A third Annunciator may announce items in its set by sending messages to a proprietary management system, or by sending emails or pages to a system technician.
+	An Annunciator management instrument holds a set of individual
+	announcements.  The function of the Annunciator is to communicate 
+	the contents of its current set via whatever platform-specific 
+	mechanism is associated with that particular Annunciator management 
+	instrument.  For example, if announcements are to be communicated 
+	via lighting a set of LEDs on a front-panel display, the Annunciator 
+	management instrument may analyze its current set of announcements 
+	and turn on a single LED reflecting the most severe condition found, 
+	or turn on a 'System Ok' LED if there are currently no items in the set.  
+	A different Annunciator may continuously scroll each announcement in
+	its set on a text display, as well as turning on LEDs and setting 
+	dry-contact relays to reflect the severity of conditions present.  
+	A third Annunciator may announce items in its set by sending messages 
+	to a proprietary management system, or by sending emails or pages to 
+	a system technician.
 
-The Annunciator provides a common interface to these varied mechanisms for announcing conditions, so the HPI User is not burdened by platform-to-platform differences.  However, the current content of any annunciator management instrument is not defined by the HPI standard in the same way that the contents of the DAT are defined.  Thus, the HPI implementation and HPI Users can exert more control over what conditions should be announced.  Further, a platform can contain multiple Annunciator management instruments, each reflecting a different physical announcement device in the platform.  By exposing each separately, HPI Users and the HPI implementation can control which conditions are handled by each announcement device.
-An Annunciator management instrument may be implemented using other HPI controls that are in 'auto' mode; for example, digital controls to turn LEDs on and off, stream controls to sound audible alerts, and/or text controls to display detailed information.  However, Annunciators may also operate directly to report conditions using mechanisms that are not themselves visible directly in the HPI interface.
+	The Annunciator provides a common interface to these varied mechanisms 
+	for announcing conditions, so the HPI SNMP Manager is not burdened by 
+	platform-to-platform differences.  However, the current content of any 
+	annunciator management instrument is not defined by the HPI standard 
+	in the same way that the contents of the DAT are defined.  Thus, the 
+	HPI implementation and HPI SNMP Manager's can exert more control over 
+	what conditions should be announced.  Further, a platform can contain 
+	multiple Annunciator management instruments, each reflecting a different 
+	physical announcement device in the platform.  By exposing each separately, 
+	HPI SNMP Manager's and the HPI implementation can control which conditions 
+	are handled by each announcement device.
 
-Over time, announcements are added to and deleted from an Annunciator`s current set of announcements. This may be done automatically by the HPI implementation to reflect platform fault conditions, or by the HPI User via the HPI interface.  When announcements are added or deleted automatically by the HPI implementation, it is implementation-specific which announcements are added or removed.
-"
+	An Annunciator management instrument may be implemented using other HPI 
+	controls that are in 'auto' mode; for example, digital controls to turn 
+	LEDs on and off, stream controls to sound audible alerts, and/or text 
+	controls to display detailed information.  However, Annunciators may 
+	also operate directly to report conditions using mechanisms that are 
+	not themselves visible directly in the HPI interface.
+
+	Over time, announcements are added to and deleted from an Annunciator`s 
+	current set of announcements. This may be done automatically by the HPI 
+	implementation to reflect platform fault conditions, or by the HPI SNMP 
+	Manager via the HPI interface.  When announcements are added or deleted 
+	automatically by the HPI implementation, it is implementation-specific 
+	which announcements are added or removed."
+	
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiAnnunciatorNum }
         ::= {saHpiAnnunciatorTable 1}
 
@@ -7481,7 +7522,7 @@ saHpiAnnunciatorModeReadOnly    OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "if True, Mode may not be changed by HPI User."
+        "if True, Mode may not be changed by HPI SNMP Manager."
         ::= {saHpiAnnunciatorEntry 3}
 
 saHpiAnnunciatorMaxConditions   OBJECT-TYPE
@@ -7505,27 +7546,27 @@ saHpiAnnunciatorMode  OBJECT-TYPE
         DESCRIPTION     
 	"The Annunciator management instrument has a current mode that 
 	indicates whether announcements are added and removed automatically 
-	by the HPI implementation, by the HPI User, or both.  The mode may 
+	by the HPI implementation, by the HPI SNMP Manager, or both.  The mode may 
 	be set to one of three values, with the following meanings: 	 
   	 
 	auto(1) - the HPI implementation automatically adds and deletes 
-		announcements; the HPI User is not permitted to add or delete announcements. 	 
-	user(2) - the HPI User may add and delete announcements; the HPI 
+		announcements; the HPI SNMP Manager is not permitted to add or delete announcements. 	 
+	user(2) - the HPI SNMP Manager may add and delete announcements; the HPI 
 		implementation will not automatically add or delete announcements. 	 
 	shared(3) -  the HPI implementation automatically adds and deletes 
-		announcements, and the HPI User may also add and delete announcements. 	 
+		announcements, and the HPI SNMP Manager may also add and delete announcements. 	 
   	 
 	The initial mode of each Annunciator is implementation-specific.  The HPI 
 	User may change the mode of Annunciators with the saHpiAnnunciatorMode object.  
 	However, the mode may be configured to be Read-only, in which case the HPI 
 	User will not be able to change the mode. 	 
   	 
-	When the mode is user(2) or shared(3), HPI Users may add or delete any types 
-	of announcements in the Annunciator's current set - not just HPI User announcements.  
-	This is allowed so that the HPI User can exert complete control over what conditions 
+	When the mode is user(2) or shared(3), HPI SNMP Managers may add or delete any types 
+	of announcements in the Annunciator's current set - not just HPI SNMP Manager announcements.  
+	This is allowed so that the HPI SNMP Manager can exert complete control over what conditions 
 	are being announced, if that is required.  Note that this is less restrictive than 
 	the similar operations on the DAT.  To distinguish between announcements added to 
-	an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser 
+	an Annunciator automatically and those added by an HPI SNMP Manager, an saHpiAddedByUser 
 	field in the announcement indicates the source of the announcement in the set.
 
 	Note: Enumerated values are increased by one value compared to SAI-HPI-B.01.01 spec."
@@ -7538,7 +7579,7 @@ saHpiAnnunciatorOem     OBJECT-TYPE
         DESCRIPTION     
         "maximum number of conditions that can be held in current 
         set.  0 means no fixed limit.  if True, Mode may not be 
-        changed by HPI User."
+        changed by HPI SNMP Manager."
         ::= {saHpiAnnunciatorEntry 6}
 	
 saHpiAnnunciatorRDR OBJECT-TYPE
