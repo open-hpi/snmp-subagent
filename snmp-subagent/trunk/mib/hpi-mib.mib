@@ -256,19 +256,6 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 	"See SAI-HPI-B.01.01 section 8.1"
     SYNTAX Unsigned32
 
-SaHpiCapabilities ::= TEXTUAL-CONVENTION
-        STATUS          current
-        DESCRIPTION     " 
-        This texual definition defines the capabilities of a given 
-        resource.
-	
-	Each capability is seperated by a delimeter a comma 
-	',' or semicolon ';'. 
-
-	There are some additional capabilties that are unique
-	to the table. They explained in more details in the columnar
-	node. "
-        SYNTAX          OCTET STRING(SIZE(0..255))
 	
 SaHpiOptionalData ::= TEXTUAL-CONVENTION
         STATUS          current
@@ -1439,7 +1426,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
 	saHpiDomainId				SaHpiDomainId,
-        saHpiDomainCapabilities         	SaHpiCapabilities,
+        saHpiDomainCapabilities         	BITS,
         saHpiDomainIsPeer                	TruthValue,
                                                                       
         saHpiDomainTagTextType          	SaHpiTextType,
@@ -1475,7 +1462,11 @@ saHpiDomainId OBJECT-TYPE
 	::=   {saHpiDomainInfoEntry 1 }
         
 saHpiDomainCapabilities OBJECT-TYPE 
-        SYNTAX          SaHpiCapabilities
+        SYNTAX          BITS {
+			  undefined(0),
+			  autoInsertReadOnly(1)
+			}
+
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
@@ -1485,7 +1476,7 @@ saHpiDomainCapabilities OBJECT-TYPE
 	A domain may support any number of capabilities , each 
 	capability seperated by a delimeter. See the textual convention.
         
-        AUTOINSERT_READ_ONLY
+        autoInsertReadOnly(1):
           Indicates that the domain auto insert timeout value is 
 	  read-only and may not be modified using the 
 	  saHpiAutoTimeoutForInsert columnar object.
