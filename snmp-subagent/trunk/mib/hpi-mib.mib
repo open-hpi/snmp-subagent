@@ -17,7 +17,7 @@ IMPORTS
 	NOTIFICATION-GROUP	FROM SNMPv2-CONF
 	enterprises		FROM RFC1155-SMI;
 
-saforum MODULE-IDENTITY
+hpi MODULE-IDENTITY
     LAST-UPDATED "200311111800Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
@@ -102,10 +102,7 @@ saforum MODULE-IDENTITY
     REVISION	"200402080000Z"
     DESCRIPTION
 	"Changed HPI MIB OID to the one SAF ratified."
-	::= { enterprises 18568 }
-
-experimental	OBJECT IDENTIFIER ::= { saforum 1 }
-hpi		OBJECT IDENTIFIER ::= { experimental 1 }
+	::= { enterprises 18568 1 1 1 }
 
 hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
 
