@@ -524,9 +524,12 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      // SaHpiCtrlRecStreamT
 	      stream = entry->TypeUnion.Stream;
 	      // define from SaHpi.h
-	      ctx->saHpiCtrlAttributes_len = SAHPI_CTRL_MAX_STREAM_LENGTH;
+	      stream.Default.StreamLength = htonl (stream.Default.StreamLength);
+
+	      ctx->saHpiCtrlAttributes_len = sizeof (SaHpiCtrlStateStreamT);
 	      memcpy (ctx->saHpiCtrlAttributes,
 		      &stream.Default.Stream, ctx->saHpiCtrlAttributes_len);
+
 	      // SaHpiCtrlStateStreamT
 	      state->StateUnion.Stream.StreamLength =
 		htonl (state->StateUnion.Stream.StreamLength);
