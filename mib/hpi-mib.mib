@@ -18,7 +18,7 @@ IMPORTS
         NOTIFICATION-GROUP      FROM SNMPv2-CONF
         enterprises             FROM RFC1155-SMI;
 
-hpi MODULE-IDENTITY
+hpiB MODULE-IDENTITY
     LAST-UPDATED "200311111800Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
@@ -112,13 +112,13 @@ hpi MODULE-IDENTITY
     REVISION    "200402080000Z"
     DESCRIPTION
         "Changed HPI MIB OID to the one SAF ratified."
-        ::= { enterprises 18568 1 1 1 }
+        ::= { enterprises 18568 1 1 1 6}
 
-hpiEntity       OBJECT IDENTIFIER ::= { hpi 1 }
-hpiEvents       OBJECT IDENTIFIER ::= { hpi 2 }
-hpiResources    OBJECT IDENTIFIER ::= { hpi 3 }
-hpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
-hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
+hpiEntity       OBJECT IDENTIFIER ::= { hpiB 1 }
+hpiEvents       OBJECT IDENTIFIER ::= { hpiB 2 }
+hpiResources    OBJECT IDENTIFIER ::= { hpiB 3 }
+hpiNotifications OBJECT IDENTIFIER ::= { hpiB 4 }
+hpiMIBCompliances OBJECT IDENTIFIER ::= { hpiB 5 }
 
 -- The hotswap table:
 hpiHotSwap	OBJECT IDENTIFIER ::= { hpiEntity 11 }
