@@ -191,7 +191,8 @@ SaHpiEntry ::= SEQUENCE {
 
 	saHpiResourceTagTextType	INTEGER,	
 	saHpiResourceTagTextLanguage	INTEGER,
-	saHpiResourceTag		OCTET STRING
+	saHpiResourceTag		OCTET STRING,
+	saHpiParamControl		INTEGER
 	}
 
 saHpiDomainID OBJECT-TYPE 
@@ -691,6 +692,35 @@ saHpiResourceTag	OBJECT-TYPE
 	DESCRIPTION	"Resource tag. The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
 	::= {saHpiEntry 17}
+
+saHpiParamControl OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined(0),
+				restoreDefaultParm(1),
+				saveParm(2),
+				restoreParm(3)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+	"This object allows the user to save and restore parameters associated 
+with a specific resource. Valid actions for this function include:
+	undefined(0)	- resource has no concept of 	configurations.
+
+	restoreDefaultParm(1) - Restores the factory default settings for a 
+specific resource. Factory defaults include sensor thresholds and 
+configurations, and resource- specific configuration parameters.
+	savaParm(2) - Stores the resource configuration parameters in 
+non-volatile storage. Resource configuration parameters stored in 
+non-volatile storage will survive power cycles and resource resets.
+	restoreParm(3) - Restores resource configuration parameters from 
+non-volatile storage. Resource
+configuration parameters include sensor thresholds and sensor 
+configurations, as well as resource-specific."
+	::={saHpiEntry 18}
+
+
+
 
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -4894,7 +4924,8 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiResourceInfoAuxFirmwareRev ,
 		saHpiResourceTagTextType ,
 		saHpiResourceTagTextLanguage,
-		saHpiResourceTag
+		saHpiResourceTag,
+		saHpiParamControl
 	}
 	STATUS current
 	DESCRIPTION
