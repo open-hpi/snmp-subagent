@@ -486,7 +486,7 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
 			      size_t * var_len, oid ** var_trap_oid)
 {
 
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   int len;
 
@@ -515,6 +515,18 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->saHpiResourceID == rpt_entry->ResourceId) &&
+	      (ctx->saHpiRdrRecordId == entry->RecordId) &&
+	      (ctx->saHpiRdrType == entry->RdrType)) {
+		  update_entry = MIB_TRUE;
+		  DEBUGMSGTL((AGENT,"Updating RDR entry. [%d, %d, %d, %d]\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  entry->RecordId,
+					  entry->RdrType));
+	     }
+
 	}
 
       if (hash == 0)
@@ -589,7 +601,8 @@ saHpiRdrTable_modify_context (SaHpiRptEntryT * rpt_entry,
       *var_trap_oid = (oid *) & saHpiResourceDataRecordNotification_oid;
 
 
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 

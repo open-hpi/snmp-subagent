@@ -348,7 +348,7 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 {
 
   long hash;
-
+  unsigned int update_entry = MIB_FALSE;
   SaHpiCtrlRecDigitalT digital;
   SaHpiCtrlRecDiscreteT discrete;
   SaHpiCtrlRecAnalogT analog;
@@ -379,6 +379,16 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id == rpt_entry->ResourceId) &&
+	      (ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->saHpiCtrlNum == entry->Num)) {
+		  // Time to update record.
+		DEBUGMSGTL((AGENT,"Updating control entry [%d, %d, %d].\n",
+					rpt_entry->DomainId,
+					rpt_entry->ResourceId,
+					entry->Num));
+		update_entry = MIB_TRUE;
+	  }
 	}
       if (hash == 0)
 	hash = 1;
@@ -553,7 +563,8 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 
 	    }
 	}
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 

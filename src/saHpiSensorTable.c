@@ -257,7 +257,7 @@ saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
 				 oid * rdr_entry, size_t rdr_entry_oid_len,
 				 saHpiSensorTable_context * ctx)
 {
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
   int i;
   SaHpiSensorDataFormatT data;
@@ -286,6 +286,15 @@ saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->resource_id == rpt_entry->ResourceId) &&
+	      (ctx->saHpiSensorIndex == entry->Num)) {
+		  update_entry = MIB_TRUE;
+		  DEBUGMSGTL((AGENT,"Updating sensor entry. [%d, %d, %d]\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  entry->Num));
+	  }
 	}
       if (hash == 0)		// Might happend - roll-over
 	hash = 1;		// Need this - we consider hash values of '0' uninitialized
@@ -489,7 +498,8 @@ saHpiSensorTable_modify_context (SaHpiSensorRecT * entry,
 
 
       ctx->saHpiSensorOEM = entry->Oem;
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 

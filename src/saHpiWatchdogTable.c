@@ -195,7 +195,7 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
 				   oid * rdr_entry, size_t rdr_entry_oid_len,
 				   saHpiWatchdogTable_context * ctx)
 {
-
+  unsigned int update_entry = MIB_FALSE;
   long hash;
 
   // Make sure they are valid.
@@ -221,6 +221,15 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
+	  if ((ctx->resource_id == rpt_entry->ResourceId) &&
+	      (ctx->domain_id == rpt_entry->DomainId) &&
+	      (ctx->saHpiWatchdogNum == entry->WatchdogNum)) {
+		  update_entry = MIB_TRUE;
+		  DEBUGMSGTL((AGENT,"Updating HotSwap entry. [%d, %d, %d]\n",
+					  rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  entry->WatchdogNum));
+	     }
 	}
 
       if (hash == 0)
@@ -248,6 +257,8 @@ saHpiWatchdogTable_modify_context (SaHpiWatchdogRecT * entry,
 	  ctx->saHpiWatchdogTimerInitialCount = wdog->InitialCount;
 	  ctx->saHpiWatchdogTimerPresentCount = wdog->PresentCount;
 	}
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 

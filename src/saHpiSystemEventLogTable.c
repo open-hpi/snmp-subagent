@@ -197,6 +197,7 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 					 ctx)
 {
   long hash = 0;
+  unsigned int update_entry = MIB_FALSE;
   SaHpiEventT *event_entry;
   SaHpiSensorEventT sensor;
   SaHpiSensorReadingT reading;
@@ -227,7 +228,11 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	  if ((ctx->resource_id == rpt->ResourceId) && 
 	      (ctx->domain_id == rpt->DomainId) && 
 	      (ctx->saHpiSystemEventLogIndex == sel->EntryId)) {
-		  return AGENT_ENTRY_EXIST; 
+		  update_entry = MIB_TRUE;
+		  DEBUGMSGTL((AGENT,"Updating SEL entry [%d, %d, %d]\n",
+					  rpt->DomainId,
+					  rpt->ResourceId,
+					  sel->EntryId));
 	   }	
 	}
 
@@ -518,7 +523,8 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
       update_event_status_flag (rpt->DomainId,
 				rpt->ResourceId, SNMP_ROW_ACTIVE);
 
-
+      if (update_entry == MIB_TRUE)
+	      return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
   return AGENT_ERR_NULL_DATA;
