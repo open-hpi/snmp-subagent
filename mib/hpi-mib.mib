@@ -2617,6 +2617,7 @@ SaHpiCtrlEntry ::= SEQUENCE {
 	saHpiCtrlBool		TruthValue,
 	saHpiCtrlType		INTEGER,
 	saHpiCtrlState		OCTET STRING,
+	saHpiCtrlAttributes	OCTET STRING,
 	saHpiCtrlOem		Unsigned32, 
 	saHpiCtrlRDR		RowPointer
 }
@@ -2675,12 +2676,14 @@ saHpiCtrlType OBJECT-TYPE
 
 
 saHpiCtrlState OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(1|4|12|9|261|275))
-	MAX-ACCESS	read-only
+	SYNTAX		OCTET STRING (SIZE(1|4|9|261|259))
+	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	
-  	"This attribute represents the current setting of the control.  It must
+	DESCRIPTION	"
+  	This attribute represents the current setting of the control.  It must
          be interpreted in the context of saHpiCtrlType.
+	if you wish to change the values of the data, this is the object
+	to use.
 
         digital  - The first octet will indicate its setting to be
                      off(0)
@@ -2688,23 +2691,37 @@ saHpiCtrlState OBJECT-TYPE
                      pulseOff(2),
                      pulseOn(3),
                      auto(255)
-        discrete - Unsigned 32bit integer. 
+        discrete - Unsigned 32bit integer  (4 octets)
 
-        analog   - Analog control attributes are represented as follows:
-                     octet 1-4  - minimum value
-                     octet 5-8  - maximum value
-                     octet 9-12 - default value
+        analog   - octets 1-4 represent the value specified in
+		   network byte order.
 
         stream   - A stream control is represented as follows:
                      octet 1    - repeat flag
-                     octets 2-5 - bytes of data stored in the stream specified 
+                     octets 2-5 - count of octets of data stored in the stream specified 
                                   in network byte order.
                      octets 6-9 - contain the stream data.
 
         text     - Text control attributes are represented as follows:
-                     octet 1    - max characters
-                     octet 2    - max lines
-                     octet 3    - language. The values can be: 
+                     octet 1    - Line number (255 indicates all lines).
+				When reading:
+				Note that depending on the data type and 
+				language, the text may be encoded in 2-byte 
+				Unicode, which requires two bytes of data per
+				character.
+
+				When writting:
+				If less than a full line of data is written, 
+				the control will clear all spaces beyond 
+				those written on the line. Thus writing a
+				zero-length string will clear the addressed line. 
+				It is also possible to include more characters 
+				in the text passed in the CtrlState structure 
+				than will fit on one line; in this case, 
+				the control will 'wrap' to the next line 
+				(still clearing the trailing characters on the
+				last line written).
+                     octet 2    - Language. The value can be: 
 				Undef (0), Afar (1), Abkhazian (2), Afrikaans (3),
 				Amharic (4), Arabic (5), Assamese (6), Aymara (7),
 				Azerbaijani (8), Bashkir (9), Byelorussian (10),
@@ -2740,47 +2757,71 @@ saHpiCtrlState OBJECT-TYPE
 				Twi (126), Ukrainian (127), Urdu (128), Uzbek (129),
 				Vietnamese (130), Volapuk (131), Wolof (132), Xhosa (133),
 				Yoruba (134), Chinese (135), Zulu (136)
-                     octet 4    - text encoding
+                     octet 3    - text encoding
 	 			binary(1):
 		  		  String of bytes, any values legal
-
          			bcdplus(2)
 				  String of 0-9, space, dash, period ONLY
          			ascii6(3)
 				  Reduced ASCII character set: 0x20-0x5F ONLY
          			language(4)
 				  ASCII or UNICODE depending on language
-		     octet 5	- line number
-				(255 for all numbers)
-                     octets 6-261 - text to display
+                     octets 4-n - text to display/write. Where max(n) is 259.
 
         oem      - An oem control is represented as follows:
                      octets 1-4   - manufacturer ID in network byte order
-                     octets 5-14  - config data
-		     octets 15-18 - the default manufacturere
-				    ID in network byte order
-		     octet 19	  - length of OEM specfic data
-		     octet 20-275 - OEM specific data
+		     octet  5	  - length of data.
+                     octets 5-n   -  control data (where max(n) is 261).
 	"
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
 	 
 	::= {saHpiCtrlEntry 5}
 
--- saHpiUint32T Oem; /* Reserved for OEM use */
+saHpiCtrlAttributes	OBJECT-TYPE
+	SYNTAX		OCTET STRING(SIZE(4|12|260|269))
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+
+	This object represents certain attributes of the control.
+	It must be interpreted in the context of saHpiCtrlType.
+	This object augments the data in saHpiCtrlState.
+
+	digital  - 4 octet value in network byte order
+	discrete - 4 octet value in network byte order
+	stream   - 4 octet value in network byte order
+
+	text	- Text control attributes are represented as follows:
+		  octet 1	- max characters	
+		  octet 2	- max lines.
+		  octet 3	- Language. Consult saHpiCtrlState for
+				  values.
+
+		  octet 4 	- encoding. Consult saHpiCtrlState for
+				  values.
+
+		  octet 5-n	- Text to display (where max(n) is 260).
+
+	oem	- An oem control is represented as follows:
+		 octet 1-4	- manufacturer ID in network byte order.
+		 octets 5-14	- configuration data.
+		 octets 14-n	- default state (where max(n) is 269).
+	" 
+	::= {saHpiCtrlEntry 6}
 saHpiCtrlOem OBJECT-TYPE
 	SYNTAX		Unsigned32
         MAX-ACCESS      read-only
 	STATUS          current
 	DESCRIPTION     "Reserved for OEM use"
-	::= {saHpiCtrlEntry 6}
+	::= {saHpiCtrlEntry 7}
 
 saHpiCtrlRDR OBJECT-TYPE
 	SYNTAX          RowPointer
 	MAX-ACCESS      read-only
 	STATUS          current
 	DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
-	::= {saHpiCtrlEntry 7}
+	::= {saHpiCtrlEntry 8}
 
 
 --/*******************************************************************************
@@ -4965,6 +5006,7 @@ saHpiCtrlGroup OBJECT-GROUP
 		saHpiCtrlBool ,
 		saHpiCtrlType ,
 		saHpiCtrlState,
+		saHpiCtrlAttributes,
 		saHpiCtrlOem,
 		saHpiCtrlRDR
 	}
