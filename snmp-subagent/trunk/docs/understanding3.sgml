@@ -314,7 +314,7 @@ functions is the responsibilty of the user (more on this in later sections):
 		<para>Look in <emphasis>net-snmp/library/container.h</emphasis>
 		for more details. The macro calls which are defined in there 
 		(CONTAINER_FIRST, CONTAINER_GET_SUBSET, etc) will be explained
-		in more details in subsequent sections.
+		in more details in <xref linkend="developer_row_creation">.
 		</para>
 	</note>
 
@@ -424,7 +424,7 @@ functions is the responsibilty of the user (more on this in later sections):
 	</para>
      </sect2>
 
-     <sect2>
+     <sect2 id="extract_index">
  	<title>Extracting index</title>
 
 	<para>
@@ -482,7 +482,7 @@ nsIETFWGProgress OBJECT-TYPE
 			debated(2),
 			rewritting(3),
 			draft(4),
-			standard(5)					
+			standard(50)					
 		}	
     MAX-ACCESS  read-only
     STATUS      current
@@ -617,7 +617,7 @@ nsIETFWGIsWorking OBJECT-TYPE
 	</para>
 	<para>
 	To delete a row from the sub-agent, you need to use the CONTAINER_REMOVE 
-	macro. Look in the section titled "Developer row deletion".
+	macro. Look in <xref linkend="developer_row_delete"> for more information.
 	</para>
    </sect2>
    <sect2>
@@ -711,9 +711,9 @@ nsIETFWGIsWorking OBJECT-TYPE
 	The create_row function is also the means by which the sub-agent internally can create fully populated rows. 
 	</para>
 	</sect3>
-	<sect3>
+	<sect3 id="developer_row_creation">
 	  <title>Developer row creation</title>
-
+	
 	<para>
 	The source code has a perfect spot for user creation - it is right
 	after the call to <emphasis>initialize_table_netSnmpIETFWGTable</emphasis>.
@@ -896,7 +896,7 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	</para>
 	</sect3>
 
-	<sect3>
+	<sect3 id="developer_row_delete">
 	 <title>Developer row deletion.</title>
 	
 	<para>
@@ -923,12 +923,12 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	</sect3>
 	</sect2>
     <sect2>
-	<title>Writing a row</title>
+	<title>Writing to a row</title>
 	<para>
 	There are two ways to write to a row. From the perspective 
 	of a SNMP SET command and sub-agent. 
 
-	<sect3>
+	<sect3 id="developer_writing">
 	<title>Developer writing to a row</title>
 	<para>
 	The process of writing to a row from a sub-agent perspective is
@@ -1027,11 +1027,11 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	type of the SNMP SET request and also the size of the payload.
 	</para>
 	<para>
-	If during the checking there is an error, the <emphasis>rc</emphasis>
+	If checking process fails, the <emphasis>rc</emphasis>
 	is set to an appropiate error code (consult net-snmp/library/snmp.h 
 	for the list) and <emphasis>netsnmp_set_mode_request_error</emphasis> 
 	is notified. This will result in removal of this SNMP SET request 
-	and the end-user will be notified of the appropiate error that was set.
+	and the end-user will be notified of the appropiate error code.
 	</para>
 	<note>
 		<para>If the end-user is using SNMP v1, only a selective
@@ -1044,25 +1044,144 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	<sect2>
 	  <title>RESERVE2 function</title>
 	<para>
+	The second stage is checking the appropiate values of the SNMP SET request.
+	This is where the developer checks for the correct length and values
+	of the columnar nodes. 
 	</para>
+	<para>
+	The OCTET STRING (or DisplayString) columnar nodes this might be not an issue,
+	but for enumerated integers - it is important to check for the right 
+	enumeration. If you refer back to <xref linkend="extract_index">, you
+	will notice the extra ASN.1 columnar node called <emphasis>nsIETFWGProgress
+	</emphasis>. This object defines six enumerations: undefined(0),
+	proposed(1), debated(2), rewritting(3), draft(4) and standard(50).
+	The check for the proper enumerations can be carried out in 
+	this function, such as:
+	</para>
+<programlisting role='C'>
+        case COLUMN_NSIETFWGPROGRESS:
+	    if (((*var->val.integer < 0) ||
+               (*var->val.integer > 4)) && (*var->val.integer != 50))
+            {
+              rc = SNMP_ERR_BADVALUE;
+            }
+          break;
+</programlisting>
+	<para>
+	For string variables, it might perhaps just imporatn to check the
+	length of the string - to make sure it is not more than 255 bytes.
+	</para>
+<programlisting role='C'>
+        case COLUMN_NSIETFWGCHAIR2:
+            /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->val_len > 255)
+                rc = SNMP_ERR_WRONGLENGTH;
+        break;
+</programlisting>
 	</sect2>
 	<sect2>
 	  <title>ACTION</title>
 
 	<para>
+	The <emphasis>netSnmpIETFWGTable_set_action</emphasis> is the function
+	where the new value is writen in the appropiate <emphasis>context</emphasis>
+	structure and where the developer would perform the write to his/her datastore.
 	</para>
+	<para>The changes are being writen to row_ctx. A copy of the original row is in undo_ctx. If this function calls <emphasis>netsnmp_set_mode_request_error</emphasis> the newly modified row is discarded and the user is notified of the error state.
+	</para>
+	<para>
+	It is this function that the developer can decide if the row has to
+	be removed or created. For deleting:
+	</para>
+<programlisting role='C'>
+	rg->row_deleted = 1;
+</programlisting>
+	<para>
+	For creating:
+	</para>
+<programlisting role='C'>
+	rg->row_created = 1;
+</programlisting>
 	</sect2>
 	<sect2>
 	  <title>COMMIT function</title>
 
 	<para>
+	This routine function is to commit the changes to the row. 
+	The intent of the ACTION/COMMIT division is that all of the 
+	fallible code should be done in the ACTION phase, 
+	so that it can be backed out if necessary.
 	</para>
 	</sect2>
 	<sect2>
 	  <title>FREE and UNDO function</title>
+	
+	<para>
+	This explanation is taken from the generated C code.
+	</para>	
+	
+	<sect3><title>FREE function</title>
+
+	<para> 
+	 If either of the RESERVE calls fail, the write routines
+are called again with the FREE action, to release any resources
+that have been allocated. The agent will then return a failure
+response to the requesting application.</para>
+<para>
+ AFTER calling this routine, the agent will delete undo_info.
+</para>
+
+	</sect3>
+	<sect3>
+	  <title>UNDO function</title>
+	<para>
+	 If the ACTION phase does fail (for example due to an apparently
+ 	valid, but unacceptable value, or an unforeseen problem), then
+ 	the list of write routines are called again, with the UNDO
+ 	action. This requires the routine to reset the value that was
+ 	changed to its previous value (assuming it was actually changed),
+ 	and then to release any resources that had been allocated. As
+ 	with the FREE phase, the agent will then return an indication
+ 	of the error to the requesting application.
+	</para>
+ 
+	<para>
+	BEFORE calling this routine, the agent will update the container
+	(remove any newly inserted row, re-insert any removed row).
+	</para>
+	</sect3>
+	</sect2>
+  </sect1>
+  <sect1>
+	<title>Getting values</title>
 
 	<para>
+	The mechanism by which the NetSNMP library retrieves the correct
+	row is by calling the function defined in the callback mechanism.
 	</para>
-	</sect2>
+<programlisting role='C'>
+   cb.get_value = netSnmpIETFWGTable_get_value;
+</programlisting>
+	<para>
+	The <emphasis>netSnmpIETFWGTable_get_value</emphasis> is similar to
+	the ACTION, RESERVE1, and RESERVE2 routines by looping through the 
+	requests for columns and retrieving the data for the correct column.
+	This is done in the switch statement by setting a pointer to the data
+	and its length (in bytes) to correct.
+<programlisting role='C'>
+  switch(table_info->colnum) {
+
+        case COLUMN_NSIETFWGNAME:
+            /** OCTETSTR = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&amp context->nsIETFWGName,
+                         context->nsIETFWGName_len );
+        break;
+	...
+</programlisting>
+	<para>
+M
+
+	</para>
   </sect1>
 </chapter>
