@@ -558,7 +558,7 @@ SaHpiHotSwapState ::= TEXTUAL-CONVENTION
                     notPresent (5)
                 }
                 
-SaHpiEventPreTimerAction ::= TEXTUAL-CONVENTION
+SaHpiWatchdogPreTimerAction ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
         "These enumerations represent the possible types of interrupts that may be
@@ -3300,7 +3300,7 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
         saHpiEventWatchdogNum                   SaHpiInstrumentId,
         saHpiWatchdogEventTimestamp             SaHpiTimeString,
         saHpiWatchdogEventAction                INTEGER,
-        saHpiWatchdogEventPreTimerAction        SaHpiEventPreTimerAction,
+        saHpiWatchdogEventPreTimerAction        SaHpiWatchdogPreTimerAction,
         saHpiWatchdogEventUse                   SaHpiWatchdogTimerUse, 
         saHpiWatchdogEventDelete                RowStatus
         }
@@ -3342,7 +3342,7 @@ saHpiWatchdogEventAction OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 3}
 
 saHpiWatchdogEventPreTimerAction OBJECT-TYPE
-        SYNTAX          SaHpiEventPreTimerAction
+        SYNTAX          SaHpiWatchdogPreTimerAction
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -6455,7 +6455,7 @@ SaHpiWatchdogEntry ::= SEQUENCE {
         saHpiWatchdogRunning            TruthValue,
         saHpiWatchdogTimerUse           SaHpiWatchdogTimerUse,
         saHpiWatchdogTimerAction        INTEGER,
-        saHpiWatchdogPretimerInterrupt  SaHpiEventPreTimerAction,
+        saHpiWatchdogPretimerInterrupt  SaHpiWatchdogPreTimerAction,
         saHpiWatchdogPreTimeoutInterval Unsigned32,
         saHpiWatchdogTimerUseExpFlags   Unsigned32,
         saHpiWatchdogTimerInitialCount  Unsigned32,
@@ -6553,7 +6553,7 @@ saHpiWatchdogTimerAction OBJECT-TYPE
         ::= {saHpiWatchdogEntry 5}
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
-        SYNTAX          SaHpiEventPreTimerAction
+        SYNTAX          SaHpiWatchdogPreTimerAction
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
