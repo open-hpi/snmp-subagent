@@ -5070,6 +5070,187 @@ saHpiCtrlAnalogRDR OBJECT-TYPE
         ::= {saHpiCtrlAnalogEntry 10}
 
 
+saHpiCtrlStreamEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of stream control records in the system."
+        ::= {hpiControl 8}
+
+saHpiCtrlStreamTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlStreamEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table of stream Control Resource Data Records and its states."
+        ::= {hpiControl 9}
+                
+
+saHpiCtrlStreamEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlStreamEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+                "Definition of the stream control resource data record and its states table."
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
+        ::= {saHpiCtrlStreamTable 1}
+
+
+SaHpiCtrlStreamEntry ::= SEQUENCE {
+        saHpiCtrlStreamOutputType		SaHpiCtrlOutputType,
+
+        saHpiCtrlStreamMode     		SaHpiCtrlMode,        
+
+        saHpiCtrlStreamIsReadOnly 		TruthValue,
+
+        saHpiCtrlStreamIsWriteOnly		TruthValue,
+
+		saHpiCtrlStreamDefaultRepeat	TruthValue,
+		saHpiCtrlStreamDefaultState		Unsigned32,	
+
+		saHpiCtrlStreamRepeat			TruthValue,
+		saHpiCtrlStreamState			Unsigned32,
+
+        saHpiCtrlStreamOem              Unsigned32, 
+   
+        saHpiCtrlStreamRDR              RowPointer
+}
+
+
+saHpiCtrlStreamOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+		"Refer to the textual convention for more details on the
+		enumerations.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+        ::= {saHpiCtrlStreamEntry 1}
+
+
+saHpiCtrlStreamMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"If this columnar node is written to when the saHpiCtrlStreamIsReadOnly 
+	flag is TRUE the an SNMP error of notWritable is returned.  
+
+	This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+	The CtrlState parameter must be of the correct type for the specified 
+	control.  
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+	REFERENCE "See section 7.3 and 7.3.3."
+        ::= {saHpiCtrlStreamEntry 2}
+        
+saHpiCtrlStreamIsReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if mode is read-only"
+        ::= {saHpiCtrlStreamEntry 3}
+        
+saHpiCtrlStreamIsWriteOnly  OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indicates if Control is write-only"
+	
+	REFERENCE "See remarks section 7.3.2."
+        ::= {saHpiCtrlStreamEntry 4}
+
+saHpiCtrlStreamDefaultRepeat          OBJECT-TYPE
+        SYNTAX          TruthValue 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default repeat flag of resource data records 
+	 	of the stream control.
+
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlStreamEntry 5}
+
+saHpiCtrlStreamDefaultState         OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+        This object represents the default value of resource data records 
+	 	of the stream control.
+
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlStreamEntry 6}
+
+saHpiCtrlStreamRepeat          OBJECT-TYPE
+        SYNTAX          TruthValue 
+        MAX-ACCESS      read-write 
+        STATUS          current
+        DESCRIPTION     "
+        This attribute represents the current stream setting of the control.  
+        Use this object to change the repeat value of the stream data.
+	
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code.
+        " 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        ::= {saHpiCtrlStreamEntry 7}
+
+saHpiCtrlStreamState OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+        This attribute represents the current stream setting of the control.  
+        Use this object to change the values of the data.
+	
+	You may not change the state of the control unless the Mode is set to
+	manual(2).  If a write is attempted when the mode is set to
+	auto(1) SNMP will return a notWriteable error code.
+
+        "
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
+	7.3.3, 8.7 and 8.8."
+         
+        ::= {saHpiCtrlStreamEntry 8}
+
+saHpiCtrlStreamOem OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Reserved for OEM use"
+        ::= {saHpiCtrlStreamEntry 9}
+
+
+saHpiCtrlStreamRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        ::= {saHpiCtrlStreamEntry 10}
+
+
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -7868,6 +8049,24 @@ saHpiCtrlAnalogGroup OBJECT-GROUP
 		"saHpiCtrlAnalog table."
 	::= { hpiMIBCompliances 23}
 
+saHpiCtrlStreamGroup OBJECT-GROUP
+	OBJECTS {
+        saHpiCtrlStreamOutputType,
+        saHpiCtrlStreamMode,
+        saHpiCtrlStreamIsReadOnly,
+        saHpiCtrlStreamIsWriteOnly,
+		saHpiCtrlStreamDefaultRepeat,
+		saHpiCtrlStreamDefaultState,
+		saHpiCtrlStreamRepeat,
+		saHpiCtrlStreamState,
+        saHpiCtrlStreamOem, 
+        saHpiCtrlStreamRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"saHpiCtrlStream table."
+	::= { hpiMIBCompliances 24}
+
 saHpiSensorGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorType,
@@ -8184,6 +8383,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiCtrlDigitalGroup,
 		saHpiCtrlDiscreteGroup,
 		saHpiCtrlAnalogGroup,
+		saHpiCtrlStreamGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
