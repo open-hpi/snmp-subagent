@@ -1353,8 +1353,8 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 	::= {hpiEntity 9}
 
 --IBMKR: Perhaps the name saHpiResourceTable is a better name?
-saHpiTable OBJECT-TYPE
-	SYNTAX		SEQUENCE OF SaHpiEntry
+saHpiResourceTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiResourceEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION	
@@ -1363,8 +1363,8 @@ saHpiTable OBJECT-TYPE
          are used to address an entity."
 	::= {hpiEntity 10}
 
-saHpiEntry OBJECT-TYPE
-	SYNTAX		SaHpiEntry
+saHpiResourceEntry OBJECT-TYPE
+	SYNTAX		SaHpiResourceEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
@@ -1379,14 +1379,14 @@ saHpiEntry OBJECT-TYPE
 		match a physical printed label attached to the primary  entity
 		which the resource manages. See section 5.2.6,
 		SaHpiResourceTagSet(), on page 33."
-	INDEX	{ saHpiDomainId, saHpiResourceId ,saHpiEntryID }
-	::= {saHpiTable 1}
+	INDEX	{ saHpiDomainId, saHpiResourceId ,saHpiResourceEntryIdx }
+	::= {saHpiResourceTable 1}
 
-SaHpiEntry ::= SEQUENCE {
+SaHpiResourceEntry ::= SEQUENCE {
 
 	saHpiDomainId				Unsigned32,
 
-	saHpiEntryID				Unsigned32,
+	saHpiResourceEntryIdx				Unsigned32,
 	saHpiResourceId				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
 	saHpiResourceCapabilities 		OCTET STRING,
@@ -1413,6 +1413,7 @@ SaHpiEntry ::= SEQUENCE {
 	saHpiResourceTag			SaHpiText,
 	
 	saHpiParamControl			INTEGER,
+
 	saHpiClearEvents			RowStatus,
 	saHpiEventLogTime			SaHpiTime,
 	saHpiEventLogState			INTEGER
@@ -1430,21 +1431,24 @@ saHpiDomainId OBJECT-TYPE
 
 	Note:
  		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
-	::= {saHpiEntry 1}
-
-saHpiEntryID OBJECT-TYPE 
+	::= {saHpiResourceEntry 1}
+--IBMKR: Is this a normal entry ID with the start being 
+-- 0x000000 and the last one being 0xFFFFFFFF?
+-- if so, perhaps a better name?
+saHpiResourceEntryIdx OBJECT-TYPE 
 	SYNTAX		Unsigned32	
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Entry ID for record"
-	::= {saHpiEntry 2}
+	::= {saHpiResourceEntry 2}
+
 
 saHpiResourceId OBJECT-TYPE 
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Resource identifier."
-	::= {saHpiEntry 3}
+	::= {saHpiResourceEntry 3}
 
 saHpiResourceEntityPath OBJECT-TYPE 
 	SYNTAX		OCTET STRING
@@ -1472,7 +1476,7 @@ saHpiResourceEntityPath OBJECT-TYPE
 	For example:
  	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
-	::= {saHpiEntry 4}
+	::= {saHpiResourceEntry 4}
 
 saHpiResourceCapabilities OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..255))
@@ -1535,7 +1539,7 @@ saHpiResourceCapabilities OBJECT-TYPE
 	
 	SENSOR
 	"
-	::= {saHpiEntry 5}
+	::= {saHpiResourceEntry 5}
 	
 saHpiResourceHotSwapCapabilities OBJECT-TYPE 
 	SYNTAX		Unsigned32 
@@ -1553,7 +1557,7 @@ saHpiResourceHotSwapCapabilities OBJECT-TYPE
 	
 		Indicates whether or not the resource has a hot swap indicator.
 	"
-	::= {saHpiEntry 6}
+	::= {saHpiResourceEntry 6}
 
 
 saHpiResourceSeverity OBJECT-TYPE 
@@ -1573,14 +1577,14 @@ saHpiResourceSeverity OBJECT-TYPE
 	
 	Note: The enumerated named have +1 added as opposed to the SA HPI 
 	spec for the same constants.  "
-	::= {saHpiEntry 7}
+	::= {saHpiResourceEntry 7}
 
 saHpiResourceFailed OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "TRUE = Resource Not Functional.  FALSE = Resource Functional "
-        ::= {saHpiEntry 8}
+        ::= {saHpiResourceEntry 8}
 
 saHpiResourceInfoResourceRev OBJECT-TYPE 
 	SYNTAX		Unsigned32(0..255)
@@ -1604,7 +1608,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
 
-	::= {saHpiEntry 9}
+	::= {saHpiResourceEntry 9}
 
 saHpiResourceInfoSpecificVer OBJECT-TYPE 
 	SYNTAX		Unsigned32(0..255)
@@ -1627,7 +1631,7 @@ saHpiResourceInfoSpecificVer OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 10}
+	::= {saHpiResourceEntry 10}
 
 
 saHpiResourceInfoDeviceSupport OBJECT-TYPE 
@@ -1651,7 +1655,7 @@ saHpiResourceInfoDeviceSupport OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 11}
+	::= {saHpiResourceEntry 11}
 
 
 saHpiResourceInfoManufacturerId OBJECT-TYPE 
@@ -1675,7 +1679,7 @@ saHpiResourceInfoManufacturerId OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 12}
+	::= {saHpiResourceEntry 12}
 
 
 saHpiResourceInfoProductId OBJECT-TYPE 
@@ -1699,7 +1703,7 @@ saHpiResourceInfoProductId OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 13}
+	::= {saHpiResourceEntry 13}
 
 
 saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE 
@@ -1723,7 +1727,7 @@ saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 14}
+	::= {saHpiResourceEntry 14}
 
 saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE 
 	SYNTAX		Unsigned32(0..255)
@@ -1746,7 +1750,7 @@ saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 15}
+	::= {saHpiResourceEntry 15}
 
 
 saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE 
@@ -1770,7 +1774,7 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
 	
 	All of the fields in the following structure may or 
 	may not be used by a given resource."
-	::= {saHpiEntry 16}
+	::= {saHpiResourceEntry 16}
 
 saHpiResourceInfoGuid 	OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..15))
@@ -1783,7 +1787,7 @@ saHpiResourceInfoGuid 	OBJECT-TYPE
 	Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
 	format, with a 3-bit variant field of 10x (where x indicates 'don't care')"
 
-	::= {saHpiEntry 17}
+	::= {saHpiResourceEntry 17}
 
 
 saHpiResourceTagTextType OBJECT-TYPE 
@@ -1791,14 +1795,14 @@ saHpiResourceTagTextType OBJECT-TYPE
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"See Definition."
-	::= {saHpiEntry 18}
+	::= {saHpiResourceEntry 18}
 
 saHpiResourceTagTextLanguage OBJECT-TYPE
 	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     "See Definition."
-	::= {saHpiEntry 19}
+	::= {saHpiResourceEntry 19}
 
 saHpiResourceTag	OBJECT-TYPE
 	SYNTAX		SaHpiText
@@ -1806,7 +1810,7 @@ saHpiResourceTag	OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	"Resource tag. The type of date is specified
 	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-	::= {saHpiEntry 20}
+	::= {saHpiResourceEntry 20}
 
 saHpiParamControl OBJECT-TYPE
 	SYNTAX		INTEGER {
@@ -1818,7 +1822,7 @@ saHpiParamControl OBJECT-TYPE
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
-	"This object allows the user to save and restore parameters 
+	    "This object allows the user to save and restore parameters 
 	associated with a specific resource. Valid actions for this 
 	function include:
 
@@ -1838,10 +1842,11 @@ saHpiParamControl OBJECT-TYPE
 			thresholds and sensor configurations, as well 
 			as resource-specific."
 	REFERENCE
-	"Derieved from SA-HPI-A.01.01 page 72."
-	::={saHpiEntry 21}
+		"Derieved from SA-HPI-B.01.01 page 162."
+	::={saHpiResourceEntry 21}
 
 
+    	
 saHpiClearEvents OBJECT-TYPE
 	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
@@ -1849,14 +1854,14 @@ saHpiClearEvents OBJECT-TYPE
 	DESCRIPTION
 	"Erase all of the system events for this particular
 	resource. The saHpiSystemEventsLogTable will be affected."
-	::= {saHpiEntry 22}
+	::= {saHpiResourceEntry 22}
 
 saHpiEventLogTime	OBJECT-TYPE
 	SYNTAX		SaHpiTime
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION     "Refer to SaSaHpiTime for full describption."
-	::= {saHpiEntry 23}
+	DESCRIPTION     "Refer to SaHpiTime for full describption."
+	::= {saHpiResourceEntry 23}
 
 saHpiEventLogState OBJECT-TYPE
 	SYNTAX	INTEGER {
@@ -1880,7 +1885,7 @@ saHpiEventLogState OBJECT-TYPE
 	default value for this parameter, which may vary by resource. 
 	This object is provided so that management software can 
 	override the default value, if desired."
-	::= {saHpiEntry 24}	
+	::= {saHpiResourceEntry 24}	
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -1929,8 +1934,10 @@ SaHpiHotSwapEntry ::= SEQUENCE {
     saHpiHotSwapPolicyCancel	INTEGER,
     saHpiHotSwapResourceRequest	INTEGER,
 
-
-    saHpiHotSwapRTP	       RowPointer }
+    saHpiHotSwapResetAction	INTEGER,
+    saHpiHotSwapPowerAction	INTEGER,
+    saHpiHotSwapRTP	       RowPointer
+    }
 
 
 saHpiHotSwapIndicator OBJECT-TYPE
@@ -2144,12 +2151,53 @@ Because a resource that supports the simplified hot swap model will never transi
         "Derived from function prototype in the SAI-HPI-B.01.01 page 148-149."
     ::= {saHpiHotSwapEntry 8}
 
+saHpiHotSwapResetAction OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    coldReset(1),
+		    warmReset(2),
+		    resetAssert(3),
+		    resetDeAssert(4)
+		}
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION
+	"This function gets the reset state of an entity, allowing the HPI User to determine if the entity is being held with its reset asserted. If a resource manages multiple entities, this function will address the entity which is identified in the RPT entry for the resource.
+
+coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be returned in saHpiResetAction. 
+
+	If the entity is not being held in reset (using resetAssert(3)), the appropriate value is resetDeAssert(4)."
+
+    REFERENCE
+    	"Derieved from SA-HPI-B.01.01 page 164."
+    ::= {saHpiHotSwapEntry 9}
+
+saHpiHotSwapPowerAction OBJECT-TYPE
+    SYNTAX	INTEGER {
+    		    undefined(0),
+		    off(1),
+		    on(2),
+		    cycle(3)
+		}
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION
+	"This function gets the power state of an entity, allowing the HPI User to determine if the entity is currently powered on or off. If a resource manages multiple entities, this function will address the entity which is identified in the RPT entry for the resource.
+
+cycle(3) is a pulsed power operation and is not a valid return for the power state.
+
+This function controls the hardware power on a FRU entity regardless of what hot-swap state the resource is in. For example, it is legal (and may be desirable) to cycle power on the FRU even while it is in ACTIVE state in order to attempt to clear a fault condition. Similarly, a resource could be instructed to power on a FRU even while it is in INACTIVE state, for example, in order to run off-line diagnostics.
+Not all resources supporting hot swap will necessarily support this function. In particular, resources that use the simplified hot swap model may not have the ability to control FRU power. 
+This function may also be supported for non-FRU entities if power control is available for those entities."
+	REFERENCE
+	    	"Derieved from SA-HPI-B.01.01 page 168-169."
+	::= {saHpiHotSwapEntry 10}
 saHpiHotSwapRTP	OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"OID for RTP"
-	::= {saHpiHotSwapEntry 10}
+	::= {saHpiHotSwapEntry 11}
 
 
 	
@@ -3287,7 +3335,7 @@ saHpiEventLogCurrentTime OBJECT-TYPE
 	current time; i.e the timestamp that would be placed on an
 	entry if it was added now. 
 
-	Refer to SaSaHpiTime for full describption."
+	Refer to SaHpiTime for full describption."
 	::= {eventLog 5}
 
 saHpiEventLogIsEnabled OBJECT-TYPE
@@ -5760,7 +5808,7 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiEntryUpdateCount,
 		saHpiEntryUpdateTimestamp,
 		saHpiDomainId ,
-		saHpiEntryID ,
+		saHpiResourceEntryIdx ,
 		saHpiResourceId ,
 		saHpiResourceEntityPath ,
 		saHpiResourceCapabilities ,
