@@ -5666,7 +5666,7 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
 	  Avoid creating duplicate entries here! 
 		1. a manager would add an event to the User Event Table, 
 		2. the Sub-agent would see this and call saHpiEventLogAdd(), 
-		3. the event would go thru the HPI system and would be 
+		3. the event would go thru the HPI system and would be
 			added to the HPI event queue, 
 		4. the sub-agent would read the event queue as part of 
 			its normal operations, and when it sees this event 
