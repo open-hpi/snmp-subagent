@@ -159,6 +159,7 @@ initialize_table_netSnmpIETFWGTable(void)
 	helper functions available. Consult the manpage - <emphasis>man netsnmp_table</emphasis>
 	</para>
 	</note>
+	</sect2>
 	<sect2><title>Notify the helper function</title>
 
 <programlisting role="C">
@@ -294,7 +295,7 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
 	<xref linkend="RESERVE2">, 
 	<xref linkend="ACTION">, 
 	<xref linkend="COMMIT"> and 
-	<xref linkend="FREE_and_UNDO"> for more details on what these functions do.
+	<xref linkend="FREE_and_UNDO"> for more details on what these functions do. </para>
 	</sect2>
 
 	<sect2>
@@ -356,7 +357,9 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
    the NetSNMP library provides a mechanism to register the developer's own sorting
    routine. More on this topic in the section below and in <xref linkend="compare_function_explanation">.
   </para>   
- <sect2 id="netSnmpIETFWGTable_IDX2">
+  </sect3>
+  </sect2>
+  <sect2 id="netSnmpIETFWGTable_IDX2">
   <title>Generic compare function</title>
 
 	<para>
@@ -380,6 +383,7 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
 	<para>
 	Consult <ulink url="http://www.net-snmp.org/faqs/rstory/array-user.html">
 	array-user Frequently Asked Questions Page</ulink> for more advanced information.
+	</para>
  </sect2>
  <sect2>
    <title>Tree searching function</title>
@@ -499,6 +503,7 @@ functions are properly implemented (more on this in <xref linkend="snmp_set_writ
 	<para>
 	For example, if this table had two extra index values: an enumerated integer
 	value (nsIETFWGProgress) and TruthValue (nsIETFWGIsWorking) with the following ASN.1 definition: 
+	</para>
 <programlisting role='C'>
 nsIETFWGProgress OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -977,7 +982,7 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	<para>
 	There are two ways to write to a row. From the perspective 
 	of a SNMP SET command and sub-agent (developer). 
-
+	</para>
 	<sect3 id="developer_writing">
 	<title>Developer writing to a row</title>
 	<para>
@@ -1023,13 +1028,14 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	The following picture, borrowed from NetSNMP webpage, demonstrates
 	these steps. A more detailed explanation of what happens during these
 	steps is explained in this <ulink url="http://www.net-snmp.org/faqs/rstory/#steps">rstory's NET-SNMP Developers Frequently Asked Questions Page: Baby Steps Flow</ulink>.
+	</para>
 	<mediaobject>
         <imageobject>
           <imagedata fileref="images/set-actions.jpg">
         </imageobject>
       </mediaobject>
 	</sect3>
-	
+ 	</sect2>	
 	<sect2 id="RESERVE1">
 	  <title>RESERVE1 function</title>
 
@@ -1224,8 +1230,6 @@ response to the requesting application.</para>
 	</para>
 	</sect3>
 	</sect2>
-
-
   </sect1>
   <sect1 id="getting_values">
 	<title>Getting values</title>
@@ -1245,6 +1249,7 @@ response to the requesting application.</para>
 	requests for columns and performing some operation on the correct column.
 	In this case, instead of checking the value, or writing, it 
 	is setting a pointer to the appropiate data and the data's length (in bytes).
+	</para>
 <programlisting role='C'>
   switch(table_info->colnum) {
 
