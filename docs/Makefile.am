@@ -30,7 +30,7 @@
 #  
 DIAGRAMS = $(shell ls  images/*jpg) 
 
-
+SFUSER = $(shell if test $(SFUID) != "" > /dev/null 2>&1; then echo $(SFUID); else echo $(USER);fi;)
 SERVER = shell1.sourceforge.net
 HLDDIR = /home/groups/o/op/openhpi/htdocs/subagent-manual
 
@@ -59,20 +59,20 @@ ps-am:
 #	find $(top_srcdir) -name \*\.c | xargs gnome-doc -docbook > function_docs.sgml
 
 subagent-manual/book1.html: $(SGML_FILES)
-	-db2html subagent-manual.sgml
+	-db2html -o subagent-manual subagent-manual.sgml
 	-mkdir -p subagent-manual/images
 	-cp $(DIAGRAMS) subagent-manual/images
+	-./htmlfilter.pl subagent-manual/*html 
 
 publish: subagent-manual/book1.html
-	-htmlfilter.pl $(shell ls subagent-manual/*html)
-	-chmod a+x $(shell ls subagent-manual/*html)
+	-chmod a+x subagent-manual/*html
 	if [ ! -e subagent-manual/book1.html ]; then \
 		ln subagent-manual/index.html subagent-manual/book1.html; \
 	fi;
 	-echo "XBitHack on" > subagent-manual/.htaccess
-	-rsync -e ssh -rP --delete subagent-manual/ $(SERVER):$(HLDDIR)
-	-ssh $(SERVER) "find $(HLDDIR) -user `whoami` -exec chmod g+w {} \;"
-	-ssh $(SERVER) "find $(HLDDIR) -user `whoami` -type d -exec chmod g+s {} \;"
+	-rsync -e ssh -rP --delete subagent-manual/ $(SFUSER)@$(SERVER):$(HLDDIR)
+	-ssh $(SFUSER)@$(SERVER) "find $(HLDDIR) -user `whoami` -exec chmod g+w {} \;"
+	-ssh $(SFUSER)@$(SERVER) "find $(HLDDIR) -user `whoami` -type d -exec chmod g+s {} \;"
 
 clean:
 	rm -fR subagent-manual
