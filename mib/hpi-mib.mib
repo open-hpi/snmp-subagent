@@ -4090,7 +4090,7 @@ saHpiCtrlType OBJECT-TYPE
 
 
 saHpiCtrlState OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(1|4|9))
+	SYNTAX		OCTET STRING (SIZE(1|4|7))
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"
@@ -4099,7 +4099,7 @@ saHpiCtrlState OBJECT-TYPE
 	if you wish to change the values of the data, this is the object
 	to use.
 
-        digital  - The first octet will indicate its setting to be
+        digital  - Unsigned 32bit integer (4 octets) defined as:
                      off(0)
                      on(1),
                      pulseOff(2),
