@@ -5804,8 +5804,6 @@ SaHpiSensorEntry ::= SEQUENCE {
          
         saHpiSensorEventCtrl                    INTEGER,  
         saHpiSensorSupportedEventStates         SaHpiEventState,   
-       
-  
         
         saHpiSensorEventsCategoryControl        INTEGER,
         
@@ -6076,7 +6074,7 @@ saHpiCurrentSensorStateEntry OBJECT-TYPE
         ::= {saHpiCurrentSensorStateTable 1}
 
 SaHpiCurrentSensorStateEntry ::= SEQUENCE {
-        saHpiCurrentSensorStateIsSupported      TruthValue,
+        saHpiCurrentSensorStateDataPresent      INTEGER,
         saHpiCurrentSensorStateType           	SaHpiSensorReadingType, 
         saHpiCurrentSensorStateValue          	SaHpiSensorReadingValue,
         saHpiCurrentSensorStateEventState       SaHpiEventState,
@@ -6086,14 +6084,36 @@ SaHpiCurrentSensorStateEntry ::= SEQUENCE {
         saHpiCurrentSensorStateDeassertEventMask	SaHpiEventState 	
         }
 
-saHpiCurrentSensorStateIsSupported  OBJECT-TYPE
-        SYNTAX          TruthValue
+saHpiCurrentSensorStateDataPresent  OBJECT-TYPE
+        SYNTAX          INTEGER {
+                                undefined (0),
+                                reading(1),
+                                eventState(2),
+                                readingAndEventState(3),
+                                noData(4)
+                        }
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "IsSupported is set when a sensor reading/threshold value is available.  
-        Otherwise, if no reading or threshold is supported, this flag is set to
-        False."
+        "
+	reading(1) - This table contains only the sensor reading values. 
+		Refer to saHpiCurrentSensorStateType and 
+		saHpiCurrentSensorStateValue.
+		SAI-HPI-b.01.01 IsSupported is set when a sensor 
+		reading/threshold value is available.  
+	   
+	eventState(2) - The sensor does not support reading values, 
+		instead events are available. Refer to 
+		saHpiCurrentSensorStateEventState.     
+		
+	readingAndEventState(3) - The sensor supports both reading 
+		current values and events. Refer to 
+		saHpiCurrentSensorStateType, saHpiCurrentSensorStateValue, 
+		saHpiCurrentSensorStateEventState.
+		
+	noData(4) - The sensor does not support reading current values 
+		nor events.
+	"
         ::= {saHpiCurrentSensorStateEntry 1}
 
 saHpiCurrentSensorStateType   OBJECT-TYPE
@@ -8649,7 +8669,7 @@ saHpiSensorGroup OBJECT-GROUP
 
 saHpiCurrentSensorStateGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiCurrentSensorStateIsSupported,
+		saHpiCurrentSensorStateDataPresent,
 		saHpiCurrentSensorStateType,
 		saHpiCurrentSensorStateValue,
 		saHpiCurrentSensorStateEventState,
