@@ -2159,7 +2159,8 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogEntryId	Unsigned32,
 	saHpiSystemEventLogTimestamp	TimeStamp,
 	saHpiSystemEventLogged		RowPointer,
-	saHpiSystemEventClearEventTable TruthValue
+	saHpiSystemEventClearEventTable TruthValue,
+	saHpiSystemEventLogState	INTEGER
 	}
 
 saHpiSystemEventLogEntryId OBJECT-TYPE
@@ -2217,6 +2218,27 @@ saHpiSystemEventClearEventTable OBJECT-TYPE
 	meaning it can erase more than one row."
 	::= {saHpiSystemEventLogEntry 4}
 
+saHpiSystemEventLogState OBJECT-TYPE
+	SYNTAX	INTEGER {
+			undefined(0),
+			enable(1),
+			disable(2)
+		}
+	MAX-ACCESS read-write
+	STATUS	current
+	DESCRIPTION "The object enables system management software to get (and
+	set) the event log state. If the event log is disable(2), no events
+	generated within the HPI implemention will be added to the event log.
+
+	When the event log is enable(1), events may be automaticlly added to
+	the event log as they are generated in a resource  or a domain.
+
+	Typically, the HPI implementation will provide an appropriate 
+	default value for this parameter, which may vary by resource. 
+	This object is provided so that management software can override 
+	the default value, if desired."
+	::= {saHpiSystemEventLogEntry 5}	
+	
 --
 -- BILL
 --
@@ -4701,7 +4723,8 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogEntryId,
 		saHpiSystemEventLogTimestamp,
 		saHpiSystemEventLogged,
-		saHpiSystemEventClearEventTable
+		saHpiSystemEventClearEventTable,
+		saHpiSystemEventLogState
 	}
 	STATUS current
 	DESCRIPTION 
