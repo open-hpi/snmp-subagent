@@ -4427,7 +4427,11 @@ saHpiWatchdogLog OBJECT-TYPE
 	If you set this object, it means:
 	Log -  indicates whether or not the Watchdog should  issue
                an event when it next times out. TRUE=event will be
-               issued on timeout."
+               issued on timeout.
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1).
+	"
 	::= {saHpiWatchdogEntry 2}
 
 saHpiWatchdogRunning OBJECT-TYPE 
@@ -4475,7 +4479,10 @@ saHpiWatchdogTimerUse OBJECT-TYPE
                    Watchdog timer.  
 	If you set this object, it means:
 	TimerUse - indicates the current use of the timer. Will control
-                   which saHpiWatchdogTimerUseExpFlags is set if the timer expires"
+                   which saHpiWatchdogTimerUseExpFlags is set if the timer expires
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 4}
 
 saHpiWatchdogTimerAction OBJECT-TYPE
@@ -4487,8 +4494,11 @@ saHpiWatchdogTimerAction OBJECT-TYPE
 			}
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "Indicates what action will be taken when the Watchdog
-                        times out."
+        DESCRIPTION     
+	"Indicates what action will be taken when the Watchdog times out.
+
+	 Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 5}
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
@@ -4501,23 +4511,31 @@ saHpiWatchdogPretimerInterrupt OBJECT-TYPE
 			}
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "PretimerInterrupt -  indicates which action will be taken
+        DESCRIPTION     
+	"PretimerInterrupt -  indicates which action will be taken
                         'PreTimeoutInterval' seconds prior to Watchdog timer
-                        expiration. "
+                        expiration. 
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 6}
 
 saHpiWatchdogPreTimeoutInterval OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "PreTimeoutInterval indicates how many  milliseconds prior to timer time
+        DESCRIPTION     
+	"PreTimeoutInterval indicates how many  milliseconds prior to timer time
                         out the PretimerInterrupt action will be taken. If
                         'PreTimeoutInterval' = 0, the PretimerInterrupt action
                         will occur concurrently with 'TimerAction.' HPI
                         implementations may not be able to support millisecond
                         resolution and may have a maximum value restriction.
                         These restrictions should be documented by the
-                        provider of the HPI interface. "
+                        provider of the HPI interface. 
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 7}
 
 saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
@@ -4540,7 +4558,10 @@ saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
  	SAHPI_WATCHDOG_EXP_OEM         0x20
 
 	The bit flag 0x00 indicates that this watchdog does not support
-	any of the flags."
+	any of the flags.
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 8}
 
 saHpiWatchdogTimerInitialCount OBJECT-TYPE
@@ -4554,7 +4575,10 @@ saHpiWatchdogTimerInitialCount OBJECT-TYPE
                         sent to the Watchdog. HPI implementations may not be
                         able to support millisecond resolution and may have a
                         maximum value restriction. These restrictions should
-                        be documented by the provider of the HPI interface."
+                        be documented by the provider of the HPI interface.
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 9}
 
 saHpiWatchdogTimerPresentCount OBJECT-TYPE
@@ -4568,7 +4592,10 @@ saHpiWatchdogTimerPresentCount OBJECT-TYPE
                         HPI implementations may not be able to support
                         millisecond resolution on watchdog timers, but will
                         return the number of clock ticks remaining times the
-                        number of milliseconds between each tick. "
+                        number of milliseconds between each tick. 
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
         ::= {saHpiWatchdogEntry 10}
 
 saHpiWatchdogTimerReset OBJECT-TYPE
@@ -4580,7 +4607,10 @@ saHpiWatchdogTimerReset OBJECT-TYPE
 
 	Setting this to true(1) will 'strobe' the counter and reset to
 	the initial countdown value as specified in 
-	saHpiWatchdogTimerInitialCount."
+	saHpiWatchdogTimerInitialCount.
+
+	Setting this object will NOT take effect on the Watchdog until the
+	object SaHpiWatchdogRunning is set to true(1)."
 	::= {saHpiWatchdogEntry 11}
 
 saHpiWatchdogOem OBJECT-TYPE
