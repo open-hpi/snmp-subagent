@@ -522,15 +522,11 @@ saHpiTable_modify_context (SaHpiRptEntryT * entry,
       ctx->saHpiResourceInfoResourceRev = entry->ResourceInfo.ResourceRev;
       ctx->saHpiResourceInfoSpecificVer = entry->ResourceInfo.SpecificVer;
       ctx->saHpiResourceInfoDeviceSupport = entry->ResourceInfo.DeviceSupport;
-      ctx->saHpiResourceInfoManufacturerId =
-	entry->ResourceInfo.ManufacturerId;
+      ctx->saHpiResourceInfoManufacturerId = entry->ResourceInfo.ManufacturerId;
       ctx->saHpiResourceInfoProductId = entry->ResourceInfo.ProductId;
-      ctx->saHpiResourceInfoFirmwareMajorRev =
-	entry->ResourceInfo.FirmwareMajorRev;
-      ctx->saHpiResourceInfoFirmwareMinorRev =
-	entry->ResourceInfo.FirmwareMinorRev;
-      ctx->saHpiResourceInfoAuxFirmwareRev =
-	entry->ResourceInfo.AuxFirmwareRev;
+      ctx->saHpiResourceInfoFirmwareMajorRev = entry->ResourceInfo.FirmwareMajorRev;
+      ctx->saHpiResourceInfoFirmwareMinorRev = entry->ResourceInfo.FirmwareMinorRev;
+      ctx->saHpiResourceInfoAuxFirmwareRev = entry->ResourceInfo.AuxFirmwareRev;
       ctx->saHpiResourceTagTextType = entry->ResourceTag.DataType + 1;
       ctx->saHpiResourceTagTextLanguage = entry->ResourceTag.Language;
       len = entry->ResourceTag.DataLength;
