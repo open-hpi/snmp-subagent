@@ -33,12 +33,12 @@ extern          "C" {
    * Max values are defined in the MIB
    */
 
-#define SAHPI_INVENTORY_ATTRIBUTES_MAX 5
+#define SAHPI_INVENTORY_ATTRIBUTES_MAX SNMP_MAX_MSG_SIZE
 #define SAHPI_STRING_MAX 255
 #define MIB_VALID 1
 #define MIB_INVALID 0
 #define MIB_OVERFLOW 2
-
+#define MAXBUF (1024*16)
 #define SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX 1
 #define SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX 5
 #define SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX 4
@@ -147,8 +147,11 @@ update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
                                 saHpiInventoryTable_context *ctx);
 
 int
- update_inventory_data_on_context(SaHpiInventGeneralDataT *data,
+ update_inventory_data_on_context(SaHpiInventGeneralDataT *gen_data,
 				  saHpiInventoryTable_context *ctx,
+				  //size_t sahpi_length,
+				  char *out,
+				  size_t max_octets,
 				  size_t *length);
 
 

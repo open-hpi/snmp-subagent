@@ -132,7 +132,8 @@ memory_fixed:
 	return AGENT_ERR_INTERNAL_ERROR;
 	    
       // Remember the first inventory context
-      first_context = inventory_context;
+      if (first_context == NULL)
+	first_context = inventory_context;
   
       DEBUGMSGTL((AGENT,"%d: %d, %d\n", count, 
 		  (data->DataRecords[count] == NULL)? -1 : data->DataRecords[count]->RecordType,
@@ -194,7 +195,7 @@ memory_fixed:
    else
     rc = AGENT_ERR_OPERATION;
   
-  if (free != NULL) 
+  if (data != NULL) 
 	DEBUGMSGTL((AGENT,"free != NULL, possible memory leak.\n"));
   DEBUGMSGTL((AGENT,"\n\t--- populate_inventory. Exit\n"));
   return rc;
@@ -273,6 +274,7 @@ saHpiInventoryTable_modify_context(
 
   long hash;
   SaHpiInventDataRecordT data;
+  long len;
   //SaHpiInventoryReadingT reading;
   // Make sure they are valid.
   if (entry && ctx) {
@@ -300,14 +302,12 @@ saHpiInventoryTable_modify_context(
       hash = 1;
     ctx->hash = hash;
 
-    DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->EirId));
+    DEBUGMSGTL((AGENT,"Creating columns for: %d, %d\n", entry->EirId, count));
     ctx->resource_id = resource_id;
     ctx->domain_id = 0;
     ctx->saHpiInventoryRDR_len = rdr_entry_oid_len*sizeof(oid);
     memcpy(ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
-   
     ctx->saHpiInventoryEirId = entry->EirId;
-
     ctx->saHpiInventoryAttributes_len = 0;
     memset(ctx->saHpiInventoryAttributes, 0x00, SAHPI_INVENTORY_ATTRIBUTES_MAX);
     ctx->saHpiInventoryManufacturer_len = 0;
@@ -322,6 +322,8 @@ saHpiInventoryTable_modify_context(
     ctx->saHpiInventoryTextType = 0;
     ctx->saHpiInventoryTextLanguage = 0;
 
+    ctx->saHpiInventoryValidity = MIB_INVALID;
+   
     if (inv_data->DataRecords[count]) {
         data = *(inv_data->DataRecords[count]);
 	switch (inv_data->Validity) {
@@ -382,16 +384,20 @@ saHpiInventoryTable_modify_context(
                         &data.RecordData.OemData.MId,
                         sizeof(SaHpiManufacturerIdT));
 		// Extra data?
-		memcpy(ctx->saHpiInventoryAttributes + ctx->saHpiInventoryAttributes_len,
-			&data.RecordData.OemData.Data,
-			data.DataLength - sizeof(SaHpiManufacturerIdT));
-		ctx->saHpiInventoryAttributes_len = data.DataLength;
+		len = ((data.DataLength - sizeof(SaHpiManufacturerIdT)) > SAHPI_INVENTORY_ATTRIBUTES_MAX) ? SAHPI_INVENTORY_ATTRIBUTES_MAX : (data.DataLength - sizeof(SaHpiManufacturerIdT));
+		memcpy(ctx->saHpiInventoryAttributes + 
+		       ctx->saHpiInventoryAttributes_len,
+		       &data.RecordData.OemData.Data,
+		       len);
+		       
+		ctx->saHpiInventoryAttributes_len = len;
 		break;
 	default:
 	  break;
 	}
 	
-	}
+    }
+    
     return AGENT_NEW_ENTRY;
   }
   
@@ -466,12 +472,14 @@ struct {
 	memcpy(ctx->saHpiInventoryCustomField, data->CustomField[0]->Data,
 			ctx->saHpiInventoryCustomField_len);
   }
-}		
+}
 
 static SaHpiTextBufferT *copy_data( saHpiInventoryTable_context *ctx,
 				   unsigned char *data, int length, 
 				   
-				   size_t *new_size) {
+				   char *mem_location,
+				    size_t max_size,
+				    size_t *new_size) {
 
   SaHpiTextBufferT *buf = NULL;
   register int l;
@@ -481,9 +489,12 @@ static SaHpiTextBufferT *copy_data( saHpiInventoryTable_context *ctx,
     sizeof(SaHpiLanguageT) + 
     sizeof(SaHpiUint8T);
 
-  DEBUGMSGTL((AGENT,"Length is : %d, (total: %d)\n",
-	      length,l ));
-  buf = malloc(l);
+  DEBUGMSGTL((AGENT,"Length is : %d, (total: %d) (left memory: %d)\n",
+	      length,l, max_size ));
+  if (l > max_size)
+    return NULL;
+  buf = (SaHpiTextBufferT *)mem_location;
+//malloc(l);
 
   if (buf == NULL) {
     return NULL;
@@ -503,46 +514,50 @@ static SaHpiTextBufferT *copy_data( saHpiInventoryTable_context *ctx,
   return buf;
 }
 int
- update_inventory_data_on_context(SaHpiInventGeneralDataT *data,
+ update_inventory_data_on_context(SaHpiInventGeneralDataT *gen_data,
 				  saHpiInventoryTable_context *ctx,
+				  char *data, 
+				  size_t max_octets,
 				  size_t *length) {
 
   //  SaHpiTextBufferT *buf =NULL;
-  
-  data->Manufacturer = copy_data(ctx, ctx->saHpiInventoryManufacturer,
+  // Memory start point is at:
+  // initial_length.
+  gen_data->Manufacturer = copy_data(ctx, ctx->saHpiInventoryManufacturer,
 				 ctx-> saHpiInventoryManufacturer_len,
-				 length);
-
-  data->ProductName = copy_data(ctx, ctx->saHpiInventoryProductName,
+				 (char *)data, max_octets, length);
+  
+  gen_data->ProductName = copy_data(ctx, ctx->saHpiInventoryProductName,
 				ctx->saHpiInventoryProductName_len,
-				length);
+				(char *)data+*length, max_octets-*length,length);
 
-  data->ProductVersion = copy_data(ctx, ctx->saHpiInventoryProductVersion,
+  gen_data->ProductVersion = copy_data(ctx, ctx->saHpiInventoryProductVersion,
 				   ctx->saHpiInventoryProductVersion_len,
-				length);
+				(char *)data+*length, max_octets-*length,length);
 
-  data->ModelNumber = copy_data(ctx, ctx->saHpiInventoryModelNumber,
+  gen_data->ModelNumber = copy_data(ctx, ctx->saHpiInventoryModelNumber,
 				ctx->saHpiInventoryModelNumber_len,
-				length);
-  data->SerialNumber = copy_data(ctx, ctx->saHpiInventorySerialNumber,
+				(char *)data+*length,max_octets-*length,length);
+
+  gen_data->SerialNumber = copy_data(ctx, ctx->saHpiInventorySerialNumber,
 				 ctx->saHpiInventorySerialNumber_len,
-				 length);
+				 (char *)data+*length,max_octets-*length,length);
 
-  data->PartNumber = copy_data(ctx, ctx->saHpiInventoryPartNumber,
+  gen_data->PartNumber = copy_data(ctx, ctx->saHpiInventoryPartNumber,
 			       ctx->saHpiInventoryPartNumber_len,
-			       length);
+			       (char *)data+*length,max_octets-*length,length);
 
-  data->FileId = copy_data(ctx, ctx->saHpiInventoryFileId,
+  gen_data->FileId = copy_data(ctx, ctx->saHpiInventoryFileId,
 			       ctx->saHpiInventoryFileId_len,
-			       length);
+			       (char *)data+*length,max_octets-*length,length);
 
-  data->AssetTag = copy_data(ctx, ctx->saHpiInventoryAssetTag,
+  gen_data->AssetTag = copy_data(ctx, ctx->saHpiInventoryAssetTag,
 			       ctx->saHpiInventoryAssetTag_len,
-			       length);
+			       (char *)data+*length,max_octets-*length,length);
 
-   data->CustomField[0] = copy_data(ctx, ctx->saHpiInventoryCustomField,
+  gen_data->CustomField[0] = copy_data(ctx, ctx->saHpiInventoryCustomField,
 			       ctx->saHpiInventoryCustomField_len,
-			       length);
+			       (char *)data+*length,max_octets-*length,length);
 
   return AGENT_ERR_NOERROR;
 
@@ -550,58 +565,153 @@ int
 
 int set_inventory(saHpiInventoryTable_context *ctx) {
 
-  SaHpiInventoryDataT inv;
+  //SaHpiInventoryDataT inv;
   SaHpiSessionIdT session_id;
-  SaHpiInventDataRecordT data;
+  SaHpiInventDataRecordT *data_rec;
   SaHpiUint32T length = 0;
-  SaHpiInventGeneralDataT *general_data = NULL;
+  //SaHpiInventGeneralDataT *general_data = NULL;
   SaErrorT rc = SA_OK;
+
+  // New
+  SaHpiInventoryDataT *data = NULL;
+  size_t initial_size;
+  SaHpiUint32T data_len;
+  // 
    
   if (ctx) {
 
     // First we retrieve the inventory item - then we
     // will modify the right context.
-    memset(&data, 0x00, sizeof(SaHpiInventDataRecordT));
-    data.RecordType = ctx->saHpiInventoryRecordType;    
-    switch (data.RecordType) {
+    // Furthemore - the next context will be *inside* the
+    // 'd' pointer. -
+    // Fortunatly we know our max:
+    // 9*sizeof(SaHpiTextBuffer)+ SAHPI_INVENTORY_ATTRIBUTES_MAX + sizeof(SaHpiInventoryDataT)
+
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;
+     
+    initial_size = sizeof(SaHpiInventoryDataT) + sizeof(SaHpiTextBufferT)*9 + SAHPI_INVENTORY_ATTRIBUTES_MAX + sizeof(SaHpiInventDataRecordT) +  SAHPI_INVENTORY_ATTRIBUTES_MAX;
+    
+memory_fixed:
+    
+    data = malloc(initial_size);
+    
+    if (data == NULL) {
+      DEBUGMSGTL((AGENT,"Not enough memory to allocate: %d\n", initial_size));
+	return AGENT_ERR_MEMORY_FAULT;	
+    }
+    memset(data, 0x00, initial_size);
+    DEBUGMSGTL((AGENT,"Calling saHpiEntityInventoryDataRead with buffer size %d\n", initial_size));
+    
+    rc = saHpiEntityInventoryDataRead (session_id,
+				       ctx->resource_id,
+				       ctx->saHpiInventoryEirId,
+				       initial_size,
+				       data,
+				       &data_len);
+    if  (rc == SA_ERR_INVENT_DATA_TRUNCATED) {
+
+	free (data);
+	data = NULL;
+	initial_size *= 2;
+	DEBUGMSGTL((AGENT,"Data is truncated. requesting %d (and if its < %d)\n",
+		    initial_size, MAXBUF));
+	if (initial_size > MAXBUF) {
+	  // Just some random limitation.
+	  return AGENT_ERR_MEMORY_FAULT;
+ 	}
+	goto memory_fixed;
+    }
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"rc from 'saHpiEntityInventoryDataRead' is %d\n", rc, SA_OK));
+      free(data);
+      data = NULL;
+      return AGENT_ERR_OPERATION;      
+    }
+
+    // The 'data_len' and 'initial_size' tell us how much memory we have to stick our information in.
+    // Check to see if its enough?
+    // 8*255 + SNMP_MAX_MSG_SIZE
+     
+    if ((initial_size - data_len) < (SNMP_MAX_MSG_SIZE + 9*SAHPI_STRING_MAX)) {
+      // Not enough space.
+      DEBUGMSGTL((AGENT,"Initial: %d, data_len: %d, our request: %d\n",
+		  initial_size, data_len, (SNMP_MAX_MSG_SIZE + 9*SAHPI_STRING_MAX)));
+      free(data);
+      data = NULL;
+      initial_size *= 2;
+      DEBUGMSGTL((AGENT,"Need more memory: %d. Requesting\n", initial_size));
+      goto memory_fixed;
+    }
+    // Modify the right SaHpiInventDataRecordT
+    data_rec = data->DataRecords[ctx->saHpiInventoryIndex];
+    if (data_rec == NULL) {
+      // Can't update NULL records.
+      free(data);data = NULL;
+      DEBUGMSGTL((AGENT,"InventoryRecord at that sub-index is NULL\n"));
+      return AGENT_ERR_OPERATION;
+    }
+    // We have a GO
+
+    // We 'assume' (this could be dangerous) that since the 
+    // record is not NULL all the data that is given (for example
+    // some of the SaHpiTextBufferT* is within the 'data_len' 
+    // Therefore, for our records we will use the memory location
+    // past 'data_len' to store our entries. We know we have enough
+    // space for 8*255 + SNMP_MAX_MSG_SIZE octets (we have our calculation
+    // above).
+    data_rec->RecordType = ctx->saHpiInventoryRecordType;    
+    switch (data_rec->RecordType) {
     case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
       memcpy(ctx->saHpiInventoryAttributes, 
-	     &data.RecordData.InternalUse.Data,
+	     &data_rec->RecordData.InternalUse.Data,
 	     sizeof(SaHpiUint8T));
       length = sizeof(SaHpiUint8T);
       break;
     case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
-      data.RecordData.ChassisInfo.Type =ctx->saHpiInventoryAttributes[0];
+      data_rec->RecordData.ChassisInfo.Type =ctx->saHpiInventoryAttributes[0];
       length = 1;
-      memcpy(&data.RecordData.ChassisInfo.GeneralData.MfgDateTime,
+      memcpy(&data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime,
 	     ctx->saHpiInventoryAttributes+1,		
 	     sizeof(SaHpiTimeT));	
       length += sizeof(SaHpiTimeT);
-      rc =update_inventory_data_on_context(&data.RecordData.ChassisInfo.GeneralData, ctx, &length);
+      // The location where information will be stored is:
+      // start address of data + 'data_len'.
+      rc =update_inventory_data_on_context(&data_rec->RecordData.ChassisInfo.GeneralData, 
+					   ctx, (char *)data + data_len,
+					   initial_size-data_len,
+					   &length);
       break;
     case SAHPI_INVENT_RECTYPE_BOARD_INFO:
-      memcpy( &data.RecordData.BoardInfo.MfgDateTime,
+      memcpy( &data_rec->RecordData.BoardInfo.MfgDateTime,
 	      ctx->saHpiInventoryAttributes,                       
 	      sizeof(SaHpiTimeT));
       length = sizeof(SaHpiTimeT);
-      rc =update_inventory_data_on_context(&data.RecordData.BoardInfo,
-					 ctx, &length);
+      rc =update_inventory_data_on_context(&data_rec->RecordData.BoardInfo,
+					 ctx, data_len + (char *)data,
+					   initial_size-data_len,
+					   &length);
       break;
     case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
-       memcpy( &data.RecordData.ProductInfo.MfgDateTime,
+       memcpy( &data_rec->RecordData.ProductInfo.MfgDateTime,
 	      ctx->saHpiInventoryAttributes,                       
 	      sizeof(SaHpiTimeT));
       length = sizeof(SaHpiTimeT);
-      rc = update_inventory_data_on_context(&data.RecordData.ProductInfo,
-					 ctx, &length);
+      rc = update_inventory_data_on_context(&data_rec->RecordData.ProductInfo,
+					    ctx, data_len + (char *)data,
+					    initial_size - data_len,
+					    &length);
       break;
     case SAHPI_INVENT_RECTYPE_OEM:
-      memcpy(&data.RecordData.OemData.MId,
+      // This is iffy?
+      memcpy(&data_rec->RecordData.OemData.MId,
 	     ctx->saHpiInventoryAttributes,	     
 	     sizeof(SaHpiManufacturerIdT));
-      data.RecordData.OemData.MId = ntohl( data.RecordData.OemData.MId);
+      data_rec->RecordData.OemData.MId = ntohl( data_rec->RecordData.OemData.MId);
       length =  sizeof(SaHpiManufacturerIdT);
-      memcpy(&data.RecordData.OemData.Data,
+      memcpy(&data_rec->RecordData.OemData.Data,
 	     ctx->saHpiInventoryAttributes + length,
 	     ctx->saHpiInventoryAttributes_len - length);
 
@@ -611,68 +721,37 @@ int set_inventory(saHpiInventoryTable_context *ctx) {
       return AGENT_ERR_NULL_DATA;
       break;
     }
-    if (rc != AGENT_ERR_NOERROR)
-      return AGENT_ERR_MEMORY_FAULT;
 
-    data.DataLength = length;
-    inv.Validity = ctx->saHpiInventoryValidity;
-    inv.DataRecords[0] = &data;
+    if (rc != AGENT_ERR_NOERROR) {
+      free(data); data = NULL;
+      return AGENT_ERR_MEMORY_FAULT;
+    }
+    data_rec->DataLength = length;
+
     // Get the seesion_id
-    DEBUGMSGTL((AGENT,"Data is type: %d, l: %d, at %X\n",
-	data.RecordType, data.DataLength, inv.DataRecords[0]));
+    DEBUGMSGTL((AGENT,"Data is type: %d with length : %d; ",
+	data_rec->RecordType, data_rec->DataLength));
+
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
    
-    DEBUGMSGTL((AGENT,"Calling 'saHpiEntityInventoryDataWrite' with %d\n",
+    DEBUGMSGTL((AGENT,"Calling 'saHpiEntityInventoryDataWrite'\n",
 		ctx->resource_id));
 	
     rc = saHpiEntityInventoryDataWrite(session_id,
 				       ctx->resource_id,
 				       ctx->saHpiInventoryEirId,
-				       &inv);
+				       data);
     if (rc != SA_OK) {
       DEBUGMSGTL((AGENT,"rc is %d\n"));
       return AGENT_ERR_OPERATION;
     }
-    
-    // Free all data
-     switch (data.RecordType) {
-     case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
-       general_data = &data.RecordData.ChassisInfo.GeneralData;
-       break;
-     case SAHPI_INVENT_RECTYPE_BOARD_INFO:
-       general_data = &data.RecordData.ProductInfo;
-       break;
-     case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
-       general_data = &data.RecordData.ProductInfo;
-     default:
-       break;
-     }
-     if (general_data != NULL) {
-       DEBUGMSGTL((AGENT,"De-allocating memory\n"));
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->Manufacturer));
-       free(general_data->Manufacturer);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ProductName));
-       free(general_data->ProductName);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ProductVersion));
-       free(general_data->ProductVersion);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->ModelNumber));
-       free(general_data->ModelNumber);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->SerialNumber));
-       free(general_data->SerialNumber);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->PartNumber));
-       free(general_data->PartNumber);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->FileId));
-       free(general_data->FileId);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->AssetTag));
-       free(general_data->AssetTag);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->CustomField[0]));
-       free(general_data->CustomField[0]);
-	DEBUGMSGTL((AGENT,"-- Dealloc: %X\n", general_data->Manufacturer));
-     }
+    free(data);
+    data = NULL;
+   
     return AGENT_ERR_NOERROR;
-  }
+  }	       
   return AGENT_ERR_NULL_DATA;
 }
 
@@ -1106,14 +1185,15 @@ saHpiInventoryTable_set_reserve1(netsnmp_request_group * rg)
       // 0 the API couldn't find the right context.
 
        if ( ((saHpiInventoryTable_context *) rg->existing_row)->hash == 0) {
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					  SNMP_ERR_NOSUCHNAME);
+	 DEBUGMSGTL((AGENT,"Wrong row\n"));
+	 netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					SNMP_ERR_NOSUCHNAME);
        } else {
 
 	 if (((saHpiInventoryTable_context *) rg->existing_row)->saHpiInventoryValidity == MIB_INVALID) {
-	   DEBUGMSGTL((AGENT,"Row hasINVALID flag, thus cannot be modified\n"));
-	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					   SNMP_ERR_NOTWRITABLE);
+	   DEBUGMSGTL((AGENT,"Row has INVALID flag, thus cannot be modified\n"));
+	   netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					  SNMP_ERR_NOTWRITABLE);
 	 }
        }
     }
@@ -1471,6 +1551,7 @@ initialize_table_saHpiInventoryTable(void)
      * internal indexes
      */
         /** index: saHpiInventoryEirId */
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
     table_info->min_column = saHpiInventoryTable_COL_MIN;
