@@ -1856,6 +1856,11 @@ saHpiResourceEntry OBJECT-TYPE
 	of the resource.  This field must be non-zero for all valid
         resources.   The ResourceTag field is an informational value.
 	
+	The HotSwapCapabilities field denotes the capabilities of the 
+	resource, specifically related to hot swap. This field is only 
+	valid if the resource supports managed hot swap, as indicated 
+	by the SAHPI_CAPABILITY_MANAGED_HOT_SWAP resource capability.
+
 	All of the fields in the following table may or may not be used by 
 	a given resource."
 		
