@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <epath_utils.h>
+#include <SaHpi.h>
 #include "saHpiResourceTable.h"
+#include "hpiSubagent.h"
+#include "saHpiDomainReferenceTable.h"
+#include "oh_error.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -1220,5 +1225,253 @@ saHpiResourceTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiResourceTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+
+//*******************************************************
+//*******************************************************
+// saHpiResourceTable support fucntions
+//*******************************************************
+//*******************************************************
+int populate_rpt(void) {
+
+	oid 		
+		rpt_oids[RESOURCE_INDEX_LEN];
+	netsnmp_index 
+		rpt_index;
+	saHpiResourceTable_context  
+		*rpt_ctx;
+
+	int rc = 0;
+	SaHpiSessionIdT sid;
+
+	SaHpiEntryIdT EntryId;
+	SaHpiEntryIdT NextEntryId;
+	SaHpiRptEntryT rpt_entry;
+	memset(&rpt_entry, 0, sizeof(rpt_entry));
+
+	sid = get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID);
+
+	EntryId = SAHPI_FIRST_ENTRY;
+	while (SA_OK == saHpiRptEntryGet (sid, 
+					  EntryId,
+					  &NextEntryId,
+					  &rpt_entry) ) { 
+		EntryId = NextEntryId;
+			
+		/* create resource tuple/ index */
+		/* saHpiDomainId, saHpiResourceId ,saHpiEntryId */
+
+		rpt_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID;
+		rpt_oids[1] = rpt_entry.ResourceId;
+		rpt_oids[2] = rpt_entry.EntryId;
+
+		rpt_index.len =  RESOURCE_INDEX_LEN;
+		rpt_index.oids = (oid *) & rpt_oids;  
+
+		/* See if it exists. */
+		rpt_ctx = NULL;
+		rpt_ctx = CONTAINER_FIND (
+			cb.container, 
+			&rpt_index);
+		// If we don't find it - we create it.
+
+		if (!rpt_ctx) 
+			/* New entry. Add it */
+			rpt_ctx = saHpiResourceTable_create_row(&rpt_index);
+
+#if 0
+typedef struct saHpiResourceTable_context_s {
+    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+
+    /*************************************************************
+     * You can store data internally in this structure.
+     *
+     * TODO: You will probably have to fix a few types here...
+     */
+    /** TODO: add storage for external index(s)! */
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceId;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiEntryId;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+            unsigned char saHpiResourceEntityPath[65535];
+            long saHpiResourceEntityPath_len;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+            unsigned char saHpiResourceCapabilities[65535];
+            long saHpiResourceCapabilities_len;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceHotSwapCapabilities;
+
+        /** INTEGER = ASN_INTEGER */
+            long saHpiResourceSeverity;
+
+        /** TruthValue = ASN_INTEGER */
+            long saHpiResourceFailed;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoResourceRev;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoSpecificVer;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoDeviceSupport;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoManufacturerId;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoProductId;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoFirmwareMajorRev;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoFirmwareMinorRev;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            unsigned long saHpiResourceInfoAuxFirmwareRev;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+            unsigned char saHpiResourceInfoGuid[65535];
+            long saHpiResourceInfoGuid_len;
+
+        /** SaHpiTextType = ASN_INTEGER */
+            long saHpiResourceTagTextType;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+            long saHpiResourceTagTextLanguage;
+
+        /** SaHpiText = ASN_OCTET_STR */
+            unsigned char saHpiResourceTag[65535];
+            long saHpiResourceTag_len;
+
+        /** INTEGER = ASN_INTEGER */
+            long saHpiResourceParamControl;
+
+
+    /*
+     * OR
+     *
+     * Keep a pointer to your data
+     */
+    void * data;
+
+    /*
+     *add anything else you want here
+     */
+
+} saHpiResourceTable_context;
+#endif
+
+		/* fill in values in ctx*/
+		/* saHpiResourceId */
+		rpt_ctx->saHpiResourceId = rpt_entry.ResourceId;
+
+		/* saHpiEntryId */
+		rpt_ctx->saHpiEntryId = rpt_entry.EntryId;
+
+		/* saHpiResourceEntityPath */
+		rpt_ctx->saHpiResourceEntityPath_len = entitypath2string(
+					&rpt_entry.ResourceEntity,
+					rpt_ctx->saHpiResourceEntityPath, 
+					SAHPI_MAX_TEXT_BUFFER_LENGTH );
+
+		/* saHpiResourceCapabilities */
+		SaHpiTextBufferT res_cap_buf;
+		if (SA_OK == oh_decode_capability(
+					rpt_entry.ResourceCapabilities,
+					&res_cap_buf)) {
+			memcpy(rpt_ctx->saHpiResourceEntityPath,
+			       res_cap_buf.Data,
+			       res_cap_buf.DataLength);
+			rpt_ctx->saHpiResourceEntityPath_len = 
+				res_cap_buf.DataLength;
+		} else {
+			dbg("ERROR: saHpiResourceCapabilities, populate_rpt");
+		}
+
+		/* saHpiResourceHotSwapCapabilities */
+		rpt_ctx->saHpiResourceHotSwapCapabilities =
+			rpt_entry.HotSwapCapabilities;
+
+		/* saHpiResourceSeverity */
+		rpt_ctx->saHpiResourceSeverity = 
+			rpt_entry.ResourceSeverity;
+
+		/* saHpiResourceFailed */
+		rpt_ctx->saHpiResourceFailed = 
+			( rpt_entry.ResourceFailed == 0 ) ? 1 : 2 ;
+
+		/* saHpiResourceInfoResourceRev */
+		rpt_ctx->saHpiResourceInfoResourceRev =
+			rpt_entry.ResourceInfo.ResourceRev;
+
+		/* saHpiResourceInfoSpecificVer */
+		rpt_ctx->saHpiResourceInfoSpecificVer = 
+			rpt_entry.ResourceInfo.SpecificVer;
+
+		/* saHpiResourceInfoDeviceSupport */
+		rpt_ctx->saHpiResourceInfoDeviceSupport = 
+			rpt_entry.ResourceInfo.DeviceSupport;
+
+		/* saHpiResourceInfoManufacturerId */
+		rpt_ctx->saHpiResourceInfoManufacturerId = 
+			rpt_entry.ResourceInfo.ManufacturerId;
+
+		/* saHpiResourceInfoProductId */
+		rpt_ctx->saHpiResourceInfoProductId =
+			rpt_entry.ResourceInfo.ProductId;
+
+		/* saHpiResourceInfoFirmwareMajorRev */
+		rpt_ctx->saHpiResourceInfoFirmwareMajorRev = 
+			rpt_entry.ResourceInfo.FirmwareMajorRev;
+
+		/* saHpiResourceInfoFirmwareMinorRev */
+		rpt_ctx->saHpiResourceInfoFirmwareMinorRev =
+			rpt_entry.ResourceInfo.FirmwareMinorRev;
+
+		/* saHpiResourceInfoAuxFirmwareRev */
+		rpt_ctx->saHpiResourceInfoAuxFirmwareRev =
+			rpt_entry.ResourceInfo.AuxFirmwareRev;
+
+		/* saHpiResourceInfoGuid */
+		memcpy(rpt_ctx->saHpiResourceInfoGuid,
+		       rpt_entry.ResourceInfo.Guid,
+		       16);
+		rpt_ctx->saHpiResourceInfoGuid_len = 16;
+
+		/* saHpiResourceTag */
+		rpt_ctx->saHpiResourceTagTextType = 
+			rpt_entry.ResourceTag.DataType+1;
+
+		rpt_ctx->saHpiResourceTagTextLanguage = 
+			rpt_entry.ResourceTag.Language+1;
+
+		memcpy(rpt_ctx->saHpiResourceTag,
+		       rpt_entry.ResourceTag.Data,
+		       rpt_entry.ResourceTag.DataLength);
+
+		rpt_ctx->saHpiResourceTag_len = 
+			rpt_entry.ResourceTag.DataLength;
+
+		/* saHpiResourceParamControl */
+		/* write only access provided by asHpiParmControl() */
+		
+		/* commit/add */
+		CONTAINER_INSERT(cb.container, rpt_ctx);
+
+	}
+
+	DEBUGMSGTL ((AGENT, "populate_rpt. Exit (rc: %d).\n", rc));
+
+	return rc;
+
+}
+
 
 

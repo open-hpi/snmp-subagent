@@ -1102,6 +1102,7 @@ main (int argc, char **argv)
         populate_drt();
 	populate_domain_info();
         populate_dat();
+        populate_rpt();
 
 
 	dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
