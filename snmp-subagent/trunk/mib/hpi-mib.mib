@@ -2358,16 +2358,6 @@ saHpiEventSaHpiTime	OBJECT-TYPE
 	if less than or equal to TIME_MAX_RELATIVE."
     ::= { saHpiEventEntry 6 }
 
-
---IBMKR: Add more in description.
---IBMKR: Remove from index the saHpiDomainId and saHpiResourceId
--- since the data is enumerated per saHpiEventIndex and a SensorNum/Watchdog
--- has no relation to a resource and domain? Or does it?  
--- IBMDJ I believe these should say DomainId/ResourceId	
-
---IBMKR: Replicate the three Watchdog objects - they are used in the RDR fields.
---IBMRK: Docuemnt in sahpiRresouceID 'UNSPECTIFIED' value.
-
 -- *********************************
 -- **
 -- **     Resource Events
@@ -3083,8 +3073,8 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
 -- IBMKR: Add some Textual Convention for these enumerations?
 --IBMKR: Missing 
 	saHpiWatchdogEventAction		INTEGER,
-	saHpiWatchdogEventPreTimerAction	INTEGER,
-	saHpiWatchdogEventUse			INTEGER,
+	saHpiWatchdogEventPreTimerAction	INTEGER,     ??????
+	saHpiWatchdogEventUse			INTEGER,     ??????
 	saHpiWatchdogEventDelete		RowStatus
 	}
 	
