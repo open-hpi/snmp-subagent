@@ -185,5 +185,14 @@ int saHpiSensorNum_check_index(long val)
 	return 0;
 }
 
+/********************************/
+/* saHpiWatchdogTable  */    
+/********************************/
+int saHpiWatchdogNum_check_index(long val)
+{
+	return 0;
+}
+
+
 
 

@@ -252,33 +252,15 @@ saHpiWatchdogTable_extract_index( saHpiWatchdogTable_context * ctx, netsnmp_inde
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiWatchdogNum;
 
        memset( &var_saHpiWatchdogNum, 0x00, sizeof(var_saHpiWatchdogNum) );
        var_saHpiWatchdogNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiWatchdogNum.next_variable = &var_XX;
-#endif
+       var_saHpiWatchdogNum.next_variable = NULL;
 
 
     /*
@@ -296,27 +278,15 @@ saHpiWatchdogTable_extract_index( saHpiWatchdogTable_context * ctx, netsnmp_inde
                 ctx->saHpiWatchdogNum = *var_saHpiWatchdogNum.val.integer;
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiWatchdogNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if(!err)
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+		
+		if(!err)
+			err = saHpiWatchdogNum_check_index(*var_saHpiWatchdogNum.val.integer);
+
     }
 
     /*

@@ -100,6 +100,12 @@ int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiSensorEnableCha
 /********************************/
 int saHpiSensorNum_check_index(long val);
 
+/********************************/
+/* saHpiWatchdogTable  		*/    
+/********************************/
+int saHpiWatchdogNum_check_index(long val);
+
+
 
 
 

@@ -238,63 +238,27 @@ saHpiWatchdogEventTable_extract_index( saHpiWatchdogEventTable_context * ctx, ne
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiWatchdogNum;
 
        memset( &var_saHpiWatchdogNum, 0x00, sizeof(var_saHpiWatchdogNum) );
        var_saHpiWatchdogNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiWatchdogNum.next_variable = &var_XX;
-#endif
+       var_saHpiWatchdogNum.next_variable = &var_saHpiEventSeverity;
 
        memset( &var_saHpiEventSeverity, 0x00, sizeof(var_saHpiEventSeverity) );
        var_saHpiEventSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventSeverity.next_variable = &var_XX;
-#endif
+       var_saHpiEventSeverity.next_variable = &var_saHpiEventHistorical;
 
        memset( &var_saHpiEventHistorical, 0x00, sizeof(var_saHpiEventHistorical) );
        var_saHpiEventHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiEventHistorical.next_variable = &var_saHpiWatchdogEventTimestamp;
 
        memset( &var_saHpiWatchdogEventTimestamp, 0x00, sizeof(var_saHpiWatchdogEventTimestamp) );
        var_saHpiWatchdogEventTimestamp.type = ASN_OCTET_STR; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiWatchdogEventTimestamp.next_variable = &var_XX;
-#endif
+       var_saHpiWatchdogEventTimestamp.next_variable = NULL;
 
 
     /*
@@ -321,49 +285,24 @@ saHpiWatchdogEventTable_extract_index( saHpiWatchdogEventTable_context * ctx, ne
                     memcpy( ctx->saHpiWatchdogEventTimestamp, var_saHpiWatchdogEventTimestamp.val.string, var_saHpiWatchdogEventTimestamp.val_len );
                 ctx->saHpiWatchdogEventTimestamp_len = var_saHpiWatchdogEventTimestamp.val_len;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiWatchdogNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventSeverity.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( XXX_check_value( var_saHpiWatchdogEventTimestamp.val.string, XXX ) ) {
-          *    err = -1;
-          * }
-          */
+		
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if(!err)
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+		
+		if(!err)
+			err = saHpiWatchdogNum_check_index(*var_saHpiWatchdogNum.val.integer);
+
+		if(!err)
+			err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
+
+		if(!err)
+			err = saHpiEventHistorical_check_index(*var_saHpiEventHistorical.val.integer);
+
+		if(!err)
+			err = saHpiTimeString_check_index(&var_saHpiWatchdogEventTimestamp);
     }
 
     /*
