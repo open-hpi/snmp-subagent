@@ -81,7 +81,14 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT  *rpt_entry,
 			     oid **var_oid);
 
 
-
+/*
+ * Populates up to FIVE different rows:
+ *  - RDR
+ *  - Sensor
+ *  - Inventory
+ *  - Control
+ *  - Watchdog
+ */
 int
 populate_rdr(SaHpiRptEntryT *rpt_entry, 
 	     oid *rpt_oid, size_t rpt_oid_len,
@@ -201,6 +208,9 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
 		      child_id, rc));
 	}
 
+
+	// Mark this ctx as touched, or cleaned
+	rdr_context->dirty_bit = AGENT_FALSE;
 	// By this stage, rdr_context surely has something in it.
 	// '*_modify_context' does a checksum check to see if 
 	// the record needs to be altered, and if so populates with
@@ -267,95 +277,102 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
   return rc;
 }
 
-/* int delete_rdr() { */
-/*    SaHpiDomainIdT domain_id; */
-/*    SaHpiResourceIdT resource_id; */
-/*    SaHpiEntryIdT num; */
-/*    SaHpiRdrTypeT type; */
-/*    saHpiRdrTable_context	*rdr_context;  */
-/*    SaHpiSessionIdT session_id; */
-/*    SaHpiRdrT rdr_entry; */
+/*
+ * Purges    up to FIVE different rows:
+ *  - RDR
+ *  - Sensor
+ *  - Inventory
+ *  - Control
+ *  - Watchdog
+ */
+
+int purge_rdr() {
+
+   SaHpiDomainIdT domain_id;
+   SaHpiResourceIdT resource_id;
+   SaHpiEntryIdT num;
+   SaHpiRdrTypeT type;
+   unsigned long child_id;
+   saHpiRdrTable_context	*rdr_context; 
+   //   SaHpiSessionIdT session_id;
+   //   SaHpiRdrT rdr_entry;
    
-
-/*    int rc; */
-/*    unsigned int deleted; */
-/*    unsigned int dirty_bit; */
-/*     // IBM-KR: TODO */
-/*    // Q: How do we determine which RDR entry is "fresh" ? */
-/*    // A: We can use 'saHpiRdrGet' to check for valid entries. */
-/*    // A: Any other ways? */
-
-/*    if ((rc = getSaHpiSession(&session_id)) != AGENT_ERR_NOERROR) */
-/*       return rc; */
-       
-/*     rdr_context = CONTAINER_FIRST(cb.container); */
-/*     DEBUGMSGTL((AGENT,"Deleting non-used RDR rows: rdr_context: %X\n", rdr_context)); */
-/*     while (rdr_context != NULL) { */
-/*       rc` = saHpiRdrGet(session_id, rdr_entry->saHpiResourceID, */
-/* 			rdr_context->saHpiRdrRecordId, */
-/* 			NULL, &rdr_entry); */
-/*       if (rc != SA_OK) */
-/* 	// Delete the object. */
-/* 	dirty_bit = AGENT_TRUE: */
+   int rc;
+   int count = 0;
+   unsigned int deleted;
 
 
-/*       deleted = AGENT_FALSE; */
-/*       DEBUGMSGTL((AGENT,"Found %d.%d, %d (%X) (child: %d)delete: %s\n", rdr_context->domain_id, */
-/* 		  rdr_context->saHpiResourceID,  */
-/* 		  rdr_context->saHpiRdrRecordId, */
-/* 		  rdr_context->saHpiRdrRecordId, */
-/* 		  rdr_context->saHpiRdrId, */
-/* 		  (dirty_bit == AGENT_TRUE)? "Yes" : "No")); */
+   // Q: How do we determine which RDR entry is "fresh" ?
+   // A: 'dirty-bit' is set (in populate_rdr) 
+   //    to AGENT_FALSE for existing ('cleaned') records. The
+   //    dirty ones are removed.
+
+   DEBUGMSGTL((AGENT,"purge_rdr. Entry.\n"));
+   rdr_context = CONTAINER_FIRST(cb.container);
+   while (rdr_context != NULL) {
+      deleted = AGENT_FALSE;
+      DEBUGMSGTL((AGENT,"Found %d.%d.%d (%X) (child: %d) purge: %s\n",
+		  rdr_context->domain_id,
+		  rdr_context->saHpiResourceID, 
+		  rdr_context->saHpiRdrRecordId,
+		  rdr_context->saHpiRdrRecordId,
+		  rdr_context->saHpiRdrId,
+		  (rdr_context->dirty_bit == AGENT_TRUE)? "Yes" : "No"));
       
-/*       if (rdr_context != NULL) { */
-/* 	if (dirty_bit == AGENT_TRUE) { */
-/* 	  // Copy the values (we are going to remove 'rdr_context' and */
-/* 	  // we need the domain_id, resourcE_id, etc values */
-/* 	  domain_id = rdr_context->domain_id; */
-/* 	  resource_id = rdr_context->saHpiResourceID; */
-/* 	  num = rdr_context->saHpiRdrRecordId; */
-/* 	  type = rdr_context->saHpiRdrType; */
-/* 	  child_id = rdr_context->saHpiRdrId; */
-/* 	  // We are getting the next item here b/c effectivly  the rpt_context */
-/* 	  // will be set to NULL in the 'delete_rpt_row'  */
-/* 	  rdr_context = CONTAINER_NEXT(cb.container, rdr_context); */
-/* 	  deleted = AGENT_TRUE; */
-/* 	  // Delete the RDR row */
-/* 	  rc = delete_rdr_row(domain_id, resource_id, num, type); */
-/* 	  if (rc != AGENT_ERR_NOERROR) */
-/* 	    DEBUGMSGTL((AGENT,"delete_rdr_row failed. Return code: %d.\n", rc)); */
-/* 	  // Delete the other sub-type. Keep in mind that this will delete */
-/* 	  // _only_ the specific subtypes. Therfore other records */
-/* 	  // with the same resource_id, domain_id, and num can still */
-/* 	  // exist. */
-/* 	  switch (type) { */
-/* 	  case SAHPI_NO_RECORD: */
-/* 	    break; */
-/* 	  case SAHPI_CTRL_RDR: */
-/* 	    rc = delete_ctrl_row(domain_id, resource_id, child_id); */
-/* 	    break; */
-/* 	  case SAHPI_SENSOR_RDR: */
-/* 	    rc = delete_sensor_row(domain_id,resource_id, child_id); */
-/* 	    break; */
-/* 	  case SAHPI_INVENTORY_RDR: */
-/* 	    rc = delete_inventory_rows(domain_id,	 resource_id, child_id); */
-/* 	    break; */
-/* 	  case SAHPI_WATCHDOG_RDR: */
-/* 	    rc = delete_watchdog_row(domain_id, resource_id, child_id); */
-/* 	    break; */
-/* 	  default: */
-/* 	    break; */
-/* 	  } */
-/* 	  if (rc != AGENT_ERR_NOERROR)  */
-/* 	    DEBUGMSGTL((AGENT,"Couldn't delete sub-RDR entry (rc: %d)\n",rc)); */
+      if (rdr_context != NULL) {
+	// Dirty bit hasn't been cleaned. Purge the record.
+	if (rdr_context->dirty_bit == AGENT_TRUE) {
+	  // Copy the values (we are going to remove 'rdr_context' and
+	  // we need the domain_id, resource_id, etc values for 
+	  // deleteing sub-RDR records.
+	  domain_id = rdr_context->domain_id;
+	  resource_id = rdr_context->saHpiResourceID;
+	  num = rdr_context->saHpiRdrRecordId;
+	  type = rdr_context->saHpiRdrType;
+	  child_id = rdr_context->saHpiRdrId;
+	  // We are getting the next item here b/c effectivly  the rpt_context
+	  // will be set to NULL in the 'delete_rpt_row' 
+	  rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
+	  deleted = AGENT_TRUE;
+	  count++;
+	  // Delete the RDR row
+	  rc = delete_rdr_row(domain_id, resource_id, num, type);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL((AGENT,"delete_rdr_row failed. Return code: %d.\n", rc));
+	  // Delete the other sub-type. Keep in mind that this will delete
+	  // _only_ the specific subtypes. Therfore other records
+	  // with the same resource_id, domain_id, and num can still
+	  // exist.
+	  switch (type) {
+	  case SAHPI_NO_RECORD:
+	    break;
+	  case SAHPI_CTRL_RDR:
+	    rc = delete_ctrl_row(domain_id, resource_id, child_id);
+	    break;
+	  case SAHPI_SENSOR_RDR:
+	    rc = delete_sensor_row(domain_id,resource_id, child_id);
+	    break;
+	  case SAHPI_INVENTORY_RDR:
+	    rc = delete_inventory_rows(domain_id,resource_id, child_id);
+	    break;
+	  case SAHPI_WATCHDOG_RDR:
+	    rc = delete_watchdog_row(domain_id, resource_id, child_id);
+	    break;
+	  default:
+	    break;
+	  }
+	  if (rc != AGENT_ERR_NOERROR) 
+	    DEBUGMSGTL((AGENT,"Couldn't delete sub-RDR entry (rc: %d)\n",rc));
 	  
-/* 	} */
-/*       } */
-/*       // Only get the next item if no deletion has happend. */
-/*       if (deleted == AGENT_FALSE) */
-/* 	rdr_context = CONTAINER_NEXT(cb.container, rdr_context); */
-/*     } */
-/* } */
+	}
+      }
+      // Only get the next item if no deletion has happend.
+      if (deleted == AGENT_FALSE)
+	rdr_context = CONTAINER_NEXT(cb.container, rdr_context);
+   }
+   DEBUGMSGTL((AGENT,"purge_rdr: Exit (delete: %d).\n"));
+   return count;
+}
 
 int
 delete_rdr_row(SaHpiDomainIdT domain_id,
@@ -447,12 +464,15 @@ saHpiRdrTable_modify_context(SaHpiRptEntryT *rpt_entry,
 			    &entry->Entity, 
 			    ctx->saHpiRdrEntityPath, 
 			    SNMP_MAX_MSG_SIZE);
+
     // Try to get it from rpt_entry.
+
     if (len == 0) {
     	len = entitypath2string(&rpt_entry->ResourceEntity,
 				ctx->saHpiRdrEntityPath,
 				SNMP_MAX_MSG_SIZE);
     }
+
     if (len < 0) {
       // Bummer, EntityPath too long to fit in the SNMP_MAX_MSG_SIZE.
       len = 0;
@@ -613,7 +633,7 @@ saHpiRdrTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash = 0;
-    //    ctx->dirty_bit = AGENT_TRUE;
+    ctx->dirty_bit = AGENT_TRUE;
     return ctx;
 }
 

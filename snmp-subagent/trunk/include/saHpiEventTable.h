@@ -217,7 +217,7 @@ extern          "C" {
                                               netsnmp_table_request_info
                                               *);
 
-
+  /*
 int
 populate_event(SaHpiSelEntryIdT,
 	       SaHpiEventT *,
@@ -227,6 +227,9 @@ populate_event(SaHpiSelEntryIdT,
 	       oid *, const size_t,
 	       oid *, const size_t);
 
+  */
+  int
+  populate_event( void );
 
   int delete_event_entry(saHpiEventTable_context *ctx);
 

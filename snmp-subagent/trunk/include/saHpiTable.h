@@ -141,6 +141,7 @@ extern          "C" {
 
   int populate_rpt( void );
 
+  int purge_rpt( void );
   /* 
    * The various SET operations. 
    */
@@ -188,8 +189,8 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 /*************************************************************
  * oid declarations
  */
-  //   extern oid      saHpiTable_oid[];
-  // extern size_t   saHpiTable_oid_len;
+     extern oid      saHpiTable_oid[];
+   extern size_t   saHpiTable_oid_len;
 
   //1,3,6,1,3,90,1,4
 
