@@ -99,8 +99,8 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,
-	      SaHpiResourceIdT resource_id,
-	      SaHpiSelEntryIdT num);
+	       SaHpiResourceIdT resource_id);
+
 
 int
 event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
