@@ -15,10 +15,9 @@ BuildRequires: pkgconfig glib-devel openhpi-devel
 BuildRequires: docbook-utils docbook-utils-pdf docbook-dtd41-sgml
 Summary: Library that provides SAForum's HPI
 Group: Utilities
-AutoReq: no
+AutoReq: yes
 Requires: libc.so.6 libglib-1.2.so.0 libpthread.so.0 
 Requires: libnetsnmp.so.5 libnetsnmpagent.so.5
-Requires: openhpi >= 0.5.0
 
 %description 
 This package contains an SNMP subagent for the Service Availability Forum's 

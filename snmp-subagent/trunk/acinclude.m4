@@ -65,7 +65,7 @@ AC_DEFUN(OH_CHECK_NETSNMP,
 		} \
 	}'`
         # the following seems to work... thankfully.
-        SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=(\S+).*/\1/'`
+        SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=([\/\w]+).*/\1/'`
 	if test "$SNMPVERSIONOK" == "OK"; then
 	        AC_MSG_RESULT(yes)
 	else
