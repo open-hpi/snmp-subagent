@@ -4870,8 +4870,8 @@ saHpiCtrlTextLanguage OBJECT-TYPE
         ::= {saHpiCtrlEntry 13}
 
 saHpiCtrlText OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
+        SYNTAX          SaHpiText
+	MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
         "This value is only filled if the saHpiCtrlType
