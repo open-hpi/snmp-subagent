@@ -913,15 +913,16 @@ saHpiDomainGuid 	OBJECT-TYPE
 	SYNTAX		OCTET STRING(SIZE(0..15))
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The GUID is used to uniquely identify a domain. A GUID value of zero is not
-	valid and indicates that the domain does not have an associated GUID.
+	DESCRIPTION	"The GUID is used to uniquely identify a domain.
+	A GUID value of zero is not valid and indicates that the domain 
+	does not have an associated GUID.
  
 	GUID - Globally Unique Identifier
 
-	The format if the ID follows that specified by the Wired for Management 
-	Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
-	format, with a 3-bit variant field of 10x (where x indicates 'don't care')"
-
+	The format if the ID follows that specified by the Wired for
+	Management Baseline, Version 2.0 specification.  HPI uses
+	version 1 of the GUID format, with a 3-bit variant field of 
+	10x (where x indicates 'don't care')"
 	::= {saHpiDomainInfoEntry 19}
 
 
@@ -959,7 +960,7 @@ SaHpiDrtEntry ::= SEQUENCE {
 	saHpiDrtIsPeer		TruthValue
 	           
 	}
-
+-- Add this object to the index values or delte it.
 saHpiDrtEntryId OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
@@ -976,12 +977,12 @@ saHpiDrtEntryId OBJECT-TYPE
 		SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
 	::= {saHpiDrtEntry 1}
 
+-- IBMKR: Delete this object
 saHpiDrtDomainId OBJECT-TYPE 
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Unique Domain Id associated with domain.
-
 	Note:
  		SAHPI_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
 	::= {saHpiDrtEntry 2}
@@ -990,8 +991,9 @@ saHpiDrtIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates that this domain participates in a peer relationship.
-	TRUE = Domain is peer.  FALSE = Domain is not peer "
+        DESCRIPTION     "Indicates that this domain participates in a
+	peer relationship.
+	TRUE = Domain is peer.  FALSE = Domain is not peer (is a child) "
         ::= {saHpiDrtEntry 3}
 	
 
@@ -999,7 +1001,8 @@ saHpiDatEntryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"The number of DomainInfo entries present in the system. 
+	DESCRIPTION	
+	"The number of DomainInfo entries present in the system. 
 	This field is used to determine if new domains have been added
 	or existing removed. The same functionality is available using
 	notifications."
@@ -1021,24 +1024,8 @@ saHpiDatEntry OBJECT-TYPE
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
-	"Domain Info:
-
-	This structure is used to store the information regarding the domain 
-	including information regarding the domain reference table (DRT) and 
-	the resource presence table (RPT).
-
-	The DomainTag field is an informational value that supplies an HPI User  
-	with naming information for the domain.
-
-	NOTE: Regarding timestamps - If the implementation cannot supply an absolute
-	timestamp, then it may supply a timestamp relative to some system-defined 
-	epoch, such as system boot. The value SAHPI_TIME_UNSPECIFIED indicates that
-	the time of the update cannot be determined. Otherwise, If the value is less
-	than or equal to SAHPI_TIME_MAX_RELATIVE, then it is relative; if it is
-	greater than SAHPI_TIME_MAX_RELATIVE, then it is absolute. 
-	
-	The GUID is used to uniquely identify a domain. A GUID value of zero is not
-	valid and indicates that the domain does not have an associated GUID."
+	"This table is used to store alarm information."
+-- IBMKR: We should take out the saHpiResourceID and stick saHpiAlarmId in
 	INDEX	{ saHpiDomainID, saHpiResourceID }
 	::= {saHpiDatTable 1}
 	
@@ -1067,19 +1054,16 @@ saHpiAlarmId OBJECT-TYPE
 	SYNTAX		Unsigned32 
 	MAX-ACCESS	read-create
 	STATUS		current
-	DESCRIPTION	"Alarm Id:
-	Table Related Type Definitions 
-		SaHpiUint32T SaHpiEntryIdT;
-		SAHPI_FIRST_ENTRY (SaHpiEntryIdT)0x00000000
-		SAHPI_LAST_ENTRY  (SaHpiEntryIdT)0xFFFFFFFF
-		SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
+	DESCRIPTION	"Alarm Id"
+
 	::= {saHpiDatEntry 1}
 	
 saHpiTimestamp OBJECT-TYPE
 	SYNTAX		HpiTimeStamp
 	MAX-ACCESS	read-create
 	STATUS		current
-	DESCRIPTION     "Refer to SaHpiTimeStamp for full describption."
+	DESCRIPTION     "Time when alarm was added to the DAT table.
+	Refer to SaHpiTimeStamp for full describption."
 	::= {saHpiDatEntry 2}
 
 saHpiSeverity OBJECT-TYPE 
@@ -1091,31 +1075,27 @@ saHpiSeverity OBJECT-TYPE
 				informational(4),
 				ok(5),
 				debug(241),
-				allseverities(256)  			
+				allSeverities(256)  			
 			} 
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
-	"Severity of alarm:
-		SAHPI_CRITICAL = 0,
-		SAHPI_MAJOR,
-		SAHPI_MINOR,
-		SAHPI_INFORMATIONAL,
-		SAHPI_OK,
-		SAHPI_DEBUG = 0xF0,
-		SAHPI_ALL_SEVERITIES = 0xFF  
-			(Only used with DAT and Annunciator
-                         functions.  This is not a valid
-                         severity for events or alarms)" 
+	"Severity of alarm.
+	(Only used with DAT and Annunciator
+	functions.  This is not a valid
+	severity for events or alarms)" 
 	::= {saHpiDatEntry 3}
 	
 saHpiAcknowledged OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-create
         STATUS          current
-        DESCRIPTION     "Acknowledged flag, Alarms are acknowledged by one of two ways: 
-	a single alarm entry by AlarmId regardless of severity or as a group of alarm
-	 entries by Severity regardless of"
+        DESCRIPTION     "
+    	Acknowledged flag, Alarms are acknowledged by one of two ways: 
+	a single alarm entry by AlarmId regardless of severity 
+	or as a group of alarm entries by Severity regardless of
+	"
+-- IBMKR: seems to be missing the rest of the description.
         ::= {saHpiDatEntry 4}
 	
 saHpiAlarmCondStatusCondType OBJECT-TYPE 
@@ -1129,7 +1109,7 @@ saHpiAlarmCondStatusCondType OBJECT-TYPE
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
-	"Status Condition Type" 
+	"Enumeration of status condition type." 
 	::= {saHpiDatEntry 5}	
 
 saHpiAlarmCondEntityPath OBJECT-TYPE 
