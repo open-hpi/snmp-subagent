@@ -1410,13 +1410,17 @@ saHpiAlarmCondEventState OBJECT-TYPE
 	sensor(1)."
 	::= {saHpiDatEntry 8}
 	
---IBMKR: What is AIS? Look in description.
 saHpiAlarmCondNameValue OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..255))
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
-	"AIS compatible identifier associated with Status condition"
+	"AIS compatible identifier associated with Status condition.
+	
+	The Service Availability(TM) Forum Application Interface 
+	Specification standardizes the interface between Service 
+	Availability(TM) Forum compliant High Availability (HA) 
+	middleware and service applications. http://www.saforum.org"
 	::= {saHpiDatEntry 9}
 	
 saHpiAlarmCondMid OBJECT-TYPE 
@@ -1533,7 +1537,7 @@ SaHpiResourceEntry ::= SEQUENCE {
 	saHpiEntryId				Unsigned32,
 	saHpiResourceId				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
--- IBNKR: Resort the Rpt entries?
+-- IBMKR: Resort the Rpt entries?
 	saHpiResourceCapabilities 		OCTET STRING,
 	
 	saHpiResourceHotSwapCapabilities 	Unsigned32,	
