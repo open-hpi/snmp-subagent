@@ -188,6 +188,9 @@ extern          "C" {
         long            saHpiEventUserEventData_len;
 
 
+        /** TruthValue = ASN_INTEGER */
+        long            saHpiEventDelete;
+
       long hash;
       long resource_id;
       long domain_id;
@@ -218,6 +221,8 @@ populate_event(SaHpiSelEntryIdT,
 	       oid *, 
 	       size_t *);
 
+
+  int delete_entry(saHpiEventTable_context *ctx);
 int
 saHpiEventTable_modify_context(SaHpiSelEntryIdT,
 			       SaHpiEventT *,
@@ -283,14 +288,15 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT,
 #define COLUMN_SAHPIEVENTOEMMANUFACTURERIDT 43
 #define COLUMN_SAHPIEVENTOEMEVENTDATA 44
 #define COLUMN_SAHPIEVENTUSEREVENTDATA 45
+#define COLUMN_SAHPIEVENTDELETE 46
 #define saHpiEventTable_COL_MIN 1
-#define saHpiEventTable_COL_MAX 45
+#define saHpiEventTable_COL_MAX 46
 
 
     int             saHpiEventTable_extract_index(saHpiEventTable_context *
                                                   ctx,
                                                   netsnmp_index * hdr);
-  /*
+
     void            saHpiEventTable_set_reserve1(netsnmp_request_group *);
     void            saHpiEventTable_set_reserve2(netsnmp_request_group *);
     void            saHpiEventTable_set_action(netsnmp_request_group *);
@@ -301,16 +307,16 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT,
     saHpiEventTable_context
         *saHpiEventTable_duplicate_row(saHpiEventTable_context *);
 
-  */
+
     netsnmp_index  *saHpiEventTable_delete_row(saHpiEventTable_context *);
 
-  /*
+
     int             saHpiEventTable_can_delete(saHpiEventTable_context *
                                                undo_ctx,
                                                saHpiEventTable_context *
                                                row_ctx,
                                                netsnmp_request_group * rg);
-  */
+
 
 
     saHpiEventTable_context *saHpiEventTable_create_row(netsnmp_index *);

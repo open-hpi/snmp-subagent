@@ -30,6 +30,7 @@ static netsnmp_table_array_callbacks cb;
 static oid             saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
 static size_t          saHpiEventTable_oid_len = OID_LENGTH(saHpiEventTable_oid);
 
+/*
 static oid      saHpiWatchdogNotification_oid[] =
         { 1, 3, 6, 1, 3, 90, 4, 3, 0 };
    
@@ -47,7 +48,7 @@ static oid      saHpiHotSwapNotification_oid[] =
    
 static oid      saHpiResourceNotifications_oid[] =
         { 1, 3, 6, 1, 3, 90, 4, 6, 0 };
-    
+*/    
 static oid      saHpiEventCount_oid[] =
         { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
 
@@ -345,26 +346,73 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
   return AGENT_ERR_NULL_DATA;
 }
 
+int
+delete_entry(saHpiEventTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  if (ctx) {
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    
+    DEBUGMSGTL((AGENT,"Deleting entry: %d: %d: %d\n", session_id, ctx->resource_id, ctx->saHpiEventIndex));
+    rc = saHpiEventLogEntryDelete(session_id,
+				  ctx->resource_id,
+				  ctx->saHpiEventIndex);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error is %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
+}
 /************************************************************
  * keep binary tree to find context by name
  */
-//static int      saHpiEventTable_cmp(const void *lhs, const void *rhs);
+static int      saHpiEventTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
-/*
+
 static int
 saHpiEventTable_cmp(const void *lhs, const void *rhs)
 {
     saHpiEventTable_context *context_l = (saHpiEventTable_context *) lhs;
     saHpiEventTable_context *context_r = (saHpiEventTable_context *) rhs;
 
-   
-    
+    int rc;
+
+    DEBUGMSGTL((AGENT,"_cmp\n"));
+    if (context_l->domain_id < context_r->domain_id)
+      return -1;
+
+    rc = (context_l->domain_id == context_r->domain_id) ? 0 : 1;
+
+    if (rc != 0)
+      return 1;
+
+    if (context_l->resource_id < context_r->resource_id)
+      return -1;
+
+    rc = (context_l->resource_id == context_r->resource_id) ? 0 : 1;
+
+    if (rc != 0)
+      return 1;
+
+    if (context_l->saHpiEventIndex < context_r->saHpiEventIndex)
+      return -1;
+
+    return (context_l->saHpiEventIndex == context_r->saHpiEventIndex) ? 0:1;
 }
-*/
+
 
 
 
@@ -608,9 +656,8 @@ saHpiEventTable_can_delete(saHpiEventTable_context * undo_ctx,
                            netsnmp_request_group * rg)
 {
 
-    /*
-     * TODO: check for other deletion requirements here
-     */
+  DEBUGMSGTL((AGENT,"Delete?\n"));
+   
     return 1;
 }
 
@@ -637,9 +684,7 @@ saHpiEventTable_create_row(netsnmp_index * hdr)
     if (!ctx)
         return NULL;
 
-    /*
-     * TODO: check indexes, if necessary.
-     */
+  
     if (saHpiEventTable_extract_index(ctx, hdr)) {
         free(ctx->index.oids);
         free(ctx);
@@ -647,7 +692,7 @@ saHpiEventTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash = 0;
-    
+    ctx->saHpiEventDelete = SNMP_ROW_ACTIVE;
 
     return ctx;
 }
@@ -681,10 +726,7 @@ saHpiEventTable_duplicate_row(saHpiEventTable_context * row_ctx)
  */
 netsnmp_index  *
 saHpiEventTable_delete_row(saHpiEventTable_context * ctx)
-{
-    /*
-     * netsnmp_mutex_destroy(ctx->lock); 
-     */
+{   
 
     if (ctx->index.oids)
         free(ctx->index.oids);
@@ -714,13 +756,166 @@ saHpiEventTable_delete_row(saHpiEventTable_context * ctx)
 void
 saHpiEventTable_set_reserve1(netsnmp_request_group * rg)
 {
+     saHpiEventTable_context *row_ctx =
+        (saHpiEventTable_context *) rg->existing_row;
    
+    
+ 
+    netsnmp_variable_list *var;
+    netsnmp_request_group_item *current;
+   
+    int             rc;
+
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+	case COLUMN_SAHPIEVENTTYPE:
+	case COLUMN_SAHPIEVENTTIMESTAMP:
+	case COLUMN_SAHPIEVENTSEVERITY:
+	case COLUMN_SAHPIEVENTSENSORNUM:
+	case COLUMN_SAHPIEVENTSENSORTYPE:
+	case COLUMN_SAHPIEVENTCATEGORY:
+	case COLUMN_SAHPIEVENTASSERTION:
+	case COLUMN_SAHPIEVENTSTATECATEGORYUNSPECIFIED:
+	case COLUMN_SAHPIEVENTSTATECATEGORYTHRESHOLD:
+	case COLUMN_SAHPIEVENTSTATECATEGORYUSAGE:
+	case COLUMN_SAHPIEVENTSTATECATEGORYSTATE:
+	case COLUMN_SAHPIEVENTSTATECATEGORYPREDFAIL:
+	case COLUMN_SAHPIEVENTSTATECATEGORYLIMIT:
+	case COLUMN_SAHPIEVENTSTATECATEGORYPERFORMANCE:
+	case COLUMN_SAHPIEVENTSTATECATEGORYSEVERITY:
+	case COLUMN_SAHPIEVENTSTATECATEGORYPRESENCE:
+	case COLUMN_SAHPIEVENTSTATECATEGORYENABLE:
+	case COLUMN_SAHPIEVENTSTATECATEGORYAVAILABILITY:
+	case COLUMN_SAHPIEVENTSTATECATEGORYREDUNDANCY:
+	case COLUMN_SAHPIEVENTSTATECATEGORYUSER:
+	case COLUMN_SAHPIEVENTSTATECATEGORYGENERIC:
+	case COLUMN_SAHPISENSOROPTIONALDATA:
+	case COLUMN_SAHPIEVENTTRIGGERREADINGTYPE:
+	case COLUMN_SAHPIEVENTTRIGGERREADINGRAW:
+	case COLUMN_SAHPIEVENTTRIGGERREADINGINTERPRETEDTYPE:
+	case COLUMN_SAHPIEVENTTRIGGERREADINGINTERPRETED:
+	case COLUMN_SAHPIEVENTTRIGGERREADINGEVENTSTATE:
+	case COLUMN_SAHPIEVENTTRIGGERTHRESHOLDTYPE:
+	case COLUMN_SAHPIEVENTTRIGGERTHRESHOLDRAW:
+	case COLUMN_SAHPIEVENTTRIGGERTHRESHOLDINTERPRETEDTYPE:
+	case COLUMN_SAHPIEVENTTRIGGERTHRESHOLDINTERPRETED:
+	case COLUMN_SAHPIEVENTTRIGGERTHRESHOLDEVENTSTATE:
+	case COLUMN_SAHPIEVENTPREVIOUSSTATE:
+	case COLUMN_SAHPIEVENTOEM:
+	case COLUMN_SAHPIEVENTSENSORSPECIFIC:
+	case COLUMN_SAHPIEVENTHOTSWAPSTATE:
+	case COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE:
+	case COLUMN_SAHPIEVENTWATCHDOGNUM:
+	case COLUMN_SAHPIEVENTWATCHDOGACTION:
+	case COLUMN_SAHPIEVENTWATCHDOGPRETIMERACTION:
+	case COLUMN_SAHPIEVENTWATCHDOGUSE:
+	case COLUMN_SAHPIEVENTOEMMANUFACTURERIDT:
+	case COLUMN_SAHPIEVENTOEMEVENTDATA:
+	   rc = SNMP_ERR_NOTWRITABLE;
+	   break;
+
+        case COLUMN_SAHPIEVENTDELETE:
+            /** TruthValue = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiEventDelete));
+            break;
+
+
+        default:/** We shouldn't get here */
+            rc = SNMP_ERR_GENERR;
+            snmp_log(LOG_ERR, "unknown column in "
+                     "saHpiEventTable_set_reserve1\n");
+        }
+
+        if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+        rg->status = SNMP_MAX(rg->status, current->ri->status);
+    }
+
+  
+    
 }
 
 void
 saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
 {
-  
+  //  saHpiEventTable_context *row_ctx =
+  //    (saHpiEventTable_context *) rg->existing_row;
+    saHpiEventTable_context *undo_ctx =
+      (saHpiEventTable_context *) rg->undo_info;
+
+ saHpiEventTable_context *ctx = NULL;
+     netsnmp_index	index;
+
+    netsnmp_request_group_item *current;
+    netsnmp_variable_list *var;
+    int             rc;
+
+    rg->rg_void = rg->list->ri;
+
+
+    if (undo_ctx) {
+      DEBUGMSGTL((AGENT,"Have undo_ctx?"));
+      DEBUGMSGTL((AGENT,"%d\n", undo_ctx->saHpiEventDelete));
+    }
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPIEVENTDELETE:
+            /** RowStatus = ASN_INTEGER */	  
+	  rc = netsnmp_check_vb_rowstatus(var, 
+					  undo_ctx ? undo_ctx->saHpiEventDelete : 0 );
+					  
+
+	  break;
+
+        default:/** We shouldn't get here */
+            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+        }
+
+        if (rc) {
+	  DEBUGMSGTL((AGENT,"rci s %d\n", rc));
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+	}
+    }
+
+    for (current = rg->list; current; current = current->next) {
+      // Does the row exist?
+      index.oids = current->tri->index_oid;
+      index.len = current->tri->index_oid_len;
+      ctx = CONTAINER_FIND(cb.container, &index);
+      if (ctx == NULL) {
+	rc = SNMP_ERR_GENERR;
+	 var = current->ri->requestvb;
+	// SNMPv2-TC has a diagram of actions.
+	if ((*var->val.integer == SNMP_ROW_CREATEANDGO) // createAndGo(4)
+	    || (*var->val.integer == SNMP_ROW_ACTIVE) // active (1)
+	    || (*var->val.integer == SNMP_ROW_NOTINSERVICE)) // notInService(2)
+	  rc = SNMP_ERR_INCONSISTENTVALUE;
+	if (*var->val.integer == SNMP_ROW_NOTREADY) // notReady(3)
+	  rc = SNMP_ERR_INCONSISTENTNAME;
+	if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
+	  rc = SNMP_ERR_WRONGVALUE;
+	if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
+	  rc = SNMP_ERR_INCONSISTENTNAME;
+
+	if (rc)
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
+      }
+    }  
 }
 
 /************************************************************
@@ -738,6 +933,40 @@ void
 saHpiEventTable_set_action(netsnmp_request_group * rg)
 {
   
+  saHpiEventTable_context *row_ctx =
+    (saHpiEventTable_context *) rg->existing_row;
+  
+  netsnmp_request_group_item *current;  
+  netsnmp_variable_list *var;
+
+
+  for (current = rg->list; current; current = current->next) {
+
+    
+      var = current->ri->requestvb; 
+      /*
+      switch (current->tri->colnum) {
+      case COLUMN_SAHPIEVENTDELETE:
+      row_ctx->saHpiEventDelete = *var->val.integer;
+      break;
+      
+      default:
+      netsnmp_assert(0); 
+      break;
+      }
+    */
+      DEBUGMSGTL((AGENT,"ACTION: %d\n", *var->val.integer));
+      if ((*var->val.integer == SNMP_ROW_DESTROY)) {
+	// Only do the operation when its set to destroy(6)
+	if (delete_entry(row_ctx) != AGENT_ERR_NOERROR) {
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 SNMP_ERR_INCONSISTENTVALUE);
+	} else // It went fine
+	  rg->row_deleted = 1; 
+      } else // The rest of SNMP_ROW operations (4,5)
+	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+				       SNMP_ERR_INCONSISTENTVALUE);
+  }
 }
 
 /************************************************************
@@ -760,7 +989,7 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 void
 saHpiEventTable_set_commit(netsnmp_request_group * rg)
 {
-  
+
 }
 
 /************************************************************
@@ -774,7 +1003,7 @@ saHpiEventTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiEventTable_set_free(netsnmp_request_group * rg)
 {
-   
+
 }
 
 /************************************************************
@@ -839,10 +1068,7 @@ initialize_table_saHpiEventTable(void)
 
     /***************************************************
      * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
+     */  
 
     /*
      * internal indexes
@@ -869,10 +1095,10 @@ initialize_table_saHpiEventTable(void)
                                 netsnmp_container_find
                                 ("saHpiEventTable_secondary:"
                                  "saHpiEventTable:" "table_container"));
-    //cb.container->next->compare = saHpiEventTable_cmp;
+    cb.container->next->compare = saHpiEventTable_cmp;
 
     cb.create_row = (UserRowMethod *) saHpiEventTable_create_row;
-    /*
+    
     cb.duplicate_row = (UserRowMethod *) saHpiEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod *) saHpiEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiEventTable_row_copy;
@@ -885,7 +1111,7 @@ initialize_table_saHpiEventTable(void)
     cb.set_commit = saHpiEventTable_set_commit;
     cb.set_free = saHpiEventTable_set_free;
     cb.set_undo = saHpiEventTable_set_undo;
-    */
+    
 
     DEBUGMSGTL(("initialize_table_saHpiEventTable",
                 "Registering table saHpiEventTable "
@@ -1289,7 +1515,12 @@ saHpiEventTable_get_value(netsnmp_request_info *request,
                                  saHpiEventUserEventData,
                                  context->saHpiEventUserEventData_len);
         break;
-
+    case COLUMN_SAHPIEVENTDELETE:
+      /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value(var, ASN_INTEGER,
+			       (char *) &context->saHpiEventDelete,
+                                 sizeof(context->saHpiEventDelete));
+        break;
     default:/** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in "
                  "saHpiEventTable_get_value\n");
@@ -1298,12 +1529,3 @@ saHpiEventTable_get_value(netsnmp_request_info *request,
     return SNMP_ERR_NOERROR;
 }
 
-/************************************************************
- * saHpiEventTable_get_by_idx
- */
-const saHpiEventTable_context *
-saHpiEventTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiEventTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
