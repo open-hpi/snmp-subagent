@@ -461,9 +461,10 @@ SaHpiEventCategory ::= TEXTUAL-CONVENTION
     Note: Enumerated values are increased by one value compared to
     SAI-HPI-B spec."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 167. "
+    "Derived from SAI-HPI-B.01.01 section 8.3."
     SYNTAX      INTEGER {
-                        unspecified (0),
+                        undefined (0),
+                        unspecified (1),
                         threshold (2),
                         usage (3),
                         state (4),
