@@ -3940,7 +3940,21 @@ saHpiUserEventRowStatus OBJECT-TYPE
           the value of saHpiEventSeverity indice must not be one of
           these minor(3), major(2), and critical(3). The effect of
           creating a new row will also be reflected in the DAT - with
-          a new row there."
+          a new row there.
+	  
+	  Developers Note:
+	  
+	  Avoid creating duplicate entries here! 
+		(1) a manager would add an event to the User Event Table, 
+		(2) the Sub-agent would see this and call saHpiEventAdd(), 
+		(3) the event would go thru the HPI system and would be 
+			added to the HPI event queue, 
+		(4) the sub-agent would read the event queue as part of 
+			its normal operations, and when it sees this event 
+			it would know to ignore it, since it is already in 
+			the table (because the manager added it to the table 
+			to start this whole process).    
+	  "
     ::= {saHpiUserEventEntry 5}
 
 -- *********************************
