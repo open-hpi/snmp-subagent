@@ -77,7 +77,7 @@ fi
 
 # Checks for libraries
 # FIXME: Replace `main' with a function in `-lopenhpi':
-AC_CHECK_LIB([$OPENHPILIB], [saHpiInitialize], 
+AC_CHECK_LIB([$OPENHPILIB], [saHpiSessionOpen], 
     [
         have_hpi=yes
         HPI_FLAGS=`pkg-config --cflags $OPENHPILIB`
@@ -85,7 +85,7 @@ AC_CHECK_LIB([$OPENHPILIB], [saHpiInitialize],
     ],
     [OH_CHECK_FAIL(lib$OPENHPILIB,openhpi-devel)])
     
-AC_CHECK_LIB([openhpiutils], [build_reading_strings], 
+AC_CHECK_LIB([openhpiutils], [oh_lookup_error], 
     [
         have_hpiutils=yes
 # uncomment the 2 lines below when openhpiutils
