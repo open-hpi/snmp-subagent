@@ -1892,7 +1892,7 @@ saHpiSystemEventLogTable_get_value (netsnmp_request_info * request,
 				saHpiSystemEventLogDelete,
 				sizeof (context->saHpiSystemEventLogDelete));
 	*/
-      return SNMP_ERR_GENERR;
+      return NULL;
       break;
 
     default:
