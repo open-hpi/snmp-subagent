@@ -1,6 +1,6 @@
 /*
  * 
-  gcc -I/home/konrad/hpi/openhpi/include test-time.c  `net-snmp-config --netsnmp-libs` -o test -ggdb
+  gcc test-time.c  `net-snmp-config --netsnmp-libs` -o test -ggdb
   snmpwalk -v2c -c public localhost hpi | grep -i "Time" | awk ' { print $1 } ' > v
   for a in `cat v`
   do 
@@ -42,7 +42,7 @@ main (int argc, char **argv){
     struct snmp_session session, *ss;
     struct snmp_pdu *pdu;
     struct snmp_pdu *response;
-    SaHpiTimeT time_is;
+    long long time_is;
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 
