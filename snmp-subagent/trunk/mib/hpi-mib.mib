@@ -7638,12 +7638,12 @@ saHpiInventoryEntry OBJECT-TYPE
         ::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
-        saHpiInventoryId	                SaHpiInstrumentId,
-        saHpiInventoryPersistent              TruthValue,
+        saHpiInventoryId	        SaHpiInstrumentId,
+        saHpiInventoryPersistent        TruthValue,
         saHpiInventoryOEM               Unsigned32,
-        saHpiInventoryUpdateCount             Unsigned32,
-        saHpiInventoryIsReadOnly              TruthValue,
-        saHpiInventoryNumAreas                Unsigned32,
+        saHpiInventoryUpdateCount       Unsigned32,
+        saHpiInventoryIsReadOnly        TruthValue,
+        saHpiInventoryNumAreas          Unsigned32,
         saHpiInventoryRDR               RowPointer
         }
         
@@ -7692,10 +7692,15 @@ saHpiInventoryIsReadOnly OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Describes if the IDR is read-only. If such, all area
-        headers and fields are flagged as well."
+        "Describes if the IDR is read-only. If 'IsReadOnly is
+	'TRUE' then all 'areas' and 'fields' associated with
+	Inventory Data Repository are also flagged as 'Read Only'
+	in thier repsective columnar nodes tracking this capability.
+	
+	An IDR with read-only elements does not allow additions, 
+	deletetions, or modifications of its elements."
     REFERENCE
-    "See SAI-HPI-B.01.01 section 8.9 "
+    "See SAI-HPI-B.01.01 section 7.4 and 8.9 "
     ::= {saHpiInventoryEntry 5}
 
 saHpiInventoryNumAreas OBJECT-TYPE
@@ -7751,11 +7756,8 @@ saHpiAreaEntry OBJECT-TYPE
         - saHpiResourceId, the id value for the resource
         - saHpiIdrId, the id value of entity inventory 
         - saHpiAreaId, the id value of inventory data area.
-	
-	New Area's are Created when 'saHpiIdrAreaType' is written with
-	the appropriate index values's.  The 'AreadId' index is ignored. 
 
-	SAI-HPI-B.01.01, pages 98...100, 104."
+	SAI-HPI-B.01.01, section 7.4."
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
@@ -7766,6 +7768,7 @@ saHpiAreaEntry OBJECT-TYPE
 
 SaHpiAreaEntry ::= SEQUENCE {
 	saHpiAreaId			SaHpiInstrumentId,
+	saHpiAreaIdIndex		SaHpiInstrumentId,
         saHpiAreaType                	INTEGER,
         saHpiAreaIsReadOnly      	TruthValue,
         saHpiAreaRowStatus		RowStatus,
@@ -7777,8 +7780,28 @@ saHpiAreaId       	OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+        "This is the HPI management user specified AreaId value.
+	It is this value that is used in row 'createAndWait'function, 
+	which is synonomous with adding a new IDR 'Area.' 
+	See saHpiAreaRowStatus.
+	
+	See TEXTUAL-CONVENTION 'SaHpiInstrumentId.'"
+	REFERENCE
+	"SAI-HPI-B.01.01 section 7.4 and 7.4.3."
         ::= {saHpiAreaEntry 1}
+	
+saHpiAreaIdIndex       	OBJECT-TYPE
+        SYNTAX          SaHpiInstrumentId
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+        "This calumnar node is the value generated and utilized by
+	the underlying system management implementation.  This is 
+	the SAI-HPI-b.01.01 AreaId.
+	
+	See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+        ::= {saHpiAreaEntry 2}
+
 
 saHpiAreaType        OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -7794,25 +7817,37 @@ saHpiAreaType        OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "
 	The type of Area.
+	
+	New Area's are Created when 'saHpiIdrAreaType' is written with
+	the appropriate index values's.   
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
-        ::= {saHpiAreaEntry 2}
+	REFERENCE
+	"SAI-HPI-B.01.01 and 7.4 and 7.4.3."
+        ::= {saHpiAreaEntry 3}
 
 saHpiAreaIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "Describes if an area is read-only.  
-
-        If an IDR is read-only then all area headers and fields are as
-        read-only as well.
+        "This columnar node is informational only.  Describes if an area 
+	is read-only.    
 	
+	If it is set to 'FASLE' then a user can 'delete' this 'area'  and
+	 add new 'fields.'  
+	
+	If  the  'IsReadOnly' is 'TRUE'  then 'area' cannot be deleted nor 
+	have 'fields' added.
+	
+	Additioanlly if an 'IsReadOnly' may be FALSE and a delete still may 
+	not be possibly if one or more of the 'area's' fields are flagged
+	as read-only.
 
-	All area headers in a 
-        read-only IDR are flagged as read-only as well."
-        ::= {saHpiAreaEntry 3}
+        If  'IsReadOnly' is 'FASLE' then  all area 'fields'  are flagged as 
+	'read-only' as well."
+        ::= {saHpiAreaEntry 4}
 
 saHpiAreaRowStatus OBJECT-TYPE 
         SYNTAX          RowStatus
@@ -7837,12 +7872,22 @@ saHpiAreaRowStatus OBJECT-TYPE
         - `createAndWait(5)', which is supplied by a management
           station wishing to create a new instance of a
           conceptual row (but not make it available for use by
-          the managed device). This function is used to add
-          an Area to the specified Inventory Data Repository.
-          The row is created (and changes state to 'active' when 
-          the saHpiAreaType has been correctly set) to a 
-          new instance of the conceptual row. The dis-allowed 
-          saHpiAreaType value is undefined(0) and unspecified(256)
+          the managed device). 
+	  
+	  This function is used to add an Area to the specified 
+	  Inventory Data Repository.  The row is created 
+	  (and changes state to 'active' when the saHpiAreaType 
+	  has been correctly set) to a new instance of the 
+	  conceptual row. The dis-allowed saHpiAreaType value is 
+	  undefined(0) and unspecified(256).
+	  
+	  It is the responsibility of the caller to specify an 
+	  AreadId that has not been previously assigned.  The 
+	  user specifies AreaId may or maynot be the same value
+	  as the under lying HPI system management service.  The 
+	  HPI assigned ID will be reflected in the columnar node
+	  'saHpiAreaIdIndex'.
+	  
 
         - `destroy(6)', which is supplied by a management station
           wishing to delete all of the instances associated with
@@ -7857,8 +7902,8 @@ saHpiAreaRowStatus OBJECT-TYPE
           cannot be deleted.  An attempt to delete an Area that 
           contains a read-only Field will return an error."
         REFERENCE
-                "Derived from SAI-HPI-B.01.01 page 114."
-        ::= {saHpiAreaEntry 4}
+        "Derived from SAI-HPI-B.01.01 sections 7.4.2, 7.4.3, and 7.4.4."
+        ::= {saHpiAreaEntry 5}
 
 saHpiAreaNumDataFields OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -7866,7 +7911,7 @@ saHpiAreaNumDataFields OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "Number of Fields contained in Area"
-        ::= {saHpiAreaEntry 5}
+        ::= {saHpiAreaEntry 6}
 	
 -- **************************************
 -- **
@@ -7946,8 +7991,8 @@ saHpiFieldType OBJECT-TYPE
         DESCRIPTION     
         "Inventory Data Field type definitions.
         
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B spec."
         ::= {saHpiFieldEntry 2}
 
 saHpiFieldIsReadOnly OBJECT-TYPE 
@@ -8024,6 +8069,8 @@ saHpiFieldStatus        OBJECT-TYPE
     - `destroy(6)', which is supplied by a management station
     	wishing to delete all of the instances associated with
 	an existing conceptual row."
+	REFERENCE
+	"SAI-HPI-B.01.01 sections 7.4.5, 7.4.6, 7.4.7, and 7.4.8."
         ::= {saHpiFieldEntry 8}
 
 
