@@ -1231,7 +1231,7 @@ saHpiDomainTag  OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Information tag associated with domain.
         The type of date is specified
-        by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+        by saHpiDomainTagTextType and saHpiDomainTagLanguage."
 	::=   {saHpiDomainInfoEntry 6 }
 
 
@@ -1241,7 +1241,7 @@ saHpiDomainReferenceUpdateCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "This count is incremented any time the
+        "This count is incremented any time the DRT
         table is changed. It rolls over to zero when the maximum 
         value (2^32) is reached." 
 	::=   {saHpiDomainInfoEntry 7 }
@@ -1384,9 +1384,8 @@ saHpiDomainReferenceEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of DRT entries present in the system. 
-        This field is used to determine if new resources have been added
-        or existing removed. "
+        DESCRIPTION     "The number of DRT entries present in the  
+	saHpiDomainReferenceTable."
         ::= {hpiDomain 3}
         
 saHpiDomainReferenceTable OBJECT-TYPE
@@ -1395,17 +1394,7 @@ saHpiDomainReferenceTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "A table, provided by an HPI implementation, of additional domains 
-        related to the current domain.
-        
-        The DRT contains an entry for each associated domain, and HPI Users may
-        read these entries to discover the presence of additional domains within 
-        a 'System'. The discovered domains can, in turn, be used to discover
-        additional resources and domains. The DRT is automatically built and 
-        maintained by the HPI implementation. Domain entries in the DRT may 
-        change over time if the 'System' configuration changes.  The domain
-        controller generates an event when a domain is added to the DRT 
-        (SAHPI_DOMAIN_REF_ADDED) and when a domain is removed from the DRT 
-        (SAHPI_DOMAIN_REF_REMOVED)."
+        related to the current domain."
         ::= {hpiDomain 4}
 
 saHpiDomainReferenceEntry OBJECT-TYPE
@@ -1413,36 +1402,36 @@ saHpiDomainReferenceEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "
-The Domain Reference Table (DRT) which provides information about other domains associated with the domain. The two saHpiDomainId are used to uniquely identify
-a domain and a corresponding domain which can be off peer or tiered domain 
-architecture.
+        "The Domain Reference Table (DRT) which provides information about 
+	other domains associated with the domain. The two saHpiDomainId 
+	indices for this table are used to uniquely a domain and an associated 
+	domain, that are in a peer or tiered domain relationship.
 
-The DRT contains an entry for each associated domain, and HPI MIB Users 
-may read these entries to discover the presence of additional domains within 
-a 'System'. The discovered domains can, in turn, be used to discover additional 
-resources and domains. The DRT is automatically built and maintained by the HPI 
-implementation.  Domain entries in the DRT may change over time if the 'System'
- configuration changes.  
+	The DRT contains an entry for each associated domain, and HPI MIB Users 
+	may read these entries to discover the presence of additional domains within 
+	a 'System'. The discovered domains can, in turn, be used to discover additional 
+	resources and domains. The DRT is automatically built and maintained by the HPI 
+	implementation.  Domain entries in the DRT may change over time if the 'System'
+	configuration changes.  
 
-There are two types of domain references:
+	There are two types of domain references:
 
-- A peer domain architecture, which consists of two or more domains that are 
-expected to contain the same resources and domain references.  Each domain 
-in a peer relationship contains an RPT listing all resources present in each 
-domain. 
+	- A peer domain architecture, which consists of two or more domains that are 
+	expected to contain the same resources and domain references.  Each domain 
+	in a peer relationship contains an RPT listing all resources present in each 
+	domain. 
 
- - A tiered (child) domain architecture is used when all the resources in a 
-'system' cannot be accessed in a single domain.  A 'parent' domain references 
-one or more 'child' domains in its DRT.  The 'child' domains may be simple 
-domains containing only resources, or they may themselves be a 'parent' to 
-other 'child' domains.  Domains in a tiered relationship are disjointed and 
-do not contain the same resources.
+	- A tiered (child) domain architecture is used when all the resources in a 
+	'system' cannot be accessed in a single domain.  A 'parent' domain references 
+	one or more 'child' domains in its DRT.  The 'child' domains may be simple 
+	domains containing only resources, or they may themselves be a 'parent' to 
+	other 'child' domains.  Domains in a tiered relationship are disjointed and 
+	do not contain the same resources.
 
-Note:
-When a domain is added to the DRT (SAHPI_DOMAIN_REF_ADDED) and when a domain 
-is removed from the DRT (SAHPI_DOMAIN_REF_REMOVED) an event is generated.
-"
+	Note:
+	When a domain is added to the DRT (SAHPI_DOMAIN_REF_ADDED) and when a domain 
+	is removed from the DRT (SAHPI_DOMAIN_REF_REMOVED) an event is generated.
+	"
         INDEX   { 
                 saHpiDomainId, 
                 saHpiDomainId
@@ -1475,9 +1464,7 @@ saHpiDomainAlarmEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "The number of DomainInfo entries present in the system. 
-        This field is used to determine if new domains have been added
-        or existing removed."
+        "The number of DomainAlarm entries present in the system. "
         ::= {hpiDomain 5}
 
 
@@ -1497,29 +1484,29 @@ saHpiDomainAlarmEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "This table is used to store alarm information."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiDomainAlarmId }
+        INDEX   { saHpiDomainId, saHpiDomainAlarmId }
         ::= {saHpiDomainAlarmTable 1}
         
 SaHpiDomainAlarmEntry ::= SEQUENCE {
 
-        saHpiDomainAlarmId                    SaHpiInstrumentId,    
-        saHpiDomainAlarmTimestamp                  SaHpiTime,  
-        saHpiDomainAlarmSeverity                   INTEGER,  
-        saHpiDomainAlarmAcknowledged               TruthValue,
+        saHpiDomainAlarmId                    	SaHpiInstrumentId,    
+        saHpiDomainAlarmTimestamp             	SaHpiTime,  
+        saHpiDomainAlarmSeverity              	INTEGER,  
+        saHpiDomainAlarmAcknowledged          	TruthValue,
         
-        saHpiDomainAlarmCondStatusCondType    INTEGER,
-        saHpiDomainAlarmCondEntityPath        OCTET STRING,
-        saHpiDomainAlarmCondSensorNum         Unsigned32, 
-        saHpiDomainAlarmCondEventState        SaHpiEventState,
+        saHpiDomainAlarmCondStatusCondType    	INTEGER,
+        saHpiDomainAlarmCondEntityPath        	OCTET STRING,
+        saHpiDomainAlarmCondSensorNum         	Unsigned32, 
+        saHpiDomainAlarmCondEventState        	SaHpiEventState,
           
-        saHpiDomainAlarmCondNameValue         OCTET STRING,
+        saHpiDomainAlarmCondNameValue         	OCTET STRING,
                
-        saHpiDomainAlarmCondMid               Unsigned32,
+        saHpiDomainAlarmCondMid               	Unsigned32,
         
-        saHpiDomainAlarmCondTextType      SaHpiTextType,
-        saHpiDomainAlarmCondTextLanguage  SaHpiTextLanguage,
-        saHpiDomainAlarmCondText             SaHpiText,
-        saHpiDomainAlarmRowStatus                        RowStatus
+        saHpiDomainAlarmCondTextType      	SaHpiTextType,
+        saHpiDomainAlarmCondTextLanguage  	SaHpiTextLanguage,
+        saHpiDomainAlarmCondText             	SaHpiText,
+        saHpiDomainAlarmRowStatus               RowStatus
         }
         
 saHpiDomainAlarmId OBJECT-TYPE 
