@@ -1140,7 +1140,7 @@ int populate_domain_info( void ) {
 	} else {
 
 	/* create domain tuple/ index */
-	domain_info_oids[1] = DomainInfo.DomainId; 
+	domain_info_oids[0] = DomainInfo.DomainId; 
 	domain_info_index.len =  DOMAIN_INFO_INDEX_LEN;
 	domain_info_index.oids = (oid *) & domain_info_oids;  
 
