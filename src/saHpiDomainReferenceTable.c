@@ -38,6 +38,8 @@
 
 #include "saHpiDomainReferenceTable.h"
 #include "oh_error.h"
+#include "hpiSubagent.h"
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -854,7 +856,7 @@ int populate_drt(void) {
 	netsnmp_index domain_refer_index;
 
 	saHpiDomainReferenceTable_context  *domain_ref_ctx;
-	int rval = 0;
+	int rc = 0;
 	SaHpiSessionIdT sid;
 
 	SaHpiEntryIdT 	EntryId;
@@ -867,7 +869,7 @@ int populate_drt(void) {
 		SAHPI_UNSPECIFIED_DOMAIN_ID, 
 		&sid, NULL) ){
 		dbg("ERROR: populate_drt, saHpiSessionOpen Failed!"); 
-		rval = -1;
+		rc = -1;
 	} else {
 		top_drt.did = SAHPI_UNSPECIFIED_DOMAIN_ID;
 		top_drt.sid = sid;
@@ -911,7 +913,9 @@ int populate_drt(void) {
 
 	} while (EntryId != SAHPI_LAST_ENTRY);
 
-	return rval;
+	DEBUGMSGTL ((AGENT, "populate_drt. Exit (rc: %d).\n", rc));
+
+	return rc;
 
 }
 
