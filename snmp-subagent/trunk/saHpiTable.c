@@ -94,34 +94,6 @@ saHpiTable_cmp(const void *lhs, const void *rhs)
     
 }
 
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiTable_context *
-saHpiTable_get(const char *name, int len)
-{
-
-    DEBUGMSGTL((AGENT,"--- saHpiTable_get: Entry. "));
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-
-    snmp_log(LOG_ERR, "saHpiTable_get not implemented!\n");
-    return NULL;
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 int
 populate_rpt() {
 
@@ -280,6 +252,7 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
     }   
 
     ctx->hash = hash;
+    ctx->resource_id = entry->ResourceId;
     DEBUGMSGTL((AGENT,"Creating columns for resourceid: %d\n", entry->ResourceId));
     
     len = entitypath2string(
@@ -315,6 +288,49 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
   
   return AGENT_ERR_NULL_DATA;
 }
+
+int set_table_tag(saHpiTable_context *ctx) { 
+	return -1;
+}
+int set_table_severity(saHpiTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+  /* 
+    ctx->saHpiResourceSeverity = entry->ResourceSeverity+1;
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;
+    
+   
+    rc = saHpiWatchdogTimerSet (session_id, 
+				ctx->resource_id,
+				ctx->saHpiWatchdogNum,
+				&wdog);
+
+    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+
+    
+    rc = saHpiWatchdogTimerGet (session_id, ctx->resource_id,
+				ctx->saHpiWatchdogNum,
+				&wdog);
+
+
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+   */ 
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
 
 int
 send_saHpiTable_notification(saHpiTable_context *ctx) {
@@ -419,7 +435,7 @@ make_SaHpiTable_trap_msg(netsnmp_variable_list *list,
 /************************************************************
  * the *_row_copy routine
  */
-/*
+
 static int
 saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
 {
@@ -482,11 +498,12 @@ saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
            src->saHpiResourceTag_len);
     dst->saHpiResourceTag_len = src->saHpiResourceTag_len;
 
+    dst->hash = src->hash;
     DEBUGMSGTL((AGENT,"--- saHpiTable_row_copy: Exit. "));
 
     return 0;
 }
-*/
+
 
 /*
  * the *_extract_index routine
@@ -577,8 +594,8 @@ saHpiTable_can_delete(saHpiTable_context * undo_ctx,
                       saHpiTable_context * row_ctx,
                       netsnmp_request_group * rg)
 {
-	// Make this inline?
-    return 0;
+
+    return 1;
 }
 
 /************************************************************
@@ -610,7 +627,10 @@ saHpiTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash = 0;
-    
+    ctx->saHpiResourceSeverity = 0;
+    ctx->saHpiResourceTagTextType = 0;
+    ctx->saHpiResourceTagTextLanguage = 0;
+    ctx->saHpiResourceTag_len = 0;    
     return ctx;
 }
 
@@ -620,24 +640,23 @@ saHpiTable_create_row(netsnmp_index * hdr)
 saHpiTable_context *
 saHpiTable_duplicate_row(saHpiTable_context * row_ctx)
 {
-  return NULL;
-  /*
-    saHpiTable_context *dup;
 
-    if (!row_ctx)
-        return NULL;
+  saHpiTable_context *dup;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiTable_context);
-    if (!dup)
-        return NULL;
+  if (!row_ctx)
+    return NULL;
+  
+  dup = SNMP_MALLOC_TYPEDEF(saHpiTable_context);
+  if (!dup)
+    return NULL;
+  
+  if (saHpiTable_row_copy(dup, row_ctx)) {
+    free(dup);
+    dup = NULL;
+  }
+  
+  return dup;
 
-    if (saHpiTable_row_copy(dup, row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
-
-    return dup;
-  */
 }
 
 /************************************************************
@@ -677,13 +696,136 @@ saHpiTable_delete_row(saHpiTable_context * ctx)
 void
 saHpiTable_set_reserve1(netsnmp_request_group * rg)
 {
-  
+   saHpiTable_context *row_ctx = (saHpiTable_context *) rg->existing_row;
+    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+    netsnmp_variable_list *var;
+    netsnmp_request_group_item *current;
+    int             rc;
+
+
+    /*
+     * TODO: loop through columns, check syntax and lengths. For
+     * columns which have no dependencies, you could also move
+     * the value/range checking here to attempt to catch error
+     * cases as early as possible.
+     */
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPIRESOURCESEVERITY:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiResourceSeverity));
+            break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiResourceTagTextType));
+            break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiResourceTagTextLanguage));
+            break;
+
+        case COLUMN_SAHPIRESOURCETAG:
+            /** OCTETSTR = ASN_OCTET_STR */
+	/*
+	  rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
+	  if (rc == SNMP_ERR_NOERROR)
+	    rc = netsnmp_check_vb_size_range(var, 0, SAHPI_RESOURCE_TAG_MAX);
+	*/
+            break;
+	case COLUMN_SAHPIDOMAINID:
+	case COLUMN_SAHPIENTRYID:
+	case COLUMN_SAHPIRESOURCEID:
+	case COLUMN_SAHPIRESOURCEENTITYPATH:
+	case COLUMN_SAHPIRESOURCECAPABILITIES:
+	case COLUMN_SAHPIRESOURCEINFORESOURCEREV:
+	case COLUMN_SAHPIRESOURCEINFOSPECIFICVER:
+	case COLUMN_SAHPIRESOURCEINFODEVICESUPPORT:
+	case COLUMN_SAHPIRESOURCEINFOMANUFACTURERID:
+	case COLUMN_SAHPIRESOURCEINFOPRODUCTID:
+	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMAJORREV:
+	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMINORREV:
+	case COLUMN_SAHPIRESOURCEINFOAUXFIRMWAREREV:
+	  rc = SNMP_ERR_NOTWRITABLE;
+	  break;
+        default:/** We shouldn't get here */
+            rc = SNMP_ERR_GENERR;
+            snmp_log(LOG_ERR, "unknown column in "
+                     "saHpiTable_set_reserve1\n");
+        }
+
+        if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+        rg->status = SNMP_MAX(rg->status, current->ri->status);
+    }
+
+   
 }
 
 void
 saHpiTable_set_reserve2(netsnmp_request_group * rg)
 {
+saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+    netsnmp_request_group_item *current;
+    netsnmp_variable_list *var;
+    int             rc;
 
+    rg->rg_void = rg->list->ri;
+
+   
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPIRESOURCESEVERITY:
+	  if ( ((*var->val.integer < 1) || 
+		(*var->val.integer > 5)) &&
+	       (*var->val.integer != 80)) {
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+	  if ( ((*var->val.integer < 1) || 
+		(*var->val.integer > 4))) {	    
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+	  if ( ((*var->val.integer < 0) || 
+		(*var->val.integer > 136))) {	    
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
+
+        case COLUMN_SAHPIRESOURCETAG:
+                break;
+
+        default:/** We shouldn't get here */
+            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+        }
+
+        if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+    }
 }
 
 /************************************************************
@@ -700,7 +842,62 @@ saHpiTable_set_reserve2(netsnmp_request_group * rg)
 void
 saHpiTable_set_action(netsnmp_request_group * rg)
 {
-  
+      netsnmp_variable_list *var;
+    saHpiTable_context *row_ctx = (saHpiTable_context *) rg->existing_row;
+    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+    netsnmp_request_group_item *current;
+
+
+    /*
+     * TODO: loop through columns, copy varbind values
+     * to context structure for the row.
+     */
+    for (current = rg->list; current; current = current->next) {
+
+        var = current->ri->requestvb;
+
+        switch (current->tri->colnum) {
+
+        case COLUMN_SAHPIRESOURCESEVERITY:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiResourceSeverity = *var->val.integer;
+            break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiResourceTagTextType = *var->val.integer;
+            break;
+
+        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiResourceTagTextLanguage = *var->val.integer;
+            break;
+
+        case COLUMN_SAHPIRESOURCETAG:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiResourceTag, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiResourceTag_len = var->val_len;
+            break;
+
+        default:/** We shouldn't get here */
+            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+        }
+/*
+	if (current->tri->colnum == COLUMN_SAHPIRESOURCESEVERITY) {
+	  (set_table_severity(row_ctx) != AGENT_ERR_NOERROR) {
+	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					   SNMP_ERR_GENERR);
+	} else {	
+	  
+	  if (set_table_tag(row_ctx) != AGENT_ERR_NOERROR) {
+	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					   SNMP_ERR_GENERR);
+	  }
+	} */
+    }
+
+
 }
 
 /************************************************************
@@ -796,7 +993,7 @@ initialize_table_saHpiTable(void)
                                                      netsnmp_table_array_helper_handler,
                                                      saHpiTable_oid,
                                                      saHpiTable_oid_len,
-                                                     HANDLER_CAN_RONLY);
+                                                     HANDLER_CAN_RWRITE);
 
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
@@ -834,12 +1031,12 @@ initialize_table_saHpiTable(void)
                                  "table_container"));
     cb.container->next->compare = saHpiTable_cmp;
     cb.create_row = (UserRowMethod *) saHpiTable_create_row;
-/*
+
     cb.can_set = 0;
     cb.duplicate_row = (UserRowMethod *) saHpiTable_duplicate_row;
-*/
+
     cb.delete_row = (UserRowMethod *) saHpiTable_delete_row;
-    /*
+
     cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiTable_row_copy;
 
     cb.can_delete = (Netsnmp_User_Row_Action *) saHpiTable_can_delete;
@@ -850,7 +1047,7 @@ initialize_table_saHpiTable(void)
     cb.set_commit = saHpiTable_set_commit;
     cb.set_free = saHpiTable_set_free;
     cb.set_undo = saHpiTable_set_undo; 
-*/
+
     DEBUGMSGTL(("initialize_table_saHpiTable",
                 "Registering table saHpiTable " "as a table array\n"));
     netsnmp_table_container_register(my_handler, table_info, &cb,

@@ -95,6 +95,7 @@ extern          "C" {
         long            saHpiResourceTag_len;
 
       long  hash;
+	long resource_id;
 
     } saHpiTable_context;
 
@@ -113,6 +114,10 @@ extern          "C" {
                                          netsnmp_table_request_info *);
 
   int populate_rpt();
+int
+set_table_severity(saHpiTable_context *ctx);
+int
+set_table_tag(saHpiTable_context *ctx);
 
 
 int  
