@@ -5626,7 +5626,9 @@ saHpiSensorRangeFlags   OBJECT-TYPE
         DESCRIPTION
         "Defines which range flags the sensor supports. They
         can be MIN, MAX, NOMINAL, NORMAL_MAX, NORMAL_MIN, or
-        nothing if the sensor does not support any ranges."
+        nothing if the sensor does not support any ranges.
+	If more than one range is supported then the strings
+	tokens are comma (',') or semicolon (';') delimited"
         ::= {saHpiSensorEntry 19}
         
 saHpiSensorAccuracyFactor     OBJECT-TYPE
