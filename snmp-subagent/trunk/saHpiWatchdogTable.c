@@ -504,7 +504,11 @@ saHpiWatchdogTable_set_reserve1(netsnmp_request_group * rg)
         rc = SNMP_ERR_NOERROR;
 
         switch (current->tri->colnum) {
-
+	case COLUMN_SAHPIWATCHDOGNUM:
+	case COLUMN_SAHPIWATCHDOGOEM:
+	case COLUMN_SAHPIWATCHDOGRDR:
+	   rc = SNMP_ERR_NOTWRITABLE;
+	   break;
         case COLUMN_SAHPIWATCHDOGLOG:
             /** TruthValue = ASN_INTEGER */
 	  rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
