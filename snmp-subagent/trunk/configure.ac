@@ -4,7 +4,7 @@
 AC_PREREQ(2.53)
 AC_INIT(FULL-PACKAGE-NAME, VERSION, BUG-REPORT-ADDRESS)
 AM_INIT_AUTOMAKE(openhpi-subagent, 0.7)
-AC_CONFIG_SRCDIR([include/saHpiTable.h])
+AC_CONFIG_SRCDIR([include/hpiB.h])
 AM_CONFIG_HEADER([config.h])
 
 # Checks for programs.
@@ -158,7 +158,6 @@ AC_SUBST(ac_configure_args)
 
 AC_CONFIG_FILES([Makefile 
     src/Makefile
-    src/t/Makefile
-    docs/Makefile
     openhpi-subagent.spec])
+
 AC_OUTPUT
