@@ -1,0 +1,96 @@
+#! /bin/sh
+# chkconfig: 35 55 55
+# description: HPI SNMP Subagent
+# processname: hpiSubagent
+
+# Source function library.
+# /etc/init.d/hpisnmpd
+#
+### BEGIN INIT INFO
+# Provides: hpiSubagent
+# Required-Start: $network net-snmp
+# X-UnitedLinux-Should-Start: network net-snmp
+# Required-Stop:  
+# Default-Start:  3 5
+# Default-Stop:
+# Description:    init script for HPI SNMP Subagent
+### END INIT INFO
+
+isUnited=`grep "UnitedLinux" /etc/issue`
+isSUSE=`grep "SuSE" /etc/issue`
+
+prog=/usr/bin/hpiSubagent
+# Enable forking
+OPTIONS="-f"
+
+if [ "$isUnited" ] || [ "$isSUSE" ]; then
+
+ . /etc/rc.status
+  rc_reset
+
+  RETVAL=$rc_done
+
+  case "$1" in
+    start)
+	echo -n "Starting up HPI SNMP sub-agent daemon  "
+	startproc $prog $OPTIONS
+	rc_status -v
+	;;
+    stop)
+	echo -n "Shutting down HPI SNMP sub-agent daemon  "	
+	killproc -TERM $proc
+	rc_status -v
+	;;
+    try-restart)
+	$0 stop && $0 start
+	rc_status
+	;;
+    restart)
+	$0 stop
+	$0 start
+	rc_status
+	;;
+    status)
+	echo -n "Checking for HPI SNMP sub-agent:"
+	checkproc $prog  ; rc_status -v
+	;;
+    *)
+	echo "Usage: $0 {start|stop|status|try-restart|restart}"
+		exit 1
+	;;
+   esac
+   rc_exit
+else
+   . /etc/rc.d/init.d/functions
+   RETVAL=0
+
+   # Red Hat/Turbo/Caldera 
+   case "$1" in
+     start)
+	echo -n $"Starting up HPI SNMP sub-agent daemon: "
+	daemon $prog $OPTIONS  
+	RETVAL=$?
+	echo
+	;;
+
+     stop)
+	echo -n $"Shutting down HPI SNMP sub-agent daemon: "
+	killproc $prog 
+	RETVAL=$?
+	echo
+	;;
+     status) 
+	status $prog 
+	RETVAL=$?
+	;;
+     restart|reload)
+	$0 stop && $0 start
+	;;
+     *)
+	echo "Usage: $0 {start|stop|status|restart|reload}"
+	exit 1
+   esac
+
+   exit $RETVAL
+
+fi
