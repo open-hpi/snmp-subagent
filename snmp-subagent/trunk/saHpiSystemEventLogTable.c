@@ -105,6 +105,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 				  rpt_entry->ResourceId,
 				  &state);
 
+      // IBM-KR: What's the right option? Set it to 'unknown' perhaps?
       if (err != SA_OK)
 	state = SAHPI_TRUE;
 
@@ -123,8 +124,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 	sel_oid[0] = rpt_entry->DomainId;
 	sel_oid[1] = rpt_entry->ResourceId;
 	sel_oid[2] = sel.EntryId;
-	DEBUGMSGTL((AGENT,"Request for %d, %d, %d\n",
-		    sel_oid[0], sel_oid[1], sel_oid[2]));
 
 	sel_index.oids = (oid *) &sel_oid;
 	sel_index.len = 3;
@@ -227,10 +226,10 @@ set_logstate(saHpiSystemEventLogTable_context *ctx) {
 			       ctx->resource_id,
 			       enable);
 
-    DEBUGMSGTL((AGENT,"Error is %d\n", rc));
-    if (rc != SA_OK) 
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error for 'saHpiEventLogStateSet' is %d\n", rc)); 
       return AGENT_ERR_OPERATION;
-    
+    }
     
     return AGENT_ERR_NOERROR;
   }
@@ -249,17 +248,47 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
     
-    rc = saHpiEventLogClear(session_id,
-			    ctx->resource_id);
+    rc = saHpiEventLogEntryDelete(session_id,
+				  ctx->resource_id,
+				  ctx->saHpiSystemEventLogEntryId);
 
-    DEBUGMSGTL((AGENT,"Error is %d\n", rc));
-    if (rc != SA_OK) 
+    if (rc != SA_OK)       
 	return AGENT_ERR_OPERATION;
       
     return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
 
+}
+
+
+int
+delete_SEL_row(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id,
+	       SaHpiSelEntryIdT num)
+{
+  saHpiSystemEventLogTable_context *ctx;
+  //saHpiSystemEventLogTable_context tmp;
+
+  oid sel_oid[3];
+  netsnmp_index sel_index;
+
+  DEBUGMSGTL((AGENT,"- delete_SEL_row\n"));
+
+  sel_oid[0] = domain_id;
+  sel_oid[1] = resource_id;
+  sel_oid[2] = num;
+  sel_index.oids = (oid *) &sel_oid;
+  sel_index.len = 3;
+  ctx = CONTAINER_FIND(cb.container, &sel_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    event_log_entries = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NOT_FOUND;
+  
 }
 
 /************************************************************
@@ -295,16 +324,16 @@ saHpiSystemEventLogTable_cmp(const void *lhs, const void *rhs)
     if (context_l->resource_id < context_r->resource_id)
 	return -1;
 
-    return (context_l->resource_id == context_r->resource_id) ? 0: 1;
-    /*
-      // Only use two indexes. 
+    rc =(context_l->resource_id == context_r->resource_id) ? 0: 1;
+    
+
     if (rc != 0)
       return 1;
     
     if (context_l->saHpiSystemEventLogEntryId < context_r->saHpiSystemEventLogEntryId)
 	return -1;
     return (context_l->saHpiSystemEventLogEntryId == context_r->saHpiSystemEventLogEntryId) ? 0: 1;
-    */
+    
 }
 
 
@@ -586,14 +615,14 @@ saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 {
-    saHpiSystemEventLogTable_context *ctx = NULL;
-    saHpiSystemEventLogTable_context *undo_ctx =
-      (saHpiSystemEventLogTable_context *) rg->undo_info;
+
+     saHpiSystemEventLogTable_context *undo_ctx =
+   (saHpiSystemEventLogTable_context *) rg->undo_info;
 
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
-     netsnmp_index	index;
+    //   netsnmp_index	index;
 
     rg->rg_void = rg->list->ri;
 
@@ -628,16 +657,17 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
     }
 
   for (current = rg->list; current; current = current->next) {
-      // Does the row exist?
-      index.oids = current->tri->index_oid;
-      index.len = current->tri->index_oid_len;
-      ctx = CONTAINER_FIND(cb.container, &index);
-      if (ctx == NULL) { // Empty. Not found.
+
+      // The nice thing about this API is that _row_copy() is called
+      // for this row - if the API has matched the index with an
+      // already existing entry. We check the 'hash' value. If its
+      // 0 the API couldn't find the right context.
+
+      if ( ((saHpiSystemEventLogTable_context *) rg->existing_row)->hash == 0) {
+	rc =  SNMP_ERR_NOSUCHNAME;
 	var = current->ri->requestvb;
-	rc = SNMP_ERR_GENERR;
 	// Do the check only for one type of column:
 	if (current->tri->colnum == COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE) {
-
 	  // SNMPv2-TC has a diagram of actions.
 	  if ((*var->val.integer == SNMP_ROW_CREATEANDGO)
 	      || (*var->val.integer == SNMP_ROW_ACTIVE)
@@ -647,7 +677,9 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 	    rc = SNMP_ERR_INCONSISTENTNAME;
 	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
 	    rc = SNMP_ERR_WRONGVALUE;
-	  if (*var->val.integer == SNMP_ROW_DESTROY) // This is suppose to return NOERROR even if it does not EXIST!
+	  if (*var->val.integer == SNMP_ROW_DESTROY) 
+	    // This is suppose to return NOERROR even if it does not EXIST!
+	    // Can't do that.
 	    rc = SNMP_ERR_INCONSISTENTNAME;
 	}
 
@@ -655,7 +687,7 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 rc);
       }
-    }  
+  }
 
 }
 
@@ -679,11 +711,7 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
         (saHpiSystemEventLogTable_context *) rg->existing_row;
 
 
-    saHpiSystemEventLogTable_context *ctx;
-    saHpiSystemEventLogTable_context tmp;
-
     netsnmp_request_group_item *current;
-
    
     for (current = rg->list; current; current = current->next) {
 
@@ -700,23 +728,15 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 	      netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					     SNMP_ERR_INCONSISTENTVALUE);
 	    } else {
-	      // IBM-KR repopulate() or re-hash-event-table() ?
 
-	      // The operation went fine.
-	      // Remove all rows with the right ResourceId.
-	      netsnmp_assert(cb.container->next != NULL);
-	      tmp.resource_id = row_ctx->resource_id;
-	      tmp.domain_id = row_ctx->domain_id;
+	      rg->row_deleted = 1;
+	      // Delete it also in event.
+	      delete_event_row(row_ctx->domain_id,
+			       row_ctx->resource_id,
+			       row_ctx->saHpiSystemEventLogEntryId);
 
-	      while ( (ctx =CONTAINER_FIND(cb.container->next, &tmp)) != NULL) {
-		DEBUGMSGTL((AGENT,"Found object: %d\n",ctx->saHpiSystemEventLogEntryId));
-		CONTAINER_REMOVE(cb.container, ctx);
-		
-	      }
-	      DEBUGMSGTL((AGENT,"Done."));
-	      event_log_entries = CONTAINER_SIZE(cb.container);
-	      // Now how do you notify event Table to delete?
-	      // rehash?
+	      // Now we have to send off an event?
+	      // IBM-KR: TODO
 	      
 	    }
             break;
@@ -727,6 +747,8 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 	    if (set_logstate(row_ctx) != AGENT_ERR_NOERROR) {
 	        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 SNMP_ERR_GENERR);
+	    } else {
+	      // IBM-KR: TODO: Send event?
 	    }
             break;
 
@@ -775,7 +797,7 @@ saHpiSystemEventLogTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiSystemEventLogTable_set_free(netsnmp_request_group * rg)
 {
- 
+
 }
 
 /************************************************************
@@ -834,7 +856,7 @@ initialize_table_saHpiSystemEventLogTable(void)
                                             netsnmp_table_array_helper_handler,
                                             saHpiSystemEventLogTable_oid,
                                             saHpiSystemEventLogTable_oid_len,
-                                            HANDLER_CAN_RONLY);
+                                            HANDLER_CAN_RWRITE);
 
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
@@ -844,9 +866,6 @@ initialize_table_saHpiSystemEventLogTable(void)
 
     /***************************************************
      * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
      */
 
     /*
@@ -882,7 +901,7 @@ initialize_table_saHpiSystemEventLogTable(void)
 
 
     cb.create_row = (UserRowMethod *) saHpiSystemEventLogTable_create_row;
-    /*
+
     cb.duplicate_row =
         (UserRowMethod *) saHpiSystemEventLogTable_duplicate_row;
     cb.delete_row = (UserRowMethod *) saHpiSystemEventLogTable_delete_row;
@@ -898,7 +917,7 @@ initialize_table_saHpiSystemEventLogTable(void)
     cb.set_commit = saHpiSystemEventLogTable_set_commit;
     cb.set_free = saHpiSystemEventLogTable_set_free;
     cb.set_undo = saHpiSystemEventLogTable_set_undo;
-    */
+
 
     DEBUGMSGTL(("initialize_table_saHpiSystemEventLogTable",
                 "Registering table saHpiSystemEventLogTable "
@@ -909,11 +928,12 @@ initialize_table_saHpiSystemEventLogTable(void)
 
 
     // Add the rest of objects 1-8
-    netsnmp_register_read_only_ulong_instance("event_log_entries",
-					      saHpiSystemEventLogEntries_oid,
-					      OID_LENGTH(saHpiSystemEventLogEntries_oid),
-					      &event_log_entries,
-					      NULL);
+    netsnmp_register_read_only_instance(netsnmp_create_handler_registration
+					("event_log_entries",
+					 event_log_entries_handler,
+					 saHpiSystemEventLogEntries_oid,
+					 OID_LENGTH(saHpiSystemEventLogEntries_oid),
+					 HANDLER_CAN_RONLY));
     
     netsnmp_register_read_only_ulong_instance("event_log_size",
 					      saHpiSystemEventLogSize_oid,
@@ -1032,21 +1052,11 @@ event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests) {
 
-  DEBUGMSGTL((AGENT,"--- event_log_update_timestamp_handler: Entry\n"));  
-  DEBUGMSGTL((AGENT," TimeStamp is %d ", event_log_update_timestamp));
-  if (reqinfo->mode == MODE_GETNEXT) {
-	DEBUGMSGTL((AGENT," GETNEXT "));
-  }
-
-  switch (reqinfo->mode) {
-  case MODE_GET:
+  if (reqinfo->mode ==  MODE_GET)
     snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
 			     (u_char *) &event_log_update_timestamp,
 			     sizeof(event_log_update_timestamp));
     
-  }
-  
-  DEBUGMSGTL((AGENT,"--- event_log_upate_timestamp_handler: Exit\n"));
   return SNMP_ERR_NOERROR;
 }
 
@@ -1056,19 +1066,30 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests) {
 
-  DEBUGMSGTL((AGENT,"--- event_log_current_timestamp_handler: Entry\n"));  
-  DEBUGMSGTL((AGENT," TimeStamp is %d ", event_log_current_timestamp));
-  if (reqinfo->mode == MODE_GETNEXT) {
-	DEBUGMSGTL((AGENT," GETNEXT "));
-  }
-
-  switch (reqinfo->mode) {
-  case MODE_GET:
+  if (reqinfo->mode == MODE_GET)
     snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
 			     (u_char *) &event_log_current_timestamp,
 			     sizeof(event_log_current_timestamp));
   }
+
+  return SNMP_ERR_NOERROR;
+}
+
+
+
+int
+event_log_entries_handler(netsnmp_mib_handler *handler,
+			 netsnmp_handler_registration *reginfo,
+			 netsnmp_agent_request_info *reqinfo,
+			 netsnmp_request_info *requests) {
+
+
+  event_log_entries = CONTAINER_SIZE(cb.container);
+
+  if (reqinfo->mode == MODE_GET) 
+    snmp_set_var_typed_value(requests->requestvb, ASN_UNSIGNED,
+			     (u_char *) &event_log_entries,
+			     sizeof(event_log_entries));
   
-  DEBUGMSGTL((AGENT,"--- event_log_current_timestamp_handler: Exit\n"));
   return SNMP_ERR_NOERROR;
 }
