@@ -101,7 +101,7 @@ populate_rdr(SaHpiRptEntryT *rpt_entry,
    saHpiRdrTable_context	*rdr_context; 
 
    DEBUGMSGTL((AGENT,"\n\t--- populate_rdr: Entry.\n"));
-  if (getSaHpiSession(&session_id) == AGENT_ERR_NOERROR) {
+  if ((rc = getSaHpiSession(&session_id)) == AGENT_ERR_NOERROR) {
     rdr_index.len = RDR_INDEX_NR;
     next_rdr= SAHPI_FIRST_ENTRY;
     do {
