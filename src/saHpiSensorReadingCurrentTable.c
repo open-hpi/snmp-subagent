@@ -693,6 +693,8 @@ saHpiSensorReadingCurrentTable_get_value (netsnmp_request_info * request,
   netsnmp_variable_list *var = request->requestvb;
   saHpiSensorReadingCurrentTable_context *context =
     (saHpiSensorReadingCurrentTable_context *) item;
+
+ #ifdef GET_ROUTINE_CALLS_SNMP_GET
   SaHpiSensorReadingT reading;
   SaHpiSessionIdT session_id;
   int rc = AGENT_ERR_NOERROR;
@@ -723,6 +725,7 @@ saHpiSensorReadingCurrentTable_get_value (netsnmp_request_info * request,
 						 context->sensor_category,
 						 &reading, context);
     }
+#endif
   switch (table_info->colnum)
     {
 

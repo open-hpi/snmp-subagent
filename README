@@ -168,7 +168,6 @@ GENERAL RELEASE NOTES and WHAT'S NEW
     876241      The saHpiCtrlState OBJECT in the MIB defines wrong length ..
     876243      saHpiCtrlState object for type analog in description mention
     876290      The 'SaHpiCtrlAttributes' is missing info about Analog type.
-    876304      Make the MIB Sensor reading return dynamic data
     876402      saHpiCtrlBool should have a better name, like SaHpiCtrlIgnor
     876405      saHpiCtrlAttributes for the type 'stream' is missing data.
     876446      The description in the SaHpiCtrlAttributes is confusing.
@@ -204,3 +203,18 @@ If you have any bugs, issues, please visit the project
 website http://openhpi.sourceforge.net, or visit us
 in the #openhpi channel on FreeNode and OFTN network.
 
+
+---------------------------------------------------------
+DEFINES
+---------------------------------------------------------
+
+There is one #define declaration that you can enable during 
+compilation time. Refer to bug [ 876304 ] Make the MIB Sensor 
+reading return dynamic data, for more concrete information. 
+It basicly boils down to querying the 
+HPI-MIB::saHpiSensorReadingCurrentInterpreted
+table and getting the results instantly instead of waiting for
+the HPI Sub-agent to refresh its internal data per 
+"check_hpi_interval"  configuration option. Use 
+-DGET_ROUTINE_CALLS_SNMP_GET to enable this option. Be aware that 
+it does not work with the SNMP_BC plugin.
