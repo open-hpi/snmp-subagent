@@ -105,7 +105,7 @@ populate_control(SaHpiCtrlRecT *ctrl,
   DEBUGMSGTL((AGENT,"\n\t--- populate_ctrl. Exit\n"));
   return rc;
 }
-
+int
 set_table_state(saHpiCtrlTable_context *ctx) {
 
   SaHpiSessionIdT session_id;

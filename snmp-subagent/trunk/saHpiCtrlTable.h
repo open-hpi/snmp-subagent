@@ -17,8 +17,6 @@
  *
  * $Id$
  *
- * Yes, there is lots of code here that you might not use. But it is much
- * easier to remove code than to add it!
  */
 #ifndef SAHPICTRLTABLE_H
 #define SAHPICTRLTABLE_H
@@ -88,6 +86,13 @@ int  populate_control(SaHpiCtrlRecT *ctrl,
 		      oid *rdr_entry_oid, size_t rdr_entry_oid_len,
 		      oid *ctrl_oid, size_t *ctrl_oid_len);
   
+
+
+int  
+saHpiCtrlTable_modify_context(
+			     SaHpiCtrlRecT *entry,
+			     oid *rdr_entry, size_t rdr_entry_oid_len,
+			     saHpiCtrlTable_context *ctx);
 
 int 
 set_table_state(saHpiCtrlTable_context *ctx);
