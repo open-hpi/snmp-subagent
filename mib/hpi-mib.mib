@@ -192,7 +192,8 @@ SaHpiEntry ::= SEQUENCE {
 	saHpiResourceTagTextType	INTEGER,	
 	saHpiResourceTagTextLanguage	INTEGER,
 	saHpiResourceTag		OCTET STRING,
-	saHpiParamControl		INTEGER
+	saHpiParamControl		INTEGER,
+	saHpiClearEvents		RowStatus
 	}
 
 saHpiDomainID OBJECT-TYPE 
@@ -721,6 +722,17 @@ configurations, as well as resource-specific."
 	"Derieved from SA-HPI-A.01.01 page 72."
 	::={saHpiEntry 18}
 
+
+saHpiClearEvents OBJECT-TYPE
+	SYNTAX		RowStatus
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION
+	"Erase all of the system events and events for this particulate
+	resource. The tables that will be affected are
+	saHpiEvents and saHpiSystemEventsLogTable
+	"
+	::= {saHpiEntry 19}
 
 
 
@@ -5107,7 +5119,8 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiResourceTagTextType ,
 		saHpiResourceTagTextLanguage,
 		saHpiResourceTag,
-		saHpiParamControl
+		saHpiParamControl,
+		saHpiClearEvents
 	}
 	STATUS current
 	DESCRIPTION
