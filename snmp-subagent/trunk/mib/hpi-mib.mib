@@ -1953,7 +1953,10 @@ SaHpiResourceEntry ::= SEQUENCE {
         saHpiResourceTagTextLanguage            SaHpiTextLanguage,
         saHpiResourceTag                        SaHpiText,
         
-        saHpiResourceParmControl                       INTEGER
+        saHpiResourceParmControl                INTEGER,
+	
+	saHpiHotSwapResetAction     		INTEGER,
+	saHpiHotSwapPowerAction     	        INTEGER
 
         }
 
@@ -2325,6 +2328,71 @@ saHpiResourceParmControl OBJECT-TYPE
         REFERENCE
         "Derived from SAI-HPI-B.01.01 section 7.8.and 8.18"
 	::= {saHpiResourceEntry   20} 
+	
+saHpiHotSwapResetAction OBJECT-TYPE
+    SYNTAX      INTEGER {
+                    undefined(0),
+                    coldReset(1),
+                    warmReset(2),
+                    resetAssert(3),
+                    resetDeAssert(4)
+                }
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+        "This function gets the reset state of an entity, allowing the HPI SNMP Manager
+	 to determine if the entity is being held with its reset asserted. If 
+	 a resource manages multiple entities, this function will address the 
+	 entity which is identified in the RPT entry for the resource.
+
+		coldReset(1) and warmReset(2) are pulsed resets, 
+		
+	and are not valid values to be returned in saHpiResetAction. 
+
+        If the entity is not being held in reset (using resetAssert(3)), 
+	the appropriate value is resetDeAssert(4).
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+
+	REFERENCE
+        "Derived from SAI-HPI-B.01.01 sections 7.9, 7.9.1 and 7.9.2."
+    ::= { saHpiResourceEntry 21 }
+
+saHpiHotSwapPowerAction OBJECT-TYPE
+	SYNTAX      INTEGER {
+                    undefined(0),
+                    off(1),
+                    on(2),
+                    cycle(3)
+                }
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION
+	"This function gets the power state of an entity, allowing the HPI SNMP Manager 
+	to determine if the entity is currently powered on or off. If a resource 
+	manages multiple entities, this function will address the entity which is 
+	identified in the RPT entry for the resource.
+
+	cycle(3) is a pulsed power operation and is not a valid return for the 
+	power state.
+
+	This function controls the hardware power on a FRU entity regardless 
+	of what hot-swap state the resource is in. For example, it is legal 
+	(and may be desirable) to cycle power on the FRU even while it is in 
+	ACTIVE state in order to attempt to clear a fault condition. Similarly, 
+	a resource could be instructed to power on a FRU even while it is in 
+	INACTIVE state, for example, in order to run off-line diagnostics.
+	Not all resources supporting hot swap will necessarily support this function. 
+	In particular, resources that use the simplified hot swap model may not have
+	 the ability to control FRU power. This function may also be supported 
+	 for non-FRU entities if power control is available for those entities.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+        REFERENCE
+        "Derived from SAI-HPI-B.01.01 sections 7.10, 7.10.1 and 7.10.2."
+        ::= { saHpiResourceEntry 22 }
 
 
 
@@ -2448,8 +2516,6 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 	saHpiHotSwapPolicyCancel    	INTEGER,
 	saHpiHotSwapResourceRequest 	INTEGER,
 
-	saHpiHotSwapResetAction     	INTEGER,
-	saHpiHotSwapPowerAction     	INTEGER,
 	saHpiHotSwapRowPointer          RowPointer
 	}
 
@@ -2624,71 +2690,6 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
         "Derived from function prototype in the SAI-HPI-B.01.01 page 140-141."
     ::= { saHpiHotSwapEntry 6 }
 
-saHpiHotSwapResetAction OBJECT-TYPE
-    SYNTAX      INTEGER {
-                    undefined(0),
-                    coldReset(1),
-                    warmReset(2),
-                    resetAssert(3),
-                    resetDeAssert(4)
-                }
-    MAX-ACCESS  read-write
-    STATUS      current
-    DESCRIPTION
-        "This function gets the reset state of an entity, allowing the HPI SNMP Manager
-	 to determine if the entity is being held with its reset asserted. If 
-	 a resource manages multiple entities, this function will address the 
-	 entity which is identified in the RPT entry for the resource.
-
-		coldReset(1) and warmReset(2) are pulsed resets, 
-		
-	and are not valid values to be returned in saHpiResetAction. 
-
-        If the entity is not being held in reset (using resetAssert(3)), 
-	the appropriate value is resetDeAssert(4).
-
-	Note: Enumerated values are increased by one value compared to
-	SAI-HPI-B spec."
-
-    REFERENCE
-        "Derived from SAI-HPI-B.01.01 page 164."
-    ::= { saHpiHotSwapEntry 7 }
-
-saHpiHotSwapPowerAction OBJECT-TYPE
-	SYNTAX      INTEGER {
-                    undefined(0),
-                    off(1),
-                    on(2),
-                    cycle(3)
-                }
-	MAX-ACCESS  read-write
-	STATUS      current
-	DESCRIPTION
-	"This function gets the power state of an entity, allowing the HPI SNMP Manager 
-	to determine if the entity is currently powered on or off. If a resource 
-	manages multiple entities, this function will address the entity which is 
-	identified in the RPT entry for the resource.
-
-	cycle(3) is a pulsed power operation and is not a valid return for the 
-	power state.
-
-	This function controls the hardware power on a FRU entity regardless 
-	of what hot-swap state the resource is in. For example, it is legal 
-	(and may be desirable) to cycle power on the FRU even while it is in 
-	ACTIVE state in order to attempt to clear a fault condition. Similarly, 
-	a resource could be instructed to power on a FRU even while it is in 
-	INACTIVE state, for example, in order to run off-line diagnostics.
-	Not all resources supporting hot swap will necessarily support this function. 
-	In particular, resources that use the simplified hot swap model may not have
-	 the ability to control FRU power. This function may also be supported 
-	 for non-FRU entities if power control is available for those entities.
-
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B.01.01 spec."
-        REFERENCE
-                "Derived from SAI-HPI-B.01.01 page 168-169."
-        ::= { saHpiHotSwapEntry 8 }
-	
 saHpiHotSwapRowPointer OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
@@ -2696,7 +2697,7 @@ saHpiHotSwapRowPointer OBJECT-TYPE
         DESCRIPTION     
 	"OID value points the Entity Entry row, which represents 
 	this hot-swap row."
-        ::= { saHpiHotSwapEntry 9 }
+        ::= { saHpiHotSwapEntry 8 }
 
 
         
@@ -8772,7 +8773,9 @@ saHpiResourceGroup OBJECT-GROUP
 		saHpiResourceTagTextType,
 		saHpiResourceTagTextLanguage,
 		saHpiResourceTag,
-		saHpiResourceParmControl
+		saHpiResourceParmControl,
+		saHpiHotSwapResetAction,
+		saHpiHotSwapPowerAction     	
 	}
 	STATUS	current
 	DESCRIPTION
@@ -8796,8 +8799,6 @@ saHpiHotSwapGroup OBJECT-GROUP
 		saHpiHotSwapActionRequest,
 		saHpiHotSwapPolicyCancel,
 		saHpiHotSwapResourceRequest,
-		saHpiHotSwapResetAction,
-		saHpiHotSwapPowerAction,
 		saHpiHotSwapRowPointer
 	}
 	STATUS	current
