@@ -41,7 +41,16 @@
 <book>
         &chapter1;
 	&chapter2;
-	&chapter3;
+<!--	&chapter3; -->
+<chapter>
+  <title>End</title>
+    <sect1>
+        <title>Unfinished</title>
+	    <para>
+	This documentation is unfinshed.
+	        </para>
+	</sect1>
+</chapter>
 </book>
       
 
