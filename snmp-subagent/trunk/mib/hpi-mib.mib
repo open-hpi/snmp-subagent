@@ -4201,7 +4201,10 @@ saHpiCtrlAttributes	OBJECT-TYPE
 		 octet 15	- body length.
 		 octets 14-n	- default state (where max(n) is 270).
 	" 
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-A.01.01 pages 92, 93, 94."
 	::= {saHpiCtrlEntry 6}
+
 saHpiCtrlOem OBJECT-TYPE
 	SYNTAX		Unsigned32
         MAX-ACCESS      read-only
