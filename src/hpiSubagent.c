@@ -118,6 +118,7 @@ static const char *version =
 /*
  * Configuration options. Changed by config file.
  */
+
 #define REDISCOVER_COUNT_MAX 10;
 
 int send_traps = AGENT_FALSE;
@@ -132,18 +133,12 @@ int MAX_EVENT_ENTRIES = 512; // Max EVENT rows.
 static int do_syslog = AGENT_TRUE;
 static int do_fork = AGENT_FALSE;
 
-/*
-static int send_traps_on_startup = AGENT_FALSE;
-int alarm_interval = 10;
-MAX_EVENT_ENTRIES = 512;
-static int do_syslog = AGENT_TRUE;
-static int do_fork = AGENT_FALSE;
-int send_traps = AGENT_FALSE;
-*/
+
 /*
  * Internal prototypes
  */
 static void usage(char *applName);
+static RETSIGTYPE stop_server (int a);
 
 static RETSIGTYPE stop_server (int a)
 {
@@ -217,7 +212,7 @@ void hpiSubagent_parse_config_max_event (const char *token, char *cptr)
     }
 }
 
-void usage(char *applName)
+static void usage(char *applName)
 {
   printf("Usage: %s [OPTION]...\n", applName);
   printf("\n");
