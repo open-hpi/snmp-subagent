@@ -30,7 +30,6 @@
 
 <!ENTITY chapter1 SYSTEM "bookinfo.sgml">
 <!ENTITY chapter2 SYSTEM "introduction.sgml">
-<!ENTITY appendix SYSTEM "appendix.sgml">
 ]>
 
 <!--
@@ -41,7 +40,6 @@
 <book>
         &chapter1;
 	&chapter2;
-        &appendix;
 </book>
       
 

@@ -104,5 +104,6 @@ if test "x$THREAD_SAFE" = "xyes" ; then
 fi
 
 AC_CONFIG_FILES([Makefile 
+    docs/Makefile
     src/Makefile])
 AC_OUTPUT
