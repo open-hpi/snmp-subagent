@@ -262,8 +262,8 @@ read_textline (saHpiCtrlTable_context * ctx)
 	  return AGENT_ERR_OPERATION;
 	}
       // Copy the data in the columns.
-      ctx->saHpiCtrlTextType = state.StateUnion.Text.Text.DataType;
-      ctx->saHpiCtrlTextLanguage = state.StateUnion.Text.Text.Language;
+      ctx->saHpiCtrlTextType = state.StateUnion.Text.Text.DataType+1;
+      ctx->saHpiCtrlTextLanguage = state.StateUnion.Text.Text.Language+1;
       ctx->saHpiCtrlText_len =
 	(state.StateUnion.Text.Text.DataLength <
 	 SAHPI_TEXT_MAX) ? state.StateUnion.Text.Text.
@@ -321,7 +321,7 @@ set_ctrl_state (saHpiCtrlTable_context * ctx)
 	case SAHPI_CTRL_TYPE_DIGITAL:
 	  memcpy (&state.StateUnion.Digital,
 		  ctx->saHpiCtrlState, sizeof (SaHpiCtrlStateDigitalT));
-	  state.StateUnion.Digital = ntohl (state.StateUnion.Digital);
+	  state.StateUnion.Digital = ntohl (state.StateUnion.Digital)-1;
 	  break;
 	case SAHPI_CTRL_TYPE_DISCRETE:
 	  memcpy (&state.StateUnion.Discrete,
@@ -344,7 +344,7 @@ set_ctrl_state (saHpiCtrlTable_context * ctx)
 
 	  state.StateUnion.Text.Line = ctx->saHpiCtrlState[0];
 	  state.StateUnion.Text.Text.DataType = ctx->saHpiCtrlTextType - 1;
-	  state.StateUnion.Text.Text.Language = ctx->saHpiCtrlTextLanguage;
+	  state.StateUnion.Text.Text.Language = ctx->saHpiCtrlTextLanguage - 1;
 	  state.StateUnion.Text.Text.DataLength = ctx->saHpiCtrlText_len;
 	  // reserve2 made sure that the length of data is less (or equal)
 	  // than Text.Data can hold
@@ -446,17 +446,17 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	(entry->Ignore == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
       /*
-         entry->Type = SAHPI_CTRL_TYPE_TEXT;
+         entry->Type = SAHPI_CTRL_TYPE_TEXT+1;
          entry->TypeUnion.Text.MaxChars = 70;
          entry->TypeUnion.Text.MaxLines =2;
-         entry->TypeUnion.Text.Language = SAHPI_LANG_DUTCH;
-         entry->TypeUnion.Text.DataType = SAHPI_TL_TYPE_ASCII6;
+         entry->TypeUnion.Text.Language = SAHPI_LANG_DUTCH+1;
+         entry->TypeUnion.Text.DataType = SAHPI_TL_TYPE_ASCII6+1;
          entry->TypeUnion.Text.Default.Text.DataLength = 28;
          strncpy(entry->TypeUnion.Text.Default.Text.Data, "Grozny smok czeka na Ciebie!", 28);
 
          state->StateUnion.Text.Line = 2;
-         state->StateUnion.Text.Text.DataType = SAHPI_TL_TYPE_BCDPLUS;
-         state->StateUnion.Text.Text.Language = SAHPI_LANG_DUTCH;
+         state->StateUnion.Text.Text.DataType = SAHPI_TL_TYPE_BCDPLUS+1;
+         state->StateUnion.Text.Text.Language = SAHPI_LANG_DUTCH+1;
          strncpy(state->StateUnion.Text.Text.Data,"Potworny ogien jest pod Krakowem", 30);
          state->StateUnion.Text.Text.DataLength = 30;
          DEBUGMSGTL((AGENT,"[%s]\n",state->StateUnion.Text.Text.Data));
@@ -489,7 +489,7 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      memcpy (ctx->saHpiCtrlAttributes,
 		      &digital.Default, ctx->saHpiCtrlState_len);
 	      // SaHpiCtrlStateDigitalT
-	      state->StateUnion.Digital = htonl (state->StateUnion.Digital);
+	      state->StateUnion.Digital = htonl (state->StateUnion.Digital)+1;
 	      ctx->saHpiCtrlState_len = sizeof (SaHpiCtrlStateDigitalT);
 	      memcpy (ctx->saHpiCtrlState,
 		      &state->StateUnion.Digital, ctx->saHpiCtrlState_len);
@@ -547,9 +547,9 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      // Max line?
 	      ctx->saHpiCtrlAttributes[1] = text.MaxLines;
 	      // Language/
-	      ctx->saHpiCtrlAttributes[2] = text.Language;
+	      ctx->saHpiCtrlAttributes[2] = text.Language+1;
 	      // Text encoding
-	      ctx->saHpiCtrlAttributes[3] = text.DataType;
+	      ctx->saHpiCtrlAttributes[3] = text.DataType+1;
 	      // Line number
 	      ctx->saHpiCtrlAttributes[4] = text.Default.Line;
 	      // Data length
@@ -567,9 +567,9 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      //SaHpiCtrlStateTextT
 	      ctx->saHpiCtrlState[0] = state->StateUnion.Text.Line;
 	      ctx->saHpiCtrlState_len = sizeof (SaHpiTxtLineNumT);
-	      ctx->saHpiCtrlTextType = state->StateUnion.Text.Text.DataType;
+	      ctx->saHpiCtrlTextType = state->StateUnion.Text.Text.DataType+!;
 	      ctx->saHpiCtrlTextLanguage =
-		state->StateUnion.Text.Text.Language;
+		state->StateUnion.Text.Text.Language+1;
 	      ctx->saHpiCtrlText_len = state->StateUnion.Text.Text.DataLength;
 
 	      memcpy (ctx->saHpiCtrlText,
@@ -1052,7 +1052,7 @@ saHpiCtrlTable_set_reserve2 (netsnmp_request_group * rg)
 
 	case COLUMN_SAHPICTRLTEXTLANGUAGE:
 
-	  if (((*var->val.integer < 0) || (*var->val.integer > 136)))
+	  if (((*var->val.integer < 1) || (*var->val.integer > 137)))
 	    {
 	      rc = SNMP_ERR_BADVALUE;
 	    }
