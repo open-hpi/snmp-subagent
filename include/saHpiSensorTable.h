@@ -44,7 +44,7 @@ extern "C"
    */
 #define SAHPISENSORFACTORS_MAX 10
 #define SENSOR_EVENTS_SUPPORTED_MAX 255
-
+#define SENSOR_RANGE_FLAGS_MAX 255
   typedef struct saHpiSensorTable_context_s
   {
     netsnmp_index index;
@@ -111,6 +111,9 @@ extern "C"
 	 /** TruthValue = ASN_INTEGER */
     long saHpiSensorPercentage;
 
+  /** OCTETSTR = ASN_OCTET_STR */
+        unsigned char   saHpiSensorRangeFlags[SENSOR_RANGE_FLAGS_MAX];
+        long            saHpiSensorRangeFlags_len;
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
     unsigned long saHpiSensorOEM;
@@ -131,20 +134,26 @@ extern "C"
   /*
    * A mapping structure for reading values.
    */
+  /*
   typedef struct sensor_threshold_to_mib_s
   {
     SaHpiSensorReadingT *reading;
     SaHpiUint8T bit;
     int pos;
   } sensor_threshold_to_mib;
-
+  
   typedef struct sensor_reading_to_mib_s
   {
     SaHpiSensorReadingT *reading;
     SaHpiSensorRangeFlagsT flag;
     int pos;
   } sensor_reading_to_mib;
-
+  */
+  typedef struct sensor_range_flags_
+  {
+    SaHpiSensorRangeFlagsT flag;
+    const unsigned char* str;
+  } sensor_range_flags;
 
 /*************************************************************
  * function declarations
@@ -201,10 +210,11 @@ extern "C"
 #define COLUMN_SAHPISENSORFACTORS 17
 #define COLUMN_SAHPISENSORFACTORSLINEARIZATION 18
 #define COLUMN_SAHPISENSORPERCENTAGE 19
-#define COLUMN_SAHPISENSOROEM 20
-#define COLUMN_SAHPISENSORRDR 21
+#define COLUMN_SAHPISENSORRANGEFLAGS 20
+#define COLUMN_SAHPISENSOROEM 21
+#define COLUMN_SAHPISENSORRDR 22
 #define saHpiSensorTable_COL_MIN 1
-#define saHpiSensorTable_COL_MAX 21
+#define saHpiSensorTable_COL_MAX 22
 
 
 
