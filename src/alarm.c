@@ -20,11 +20,9 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
-#include <saHpiTable.h>
-#include <saHpiRdrTable.h>
-#include <saHpiEventTable.h>
-
 extern int alarm_interval;
+
+
 
 int
 init_alarm ()
@@ -49,10 +47,12 @@ do_alarm (unsigned int clientreg, void *clientarg)
   int rc;
   DEBUGMSGTL ((AGENT, "--- do_alarm: Entry\n"));
 
-  rc = populate_rpt ();
+  DEBUGMSGTL ((AGENT, "TODO: Call to populate_rpt() returns: %d.\n", rc));
+//  rc = populate_rpt ();
   DEBUGMSGTL ((AGENT, "Call to populate_rpt() returns: %d.\n", rc));
 
-  rc = purge_rpt ();
+  DEBUGMSGTL ((AGENT, "TODO: Call to purge_rpt(). Purged: %d RPT records.\n", rc));  
+//  rc = purge_rpt ();
   DEBUGMSGTL ((AGENT, "Call to purge_rpt(). Purged: %d RPT records.\n", rc));
   if (rc > 0) 
   	snmp_log (LOG_INFO,"Removed %d RPT record%s.\n", rc,
@@ -60,17 +60,20 @@ do_alarm (unsigned int clientreg, void *clientarg)
   // No need to call 'populate_rdr()' b/c populate_rpt() already did
   // that per each RPT. - The populate_rdr() marked used rows and
   // purge_rdr() will just erase non-marked rows.
-  rc = purge_rdr ();
+  DEBUGMSGTL ((AGENT, "TODO: Call to purge_rdr(). Purged: %d RDR records.\n", rc));  
+//  rc = purge_rdr ();
   DEBUGMSGTL ((AGENT, "Call to purge_rdr(). Purged: %d RDR records.\n", rc));
   if (rc > 0) 
   	snmp_log (LOG_INFO,"Removed %d RDR record%s.\n", rc,
 		(rc > 1) ? "s" : "" );
 
   // Get new events, if there are any.
-  rc = populate_event ();
+  DEBUGMSGTL ((AGENT, "TODO: Call to populate_event() returns: %d.\n", rc));  
+//  rc = populate_event ();
   DEBUGMSGTL ((AGENT, "Call to populate_event() returns: %d.\n", rc));
 
-  rc = purge_event ();
+  DEBUGMSGTL ((AGENT, "TODO: Call to purge_event(). Purged: %d EVENT rows.\n", rc));  
+//  rc = purge_event ();
   DEBUGMSGTL ((AGENT, "Call to purge_event(). Purged: %d EVENT rows.\n", rc));
   if (rc > 0)
   	snmp_log (LOG_INFO,"Removed %d Event record%s.\n", rc,
