@@ -20,6 +20,9 @@ AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([memset strncasecmp])
 
+# check for helper progs
+AC_PATH_PROGS(RPM, rpmbuild)
+
 # set up some vars
 HPI_PKG=openhpi-subagent
 AC_SUBST(HPI_PKG)
