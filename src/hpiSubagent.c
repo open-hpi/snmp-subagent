@@ -254,6 +254,7 @@ static void usage(char *applName)
 int
 main (int argc, char **argv)
 {
+	
 	  	int agentx_subagent = AGENT_TRUE;
 	  	int c;
 	  	int rc = 0;
@@ -264,6 +265,10 @@ main (int argc, char **argv)
 		
 	  	pid_t child;
 	  	/* change this if you want to be a SNMP master agent */
+	  	
+	  	debug_register_tokens (AGENT);
+        snmp_enable_stderrlog ();
+        snmp_set_do_debugging (1);
 
 	  	while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
 	    switch (c) {
@@ -347,9 +352,9 @@ main (int argc, char **argv)
 	hpiVer = saHpiVersionGet();
 	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));
 
-	DEBUGMSGTL ((AGENT, "saHpiSessionOpen\n"));
+	DEBUGMSGTL ((AGENT, "saHpiSessionOpen calling\n"));
 	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
-	
+	DEBUGMSGTL ((AGENT, "saHpiSessionOpen return\n"));
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns %s\n",
 			oh_lookup_error(rv)));
