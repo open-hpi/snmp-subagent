@@ -1812,8 +1812,7 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
 	the saHpiDomainAlarmSeverity has been set on) to a 
 	new instance of the conceptual row. The dis-allowed 
 	saHpiDomainAlarmSeverity values are minor(3), major(2), and
-	critical(3). When a row is created in the DAT it is also
-	duplicated in the User Event Table.
+	critical(3). 
 
 	- `destroy(6)', which is supplied by a management station
 	wishing to delete all of the instances associated with
@@ -2692,8 +2691,10 @@ saHpiEventEntryCount OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "The number of events present in this table.
 
-	saHpiEventCount represents the total of types currently in the 
-	system.  saHpiDomainEventCount represents the subset of events 
+	'saHpiEventCount' represents the total of all events types 
+	currently stored in the 'saHpiEventTable.' 
+	
+	saHpiDomainEventCount represents the subset of events 
 	that are Domain events.  The same relationship exists for 
 	ResourceEvent,  SensorEvent,  SensorEnableChangeEvent, 
 	HotSwapEvent,  WatchdogEvent,  HpiSwEvent,  OemEvent,  UserEvent."
