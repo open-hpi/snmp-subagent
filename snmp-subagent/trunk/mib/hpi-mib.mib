@@ -2862,6 +2862,9 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorCategory			INTEGER,
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsState			Unsigned32,
+	saHpiSensorStatus			Unsigned32,
+	saHpiSensorAssertEvents			Unsigned32,
+	saHpiSensorDeassertEvents		Unsigned32,
 	saHpiSensorIgnore			TruthValue,
 	saHpiSensorReadingFormats		Unsigned32,
 	saHpiSensorIsNumeric                   TruthValue,
@@ -3143,6 +3146,54 @@ saHpiSensorEventsState OBJECT-TYPE
 
         ::= {saHpiSensorEntry 5}
 
+saHpiSensorStatus OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"The sensor status structure is used to determine if sensor 	scanning 
+is enabled and if events are enabled. If events are enabled, the 
+structure will have valid data for the outstanding sensor event states. 
+The bit flags are:
+	SAHPI_SENSTAT_EVENTS_ENABLED 0x80
+	SAHPI_SENSTAT_SCAN_ENABLED   0x40
+	SAHPI_SENSTAT_BUSY           0x2"
+	::= {saHpiSensorEntry 6}
+
+saHpiSensorAssertEvents OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"This object provides the ability to get the disable or enable event 
+message generation status for individual sensor events. The sensor
+event states are relative to the event category specified by the
+sensor. See the saHpiEventCategory object for more information.
+
+A bit set to '1' in this object indicates that an event
+will be generated when the corresponding event state (look in 
+saHpiEventCategory for different event state bit masks) changes from
+de-asserted to asserted on that sensor. "
+	::= {saHpiSensorEntry 7}
+
+
+saHpiSensorDeassertEvents OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"This object provides the ability to get the disable or enable event 
+message generation status for individual sensor events. The sensor
+event states are relative to the event category specified by the
+sensor. See the saHpiEventCategory object for more information.
+
+A bit set to '1' in this object indicates that an event
+will be generated when the corresponding event state (look in 
+saHpiEventCategory for different event state bit masks) changes from
+asserted to de-asserted on that sensor. "
+	::= {saHpiSensorEntry 8}
+
+
 saHpiSensorIgnore OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
@@ -3150,7 +3201,7 @@ saHpiSensorIgnore OBJECT-TYPE
         DESCRIPTION     "Ignore sensor (entity not present, disabled, etc.)
 
 	IBM-KR: If this is 'false' then this sensor wouldn't show up at all, would it?"
-        ::= {saHpiSensorEntry 6}
+        ::= {saHpiSensorEntry 9}
 
 saHpiSensorReadingFormats OBJECT-TYPE
         SYNTAX          Unsigned32 (1..3)
@@ -3165,14 +3216,14 @@ saHpiSensorReadingFormats OBJECT-TYPE
  	SAHPI_SRF_EVENT_STATE 0x04
 
 	"
-        ::= {saHpiSensorEntry 7}
+        ::= {saHpiSensorEntry 10}
 
 saHpiSensorIsNumeric OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "If FALSE, rest of this structure is not meaningful."
-        ::= {saHpiSensorEntry 8}
+        ::= {saHpiSensorEntry 11}
 
 saHpiSensorSignFormat OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3186,7 +3237,7 @@ saHpiSensorSignFormat OBJECT-TYPE
 			 
 	This type defines what the sign format of the sensor's raw value is 
 	(1's complement, unsigned, etc.).  "
-        ::= {saHpiSensorEntry 9}
+        ::= {saHpiSensorEntry 12}
 
 saHpiSensorBaseUnits OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3286,7 +3337,7 @@ saHpiSensorBaseUnits OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Base units (meters, etc.). 
 	This is a list of all the sensor units supported by HPI."
-        ::= {saHpiSensorEntry 10}
+        ::= {saHpiSensorEntry 13}
 
 saHpiSensorModifierUnits OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3386,7 +3437,7 @@ saHpiSensorModifierUnits OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Modifier unit (second, etc.).  
 	This is a list of all the sensor units supported by HPI"
-        ::= {saHpiSensorEntry 11}
+        ::= {saHpiSensorEntry 14}
 
 saHpiSensorModifierUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3402,7 +3453,7 @@ saHpiSensorModifierUse OBJECT-TYPE
 	base unit == meter, modifier unit == seconds, and
 	 modifier unit use == basicOverModifier(1). 
 	The resulting unit would be meters per second."			
-        ::= {saHpiSensorEntry 12}
+        ::= {saHpiSensorEntry 15}
 
 saHpiSensorFactorsStatic OBJECT-TYPE
         SYNTAX          TruthValue
@@ -3411,7 +3462,7 @@ saHpiSensorFactorsStatic OBJECT-TYPE
         DESCRIPTION     " True if the sensor factors are static. If 
 			factors vary over sensor range, and are not
                         accessible through HPI."
-        ::= {saHpiSensorEntry 13}
+        ::= {saHpiSensorEntry 16}
 
 
 saHpiSensorFactors OBJECT-TYPE
@@ -3432,7 +3483,7 @@ saHpiSensorFactors OBJECT-TYPE
 	8		Accuracy Exponent (8-bit unsigned integer)
 	9		Result Exponent	(8-bit signed integer)
 	10		B Exponent	(8-bit signed integer) "	
-        ::= {saHpiSensorEntry 14}
+        ::= {saHpiSensorEntry 17}
 
 saHpiSensorFactorsLinearization OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3455,14 +3506,14 @@ saHpiSensorFactorsLinearization OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Linearization"
-        ::= {saHpiSensorEntry 15}
+        ::= {saHpiSensorEntry 18}
 
 saHpiSensorPercentage OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Is value a percentage."
-        ::= {saHpiSensorEntry 16}
+        ::= {saHpiSensorEntry 19}
 
 saHpiSensorRangeFlags OBJECT-TYPE
         SYNTAX          Unsigned32 (1..255)
@@ -3477,7 +3528,7 @@ saHpiSensorRangeFlags OBJECT-TYPE
 			 NORMAL_MIN 0x04
 			 NORMAL_MAX 0x02 
 			 NOMINAL    0x01"
-        ::= {saHpiSensorEntry 17}
+        ::= {saHpiSensorEntry 20}
 
 
 saHpiSensorRangeReadingValuesPresent OBJECT-TYPE
@@ -3522,7 +3573,7 @@ saHpiSensorRangeReadingValuesPresent OBJECT-TYPE
 			 EVENT_STATE 0x04
 
 	"
-        ::= {saHpiSensorEntry 18}
+        ::= {saHpiSensorEntry 21}
 
 saHpiSensorRangeReadingRaw OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0|20))
@@ -3534,7 +3585,7 @@ saHpiSensorRangeReadingRaw OBJECT-TYPE
 	32-bit unsigned integer. To determine which set of reading is active,
 	consult saHpiSensorRangeFlags."
 	
-        ::= {saHpiSensorEntry 19}
+        ::= {saHpiSensorEntry 22}
 
 saHpiSensorRangeReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0|165))
@@ -3564,7 +3615,7 @@ saHpiSensorRangeReadingInterpreted OBJECT-TYPE
 	16-bit unsigned integer, etc. Max length of data is 32 octets."
 
 
-        ::= {saHpiSensorEntry 20}
+        ::= {saHpiSensorEntry 23}
 
 saHpiSensorRangeReadingEventSensor OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0|15))
@@ -3702,7 +3753,7 @@ saHpiSensorRangeReadingEventSensor OBJECT-TYPE
 			 SAHPI_ES_STATE_12  0x1000
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000"
-        ::= {saHpiSensorEntry 21}
+        ::= {saHpiSensorEntry 24}
 
 
 saHpiSensorThresholdDefnIsThreshold OBJECT-TYPE
@@ -3711,7 +3762,7 @@ saHpiSensorThresholdDefnIsThreshold OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "True if the sensor supports thresholds. If false,
 	 rest of these objects are not meaningful."
-        ::= {saHpiSensorEntry 22}
+        ::= {saHpiSensorEntry 25}
 
 saHpiSensorThresholdDefnTholdCapabilities OBJECT-TYPE
         SYNTAX          Unsigned32(0..2)
@@ -3722,7 +3773,7 @@ saHpiSensorThresholdDefnTholdCapabilities OBJECT-TYPE
 	Raw (0x01) or in interpreted state (0x02).
 
 	If set to zero means data is undefined."
-        ::= {saHpiSensorEntry 23}
+        ::= {saHpiSensorEntry 26}
 
 saHpiSensorThresholdDefnReadThold OBJECT-TYPE
         SYNTAX          Unsigned32(0..128)
@@ -3742,7 +3793,7 @@ saHpiSensorThresholdDefnReadThold OBJECT-TYPE
 			 SAHPI_STM_LOW_HYSTERESIS 0x80 
 
 	If set to zero means data is undefined."
-        ::= {saHpiSensorEntry 24}
+        ::= {saHpiSensorEntry 27}
 
 saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
         SYNTAX          Unsigned32 (0..128)
@@ -3763,7 +3814,7 @@ saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
 
 
 	If set to zero means data is undefined."
-        ::= {saHpiSensorEntry 25}
+        ::= {saHpiSensorEntry 28}
 
 saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
         SYNTAX          Unsigned32 (0..128) 
@@ -3783,7 +3834,7 @@ saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
 			 SAHPI_STM_LOW_HYSTERESIS 0x80 
 
 	If set to zero means data is undefined."
-        ::= {saHpiSensorEntry 26}
+        ::= {saHpiSensorEntry 29}
 
 
 saHpiSensorThresholdRaw OBJECT-TYPE
@@ -3825,7 +3876,7 @@ saHpiSensorThresholdRaw OBJECT-TYPE
 	Furthermore if saHpiSensorThresholdDefnIsThreshold is set to
 	false(2) this object has undefined values.
 	"
-        ::= {saHpiSensorEntry 27}
+        ::= {saHpiSensorEntry 30}
 
 saHpiSensorThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0|264))
@@ -3884,21 +3935,21 @@ saHpiSensorThresholdInterpreted OBJECT-TYPE
 	Furthermore if saHpiSensorThresholdDefnIsThreshold is set to
 	false(2) this object has undefined values.
 	"
-        ::= {saHpiSensorEntry 28}
+        ::= {saHpiSensorEntry 31}
 
 saHpiSensorOEM OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " Reserved for OEM use."
-        ::= {saHpiSensorEntry 29}
+        ::= {saHpiSensorEntry 32}
 
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 30}
+	::= {saHpiSensorEntry 33}
 --
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -4967,6 +5018,9 @@ saHpiSensorGroup	OBJECT-GROUP
 		saHpiSensorCategory,
 		saHpiSensorEventsCategoryControl,
 		saHpiSensorEventsState,
+		saHpiSensorStatus,
+        	saHpiSensorAssertEvents,
+        	saHpiSensorDeassertEvents,
 		saHpiSensorIgnore,
 		saHpiSensorReadingFormats,
 		saHpiSensorIsNumeric,
