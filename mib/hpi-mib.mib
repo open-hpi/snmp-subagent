@@ -789,7 +789,9 @@ SaHpiEventEntry ::= SEQUENCE {
 	saHpiEventOemManufacturerIdT	Unsigned32,
 	saHpiEventOemEventData		OCTET STRING,
 
-	saHpiEventUserEventData		OCTET STRING
+	saHpiEventUserEventData		OCTET STRING,
+
+	saHpiEventDelete		TruthValue
 	}
 
 saHpiEventIndex OBJECT-TYPE
@@ -2007,6 +2009,12 @@ saHpiEventUserEventData OBJECT-TYPE
 			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
         ::= {saHpiEventEntry 45}
 
+saHpiEventDelete OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Set this to 'true(1)' to delete this entry."
+	::= {saHpiEventEntry 46}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -4662,7 +4670,8 @@ saHpiEventGroup OBJECT-GROUP
 		saHpiEventWatchdogUse,
 		saHpiEventOemManufacturerIdT,
 		saHpiEventOemEventData,
-		saHpiEventUserEventData
+		saHpiEventUserEventData,
+		saHpiEventDelete
 	}
 	STATUS current
 	DESCRIPTION
