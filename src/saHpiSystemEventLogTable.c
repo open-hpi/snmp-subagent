@@ -477,7 +477,6 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 	    {
 	      oem = event_entry->EventDataUnion.OemEvent;
 	      ctx->saHpiSystemEventLogOemManufacturerIdT = oem.MId;
-	// IBM-KR:htonl (oem.MId);
 	      memcpy (ctx->saHpiSystemEventLogOemEventData,
 		      oem.OemEventData, SAHPI_OEM_EVENT_DATA_SIZE);
 	      ctx->saHpiSystemEventLogOemEventData_len =

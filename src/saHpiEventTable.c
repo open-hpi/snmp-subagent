@@ -748,7 +748,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
       if (event_entry->EventType == SAHPI_ET_OEM)
 	{
 	  oem = event_entry->EventDataUnion.OemEvent;
-	  ctx->saHpiEventOemManufacturerIdT = oem.MId;//htonl (oem.MId);
+	  ctx->saHpiEventOemManufacturerIdT = oem.MId;
 	  memcpy (ctx->saHpiEventOemEventData,
 		  oem.OemEventData, SAHPI_OEM_EVENT_DATA_SIZE);
 	  ctx->saHpiEventOemEventData_len = SAHPI_OEM_EVENT_DATA_SIZE;

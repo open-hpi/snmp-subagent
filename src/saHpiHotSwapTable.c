@@ -233,7 +233,7 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
       else
 	// IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
 	// Should we make it 64-bit? Endian
-	ctx->saHpiHotSwapInsertTimeout = insert ; 
+	ctx->saHpiHotSwapInsertTimeout = insert_t; 
 
       // Extract timeout
       DEBUGMSGTL ((AGENT, "Calling saHpiAutoExtractTimeoutGet with %d\n",
