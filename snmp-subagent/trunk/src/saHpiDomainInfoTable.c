@@ -53,8 +53,12 @@ void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	SaErrorT rv;
 	SaHpiDomainInfoT domain_info;
 
-	rv = saHpiDomainInfoGet(sessionid, &domain_info);	
-
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);
+	if (rv != SA_OK) DEBUGMSGTL {
+		((AGENT, "saHpiDomainInfoGet rv = %d\n",rv);
+		return;
+	}
+		
 	DEBUGMSGTL ((AGENT, 
 		"WARNING: populate_saHpiDomainInfoTable: not implemented!"));
 }
