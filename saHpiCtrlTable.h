@@ -31,7 +31,7 @@ extern          "C" {
 #include <net-snmp/agent/table_array.h>
 #include <SaHpi.h>
 
-#define TEXT_MAX 255
+#define SAHPI_TEXT_MAX 255
 #define SAHPI_CTRL_STATE_MAX 7//sizeof(SaHpiCtrlStateStreamT)
 #define SAHPI_CTRL_ATTR_MAX 269
 #define POS_DIGITAL 0
@@ -71,7 +71,7 @@ extern          "C" {
         long            saHpiCtrlTextLanguage;
 
         /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiCtrlText[TEXT_MAX];
+        unsigned char   saHpiCtrlText[SAHPI_TEXT_MAX];
         long            saHpiCtrlText_len;
 
         /** RowPointer = ASN_OBJECT_ID */
@@ -105,6 +105,9 @@ int
 set_ctrl_state(saHpiCtrlTable_context *ctx);
 
 
+
+int 
+read_ctrl_state(saHpiCtrlTable_context *ctx);
 /*************************************************************
  * oid declarations
  */
