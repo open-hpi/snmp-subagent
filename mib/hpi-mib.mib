@@ -3184,7 +3184,7 @@ saHpiHotSwapTable OBJECT-TYPE
          entities in the managed platform.  The entries in this table are 
          straight from the HPI spec.  This table builds upon information present 
          in the Entity Table."
-    ::= { hpiResources 12 }
+    ::= { hpiResources 11 }
 
 
 saHpiHotSwapEntry OBJECT-TYPE
@@ -5032,394 +5032,273 @@ saHpiSensorThdNegHysteresisValue		OBJECT-TYPE
 -- ********************************************************************************
 -- *******************************************************************************/
 
-		
+hpiInventory	OBJECT IDENTIFIER ::= { hpiResources 8 }
+
 saHpiInventoryCount OBJECT-TYPE
 	SYNTAX		Counter32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"The number of inventory resource data records present on this system."
-	::= {hpiResources 8}
+	::= {hpiInventory 1}
 
 saHpiInventoryTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF SaHpiInventoryEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION	"Table defining entity inventory resource data records."
-	::= {hpiResources 9}
+	::= {hpiInventory 2}
+	
 saHpiInventoryEntry OBJECT-TYPE
 	SYNTAX		SaHpiInventoryEntry
 	MAX-ACCESS	not-accessible
 	STATUS		current
 	DESCRIPTION
-		"These structures are used to read and write inventory data to entity inventory
-		repositories within a resource."
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiInventoryEirId, saHpiInventoryIndex }
+	"These structures are used to read and write inventory data to entity inventory
+	repositories within a resource.
+		
+	All inventory data contained in an inventory data repository (IDR)
+	must be represented in the RDR repository"
+	
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiIdrId  }
 	::= {saHpiInventoryTable 1}
 
-
 SaHpiInventoryEntry ::= SEQUENCE {
-	saHpiInventoryEirId		Unsigned32,
-	saHpiInventoryIndex		Unsigned32,
-	saHpiInventoryRecordType	INTEGER,
-	saHpiInventoryValidity		INTEGER,
-	saHpiInventoryAttributes	OCTET STRING,
-	saHpiInventoryTextType		SaHpiTextType,
-	saHpiInventoryTextLanguage	SaHpiTextLanguage,
-	saHpiInventoryManufacturer	OCTET STRING,
-	saHpiInventoryProductName	OCTET STRING,
-	saHpiInventoryProductVersion	OCTET STRING,
-	saHpiInventoryModelNumber	OCTET STRING,
-	saHpiInventorySerialNumber	OCTET STRING,
-	saHpiInventoryPartNumber	OCTET STRING,
-	saHpiInventoryFileId		OCTET STRING,
-	saHpiInventoryAssetTag		OCTET STRING,
-	saHpiInventoryCustomField	OCTET STRING,
+	saHpiIdrId			Unsigned32,
+	saHpiIdrPersistent              TruthValue,
 	saHpiInventoryOEM		Unsigned32,
 	saHpiInventoryRDR		RowPointer
 	}
-
-saHpiInventoryEirId OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     
-	"Identifier for an entity inventory repository. The  default is
-	SAHPI_DEFAULT_INVENTORY_ID  0x00 "
-        ::= {saHpiInventoryEntry 1}
-
-saHpiInventoryIndex OBJECT-TYPE
+	
+saHpiIdrId OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	"Sub-index for the inventory data resource record.
-	This value enumerate n-inventory data resource records for
-	a record that has mulitple inventory entires (for the same 
-	saHpiInventoryEirId)."
-	::= {saHpiInventoryEntry 2}
+	DESCRIPTION
+	"Repository Identifier."
+	::= {saHpiInventoryEntry 1}
 
-saHpiInventoryRecordType OBJECT-TYPE
-        SYNTAX          INTEGER {
-				undefined (0),
-				internalUse(177),
-                                chassisInfo(178),
-                                boardInfo(179),
-                                productInfo(180),
-                                oem(193)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     " Inventory Record definitions"
-        ::= {saHpiInventoryEntry 3}
-
-saHpiInventoryValidity OBJECT-TYPE
-        SYNTAX          INTEGER{
-				undefined (0),
-				valid(1),
-				invalid(2),
-				dataOverflow(3)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Indication as to whether data is complete and valid. "
-        ::= {saHpiInventoryEntry 4}
-
-saHpiInventoryAttributes OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(8|12|260|1000))
+saHpiIdrPersistent OBJECT-TYPE 
+	SYNTAX		TruthValue
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
-  	"This attribute represents the current setting of the inventory.  It must
-         be interpreted in the context of saHpiInventoryRecordType.
-
-        internalUse  - Variable length opaque data. Max length
-		       of data is 1000 octets. 
-
-        chassisInfo  - Chassis informations are represented as follows:
-		octet 1-4		- determines the type of chassis:
-
-				other (2), unknown (3), desktop (4),
-				lowProfileDesktop (5), pizzaBox (6),
-				miniTower (7), tower (8), portable (9),
-				laptop (10), notebook (11), handheld (12),
-				dockingStation (13), allinone (14),
-				subnotebook (15), spaceSaving (16),
-				lunchBox (17), mainServer (18),
-				expansion (19), subchassis (20),
-				busExpansionChassis (21),
-				peripheralChassis (22), raidChassis (23),
-				rackmount (24)
-		octet 4-12	- manufacturing date/time represented
-			as 64-bit signed integer from 00:00:00, 
-			January 1, 1970, in a 64-bit signed integer. This format
-			is sufficient to represent times with nano-second resolution from the
-			year 1678 to 2262.
-			
-			The value -263, which is 0x8000000000000000, is used to indicate
-			unknownunspecified time.
-
-		The rest of information is provided in following objects
-
-		saHpiInventoryManufacturer
-		saHpiInventoryProductName
-		saHpiInventoryProductVersion
-		saHpiInventoryModelNumber
-		saHpiInventorySerialNumber
-		saHpiInventoryPartNumber
-		saHpiInventoryFileId
-		saHpiInventoryAssetTag
-		saHpiInventoryCustomField
-			 			
-	boardInfo- Textual information regarding the board.
-		octet 1-8	- manufacturing date/time represented
-			as 64-bit signed integer from 00:00:00, 
-			January 1, 1970, in a 64-bit signed integer. This format
-			is sufficient to represent times with nano-second resolution from the
-			year 1678 to 2262.
-			
-			The value -263, which is 0x8000000000000000, is used to indicate
-			unknownunspecified time.
-
-		The rest of information is provided in following objects
-
-		saHpiInventoryManufacturer
-		saHpiInventoryProductName
-		saHpiInventoryProductVersion
-		saHpiInventoryModelNumber
-		saHpiInventorySerialNumber
-		saHpiInventoryPartNumber
-		saHpiInventoryFileId
-		saHpiInventoryAssetTag
-		saHpiInventoryCustomField	 
-              
-
-		   
-	productInfo-The information of the product board represented as follows:
-
-		octet 1-8	- manufacturing date/time represented
-			as 64-bit signed integer from 00:00:00, 
-			January 1, 1970, in a 64-bit signed integer. This format
-			is sufficient to represent times with nano-second resolution from the
-			year 1678 to 2262.
-			
-			The value -263, which is 0x8000000000000000, is used to indicate
-			unknownunspecified time.
-
-		The rest of information is provided in following objects
-
-		saHpiInventoryManufacturer
-		saHpiInventoryProductName
-		saHpiInventoryProductVersion
-		saHpiInventoryModelNumber
-		saHpiInventorySerialNumber
-		saHpiInventoryPartNumber
-		saHpiInventoryFileId
-		saHpiInventoryAssetTag
-		saHpiInventoryCustomField
-			                 
-
-	oem	- OEM data represented as follows:
-		octet 1-4	- manufacturer ID in network byte order 
-		octet 5-n	- variable length data (defined by OEM).
-				  max(n) is 260."
-        ::= {saHpiInventoryEntry 5}
-
-saHpiInventoryTextType OBJECT-TYPE 
-	SYNTAX		SaHpiTextType
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION	"See Definition"
-	::= {saHpiInventoryEntry 6}
-
-saHpiInventoryTextLanguage OBJECT-TYPE
-	SYNTAX		SaHpiTextLanguage
-        MAX-ACCESS      read-write
-	STATUS          current
-	DESCRIPTION     "See Definition"
-	::= {saHpiInventoryEntry 7}
-
-saHpiInventoryManufacturer OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Manufacturer  of the inventory resource data record product.
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 8}
-
-saHpiInventoryProductName OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255)) 
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Product name of the inventory resource data record product.
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 9}
-
-saHpiInventoryProductVersion OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Product version of the inventory resource data record product.
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 10}
-
-saHpiInventoryModelNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Model number of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 11}
-
-saHpiInventorySerialNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Serial number of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 12}
-
-saHpiInventoryPartNumber OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Part number  of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 13}
-
-saHpiInventoryFileId OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	File id of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 14}
-
-saHpiInventoryAssetTag OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Asset tag of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 15}
-
-saHpiInventoryCustomField OBJECT-TYPE
-        SYNTAX          OCTET STRING(SIZE(0..255))
-        MAX-ACCESS      read-write
-        STATUS          current
-        DESCRIPTION     "
-	Custom field of the inventory resource data record product.
-
-	It must be interpreted in the context of saHpiInventoryRecordType to 
-	figure out if this information is related to  chassisInfo(177),
-        boardInfo(178), or oductInfo(179) of the inventory item.
-
-	Zero-length description means that the device does NOT have the means
-	to provide correct information (or simply the device not support 
-	this entry).
-
-	Changing this field in those cases may not alter the inventory 
-	information."
-        ::= {saHpiInventoryEntry 16}
+	"True indicates that updates to IDR are automatically and immediately 
+	persisted. False indicates that updates are notimmediately persisted; 
+	but optionally may be persisted via saHpiParmControl() function, as
+        defined in implementation documentation."
+	::= {saHpiInventoryEntry 2}
 
 saHpiInventoryOEM OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
-	"OEM value for the inventory record. This is
-	manufacturere' specific value."
-	::= {saHpiInventoryEntry 17}
+	"OEM value for the inventory record. This is manufacturere' 
+	specific value."
+	::= {saHpiInventoryEntry 3}
 
 saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 18}
+        ::= {saHpiInventoryEntry 4}
+	
+--
+--
+--
+
+saHpiInventoryDataAreaCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"The number of inventory resource area data records present on this system."
+	::= {hpiInventory 3}
+
+saHpiInventoryDataAreaTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiInventoryDataAreaEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"Table defining inventory data respoitory data area records."
+	::= {hpiInventory 4}
+	
+saHpiInventoryDataAreaEntry OBJECT-TYPE
+	SYNTAX		SaHpiInventoryDataAreaEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+	"These structures are used to read and write inventory data respository 
+	data area records."
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiIdrId, saHpiAreaId }
+	::= {saHpiInventoryDataAreaTable 1}
+
+
+SaHpiInventoryDataAreaEntry ::= SEQUENCE {
+	saHpiAreaId  			Unsigned32,
+	saHpiIdrAreaType	       	INTEGER,
+	saHpiIdrDataAreaReadOnly	TruthValue,
+	saHpiIdrNumDataArea		Unsigned32
+	}
+	
+saHpiAreaId OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Repository Identifier."
+	::= {saHpiInventoryDataAreaEntry 1}
+
+
+saHpiIdrAreaType	OBJECT-TYPE
+        SYNTAX          INTEGER {
+				undefined(0),
+				internalUse(177),
+				chassisInfo(178),
+				boardInfo(179),
+				productInfo(180),
+				oem(193),
+				unspecified(256)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	The type of Area.
+
+	Note: The enumerated named have +1 added as opposed to the 
+	SA HPI  spec for the same constants.  Inventory Data Area 
+	type definitions."
+	::= {saHpiInventoryDataAreaEntry 2}
+
+saHpiIdrDataAreaReadOnly OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"Describes if an area is read-only.  All area headers in a 
+	read-only IDR are flagged as read-only as well."
+	::= {saHpiInventoryDataAreaEntry 3}
+
+saHpiIdrNumDataArea OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of Fields contained in Area"
+	::= {saHpiInventoryDataAreaEntry 4}
+--
+--
+--
+
+saHpiInventoryFieldCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of inventory data repository field records."
+	::= {hpiInventory 5}
+
+saHpiInventoryFieldTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiInventoryFieldEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"Table defining inventory data repository field records."
+	::= {hpiInventory 6}
+	
+saHpiInventoryFieldEntry OBJECT-TYPE
+	SYNTAX		SaHpiInventoryFieldEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+       	"These structures are used to read and write inventory data repository 
+	field records."
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiAreaId, saHpiDataFieldId }
+	::= {saHpiInventoryFieldTable 1}
+
+SaHpiInventoryFieldEntry ::= SEQUENCE {
+	saHpiDataFieldId	Unsigned32,
+	saHpiIdrFieldType	INTEGER,
+	saHpiIdrFieldReadOnly	TruthValue,
+	saHpiIdrNumField	Unsigned32,
+	saHpiFieldTextType    	SaHpiTextType, 
+	saHpiFieldTextLanguage  SaHpiTextLanguage, 
+	saHpiFieldText  	SaHpiText
+	}
+	
+saHpiDataFieldId OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Repository Identifier."
+	::= {saHpiInventoryFieldEntry 1}
+	
+saHpiIdrFieldType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				undefined(0),
+				chassisType(1),
+				mfgDatetime(2),
+				manufacturer(3),
+				productName(4),
+				productVersion(5),
+				serialNumber(6),
+				partNumber(7),
+				fileId(8),
+				assetTag(9),
+				custom(10),
+				unspecified(256)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Inventory Data Field type definitions.
+	
+	Note: The enumerated named have +1 added as opposed to the 
+	SA HPI  spec for the same constants.  Inventory Data Area 
+	type definitions."
+	::= {saHpiInventoryFieldEntry 2}
+
+saHpiIdrFieldReadOnly OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	"Describes if an field is read-only.  All field headers in a 
+	read-only IDR are flagged as read-only as well."
+	::= {saHpiInventoryFieldEntry 3}
+
+saHpiIdrNumField OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+	"Number of Fields contained in Area."
+	::= {saHpiInventoryFieldEntry 4}
+	
+saHpiFieldTextType OBJECT-TYPE 
+	SYNTAX		SaHpiTextType
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Field Data. 
+	See Definition for SaHpiTextType for more details."
+	::= {saHpiInventoryFieldEntry 5}
+	
+saHpiFieldTextLanguage	OBJECT-TYPE
+	SYNTAX		SaHpiTextLanguage
+        MAX-ACCESS      read-write
+	STATUS          current
+	DESCRIPTION     "Field Data.
+	See Definition for SaHpiTextLanguage for more details."
+	::= {saHpiInventoryFieldEntry 6}
+
+saHpiFieldText	OBJECT-TYPE
+	SYNTAX		SaHpiText
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Field Data.
+	The type of date is specified
+	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+	::= {saHpiInventoryFieldEntry 7}
+
 --
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -5436,14 +5315,14 @@ saHpiWatchdogCount OBJECT-TYPE
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"The number of watchdogs present on this system."
-	::= {hpiResources 10}
+	::= {hpiResources 9}
 
 saHpiWatchdogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION	"Table of watchdog  resource data records."
-        ::= {hpiResources 11}
+        ::= {hpiResources 10}
 
 saHpiWatchdogEntry OBJECT-TYPE
         SYNTAX          SaHpiWatchdogEntry
@@ -6115,22 +5994,6 @@ saHpiCtrlGroup OBJECT-GROUP
 saHpiInventoryGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiInventoryCount,
-		saHpiInventoryEirId,
-		saHpiInventoryIndex,
-		saHpiInventoryRecordType,
-		saHpiInventoryValidity,
-		saHpiInventoryAttributes,
-		saHpiInventoryTextType ,
-		saHpiInventoryTextLanguage,
-		saHpiInventoryManufacturer,
-		saHpiInventoryProductName,
-		saHpiInventoryProductVersion,
-		saHpiInventoryModelNumber,
-		saHpiInventorySerialNumber,
-		saHpiInventoryPartNumber,
-		saHpiInventoryFileId,
-		saHpiInventoryAssetTag,
-		saHpiInventoryCustomField,
 		saHpiInventoryRDR
 	}
 	STATUS current
