@@ -28,7 +28,7 @@
 #include <saHpiWatchdogTable.h>
 #include <hpiSubagent.h>
 #include <alarm.h>
-
+#include <stdio.h>
 /*
  * Internal data for the sub-agent.
  */
@@ -86,11 +86,16 @@ calculate_hash_value(void *data, int len) {
 
   register long hash = 0;
   register int i = 0;
-
+  
   // WARNING. Can seg fault!
   // Pretty simple. Can also roll-over back to zero.
-  for ( ; i < len; i++, hash+= ((char *)data)[i]);
 
+  //DEBUGMSGTL((AGENT,"HASH DATA:\n"));
+  for ( ; i < len; i++, hash+= ((char *)data)[i]) ;
+    //{
+    //printf("%X",((char *)data)[i]);
+    //}
+    //DEBUGMSGTL((AGENT,"HASH END\n"));
   return hash;
 }
 
