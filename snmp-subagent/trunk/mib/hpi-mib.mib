@@ -6036,12 +6036,9 @@ saHpiSensorThdLowCriticalIsReadable     OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read. 
-        If set to 'false(2)' the saHpiSensorThdLowCriticalRaw is set to
-        '-1' and saHpiSensorThdLowCriticalInterpreted is set to zero-length
-        string."
+        "Defines if sensor threshold information can be read."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2, 7.2.6, and 7.2.7."
         ::= {saHpiSensorThdLowCriticalEntry 1}
 
 saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
@@ -6049,13 +6046,9 @@ saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to. 
-
-        If set to 'false(2)' writting to saHpiSensorThdLowCriticalRaw 
-        and saHpiSensorThdLowCriticalInterpreted will not change the
-        threshold values."
+        "Defines if sensor threshold information can be written to." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 spec page 90 and 91."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdLowCriticalEntry 2}
 
 saHpiSensorThdLowCriticalType           OBJECT-TYPE
