@@ -492,7 +492,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
 	    {
-	      ctx->saHpiEventSensorTriggerReadingRaw = htonl (reading.Raw);
+	      ctx->saHpiEventSensorTriggerReadingRaw = reading.Raw;//IBM-KR:htonl (reading.Raw);
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 	    {
@@ -545,7 +545,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
 
 	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
 	    {
-	      ctx->saHpiEventSensorTriggerThresholdRaw = htonl (reading.Raw);
+	      ctx->saHpiEventSensorTriggerThresholdRaw = reading.Raw;//htonl (reading.Raw);
 	    }
 	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
 	    {
@@ -748,7 +748,7 @@ saHpiEventTable_modify_context (unsigned long entry_id,
       if (event_entry->EventType == SAHPI_ET_OEM)
 	{
 	  oem = event_entry->EventDataUnion.OemEvent;
-	  ctx->saHpiEventOemManufacturerIdT = htonl (oem.MId);
+	  ctx->saHpiEventOemManufacturerIdT = oem.MId;//htonl (oem.MId);
 	  memcpy (ctx->saHpiEventOemEventData,
 		  oem.OemEventData, SAHPI_OEM_EVENT_DATA_SIZE);
 	  ctx->saHpiEventOemEventData_len = SAHPI_OEM_EVENT_DATA_SIZE;
