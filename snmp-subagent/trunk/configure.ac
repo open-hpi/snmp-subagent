@@ -20,6 +20,9 @@ AC_HEADER_STDC
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS([memset strncasecmp])
 
+# set up some vars
+HPI_PKG=openhpi-subagent
+AC_SUBST(HPI_PKG)
 
 # Checks for header files.
 AC_CHECK_HEADERS([netinet/in.h])
@@ -44,12 +47,7 @@ AC_CHECK_LIB([openhpi], [saHpiInitialize],
 
 OH_CHECK_NETSNMP
 
-if test "x" != "x$have_netsnmp"; then
-    SNMPLIBS=`net-snmp-config --agent-libs`
-else
-    OH_CHECK_FAIL(net-snmp,net-snmp-devel,http://net-snmp.sourceforge.net/,
-                Can not build HPI agent without net-snmp)
-fi
+AC_SUBST(SNMPCONFDIR)
 
 dnl 
 dnl This code was borrowed from linux-ha configure.in file
@@ -98,12 +96,16 @@ if test "x$THREAD_SAFE" = "xyes" ; then
         CFLAGS="$CFLAGS -D_GNU_SOURCE -D_REENTRANT -fexceptions"
 fi
 
-LIBS="$LIBS $SNMPLIBS $HPI_LIBS -lm"
+LIBS="$LIBS $SNMPALIBS $HPI_LIBS -lm"
 if test "x$THREAD_SAFE" = "xyes" ; then
         LIBS="$LIBS -lpthread"
 fi
 
+# pass this down to the spec file
+AC_SUBST(ac_configure_args)
+
 AC_CONFIG_FILES([Makefile 
     docs/Makefile
-    src/Makefile])
+    src/Makefile
+    openhpi-subagent.spec])
 AC_OUTPUT

@@ -40,8 +40,6 @@ RPMDIR			=$(HOME)/rpms
 RPMSRC	=$(DESTDIR)$(RPMDIR)/SRPMS/$(PACKAGE)-$(VERSION)-$(RPMREL).src.rpm
 RPM386	=$(DESTDIR)$(RPMDIR)/RPMS/i386/$(PACKAGE)-$(VERSION)-$(RPMREL).i386.rpm
 
-EXTRA_DIST		= 
-
 AUTOMAKE_OPTIONS	= foreign
 
 MAINTAINERCLEANFILES 	= Makefile.in aclocal.m4 configure config.guess config.sub \
@@ -49,9 +47,9 @@ MAINTAINERCLEANFILES 	= Makefile.in aclocal.m4 configure config.guess config.sub
 			stamp-h.in cscope.files cscope.out $(distdir).tar.gz 
 MOSTLYCLEANFILES	= tags
 
-SUBDIRS			= src 
+SUBDIRS			= src docs
 
-DIST_SUBDIRS = src 
+DIST_SUBDIRS = src docs
 
 DISTCHECK_CONFIGURE_FLAGS = --with-initdir=prefix
 
@@ -61,7 +59,10 @@ ALLSOURCES = $(shell \
 
 includedir=$(base_includedir)/openhpi
 
-include_HEADERS	= $(shell find include -name '*.h')
+EXTRA_DIST	= $(shell find include -name '*.h') \
+	hpiSubagent.conf mib/hpi-mib.mib
+
+
 
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
