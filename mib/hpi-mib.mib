@@ -7218,10 +7218,11 @@ saHpiWatchdogRunning OBJECT-TYPE
                                 Note that there is a race condition possible
                                 with this setting, so it should be used with
                                 care.
-                        FALSE = Watchdog is stopped. After this object 
-                                is set, a subsequent read on this object
-                                is required to start the timer.
-        "
+                        FALSE = Watchdog is stopped. After this object is called,
+				a subsequent write to saHpiWatchdogTimerReset 
+				is required to start the timer."				
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 7.5 and 7.5.3."				
         ::= {saHpiWatchdogEntry 3}
 
 saHpiWatchdogTimerUse OBJECT-TYPE
