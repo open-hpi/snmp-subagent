@@ -107,11 +107,12 @@ hpiB MODULE-IDENTITY
         "HPI MIB for SAF-HPI B."
         ::= { enterprises 18568 1 1 1 6}
 
-hpiDomain       OBJECT IDENTIFIER ::= { hpiB 1 }
-hpiEvents       OBJECT IDENTIFIER ::= { hpiB 2 }
-hpiResources    OBJECT IDENTIFIER ::= { hpiB 3 }
-hpiNotifications OBJECT IDENTIFIER ::= { hpiB 4 }
-hpiMIBCompliances OBJECT IDENTIFIER ::= { hpiB 5 }
+hpiAdministration	OBJECT IDENTIFIER ::= { hpiB 1 }
+hpiDomain       	OBJECT IDENTIFIER ::= { hpiB 2 }
+hpiEvents       	OBJECT IDENTIFIER ::= { hpiB 3 }
+hpiResources    	OBJECT IDENTIFIER ::= { hpiB 4 }
+hpiNotifications 	OBJECT IDENTIFIER ::= { hpiB 5 }
+hpiMIBCompliances 	OBJECT IDENTIFIER ::= { hpiB 6 }
 
 -- The hotswap table:
 hpiHotSwap	OBJECT IDENTIFIER ::= { hpiDomain 11 }
@@ -1063,6 +1064,18 @@ version 1 of the GUID format, with a 3-bit variant field of
 	"Derieved from SAI-HPI-B.01.01 spec, pg 186."
         SYNTAX          OCTET STRING(SIZE(0..15))
 
+-- *************************************
+-- **
+-- **   Administration
+-- **
+-- *************************************
+saHpiHpiVersion OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+        "This columnar node provides the version of HPI this MIB is based on."
+        ::= { hpiAdministration 1 } 
 
 -- *************************************
 -- **
