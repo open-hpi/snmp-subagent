@@ -5278,6 +5278,286 @@ saHpiCtrlStreamRDR OBJECT-TYPE
         DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
         ::= {saHpiCtrlStreamEntry 10}
 
+saHpiCtrlTextEntryCount OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"The number of text control records in the system."
+        ::= {hpiControl 10}
+
+saHpiCtrlTextTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiCtrlTextEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     
+	"A table of text Control Resource Data Records and its states."
+        ::= {hpiControl 11}
+                
+
+saHpiCtrlTextEntry OBJECT-TYPE
+        SYNTAX          SaHpiCtrlTextEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+    "Definition of the text control resource data record and its states table."
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
+        ::= {saHpiCtrlTextTable 1}
+
+
+SaHpiCtrlTextEntry ::= SEQUENCE {
+        saHpiCtrlTextOutputType			SaHpiCtrlOutputType,
+
+        saHpiCtrlTextMode     			SaHpiCtrlMode,        
+
+        saHpiCtrlTextIsReadOnly 		TruthValue,
+
+        saHpiCtrlTextIsWriteOnly		TruthValue,
+
+		saHpiCtrlTextMaxChars			Unsigned8,
+		saHpiCtrlTextMaxLines			Unsigned8,
+
+		saHpiCtrlTextLanguage			SaHpiTextLanguage,
+		saHpiCtrlTextType				SaHpiTextType,
+		saHpiCtrlTextDefaultLine		Unsigned8,
+		saHpiCtrlTextDefault			SaHpiText,
+
+		saHpiCtrlTextLine				Unsigned8,
+		saHpiCtrlTextState				SaHpiText,
+
+        saHpiCtrlTextOem              Unsigned32, 
+   
+        saHpiCtrlTextRDR              RowPointer
+}
+
+
+saHpiCtrlTextOutputType OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlOutputType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Refer to the textual convention for more details on the
+	enumerations.
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 1}
+
+
+saHpiCtrlTextMode OBJECT-TYPE 
+        SYNTAX          SaHpiCtrlMode
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION 
+	   
+	"If this columnar node is written to when the saHpiCtrlTextIsReadOnly 
+	flag is TRUE the an SNMP error of notWritable is returned.  
+
+	This object describes how the control is managed.  The control may 
+	be managed automatically by the implementation (auto mode).  Or it 
+	may be managed by the HPI User (manual mode).  Some controls allow 
+	their modes to be changed, allowing the HPI User to determine if they 
+	will manage the control, or relinquish the management to the 
+	implementation.  But, other controls do not allow the mode to be 
+	changed.  These static-mode controls are indicated with the 
+	saHpiCtrlReadOnly flag set as part of the default control mode.
+	
+	When the mode is set to auto(1), the state input is 
+	ignored. Ignored state inputs are not checked by the implementation. 
+	The CtrlState parameter must be of the correct type for the specified 
+	control.  
+
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 spec."
+	
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 2}
+        
+saHpiCtrlTextIsReadOnly OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 3}
+        
+saHpiCtrlTextIsWriteOnly  OBJECT-TYPE 
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Indicates if Control is write-only"
+		REFERENCE 		
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 4}
+
+saHpiCtrlTextMaxChars          OBJECT-TYPE
+        SYNTAX          Unsigned8 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+    "This object represents the maximum chars per line.
+
+	If the saHpiCtrlTextType is unicode(1), there will 
+	be two bytes required for each character.  This field 
+	reports the number of characters per line- not the 
+	number of bytes.  saHpiCtrlTextMaxChars must not be
+	larger than the number of characters that can be 
+	placed in a saHpiTextState columnar node." 
+
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 5}
+
+saHpiCtrlTextMaxLines         OBJECT-TYPE
+        SYNTAX          Unsigned8
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This object represents the maximum number of line of the 
+	text control." 
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 6}
+
+saHpiCtrlTextLanguage          OBJECT-TYPE
+        SYNTAX          SaHpiTextLanguage 
+        MAX-ACCESS      read-only 
+        STATUS          current
+        DESCRIPTION     
+    "This attribute represents the default text language setting 
+	of the control text. " 
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 7}
+
+saHpiCtrlTextType OBJECT-TYPE
+        SYNTAX          SaHpiTextType
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"This represents the current text setting of the control."
+    	REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 8}
+
+saHpiCtrlTextDefaultLine OBJECT-TYPE
+        SYNTAX         	Unsigned8 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+        "This object represents the default line number of text represented in 
+	saHpiCtrlTextDefault object.
+
+	If the line is 255, then saHpiCtrlTextDefault columnar node will 
+	containt the entire text of the control, or as much of it as will fit in a single 
+	columnar node. This value will consist of the text of all the lines concatenated, 
+	using the maximum number of characters for each line (no trimming of trailing blanks). 
+	
+	Note that depending on the data type and language, the text may be encoded in 2-byte 
+	Unicode, which requires two bytes of data per character. 
+
+	Note that the number of lines and columns in a text control can be obtained from 
+	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. "
+
+		REFERENCE
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+		::= {saHpiCtrlTextEntry 9}
+
+saHpiCtrlTextDefault	OBJECT-TYPE
+		SYNTAX		SaHpiText
+		MAX-ACCESS	read-only
+		STATUS		current
+		DESCRIPTION
+	"The default text of a control text resource."
+		REFERENCE 
+	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+		::= {saHpiCtrlTextEntry 10}
+
+
+saHpiCtrlTextLine OBJECT-TYPE
+		SYNTAX		Unsigned8
+		MAX-ACCESS	read-write
+		STATUS		current
+		DESCRIPTION
+		"The current line number of text. Refer to saHpiCtrlTextState for usage examples.
+
+	If the line number passed in is 255, then saHpiCtrlTextState columnar node will 
+	containt the entire text of the control, or as much of it as will fit in a single 
+	columnar node. This value will consist of the text of all the lines concatenated, 
+	using the maximum number of characters for each line (no trimming of trailing blanks). 
+	
+	Note that depending on the data type and language, the text may be encoded in 2-byte 
+	Unicode, which requires two bytes of data per character. 
+
+	Note that the number of lines and columns in a text control can be obtained from 
+	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. "
+
+		REFERENCE
+	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+		::= {saHpiCtrlTextEntry 11}
+
+saHpiCtrlTextState OBJECT-TYPE
+		SYNTAX		SaHpiText
+		MAX-ACCESS	read-write
+		STATUS		current
+		DESCRIPTION
+		"This columnar object can be used to write to the text controls. To do so, first 
+	set the line number in saHpiCtrlTextLine and then write to this object. 
+
+	The first line of the text control is line number  1 . If less than a full line of 
+	data is written, the control will clear all spaces beyond those written on the line. 
+	Thus writing a zero-length string will clear the addressed line. It is also possible 
+	to include more characters in the text passed in this columnar node than will fit on 
+	one line; in this case, the control will wrap to the next line (still clearing the 
+	trailing characters on the last line written). Thus, there are two ways to write 
+	multiple lines to a text control: 
+		
+		(a) set saHpiCtrlTextState repeatedly for each line, or 
+		(b) set saHpiCtrlTextState once and send more characters than will fit on one line.
+
+	 An HPI SNMP Manager should not assume any  cursor positioning  characters are 
+	available to use, but rather should always write full lines and allow  wrapping  to 
+	occur. 
+
+	When calling this  object, an HPI SNMP Manager may set the line number to 
+	255; in this case, the entire control will be cleared, and the data will be written 
+	starting on line 1. (This is different from simply writing at line 1, which only 
+	alters the lines written to.) This feature may be used to clear the entire control, 
+	which can be accomplished by setting: saHpiCtrlTextLine = 255; saHpiCtrlState = '';
+
+	Note that the number of lines and columns in a text control can be obtained from 
+	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. "
+
+		REFERENCE 
+	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+		::= {saHpiCtrlTextEntry 12}
+
+saHpiCtrlTextOem OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
+        ::= {saHpiCtrlTextEntry 13}
+
+
+saHpiCtrlTextRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     
+	"Pointer to RDR for this Control Resource Data Record."
+        ::= {saHpiCtrlTextEntry 14}
+
 
 
 --/*******************************************************************************
@@ -6382,7 +6662,7 @@ saHpiSensorThdUpMajorIsReadable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be read". 
+        "Defines if sensor threshold information can be read" 
         REFERENCE
         "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6. "
         ::= {saHpiSensorThdUpMajorEntry 1}
@@ -8095,6 +8375,28 @@ saHpiCtrlStreamGroup OBJECT-GROUP
 		"saHpiCtrlStream table."
 	::= { hpiMIBCompliances 24}
 
+saHpiCtrlTextGroup OBJECT-GROUP
+	OBJECTS {
+        saHpiCtrlTextOutputType,
+        saHpiCtrlTextMode,
+        saHpiCtrlTextIsReadOnly,
+        saHpiCtrlTextIsWriteOnly,
+		saHpiCtrlTextMaxChars,
+		saHpiCtrlTextMaxLines,
+		saHpiCtrlTextLanguage,
+		saHpiCtrlTextType,
+		saHpiCtrlTextDefaultLine,
+		saHpiCtrlTextDefault,
+		saHpiCtrlTextLine,
+		saHpiCtrlTextState,
+        saHpiCtrlTextOem, 
+        saHpiCtrlTextRDR
+	}
+	STATUS	current
+	DESCRIPTION
+		"saHpiCtrlText table."
+	::= { hpiMIBCompliances 25}
+
 saHpiSensorGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiSensorType,
@@ -8412,6 +8714,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
 		saHpiCtrlDiscreteGroup,
 		saHpiCtrlAnalogGroup,
 		saHpiCtrlStreamGroup,
+		saHpiCtrlTextGroup,
 		saHpiSensorGroup,
 		saHpiSensorReadingCurrentGroup,
 		saHpiSensorReadingMaxGroup,
