@@ -26,13 +26,18 @@
 #include <saHpiEventTable.h>
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiHotSwapTable.h>
+#include <saHpiWatchdogTable.h>
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
 static oid             saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
 static size_t          saHpiEventTable_oid_len = OID_LENGTH(saHpiEventTable_oid);
 
-/*
+static oid saHpiSensorNotification_oid[] = { hpiNotifications_OID, 6, 0 };
+  
+static oid      saHpiHotSwapNotification_oid[] =
+        { 1, 3, 6, 1, 3, 90, 4, 2, 0 };
+
 static oid      saHpiWatchdogNotification_oid[] =
         { 1, 3, 6, 1, 3, 90, 4, 3, 0 };
    
@@ -41,21 +46,61 @@ static oid      saHpiUserNotifications_oid[] =
     
 static oid      saHpiOEMNotifications_oid[] =
         { 1, 3, 6, 1, 3, 90, 4, 4, 0 };
-    
-static oid      saHpiResourceDataRecordNotifications_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 7, 0 };
- 
-static oid      saHpiHotSwapNotification_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 2, 0 };
-   
-static oid      saHpiResourceNotifications_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 6, 0 };
-*/    
+
+
+static trap_vars saHpiSensorNotification[]  = {
+  {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTCATEGORY, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTSENSORNUM, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSENSORTYPE , ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPISENSOROPTIONALDATA, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTTRIGGERREADINGRAW, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTOEM, ASN_UNSIGNED, NULL, 0}};
+
+static trap_vars saHpiHotSwapNotification[] = {
+  {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTHOTSWAPSTATE, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE , ASN_INTEGER, NULL, 0}};
+// IBM-KR: TODO add an OID to the HotSwap row?
+  
+static trap_vars saHpiWatchdogNotification[] = {
+  {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTWATCHDOGNUM, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTWATCHDOGACTION, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTWATCHDOGPRETIMERACTION, ASN_INTEGER, NULL,0},
+  {COLUMN_SAHPIEVENTWATCHDOGUSE, ASN_INTEGER, NULL, 0}};
+// IBM-KR: TODO add an OID to the Watchdog row? 
+
+static trap_vars saHpiOEMNotification[] = {  
+  {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0}, 
+  {COLUMN_SAHPIEVENTOEMMANUFACTURERIDT, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTOEMEVENTDATA, ASN_OCTET_STR, NULL, 0}};
+
+static trap_vars saHpiUserNotification[] = {
+  {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0}, 
+  {COLUMN_SAHPIEVENTUSEREVENTDATA, ASN_OCTET_STR, NULL, 0}};
+  
+
+
 static oid      saHpiEventCount_oid[] =
         { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
 
 static u_long event_count = 0;
  
+static int
+saHpiEventTable_modify_context(SaHpiSelEntryIdT,
+			       SaHpiEventT *,
+			       SaHpiRptEntryT *t,
+			       SaHpiRdrT *,
+			       saHpiEventTable_context *ctx,
+			       trap_vars *var);
+
+
 int
 populate_event(SaHpiSelEntryIdT entry_id,
 	       SaHpiEventT *event_entry,
@@ -71,6 +116,7 @@ populate_event(SaHpiSelEntryIdT entry_id,
   netsnmp_index event_index;
   saHpiEventTable_context *event_context;
   oid column[2];
+  trap_vars *trap = NULL;
 
   DEBUGMSGTL((AGENT,"\t --- populate_event. Entry\n"));  
 
@@ -114,12 +160,15 @@ populate_event(SaHpiSelEntryIdT entry_id,
 				       event_entry,
 				       rpt_entry,
 				       rdr_entry,
-				       event_context)
+				       event_context,
+				       trap)
 	    == AGENT_NEW_ENTRY) {
 
       CONTAINER_INSERT(cb.container, event_context);
       event_count = CONTAINER_SIZE(cb.container);
       // traps
+      // IBM-KR: TODO Send notifiation
+      
     }
   }
   DEBUGMSGTL((AGENT,"\t --- populate_event. Exit\n"));
@@ -131,7 +180,8 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
 			       SaHpiEventT *event_entry,
 			       SaHpiRptEntryT *rpt_entry,
 			       SaHpiRdrT *rdr_entry,
-			       saHpiEventTable_context *ctx) {
+			       saHpiEventTable_context *ctx,
+			       trap_vars *var) {
 
   long hash;
   SaHpiSensorEventT sensor;
@@ -270,7 +320,8 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
       
        
       reading = sensor.TriggerThreshold;
-      // 
+   
+      
       if (reading.ValuesPresent & SAHPI_SRF_RAW) {
 	ctx->saHpiEventTriggerThresholdRaw = htonl(reading.Raw);
       }
@@ -321,6 +372,9 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
       ctx->saHpiEventOem = sensor.Oem;
       ctx->saHpiEventSensorSpecific = sensor.SensorSpecific;
       
+      // 
+      var = saHpiSensorNotification;
+      // Update the var  values. Any good way?
     }
 
     if (event_entry->EventType == SAHPI_ET_HOTSWAP) {
@@ -345,6 +399,11 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
       ctx->saHpiEventWatchdogAction = watchdog.WatchdogAction+1;
       ctx->saHpiEventWatchdogPreTimerAction = watchdog.WatchdogPreTimerAction+1;
       ctx-> saHpiEventWatchdogUse = watchdog.WatchdogUse +1;
+      // Update the Watchdog table
+      update_watchdog_row(rpt_entry->DomainId,
+			  rpt_entry->ResourceId,
+			  watchdog.WatchdogNum,
+			  &watchdog);
     }
 
     if (event_entry->EventType == SAHPI_ET_OEM) {
@@ -432,6 +491,95 @@ delete_event_row(SaHpiDomainIdT domain_id,
   return AGENT_ERR_NOT_FOUND;  
 }
 
+static 
+int build_notification_var (netsnmp_variable_list *trap_list,
+		       trap_vars *var,  size_t const var_len,
+		       const oid *prefix, const size_t prefix_len,
+		       netsnmp_index *index) {
+
+  oid full_oid[MAX_OID_LEN];
+  size_t full_oid_len;
+  int i,j;
+  int rc = AGENT_ERR_NOERROR;
+
+  DEBUGMSGTL((AGENT,"send_notification. Entry\n"));
+  if (var && trap_list && index) {
+    if ((prefix_len + 2 + index-> len) < MAX_OID_LEN) {
+      for (i = 0; i < var_len; i++ ) {
+	// Generate the full OID.	
+	// Get the prefix.    
+	memcpy(full_oid, prefix, prefix_len * sizeof(oid));
+	full_oid_len = prefix_len;
+	// Get the column number.
+	full_oid[full_oid_len++] = 1;
+	full_oid[full_oid_len++] = var->column;
+	// Put the index value in
+	for (j = 0; j< index->len; j++) {
+	  full_oid[full_oid_len+j] = index->oids[j];
+	}
+	full_oid_len += index->len;
+	DEBUGMSGOID((AGENT,full_oid, full_oid_len));
+	DEBUGMSGTL((AGENT,"\n"));
+	
+	snmp_varlist_add_variable(&trap_list,
+				  full_oid,
+				  full_oid_len * sizeof(oid),
+				  var->type,
+				  var->value,
+				  var->value_len);
+	
+      } 
+    }
+    else
+      {
+	rc = AGENT_ERR_MEMORY_FAULT;
+	DEBUGMSGTL((AGENT,"Cannot generate the OID b/c it would bigger than MAX_OID_LEN\n"));
+      }
+  } else
+    rc = AGENT_ERR_NULL_DATA;
+
+  DEBUGMSGTL((AGENT,"send_notification. Exit (rc: %d)\n",rc));
+  return rc;
+}
+
+static
+int send_notification(SaHpiDomainIdT domain_id,
+		      SaHpiResourceIdT resource_id,
+		      netsnmp_index *index,
+		      trap_vars *var, size_t var_len,
+		      oid *notification_oid, size_t notification_oid_len,
+		      oid *table_oid, size_t table_oid_len) {
+  // Attach the 
+  netsnmp_variable_list *notification_vars = NULL;
+  oid snmptrap[] = { snmptrap_oid };
+  
+  DEBUGMSGTL((AGENT,"--- send_notification: Entry.\n"));  
+
+  snmp_varlist_add_variable(&notification_vars,
+			    snmptrap, OID_LENGTH(snmptrap),
+			    ASN_OBJECT_ID,
+			    (u_char *)notification_oid,
+			    notification_oid_len* sizeof(oid));
+
+  // Add the DomainId; Generate hte OID for this row.
+  
+  //   snmp_varlist_add_variable(&notification_vars,
+			     
+
+   // Add the ResourceId
+			     // snmp_varlist_add_variable(&notification_vars,
+
+ // Add the rest from trap_vars
+ build_notification_var(notification_vars,
+			var, var_len,
+			table_oid, table_oid_len,
+			index);
+
+ // Bah, send it.
+}
+
+  
+		      
 /************************************************************
  * keep binary tree to find context by name
  */

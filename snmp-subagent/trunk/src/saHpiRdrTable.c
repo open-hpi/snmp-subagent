@@ -45,6 +45,8 @@ static size_t          saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 //   { 1, 3, 6, 1, 3, 90, 3, 1, 0 };
 static oid      saHpiRdrCount_oid[] = { hpiResources_OID, SCALAR_COLUMN_SAHPIRDRCOUNT, 0 };
 
+  
+
 //  { 1, 3, 6, 1, 3, 90, 4, 7, 0 };
 static oid saHpiResourceDataRecordNotification[] = { hpiNotifications_OID, 7, 0};
 
