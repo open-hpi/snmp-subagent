@@ -34,27 +34,23 @@ extern int MAX_EVENT_ENTRIES;
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
-static oid             saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
-static size_t          saHpiEventTable_oid_len = OID_LENGTH(saHpiEventTable_oid);
+static oid saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
+static size_t saHpiEventTable_oid_len = OID_LENGTH (saHpiEventTable_oid);
 
 
 
 // IBM-KR: TODO, make sure the OIDs are right.
 static oid saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
-  
-static oid      saHpiHotSwapNotification_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 2, 0 };
 
-static oid      saHpiWatchdogNotification_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 3, 0 };
-   
-static oid      saHpiUserNotification_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 5, 0 };
-    
-static oid      saHpiOEMNotification_oid[] =
-        { 1, 3, 6, 1, 3, 90, 4, 4, 0 };
+static oid saHpiHotSwapNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 2, 0 };
 
-static size_t TRAPS_OID_LENGTH = OID_LENGTH( saHpiSensorNotification_oid );
+static oid saHpiWatchdogNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 3, 0 };
+
+static oid saHpiUserNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 5, 0 };
+
+static oid saHpiOEMNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 4, 0 };
+
+static size_t TRAPS_OID_LENGTH = OID_LENGTH (saHpiSensorNotification_oid);
 #define SENSOR_NOTIF_COUNT 8
 #define NOTIF_EVENTINDEX 0
 #define NOTIF_SEVERITY 1
@@ -65,15 +61,16 @@ static size_t TRAPS_OID_LENGTH = OID_LENGTH( saHpiSensorNotification_oid );
 #define SENSOR_NOTIF_SENSORTRIGGERREADINGRAW 6
 #define SENSOR_NOTIF_SENSOROEM 7
 
-static trap_vars saHpiSensorNotification[]  = {
+static trap_vars saHpiSensorNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTSENSORCATEGORY, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTSENSORNUM, ASN_UNSIGNED, NULL, 0},
-  {COLUMN_SAHPIEVENTSENSORTYPE , ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTSENSORTYPE, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTSENSOROPTIONALDATA, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSENSORTRIGGERREADINGRAW, ASN_UNSIGNED, NULL, 0},
-  {COLUMN_SAHPIEVENTSENSOROEM, ASN_UNSIGNED, NULL, 0}};
+  {COLUMN_SAHPIEVENTSENSOROEM, ASN_UNSIGNED, NULL, 0}
+};
 
 #define HOTSWAP_NOTIF_COUNT 4
 #define HOTSWAP_STATE 2
@@ -82,7 +79,9 @@ static trap_vars saHpiHotSwapNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTHOTSWAPSTATE, ASN_INTEGER, NULL, 0},
-  {COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE , ASN_INTEGER, NULL, 0}};
+  {COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE, ASN_INTEGER, NULL, 0}
+};
+
 // IBM-KR: TODO add an OID to the HotSwap row?
 
 #define WATCHDOG_NOTIF_COUNT 6
@@ -95,52 +94,56 @@ static trap_vars saHpiWatchdogNotification[] = {
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTWATCHDOGNUM, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTWATCHDOGACTION, ASN_INTEGER, NULL, 0},
-  {COLUMN_SAHPIEVENTWATCHDOGPRETIMERACTION, ASN_INTEGER, NULL,0},
-  {COLUMN_SAHPIEVENTWATCHDOGUSE, ASN_INTEGER, NULL, 0}};
+  {COLUMN_SAHPIEVENTWATCHDOGPRETIMERACTION, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTWATCHDOGUSE, ASN_INTEGER, NULL, 0}
+};
+
 // IBM-KR: TODO add an OID to the Watchdog row? 
 
 #define OEM_NOTIF_COUNT 4
 #define OEM_NOTIF_MANUF_ID 2
 #define OEM_NOTIF_EVENT_DATA 3
 
-static trap_vars saHpiOEMNotification[] = {  
+static trap_vars saHpiOEMNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
-  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0}, 
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
   {COLUMN_SAHPIEVENTOEMMANUFACTURERIDT, ASN_UNSIGNED, NULL, 0},
-  {COLUMN_SAHPIEVENTOEMEVENTDATA, ASN_OCTET_STR, NULL, 0}};
+  {COLUMN_SAHPIEVENTOEMEVENTDATA, ASN_OCTET_STR, NULL, 0}
+};
 
 #define USER_NOTIF_COUNT 3
 #define USER_NOTIF_EVENT_DATA 2
 static trap_vars saHpiUserNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
-  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0}, 
-  {COLUMN_SAHPIEVENTUSEREVENTDATA, ASN_OCTET_STR, NULL, 0}};
-  
+  {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
+  {COLUMN_SAHPIEVENTUSEREVENTDATA, ASN_OCTET_STR, NULL, 0}
+};
 
 
-static oid      saHpiEventCount_oid[] =
-        { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
+
+static oid saHpiEventCount_oid[] = { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
 
 static u_long event_count = 0;
 static SaHpiTimeoutT timeout = SAHPI_TIMEOUT_IMMEDIATE;
 static u_long index_nr = 0;
 
 static int
-saHpiEventTable_modify_context(unsigned long,
-			       SaHpiEventT *,
-			       SaHpiRptEntryT *t,
-			       SaHpiRdrT *,
-			       saHpiEventTable_context *ctx,
-			       trap_vars **var,
-			       size_t *var_len,
-			       oid **var_oid);
+saHpiEventTable_modify_context (unsigned long,
+				SaHpiEventT *,
+				SaHpiRptEntryT * t,
+				SaHpiRdrT *,
+				saHpiEventTable_context * ctx,
+				trap_vars ** var,
+				size_t * var_len, oid ** var_oid);
 
 /*
  * Checks for all SEL and EVENTs
  */
-int populate_event() {
- 
-  SaErrorT     err;
+int
+populate_event ()
+{
+
+  SaErrorT err;
   SaHpiSessionIdT session_id;
 
   SaHpiEventT event;
@@ -171,181 +174,199 @@ int populate_event() {
 
   saHpiEventTable_context *event_context;
 
-  DEBUGMSGTL((AGENT,"\t--- populate_event. Entry\n"));
+  DEBUGMSGTL ((AGENT, "\t--- populate_event. Entry\n"));
 
-  rc = getSaHpiSession(&session_id);
-  if (rc != AGENT_ERR_NOERROR) {
-    DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
-    return rc;
-  }
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+      return rc;
+    }
 
 
-  while ( eventflag == AGENT_TRUE ) {
-    memset(&event, 0x20, sizeof(SaHpiEventT));
-    err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
-    if (err == SA_OK) {
-      /*
-	rpt.ResourceCapabilities = 0;
-	event.Source = 200;
-	event.EventType = SAHPI_ET_USER;
-	event.Timestamp = -1;
-	event.Severity = 3;
-	strncpy(event.EventDataUnion.UserEvent.UserEventData,"Grozny smok.", 12);
-      */
-      if (rpt.ResourceCapabilities == 0) { // OEM or USER type event
-	rpt.ResourceId = 0;
-	rpt.DomainId = 0;
-	rpt.EntryId = 0;
-	user_oem_event_type = AGENT_TRUE;
-      }
-      
-      // 1). Generate the domain_oid and resource_oid
-      //     Only do it when its necessary
+  while (eventflag == AGENT_TRUE)
+    {
+      memset (&event, 0x20, sizeof (SaHpiEventT));
+      err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
+      if (err == SA_OK)
+	{
+	  /*
+	     rpt.ResourceCapabilities = 0;
+	     event.Source = 200;
+	     event.EventType = SAHPI_ET_USER;
+	     event.Timestamp = -1;
+	     event.Severity = 3;
+	     strncpy(event.EventDataUnion.UserEvent.UserEventData,"Grozny smok.", 12);
+	   */
+	  if (rpt.ResourceCapabilities == 0)
+	    {			// OEM or USER type event
+	      rpt.ResourceId = 0;
+	      rpt.DomainId = 0;
+	      rpt.EntryId = 0;
+	      user_oem_event_type = AGENT_TRUE;
+	    }
 
-      if ((rpt_oid[0] != rpt.DomainId) ||
-	  (rpt_oid[1] != rpt.ResourceId) ||
-	  (rpt_oid[2] != rpt.EntryId)) {
-	
-	// Make the RPT index value.
-	rpt_oid[0] = rpt.DomainId;
-	rpt_oid[1] = rpt.ResourceId;
-	rpt_oid[2] = rpt.EntryId;
+	  // 1). Generate the domain_oid and resource_oid
+	  //     Only do it when its necessary
 
-	rpt_index.len = RPT_INDEX_NR;
-	rpt_index.oids = (oid *)&rpt_oid;
+	  if ((rpt_oid[0] != rpt.DomainId) ||
+	      (rpt_oid[1] != rpt.ResourceId) || (rpt_oid[2] != rpt.EntryId))
+	    {
 
-	// This is copied from saHpiTable.c:197
-	// Generate our full OID for the DomainID
-	column[0] = 1;
-	// Point to first object.
-	column[1] = COLUMN_SAHPIDOMAINID;
-	
-	build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
-		       column, 2,
-		       &rpt_index,
-		       domain_oid, MAX_OID_LEN, &domain_oid_len);
-	
-	column[1] = COLUMN_SAHPIRESOURCEID;
-	
-	build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
-		       column, 2,
-		       &rpt_index,
-		       resource_oid, MAX_OID_LEN, &resource_oid_len);
+	      // Make the RPT index value.
+	      rpt_oid[0] = rpt.DomainId;
+	      rpt_oid[1] = rpt.ResourceId;
+	      rpt_oid[2] = rpt.EntryId;
 
-	DEBUGMSGTL((AGENT,"Our OIDS in Event are:\n"));
-	DEBUGMSGOID((AGENT,domain_oid, domain_oid_len));
-	DEBUGMSGOID((AGENT,resource_oid, resource_oid_len));
-	DEBUGMSGTL((AGENT,"Values are: %d.%d.%d\n",
-		    rpt.DomainId,
-		    rpt.ResourceId,
-		    rpt.EntryId));
+	      rpt_index.len = RPT_INDEX_NR;
+	      rpt_index.oids = (oid *) & rpt_oid;
 
-	if (user_oem_event_type == AGENT_TRUE) {	  
-	  domain_oid_len = 0;
-	  resource_oid_len = 0;
-	  user_oem_event_type = AGENT_FALSE;
+	      // This is copied from saHpiTable.c:197
+	      // Generate our full OID for the DomainID
+	      column[0] = 1;
+	      // Point to first object.
+	      column[1] = COLUMN_SAHPIDOMAINID;
+
+	      build_full_oid (saHpiTable_oid, saHpiTable_oid_len,
+			      column, 2,
+			      &rpt_index,
+			      domain_oid, MAX_OID_LEN, &domain_oid_len);
+
+	      column[1] = COLUMN_SAHPIRESOURCEID;
+
+	      build_full_oid (saHpiTable_oid, saHpiTable_oid_len,
+			      column, 2,
+			      &rpt_index,
+			      resource_oid, MAX_OID_LEN, &resource_oid_len);
+
+	      DEBUGMSGTL ((AGENT, "Our OIDS in Event are:\n"));
+	      DEBUGMSGOID ((AGENT, domain_oid, domain_oid_len));
+	      DEBUGMSGOID ((AGENT, resource_oid, resource_oid_len));
+	      DEBUGMSGTL ((AGENT, "Values are: %d.%d.%d\n",
+			   rpt.DomainId, rpt.ResourceId, rpt.EntryId));
+
+	      if (user_oem_event_type == AGENT_TRUE)
+		{
+		  domain_oid_len = 0;
+		  resource_oid_len = 0;
+		  user_oem_event_type = AGENT_FALSE;
+		}
+	    }
+	  // 2). Create our index value
+
+	  event_oid[0] = rpt.DomainId;
+	  event_oid[1] = rpt.ResourceId;
+	  event_oid[2] = index_nr;
+
+	  event_index.oids = (oid *) & event_oid;
+	  event_index.len = EVENT_INDEX_NR;
+
+	  event_context = NULL;
+	  event_context = CONTAINER_FIND (cb.container, &event_index);
+
+	  if (!event_context)
+	    {
+	      // New entry. Add it
+	      event_context = saHpiEventTable_create_row (&event_index);
+	    }
+
+	  // By this stage, event_context surely has something in it.
+
+	  // And since this is a queue, only NEW entries are seen.
+	  // Thus we don't need to check to see if this value already exist      
+
+	  saHpiEventTable_modify_context (index_nr,
+					  &event,
+					  &rpt,
+					  &rdr,
+					  event_context,
+					  &trap, &trap_len, &trap_oid);
+
+	  CONTAINER_INSERT (cb.container, event_context);
+	  event_count = CONTAINER_SIZE (cb.container);
+	  // Update our third undex value.
+	  index_nr++;
+	  if (send_traps == AGENT_TRUE)
+	    {
+	      if (trap != NULL)
+		{
+		  trap_var = build_notification (&event_index,
+						 trap, trap_len,
+						 trap_oid, TRAPS_OID_LENGTH,
+						 saHpiEventTable_oid,
+						 saHpiEventTable_oid_len,
+						 rpt.DomainId, domain_oid,
+						 domain_oid_len,
+						 rpt.ResourceId, resource_oid,
+						 resource_oid_len);
+		  if (trap_var != NULL)
+		    {
+		      send_v2trap (trap_var);
+		      snmp_free_varbind (trap_var);
+		    }
+		  else
+		    {
+		      snmp_log (LOG_WARNING,
+				"Could not build an EVENT trap message.\n");
+		      rc = AGENT_ERR_BUILD_TRAP;
+		    }
+		}
+	    }
 	}
-      }
-      // 2). Create our index value
+      else
 
-      event_oid[0] = rpt.DomainId;
-      event_oid[1] = rpt.ResourceId;
-      event_oid[2] = index_nr;
-    
-      event_index.oids = (oid *)&event_oid;
-      event_index.len = EVENT_INDEX_NR;
-    
-      event_context = NULL;
-      event_context = CONTAINER_FIND(cb.container, &event_index);
+	{
+	  DEBUGMSGTL ((AGENT, "%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ?
+		       "No more EVENT  entries. " :
+		       "Call to saHpiEventGet failed.", err));
+	  eventflag = AGENT_FALSE;
+	}
 
-      if (!event_context) {
-	// New entry. Add it
-	event_context = saHpiEventTable_create_row(&event_index);
-      }
-     
-      // By this stage, event_context surely has something in it.
+    }				// while loop
 
-      // And since this is a queue, only NEW entries are seen.
-      // Thus we don't need to check to see if this value already exist      
-
-      saHpiEventTable_modify_context(index_nr,
-				     &event,
-				     &rpt,
-				     &rdr,
-				     event_context,
-				     &trap, &trap_len, &trap_oid);
-      
-      CONTAINER_INSERT(cb.container, event_context);
-      event_count = CONTAINER_SIZE(cb.container);
-      // Update our third undex value.
-      index_nr++;
-      if (send_traps == AGENT_TRUE) {
-	if (trap != NULL) {	  
-	  trap_var = build_notification(&event_index,
-					trap, trap_len,
-					trap_oid, TRAPS_OID_LENGTH,
-					saHpiEventTable_oid, saHpiEventTable_oid_len,
-					rpt.DomainId,
-					domain_oid, domain_oid_len,
-					rpt.ResourceId,
-					resource_oid, resource_oid_len);
-	  if (trap_var != NULL) {
-	    send_v2trap(trap_var);
-	    snmp_free_varbind(trap_var);
-	  } else {
-	    snmp_log(LOG_WARNING,"Could not build an EVENT trap message.\n");
-	    rc = AGENT_ERR_BUILD_TRAP;
-	  }
-	}      
-      }
-    } else 
-      
-      {
-	DEBUGMSGTL((AGENT,"%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ? 
-		    "No more EVENT  entries. " : 
-		    "Call to saHpiEventGet failed.", err));
-	eventflag = AGENT_FALSE;
-      }
-    
-  } // while loop
-
-    return rc;
+  return rc;
 }
-  
 
-unsigned long purge_event( void ) {
-  
+
+unsigned long
+purge_event (void)
+{
+
 
   unsigned long count = 0;
   unsigned long i;
 
   saHpiEventTable_context *event_context;
-  DEBUGMSGTL((AGENT,"purge_event. Entry.\n"));
-  
-  if ((i = CONTAINER_SIZE(cb.container)) > MAX_EVENT_ENTRIES) {
-    // Delete 'count' entries.    
-    i = i - MAX_EVENT_ENTRIES;
-    DEBUGMSGTL((AGENT,"Deleting %d EVENT row(s).\n", i));
-    count = i;
-    while (i > 0) {
-      event_context = CONTAINER_FIRST(cb.container);
-      CONTAINER_REMOVE(cb.container, event_context);
-      i--;      
+  DEBUGMSGTL ((AGENT, "purge_event. Entry.\n"));
+
+  if ((i = CONTAINER_SIZE (cb.container)) > MAX_EVENT_ENTRIES)
+    {
+      // Delete 'count' entries.    
+      i = i - MAX_EVENT_ENTRIES;
+      DEBUGMSGTL ((AGENT, "Deleting %d EVENT row(s).\n", i));
+      count = i;
+      while (i > 0)
+	{
+	  event_context = CONTAINER_FIRST (cb.container);
+	  CONTAINER_REMOVE (cb.container, event_context);
+	  i--;
+	}
     }
-  }
-  
-  DEBUGMSGTL((AGENT,"purge_event. Exit. (purged: %d)\n",count));
+
+  DEBUGMSGTL ((AGENT, "purge_event. Exit. (purged: %d)\n", count));
   return count;
 }
 
 int
-saHpiEventTable_modify_context(unsigned long  entry_id,
-			       SaHpiEventT *event_entry,
-			       SaHpiRptEntryT *rpt_entry,
-			       SaHpiRdrT *rdr_entry,
-			       saHpiEventTable_context *ctx,
-			       trap_vars **var, size_t *var_len, 
-			       oid **var_trap_oid) {
+saHpiEventTable_modify_context (unsigned long entry_id,
+				SaHpiEventT * event_entry,
+				SaHpiRptEntryT * rpt_entry,
+				SaHpiRdrT * rdr_entry,
+				saHpiEventTable_context * ctx,
+				trap_vars ** var, size_t * var_len,
+				oid ** var_trap_oid)
+{
 
   long hash;
   SaHpiSensorEventT sensor;
@@ -355,398 +376,411 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
   SaHpiOemEventT oem;
   SaHpiUserEventT user;
 
-  if (event_entry && ctx) {
-    hash = calculate_hash_value(event_entry, sizeof(SaHpiEventT));
+  if (event_entry && ctx)
+    {
+      hash = calculate_hash_value (event_entry, sizeof (SaHpiEventT));
 
-    DEBUGMSGTL((AGENT," Hash value: %d, in ctx: %d\n", hash, ctx->hash));
+      DEBUGMSGTL ((AGENT, " Hash value: %d, in ctx: %d\n", hash, ctx->hash));
 
-    if (ctx->hash != 0) {
-      // Only do the check if the hash value is something else than zero.
-      // 'zero' value is only for newly created records, and in some
-      // rare instances when the hash has rolled to zero - in which
-      // case we will just consider the worst-case scenario and update
-      // the record and not trust the hash value.
-      if (hash == ctx->hash) {
-	// The same data. No need to change.
-	return AGENT_ENTRY_EXIST;
-      }
-    }
-
-    if (hash == 0) 
-      hash = 1;
-    ctx->hash = hash;
-    ctx->resource_id = rpt_entry->ResourceId;
-    ctx->domain_id = rpt_entry->DomainId;
-
-    ctx->saHpiEventIndex = entry_id;
-
-    ctx->saHpiEventType = event_entry->EventType + 1;
-
-    memcpy(&ctx->saHpiEventTimestamp,
-	   &event_entry->Timestamp,
-	   sizeof(SaHpiTimeT));
-
-    ctx->saHpiEventTimestamp.low =
-      htonl(ctx->saHpiEventTimestamp.low);
-    
-    ctx->saHpiEventTimestamp.high =
-      htonl(ctx->saHpiEventTimestamp.high);
-
-    ctx->saHpiEventSeverity = event_entry->Severity;
-
-    if (event_entry->EventType == SAHPI_ET_SENSOR) {
-      sensor = event_entry->EventDataUnion.SensorEvent;
-      ctx->saHpiEventSensorNum = sensor.SensorNum;
-      ctx->saHpiEventSensorType = sensor.SensorType;
-      ctx->saHpiEventSensorCategory = sensor.EventCategory;
-      ctx->saHpiEventSensorAssertion = (sensor.Assertion == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-      if (sensor.EventCategory & SAHPI_EC_THRESHOLD)
-	ctx->saHpiEventSensorStateCategoryThreshold = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_USAGE) 
-	ctx->saHpiEventSensorStateCategoryUsage = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_STATE) 
-	ctx->saHpiEventSensorStateCategoryState = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_PRED_FAIL) 
-	ctx->saHpiEventSensorStateCategoryPredFail = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_LIMIT) 
-	ctx->saHpiEventSensorStateCategoryLimit = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_PERFORMANCE) 
-	ctx->saHpiEventSensorStateCategoryPerformance = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_SEVERITY) 
-	ctx->saHpiEventSensorStateCategorySeverity = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_PRESENCE) 
-	ctx->saHpiEventSensorStateCategoryPresence = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_ENABLE) 
-	ctx->saHpiEventSensorStateCategoryEnable = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_AVAILABILITY) 
-	ctx->saHpiEventSensorStateCategoryAvailability = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_REDUNDANCY) 
-	ctx->saHpiEventSensorStateCategoryRedundancy = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_USER) 
-	ctx->saHpiEventSensorStateCategoryUser = sensor.EventState;
-      if (sensor.EventCategory & SAHPI_EC_GENERIC) 
-	ctx->saHpiEventSensorStateCategoryGeneric = sensor.EventState;
-      /*
-	#define SAHPI_SOD_TRIGGER_READING   (SaHpiSensorOptionalDataT)0x01
-	#define SAHPI_SOD_TRIGGER_THRESHOLD (SaHpiSensorOptionalDataT)0x02
-	#define SAHPI_SOD_OEM               (SaHpiSensorOptionalDataT)0x04
-	#define SAHPI_SOD_PREVIOUS_STATE    (SaHpiSensorOptionalDataT)0x08
-	#define SAHPI_SOD_SENSOR_SPECIFIC   (SaHpiSensorOptionalDataT)0x10
-       */
-      ctx->saHpiEventSensorOptionalData = sensor.OptionalDataPresent;
-      reading = sensor.TriggerReading;
-      ctx->saHpiEventSensorTriggerReadingType = reading.ValuesPresent;
-
-      if (reading.ValuesPresent & SAHPI_SRF_RAW) {
-	ctx->saHpiEventSensorTriggerReadingRaw = htonl(reading.Raw);
-      }
-      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED) {     
-	ctx->saHpiEventSensorTriggerReadingInterpretedType = reading.Interpreted.Type + 1;
-	switch (reading.Interpreted.Type) {
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:       	
-	  reading.Interpreted.
-	    Value.
-	    SensorUint16 = htons(reading.Interpreted.
-				 Value.
-				 SensorUint16);	    
-	  break;							 
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-	  reading.Interpreted.
-	    Value.
-	    SensorUint32 = htonl(reading.Interpreted.
-				 Value.
-				 SensorUint32);
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
-	  break;
+      if (ctx->hash != 0)
+	{
+	  // Only do the check if the hash value is something else than zero.
+	  // 'zero' value is only for newly created records, and in some
+	  // rare instances when the hash has rolled to zero - in which
+	  // case we will just consider the worst-case scenario and update
+	  // the record and not trust the hash value.
+	  if (hash == ctx->hash)
+	    {
+	      // The same data. No need to change.
+	      return AGENT_ENTRY_EXIST;
+	    }
 	}
-	memcpy(ctx->saHpiEventSensorTriggerReadingInterpreted,
-	       &reading.Interpreted.Value,
-	       SAHPI_SENSOR_BUFFER_LENGTH);      
-	ctx->saHpiEventSensorTriggerReadingInterpreted_len = EVENT_TRIGGER_READING_INTERPRETED_MAX;
-      }          
-      if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE) {
-	ctx->saHpiEventSensorTriggerReadingEventState[0] = reading.EventStatus.SensorStatus;
-	reading.EventStatus.SensorStatus = htons(reading.
-						 EventStatus.
-						 EventStatus);
-	memcpy(ctx->saHpiEventSensorTriggerReadingEventState + 1,
-	       &reading.EventStatus.EventStatus, 2);
-	ctx->saHpiEventSensorTriggerReadingEventState_len = EVENT_TRIGGER_READING_EVENT_STATE_MAX;		 		 
-      }
-      
-       
-      reading = sensor.TriggerThreshold;
-   
-      
-      if (reading.ValuesPresent & SAHPI_SRF_RAW) {
-	ctx->saHpiEventSensorTriggerThresholdRaw = htonl(reading.Raw);
-      }
-      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED) {
-	ctx->saHpiEventSensorTriggerThresholdInterpretedType = reading.Interpreted.Type + 1;
-	switch (reading.Interpreted.Type) {
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:       	
-	  reading.Interpreted.
-	    Value.
-	    SensorUint16 = htons(reading.Interpreted.
-				 Value.
-				 SensorUint16);	    
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-	  reading.Interpreted.
-	    Value.
-	    SensorUint32 = htonl(reading.Interpreted.
-				 Value.
-				 SensorUint32);
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
-	case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-	  break;
-	case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
-	  break;
+
+      if (hash == 0)
+	hash = 1;
+      ctx->hash = hash;
+      ctx->resource_id = rpt_entry->ResourceId;
+      ctx->domain_id = rpt_entry->DomainId;
+
+      ctx->saHpiEventIndex = entry_id;
+
+      ctx->saHpiEventType = event_entry->EventType + 1;
+
+      memcpy (&ctx->saHpiEventTimestamp,
+	      &event_entry->Timestamp, sizeof (SaHpiTimeT));
+
+      ctx->saHpiEventTimestamp.low = htonl (ctx->saHpiEventTimestamp.low);
+
+      ctx->saHpiEventTimestamp.high = htonl (ctx->saHpiEventTimestamp.high);
+
+      ctx->saHpiEventSeverity = event_entry->Severity;
+
+      if (event_entry->EventType == SAHPI_ET_SENSOR)
+	{
+	  sensor = event_entry->EventDataUnion.SensorEvent;
+	  ctx->saHpiEventSensorNum = sensor.SensorNum;
+	  ctx->saHpiEventSensorType = sensor.SensorType;
+	  ctx->saHpiEventSensorCategory = sensor.EventCategory;
+	  ctx->saHpiEventSensorAssertion =
+	    (sensor.Assertion == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	  if (sensor.EventCategory & SAHPI_EC_THRESHOLD)
+	    ctx->saHpiEventSensorStateCategoryThreshold = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_USAGE)
+	    ctx->saHpiEventSensorStateCategoryUsage = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_STATE)
+	    ctx->saHpiEventSensorStateCategoryState = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_PRED_FAIL)
+	    ctx->saHpiEventSensorStateCategoryPredFail = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_LIMIT)
+	    ctx->saHpiEventSensorStateCategoryLimit = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_PERFORMANCE)
+	    ctx->saHpiEventSensorStateCategoryPerformance = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_SEVERITY)
+	    ctx->saHpiEventSensorStateCategorySeverity = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_PRESENCE)
+	    ctx->saHpiEventSensorStateCategoryPresence = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_ENABLE)
+	    ctx->saHpiEventSensorStateCategoryEnable = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_AVAILABILITY)
+	    ctx->saHpiEventSensorStateCategoryAvailability =
+	      sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_REDUNDANCY)
+	    ctx->saHpiEventSensorStateCategoryRedundancy = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_USER)
+	    ctx->saHpiEventSensorStateCategoryUser = sensor.EventState;
+	  if (sensor.EventCategory & SAHPI_EC_GENERIC)
+	    ctx->saHpiEventSensorStateCategoryGeneric = sensor.EventState;
+	  /*
+	     #define SAHPI_SOD_TRIGGER_READING   (SaHpiSensorOptionalDataT)0x01
+	     #define SAHPI_SOD_TRIGGER_THRESHOLD (SaHpiSensorOptionalDataT)0x02
+	     #define SAHPI_SOD_OEM               (SaHpiSensorOptionalDataT)0x04
+	     #define SAHPI_SOD_PREVIOUS_STATE    (SaHpiSensorOptionalDataT)0x08
+	     #define SAHPI_SOD_SENSOR_SPECIFIC   (SaHpiSensorOptionalDataT)0x10
+	   */
+	  ctx->saHpiEventSensorOptionalData = sensor.OptionalDataPresent;
+	  reading = sensor.TriggerReading;
+	  ctx->saHpiEventSensorTriggerReadingType = reading.ValuesPresent;
+
+	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
+	    {
+	      ctx->saHpiEventSensorTriggerReadingRaw = htonl (reading.Raw);
+	    }
+	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	    {
+	      ctx->saHpiEventSensorTriggerReadingInterpretedType =
+		reading.Interpreted.Type + 1;
+	      switch (reading.Interpreted.Type)
+		{
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
+		  reading.Interpreted.
+		    Value.
+		    SensorUint16 = htons (reading.Interpreted.
+					  Value.SensorUint16);
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+		  reading.Interpreted.
+		    Value.
+		    SensorUint32 = htonl (reading.Interpreted.
+					  Value.SensorUint32);
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
+		  break;
+		}
+	      memcpy (ctx->saHpiEventSensorTriggerReadingInterpreted,
+		      &reading.Interpreted.Value, SAHPI_SENSOR_BUFFER_LENGTH);
+	      ctx->saHpiEventSensorTriggerReadingInterpreted_len =
+		EVENT_TRIGGER_READING_INTERPRETED_MAX;
+	    }
+	  if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE)
+	    {
+	      ctx->saHpiEventSensorTriggerReadingEventState[0] =
+		reading.EventStatus.SensorStatus;
+	      reading.EventStatus.SensorStatus =
+		htons (reading.EventStatus.EventStatus);
+	      memcpy (ctx->saHpiEventSensorTriggerReadingEventState + 1,
+		      &reading.EventStatus.EventStatus, 2);
+	      ctx->saHpiEventSensorTriggerReadingEventState_len =
+		EVENT_TRIGGER_READING_EVENT_STATE_MAX;
+	    }
+
+
+	  reading = sensor.TriggerThreshold;
+
+
+	  if (reading.ValuesPresent & SAHPI_SRF_RAW)
+	    {
+	      ctx->saHpiEventSensorTriggerThresholdRaw = htonl (reading.Raw);
+	    }
+	  if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	    {
+	      ctx->saHpiEventSensorTriggerThresholdInterpretedType =
+		reading.Interpreted.Type + 1;
+	      switch (reading.Interpreted.Type)
+		{
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
+		  reading.Interpreted.
+		    Value.
+		    SensorUint16 = htons (reading.Interpreted.
+					  Value.SensorUint16);
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+		  reading.Interpreted.
+		    Value.
+		    SensorUint32 = htonl (reading.Interpreted.
+					  Value.SensorUint32);
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
+		case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
+		  break;
+		case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
+		  break;
+		}
+	      memcpy (ctx->saHpiEventSensorTriggerThresholdInterpreted,
+		      &reading.Interpreted.Value, SAHPI_SENSOR_BUFFER_LENGTH);
+	      ctx->saHpiEventSensorTriggerThresholdInterpreted_len =
+		EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX;
+	    }
+	  if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE)
+	    {
+	      ctx->saHpiEventSensorTriggerThresholdEventState[0] =
+		reading.EventStatus.SensorStatus;
+	      reading.EventStatus.SensorStatus =
+		htons (reading.EventStatus.EventStatus);
+	      memcpy (ctx->saHpiEventSensorTriggerThresholdEventState + 1,
+		      &reading.EventStatus.EventStatus, 2);
+	      ctx->saHpiEventSensorTriggerThresholdEventState_len =
+		EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX;
+
+	    }
+
+	  ctx->saHpiEventSensorPreviousState = sensor.PreviousState;
+	  ctx->saHpiEventSensorOem = sensor.Oem;
+	  ctx->saHpiEventSensorSpecific = sensor.SensorSpecific;
+
+
+
+	  // Update the var  pointer references.
+
+	  saHpiSensorNotification[NOTIF_EVENTINDEX].value =
+	    (u_char *) & ctx->saHpiEventIndex;
+	  saHpiSensorNotification[NOTIF_EVENTINDEX].value_len =
+	    sizeof (ctx->saHpiEventIndex);
+
+	  saHpiSensorNotification[NOTIF_SEVERITY].value =
+	    (u_char *) & ctx->saHpiEventSeverity;
+	  saHpiSensorNotification[NOTIF_SEVERITY].value_len =
+	    sizeof (ctx->saHpiEventSeverity);
+
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORCATEGORY].value =
+	    (u_char *) & ctx->saHpiEventSensorCategory;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORCATEGORY].value_len =
+	    sizeof (ctx->saHpiEventSensorCategory);
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORNUM].value =
+	    (u_char *) & ctx->saHpiEventSensorNum;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORNUM].value_len =
+	    sizeof (ctx->saHpiEventSensorNum);
+
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORTYPE].value =
+	    (u_char *) & ctx->saHpiEventSensorType;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORTYPE].value_len =
+	    sizeof (ctx->saHpiEventSensorType);
+
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSOROPTIONALDATA].value =
+	    (u_char *) & ctx->saHpiEventSensorOptionalData;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSOROPTIONALDATA].value_len =
+	    sizeof (ctx->saHpiEventSensorOptionalData);
+
+
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORTRIGGERREADINGRAW].
+	    value = (u_char *) & ctx->saHpiEventSensorTriggerReadingRaw;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSORTRIGGERREADINGRAW].
+	    value_len = sizeof (ctx->saHpiEventSensorTriggerReadingRaw);
+
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSOROEM].value =
+	    (u_char *) & ctx->saHpiEventSensorOem;
+	  saHpiSensorNotification[SENSOR_NOTIF_SENSOROEM].value_len =
+	    sizeof (ctx->saHpiEventSensorOem);
+
+	  // Point *var to this trap_vars. 
+	  *var = (trap_vars *) & saHpiSensorNotification;
+	  *var_len = SENSOR_NOTIF_COUNT;
+	  *var_trap_oid = (oid *) & saHpiSensorNotification_oid;
+
+	  // Update the Sensor table with new information
+	  // No need
 	}
-	memcpy(ctx->saHpiEventSensorTriggerThresholdInterpreted,
-	       &reading.Interpreted.Value,
-	       SAHPI_SENSOR_BUFFER_LENGTH);      
-	ctx->saHpiEventSensorTriggerThresholdInterpreted_len = EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX;
-      }          
-      if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE) {
-	ctx->saHpiEventSensorTriggerThresholdEventState[0] = reading.EventStatus.SensorStatus;
-	reading.EventStatus.SensorStatus = htons(reading.
-						 EventStatus.
-						 EventStatus);
-	memcpy(ctx->saHpiEventSensorTriggerThresholdEventState + 1,
-	       &reading.EventStatus.EventStatus, 2);
-	ctx->saHpiEventSensorTriggerThresholdEventState_len =EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX; 
 
-      }
-
-      ctx->saHpiEventSensorPreviousState = sensor.PreviousState;
-      ctx->saHpiEventSensorOem = sensor.Oem;
-      ctx->saHpiEventSensorSpecific = sensor.SensorSpecific;
-      
-      
-
-      // Update the var  pointer references.
-
-      saHpiSensorNotification[NOTIF_EVENTINDEX].value = 
-	(u_char *)&ctx->saHpiEventIndex;
-      saHpiSensorNotification[NOTIF_EVENTINDEX].value_len = 
-	sizeof(ctx->saHpiEventIndex);
-
-      saHpiSensorNotification[NOTIF_SEVERITY].value = 
-	(u_char *)&ctx->saHpiEventSeverity;
-      saHpiSensorNotification[NOTIF_SEVERITY].value_len = 
-	sizeof(ctx->saHpiEventSeverity);
-
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORCATEGORY].value = 
-	(u_char *)&ctx->saHpiEventSensorCategory;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORCATEGORY].value_len = 
-	sizeof(ctx->saHpiEventSensorCategory);
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORNUM].value =
-	(u_char *)&ctx->saHpiEventSensorNum;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORNUM].value_len =
-	sizeof(ctx->saHpiEventSensorNum);
-
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORTYPE].value =
-	(u_char *)&ctx->saHpiEventSensorType;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORTYPE].value_len =
-	sizeof(ctx->saHpiEventSensorType);
-      
-      saHpiSensorNotification[SENSOR_NOTIF_SENSOROPTIONALDATA].value =
-	(u_char *)&ctx->saHpiEventSensorOptionalData;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSOROPTIONALDATA].value_len =
-	sizeof(ctx->saHpiEventSensorOptionalData);
+      if (event_entry->EventType == SAHPI_ET_HOTSWAP)
+	{
+	  hotswap = event_entry->EventDataUnion.HotSwapEvent;
+	  // CR: #022
+	  ctx->saHpiEventHotSwapState = hotswap.HotSwapState + 1;
+	  ctx->saHpiEventPreviousHotSwapState =
+	    hotswap.PreviousHotSwapState + 1;
 
 
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORTRIGGERREADINGRAW].value =
-	(u_char *)&ctx->saHpiEventSensorTriggerReadingRaw;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSORTRIGGERREADINGRAW].value_len =
-	sizeof(ctx->saHpiEventSensorTriggerReadingRaw);
+	  saHpiHotSwapNotification[NOTIF_EVENTINDEX].value =
+	    (u_char *) & ctx->saHpiEventIndex;
+	  saHpiHotSwapNotification[NOTIF_EVENTINDEX].value_len =
+	    sizeof (ctx->saHpiEventIndex);
 
-      saHpiSensorNotification[SENSOR_NOTIF_SENSOROEM].value = 
-	(u_char *)&ctx->saHpiEventSensorOem;
-      saHpiSensorNotification[SENSOR_NOTIF_SENSOROEM].value_len =
-	sizeof(ctx->saHpiEventSensorOem);
+	  saHpiHotSwapNotification[NOTIF_SEVERITY].value =
+	    (u_char *) & ctx->saHpiEventSeverity;
+	  saHpiHotSwapNotification[NOTIF_SEVERITY].value_len =
+	    sizeof (ctx->saHpiEventSeverity);
 
-      // Point *var to this trap_vars. 
-      *var = (trap_vars *)&saHpiSensorNotification;
-      *var_len = SENSOR_NOTIF_COUNT;
-      *var_trap_oid = (oid *)&saHpiSensorNotification_oid;
-      
-      // Update the Sensor table with new information
-      // No need
+	  saHpiHotSwapNotification[HOTSWAP_STATE].value =
+	    (u_char *) & ctx->saHpiEventHotSwapState;
+
+	  saHpiHotSwapNotification[HOTSWAP_STATE].value_len =
+	    sizeof (ctx->saHpiEventHotSwapState);
+
+	  saHpiHotSwapNotification[HOTSWAP_PREVIOUS_STATE].value =
+	    (u_char *) & ctx->saHpiEventPreviousHotSwapState;
+
+	  saHpiHotSwapNotification[HOTSWAP_PREVIOUS_STATE].value_len =
+	    sizeof (ctx->saHpiEventPreviousHotSwapState);
+
+	  // Point *var to this trap_vars. 
+	  *var = (trap_vars *) & saHpiHotSwapNotification;
+	  *var_len = HOTSWAP_NOTIF_COUNT;
+	  *var_trap_oid = saHpiHotSwapNotification_oid;
+	  // Notify the HotSwap table about the event state
+	  update_hotswap_event (rpt_entry->DomainId,
+				rpt_entry->ResourceId, &hotswap);
+
+	}
+
+      if (event_entry->EventType == SAHPI_ET_WATCHDOG)
+	{
+	  watchdog = event_entry->EventDataUnion.WatchdogEvent;
+	  ctx->saHpiEventWatchdogNum = watchdog.WatchdogNum;
+	  ctx->saHpiEventWatchdogAction = watchdog.WatchdogAction + 1;
+	  ctx->saHpiEventWatchdogPreTimerAction =
+	    watchdog.WatchdogPreTimerAction + 1;
+	  ctx->saHpiEventWatchdogUse = watchdog.WatchdogUse + 1;
+
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_NUM].value =
+	    (u_char *) & ctx->saHpiEventWatchdogNum;
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_NUM].value_len =
+	    sizeof (ctx->saHpiEventWatchdogNum);
+
+
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_ACTION].value =
+	    (u_char *) & ctx->saHpiEventWatchdogAction;
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_ACTION].value_len =
+	    sizeof (ctx->saHpiEventWatchdogAction);
+
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_PRETIMERACTION].value =
+	    (u_char *) & ctx->saHpiEventWatchdogPreTimerAction;
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_PRETIMERACTION].value_len =
+	    sizeof (ctx->saHpiEventWatchdogPreTimerAction);
+
+
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_USE].value =
+	    (u_char *) & ctx->saHpiEventWatchdogUse;
+
+	  saHpiWatchdogNotification[WATCHDOG_NOTIF_USE].value_len =
+	    sizeof (ctx->saHpiEventWatchdogUse);
+
+	  saHpiWatchdogNotification[NOTIF_EVENTINDEX].value =
+	    (u_char *) & ctx->saHpiEventIndex;
+	  saHpiWatchdogNotification[NOTIF_EVENTINDEX].value_len =
+	    sizeof (ctx->saHpiEventIndex);
+
+	  saHpiWatchdogNotification[NOTIF_SEVERITY].value =
+	    (u_char *) & ctx->saHpiEventSeverity;
+	  saHpiWatchdogNotification[NOTIF_SEVERITY].value_len =
+	    sizeof (ctx->saHpiEventSeverity);
+
+
+	  // Point *var to this trap_vars. 
+	  *var = (trap_vars *) & saHpiWatchdogNotification;
+	  *var_len = WATCHDOG_NOTIF_COUNT;
+	  *var_trap_oid = saHpiWatchdogNotification_oid;
+
+	  // Update the Watchdog table
+	  update_watchdog_row (rpt_entry->DomainId,
+			       rpt_entry->ResourceId,
+			       watchdog.WatchdogNum, &watchdog);
+	}
+
+      if (event_entry->EventType == SAHPI_ET_OEM)
+	{
+	  oem = event_entry->EventDataUnion.OemEvent;
+	  ctx->saHpiEventOemManufacturerIdT = htonl (oem.MId);
+	  memcpy (ctx->saHpiEventOemEventData,
+		  oem.OemEventData, SAHPI_OEM_EVENT_DATA_SIZE);
+	  ctx->saHpiEventOemEventData_len = SAHPI_OEM_EVENT_DATA_SIZE;
+
+	  saHpiOEMNotification[OEM_NOTIF_EVENT_DATA].value =
+	    (u_char *) & ctx->saHpiEventOemEventData;
+	  saHpiOEMNotification[OEM_NOTIF_EVENT_DATA].value_len =
+	    ctx->saHpiEventOemEventData_len;
+
+	  saHpiOEMNotification[NOTIF_EVENTINDEX].value =
+	    (u_char *) & ctx->saHpiEventIndex;
+	  saHpiOEMNotification[NOTIF_EVENTINDEX].value_len =
+	    sizeof (ctx->saHpiEventIndex);
+
+	  saHpiOEMNotification[NOTIF_SEVERITY].value =
+	    (u_char *) & ctx->saHpiEventSeverity;
+	  saHpiOEMNotification[NOTIF_SEVERITY].value_len =
+	    sizeof (ctx->saHpiEventSeverity);
+
+
+	  // Point *var to this trap_vars. 
+	  *var = (trap_vars *) & saHpiOEMNotification;
+	  *var_len = OEM_NOTIF_COUNT;
+	  *var_trap_oid = saHpiOEMNotification_oid;
+
+
+	}
+
+      if (event_entry->EventType == SAHPI_ET_USER)
+	{
+	  user = event_entry->EventDataUnion.UserEvent;
+	  memcpy (ctx->saHpiEventUserEventData,
+		  user.UserEventData, SAHPI_USER_EVENT_DATA_SIZE);
+	  ctx->saHpiEventUserEventData_len = SAHPI_USER_EVENT_DATA_SIZE;
+
+
+	  saHpiUserNotification[USER_NOTIF_EVENT_DATA].value =
+	    (u_char *) & ctx->saHpiEventUserEventData;
+	  saHpiUserNotification[USER_NOTIF_EVENT_DATA].value_len =
+	    ctx->saHpiEventUserEventData_len;
+
+	  saHpiUserNotification[NOTIF_EVENTINDEX].value =
+	    (u_char *) & ctx->saHpiEventIndex;
+	  saHpiUserNotification[NOTIF_EVENTINDEX].value_len =
+	    sizeof (ctx->saHpiEventIndex);
+
+	  saHpiUserNotification[NOTIF_SEVERITY].value =
+	    (u_char *) & ctx->saHpiEventSeverity;
+	  saHpiUserNotification[NOTIF_SEVERITY].value_len =
+	    sizeof (ctx->saHpiEventSeverity);
+
+
+	  // Point *var to this trap_vars. 
+	  *var = (trap_vars *) & saHpiUserNotification;
+	  *var_len = USER_NOTIF_COUNT;
+	  *var_trap_oid = saHpiUserNotification_oid;
+
+	}
+
+      return AGENT_NEW_ENTRY;
     }
-
-    if (event_entry->EventType == SAHPI_ET_HOTSWAP) {
-      hotswap = event_entry->EventDataUnion.HotSwapEvent;
-      // CR: #022
-      ctx->saHpiEventHotSwapState = hotswap.HotSwapState + 1;
-      ctx->saHpiEventPreviousHotSwapState = hotswap.PreviousHotSwapState +1;
-
-
-      saHpiHotSwapNotification[NOTIF_EVENTINDEX].value = 
-	(u_char *)&ctx->saHpiEventIndex;
-      saHpiHotSwapNotification[NOTIF_EVENTINDEX].value_len = 
-	sizeof(ctx->saHpiEventIndex);
-
-      saHpiHotSwapNotification[NOTIF_SEVERITY].value = 
-	(u_char *)&ctx->saHpiEventSeverity;
-      saHpiHotSwapNotification[NOTIF_SEVERITY].value_len = 
-	sizeof(ctx->saHpiEventSeverity);
-      
-      saHpiHotSwapNotification[HOTSWAP_STATE].value = 
-	(u_char *)&ctx->saHpiEventHotSwapState;
-      
-      saHpiHotSwapNotification[HOTSWAP_STATE].value_len=
-	sizeof(ctx->saHpiEventHotSwapState);
-
-      saHpiHotSwapNotification[HOTSWAP_PREVIOUS_STATE].value = 
-	(u_char *)&ctx->saHpiEventPreviousHotSwapState;
-      
-      saHpiHotSwapNotification[HOTSWAP_PREVIOUS_STATE].value_len=
-	sizeof(ctx->saHpiEventPreviousHotSwapState);
-
-      // Point *var to this trap_vars. 
-      *var = (trap_vars *)& saHpiHotSwapNotification;
-      *var_len = HOTSWAP_NOTIF_COUNT;
-      *var_trap_oid = saHpiHotSwapNotification_oid;
-      // Notify the HotSwap table about the event state
-      update_hotswap_event(rpt_entry->DomainId,
-			   rpt_entry->ResourceId,
-			   &hotswap);
-
-    }
-
-    if (event_entry->EventType == SAHPI_ET_WATCHDOG) {
-      watchdog = event_entry->EventDataUnion.WatchdogEvent;
-      ctx->saHpiEventWatchdogNum = watchdog.WatchdogNum;
-      ctx->saHpiEventWatchdogAction = watchdog.WatchdogAction+1;
-      ctx->saHpiEventWatchdogPreTimerAction = watchdog.WatchdogPreTimerAction+1;
-      ctx-> saHpiEventWatchdogUse = watchdog.WatchdogUse +1;
-
-      saHpiWatchdogNotification[ WATCHDOG_NOTIF_NUM].value =
-	(u_char *) &ctx->saHpiEventWatchdogNum;
-      saHpiWatchdogNotification[ WATCHDOG_NOTIF_NUM].value_len =
-	sizeof(ctx->saHpiEventWatchdogNum);
-
-
-      saHpiWatchdogNotification[WATCHDOG_NOTIF_ACTION].value =
-	(u_char *)&ctx->saHpiEventWatchdogAction;
-      saHpiWatchdogNotification[WATCHDOG_NOTIF_ACTION].value_len =
-	sizeof(ctx->saHpiEventWatchdogAction);
-
-      saHpiWatchdogNotification[ WATCHDOG_NOTIF_PRETIMERACTION].value =
-	(u_char *)&ctx->saHpiEventWatchdogPreTimerAction;
-      saHpiWatchdogNotification[ WATCHDOG_NOTIF_PRETIMERACTION].value_len =
-	sizeof(ctx->saHpiEventWatchdogPreTimerAction);
-
-
-      saHpiWatchdogNotification[WATCHDOG_NOTIF_USE].value = 
-	(u_char *)&ctx->saHpiEventWatchdogUse;
-
-      saHpiWatchdogNotification[WATCHDOG_NOTIF_USE].value_len =
-	sizeof(ctx->saHpiEventWatchdogUse);
-
-      saHpiWatchdogNotification[NOTIF_EVENTINDEX].value = 
-	(u_char *)&ctx->saHpiEventIndex;
-      saHpiWatchdogNotification[NOTIF_EVENTINDEX].value_len = 
-	sizeof(ctx->saHpiEventIndex);
-
-      saHpiWatchdogNotification[NOTIF_SEVERITY].value = 
-	(u_char *)&ctx->saHpiEventSeverity;
-      saHpiWatchdogNotification[NOTIF_SEVERITY].value_len = 
-	sizeof(ctx->saHpiEventSeverity);
-
-      
-      // Point *var to this trap_vars. 
-      *var = (trap_vars *)& saHpiWatchdogNotification;
-      *var_len = WATCHDOG_NOTIF_COUNT;
-      *var_trap_oid = saHpiWatchdogNotification_oid;
-
-      // Update the Watchdog table
-      update_watchdog_row(rpt_entry->DomainId,
-			  rpt_entry->ResourceId,
-			  watchdog.WatchdogNum,
-			  &watchdog);
-    }
-
-    if (event_entry->EventType == SAHPI_ET_OEM) {
-      oem = event_entry->EventDataUnion.OemEvent;
-      ctx->saHpiEventOemManufacturerIdT= htonl(oem.MId);
-      memcpy(ctx->saHpiEventOemEventData,
-	     oem.OemEventData,
-	     SAHPI_OEM_EVENT_DATA_SIZE);
-      ctx->saHpiEventOemEventData_len = SAHPI_OEM_EVENT_DATA_SIZE;	     
-
-      saHpiOEMNotification[OEM_NOTIF_EVENT_DATA].value =
-	(u_char *)&ctx->saHpiEventOemEventData;
-      saHpiOEMNotification[OEM_NOTIF_EVENT_DATA].value_len =
-	ctx->saHpiEventOemEventData_len;
-
-      saHpiOEMNotification[NOTIF_EVENTINDEX].value = 
-	(u_char *)&ctx->saHpiEventIndex;
-      saHpiOEMNotification[NOTIF_EVENTINDEX].value_len = 
-	sizeof(ctx->saHpiEventIndex);
-
-      saHpiOEMNotification[NOTIF_SEVERITY].value = 
-	(u_char *)&ctx->saHpiEventSeverity;
-      saHpiOEMNotification[NOTIF_SEVERITY].value_len = 
-	sizeof(ctx->saHpiEventSeverity);
-
-      
-      // Point *var to this trap_vars. 
-      *var = (trap_vars *)& saHpiOEMNotification;
-      *var_len = OEM_NOTIF_COUNT;
-      *var_trap_oid = saHpiOEMNotification_oid;
-
-      
-    }
-
-    if (event_entry->EventType == SAHPI_ET_USER) {
-      user = event_entry->EventDataUnion.UserEvent;
-      memcpy(ctx->saHpiEventUserEventData,
-	     user.UserEventData,
-	     SAHPI_USER_EVENT_DATA_SIZE);
-      ctx->saHpiEventUserEventData_len = SAHPI_USER_EVENT_DATA_SIZE;
-
-
-      saHpiUserNotification[USER_NOTIF_EVENT_DATA].value =
-	(u_char *)&ctx->saHpiEventUserEventData;
-      saHpiUserNotification[USER_NOTIF_EVENT_DATA].value_len =
-	ctx->saHpiEventUserEventData_len;
-
-      saHpiUserNotification[NOTIF_EVENTINDEX].value = 
-	(u_char *)&ctx->saHpiEventIndex;
-      saHpiUserNotification[NOTIF_EVENTINDEX].value_len = 
-	sizeof(ctx->saHpiEventIndex);
-
-      saHpiUserNotification[NOTIF_SEVERITY].value = 
-	(u_char *)&ctx->saHpiEventSeverity;
-      saHpiUserNotification[NOTIF_SEVERITY].value_len = 
-	sizeof(ctx->saHpiEventSeverity);
-
-      
-      // Point *var to this trap_vars. 
-      *var = (trap_vars *)& saHpiUserNotification;
-      *var_len = USER_NOTIF_COUNT;
-      *var_trap_oid = saHpiUserNotification_oid;
-
-    }
-  
-    return AGENT_NEW_ENTRY;
-  }
   return AGENT_ERR_NULL_DATA;
 }
 
@@ -754,200 +788,199 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
 
 
 int
-delete_event_row(SaHpiDomainIdT domain_id,
-		 SaHpiResourceIdT resource_id,
-		 unsigned long num)
+delete_event_row (SaHpiDomainIdT domain_id,
+		  SaHpiResourceIdT resource_id, unsigned long num)
 {
   saHpiEventTable_context *ctx;
   int rc = AGENT_ERR_NOT_FOUND;
   netsnmp_index event_index;
   oid event_oid[EVENT_INDEX_NR];
 
-  DEBUGMSGTL((AGENT,"delete_event_row(%d, %d, %d). Entry \n",
-  	domain_id, resource_id, num));
+  DEBUGMSGTL ((AGENT, "delete_event_row(%d, %d, %d). Entry \n",
+	       domain_id, resource_id, num));
 
   event_oid[0] = domain_id;
   event_oid[1] = resource_id;
   event_oid[2] = num;
-    
-  event_index.oids = (oid *)&event_oid;
+
+  event_index.oids = (oid *) & event_oid;
   event_index.len = EVENT_INDEX_NR;
 
-  ctx = CONTAINER_FIND(cb.container, &event_index);
+  ctx = CONTAINER_FIND (cb.container, &event_index);
 
-  if (ctx) {
-    CONTAINER_REMOVE(cb.container, ctx);
-    event_count = CONTAINER_SIZE(cb.container);
-    rc = AGENT_ERR_NOERROR;
-  }
-  DEBUGMSGTL((AGENT,"delete_event_row. Exit (rc: %d).\n", rc));
+  if (ctx)
+    {
+      CONTAINER_REMOVE (cb.container, ctx);
+      event_count = CONTAINER_SIZE (cb.container);
+      rc = AGENT_ERR_NOERROR;
+    }
+  DEBUGMSGTL ((AGENT, "delete_event_row. Exit (rc: %d).\n", rc));
   return rc;
 }
 
-  
-      
+
+
 
 /************************************************************
  * the *_row_copy routine
  */
 static int
-saHpiEventTable_row_copy(saHpiEventTable_context * dst,
-                         saHpiEventTable_context * src)
+saHpiEventTable_row_copy (saHpiEventTable_context * dst,
+			  saHpiEventTable_context * src)
 {
-    if (!dst || !src)
-        return 1;
+  if (!dst || !src)
+    return 1;
 
-    /*
-     * copy index, if provided
-     */
-    if (dst->index.oids)
-        free(dst->index.oids);
-    if (snmp_clone_mem((void *) &dst->index.oids, src->index.oids,
-                       src->index.len * sizeof(oid))) {
-        dst->index.oids = NULL;
-        return 1;
+  /*
+   * copy index, if provided
+   */
+  if (dst->index.oids)
+    free (dst->index.oids);
+  if (snmp_clone_mem ((void *) &dst->index.oids, src->index.oids,
+		      src->index.len * sizeof (oid)))
+    {
+      dst->index.oids = NULL;
+      return 1;
     }
-    dst->index.len = src->index.len;
+  dst->index.len = src->index.len;
 
 
-    dst->saHpiEventIndex = src->saHpiEventIndex;
+  dst->saHpiEventIndex = src->saHpiEventIndex;
 
-    dst->saHpiEventType = src->saHpiEventType;
+  dst->saHpiEventType = src->saHpiEventType;
 
-    dst->saHpiEventTimestamp = src->saHpiEventTimestamp;
+  dst->saHpiEventTimestamp = src->saHpiEventTimestamp;
 
-    dst->saHpiEventSeverity = src->saHpiEventSeverity;
+  dst->saHpiEventSeverity = src->saHpiEventSeverity;
 
-    dst->saHpiEventSensorNum = src->saHpiEventSensorNum;
+  dst->saHpiEventSensorNum = src->saHpiEventSensorNum;
 
-    dst->saHpiEventSensorType = src->saHpiEventSensorType;
+  dst->saHpiEventSensorType = src->saHpiEventSensorType;
 
-    dst->saHpiEventSensorCategory = src->saHpiEventSensorCategory;
+  dst->saHpiEventSensorCategory = src->saHpiEventSensorCategory;
 
-    dst->saHpiEventSensorAssertion = src->saHpiEventSensorAssertion;
+  dst->saHpiEventSensorAssertion = src->saHpiEventSensorAssertion;
 
-    dst->saHpiEventSensorStateCategoryUnspecified =
-        src->saHpiEventSensorStateCategoryUnspecified;
+  dst->saHpiEventSensorStateCategoryUnspecified =
+    src->saHpiEventSensorStateCategoryUnspecified;
 
-    dst->saHpiEventSensorStateCategoryThreshold =
-        src->saHpiEventSensorStateCategoryThreshold;
+  dst->saHpiEventSensorStateCategoryThreshold =
+    src->saHpiEventSensorStateCategoryThreshold;
 
-    dst->saHpiEventSensorStateCategoryUsage =
-        src->saHpiEventSensorStateCategoryUsage;
+  dst->saHpiEventSensorStateCategoryUsage =
+    src->saHpiEventSensorStateCategoryUsage;
 
-    dst->saHpiEventSensorStateCategoryState =
-        src->saHpiEventSensorStateCategoryState;
+  dst->saHpiEventSensorStateCategoryState =
+    src->saHpiEventSensorStateCategoryState;
 
-    dst->saHpiEventSensorStateCategoryPredFail =
-        src->saHpiEventSensorStateCategoryPredFail;
+  dst->saHpiEventSensorStateCategoryPredFail =
+    src->saHpiEventSensorStateCategoryPredFail;
 
-    dst->saHpiEventSensorStateCategoryLimit =
-        src->saHpiEventSensorStateCategoryLimit;
+  dst->saHpiEventSensorStateCategoryLimit =
+    src->saHpiEventSensorStateCategoryLimit;
 
-    dst->saHpiEventSensorStateCategoryPerformance =
-        src->saHpiEventSensorStateCategoryPerformance;
+  dst->saHpiEventSensorStateCategoryPerformance =
+    src->saHpiEventSensorStateCategoryPerformance;
 
-    dst->saHpiEventSensorStateCategorySeverity =
-        src->saHpiEventSensorStateCategorySeverity;
+  dst->saHpiEventSensorStateCategorySeverity =
+    src->saHpiEventSensorStateCategorySeverity;
 
-    dst->saHpiEventSensorStateCategoryPresence =
-        src->saHpiEventSensorStateCategoryPresence;
+  dst->saHpiEventSensorStateCategoryPresence =
+    src->saHpiEventSensorStateCategoryPresence;
 
-    dst->saHpiEventSensorStateCategoryEnable =
-        src->saHpiEventSensorStateCategoryEnable;
+  dst->saHpiEventSensorStateCategoryEnable =
+    src->saHpiEventSensorStateCategoryEnable;
 
-    dst->saHpiEventSensorStateCategoryAvailability =
-        src->saHpiEventSensorStateCategoryAvailability;
+  dst->saHpiEventSensorStateCategoryAvailability =
+    src->saHpiEventSensorStateCategoryAvailability;
 
-    dst->saHpiEventSensorStateCategoryRedundancy =
-        src->saHpiEventSensorStateCategoryRedundancy;
+  dst->saHpiEventSensorStateCategoryRedundancy =
+    src->saHpiEventSensorStateCategoryRedundancy;
 
-    dst->saHpiEventSensorStateCategoryUser =
-        src->saHpiEventSensorStateCategoryUser;
+  dst->saHpiEventSensorStateCategoryUser =
+    src->saHpiEventSensorStateCategoryUser;
 
-    dst->saHpiEventSensorStateCategoryGeneric =
-        src->saHpiEventSensorStateCategoryGeneric;
+  dst->saHpiEventSensorStateCategoryGeneric =
+    src->saHpiEventSensorStateCategoryGeneric;
 
-    dst->saHpiEventSensorOptionalData = src->saHpiEventSensorOptionalData;
+  dst->saHpiEventSensorOptionalData = src->saHpiEventSensorOptionalData;
 
-    dst->saHpiEventSensorTriggerReadingType =
-        src->saHpiEventSensorTriggerReadingType;
+  dst->saHpiEventSensorTriggerReadingType =
+    src->saHpiEventSensorTriggerReadingType;
 
-    dst->saHpiEventSensorTriggerReadingRaw =
-        src->saHpiEventSensorTriggerReadingRaw;
+  dst->saHpiEventSensorTriggerReadingRaw =
+    src->saHpiEventSensorTriggerReadingRaw;
 
-    dst->saHpiEventSensorTriggerReadingInterpretedType =
-        src->saHpiEventSensorTriggerReadingInterpretedType;
+  dst->saHpiEventSensorTriggerReadingInterpretedType =
+    src->saHpiEventSensorTriggerReadingInterpretedType;
 
-    memcpy(dst->saHpiEventSensorTriggerReadingInterpreted,
-           src->saHpiEventSensorTriggerReadingInterpreted,
-           src->saHpiEventSensorTriggerReadingInterpreted_len);
-    dst->saHpiEventSensorTriggerReadingInterpreted_len =
-        src->saHpiEventSensorTriggerReadingInterpreted_len;
+  memcpy (dst->saHpiEventSensorTriggerReadingInterpreted,
+	  src->saHpiEventSensorTriggerReadingInterpreted,
+	  src->saHpiEventSensorTriggerReadingInterpreted_len);
+  dst->saHpiEventSensorTriggerReadingInterpreted_len =
+    src->saHpiEventSensorTriggerReadingInterpreted_len;
 
-    memcpy(dst->saHpiEventSensorTriggerReadingEventState,
-           src->saHpiEventSensorTriggerReadingEventState,
-           src->saHpiEventSensorTriggerReadingEventState_len);
-    dst->saHpiEventSensorTriggerReadingEventState_len =
-        src->saHpiEventSensorTriggerReadingEventState_len;
+  memcpy (dst->saHpiEventSensorTriggerReadingEventState,
+	  src->saHpiEventSensorTriggerReadingEventState,
+	  src->saHpiEventSensorTriggerReadingEventState_len);
+  dst->saHpiEventSensorTriggerReadingEventState_len =
+    src->saHpiEventSensorTriggerReadingEventState_len;
 
-    dst->saHpiEventSensorTriggerThresholdType =
-        src->saHpiEventSensorTriggerThresholdType;
+  dst->saHpiEventSensorTriggerThresholdType =
+    src->saHpiEventSensorTriggerThresholdType;
 
-    dst->saHpiEventSensorTriggerThresholdRaw =
-        src->saHpiEventSensorTriggerThresholdRaw;
+  dst->saHpiEventSensorTriggerThresholdRaw =
+    src->saHpiEventSensorTriggerThresholdRaw;
 
-    dst->saHpiEventSensorTriggerThresholdInterpretedType =
-        src->saHpiEventSensorTriggerThresholdInterpretedType;
+  dst->saHpiEventSensorTriggerThresholdInterpretedType =
+    src->saHpiEventSensorTriggerThresholdInterpretedType;
 
-    memcpy(dst->saHpiEventSensorTriggerThresholdInterpreted,
-           src->saHpiEventSensorTriggerThresholdInterpreted,
-           src->saHpiEventSensorTriggerThresholdInterpreted_len);
-    dst->saHpiEventSensorTriggerThresholdInterpreted_len =
-        src->saHpiEventSensorTriggerThresholdInterpreted_len;
+  memcpy (dst->saHpiEventSensorTriggerThresholdInterpreted,
+	  src->saHpiEventSensorTriggerThresholdInterpreted,
+	  src->saHpiEventSensorTriggerThresholdInterpreted_len);
+  dst->saHpiEventSensorTriggerThresholdInterpreted_len =
+    src->saHpiEventSensorTriggerThresholdInterpreted_len;
 
-    memcpy(dst->saHpiEventSensorTriggerThresholdEventState,
-           src->saHpiEventSensorTriggerThresholdEventState,
-           src->saHpiEventSensorTriggerThresholdEventState_len);
-    dst->saHpiEventSensorTriggerThresholdEventState_len =
-        src->saHpiEventSensorTriggerThresholdEventState_len;
+  memcpy (dst->saHpiEventSensorTriggerThresholdEventState,
+	  src->saHpiEventSensorTriggerThresholdEventState,
+	  src->saHpiEventSensorTriggerThresholdEventState_len);
+  dst->saHpiEventSensorTriggerThresholdEventState_len =
+    src->saHpiEventSensorTriggerThresholdEventState_len;
 
-    dst->saHpiEventSensorPreviousState =
-        src->saHpiEventSensorPreviousState;
+  dst->saHpiEventSensorPreviousState = src->saHpiEventSensorPreviousState;
 
-    dst->saHpiEventSensorOem = src->saHpiEventSensorOem;
+  dst->saHpiEventSensorOem = src->saHpiEventSensorOem;
 
-    dst->saHpiEventSensorSpecific = src->saHpiEventSensorSpecific;
+  dst->saHpiEventSensorSpecific = src->saHpiEventSensorSpecific;
 
-    dst->saHpiEventHotSwapState = src->saHpiEventHotSwapState;
+  dst->saHpiEventHotSwapState = src->saHpiEventHotSwapState;
 
-    dst->saHpiEventPreviousHotSwapState =
-        src->saHpiEventPreviousHotSwapState;
+  dst->saHpiEventPreviousHotSwapState = src->saHpiEventPreviousHotSwapState;
 
-    dst->saHpiEventWatchdogNum = src->saHpiEventWatchdogNum;
+  dst->saHpiEventWatchdogNum = src->saHpiEventWatchdogNum;
 
-    dst->saHpiEventWatchdogAction = src->saHpiEventWatchdogAction;
+  dst->saHpiEventWatchdogAction = src->saHpiEventWatchdogAction;
 
-    dst->saHpiEventWatchdogPreTimerAction =
-        src->saHpiEventWatchdogPreTimerAction;
+  dst->saHpiEventWatchdogPreTimerAction =
+    src->saHpiEventWatchdogPreTimerAction;
 
-    dst->saHpiEventWatchdogUse = src->saHpiEventWatchdogUse;
+  dst->saHpiEventWatchdogUse = src->saHpiEventWatchdogUse;
 
-    dst->saHpiEventOemManufacturerIdT = src->saHpiEventOemManufacturerIdT;
+  dst->saHpiEventOemManufacturerIdT = src->saHpiEventOemManufacturerIdT;
 
-    memcpy(dst->saHpiEventOemEventData, src->saHpiEventOemEventData,
-           src->saHpiEventOemEventData_len);
-    dst->saHpiEventOemEventData_len = src->saHpiEventOemEventData_len;
+  memcpy (dst->saHpiEventOemEventData, src->saHpiEventOemEventData,
+	  src->saHpiEventOemEventData_len);
+  dst->saHpiEventOemEventData_len = src->saHpiEventOemEventData_len;
 
-    memcpy(dst->saHpiEventUserEventData, src->saHpiEventUserEventData,
-           src->saHpiEventUserEventData_len);
-    dst->saHpiEventUserEventData_len = src->saHpiEventUserEventData_len;
+  memcpy (dst->saHpiEventUserEventData, src->saHpiEventUserEventData,
+	  src->saHpiEventUserEventData_len);
+  dst->saHpiEventUserEventData_len = src->saHpiEventUserEventData_len;
 
-    dst->saHpiEventDelete = src->saHpiEventDelete;
+  dst->saHpiEventDelete = src->saHpiEventDelete;
 
-    dst->resource_id = src->resource_id;
-    dst->domain_id = src->domain_id;
-    return 0;
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  return 0;
 }
 
 
@@ -955,69 +988,71 @@ saHpiEventTable_row_copy(saHpiEventTable_context * dst,
  * the *_extract_index routine
  */
 int
-saHpiEventTable_extract_index(saHpiEventTable_context * ctx,
-                              netsnmp_index * hdr)
+saHpiEventTable_extract_index (saHpiEventTable_context * ctx,
+			       netsnmp_index * hdr)
 {
-    /*
-     * temporary local storage for extracting oid index
-     */
-    netsnmp_variable_list var_saHpiDomainID;
-    netsnmp_variable_list var_saHpiResourceID;
-    netsnmp_variable_list var_saHpiEntryID;
-    int             err;
+  /*
+   * temporary local storage for extracting oid index
+   */
+  netsnmp_variable_list var_saHpiDomainID;
+  netsnmp_variable_list var_saHpiResourceID;
+  netsnmp_variable_list var_saHpiEntryID;
+  int err;
 
-    /*
-     * copy index, if provided
-     */
-    if (hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if (snmp_clone_mem((void *) &ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid))) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
+  /*
+   * copy index, if provided
+   */
+  if (hdr)
+    {
+      netsnmp_assert (ctx->index.oids == NULL);
+      if (snmp_clone_mem ((void *) &ctx->index.oids, hdr->oids,
+			  hdr->len * sizeof (oid)))
+	{
+	  return -1;
+	}
+      ctx->index.len = hdr->len;
     }
 
-   
-    memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
-    var_saHpiDomainID.type = ASN_UNSIGNED;
-    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
+  memset (&var_saHpiDomainID, 0x00, sizeof (var_saHpiDomainID));
+  var_saHpiDomainID.type = ASN_UNSIGNED;
+  var_saHpiDomainID.next_variable = &var_saHpiResourceID;
 
 
-    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
-    var_saHpiResourceID.type = ASN_UNSIGNED;
-    var_saHpiResourceID.next_variable = &var_saHpiEntryID;
+  memset (&var_saHpiResourceID, 0x00, sizeof (var_saHpiResourceID));
+  var_saHpiResourceID.type = ASN_UNSIGNED;
+  var_saHpiResourceID.next_variable = &var_saHpiEntryID;
 
-    memset(&var_saHpiEntryID, 0x00, sizeof(var_saHpiEntryID));
-    var_saHpiEntryID.type = ASN_UNSIGNED;  
-    var_saHpiEntryID.next_variable = NULL;
+  memset (&var_saHpiEntryID, 0x00, sizeof (var_saHpiEntryID));
+  var_saHpiEntryID.type = ASN_UNSIGNED;
+  var_saHpiEntryID.next_variable = NULL;
 
 
-    /*
-     * parse the oid into the individual components
-     */
-    err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
-    if (err == SNMP_ERR_NOERROR) {
-        /*
-         * copy components into the context structure
-         */
-              /** skipping external index saHpiDomainID */
+  /*
+   * parse the oid into the individual components
+   */
+  err = parse_oid_indexes (hdr->oids, hdr->len, &var_saHpiDomainID);
+  if (err == SNMP_ERR_NOERROR)
+    {
+      /*
+       * copy components into the context structure
+       */
+	      /** skipping external index saHpiDomainID */
 
-              /** skipping external index saHpiResourceID */
+	      /** skipping external index saHpiResourceID */
 
-              /** skipping external index saHpiEntryID */
-      ctx->saHpiEventIndex =
-            *var_saHpiEntryID.val.integer;
+	      /** skipping external index saHpiEntryID */
+      ctx->saHpiEventIndex = *var_saHpiEntryID.val.integer;
 
-       
+
     }
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers(&var_saHpiDomainID);
+  /*
+   * parsing may have allocated memory. free it.
+   */
+  snmp_reset_var_buffers (&var_saHpiDomainID);
 
-    return err;
+  return err;
 }
 
 /************************************************************
@@ -1028,13 +1063,13 @@ saHpiEventTable_extract_index(saHpiEventTable_context * ctx,
  * return 0 if the row cannot be deleted
  */
 int
-saHpiEventTable_can_delete(saHpiEventTable_context * undo_ctx,
-                           saHpiEventTable_context * row_ctx,
-                           netsnmp_request_group * rg)
+saHpiEventTable_can_delete (saHpiEventTable_context * undo_ctx,
+			    saHpiEventTable_context * row_ctx,
+			    netsnmp_request_group * rg)
 {
 
-   
-    return 1;
+
+  return 1;
 }
 
 
@@ -1053,24 +1088,25 @@ saHpiEventTable_can_delete(saHpiEventTable_context * undo_ctx,
  * returns NULL for errors or illegal index values.
  */
 saHpiEventTable_context *
-saHpiEventTable_create_row(netsnmp_index * hdr)
+saHpiEventTable_create_row (netsnmp_index * hdr)
 {
-    saHpiEventTable_context *ctx =
-        SNMP_MALLOC_TYPEDEF(saHpiEventTable_context);
-    if (!ctx)
-        return NULL;
+  saHpiEventTable_context *ctx =
+    SNMP_MALLOC_TYPEDEF (saHpiEventTable_context);
+  if (!ctx)
+    return NULL;
 
-  
-    if (saHpiEventTable_extract_index(ctx, hdr)) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
+
+  if (saHpiEventTable_extract_index (ctx, hdr))
+    {
+      free (ctx->index.oids);
+      free (ctx);
+      return NULL;
     }
 
-    ctx->hash = 0;
-    ctx->saHpiEventDelete = SNMP_ROW_ACTIVE;
-    
-    return ctx;
+  ctx->hash = 0;
+  ctx->saHpiEventDelete = SNMP_ROW_ACTIVE;
+
+  return ctx;
 }
 
 
@@ -1078,39 +1114,40 @@ saHpiEventTable_create_row(netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiEventTable_context *
-saHpiEventTable_duplicate_row(saHpiEventTable_context * row_ctx)
+saHpiEventTable_duplicate_row (saHpiEventTable_context * row_ctx)
 {
-    saHpiEventTable_context *dup;
+  saHpiEventTable_context *dup;
 
-    if (!row_ctx)
-        return NULL;
+  if (!row_ctx)
+    return NULL;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiEventTable_context);
-    if (!dup)
-        return NULL;
+  dup = SNMP_MALLOC_TYPEDEF (saHpiEventTable_context);
+  if (!dup)
+    return NULL;
 
-    if (saHpiEventTable_row_copy(dup, row_ctx)) {
-        free(dup);
-        dup = NULL;
+  if (saHpiEventTable_row_copy (dup, row_ctx))
+    {
+      free (dup);
+      dup = NULL;
     }
 
-    return dup;
+  return dup;
 }
 
 /************************************************************
  * the *_delete_row method is called to delete a row.
  */
-netsnmp_index  *
-saHpiEventTable_delete_row(saHpiEventTable_context * ctx)
-{   
+netsnmp_index *
+saHpiEventTable_delete_row (saHpiEventTable_context * ctx)
+{
 
-    if (ctx->index.oids)
-        free(ctx->index.oids);
+  if (ctx->index.oids)
+    free (ctx->index.oids);
 
-  
-    free(ctx);
 
-    return NULL;
+  free (ctx);
+
+  return NULL;
 }
 
 
@@ -1130,26 +1167,28 @@ saHpiEventTable_delete_row(saHpiEventTable_context * ctx)
  * next state -> SET_RESERVE2 || SET_FREE
  */
 void
-saHpiEventTable_set_reserve1(netsnmp_request_group * rg)
+saHpiEventTable_set_reserve1 (netsnmp_request_group * rg)
 {
-     saHpiEventTable_context *row_ctx =
-        (saHpiEventTable_context *) rg->existing_row;
-   
-    
- 
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-   
-    int             rc = SNMP_ERR_NOERROR;
+  saHpiEventTable_context *row_ctx =
+    (saHpiEventTable_context *) rg->existing_row;
 
-    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve1: Entry.\n"));
 
-    for (current = rg->list; current; current = current->next) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+  netsnmp_variable_list *var;
+  netsnmp_request_group_item *current;
 
-        switch (current->tri->colnum) {
+  int rc = SNMP_ERR_NOERROR;
+
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_reserve1: Entry.\n"));
+
+  for (current = rg->list; current; current = current->next)
+    {
+
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
+
+      switch (current->tri->colnum)
+	{
 
 	case COLUMN_SAHPIEVENTTYPE:
 	case COLUMN_SAHPIEVENTTIMESTAMP:
@@ -1194,104 +1233,109 @@ saHpiEventTable_set_reserve1(netsnmp_request_group * rg)
 	case COLUMN_SAHPIEVENTWATCHDOGUSE:
 	case COLUMN_SAHPIEVENTOEMMANUFACTURERIDT:
 	case COLUMN_SAHPIEVENTOEMEVENTDATA:
-	   rc = SNMP_ERR_NOTWRITABLE;
-	   break;
+	  rc = SNMP_ERR_NOTWRITABLE;
+	  break;
 
-        case COLUMN_SAHPIEVENTDELETE:
-            /** TruthValue = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->
-                                                       saHpiEventDelete));
-            break;
+	case COLUMN_SAHPIEVENTDELETE:
+	    /** TruthValue = ASN_INTEGER */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_INTEGER,
+					       sizeof (row_ctx->
+						       saHpiEventDelete));
+	  break;
 
 
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiEventTable_set_reserve1\n");
-        }
+	default:
+		/** We shouldn't get here */
+	  rc = SNMP_ERR_GENERR;
+	  snmp_log (LOG_ERR, "unknown column in "
+		    "saHpiEventTable_set_reserve1\n");
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
-        rg->status = SNMP_MAX(rg->status, current->ri->status);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+      rg->status = SNMP_MAX (rg->status, current->ri->status);
     }
 
-    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve1: Exit (rc: %d).\n", rc));
-    
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_reserve1: Exit (rc: %d).\n", rc));
+
 }
 
 void
-saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
+saHpiEventTable_set_reserve2 (netsnmp_request_group * rg)
 {
-    saHpiEventTable_context *undo_ctx =
-      (saHpiEventTable_context *) rg->undo_info;
+  saHpiEventTable_context *undo_ctx =
+    (saHpiEventTable_context *) rg->undo_info;
 
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int             rc = SNMP_ERR_NOERROR;
+  netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  int rc = SNMP_ERR_NOERROR;
 
-    rg->rg_void = rg->list->ri;
+  rg->rg_void = rg->list->ri;
 
 
-    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve2. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_reserve2. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
-        case COLUMN_SAHPIEVENTDELETE:
-            /** RowStatus = ASN_INTEGER */	  
-	  rc = netsnmp_check_vb_rowstatus(var, 
-					  undo_ctx ? undo_ctx->saHpiEventDelete : 0 );	 
+	case COLUMN_SAHPIEVENTDELETE:
+	    /** RowStatus = ASN_INTEGER */
+	  rc = netsnmp_check_vb_rowstatus (var,
+					   undo_ctx ? undo_ctx->
+					   saHpiEventDelete : 0);
 	  break;
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    break;
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	  break;
+	}
 
-        if (rc) {
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 rc);
+      if (rc)
+	{
+	  netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
 	}
     }
 
-    for (current = rg->list; current; current = current->next) {
-      
+  for (current = rg->list; current; current = current->next)
+    {
+
       // We check to see if the row exist by finding the
       // 'hash' variable. If its set to '0' - we know we have
       // not manipulated it and thus its a non-existent row
 
-      if ( ((saHpiEventTable_context *) rg->existing_row)->hash == 0) {
-	//rc =  SNMP_ERR_NOSUCHNAME;
-	var = current->ri->requestvb;
+      if (((saHpiEventTable_context *) rg->existing_row)->hash == 0)
+	{
+	  //rc =  SNMP_ERR_NOSUCHNAME;
+	  var = current->ri->requestvb;
 
-	// SNMPv2-TC has a diagram of actions.
-	if ((*var->val.integer == SNMP_ROW_CREATEANDGO) // createAndGo(4)
-	    || (*var->val.integer == SNMP_ROW_ACTIVE) // active (1)
-	    || (*var->val.integer == SNMP_ROW_NOTINSERVICE)) // notInService(2)
-	  rc = SNMP_ERR_INCONSISTENTVALUE;
-	if (*var->val.integer == SNMP_ROW_NOTREADY) // notReady(3)
-	  rc = SNMP_ERR_INCONSISTENTNAME;
-	if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
-	  rc = SNMP_ERR_WRONGVALUE;
+	  // SNMPv2-TC has a diagram of actions.
+	  if ((*var->val.integer == SNMP_ROW_CREATEANDGO)	// createAndGo(4)
+	      || (*var->val.integer == SNMP_ROW_ACTIVE)	// active (1)
+	      || (*var->val.integer == SNMP_ROW_NOTINSERVICE))	// notInService(2)
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	  if (*var->val.integer == SNMP_ROW_NOTREADY)	// notReady(3)
+	    rc = SNMP_ERR_INCONSISTENTNAME;
+	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT)	// createAndWait(5)
+	    rc = SNMP_ERR_WRONGVALUE;
 
-	// IBM-KR: TODO. This 'destroy' should work on _ANY_ row (even
-	// non-existent ones. 
+	  // IBM-KR: TODO. This 'destroy' should work on _ANY_ row (even
+	  // non-existent ones. 
 
 
-	//if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
-	//  rc = SNMP_ERR_INCONSISTENTNAME;
-      
-	if (rc)
-	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 rc);
-      }
+	  //if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
+	  //  rc = SNMP_ERR_INCONSISTENTNAME;
+
+	  if (rc)
+	    netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+	}
     }
-    DEBUGMSGTL((AGENT,"saHpiEventTable_set_reserve2. Exit (rc: %d).\n", rc));
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_reserve2. Exit (rc: %d).\n", rc));
 }
 
 /************************************************************
@@ -1306,33 +1350,36 @@ saHpiEventTable_set_reserve2(netsnmp_request_group * rg)
  * the original row is in undo_ctx.
  */
 void
-saHpiEventTable_set_action(netsnmp_request_group * rg)
+saHpiEventTable_set_action (netsnmp_request_group * rg)
 {
-  
-  
-  netsnmp_request_group_item *current;  
+
+
+  netsnmp_request_group_item *current;
   netsnmp_variable_list *var;
 
-  DEBUGMSGTL((AGENT,"saHpiEventTable_set_action. Entry.\n"));
-  for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_action. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-    
-      var = current->ri->requestvb; 
 
-      if ((*var->val.integer == SNMP_ROW_DESTROY)) {
-	/*
-	  No need for that.
-	if (row_ctx->hash != 0)
-	  delete_event_row(row_ctx->domain_id,
-			     row_ctx->resource_id,
-			     row_ctx->saHpiEventIndex);
-	*/
-	rg->row_deleted = 1;
-      } else // The rest of SNMP_ROW operations (4,5)
-	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-				       SNMP_ERR_INCONSISTENTVALUE);
-  }
-  DEBUGMSGTL((AGENT,"saHpiEventTable_set_action. Entry.\n"));
+      var = current->ri->requestvb;
+
+      if ((*var->val.integer == SNMP_ROW_DESTROY))
+	{
+	  /*
+	     No need for that.
+	     if (row_ctx->hash != 0)
+	     delete_event_row(row_ctx->domain_id,
+	     row_ctx->resource_id,
+	     row_ctx->saHpiEventIndex);
+	   */
+	  rg->row_deleted = 1;
+	}
+      else			// The rest of SNMP_ROW operations (4,5)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri,
+					SNMP_ERR_INCONSISTENTVALUE);
+    }
+  DEBUGMSGTL ((AGENT, "saHpiEventTable_set_action. Entry.\n"));
 }
 
 /************************************************************
@@ -1353,7 +1400,7 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
  * undo_info.
  */
 void
-saHpiEventTable_set_commit(netsnmp_request_group * rg)
+saHpiEventTable_set_commit (netsnmp_request_group * rg)
 {
 
 }
@@ -1367,7 +1414,7 @@ saHpiEventTable_set_commit(netsnmp_request_group * rg)
  * AFTER calling this routine, the agent will delete undo_info.
  */
 void
-saHpiEventTable_set_free(netsnmp_request_group * rg)
+saHpiEventTable_set_free (netsnmp_request_group * rg)
 {
 
 }
@@ -1391,9 +1438,9 @@ saHpiEventTable_set_free(netsnmp_request_group * rg)
  * == 1).
  */
 void
-saHpiEventTable_set_undo(netsnmp_request_group * rg)
+saHpiEventTable_set_undo (netsnmp_request_group * rg)
 {
-   
+
 }
 
 /************************************************************
@@ -1401,92 +1448,93 @@ saHpiEventTable_set_undo(netsnmp_request_group * rg)
  * Initialize the saHpiEventTable table by defining its contents and how it's structured
  */
 void
-initialize_table_saHpiEventTable(void)
+initialize_table_saHpiEventTable (void)
 {
-    netsnmp_table_registration_info *table_info;
+  netsnmp_table_registration_info *table_info;
 
-    if (my_handler) {
-        snmp_log(LOG_ERR,
-                 "initialize_table_saHpiEventTable_handler called again\n");
-        return;
+  if (my_handler)
+    {
+      snmp_log (LOG_ERR,
+		"initialize_table_saHpiEventTable_handler called again\n");
+      return;
     }
 
-    memset(&cb, 0x00, sizeof(cb));
+  memset (&cb, 0x00, sizeof (cb));
 
     /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+  table_info = SNMP_MALLOC_TYPEDEF (netsnmp_table_registration_info);
 
-    /*
-     * if your table is read only, it's easiest to change the
-     * HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY 
-     */
-    my_handler = netsnmp_create_handler_registration("saHpiEventTable",
-                                                     netsnmp_table_array_helper_handler,
-                                                     saHpiEventTable_oid,
-                                                     saHpiEventTable_oid_len,
-                                                     HANDLER_CAN_RWRITE);
+  /*
+   * if your table is read only, it's easiest to change the
+   * HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY 
+   */
+  my_handler = netsnmp_create_handler_registration ("saHpiEventTable",
+						    netsnmp_table_array_helper_handler,
+						    saHpiEventTable_oid,
+						    saHpiEventTable_oid_len,
+						    HANDLER_CAN_RWRITE);
 
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiEventTable_handler\n");
-        return; /** mallocs failed */
+  if (!my_handler || !table_info)
+    {
+      snmp_log (LOG_ERR, "malloc failed in "
+		"initialize_table_saHpiEventTable_handler\n");
+      return;	/** mallocs failed */
     }
 
     /***************************************************
      * Setting up the table's definition
-     */  
-
-    /*
-     * internal indexes
      */
-        /** index: saHpiDomainID */
-    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceID */
-    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiEntryID */
-    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    table_info->min_column = saHpiEventTable_COL_MIN;
-    table_info->max_column = saHpiEventTable_COL_MAX;
+  /*
+   * internal indexes
+   */
+	/** index: saHpiDomainID */
+  netsnmp_table_helper_add_index (table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceID */
+  netsnmp_table_helper_add_index (table_info, ASN_UNSIGNED);
+	/** index: saHpiEntryID */
+  netsnmp_table_helper_add_index (table_info, ASN_UNSIGNED);
+
+  table_info->min_column = saHpiEventTable_COL_MIN;
+  table_info->max_column = saHpiEventTable_COL_MAX;
 
     /***************************************************
      * registering the table with the master agent
      */
-    cb.get_value = saHpiEventTable_get_value;
-    cb.container = netsnmp_container_find("saHpiEventTable_primary:"
-                                          "saHpiEventTable:"
-                                          "table_container");
+  cb.get_value = saHpiEventTable_get_value;
+  cb.container = netsnmp_container_find ("saHpiEventTable_primary:"
+					 "saHpiEventTable:"
+					 "table_container");
 
-  
 
-    cb.create_row = (UserRowMethod *) saHpiEventTable_create_row;
-    
-    cb.duplicate_row = (UserRowMethod *) saHpiEventTable_duplicate_row;
-    cb.delete_row = (UserRowMethod *) saHpiEventTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiEventTable_row_copy;
 
-    cb.can_delete = (Netsnmp_User_Row_Action *) saHpiEventTable_can_delete;
+  cb.create_row = (UserRowMethod *) saHpiEventTable_create_row;
 
-    cb.set_reserve1 = saHpiEventTable_set_reserve1;
-    cb.set_reserve2 = saHpiEventTable_set_reserve2;
-    cb.set_action = saHpiEventTable_set_action;
-    cb.set_commit = saHpiEventTable_set_commit;
-    cb.set_free = saHpiEventTable_set_free;
-    cb.set_undo = saHpiEventTable_set_undo;
-    
+  cb.duplicate_row = (UserRowMethod *) saHpiEventTable_duplicate_row;
+  cb.delete_row = (UserRowMethod *) saHpiEventTable_delete_row;
+  cb.row_copy = (Netsnmp_User_Row_Operation *) saHpiEventTable_row_copy;
 
-    DEBUGMSGTL(("initialize_table_saHpiEventTable",
-                "Registering table saHpiEventTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+  cb.can_delete = (Netsnmp_User_Row_Action *) saHpiEventTable_can_delete;
 
-  netsnmp_register_read_only_instance(netsnmp_create_handler_registration
-					("event_count_entries",
-					 event_count_entries_handler,
-					 saHpiEventCount_oid,
-					 OID_LENGTH(saHpiEventCount_oid),
-					 HANDLER_CAN_RONLY));
+  cb.set_reserve1 = saHpiEventTable_set_reserve1;
+  cb.set_reserve2 = saHpiEventTable_set_reserve2;
+  cb.set_action = saHpiEventTable_set_action;
+  cb.set_commit = saHpiEventTable_set_commit;
+  cb.set_free = saHpiEventTable_set_free;
+  cb.set_undo = saHpiEventTable_set_undo;
+
+
+  DEBUGMSGTL (("initialize_table_saHpiEventTable",
+	       "Registering table saHpiEventTable " "as a table array\n"));
+  netsnmp_table_container_register (my_handler, table_info, &cb,
+				    cb.container, 1);
+
+  netsnmp_register_read_only_instance (netsnmp_create_handler_registration
+				       ("event_count_entries",
+					event_count_entries_handler,
+					saHpiEventCount_oid,
+					OID_LENGTH (saHpiEventCount_oid),
+					HANDLER_CAN_RONLY));
 
 }
 
@@ -1494,425 +1542,422 @@ initialize_table_saHpiEventTable(void)
  * saHpiEventTable_get_value
  */
 int
-saHpiEventTable_get_value(netsnmp_request_info *request,
-                          netsnmp_index * item,
-                          netsnmp_table_request_info *table_info)
+saHpiEventTable_get_value (netsnmp_request_info * request,
+			   netsnmp_index * item,
+			   netsnmp_table_request_info * table_info)
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiEventTable_context *context = (saHpiEventTable_context *) item;
+  netsnmp_variable_list *var = request->requestvb;
+  saHpiEventTable_context *context = (saHpiEventTable_context *) item;
 
-    switch (table_info->colnum) {
+  switch (table_info->colnum)
+    {
 
     case COLUMN_SAHPIEVENTINDEX:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiEventIndex,
-                                 sizeof(context->saHpiEventIndex));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiEventIndex,
+				sizeof (context->saHpiEventIndex));
+      break;
 
     case COLUMN_SAHPIEVENTTYPE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventType,
-                                 sizeof(context->saHpiEventType));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventType,
+				sizeof (context->saHpiEventType));
+      break;
 
     case COLUMN_SAHPIEVENTTIMESTAMP:
-            /** HpiTimeStamp = ASN_COUNTER64 */
-        snmp_set_var_typed_value(var, ASN_COUNTER64,
-                                 (char *) &context->saHpiEventTimestamp,
-                                 sizeof(context->saHpiEventTimestamp));
-        break;
+	    /** HpiTimeStamp = ASN_COUNTER64 */
+      snmp_set_var_typed_value (var, ASN_COUNTER64,
+				(char *) &context->saHpiEventTimestamp,
+				sizeof (context->saHpiEventTimestamp));
+      break;
 
     case COLUMN_SAHPIEVENTSEVERITY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventSeverity,
-                                 sizeof(context->saHpiEventSeverity));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventSeverity,
+				sizeof (context->saHpiEventSeverity));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORNUM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiEventSensorNum,
-                                 sizeof(context->saHpiEventSensorNum));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiEventSensorNum,
+				sizeof (context->saHpiEventSensorNum));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTYPE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventSensorType,
-                                 sizeof(context->saHpiEventSensorType));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventSensorType,
+				sizeof (context->saHpiEventSensorType));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORCATEGORY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorCategory,
-                                 sizeof(context->
-                                        saHpiEventSensorCategory));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorCategory,
+				sizeof (context->saHpiEventSensorCategory));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORASSERTION:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorAssertion,
-                                 sizeof(context->
-                                        saHpiEventSensorAssertion));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorAssertion,
+				sizeof (context->saHpiEventSensorAssertion));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUNSPECIFIED:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryUnspecified,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryUnspecified));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryUnspecified,
+				sizeof (context->
+					saHpiEventSensorStateCategoryUnspecified));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYTHRESHOLD:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryThreshold,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryThreshold));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryThreshold,
+				sizeof (context->
+					saHpiEventSensorStateCategoryThreshold));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSAGE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryUsage,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryUsage));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryUsage,
+				sizeof (context->
+					saHpiEventSensorStateCategoryUsage));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSTATE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryState,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryState));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryState,
+				sizeof (context->
+					saHpiEventSensorStateCategoryState));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPREDFAIL:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryPredFail,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryPredFail));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryPredFail,
+				sizeof (context->
+					saHpiEventSensorStateCategoryPredFail));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYLIMIT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryLimit,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryLimit));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryLimit,
+				sizeof (context->
+					saHpiEventSensorStateCategoryLimit));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPERFORMANCE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryPerformance,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryPerformance));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryPerformance,
+				sizeof (context->
+					saHpiEventSensorStateCategoryPerformance));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYSEVERITY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategorySeverity,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategorySeverity));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategorySeverity,
+				sizeof (context->
+					saHpiEventSensorStateCategorySeverity));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYPRESENCE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryPresence,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryPresence));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryPresence,
+				sizeof (context->
+					saHpiEventSensorStateCategoryPresence));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYENABLE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryEnable,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryEnable));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryEnable,
+				sizeof (context->
+					saHpiEventSensorStateCategoryEnable));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYAVAILABILITY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryAvailability,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryAvailability));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryAvailability,
+				sizeof (context->
+					saHpiEventSensorStateCategoryAvailability));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYREDUNDANCY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryRedundancy,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryRedundancy));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryRedundancy,
+				sizeof (context->
+					saHpiEventSensorStateCategoryRedundancy));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSER:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryUser,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryUser));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryUser,
+				sizeof (context->
+					saHpiEventSensorStateCategoryUser));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSTATECATEGORYGENERIC:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorStateCategoryGeneric,
-                                 sizeof(context->
-                                        saHpiEventSensorStateCategoryGeneric));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorStateCategoryGeneric,
+				sizeof (context->
+					saHpiEventSensorStateCategoryGeneric));
+      break;
 
     case COLUMN_SAHPIEVENTSENSOROPTIONALDATA:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorOptionalData,
-                                 sizeof(context->
-                                        saHpiEventSensorOptionalData));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorOptionalData,
+				sizeof (context->
+					saHpiEventSensorOptionalData));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGTYPE:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerReadingType,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerReadingType));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorTriggerReadingType,
+				sizeof (context->
+					saHpiEventSensorTriggerReadingType));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerReadingRaw,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerReadingRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorTriggerReadingRaw,
+				sizeof (context->
+					saHpiEventSensorTriggerReadingRaw));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETEDTYPE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerReadingInterpretedType,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerReadingInterpretedType));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorTriggerReadingInterpretedType,
+				sizeof (context->
+					saHpiEventSensorTriggerReadingInterpretedType));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerReadingInterpreted,
-                                 context->
-                                 saHpiEventSensorTriggerReadingInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiEventSensorTriggerReadingInterpreted,
+				context->
+				saHpiEventSensorTriggerReadingInterpreted_len);
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATE:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerReadingEventState,
-                                 context->
-                                 saHpiEventSensorTriggerReadingEventState_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiEventSensorTriggerReadingEventState,
+				context->
+				saHpiEventSensorTriggerReadingEventState_len);
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDTYPE:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerThresholdType,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerThresholdType));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorTriggerThresholdType,
+				sizeof (context->
+					saHpiEventSensorTriggerThresholdType));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerThresholdRaw,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerThresholdRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorTriggerThresholdRaw,
+				sizeof (context->
+					saHpiEventSensorTriggerThresholdRaw));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerThresholdInterpretedType,
-                                 sizeof(context->
-                                        saHpiEventSensorTriggerThresholdInterpretedType));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventSensorTriggerThresholdInterpretedType,
+				sizeof (context->
+					saHpiEventSensorTriggerThresholdInterpretedType));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerThresholdInterpreted,
-                                 context->
-                                 saHpiEventSensorTriggerThresholdInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiEventSensorTriggerThresholdInterpreted,
+				context->
+				saHpiEventSensorTriggerThresholdInterpreted_len);
+      break;
 
     case COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATE:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiEventSensorTriggerThresholdEventState,
-                                 context->
-                                 saHpiEventSensorTriggerThresholdEventState_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiEventSensorTriggerThresholdEventState,
+				context->
+				saHpiEventSensorTriggerThresholdEventState_len);
+      break;
 
     case COLUMN_SAHPIEVENTSENSORPREVIOUSSTATE:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorPreviousState,
-                                 sizeof(context->
-                                        saHpiEventSensorPreviousState));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorPreviousState,
+				sizeof (context->
+					saHpiEventSensorPreviousState));
+      break;
 
     case COLUMN_SAHPIEVENTSENSOROEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiEventSensorOem,
-                                 sizeof(context->saHpiEventSensorOem));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiEventSensorOem,
+				sizeof (context->saHpiEventSensorOem));
+      break;
 
     case COLUMN_SAHPIEVENTSENSORSPECIFIC:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventSensorSpecific,
-                                 sizeof(context->
-                                        saHpiEventSensorSpecific));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventSensorSpecific,
+				sizeof (context->saHpiEventSensorSpecific));
+      break;
 
     case COLUMN_SAHPIEVENTHOTSWAPSTATE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventHotSwapState,
-                                 sizeof(context->saHpiEventHotSwapState));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventHotSwapState,
+				sizeof (context->saHpiEventHotSwapState));
+      break;
 
     case COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventPreviousHotSwapState,
-                                 sizeof(context->
-                                        saHpiEventPreviousHotSwapState));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventPreviousHotSwapState,
+				sizeof (context->
+					saHpiEventPreviousHotSwapState));
+      break;
 
     case COLUMN_SAHPIEVENTWATCHDOGNUM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiEventWatchdogNum,
-                                 sizeof(context->saHpiEventWatchdogNum));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiEventWatchdogNum,
+				sizeof (context->saHpiEventWatchdogNum));
+      break;
 
     case COLUMN_SAHPIEVENTWATCHDOGACTION:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventWatchdogAction,
-                                 sizeof(context->
-                                        saHpiEventWatchdogAction));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventWatchdogAction,
+				sizeof (context->saHpiEventWatchdogAction));
+      break;
 
     case COLUMN_SAHPIEVENTWATCHDOGPRETIMERACTION:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiEventWatchdogPreTimerAction,
-                                 sizeof(context->
-                                        saHpiEventWatchdogPreTimerAction));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiEventWatchdogPreTimerAction,
+				sizeof (context->
+					saHpiEventWatchdogPreTimerAction));
+      break;
 
     case COLUMN_SAHPIEVENTWATCHDOGUSE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventWatchdogUse,
-                                 sizeof(context->saHpiEventWatchdogUse));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventWatchdogUse,
+				sizeof (context->saHpiEventWatchdogUse));
+      break;
 
     case COLUMN_SAHPIEVENTOEMMANUFACTURERIDT:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiEventOemManufacturerIdT,
-                                 sizeof(context->
-                                        saHpiEventOemManufacturerIdT));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiEventOemManufacturerIdT,
+				sizeof (context->
+					saHpiEventOemManufacturerIdT));
+      break;
 
     case COLUMN_SAHPIEVENTOEMEVENTDATA:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->saHpiEventOemEventData,
-                                 context->saHpiEventOemEventData_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->saHpiEventOemEventData,
+				context->saHpiEventOemEventData_len);
+      break;
 
     case COLUMN_SAHPIEVENTUSEREVENTDATA:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiEventUserEventData,
-                                 context->saHpiEventUserEventData_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiEventUserEventData,
+				context->saHpiEventUserEventData_len);
+      break;
 
     case COLUMN_SAHPIEVENTDELETE:
-            /** RowStatus = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiEventDelete,
-                                 sizeof(context->saHpiEventDelete));
-        break;
+	    /** RowStatus = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiEventDelete,
+				sizeof (context->saHpiEventDelete));
+      break;
 
-    default:/** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiEventTable_get_value\n");
-        return SNMP_ERR_GENERR;
+    default:
+	    /** We shouldn't get here */
+      snmp_log (LOG_ERR, "unknown column in " "saHpiEventTable_get_value\n");
+      return SNMP_ERR_GENERR;
     }
-    return SNMP_ERR_NOERROR;
+  return SNMP_ERR_NOERROR;
 }
 
 
 int
-event_count_entries_handler(netsnmp_mib_handler *handler,
-			 netsnmp_handler_registration *reginfo,
-			 netsnmp_agent_request_info *reqinfo,
-			 netsnmp_request_info *requests) {
+event_count_entries_handler (netsnmp_mib_handler * handler,
+			     netsnmp_handler_registration * reginfo,
+			     netsnmp_agent_request_info * reqinfo,
+			     netsnmp_request_info * requests)
+{
 
-  event_count = CONTAINER_SIZE(cb.container);
+  event_count = CONTAINER_SIZE (cb.container);
 
   if (reqinfo->mode == MODE_GET)
-    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-			     (u_char *) &event_count,
-			     sizeof(event_count));
-  
+    snmp_set_var_typed_value (requests->requestvb, ASN_COUNTER,
+			      (u_char *) & event_count, sizeof (event_count));
+
   return SNMP_ERR_NOERROR;
 }

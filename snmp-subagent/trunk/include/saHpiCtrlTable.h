@@ -22,7 +22,8 @@
 #define SAHPICTRLTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 
@@ -64,79 +65,77 @@ extern          "C" {
   //#define POS_DISCRETE 1
 
 
-    typedef struct saHpiCtrlTable_context_s {
-        netsnmp_index   index;
+  typedef struct saHpiCtrlTable_context_s
+  {
+    netsnmp_index index;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiCtrlNum;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiCtrlNum;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiCtrlOutputType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiCtrlOutputType;
 
-        /** TruthValue = ASN_INTEGER */
-        long            saHpiCtrlBool;
+	/** TruthValue = ASN_INTEGER */
+    long saHpiCtrlBool;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiCtrlType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiCtrlType;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiCtrlState[SAHPI_CTRL_STATE_MAX];
-        long            saHpiCtrlState_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiCtrlState[SAHPI_CTRL_STATE_MAX];
+    long saHpiCtrlState_len;
 
       /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiCtrlAttributes[SAHPI_CTRL_ATTR_MAX];
-        long            saHpiCtrlAttributes_len;
+    unsigned char saHpiCtrlAttributes[SAHPI_CTRL_ATTR_MAX];
+    long saHpiCtrlAttributes_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiCtrlOem;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiCtrlOem;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiCtrlTextType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiCtrlTextType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiCtrlTextLanguage;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiCtrlTextLanguage;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiCtrlText[SAHPI_TEXT_MAX];
-        long            saHpiCtrlText_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiCtrlText[SAHPI_TEXT_MAX];
+    long saHpiCtrlText_len;
 
-        /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiCtrlRDR[MAX_OID_LEN];
-        long            saHpiCtrlRDR_len;
+	/** RowPointer = ASN_OBJECT_ID */
+    oid saHpiCtrlRDR[MAX_OID_LEN];
+    long saHpiCtrlRDR_len;
 
-      
-      long resource_id;
-      long hash;
-      long domain_id;
-    } saHpiCtrlTable_context;
+
+    long resource_id;
+    long hash;
+    long domain_id;
+  } saHpiCtrlTable_context;
 
 /*************************************************************
  * function declarations
  */
 
-    void            initialize_table_saHpiCtrlTable(void);
+  void initialize_table_saHpiCtrlTable (void);
 
-    int             saHpiCtrlTable_get_value(netsnmp_request_info *,
-                                             netsnmp_index *,
-                                             netsnmp_table_request_info *);
+  int saHpiCtrlTable_get_value (netsnmp_request_info *,
+				netsnmp_index *,
+				netsnmp_table_request_info *);
 
-int  populate_control(SaHpiCtrlRecT *ctrl, 
-		      SaHpiRptEntryT *rpt_entry,
-		      oid *rdr_entry_oid, size_t rdr_entry_oid_len,
-		      oid *ctrl_oid, size_t *ctrl_oid_len);
-  
-
- int
-   delete_ctrl_row(SaHpiDomainIdT domain_id,
-		   SaHpiResourceIdT resource_id,
-		   SaHpiCtrlNumT num);
+  int populate_control (SaHpiCtrlRecT * ctrl,
+			SaHpiRptEntryT * rpt_entry,
+			oid * rdr_entry_oid, size_t rdr_entry_oid_len,
+			oid * ctrl_oid, size_t * ctrl_oid_len);
 
 
-  int 
-  set_ctrl_state(saHpiCtrlTable_context *ctx);
+  int
+    delete_ctrl_row (SaHpiDomainIdT domain_id,
+		     SaHpiResourceIdT resource_id, SaHpiCtrlNumT num);
 
-  int 
-  read_textline(saHpiCtrlTable_context *ctx);
+
+  int set_ctrl_state (saHpiCtrlTable_context * ctx);
+
+  int read_textline (saHpiCtrlTable_context * ctx);
 /*************************************************************
  * oid declarations
  */
@@ -164,31 +163,30 @@ int  populate_control(SaHpiCtrlRecT *ctrl,
 #define saHpiCtrlTable_COL_MIN 1
 #define saHpiCtrlTable_COL_MAX 11
 
-  
 
-    int             saHpiCtrlTable_extract_index(saHpiCtrlTable_context *
-                                                 ctx, netsnmp_index * hdr);
-  
-    void            saHpiCtrlTable_set_reserve1(netsnmp_request_group *);
-    void            saHpiCtrlTable_set_reserve2(netsnmp_request_group *);
-    void            saHpiCtrlTable_set_action(netsnmp_request_group *);
-    void            saHpiCtrlTable_set_commit(netsnmp_request_group *);
-    void            saHpiCtrlTable_set_free(netsnmp_request_group *);
-    void            saHpiCtrlTable_set_undo(netsnmp_request_group *);
+
+  int saHpiCtrlTable_extract_index (saHpiCtrlTable_context *
+				    ctx, netsnmp_index * hdr);
+
+  void saHpiCtrlTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiCtrlTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiCtrlTable_set_action (netsnmp_request_group *);
+  void saHpiCtrlTable_set_commit (netsnmp_request_group *);
+  void saHpiCtrlTable_set_free (netsnmp_request_group *);
+  void saHpiCtrlTable_set_undo (netsnmp_request_group *);
 
     saHpiCtrlTable_context
-        *saHpiCtrlTable_duplicate_row(saHpiCtrlTable_context *);
-    netsnmp_index  *saHpiCtrlTable_delete_row(saHpiCtrlTable_context *);
+    * saHpiCtrlTable_duplicate_row (saHpiCtrlTable_context *);
+  netsnmp_index *saHpiCtrlTable_delete_row (saHpiCtrlTable_context *);
 
-    int             saHpiCtrlTable_can_delete(saHpiCtrlTable_context *
-                                              undo_ctx,
-                                              saHpiCtrlTable_context *
-                                              row_ctx,
-                                              netsnmp_request_group * rg);
+  int saHpiCtrlTable_can_delete (saHpiCtrlTable_context *
+				 undo_ctx,
+				 saHpiCtrlTable_context *
+				 row_ctx, netsnmp_request_group * rg);
 
-  
 
-    saHpiCtrlTable_context *saHpiCtrlTable_create_row(netsnmp_index *);
+
+  saHpiCtrlTable_context *saHpiCtrlTable_create_row (netsnmp_index *);
 
 
 #ifdef __cplusplus

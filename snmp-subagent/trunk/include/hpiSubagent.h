@@ -121,9 +121,9 @@
 #define INTERVAL_TOKEN "check_hpi_interval"
 #define MAX_EVENT_TOKEN "max_event_rows"
 
-void hpiSubagent_parse_config_traps(const char *, char *);
-void hpiSubagent_parse_config_interval(const char *, char *);
-void hpiSubagent_parse_config_max_event(const char *, char *);
+void hpiSubagent_parse_config_traps (const char *, char *);
+void hpiSubagent_parse_config_interval (const char *, char *);
+void hpiSubagent_parse_config_max_event (const char *, char *);
 
 
 /*
@@ -134,8 +134,7 @@ void hpiSubagent_parse_config_max_event(const char *, char *);
  *   AGENT_ERR_SESSION_CLOSE if encountered problems. Query 'rcSaHpi()' to
  *      find out what kind of return code SAHPI library returns.
  */
-int 
-closeSaHpiSession( void );
+int closeSaHpiSession (void);
 
 /*
  * Get the HPI session key. If the session hasn't been started this
@@ -152,7 +151,7 @@ closeSaHpiSession( void );
  *
  * Query the 'rcSaHpi()' to get the SAHPI return code.
  */
-int getSaHpiSession(SaHpiSessionIdT *out);
+int getSaHpiSession (SaHpiSessionIdT * out);
 
 /*
  * Find out if the SAHPI information changed. The 'answer'
@@ -172,7 +171,7 @@ int getSaHpiSession(SaHpiSessionIdT *out);
  *  AGENT_ERR_RPTGET - error during saHpiRptInfoGet operation
  *  
  */
-int didSaHpiChanged(int *answer, SaHpiRptInfoT *info );
+int didSaHpiChanged (int *answer, SaHpiRptInfoT * info);
 
 /*
  * Return the latest return code for the SAHPI library operation.
@@ -182,7 +181,7 @@ int didSaHpiChanged(int *answer, SaHpiRptInfoT *info );
  * Return:
  *  Consult SaHpi.h for the latest information.
  */
-SaErrorT rcSaHpi( void );
+SaErrorT rcSaHpi (void);
 
 /*
  * Calculate a hash value of the 'data' which is 'len' bytes
@@ -196,7 +195,7 @@ SaErrorT rcSaHpi( void );
  *
  * @return hash value. 
  */
-long calculate_hash_value(void *data, int len);
+long calculate_hash_value (void *data, int len);
 
 /*
  * Construct a full OID from three different sources:
@@ -219,15 +218,16 @@ long calculate_hash_value(void *data, int len);
  * @return AGENT_ERR_NOERROR - operation went ok
  * @return AGENT_ERR_MEMORY_FAULT - the resulting OID would be bigger than the 'in_len'
  *    count.
- */ 
-int build_full_oid(oid *prefix, size_t prefix_len,
-		   oid *column, size_t column_len,
-		   netsnmp_index *index,
-		   oid *out_oid, size_t in_len, size_t *out_len);
+ */
+int build_full_oid (oid * prefix, size_t prefix_len,
+		    oid * column, size_t column_len,
+		    netsnmp_index * index,
+		    oid * out_oid, size_t in_len, size_t * out_len);
 
 #ifndef TRAP_VARS_HAVE
 #define TRAP_VARS_HAVE
-typedef struct trap_vars_ {
+typedef struct trap_vars_
+{
   int column;
   u_char type;
   u_char *value;
@@ -235,12 +235,16 @@ typedef struct trap_vars_ {
 } trap_vars;
 #endif
 
-netsnmp_variable_list *build_notification(
-					  const netsnmp_index *index,
-					  const trap_vars *var, const size_t var_len,
-					  const oid *notification_oid, const size_t notification_oid_len,
-					  const oid *root_table_oid, const size_t root_table_oid_len,
-					  const SaHpiDomainIdT domain_id, 
-					  const oid *domain_id_oid, const size_t domain_id_oid_len,
-					  const SaHpiResourceIdT resource_id, 
-					  const oid *resource_id_oid, const size_t resource_id_oid_len);
+netsnmp_variable_list *build_notification (const netsnmp_index * index,
+					   const trap_vars * var,
+					   const size_t var_len,
+					   const oid * notification_oid,
+					   const size_t notification_oid_len,
+					   const oid * root_table_oid,
+					   const size_t root_table_oid_len,
+					   const SaHpiDomainIdT domain_id,
+					   const oid * domain_id_oid,
+					   const size_t domain_id_oid_len,
+					   const SaHpiResourceIdT resource_id,
+					   const oid * resource_id_oid,
+					   const size_t resource_id_oid_len);

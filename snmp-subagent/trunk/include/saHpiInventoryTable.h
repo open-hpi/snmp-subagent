@@ -21,7 +21,8 @@
 #define SAHPIINVENTORYTABLE_H
 
 #ifdef __cplusplus
-extern          "C" {
+extern "C"
+{
 #endif
 
 #include <net-snmp/net-snmp-config.h>
@@ -73,100 +74,98 @@ extern          "C" {
 #define SAHPI_INVENT_RECTYPE_PRODUCT_INFO_MAX 4
 #define SAHPI_INVENT_RECTYPE_OEM_MAX 4
 
-    typedef struct saHpiInventoryTable_context_s {
-        netsnmp_index   index;
-                   
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiInventoryEirId;
+  typedef struct saHpiInventoryTable_context_s
+  {
+    netsnmp_index index;
+
+	/** UNSIGNED32 = ASN_UNSIGNED */
+    unsigned long saHpiInventoryEirId;
       /** UNSIGNED32 */
-      unsigned long saHpiInventoryIndex;
+    unsigned long saHpiInventoryIndex;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiInventoryRecordType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiInventoryRecordType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiInventoryValidity;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiInventoryValidity;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryAttributes[SAHPI_INVENTORY_ATTRIBUTES_MAX];
-        long            saHpiInventoryAttributes_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryAttributes[SAHPI_INVENTORY_ATTRIBUTES_MAX];
+    long saHpiInventoryAttributes_len;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiInventoryTextType;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiInventoryTextType;
 
-        /** INTEGER = ASN_INTEGER */
-        long            saHpiInventoryTextLanguage;
+	/** INTEGER = ASN_INTEGER */
+    long saHpiInventoryTextLanguage;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryManufacturer[SAHPI_STRING_MAX];
-        long            saHpiInventoryManufacturer_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryManufacturer[SAHPI_STRING_MAX];
+    long saHpiInventoryManufacturer_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryProductName[SAHPI_STRING_MAX];
-        long            saHpiInventoryProductName_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryProductName[SAHPI_STRING_MAX];
+    long saHpiInventoryProductName_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryProductVersion[SAHPI_STRING_MAX];
-        long            saHpiInventoryProductVersion_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryProductVersion[SAHPI_STRING_MAX];
+    long saHpiInventoryProductVersion_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryModelNumber[SAHPI_STRING_MAX];
-        long            saHpiInventoryModelNumber_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryModelNumber[SAHPI_STRING_MAX];
+    long saHpiInventoryModelNumber_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventorySerialNumber[SAHPI_STRING_MAX];
-        long            saHpiInventorySerialNumber_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventorySerialNumber[SAHPI_STRING_MAX];
+    long saHpiInventorySerialNumber_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryPartNumber[SAHPI_STRING_MAX];
-        long            saHpiInventoryPartNumber_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryPartNumber[SAHPI_STRING_MAX];
+    long saHpiInventoryPartNumber_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryFileId[SAHPI_STRING_MAX];
-        long            saHpiInventoryFileId_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryFileId[SAHPI_STRING_MAX];
+    long saHpiInventoryFileId_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryAssetTag[SAHPI_STRING_MAX];
-        long            saHpiInventoryAssetTag_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryAssetTag[SAHPI_STRING_MAX];
+    long saHpiInventoryAssetTag_len;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiInventoryCustomField[SAHPI_STRING_MAX];
-        long            saHpiInventoryCustomField_len;
+	/** OCTETSTR = ASN_OCTET_STR */
+    unsigned char saHpiInventoryCustomField[SAHPI_STRING_MAX];
+    long saHpiInventoryCustomField_len;
 
-        /** RowPointer = ASN_OBJECT_ID */
-        oid             saHpiInventoryRDR[MAX_OID_LEN];
-        long            saHpiInventoryRDR_len;
+	/** RowPointer = ASN_OBJECT_ID */
+    oid saHpiInventoryRDR[MAX_OID_LEN];
+    long saHpiInventoryRDR_len;
 
-      long domain_id;
-      long resource_id;
-      long hash;
+    long domain_id;
+    long resource_id;
+    long hash;
 
-      long count_of_subitems;
-    } saHpiInventoryTable_context;
+    long count_of_subitems;
+  } saHpiInventoryTable_context;
 
 /*************************************************************
  * function declarations
  */
 
-    void            initialize_table_saHpiInventoryTable(void);
+  void initialize_table_saHpiInventoryTable (void);
 
 
-    int             saHpiInventoryTable_get_value(netsnmp_request_info *,
-                                                  netsnmp_index *,
-                                                  netsnmp_table_request_info
-                                                  *);
+  int saHpiInventoryTable_get_value (netsnmp_request_info *,
+				     netsnmp_index *,
+				     netsnmp_table_request_info *);
 
-  int  populate_inventory(SaHpiInventoryRecT *control,
-			  SaHpiRptEntryT *rpt_entry,
-			  oid *rdr_oid, size_t rdr_oid_len,
-			  oid *control_oid, 
-			  size_t *control_oid_len);
+  int populate_inventory (SaHpiInventoryRecT * control,
+			  SaHpiRptEntryT * rpt_entry,
+			  oid * rdr_oid, size_t rdr_oid_len,
+			  oid * control_oid, size_t * control_oid_len);
   int
-  delete_inventory_rows(SaHpiDomainIdT domain_id,
-		     SaHpiResourceIdT resource_id,
-		     SaHpiEirIdT num);
+    delete_inventory_rows (SaHpiDomainIdT domain_id,
+			   SaHpiResourceIdT resource_id, SaHpiEirIdT num);
 
-  int set_inventory(saHpiInventoryTable_context *ctx);
+  int set_inventory (saHpiInventoryTable_context * ctx);
 
 
 /*************************************************************
@@ -201,39 +200,34 @@ extern          "C" {
 #define saHpiInventoryTable_COL_MIN 1
 #define saHpiInventoryTable_COL_MAX 17
 
- 
 
-    int            
-        saHpiInventoryTable_extract_index(saHpiInventoryTable_context *
-                                          ctx, netsnmp_index * hdr);
-  
-    void            saHpiInventoryTable_set_reserve1(netsnmp_request_group
-                                                     *);
-    void            saHpiInventoryTable_set_reserve2(netsnmp_request_group
-                                                     *);
-    void            saHpiInventoryTable_set_action(netsnmp_request_group
-                                                   *);
-    void            saHpiInventoryTable_set_commit(netsnmp_request_group
-                                                   *);
-    void            saHpiInventoryTable_set_free(netsnmp_request_group *);
-    void            saHpiInventoryTable_set_undo(netsnmp_request_group *);
+
+  int
+    saHpiInventoryTable_extract_index (saHpiInventoryTable_context *
+				       ctx, netsnmp_index * hdr);
+
+  void saHpiInventoryTable_set_reserve1 (netsnmp_request_group *);
+  void saHpiInventoryTable_set_reserve2 (netsnmp_request_group *);
+  void saHpiInventoryTable_set_action (netsnmp_request_group *);
+  void saHpiInventoryTable_set_commit (netsnmp_request_group *);
+  void saHpiInventoryTable_set_free (netsnmp_request_group *);
+  void saHpiInventoryTable_set_undo (netsnmp_request_group *);
 
     saHpiInventoryTable_context
-        *saHpiInventoryTable_duplicate_row(saHpiInventoryTable_context *);
-	
-    netsnmp_index 
-        *saHpiInventoryTable_delete_row(saHpiInventoryTable_context *);
-  
-    int            
-        saHpiInventoryTable_can_delete(saHpiInventoryTable_context *
-                                       undo_ctx,
-                                       saHpiInventoryTable_context *
-                                       row_ctx,
-                                       netsnmp_request_group * rg);
-  
+    * saHpiInventoryTable_duplicate_row (saHpiInventoryTable_context *);
+
+    netsnmp_index
+    * saHpiInventoryTable_delete_row (saHpiInventoryTable_context *);
+
+  int
+    saHpiInventoryTable_can_delete (saHpiInventoryTable_context *
+				    undo_ctx,
+				    saHpiInventoryTable_context *
+				    row_ctx, netsnmp_request_group * rg);
+
 
     saHpiInventoryTable_context
-        *saHpiInventoryTable_create_row(netsnmp_index *);
+    * saHpiInventoryTable_create_row (netsnmp_index *);
 
 
 #ifdef __cplusplus
