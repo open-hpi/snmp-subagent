@@ -2830,7 +2830,7 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorRangeReadingEventSensor	OCTET STRING,
 
 	saHpiSensorThresholdDefnIsThreshold		TruthValue,
-	saHpiSensorThresholdDefnTholdCapabilities	INTEGER,
+	saHpiSensorThresholdDefnTholdCapabilities	Unsigned32,
 	saHpiSensorThresholdDefnReadThold	Unsigned32,
 	saHpiSensorThresholdDefnWriteThold	Unsigned32,
 	saHpiSensorThresholdDefnFixedThold	Unsigned32,
@@ -3662,13 +3662,12 @@ saHpiSensorThresholdDefnIsThreshold OBJECT-TYPE
         ::= {saHpiSensorEntry 22}
 
 saHpiSensorThresholdDefnTholdCapabilities OBJECT-TYPE
-        SYNTAX          INTEGER {
-				raw(1),
-				interpretted(2)
-			}
+        SYNTAX          Unsigned32(1..2)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "How the threshold values are written. Raw or in interpreted state"
+        DESCRIPTION     "
+	How the threshold values are written. 
+	Raw (0x01) or in interpreted state (0x02)"
         ::= {saHpiSensorEntry 23}
 
 saHpiSensorThresholdDefnReadThold OBJECT-TYPE
