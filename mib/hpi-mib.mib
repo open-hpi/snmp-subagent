@@ -6749,8 +6749,9 @@ saHpiSensorThdLowMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMajorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining severely degraded status at the
-        lower bound of the critical threshold values for a given sensor." 
+        DESCRIPTION     "A table definining lower major threshold values."
+	REFERENCE
+	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 	
         ::= {hpiSensor 8}
 
 saHpiSensorThdLowMajorEntry OBJECT-TYPE
