@@ -142,7 +142,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
         "Textual convention for an unsigned 16-bit data, 
     2-byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
      see typedef unsigned short    SaHpiUint16T;"
     SYNTAX       INTEGER (0..65535)
 
@@ -151,7 +151,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
     DESCRIPTION
         "Textual convention for an unsigned 8-bit data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
         see typedef unsigned char SaHpiUint8T;"
     SYNTAX      INTEGER(0..255)
 
@@ -161,7 +161,7 @@ Float64 ::= TEXTUAL-CONVENTION
         "Textual convention for an 64 bit float number, 
     8 byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 152.
+        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
         The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
         sign(1)exponent(11)mantissa(52)."
     SYNTAX      Opaque (SIZE(0..65))
@@ -1080,7 +1080,7 @@ SaHpiGuid ::= TEXTUAL-CONVENTION
 	version 1 of the GUID format, with a 3-bit variant field of 
 	10x (where x indicates 'don't care')"
 	REFERENCE
-	"Derieved from SAI-HPI-B.01.01 spec, pg 186."
+	"Derieved from SAI-HPI-B.01.01 section 8.21."
         SYNTAX          OCTET STRING(SIZE(0..15))
 
 -- *************************************
@@ -1199,7 +1199,7 @@ saHpiDomainCapabilities OBJECT-TYPE
         
         This definition defines the capabilities of a given domain. 
 	A domain may support any number of capabilities , each 
-	capability seperated by a delimeter (,).
+	capability seperated by a delimeter. See textual.
         
         AUTOINSERT_READ_ONLY
           Indicates that the domain auto insert timeout value is 
@@ -1376,16 +1376,18 @@ saHpiDomainGuid         OBJECT-TYPE
         SYNTAX          SaHpiGuid
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The GUID is used to uniquely identify a domain.
-        A GUID value of zero is not valid and indicates that the domain 
-        does not have an associated GUID.
+        DESCRIPTION     
+	"The GUID is used to uniquely identify a domain.  A GUID value
+	of zero is not valid and indicates that the domain does not 
+	have an associated GUID.
  
-        GUID - Globally Unique Identifier
-
-        The format if the ID follows that specified by the Wired for
-        Management Baseline, Version 2.0 specification.  HPI uses
-        version 1 of the GUID format, with a 3-bit variant field of 
-        10x (where x indicates 'don't care')"
+	GUID - Globally Unique Identifier
+	
+	A GUID value of zero is not valid and indicates that the domain 
+	does not have an associated GUID.
+	See textual convention"
+	REFERENCE 
+	"SAI-HPI-B.01.01 section 8.22."
 	::=   {saHpiDomainInfoEntry 19 }
 
 
@@ -1900,7 +1902,8 @@ saHpiResourceCapabilities OBJECT-TYPE
         
         This definition defines the capabilities of a given resource.
         One resource may support any number of capabilities using this
-        string (each capability is seperated by a delimeter). 
+        string (each capability is seperated by a delimeter, See 
+	textual-convention for further definition.). 
 
         Because each entry in an RPT will have the 
         RESOURCE string, no value  is not a valid value for the 
@@ -2009,7 +2012,7 @@ saHpiResourceFailed OBJECT-TYPE
 
 
 saHpiResourceInfoResourceRev OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " 
@@ -2036,7 +2039,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
 
 
 saHpiResourceInfoSpecificVer OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2048,7 +2051,7 @@ saHpiResourceInfoSpecificVer OBJECT-TYPE
 
 
 saHpiResourceInfoDeviceSupport OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2072,7 +2075,7 @@ saHpiResourceInfoManufacturerId OBJECT-TYPE
 
 
 saHpiResourceInfoProductId OBJECT-TYPE 
-        SYNTAX          Unsigned32
+        SYNTAX          Unsigned16
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2085,7 +2088,7 @@ saHpiResourceInfoProductId OBJECT-TYPE
 
 
 saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2096,7 +2099,7 @@ saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE
 
 
 saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2108,7 +2111,7 @@ saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE
 
 
 saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE 
-        SYNTAX          Unsigned32(0..255)
+        SYNTAX          Unsigned8
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -2122,18 +2125,13 @@ saHpiResourceInfoGuid   OBJECT-TYPE
         SYNTAX          SaHpiGuid
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        GUID - Globally Unique Identifier
-
-        The format if the ID follows that specified by the Wired for Management 
-        Baseline, Version 2.0 specification.  HPI uses version 1 of the GUID
-        format, with a 3-bit variant field of 10x (where x indicates 'don't care')
+        DESCRIPTION     
+	"The GUID is used to uniquely identify a Resource. A GUID value of zero is not
+	valid and indicates that the Resource does not have an associated GUID.
 	
 	See textial-convention"
 	REFERENCE 
 	"See SAI-HPI-B.01.01 sections 6.3 and 8.21"
-	
-
 	::=   {saHpiResourceEntry 16 }
 
 
@@ -3187,23 +3185,45 @@ saHpiSensorEnableChangeEventDeassertEvents OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Refer to the textual convention for more details."
+    "Refer to the textual convention for more details."
     ::= {saHpiSensorEnableChangeEventEntry 7}
 
-
 saHpiSensorEnableChangeEventOptionalData OBJECT-TYPE
-    SYNTAX      Unsigned8
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-        ""
+	SYNTAX      SaHpiCapabilities
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION 
+	"This columnar node provides a list of string delimited indicators.  See
+	textual convention for details.
+    
+	Sensor events may contain optional data items passed and stored with the 
+	event. If these optional data items are present, they will be included with 
+	the event data returned in response to a saHpiEventGet (SAI-HPI-b.01.01 
+	section 6.5.3) or saHpiEventLogEntryGet (SAI-HPI-B.01.01 section 6.4.2). 
+	Also, the optional data items may be included with the event data passed 
+	to the saHpiEventLogEntryAdd (SAI-HPI-B.01.01 section 6.4.3).
+    
+	Specific implementations of HPI (SNMP subagent) may have restrictions on 
+	how much data may be passed to saHpiEventLogEntryAdd. These restrictions 
+	should be documented by the provider of the HPI interface.
+
+	String token values are listed below.
+		SAHPI_SOD_TRIGGER_READING   
+		SAHPI_SOD_TRIGGER_THRESHOLD 
+		SAHPI_SOD_OEM               
+		SAHPI_SOD_PREVIOUS_STATE    
+		SAHPI_SOD_CURRENT_STATE     
+		SAHPI_SOD_SENSOR_SPECIFIC"
+    REFERENCE
+    "See SAI-HPI-B.01.01 section 8.14"
     ::= {saHpiSensorEnableChangeEventEntry 8}
+    
 saHpiSensorEnableChangeEventState OBJECT-TYPE
     SYNTAX      SaHpiEventState
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Current set of asserted Event states."
+    "Current set of asserted Event states."
     ::= {saHpiSensorEnableChangeEventEntry 9}
 
 
