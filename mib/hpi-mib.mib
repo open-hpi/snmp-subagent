@@ -1311,12 +1311,12 @@ saHpiDrtIsPeer OBJECT-TYPE
 
 -- *************************************
 -- **
--- **   DAT
+-- **   Domain Alarm Table
 -- **
 -- *************************************
         
 
-saHpiDatEntryCount OBJECT-TYPE
+saHpiAlarmEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -1328,8 +1328,8 @@ saHpiDatEntryCount OBJECT-TYPE
         ::= {hpiEntity 5}
 
 
-saHpiDatTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiDatEntry
+saHpiAlarmTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiAlarmEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
@@ -1338,16 +1338,16 @@ saHpiDatTable OBJECT-TYPE
          are used to address an entity."
         ::= {hpiEntity 6}
         
-saHpiDatEntry OBJECT-TYPE
-        SYNTAX          SaHpiDatEntry
+saHpiAlarmEntry OBJECT-TYPE
+        SYNTAX          SaHpiAlarmEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
         "This table is used to store alarm information."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiAlarmId }
-        ::= {saHpiDatTable 1}
+        ::= {saHpiAlarmTable 1}
         
-SaHpiDatEntry ::= SEQUENCE {
+SaHpiAlarmEntry ::= SEQUENCE {
 
         saHpiAlarmId                    SaHpiInstrumentId,    
         saHpiAlarmTimestamp                  SaHpiTime,  
@@ -1363,9 +1363,9 @@ SaHpiDatEntry ::= SEQUENCE {
                
         saHpiAlarmCondMid               Unsigned32,
         
-        saHpiAlarmCondDataTextType      SaHpiTextType,
-        saHpiAlarmCondDataTextLanguage  SaHpiTextLanguage,
-        saHpiAlarmCondData              SaHpiText,
+        saHpiAlarmCondAlarmaTextType      SaHpiTextType,
+        saHpiAlarmCondAlarmaTextLanguage  SaHpiTextLanguage,
+        saHpiAlarmCondAlarma              SaHpiText,
         saHpiAlarmDelete                        RowStatus
         }
         
@@ -1375,7 +1375,7 @@ saHpiAlarmId OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Alarm Id"
 
-        ::= {saHpiDatEntry 1}
+        ::= {saHpiAlarmEntry 1}
         
 saHpiAlarmTimestamp OBJECT-TYPE
         SYNTAX          SaHpiTime
@@ -1383,7 +1383,7 @@ saHpiAlarmTimestamp OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Time when alarm was added to the DAT table.
         Refer to SaSaHpiTime for full describption."
-        ::= {saHpiDatEntry 2}
+        ::= {saHpiAlarmEntry 2}
 
 saHpiAlarmSeverity OBJECT-TYPE 
         SYNTAX          INTEGER {
@@ -1403,7 +1403,7 @@ saHpiAlarmSeverity OBJECT-TYPE
         (Only used with DAT and Annunciator
         functions.  This is not a valid
         severity for events or alarms)" 
-        ::= {saHpiDatEntry 3}
+        ::= {saHpiAlarmEntry 3}
         
 saHpiAlarmAcknowledged OBJECT-TYPE
         SYNTAX          TruthValue
@@ -1450,7 +1450,7 @@ saHpiAlarmAcknowledged OBJECT-TYPE
         so using either symbol will have the same effect.  However,                 
         SAHPI_ENTRY_UNSPECIFIED should be used with this function for clarity.      
         "
-        ::= {saHpiDatEntry 4}
+        ::= {saHpiAlarmEntry 4}
         
 saHpiAlarmCondStatusCondType OBJECT-TYPE 
         SYNTAX          INTEGER {
@@ -1464,7 +1464,7 @@ saHpiAlarmCondStatusCondType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Enumeration of status condition type." 
-        ::= {saHpiDatEntry 5}   
+        ::= {saHpiAlarmEntry 5}   
 
 saHpiAlarmCondEntityPath OBJECT-TYPE 
         SYNTAX          OCTET STRING
@@ -1493,7 +1493,7 @@ saHpiAlarmCondEntityPath OBJECT-TYPE
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 
-        ::= {saHpiDatEntry 6}
+        ::= {saHpiAlarmEntry 6}
 
 saHpiAlarmCondSensorNum OBJECT-TYPE 
         SYNTAX          Unsigned32
@@ -1502,7 +1502,7 @@ saHpiAlarmCondSensorNum OBJECT-TYPE
         DESCRIPTION     
         "Sensor associated with status Only valid if Type is
          SAHPI_STATUS_COND_TYPE_SENSOR"
-        ::= {saHpiDatEntry 7}
+        ::= {saHpiAlarmEntry 7}
         
 saHpiAlarmCondEventState OBJECT-TYPE
         SYNTAX          SaHpiEventState
@@ -1511,7 +1511,7 @@ saHpiAlarmCondEventState OBJECT-TYPE
         DESCRIPTION     
         "Sensor event state.  Only valid if saHpiAlarmCondStatusCondType is 
         sensor(1)."
-        ::= {saHpiDatEntry 8}
+        ::= {saHpiAlarmEntry 8}
         
 saHpiAlarmCondNameValue OBJECT-TYPE 
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -1524,7 +1524,7 @@ saHpiAlarmCondNameValue OBJECT-TYPE
         Specification standardizes the interface between Service 
         Availability(TM) Forum compliant High Availability (HA) 
         middleware and service applications. http://www.saforum.org"
-        ::= {saHpiDatEntry 9}
+        ::= {saHpiAlarmEntry 9}
         
 saHpiAlarmCondMid OBJECT-TYPE 
         SYNTAX          Unsigned32 
@@ -1533,34 +1533,34 @@ saHpiAlarmCondMid OBJECT-TYPE
         DESCRIPTION     
         "Manufacturer Id associated with status condition, 
         required when saHpiAlarmCondStatusCondType is oem(3)."
-        ::= {saHpiDatEntry 10}
+        ::= {saHpiAlarmEntry 10}
         
-saHpiAlarmCondDataTextType OBJECT-TYPE 
+saHpiAlarmCondAlarmaTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "Optional data associated with status 
         condition. For more details, see textual definition"
-        ::= {saHpiDatEntry 11}
+        ::= {saHpiAlarmEntry 11}
 
-saHpiAlarmCondDataTextLanguage OBJECT-TYPE
+saHpiAlarmCondAlarmaTextLanguage OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status 
         condition. For more details, see textual definition"
-        ::= {saHpiDatEntry 12}
+        ::= {saHpiAlarmEntry 12}
 
-saHpiAlarmCondData      OBJECT-TYPE
+saHpiAlarmCondAlarma      OBJECT-TYPE
         SYNTAX          SaHpiText
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
         "Optional data associated with status condition.
-        The type of date is specified by saHpiAlarmCondDataTextType and 
-        saHpiAlarmCondDataTextLanguage."
-        ::= {saHpiDatEntry 13}
+        The type of date is specified by saHpiAlarmCondAlarmaTextType and 
+        saHpiAlarmCondAlarmaTextLanguage."
+        ::= {saHpiAlarmEntry 13}
 
 saHpiAlarmDelete OBJECT-TYPE
         SYNTAX          RowStatus
@@ -1568,7 +1568,7 @@ saHpiAlarmDelete OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         " "
-        ::= {saHpiDatEntry 14}
+        ::= {saHpiAlarmEntry 14}
 
 --/*******************************************************************************
 -- * *****************************************************************************
@@ -6169,11 +6169,11 @@ saHpiInventoryRDR OBJECT-TYPE
         
 -- **************************************
 -- **
--- ** saHpiInventoryDataAreaTable
+-- ** saHpiAreaTable
 -- **
 -- **************************************
 
-saHpiInventoryDataAreaCount OBJECT-TYPE
+saHpiAreaCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -6181,15 +6181,15 @@ saHpiInventoryDataAreaCount OBJECT-TYPE
         "The number of inventory resource area data records present on this system."
         ::= {hpiInventory 3}
 
-saHpiInventoryDataAreaTable OBJECT-TYPE
-        SYNTAX          SEQUENCE OF SaHpiInventoryDataAreaEntry
+saHpiAreaTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiAreaEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Table defining inventory data respoitory data area records."
         ::= {hpiInventory 4}
         
-saHpiInventoryDataAreaEntry OBJECT-TYPE
-        SYNTAX          SaHpiInventoryDataAreaEntry
+saHpiAreaEntry OBJECT-TYPE
+        SYNTAX          SaHpiAreaEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
@@ -6212,14 +6212,14 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
                 saHpiInventoryId, 
                 saHpiAreaId
         }
-        ::= {saHpiInventoryDataAreaTable 1}
+        ::= {saHpiAreaTable 1}
 
-SaHpiInventoryDataAreaEntry ::= SEQUENCE {
+SaHpiAreaEntry ::= SEQUENCE {
 	saHpiAreaId			SaHpiInstrumentId,
-        saHpiIdrAreaType                INTEGER,
-        saHpiIdrDataAreaIsReadOnly      TruthValue,
-        saHpiIdrDataAreaDelete          RowStatus,
-        saHpiIdrNumDataFields           Unsigned32
+        saHpiAreaType                	INTEGER,
+        saHpiAreaIsReadOnly      	TruthValue,
+        saHpiAreaDelete          	RowStatus,
+        saHpiAreaNumDataFields           Unsigned32
         }
         
 saHpiAreaId       	OBJECT-TYPE
@@ -6228,9 +6228,9 @@ saHpiAreaId       	OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
-        ::= {saHpiInventoryDataAreaEntry 1}
+        ::= {saHpiAreaEntry 1}
 
-saHpiIdrAreaType        OBJECT-TYPE
+saHpiAreaType        OBJECT-TYPE
         SYNTAX          INTEGER {
                                 undefined(0),
                                 internalUse(177),
@@ -6248,18 +6248,18 @@ saHpiIdrAreaType        OBJECT-TYPE
         Note: The enumerated named have +1 added as opposed to the 
         SA HPI  spec for the same constants.  Inventory Data Area 
         type definitions."
-        ::= {saHpiInventoryDataAreaEntry 2}
+        ::= {saHpiAreaEntry 2}
 
-saHpiIdrDataAreaIsReadOnly OBJECT-TYPE 
+saHpiAreaIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "Describes if an area is read-only.  All area headers in a 
         read-only IDR are flagged as read-only as well."
-        ::= {saHpiInventoryDataAreaEntry 3}
+        ::= {saHpiAreaEntry 3}
 
-saHpiIdrDataAreaDelete OBJECT-TYPE 
+saHpiAreaDelete OBJECT-TYPE 
         SYNTAX          RowStatus
         MAX-ACCESS      read-write
         STATUS          current
@@ -6276,15 +6276,15 @@ saHpiIdrDataAreaDelete OBJECT-TYPE
 	delete an Area that contains a read-only Field will return an error."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 114."
-        ::= {saHpiInventoryDataAreaEntry 4}
+        ::= {saHpiAreaEntry 4}
 
-saHpiIdrNumDataFields OBJECT-TYPE
+saHpiAreaNumDataFields OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
         "Number of Fields contained in Area"
-        ::= {saHpiInventoryDataAreaEntry 5}
+        ::= {saHpiAreaEntry 5}
 	
 -- **************************************
 -- **
