@@ -6491,7 +6491,7 @@ saHpiAreaTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAreaEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table defining inventory data respoitory data area records."
+        DESCRIPTION     "Table defining inventory data respository data area records."
         ::= {hpiInventory 4}
         
 saHpiAreaEntry OBJECT-TYPE
