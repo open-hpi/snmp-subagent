@@ -20,11 +20,9 @@ if [ "$1" == "-v" ]; then
 	VERBOSE=yes
 fi
 
-start
 
 q $SNMPWALK -v2c -c $SNMPD_COMMUNITY $SNMPD_SOCKET hpi | grep -v Counter64 > $0.tmp
 cat $0.tmp | grep -v $SNMPWALK > $0.result
-rm $0.tmp
+#rm $0.tmp
 
 check
-stop
