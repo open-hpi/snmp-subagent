@@ -1,5 +1,5 @@
 #! /bin/sh
-# chkconfig: 35 26 74
+# chkconfig: 35 55 55
 # description: HPI SNMP Subagent
 # processname: hpiSubagent
 
@@ -8,8 +8,8 @@
 #
 ### BEGIN INIT INFO
 # Provides: hpiSubagent
-# Required-Start: $network $snmpd
-# X-UnitedLinux-Should-Start: network snmpd
+# Required-Start: $network net-snmp
+# X-UnitedLinux-Should-Start: network net-snmp
 # Required-Stop:  
 # Default-Start:  3 5
 # Default-Stop:
