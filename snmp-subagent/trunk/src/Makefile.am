@@ -11,6 +11,8 @@ SUBDIRS                 =
 hpiSubagent_SOURCES	= alarm.c \
 			hpiB.c \
 			hpiSubagent.c \
+			hpiCheckIndice.c \
+			hpiDomain.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnunciatorTable.c \
 			saHpiAreaTable.c \
@@ -51,9 +53,7 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSoftwareEventTable.c \
 			saHpiUserEventTable.c \
 			saHpiWatchdogEventTable.c \
-			saHpiWatchdogTable.c \
-			hpiCheckIndice.c \
-			hpiDomain.c
+			saHpiWatchdogTable.c 
 
 hpiSubagent_LDADD	= 
 hpiSubagent_LDFLAGS	= 

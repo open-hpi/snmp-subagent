@@ -21,6 +21,7 @@
 #include <signal.h>
 
 #include "alarm.h"
+#include "hpiDomain.h"
 #include <oh_error.h>
 
 #include <hpiB_columns.h>
@@ -1234,8 +1235,12 @@ main (int argc, char **argv)
 				 NULL,
 				 "hpiSubagent MAX number of rows for Events.");
 
-  init_snmp (AGENT);
-  /* Initialize tables */
+	/* Initialize drt, rpt */
+	populate_drt();
+	saHpiDiscover( get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID) );
+
+	init_snmp (AGENT);
+	/* Initialize tables */
 	init_saHpiDomainInfoTable();
 	init_saHpiDomainReferenceTable();
 	init_saHpiDomainAlarmTable();
