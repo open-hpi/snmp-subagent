@@ -54,8 +54,8 @@ void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	SaHpiDomainInfoT domain_info;
 
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
-	if (rv != SA_OK) DEBUGMSGTL {
-		((AGENT, "saHpiDomainInfoGet rv = %d\n",rv);
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, "saHpiDomainInfoGet rv = %d\n",rv));
 		return;
 	}
 		
