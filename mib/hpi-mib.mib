@@ -174,6 +174,12 @@ Float64 ::= TEXTUAL-CONVENTION
         sign(1)exponent(11)mantissa(52)."
     SYNTAX      Opaque (SIZE(0..65))
 
+SaHpiDomainId ::= TEXTUAL-CONVENTION
+	STATUS      current
+        DESCRIPTION
+	"Each domain identifier is unique within the system."
+	SYNTAX      Unsigned32
+
 SaHpiInstrumentId ::= TEXTUAL-CONVENTION
     STATUS      current
     DESCRIPTION
@@ -1260,7 +1266,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiDomainId				Unsigned32,
+	saHpiDomainId				SaHpiDomainId,
         saHpiDomainCapabilities         	SaHpiCapabilities,
         saHpiDomainIsPeer                	TruthValue,         
                                                                       
@@ -1290,14 +1296,12 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 
 
 saHpiDomainId OBJECT-TYPE
-        SYNTAX          Unsigned32
+        SYNTAX          SaHpiDomainId
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
 	"Each domain identifier is unique within the system."
 	::=   {saHpiDomainInfoEntry 1 }
-
-
         
 saHpiDomainCapabilities OBJECT-TYPE 
         SYNTAX          SaHpiCapabilities
@@ -1557,14 +1561,21 @@ saHpiDomainReferenceEntry OBJECT-TYPE
 	do not contain the same resources."
         INDEX   { 
                 saHpiDomainId, 
-                saHpiDomainId
+                saHpiDomainRef
         }
         ::= {saHpiDomainReferenceTable 1}
         
 SaHpiDomainReferenceEntry ::= SEQUENCE {
-        saHpiDomainReferenceIsPeer          TruthValue
-                   
+	saHpiDomainRef			SaHpiDomainId,
+        saHpiDomainReferenceIsPeer      TruthValue
         }
+	
+saHpiDomainRef OBJECT-TYPE
+        SYNTAX          SaHpiDomainId
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "If a Peer or child domain exits this is the DomainID."
+        ::= {saHpiDomainReferenceEntry 1}
 
 saHpiDomainReferenceIsPeer OBJECT-TYPE
         SYNTAX          TruthValue
@@ -1573,7 +1584,7 @@ saHpiDomainReferenceIsPeer OBJECT-TYPE
         DESCRIPTION     "Indicates that this domain participates in a
         peer relationship.
         TRUE = Domain is peer.  FALSE = Domain is not peer (is a child) "
-        ::= {saHpiDomainReferenceEntry 1}
+        ::= {saHpiDomainReferenceEntry 2}
 
 -- *************************************
 -- **
