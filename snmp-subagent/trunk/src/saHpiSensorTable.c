@@ -337,7 +337,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       /*
        * Thresholds
        */
-      if (sensor_context->saHpiSensorThresholdCapabilities == MIB_TRUE)
+      if (sensor_context->saHpiSensorHasThresholds == MIB_TRUE)
 	{
 	  /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_CRIT) */
 	  {
@@ -546,7 +546,7 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
       /*
        * Threshold rows
        */
-      if (ctx->saHpiSensorThresholdCapabilities == MIB_TRUE)
+      if (ctx->saHpiSensorHasThresholds == MIB_TRUE)
 	{
 	  rc = delete_ThdLowCritical_row (ctx->domain_id,
 					  ctx->resource_id,
