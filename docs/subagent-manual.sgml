@@ -41,7 +41,7 @@
 <book>
         &chapter1;
 	&chapter2;
-<!--	&chapter3; -->
+	&chapter3; <!--
 <chapter>
   <title>End</title>
     <sect1>
@@ -51,6 +51,7 @@
 	        </para>
 	</sect1>
 </chapter>
+-->
 </book>
       
 
