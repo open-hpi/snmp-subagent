@@ -110,6 +110,7 @@
 #define hpiEntity_OID hpi_OID,1
 #define hpiEvents_OID hpi_OID,2
 #define hpiResources_OID hpi_OID,3
+#define hpiSensor_OID hpiResources_OID,7
 #define hpiNotifications_OID hpi_OID,4
 
 #define systemEvents_OID hpiEvents_OID,2
@@ -282,7 +283,7 @@ typedef struct state_category_string_
 {
     SaHpiEventCategoryT category;
     SaHpiEventStateT state;
-    char *str;
+    unsigned char *str;
 } state_category_string;
 #endif
 /*
@@ -300,7 +301,7 @@ typedef struct state_category_string_
  */
 int build_state_string (SaHpiEventCategoryT category,
 			SaHpiEventStateT state,
-			char *str,
+			unsigned char *str,
 			size_t *len,
 			size_t max_len);
 			
@@ -314,6 +315,67 @@ int build_state_string (SaHpiEventCategoryT category,
  *
  * @return AGENT_ERR_NOERROR - operation went ok
  */
-int build_state_value (char *str,
+int build_state_value (unsigned char *str,
 		       size_t len,
 		       SaHpiEventStateT *state);
+
+/*
+ * Build four different values:
+ * - ValuesPresent
+ * - Raw reading (if applicable)
+ * - Interpreted reading (if applicable)
+ * - Event Status (if applicable)
+ *
+ * These four values are built from the SaHpiSensorReadingT structure 
+ *
+ * @param reading [IN] SaHpiSensorReadingT with sensor readings.
+ * @param values_present [OUT] Values Present value with +1 added.
+ * @param raw_reading [OUT] raw reading (if applicable)
+ * @param interpreted_reading [OUT] the interpreted reading stored in
+ *                                   char array.
+ * @param interpreted_reading_len [OUT] the length of the array that has been
+ *  filled.
+ * @param interpreted_reading_max [IN] Maximum length allowed in interpreted
+ * char array.
+ * @param sense_status [OUT] The status of the sensor  +1
+ * @param event_status [OUT] the status of the event of the sensor in a
+ * char array.
+ * @param event_status_len [OUT] the length of the event char array.
+ * @param event_status_max [IN] the maximum length of the event char array.
+ *
+ */
+int build_reading_strings (SaHpiSensorReadingT *reading,
+			   SaHpiEventCategoryT sensor_category,
+			   long *values_present,
+			   long *raw_reading,
+			   unsigned char *interpreted_reading,
+			   size_t *interpreted_reading_len,
+			   size_t  interpreted_reading_max,
+			   long *sensor_status,
+			   unsigned char *event_status,
+			   size_t *event_status_len,
+			   size_t event_status_max);
+			   
+
+#define SENSOR_READING_UNSIGNED_INT "%u"
+#define SENSOR_READING_SIGNED_INT "%d"
+#define SENSOR_READING_UNSIGNED_INT_LEN 2
+#define SENSOR_READING_SIGNED_INT_LEN 2
+
+#define SENSOR_READING_FLOAT "%f"
+#define SENSOR_READING_FLOAT_LEN 2
+
+#define SENSOR_READING_MAX_LEN 256
+                                                                                                                               
+  /*
+   * Number of index values in saHpiSensorReading<Min|Max|Nomainal|etc> tables
+   * Consult the HPI-MIB
+   *
+   * If this number changes, look in the src code for this
+   * define, and make sure to add/remove the new index value(s).
+   */
+
+#define SENSOR_READING_INDEX_NR 3
+#define SENSOR_READING_INTER_MAX 255
+#define SENSOR_READING_EVENT_MAX 255
+

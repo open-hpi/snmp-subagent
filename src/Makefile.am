@@ -8,7 +8,11 @@ bin_PROGRAMS		= hpiSubagent
 
 SUBDIRS                 = t
 
-hpiSubagent_SOURCES	= saHpiHotSwapTable.c \
+hpiSubagent_SOURCES	= saHpiSensorReadingCurrentTable.c \
+	saHpiSensorReadingMaxTable.c saHpiSensorReadingMinTable.c \
+	saHpiSensorReadingNormalMaxTable.c saHpiSensorReadingNormalMinTable.c \
+	saHpiSensorReadingNominalTable.c \
+	saHpiHotSwapTable.c \
 	saHpiEventTable.c saHpiSystemEventLogTable.c saHpiWatchdogTable.c \
 	saHpiSensorTable.c saHpiInventoryTable.c saHpiCtrlTable.c hpiSubagent.c \
 	saHpiTable.c saHpiRdrTable.c alarm.c

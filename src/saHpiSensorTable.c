@@ -25,6 +25,12 @@
 #include <netinet/in.h>
 #include <saHpiSensorTable.h>
 
+#include <saHpiSensorReadingCurrentTable.h>
+#include <saHpiSensorReadingMinTable.h>
+#include <saHpiSensorReadingMaxTable.h>
+#include <saHpiSensorReadingNominalTable.h>
+#include <saHpiSensorReadingNormalMinTable.h>
+#include <saHpiSensorReadingNormalMaxTable.h>
 #include <hpiSubagent.h>
 #include <SaHpi.h>
 
@@ -80,6 +86,7 @@ populate_sensor (SaHpiEntryIdT rdr_id,
   SaHpiSensorThresholdsT sensor_threshold;
   SaHpiSessionIdT session_id;
   SaHpiSensorEvtEnablesT enables;
+  SaHpiSensorReadingT current_reading;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_sensor: Entry.\n"));
 
@@ -98,39 +105,40 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       // If we don't find it - we create it.
 #ifdef  BUG_873961
       if (!sensor_context)
-        {
-	 // Bug # 873961. We use the 'rdr_id' to check to see if
-	 // it is the context. To do so, we have to search for it first.
-	 sensor_index.len = 1;
-	 // re-using the index_oid.
-	 array = CONTAINER_GET_SUBSET (cb.container, &sensor_index);
-		if (array != NULL) 
+	{
+	  // Bug # 873961. We use the 'rdr_id' to check to see if
+	  // it is the context. To do so, we have to search for it first.
+	  sensor_index.len = 1;
+	  // re-using the index_oid.
+	  array = CONTAINER_GET_SUBSET (cb.container, &sensor_index);
+	  if (array != NULL)
+	    {
+	      if (array->size > 0)
 		{
-			if (array->size > 0) 
+		  for (i = 0; i < array->size; i++)
+		    {
+		      ctx = array->array[i];
+		      if (ctx->rdr_id == rdr_id)
 			{
-				for (i = 0; i < array->size; i++) 
-				{
-					ctx = array->array[i];
-					if (ctx->rdr_id == rdr_id) 
-					{
-						// Found the duplicate entry!
-						sensor_context = ctx;
-						index_oid[1] = ctx->resource_id;
-						index_oid[2] = ctx->saHpiSensorIndex;
-						DEBUGMSGTL((AGENT,"duplicate sensor entry %d, %d, %d [rdr: %d] found.\n",
-									rpt_entry->DomainId,
-									rpt_entry->ResourceId,
-									sensor->Num,
-									rdr_id));
-						break;
-					}
-				}
+			  // Found the duplicate entry!
+			  sensor_context = ctx;
+			  index_oid[1] = ctx->resource_id;
+			  index_oid[2] = ctx->saHpiSensorIndex;
+			  DEBUGMSGTL ((AGENT,
+				       "duplicate sensor entry %d, %d, %d [rdr: %d] found.\n",
+				       rpt_entry->DomainId,
+				       rpt_entry->ResourceId, sensor->Num,
+				       rdr_id));
+			  break;
 			}
-			free(array->array);
-			free(array); array = NULL;
+		    }
 		}
-		// restoree it to its previous glory.
-		sensor_index.len =  SENSOR_INDEX_NR;
+	      free (array->array);
+	      free (array);
+	      array = NULL;
+	    }
+	  // restoree it to its previous glory.
+	  sensor_index.len = SENSOR_INDEX_NR;
 	}
 #endif
       if (!sensor_context)
@@ -196,6 +204,22 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 	  // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
 	}
 
+      rc = saHpiSensorReadingGet (session_id,
+				  rpt_entry->ResourceId,
+				  sensor->Num, &current_reading);
+
+      if (rc != SA_OK)
+	{
+	  snmp_log (LOG_ERR,
+		    "Call to saHpiSensorReadingGet fails with return code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT,
+		       "Call to  saHpiSensorReadingGet fails with return code: %s.\n",
+		       get_error_string (rc)));
+	}
+
+
+
       if (saHpiSensorTable_modify_context (rdr_id, sensor,
 					   &sensor_threshold,
 					   &enables,
@@ -205,10 +229,90 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 	{
 	  CONTAINER_INSERT (cb.container, sensor_context);
 	  sensor_count = CONTAINER_SIZE (cb.container);
-
-
-
 	}
+      /*
+         Update our child sensor tables
+       */
+
+
+
+      rc = populate_ReadingCurrent (rpt_entry->DomainId,
+				    rpt_entry->ResourceId,
+				    sensor->Num,
+				    sensor->Category, &current_reading);
+
+      if (rc != AGENT_ERR_NOERROR)
+	DEBUGMSGTL ((AGENT,
+		     "call to populate_ReadingCurrent failed with rc: %d\n",
+		     rc));
+
+
+      if (sensor_context->flags & SAHPI_SRF_MIN)
+	{
+	  rc = populate_ReadingMin (rpt_entry->DomainId,
+				    rpt_entry->ResourceId,
+				    sensor->Num,
+				    sensor->Category,
+				    &sensor->DataFormat.Range.Min);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to populate_ReadingMin failed with rc: %d\n",
+			 rc));
+	}
+      if (sensor_context->flags & SAHPI_SRF_MAX)
+	{
+	  rc = populate_ReadingMax (rpt_entry->DomainId,
+				    rpt_entry->ResourceId,
+				    sensor->Num,
+				    sensor->Category,
+				    &sensor->DataFormat.Range.Max);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to populate_ReadingMax failed with rc: %d\n",
+			 rc));
+	}
+
+      if (sensor_context->flags & SAHPI_SRF_NOMINAL)
+	{
+	  rc = populate_ReadingNominal (rpt_entry->DomainId,
+					rpt_entry->ResourceId,
+					sensor->Num,
+					sensor->Category,
+					&sensor->DataFormat.Range.Nominal);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to populate_ReadingNominal failed with rc: %d\n",
+			 rc));
+	}
+      if (sensor_context->flags & SAHPI_SRF_NORMAL_MAX)
+	{
+	  rc = populate_ReadingNormalMax (rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  sensor->Num,
+					  sensor->Category,
+					  &sensor->DataFormat.Range.
+					  NormalMax);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to populate_ReadingNormalMax failed with rc: %d\n",
+			 rc));
+	}
+
+
+      if (sensor_context->flags & SAHPI_SRF_NORMAL_MIN)
+	{
+	  rc = populate_ReadingNormalMin (rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  sensor->Num,
+					  sensor->Category,
+					  &sensor->DataFormat.Range.
+					  NormalMin);
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to populate_ReadingNormalMin failed with rc: %d\n",
+			 rc));
+	}
+
       rc = AGENT_ERR_NOERROR;
     }
   else
@@ -243,6 +347,72 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 
   if (ctx)
     {
+      rc = delete_ReadingCurrent_row (ctx->domain_id,
+				      ctx->resource_id,
+				      ctx->saHpiSensorIndex);
+
+
+      if (rc != AGENT_ERR_NOERROR)
+	DEBUGMSGTL ((AGENT,
+		     "call to delete_ReadingCurrent failed with rc: %d\n",
+		     rc));
+
+      if (ctx->flags & SAHPI_SRF_MIN)
+	{
+	  rc = delete_ReadingMin_row (ctx->domain_id,
+				      ctx->resource_id,
+				      ctx->saHpiSensorIndex);
+
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to delete_ReadingMin failed with rc: %d\n",
+			 rc));
+	}
+      if (ctx->flags & SAHPI_SRF_MAX)
+	{
+	  rc = delete_ReadingMax_row (ctx->domain_id,
+				      ctx->resource_id,
+				      ctx->saHpiSensorIndex);
+
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to delete_ReadingMaxfailed with rc: %d\n",
+			 rc));
+	}
+      if (ctx->flags & SAHPI_SRF_NORMAL_MIN)
+	{
+	  rc = delete_ReadingNormalMin_row (ctx->domain_id,
+					    ctx->resource_id,
+					    ctx->saHpiSensorIndex);
+
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to delete_ReadingNormalMin failed with rc: %d\n",
+			 rc));
+	}
+      if (ctx->flags & SAHPI_SRF_NORMAL_MAX)
+	{
+	  rc = delete_ReadingNormalMax_row (ctx->domain_id,
+					    ctx->resource_id,
+					    ctx->saHpiSensorIndex);
+
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to delete_ReadingNormalMax failed with rc: %d\n",
+			 rc));
+	}
+      if (ctx->flags & SAHPI_SRF_NOMINAL)
+	{
+	  rc = delete_ReadingNominal_row (ctx->domain_id,
+					  ctx->resource_id,
+					  ctx->saHpiSensorIndex);
+
+	  if (rc != AGENT_ERR_NOERROR)
+	    DEBUGMSGTL ((AGENT,
+			 "call to delete_ReadingNominal failed with rc: %d\n",
+			 rc));
+	}
+
       CONTAINER_REMOVE (cb.container, ctx);
       saHpiSensorTable_delete_row (ctx);
       sensor_count = CONTAINER_SIZE (cb.container);
@@ -265,10 +435,8 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
   long hash;
   //int i;
   SaHpiSensorDataFormatT data;
-  SaHpiSensorThdDefnT thd;
-  //SaHpiSensorReadingT *reading;
 
-  DEBUGMSGTL ((AGENT, "Sensor threshold: %x\n", sensor_threshold));
+
   // Make sure they are valid.
   if (entry && ctx)
     {
@@ -291,28 +459,29 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 	      return AGENT_ENTRY_EXIST;
 	    }
 	  if (((ctx->domain_id == rpt_entry->DomainId) &&
-	      (ctx->resource_id == rpt_entry->ResourceId) &&
-	      (ctx->saHpiSensorIndex == entry->Num)) ||
-	      (ctx->rdr_id == rdr_id)){
-		  update_entry = MIB_TRUE;
-		  DEBUGMSGTL((AGENT,"Updating sensor entry. [%d, %d, %d]\n",
-					  rpt_entry->DomainId,
-					  rpt_entry->ResourceId,
-					  entry->Num));
-	  }
+	       (ctx->resource_id == rpt_entry->ResourceId) &&
+	       (ctx->saHpiSensorIndex == entry->Num)) ||
+	      (ctx->rdr_id == rdr_id))
+	    {
+	      update_entry = MIB_TRUE;
+	      DEBUGMSGTL ((AGENT, "Updating sensor entry. [%d, %d, %d]\n",
+			   rpt_entry->DomainId,
+			   rpt_entry->ResourceId, entry->Num));
+	    }
 	}
       if (hash == 0)		// Might happend - roll-over
 	hash = 1;		// Need this - we consider hash values of '0' uninitialized
       ctx->hash = hash;
 
       data = entry->DataFormat;
-      thd = entry->ThresholdDefn;
+      ctx->flags = data.Range.Flags;
+
       ctx->saHpiSensorRDR_len = rdr_entry_oid_len * sizeof (oid);
       memcpy (ctx->saHpiSensorRDR, rdr_entry, ctx->saHpiSensorRDR_len);
 
       ctx->saHpiSensorIndex = entry->Num;
-      ctx->saHpiSensorType = entry->Type+1;
-      ctx->saHpiSensorCategory = entry->Category+1;
+      ctx->saHpiSensorType = entry->Type + 1;
+      ctx->saHpiSensorCategory = entry->Category + 1;
 
       // DOAMIN
       ctx->domain_id = rpt_entry->DomainId;
@@ -325,25 +494,25 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
        * Generate a string representation of the state
        */
 
-      build_state_string(entry->Category, 
-			 entry->Events,
-			 (char *)&ctx->saHpiSensorEventsSupported,
-			 &ctx->saHpiSensorEventsSupported_len,
-			 SENSOR_EVENTS_SUPPORTED_MAX);
+      build_state_string (entry->Category,
+			  entry->Events,
+			  (char *) &ctx->saHpiSensorEventsSupported,
+			  &ctx->saHpiSensorEventsSupported_len,
+			  SENSOR_EVENTS_SUPPORTED_MAX);
 
       ctx->saHpiSensorStatus = enables->SensorStatus;
 
-      build_state_string(entry->Category, 
-			 enables->AssertEvents,
-			 (char *)&ctx->saHpiSensorAssertEvents,
-			 &ctx->saHpiSensorAssertEvents_len,
-			 SENSOR_EVENTS_SUPPORTED_MAX);
+      build_state_string (entry->Category,
+			  enables->AssertEvents,
+			  (char *) &ctx->saHpiSensorAssertEvents,
+			  &ctx->saHpiSensorAssertEvents_len,
+			  SENSOR_EVENTS_SUPPORTED_MAX);
 
-      build_state_string(entry->Category, 
-			 enables->DeassertEvents,
-			 (char *)&ctx->saHpiSensorDeassertEvents,
-			 &ctx->saHpiSensorDeassertEvents_len,
-			 SENSOR_EVENTS_SUPPORTED_MAX);
+      build_state_string (entry->Category,
+			  enables->DeassertEvents,
+			  (char *) &ctx->saHpiSensorDeassertEvents,
+			  &ctx->saHpiSensorDeassertEvents_len,
+			  SENSOR_EVENTS_SUPPORTED_MAX);
 
 
 
@@ -354,10 +523,10 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->saHpiSensorIsNumeric =
 	(data.IsNumeric == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-      ctx->saHpiSensorSignFormat = data.SignFormat+1;
-      ctx->saHpiSensorBaseUnits = data.BaseUnits+1;
-      ctx->saHpiSensorModifierUnits = data.ModifierUnits+1;
-      ctx->saHpiSensorModifierUse = data.ModifierUse+1;
+      ctx->saHpiSensorSignFormat = data.SignFormat + 1;
+      ctx->saHpiSensorBaseUnits = data.BaseUnits + 1;
+      ctx->saHpiSensorModifierUnits = data.ModifierUnits + 1;
+      ctx->saHpiSensorModifierUse = data.ModifierUse + 1;
       ctx->saHpiSensorFactorsStatic =
 	(data.FactorsStatic == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
@@ -382,247 +551,21 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->saHpiSensorFactors[9] = data.Factors.ExpB;
       ctx->saHpiSensorFactors_len = SAHPISENSORFACTORS_MAX;
 
-      ctx->saHpiSensorFactorsLinearization = data.Factors.Linearization+1;
+      ctx->saHpiSensorFactorsLinearization = data.Factors.Linearization + 1;
 
       ctx->saHpiSensorPercentage =
 	(data.Percentage == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-
-      /*
-      ctx->saHpiSensorRangeFlags = data.Range.Flags;
-      // Clean the memory.
-      memset (ctx->saHpiSensorRangeReadingValuesPresent, 0x00,
-	      SAHPI_RANGE_VALUES_MAX);
-      memset (ctx->saHpiSensorRangeReadingRaw, 0x00, SAHPI_RANGE_RAW_MAX);
-      memset (ctx->saHpiSensorRangeReadingInterpreted, 0x00,
-	      SAHPI_RANGE_INTERPRETED_MAX);
-      memset (ctx->saHpiSensorRangeReadingEventSensor, 0x00,
-	      SAHPI_RANGE_EVENT_SENSOR_MAX);
-
-      // Set the structures.
-      
-      sensor_reading[SENSOR_READING_MIN].reading = &data.Range.Min;
-      sensor_reading[SENSOR_READING_MAX].reading = &data.Range.Max;
-      sensor_reading[SENSOR_READING_NORMAL_MIN].reading =
-	&data.Range.NormalMin;
-      sensor_reading[SENSOR_READING_NORMAL_MAX].reading =
-	&data.Range.NormalMax;
-      sensor_reading[SENSOR_READING_NOMINAL].reading = &data.Range.Nominal;
-      */
-      // TEST. The dummy plugin doesn't have these values filled, so we made some up to test the sub-agent.
-      /*
-         data.Range.Flags =  data.Range.Flags | SAHPI_SRF_NOMINAL;    
-         data.Range.Nominal.ValuesPresent = SAHPI_SRF_INTERPRETED;
-         data.Range.Nominal.Interpreted.Value.SensorUint32 = 0x12345678;
-         data.Range.Nominal.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_UINT32;
-
-         data.Range.Flags = data.Range.Flags | SAHPI_SRF_NORMAL_MIN;
-         data.Range.NormalMin.ValuesPresent = SAHPI_SRF_INTERPRETED;
-         data.Range.NormalMin.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-         strncpy(data.Range.NormalMin.Interpreted.Value.SensorBuffer, "aaaabbbbcccc", 12);
-
-         data.Range.Flags = data.Range.Flags | SAHPI_SRF_NORMAL_MAX;
-         data.Range.NormalMax.ValuesPresent = SAHPI_SRF_EVENT_STATE;
-         data.Range.NormalMax.EventStatus.SensorStatus = SAHPI_SENSTAT_EVENTS_ENABLED;
-         data.Range.NormalMax.EventStatus.EventStatus = SAHPI_ES_INSTALL_ERROR;
-       */
-      /*
-      for (i = 0; i < SENSOR_READING_COUNT; i++)
-	{
-	  //DEBUGMSGTL((AGENT,"%X & %X = %X\n", data.Range.Flags, sensor_reading[i].flag,
-	  //          (data.Range.Flags & sensor_reading[i].flag)));
-	  if (data.Range.Flags & sensor_reading[i].flag)
-	    {
-	      reading = sensor_reading[i].reading;
-	      // Set the flag in the proper spot.
-	      ctx->saHpiSensorRangeReadingValuesPresent[sensor_reading[i].
-							pos] =
-		reading->ValuesPresent;
-
-	      // See which type of data it is
-	      if (reading->ValuesPresent & SAHPI_SRF_RAW)
-		{
-		  reading->Raw = htonl (reading->Raw);
-		  memcpy (ctx->saHpiSensorRangeReadingRaw +
-			  (sensor_reading[i].pos * SIZEOF_UINT32),
-			  &reading->Raw, SIZEOF_UINT32);
-		  //DEBUGMSGTL((AGENT,"%d is SAHPI_SRF_RAW, value is %X -> [%X]\n",
-		  //      i, reading->Raw, (ctx->saHpiSensorRangeReadingRaw +
-		  //      (sensor_reading[i].pos*SIZEOF_UINT32))));
-		}
-
-	      if (reading->ValuesPresent & SAHPI_SRF_INTERPRETED)
-		{
-		  switch (reading->Interpreted.Type)
-		    {
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
-		      reading->Interpreted.
-			Value.
-			SensorUint16 = htons (reading->Interpreted.
-					      Value.SensorUint16);
-		      break;
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-		      reading->Interpreted.
-			Value.
-			SensorUint32 = htonl (reading->Interpreted.
-					      Value.SensorUint32);
-		      break;
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
-		      break;
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-		      break;
-		    case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
-		      break;
-		    }
-		  memcpy (ctx->saHpiSensorRangeReadingInterpreted +
-			  (sensor_reading[i].pos *
-			   SAHPI_SENSOR_BUFFER_LENGTH),
-			  &reading->Interpreted.Value,
-			  SAHPI_SENSOR_BUFFER_LENGTH);
-		}
-	      if (reading->ValuesPresent & SAHPI_SRF_EVENT_STATE)
-		{
-		  ctx->saHpiSensorRangeReadingEventSensor[sensor_reading[i].
-							  pos * 3] =
-		    reading->EventStatus.SensorStatus;
-
-		  reading->EventStatus.EventStatus =
-		    htons (reading->EventStatus.EventStatus);
-
-		  memcpy (ctx->saHpiSensorRangeReadingEventSensor +
-			  (sensor_reading[i].pos * 3) + 1,
-			  &reading->EventStatus.EventStatus, SIZEOF_UINT16);
-		}
-	    }
-	}
-
-      ctx->saHpiSensorRangeReadingValuesPresent_len = SAHPI_RANGE_VALUES_MAX;
-      ctx->saHpiSensorRangeReadingRaw_len = SAHPI_RANGE_RAW_MAX;
-      ctx->saHpiSensorRangeReadingInterpreted_len =
-	SAHPI_RANGE_INTERPRETED_MAX;
-      ctx->saHpiSensorRangeReadingEventSensor_len =
-	SAHPI_RANGE_EVENT_SENSOR_MAX;
-
-      ctx->saHpiSensorThresholdDefnIsThreshold =
-	(thd.IsThreshold == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-
-      ctx->saHpiSensorThresholdDefnTholdCapabilities = thd.TholdCapabilities;
-
-      ctx->saHpiSensorThresholdDefnReadThold = thd.ReadThold;
-      ctx->saHpiSensorThresholdDefnWriteThold = thd.WriteThold;
-      ctx->saHpiSensorThresholdDefnFixedThold = thd.FixedThold;
-
-      ctx->saHpiSensorThresholdInterpreted_len = 0;
-      ctx->saHpiSensorThresholdRaw_len = 0;
-
-      if (thd.IsThreshold == SAHPI_TRUE)
-	fill_sensor_threshold_info (ctx, sensor_threshold);
-      */
-
       ctx->saHpiSensorOEM = entry->Oem;
       if (update_entry == MIB_TRUE)
-	      return AGENT_ENTRY_EXIST;
+	return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
     }
 
   return AGENT_ERR_NULL_DATA;
 }
+
 /*
-void
-fill_sensor_threshold_info (saHpiSensorTable_context * ctx,
-			    SaHpiSensorThresholdsT * sensor_threshold)
-{
-
-  int i;
-  DEBUGMSGTL ((AGENT, "fill_sensor_threshold_info: Entry.\n"));
-
-  if (sensor_threshold)
-    {
-      memset (ctx->saHpiSensorThresholdInterpreted, 0x00, THRESHOLD_RAW_MAX);
-      memset (ctx->saHpiSensorThresholdRaw, 0x00, THRESHOLD_INTERPRETED_MAX);
-
-      sensor_thd[SENSOR_THD_LOW_MINOR].reading = &sensor_threshold->LowMinor;
-      sensor_thd[SENSOR_THD_LOW_MAJOR].reading = &sensor_threshold->LowMajor;
-      sensor_thd[SENSOR_THD_LOW_CRIT].reading =
-	&sensor_threshold->LowCritical;
-      sensor_thd[SENSOR_THD_UP_MINOR].reading = &sensor_threshold->UpMinor;
-      sensor_thd[SENSOR_THD_UP_MAJOR].reading = &sensor_threshold->UpMajor;
-      sensor_thd[SENSOR_THD_UP_CRIT].reading = &sensor_threshold->UpCritical;
-      sensor_thd[SENSOR_THD_UP_HYSTERESIS].reading =
-	&sensor_threshold->PosThdHysteresis;
-      sensor_thd[SENSOR_THD_LOW_HYSTERESIS].reading =
-	&sensor_threshold->NegThdHysteresis;
-      if (ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW)
-	{
-	  DEBUGMSGTL ((AGENT, "Values are SAHPI_STC_RAW\n"));
-	  for (i = 0; i < SENSOR_THD_COUNT; i++)
-	    {
-	      // Normalize the data and put it in saHpiSensorThresholdRaw
-	      sensor_thd[i].reading->Raw = htonl (sensor_thd[i].reading->Raw);
-	      memcpy (ctx->saHpiSensorThresholdRaw +
-		      (sensor_thd[i].pos * SIZEOF_UINT32),
-		      &sensor_thd[i].reading->Raw, SIZEOF_UINT32);
-	      //DEBUGMSGTL((AGENT,"%d: Raw: %X at %X (base is %X)\n",
-	      //          i, sensor_thd[i].reading->Raw,
-	      //    ctx->saHpiSensorThresholdRaw + 
-	      //    (sensor_thd[i].pos * SIZEOF_UINT32),
-	      //     ctx->saHpiSensorThresholdRaw));
-	    }
-	  // Set the lenght
-	  ctx->saHpiSensorThresholdRaw_len = THRESHOLD_RAW_MAX;
-	}
-      // Can't do 'else' b/c its a bit flag.
-      if (ctx->
-	  saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_INTERPRETED)
-	{
-	  DEBUGMSGTL ((AGENT, "Values are SAHPI_STC_RAW\n"));
-	  for (i = 0; i < SENSOR_THD_COUNT; i++)
-	    {
-	      // Convert from our platform to network order
-	      switch (sensor_thd[i].reading->Interpreted.Type)
-		{
-		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
-		case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-		  sensor_thd[i].reading->Interpreted.Value.SensorUint16 =
-		    htons (sensor_thd[i].reading->Interpreted.Value.
-			   SensorUint16);
-		  break;
-		case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-		case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-		  sensor_thd[i].reading->Interpreted.Value.SensorUint32 =
-		    htonl (sensor_thd[i].reading->Interpreted.Value.
-			   SensorUint32);
-		  break;
-		default:
-		  break;
-		}
-	      // Copy the type of data (uint8, 16, 32, float, etc)
-	      ctx->saHpiSensorThresholdInterpreted[sensor_thd[i].pos *
-						   (SAHPI_SENSOR_BUFFER_LENGTH
-						    + 1)] =
-		sensor_thd[i].reading->Interpreted.Type;
-	      // Copy the data.
-	      memcpy (ctx->saHpiSensorThresholdInterpreted + 1 +
-		      (sensor_thd[i].pos * (1 + SAHPI_SENSOR_BUFFER_LENGTH)),
-		      sensor_thd[i].reading->Interpreted.Value.SensorBuffer,
-		      SAHPI_SENSOR_BUFFER_LENGTH);
-	      //DEBUGMSGTL((AGENT,"%d: Type: %X at %X (base is %X)\n",
-	      //    i, sensor_thd[i].reading->Interpreted.Type,
-	      //   ctx->saHpiSensorThresholdInterpreted + 
-	      //   (sensor_thd[i].pos * 32) + 1,
-	      //    ctx->saHpiSensorThresholdInterpreted));
-	    }
-	  ctx->saHpiSensorThresholdInterpreted_len =
-	    THRESHOLD_INTERPRETED_MAX;
-	}
-    }
-  DEBUGMSGTL ((AGENT, "fill_sensor_threshold_info: Exit.\n"));
-
-}
-
 int
 set_sensor (saHpiSensorTable_context * ctx)
 {
@@ -772,31 +715,35 @@ set_sensor_event (saHpiSensorTable_context * ctx)
 
   if (ctx)
     {
-      memset (&enables, 0x00, sizeof(SaHpiSensorEvtEnablesT));
-      enables.SensorStatus =  ctx->saHpiSensorStatus;
+      memset (&enables, 0x00, sizeof (SaHpiSensorEvtEnablesT));
+      enables.SensorStatus = ctx->saHpiSensorStatus;
 
       rc = build_state_value (ctx->saHpiSensorAssertEvents,
 			      ctx->saHpiSensorAssertEvents_len,
 			      &enables.AssertEvents);
-      if (rc != AGENT_ERR_NOERROR) {
-	DEBUGMSGTL  ((AGENT,"Call to build_state_value with [%s] failed with rc: %d.\n",
-		      ctx->saHpiSensorAssertEvents, rc));
-	return AGENT_ERR_WRONG_DELIM;
-      }
+      if (rc != AGENT_ERR_NOERROR)
+	{
+	  DEBUGMSGTL ((AGENT,
+		       "Call to build_state_value with [%s] failed with rc: %d.\n",
+		       ctx->saHpiSensorAssertEvents, rc));
+	  return AGENT_ERR_WRONG_DELIM;
+	}
       rc = build_state_value (ctx->saHpiSensorDeassertEvents,
 			      ctx->saHpiSensorDeassertEvents_len,
 			      &enables.DeassertEvents);
-      if (rc != AGENT_ERR_NOERROR) {
-	DEBUGMSGTL  ((AGENT,"Call to build_state_value with [%s] failed with rc: %d.\n",
-		      ctx->saHpiSensorDeassertEvents, rc));
-	return AGENT_ERR_WRONG_DELIM;
-      }      
-      DEBUGMSGTL(( AGENT,
-		   "enables.SensorStatus:   %X\n" \
-		   "enables.AssertEvents:   %X[%s]\n" \
+      if (rc != AGENT_ERR_NOERROR)
+	{
+	  DEBUGMSGTL ((AGENT,
+		       "Call to build_state_value with [%s] failed with rc: %d.\n",
+		       ctx->saHpiSensorDeassertEvents, rc));
+	  return AGENT_ERR_WRONG_DELIM;
+	}
+      DEBUGMSGTL ((AGENT,
+		   "enables.SensorStatus:   %X\n"
+		   "enables.AssertEvents:   %X[%s]\n"
 		   "enables.DeassertEvents: %X[%s]\n",
 		   enables.SensorStatus, enables.AssertEvents,
-			ctx->saHpiSensorAssertEvents,
+		   ctx->saHpiSensorAssertEvents,
 		   enables.DeassertEvents, ctx->saHpiSensorDeassertEvents));
       // Get the seesion_id
       rc = getSaHpiSession (&session_id);
@@ -822,17 +769,17 @@ set_sensor_event (saHpiSensorTable_context * ctx)
 	  return AGENT_ERR_OPERATION;
 	}
 
-       build_state_string(ctx->saHpiSensorCategory-1, 
-			 enables.AssertEvents,
-			 (char *)&ctx->saHpiSensorAssertEvents,
-			 &ctx->saHpiSensorAssertEvents_len,
-			 SENSOR_EVENTS_SUPPORTED_MAX);
+      build_state_string (ctx->saHpiSensorCategory - 1,
+			  enables.AssertEvents,
+			  (char *) &ctx->saHpiSensorAssertEvents,
+			  &ctx->saHpiSensorAssertEvents_len,
+			  SENSOR_EVENTS_SUPPORTED_MAX);
 
-      build_state_string(ctx->saHpiSensorCategory-1, 
-			 enables.DeassertEvents,
-			 (char *)&ctx->saHpiSensorDeassertEvents,
-			 &ctx->saHpiSensorDeassertEvents_len,
-			 SENSOR_EVENTS_SUPPORTED_MAX);
+      build_state_string (ctx->saHpiSensorCategory - 1,
+			  enables.DeassertEvents,
+			  (char *) &ctx->saHpiSensorDeassertEvents,
+			  &ctx->saHpiSensorDeassertEvents_len,
+			  SENSOR_EVENTS_SUPPORTED_MAX);
 
       return AGENT_ERR_NOERROR;
     }
@@ -869,62 +816,58 @@ saHpiSensorTable_row_copy (saHpiSensorTable_context * dst,
   /*
    * copy components into the context structure
    */
-    dst->saHpiSensorIndex = src->saHpiSensorIndex;
+  dst->saHpiSensorIndex = src->saHpiSensorIndex;
 
-    dst->saHpiSensorType = src->saHpiSensorType;
+  dst->saHpiSensorType = src->saHpiSensorType;
 
-    dst->saHpiSensorCategory = src->saHpiSensorCategory;
+  dst->saHpiSensorCategory = src->saHpiSensorCategory;
 
-    dst->saHpiSensorEventsCategoryControl =
-        src->saHpiSensorEventsCategoryControl;
+  dst->saHpiSensorEventsCategoryControl =
+    src->saHpiSensorEventsCategoryControl;
 
-    memcpy(dst->saHpiSensorEventsSupported,
-           src->saHpiSensorEventsSupported,
-           src->saHpiSensorEventsSupported_len);
-    dst->saHpiSensorEventsSupported_len =
-        src->saHpiSensorEventsSupported_len;
+  memcpy (dst->saHpiSensorEventsSupported,
+	  src->saHpiSensorEventsSupported,
+	  src->saHpiSensorEventsSupported_len);
+  dst->saHpiSensorEventsSupported_len = src->saHpiSensorEventsSupported_len;
 
-    dst->saHpiSensorStatus = src->saHpiSensorStatus;
+  dst->saHpiSensorStatus = src->saHpiSensorStatus;
 
-    memcpy(dst->saHpiSensorAssertEvents, src->saHpiSensorAssertEvents,
-           src->saHpiSensorAssertEvents_len);
-    dst->saHpiSensorAssertEvents_len = src->saHpiSensorAssertEvents_len;
+  memcpy (dst->saHpiSensorAssertEvents, src->saHpiSensorAssertEvents,
+	  src->saHpiSensorAssertEvents_len);
+  dst->saHpiSensorAssertEvents_len = src->saHpiSensorAssertEvents_len;
 
-    memcpy(dst->saHpiSensorDeassertEvents, src->saHpiSensorDeassertEvents,
-           src->saHpiSensorDeassertEvents_len);
-    dst->saHpiSensorDeassertEvents_len =
-        src->saHpiSensorDeassertEvents_len;
+  memcpy (dst->saHpiSensorDeassertEvents, src->saHpiSensorDeassertEvents,
+	  src->saHpiSensorDeassertEvents_len);
+  dst->saHpiSensorDeassertEvents_len = src->saHpiSensorDeassertEvents_len;
 
-    dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
+  dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
 
-    dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
+  dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
 
-    dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
+  dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
 
-    dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
+  dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
 
-    dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
+  dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
 
-    dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
+  dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
 
-    dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
+  dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
 
-    dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
+  dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
 
-    memcpy(dst->saHpiSensorFactors, src->saHpiSensorFactors,
-           src->saHpiSensorFactors_len);
-    dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
+  memcpy (dst->saHpiSensorFactors, src->saHpiSensorFactors,
+	  src->saHpiSensorFactors_len);
+  dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
 
-    dst->saHpiSensorFactorsLinearization =
-        src->saHpiSensorFactorsLinearization;
+  dst->saHpiSensorFactorsLinearization = src->saHpiSensorFactorsLinearization;
 
-    dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
+  dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
 
-    dst->saHpiSensorOEM = src->saHpiSensorOEM;
+  dst->saHpiSensorOEM = src->saHpiSensorOEM;
 
-    memcpy(src->saHpiSensorRDR, dst->saHpiSensorRDR,
-           src->saHpiSensorRDR_len);
-    dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
+  memcpy (src->saHpiSensorRDR, dst->saHpiSensorRDR, src->saHpiSensorRDR_len);
+  dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
 
   dst->resource_id = src->resource_id;
@@ -1161,7 +1104,7 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 	      rc = SNMP_ERR_WRONGLENGTH;
 	    }
 	  break;
-	  
+
 	case COLUMN_SAHPISENSORINDEX:
 	case COLUMN_SAHPISENSORTYPE:
 	case COLUMN_SAHPISENSORCATEGORY:
@@ -1226,25 +1169,25 @@ saHpiSensorTable_set_reserve2 (netsnmp_request_group * rg)
       switch (current->tri->colnum)
 	{
 	  /*
-	case COLUMN_SAHPISENSORTHRESHOLDRAW:
-	  // Check to see if this can be set.
-	  if (row_ctx->
-	      saHpiSensorThresholdDefnTholdCapabilities &
-	      SAHPI_STC_INTERPRETED)
-	    {
-	      rc = SNMP_ERR_NOACCESS;
-	    }
+	     case COLUMN_SAHPISENSORTHRESHOLDRAW:
+	     // Check to see if this can be set.
+	     if (row_ctx->
+	     saHpiSensorThresholdDefnTholdCapabilities &
+	     SAHPI_STC_INTERPRETED)
+	     {
+	     rc = SNMP_ERR_NOACCESS;
+	     }
 
-	  break;
+	     break;
 
-	case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
-	  if (row_ctx->
-	      saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW)
-	    {
-	      rc = SNMP_ERR_NOACCESS;
-	    }
-	  break;
-	  */
+	     case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
+	     if (row_ctx->
+	     saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW)
+	     {
+	     rc = SNMP_ERR_NOACCESS;
+	     }
+	     break;
+	   */
 	case COLUMN_SAHPISENSORSTATUS:
 	  if ((*var->val.integer != SAHPI_SENSTAT_EVENTS_ENABLED) &&
 	      (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED) &&
@@ -1306,48 +1249,48 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
 	  rc2 = set_sensor_event (row_ctx);
 	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
-	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	  if (rc2 == AGENT_ERR_WRONG_DELIM)
 	    rc = SNMP_ERR_BADVALUE;
 	  break;
 
 	case COLUMN_SAHPISENSORASSERTEVENTS:
-	  memcpy ( row_ctx->saHpiSensorAssertEvents,
-		   var->val.string, var->val_len);
+	  memcpy (row_ctx->saHpiSensorAssertEvents,
+		  var->val.string, var->val_len);
 	  row_ctx->saHpiSensorAssertEvents_len = var->val_len;
 	  rc2 = set_sensor_event (row_ctx);
 	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
-	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	  if (rc2 == AGENT_ERR_WRONG_DELIM)
 	    rc = SNMP_ERR_BADVALUE;
 	  break;
 
 	case COLUMN_SAHPISENSORDEASSERTEVENTS:
-	  memcpy(  row_ctx->saHpiSensorDeassertEvents,
-		   var->val.string, var->val_len);
+	  memcpy (row_ctx->saHpiSensorDeassertEvents,
+		  var->val.string, var->val_len);
 	  row_ctx->saHpiSensorDeassertEvents_len = var->val_len;
 	  rc2 = set_sensor_event (row_ctx);
 	  if (rc2 != AGENT_ERR_NOERROR)
 	    rc = SNMP_ERR_GENERR;
-	  if (rc2 ==  AGENT_ERR_WRONG_DELIM )
+	  if (rc2 == AGENT_ERR_WRONG_DELIM)
 	    rc = SNMP_ERR_BADVALUE;
 	  break;
 	  /*
-	case COLUMN_SAHPISENSORTHRESHOLDRAW:
+	     case COLUMN_SAHPISENSORTHRESHOLDRAW:
 
-	  memcpy (row_ctx->saHpiSensorThresholdRaw, var->val.string,
-		  var->val_len);
-	  row_ctx->saHpiSensorThresholdRaw_len = var->val_len;
-	  break;
+	     memcpy (row_ctx->saHpiSensorThresholdRaw, var->val.string,
+	     var->val_len);
+	     row_ctx->saHpiSensorThresholdRaw_len = var->val_len;
+	     break;
 
-	case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
+	     case COLUMN_SAHPISENSORTHRESHOLDINTERPRETED:
 
-	  memcpy (row_ctx->saHpiSensorThresholdInterpreted,
-		  var->val.string, var->val_len);
-	  row_ctx->saHpiSensorThresholdInterpreted_len = var->val_len;
-	  if (set_sensor (row_ctx) != AGENT_ERR_NOERROR)
-	    rc = SNMP_ERR_GENERR;
-	  break;
-	  */
+	     memcpy (row_ctx->saHpiSensorThresholdInterpreted,
+	     var->val.string, var->val_len);
+	     row_ctx->saHpiSensorThresholdInterpreted_len = var->val_len;
+	     if (set_sensor (row_ctx) != AGENT_ERR_NOERROR)
+	     rc = SNMP_ERR_GENERR;
+	     break;
+	   */
 	default:
 		/** We shouldn't get here */
 	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
@@ -1533,165 +1476,162 @@ saHpiSensorTable_get_value (netsnmp_request_info * request,
   switch (table_info->colnum)
     {
 
-       case COLUMN_SAHPISENSORINDEX:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiSensorIndex,
-                                 sizeof(context->saHpiSensorIndex));
-        break;
+    case COLUMN_SAHPISENSORINDEX:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiSensorIndex,
+				sizeof (context->saHpiSensorIndex));
+      break;
 
     case COLUMN_SAHPISENSORTYPE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorType,
-                                 sizeof(context->saHpiSensorType));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorType,
+				sizeof (context->saHpiSensorType));
+      break;
 
     case COLUMN_SAHPISENSORCATEGORY:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorCategory,
-                                 sizeof(context->saHpiSensorCategory));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorCategory,
+				sizeof (context->saHpiSensorCategory));
+      break;
 
     case COLUMN_SAHPISENSOREVENTSCATEGORYCONTROL:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorEventsCategoryControl,
-                                 sizeof(context->
-                                        saHpiSensorEventsCategoryControl));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorEventsCategoryControl,
+				sizeof (context->
+					saHpiSensorEventsCategoryControl));
+      break;
 
     case COLUMN_SAHPISENSOREVENTSSUPPORTED:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorEventsSupported,
-                                 context->saHpiSensorEventsSupported_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiSensorEventsSupported,
+				context->saHpiSensorEventsSupported_len);
+      break;
 
     case COLUMN_SAHPISENSORSTATUS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiSensorStatus,
-                                 sizeof(context->saHpiSensorStatus));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiSensorStatus,
+				sizeof (context->saHpiSensorStatus));
+      break;
 
     case COLUMN_SAHPISENSORASSERTEVENTS:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorAssertEvents,
-                                 context->saHpiSensorAssertEvents_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiSensorAssertEvents,
+				context->saHpiSensorAssertEvents_len);
+      break;
 
     case COLUMN_SAHPISENSORDEASSERTEVENTS:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorDeassertEvents,
-                                 context->saHpiSensorDeassertEvents_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->
+				saHpiSensorDeassertEvents,
+				context->saHpiSensorDeassertEvents_len);
+      break;
 
     case COLUMN_SAHPISENSORIGNORE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorIgnore,
-                                 sizeof(context->saHpiSensorIgnore));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorIgnore,
+				sizeof (context->saHpiSensorIgnore));
+      break;
 
     case COLUMN_SAHPISENSORREADINGFORMATS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorReadingFormats,
-                                 sizeof(context->
-                                        saHpiSensorReadingFormats));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->
+				saHpiSensorReadingFormats,
+				sizeof (context->saHpiSensorReadingFormats));
+      break;
 
     case COLUMN_SAHPISENSORISNUMERIC:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorIsNumeric,
-                                 sizeof(context->saHpiSensorIsNumeric));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorIsNumeric,
+				sizeof (context->saHpiSensorIsNumeric));
+      break;
 
     case COLUMN_SAHPISENSORSIGNFORMAT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorSignFormat,
-                                 sizeof(context->saHpiSensorSignFormat));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorSignFormat,
+				sizeof (context->saHpiSensorSignFormat));
+      break;
 
     case COLUMN_SAHPISENSORBASEUNITS:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorBaseUnits,
-                                 sizeof(context->saHpiSensorBaseUnits));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorBaseUnits,
+				sizeof (context->saHpiSensorBaseUnits));
+      break;
 
     case COLUMN_SAHPISENSORMODIFIERUNITS:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorModifierUnits,
-                                 sizeof(context->
-                                        saHpiSensorModifierUnits));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorModifierUnits,
+				sizeof (context->saHpiSensorModifierUnits));
+      break;
 
     case COLUMN_SAHPISENSORMODIFIERUSE:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorModifierUse,
-                                 sizeof(context->saHpiSensorModifierUse));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorModifierUse,
+				sizeof (context->saHpiSensorModifierUse));
+      break;
 
     case COLUMN_SAHPISENSORFACTORSSTATIC:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorFactorsStatic,
-                                 sizeof(context->
-                                        saHpiSensorFactorsStatic));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorFactorsStatic,
+				sizeof (context->saHpiSensorFactorsStatic));
+      break;
 
     case COLUMN_SAHPISENSORFACTORS:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->saHpiSensorFactors,
-                                 context->saHpiSensorFactors_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->saHpiSensorFactors,
+				context->saHpiSensorFactors_len);
+      break;
 
     case COLUMN_SAHPISENSORFACTORSLINEARIZATION:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorFactorsLinearization,
-                                 sizeof(context->
-                                        saHpiSensorFactorsLinearization));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorFactorsLinearization,
+				sizeof (context->
+					saHpiSensorFactorsLinearization));
+      break;
 
     case COLUMN_SAHPISENSORPERCENTAGE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiSensorPercentage,
-                                 sizeof(context->saHpiSensorPercentage));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->saHpiSensorPercentage,
+				sizeof (context->saHpiSensorPercentage));
+      break;
 
     case COLUMN_SAHPISENSOROEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiSensorOEM,
-                                 sizeof(context->saHpiSensorOEM));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				(char *) &context->saHpiSensorOEM,
+				sizeof (context->saHpiSensorOEM));
+      break;
 
     case COLUMN_SAHPISENSORRDR:
-            /** RowPointer = ASN_OBJECT_ID */
-        snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                                 (char *) &context->saHpiSensorRDR,
-                                 context->saHpiSensorRDR_len);
-        break;
+	    /** RowPointer = ASN_OBJECT_ID */
+      snmp_set_var_typed_value (var, ASN_OBJECT_ID,
+				(char *) &context->saHpiSensorRDR,
+				context->saHpiSensorRDR_len);
+      break;
 
     default:
 	    /** We shouldn't get here */
