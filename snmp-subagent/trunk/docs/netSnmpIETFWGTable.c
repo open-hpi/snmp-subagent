@@ -151,6 +151,7 @@ init_netSnmpIETFWGTable(void)
    netsnmp_index index;
    oid index_oid[MAX_OID_LEN];
    char *index_char[] = {"hickory","joe","hickory","bob","new orleans","help"};
+   char *chair = "John Black";
    int i,j;
    netSnmpIETFWGTable_context *ctx;
 
@@ -194,11 +195,32 @@ init_netSnmpIETFWGTable(void)
    index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
    index.oids = (oid *) &index_oid;
    index.len = 4;
-   CONTAINER_REMOVE( cb.container, &index);
-   printf("Removed joe\n");
+   ctx = CONTAINER_FIND(cb.container, &index);
+   if (ctx) {
+        CONTAINER_REMOVE( cb.container, &index);
+        netSnmpIETFWGTable_delete_row ( ctx );
+        printf("Removed joe\n");
+   }
 
    /*
-     Or the hard way:
+    * Modify 'bob'
+    */
+   index_oid[0] = 3;
+   index_oid[1] = 'b'; index_oid[2] = 'o'; index_oid[3] = 'b';
+   index.oids = (oid *) & index_oid;
+   index.len = 4;
+   ctx = CONTAINER_FIND(cb.container, & index);
+   if (ctx) {
+        /* Modify the context to our content. */
+	ctx->nsIETFWGChair1_len = strlen(chair);
+	memcpy(ctx->nsIETFWGChair1, chair, ctx->nsIETFWGChair1_len);
+   }
+
+
+
+
+   /*
+     Print the hard way:
    */
    
    ctx = CONTAINER_FIRST(cb.container);

@@ -210,9 +210,10 @@
 		more than one index value undefine <emphasis>netSnmpIETFWGTable_IDX2</emphasis> and let the NetSNMP library do the sorting.
 		</para>
 		<note>
-			<para>The compare routine is <emphasis>ONLY</emphasis>
-			used during adding and removal of rows that have more than
-			one index value.  
+			<para>The compare routine should <emphasis>ONLY</emphasis>
+			be used during adding and removal of rows that have more than
+			one index value. For more reasons why, consult this
+			<ulink url="http://www.net-snmp.org/faqs/rstory/array-user.html">array-user Frequently Asked Questions Page</ulink>.  
 			</para>
 		</note>
 		<para>	
@@ -356,6 +357,9 @@ functions is the responsibilty of the user (more on this in later sections):
 	your own method of figuring out which of passed <emphasis>context</emphasis>
 	structures is less, matches or greater.
 	</para>
+	<para>
+	Consult <ulink url="http://www.net-snmp.org/faqs/rstory/array-user.html">
+	array-user Frequently Asked Questions Page</ulink> for more advanced information.
  </sect2>
  <sect2>
    <title>Tree searching function</title>
@@ -605,6 +609,16 @@ nsIETFWGIsWorking OBJECT-TYPE
 	<para>
 	defined <emphasis>context</emphasis> structure in the header file.
 	</para>
+	<para>
+	However, this function is misleading. It is only used when the 
+	NetSNMP library is trying to write to a row and finds out 
+	that something is wrong. Then it
+	deletes the temporary row (a copy of the original).
+	</para>
+	<para>
+	To delete a row from the sub-agent, you need to use the CONTAINER_REMOVE 
+	macro. Look in the section titled "Developer row deletion".
+	</para>
    </sect2>
    <sect2>
 	<title>Creating rows</title>
@@ -698,7 +712,7 @@ nsIETFWGIsWorking OBJECT-TYPE
 	</para>
 	</sect3>
 	<sect3>
-	  <title>User row creation </title>
+	  <title>Developer row creation</title>
 
 	<para>
 	The source code has a perfect spot for user creation - it is right
@@ -821,11 +835,15 @@ init_netSnmpIETFWGTable(void)
    index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
    index.oids = (oid *) &amp index_oid;
    index.len = 4;
-   CONTAINER_REMOVE( cb.container, &amp index);
-   printf("Removed joe\n");
 
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        CONTAINER_REMOVE( cb.container, &amp index);
+        netSnmpIETFWGTable_delete_row ( ctx );
+        printf("Removed joe\n");
+   }
    /*
-     Or the hard way:
+     Print the hard way:
    */
    
    ctx = CONTAINER_FIRST(cb.container);
@@ -877,11 +895,174 @@ static int netSnmpIETFWGTable_cmp( const void *lhs, const void *rhs );</emphasis
 	And make sure that your compare function works properly.
 	</para>
 	</sect3>
+
+	<sect3>
+	 <title>Developer row deletion.</title>
+	
+	<para>
+	Removing rows requires to do four steps. You have
+	know which row you want (by the index value). Find it,  remove from the 
+	container, and then finally free it.	
+	</para>
+<programlisting role='C'>
+   /*     
+   We do not like 'joe', so we remove him.
+   */
+   index_oid[0] = 3;
+   index_oid[1] = 'j'; index_oid[2] = 'o'; index_oid[3] = 'e';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        CONTAINER_REMOVE( cb.container, &amp index);
+        netSnmpIETFWGTable_delete_row ( ctx );
+        printf("Removed joe\n");
+   }
+</programlisting>
+	</sect3>
 	</sect2>
     <sect2>
 	<title>Writing a row</title>
 	<para>
+	There are two ways to write to a row. From the perspective 
+	of a SNMP SET command and sub-agent. 
 
-	</para>				
+	<sect3>
+	<title>Developer writing to a row</title>
+	<para>
+	The process of writing to a row from a sub-agent perspective is
+	simplistic. It requires the task of retrieving the row and
+	modifying it. No need to re-insert it using CONTAINER_INSERT, since it is
+	already in there.
+	</para> 
+<programlisting role='C'>
+   char chair* = "John Block";
+   /*
+    * Modify 'bob'
+    */
+   index_oid[0] = 3;
+   index_oid[1] = 'b'; index_oid[2] = 'o'; index_oid[3] = 'b';
+   index.oids = (oid *) &amp index_oid;
+   index.len = 4;
+   ctx = CONTAINER_FIND(cb.container, &amp index);
+   if (ctx) {
+        /* Modify the context to our content. */
+	ctx->nsIETFWGChair1_len = strlen(chair);
+	memcpy(ctx->nsIETFWGChair1, chair, ctx->nsIETFWGChair1_len);
+   }
+</programlisting>
+
+	</sect3>
+	
+	<sect3>
+		<title>SNMP SET writting to a row</title>
+
+		<para>
+		This process is more complex due to the neccessity of
+		checking that the SNMP SET request is 
+		the correct type, length, and other ones that the developer
+		might deem neccesary.
+		</para>
+	<para>
+	The process by which the NetSNMP library uses to decide if the data is OK 
+	is a state machine. If the SET request  passes succesfully through 
+	the RESERVE1, RESERVE2, and ACTION phase it is committed to memory.  
+	</para>
+	<para>
+	The following picture, borrowed from NetSNMP webpage demonstrates
+	these steps. A more detailed explanation of what happends during these
+	steps is explained in this <ulink url="http://www.net-snmp.org/faqs/rstory/#steps">rstory's NET-SNMP Developers Frequently Asked Questions Page: Baby Steps Flow</ulink>.
+	<mediaobject>
+        <imageobject>
+          <imagedata fileref="images/set-actions.jpg">
+        </imageobject>
+      </mediaobject>
+	</sect3>
+	
+	<sect2>
+	  <title>RESERVE1 function</title>
+
+	   <para>
+	   The <emphasis>netSnmpIETFWGTable_set_reserve1</emphasis> job is
+	   to make sure that the SET request is of right type.
+	   </para>
+<programlisting role='C'>
+ for( current = rg->list; current; current = current->next ) {
+
+        var = current->ri->requestvb;
+        rc = SNMP_ERR_NOERROR;
+
+        switch(current->tri->colnum) {
+
+        case COLUMN_NSIETFWGCHAIR1:
+            /** OCTETSTR = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
+                                                sizeof(row_ctx->nsIETFWGChair1));
+        break;
+</programlisting>
+	<para>
+	 The <emphasis>for</emphasis> loop goes through all of the SNMP SET requests.
+	The <emphasis>netsnmp_request_group *rg</emphasis> keeps a list of all
+	aggregate SNMP SET request for this particular table.
+	</para>
+	<note>
+		<para>This can mean that this function is called with more than
+		one SNMP SET request for different columns. 
+		</para>
+	</note>
+	<note>
+		<para>
+	This list of SNMP SET request can also be for non-existent rows - because
+	the index values do not match to what the NetSNMP library has. For 
+	rows that do not exist in the container (as in, they have not
+	been inserted using CONTAINER_INSERT), the NetSNMP creates a
+	<emphasis>context</emphasis> structure using the 
+	<emphasis>netSnmpIETFWGTable_create_row</emphasis>. For those that do
+	exist, it grabs them from the container. 
+		</para>
+	</note>
+	<para>
+	The <emphasis>netsnmp_check_vb_type_and_size</emphasis> checks the
+	type of the SNMP SET request and also the size of the payload.
+	</para>
+	<para>
+	If during the checking there is an error, the <emphasis>rc</emphasis>
+	is set to an appropiate error code (consult net-snmp/library/snmp.h 
+	for the list) and <emphasis>netsnmp_set_mode_request_error</emphasis> 
+	is notified. This will result in removal of this SNMP SET request 
+	and the end-user will be notified of the appropiate error that was set.
+	</para>
+	<note>
+		<para>If the end-user is using SNMP v1, only a selective
+		set of error codes is available. Therefore if the user
+		gets a different error code than what you had set, it might be 
+		due to that fact.
+		</para>
+	</note>
+	</sect2>
+	<sect2>
+	  <title>RESERVE2 function</title>
+	<para>
+	</para>
+	</sect2>
+	<sect2>
+	  <title>ACTION</title>
+
+	<para>
+	</para>
+	</sect2>
+	<sect2>
+	  <title>COMMIT function</title>
+
+	<para>
+	</para>
+	</sect2>
+	<sect2>
+	  <title>FREE and UNDO function</title>
+
+	<para>
+	</para>
+	</sect2>
   </sect1>
 </chapter>
