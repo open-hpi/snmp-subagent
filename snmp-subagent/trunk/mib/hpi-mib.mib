@@ -6091,8 +6091,7 @@ saHpiSensorThdLowMajorTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining severely degraded status at the
-        lower end of critical threshold values for sensor that supports raw or 
-        interpreted values."
+        lower bound of the critical threshold values for a given sensor." 
         ::= {hpiSensor 8}
 
 saHpiSensorThdLowMajorEntry OBJECT-TYPE
