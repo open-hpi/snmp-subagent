@@ -133,9 +133,9 @@ eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
 
 -- The resource tables.
 
+hpiControl	OBJECT IDENTIFIER ::= { hpiResources 3 }
 hpiSensor       OBJECT IDENTIFIER ::= { hpiResources 7 }
 hpiInventory    OBJECT IDENTIFIER ::= { hpiResources 8 }
-hpiControl		OBJECT IDENTIFIER ::= { hpiResources 3 }
 
 
 -- ************************************************
@@ -7522,7 +7522,7 @@ saHpiSensorEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of sensor resource data records in the system."
-        ::= {hpiResources 5}
+        ::= {hpiSensor 1}
 
 saHpiSensorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEntry
@@ -7530,7 +7530,7 @@ saHpiSensorTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "A table defining the static Sensor data found in the
 	Sensor RDR's."
-        ::= {hpiResources 6}
+        ::= {hpiSensor 2}
 
 saHpiSensorEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorEntry
@@ -7781,7 +7781,7 @@ saHpiCurrentSensorStateTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining current sensor readings."
-        ::= {hpiSensor 1}
+        ::= {hpiSensor 3}
 
 saHpiCurrentSensorStateEntry OBJECT-TYPE
         SYNTAX          SaHpiCurrentSensorStateEntry
@@ -7984,7 +7984,7 @@ saHpiSensorReadingMaxTable OBJECT-TYPE
 	defined in the sensor rdr"
 	REFERENCE
 	"SAI-HPI-B.01.01 section 7.2 and 8.5."
-        ::= {hpiSensor 2}
+        ::= {hpiSensor 4}
 
 saHpiSensorReadingMaxEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingMaxEntry
@@ -8045,7 +8045,7 @@ saHpiSensorReadingMinTable OBJECT-TYPE
 	as defined in the sensor rdr."
 	REFERENCE
 	"SAI-HPI-B.01.01 section 7.2 and 8.5."
-        ::= {hpiSensor 3}
+        ::= {hpiSensor 5}
 
 saHpiSensorReadingMinEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingMinEntry
@@ -8105,7 +8105,7 @@ saHpiSensorReadingNominalTable OBJECT-TYPE
         DESCRIPTION     "A table definining nominal sensor readings."
 	REFERENCE
 	"SAI-HPI-B.01.01 section 7.2 and 8.5."	
-        ::= {hpiSensor 4}
+        ::= {hpiSensor 6}
 
 saHpiSensorReadingNominalEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingNominalEntry
@@ -8163,7 +8163,7 @@ saHpiSensorReadingNormalMaxTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining normal maximum sensor readings."
-        ::= {hpiSensor 5}
+        ::= {hpiSensor 7}
 
 saHpiSensorReadingNormalMaxEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingNormalMaxEntry
@@ -8221,7 +8221,7 @@ saHpiSensorReadingNormalMinTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "A table definining normal minimum sensor readings."
-        ::= {hpiSensor 6}
+        ::= {hpiSensor 8}
 
 saHpiSensorReadingNormalMinEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingNormalMinEntry
@@ -8284,7 +8284,7 @@ saHpiSensorThdLowCriticalTable OBJECT-TYPE
 	for dependencies."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 
-        ::= {hpiSensor 7}
+        ::= {hpiSensor 9}
 
 saHpiSensorThdLowCriticalEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdLowCriticalEntry
@@ -8368,7 +8368,7 @@ saHpiSensorThdLowMajorTable OBJECT-TYPE
 	for dependencies."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 	
-        ::= {hpiSensor 8}
+        ::= {hpiSensor 10}
 
 saHpiSensorThdLowMajorEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdLowMajorEntry
@@ -8454,7 +8454,7 @@ saHpiSensorThdLowMinorTable OBJECT-TYPE
 	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
 	for dependencies."
 
-        ::= {hpiSensor 9}
+        ::= {hpiSensor 11}
 
 saHpiSensorThdLowMinorEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdLowMinorEntry
@@ -8537,7 +8537,7 @@ saHpiSensorThdUpCriticalTable OBJECT-TYPE
 	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
 	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
 	for dependencies."
-        ::= {hpiSensor 10}
+        ::= {hpiSensor 12}
 
 saHpiSensorThdUpCriticalEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdUpCriticalEntry
@@ -8618,7 +8618,7 @@ saHpiSensorThdUpMajorTable OBJECT-TYPE
 	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
 	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
 	for dependencies."
-        ::= {hpiSensor 11}
+        ::= {hpiSensor 13}
 
 saHpiSensorThdUpMajorEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdUpMajorEntry
@@ -8700,7 +8700,7 @@ saHpiSensorThdUpMinorTable OBJECT-TYPE
 	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
 	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
 	for dependencies."
-        ::= {hpiSensor 12}
+        ::= {hpiSensor 14}
 
 saHpiSensorThdUpMinorEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdUpMinorEntry
@@ -8780,7 +8780,7 @@ saHpiSensorThdPosHysteresisTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "A table definining the positive going hysteresis 
 	upper bound."
-        ::= {hpiSensor 13}
+        ::= {hpiSensor 15}
 
 saHpiSensorThdPosHysteresisEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdPosHysteresisEntry
@@ -8861,7 +8861,7 @@ saHpiSensorThdNegHysteresisTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "A table definining the negative going hysteresis
 	lower bound."
-        ::= {hpiSensor 14}
+        ::= {hpiSensor 16}
 
 saHpiSensorThdNegHysteresisEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorThdNegHysteresisEntry
@@ -9427,7 +9427,7 @@ saHpiWatchdogEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of watchdogs present on this system."
-        ::= {hpiResources 9}
+        ::= {hpiResources 3}
 
 saHpiWatchdogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEntry
@@ -9436,7 +9436,7 @@ saHpiWatchdogTable OBJECT-TYPE
         DESCRIPTION     "Table of static and dynamic watchdog information 
 	including watchdog RDR data.  The dynamic data portion is necessary 
 	for control and operation of the watchdog timers."
-        ::= {hpiResources 10}
+        ::= {hpiResources 4}
 
 saHpiWatchdogEntry OBJECT-TYPE
         SYNTAX          SaHpiWatchdogEntry
@@ -9701,7 +9701,7 @@ saHpiAnnunciatorEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of annunciators present on this system."
-        ::= {hpiResources 11}
+        ::= {hpiResources 5}
 
 saHpiAnnunciatorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnunciatorEntry
@@ -9709,7 +9709,7 @@ saHpiAnnunciatorTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Table of static Annunciator resource data record 
 	information and dynamic control and operational data."
-        ::= {hpiResources 12}
+        ::= {hpiResources 6}
 
 saHpiAnnunciatorEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnunciatorEntry
