@@ -4164,7 +4164,13 @@ saHpiCtrlAttributes	OBJECT-TYPE
 
 	digital  - 4 octet value in network byte order
 	discrete - 4 octet value in network byte order
-	stream   - 4 octet value in network byte order
+	stream   - 9 octet values in network byte order represented as:
+                     octet 1    - repeat flag
+                     octets 2-5 - count of octets of data stored in the stream 
+				  specified in network byte order.
+                     octets 6-9 - contain the stream data.
+
+        text     - Text control attributes are represented as follows:
 
 	text	- Text control attributes are represented as follows:
 		  octet 1	- max characters	
