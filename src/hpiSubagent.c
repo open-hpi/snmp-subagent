@@ -1235,12 +1235,12 @@ main (int argc, char **argv)
 				 NULL,
 				 "hpiSubagent MAX number of rows for Events.");
 
-	/* Initialize drt, rpt */
-	populate_drt();
+	/* Initialize HPI library*/
 	saHpiDiscover( get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID) );
 
 	init_snmp (AGENT);
-	/* Initialize tables */
+
+	/* Initialize subagent tables */
 	init_saHpiDomainInfoTable();
 	init_saHpiDomainReferenceTable();
 	init_saHpiDomainAlarmTable();
@@ -1289,10 +1289,15 @@ main (int argc, char **argv)
 	init_saHpiWatchdogTable();
 	init_saHpiAnnunciatorTable();
 
-  if (send_traps_on_startup == AGENT_TRUE)
-    send_traps = AGENT_TRUE;
+	if (send_traps_on_startup == AGENT_TRUE)
+		send_traps = AGENT_TRUE;
 
-  dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
+	/* after initialization populate tables */
+	populate_domain_info();
+
+        populate_drt();
+
+	dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
 #if 0 /* TODO DMJ */
   if (populate_rpt () != AGENT_ERR_NOERROR)
     {
