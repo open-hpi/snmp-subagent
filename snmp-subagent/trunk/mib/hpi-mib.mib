@@ -3659,20 +3659,22 @@ saHpiSensorThresholdDefnIsThreshold OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "True if the sensor supports thresholds. If false,
-	 rest of structure is not meaningful."
+	 rest of these objects are not meaningful."
         ::= {saHpiSensorEntry 22}
 
 saHpiSensorThresholdDefnTholdCapabilities OBJECT-TYPE
-        SYNTAX          Unsigned32(1..2)
+        SYNTAX          Unsigned32(0..2)
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
 	How the threshold values are written. 
-	Raw (0x01) or in interpreted state (0x02)"
+	Raw (0x01) or in interpreted state (0x02).
+
+	If set to zero means data is undefined."
         ::= {saHpiSensorEntry 23}
 
 saHpiSensorThresholdDefnReadThold OBJECT-TYPE
-        SYNTAX          Unsigned32(1..128)
+        SYNTAX          Unsigned32(0..128)
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Threshold Support
@@ -3686,11 +3688,13 @@ saHpiSensorThresholdDefnReadThold OBJECT-TYPE
 			 SAHPI_STM_UP_MAJOR       0x10
 			 SAHPI_STM_UP_CRIT        0x20
 			 SAHPI_STM_UP_HYSTERESIS  0x40
-			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 
+
+	If set to zero means data is undefined."
         ::= {saHpiSensorEntry 24}
 
 saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
-        SYNTAX          Unsigned32 (1..128)
+        SYNTAX          Unsigned32 (0..128)
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Threshold Support
@@ -3704,11 +3708,14 @@ saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
 			 SAHPI_STM_UP_MAJOR       0x10
 			 SAHPI_STM_UP_CRIT        0x20
 			 SAHPI_STM_UP_HYSTERESIS  0x40
-			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 
+
+
+	If set to zero means data is undefined."
         ::= {saHpiSensorEntry 25}
 
 saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
-        SYNTAX          Unsigned32 (1..128) 
+        SYNTAX          Unsigned32 (0..128) 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " Threshold Support
@@ -3722,7 +3729,9 @@ saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
 			 SAHPI_STM_UP_MAJOR       0x10
 			 SAHPI_STM_UP_CRIT        0x20
 			 SAHPI_STM_UP_HYSTERESIS  0x40
-			 SAHPI_STM_LOW_HYSTERESIS 0x80 "
+			 SAHPI_STM_LOW_HYSTERESIS 0x80 
+
+	If set to zero means data is undefined."
         ::= {saHpiSensorEntry 26}
 
 
@@ -3752,10 +3761,18 @@ saHpiSensorThresholdRaw OBJECT-TYPE
 
 	Also the saHpiSensorThresholdDefnTholdCapabilities determines
 	if the threshold set can be set using raw values or interpreted.
+	The sets of data that are NOT set to be writeable by
+	saHpiSensorThresholdDefnWriteThold bit mask are ignored.
 
+	After the write operation the data might e different from the
+	supplied data.
+	
 	And finally, make sure saHpiSensorThresholdDefnIsThreshold
 	is to true, otherwise the sensor does not support setting
 	threshold values.
+
+	Furthermore if saHpiSensorThresholdDefnIsThreshold is set to
+	false(2) this object has undefined values.
 	"
         ::= {saHpiSensorEntry 27}
 
@@ -3800,6 +3817,11 @@ saHpiSensorThresholdInterpreted OBJECT-TYPE
 	Note: Depending on saHpiSensorThresholdDefnFixedThold,
 	saHpiSensorThresholdDefnWriteThold  only selective sets
 	can be set.
+	The sets of data that are NOT set to be writeable by
+	saHpiSensorThresholdDefnWriteThold bit mask are ignored.
+
+	After the write operation the data might be different from the
+	supplied data.
 
 	Also the saHpiSensorThresholdDefnTholdCapabilities determines
 	if the threshold set can be set using raw values or interpreted.
@@ -3807,6 +3829,9 @@ saHpiSensorThresholdInterpreted OBJECT-TYPE
 	And finally, make sure saHpiSensorThresholdDefnIsThreshold
 	is to true, otherwise the sensor does not support setting
 	threshold values.
+
+	Furthermore if saHpiSensorThresholdDefnIsThreshold is set to
+	false(2) this object has undefined values.
 	"
         ::= {saHpiSensorEntry 28}
 
