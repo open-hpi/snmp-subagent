@@ -1,3 +1,5 @@
+
+
 HPI-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
@@ -9774,7 +9776,11 @@ saHpiAnnunciatorTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Table of static Annunciator resource data record 
-	information and dynamic control and operational data."
+	information and dynamic control data.  The columnar node 
+	'saHpiAnnunciatorMode' is in support of SAI-HPI-B.01.01 sections
+	7.6.6 and 7.6.7 and is representative of the dynamic control data 
+	found in this table.  
+	"
         ::= {hpiResources 6}
 
 saHpiAnnunciatorEntry OBJECT-TYPE
