@@ -118,6 +118,8 @@ populate_control (SaHpiEntryIdT rdr_id,
 					}
 				}
 			}
+			free(array->array);
+			free (array); array = NULL;
 		}
 		// restoree it to its previous glory.
 		ctrl_index.len =  CTRL_INDEX_NR;
@@ -126,7 +128,6 @@ populate_control (SaHpiEntryIdT rdr_id,
       if (!ctrl_context)
 	{
 	  // New entry. Add it
-	  DEBUGMSGTL((AGENT, "1 MEMORY"));
 	  ctrl_context = saHpiCtrlTable_create_row (&ctrl_index);
 	}
 
@@ -175,7 +176,6 @@ populate_control (SaHpiEntryIdT rdr_id,
 					 rdr_entry_oid, rdr_entry_oid_len,
 					 ctrl_context) == AGENT_NEW_ENTRY)
 	{
-	DEBUGMSGTL((AGENT," 2 MEMORY"));
 	  CONTAINER_INSERT (cb.container, ctrl_context);
 	  control_count = CONTAINER_SIZE (cb.container);
 	}
@@ -489,7 +489,7 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      memcpy (ctx->saHpiCtrlAttributes,
 		      &digital.Default, ctx->saHpiCtrlState_len);
 	      // SaHpiCtrlStateDigitalT
-	      state->StateUnion.Digital = htonl (state->StateUnion.Digital)+1;
+	      state->StateUnion.Digital = htonl (state->StateUnion.Digital+1);
 	      ctx->saHpiCtrlState_len = sizeof (SaHpiCtrlStateDigitalT);
 	      memcpy (ctx->saHpiCtrlState,
 		      &state->StateUnion.Digital, ctx->saHpiCtrlState_len);

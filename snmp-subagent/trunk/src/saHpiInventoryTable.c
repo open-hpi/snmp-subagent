@@ -198,6 +198,8 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 					}
 				}
 			}
+			free(array->array);
+			free(array); array = NULL;
 		}
 		// restoree it to its previous glory.
 		inventory_index.len =  INVENTORY_INDEX_NR;
@@ -206,7 +208,6 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 	  if (!inventory_context)
 	    {
 	      // New entry.
-	      DEBUGMSGTL((AGENT,"1 MEMORY"));
 	      inventory_context =
 		saHpiInventoryTable_create_row (&inventory_index);
 	    }
@@ -247,7 +248,6 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 						  inventory_context) ==
 	      AGENT_NEW_ENTRY)
 	    {
-		DEBUGMSGTL((AGENT,"2 MEMORY"));
 	      CONTAINER_INSERT (cb.container, inventory_context);
 	      inventory_count = CONTAINER_SIZE (cb.container);
 	    }

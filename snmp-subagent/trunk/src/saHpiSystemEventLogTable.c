@@ -153,7 +153,6 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 	      if (!sel_context)
 		{
 		  // New entry. Add it
-		  DEBUGMSGTL((AGENT,"1 MEMORY"));
 		  sel_context =
 		    saHpiSystemEventLogTable_create_row (&sel_index);
 		}
@@ -168,7 +167,6 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
 							   sel_context)
 		  == AGENT_NEW_ENTRY)
 		{
-		DEBUGMSGTL((AGENT,"2 MEMORY"));
 		  CONTAINER_INSERT (cb.container, sel_context);
 		  event_log_entries = CONTAINER_SIZE (cb.container);
 		}
@@ -572,7 +570,7 @@ delete_SEL_row (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id)
   netsnmp_index index;
   netsnmp_void_array *array;
 
-  DEBUGMSGTL ((AGENT, "delete_SEL_row (%d, %d). Entry\n",
+  DEBUGMSGTL ((AGENT, "Entry: delete_SEL_row (%d, %d). Entry\n",
 	       domain_id, resource_id));
 
   partial_index_oid[0] = domain_id;
@@ -594,9 +592,10 @@ delete_SEL_row (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id)
 	    }
 	  rc = AGENT_ERR_NOERROR;
 	}
-
+	free(array->array);
+	free(array); array = NULL;
     }
-  DEBUGMSGTL ((AGENT, "delete_SEL_row. Exit (rc: %d, purged: %d records)\n",
+  DEBUGMSGTL ((AGENT, "Exit: delete_SEL_row. Exit (rc: %d, purged: %d records)\n",
 	       rc, i));
   return rc;
 
@@ -627,6 +626,8 @@ number_of_rows (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id)
   if (array != NULL)
     {
       i = array->size;
+      free(array->array);
+      free(array); array = NULL;
     }
   DEBUGMSGTL ((AGENT, "number_of_rows (count: %d). Exit\n", i));
   return i;

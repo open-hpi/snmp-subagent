@@ -120,6 +120,8 @@ populate_watchdog (SaHpiEntryIdT rdr_id,
 					}
 				}
 			}
+			free(array->array);
+			free(array); array = NULL;
 		}
 		// restoree it to its previous glory.
 		watchdog_index.len =  WATCHDOG_INDEX_NR;
