@@ -6269,7 +6269,10 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
 
 saHpiSoftwareNotifications NOTIFICATION-TYPE
 	OBJECTS {
-		saHpiSoftwareEventType
+		saHpiSoftwareEventType,
+		saHpiSoftwareEventTextType,
+		saHpiSoftwareEventTextLanguage,
+		saHpiSoftwareEventText
 	}
 	STATUS current
 	DESCRIPTION
