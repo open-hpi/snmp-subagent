@@ -7144,9 +7144,9 @@ saHpiWatchdogEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "When the 'Watchdog' capability is set in a resource, a watchdog with 
-        an identifier of SAHPI_DEFAULT_WATCHDOG_NUM is required. All 
-        watchdogs must be represented in the RDR repository with an 
-        saHpiWatchdogRecT, including the watchdog with an identifier of 
+        an identifier of SAHPI_DEFAULT_WATCHDOG_NUM, that is defined as 0,  
+	is required. All watchdogs shall be represented with an entry in in 
+	saHpiWatchdogTable, including the initial watchdog with an identifier of 
         SAHPI_DEFAULT_WATCHDOG_NUM."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiWatchdogNum }
         ::= {saHpiWatchdogTable 1}
@@ -7171,7 +7171,13 @@ saHpiWatchdogNum OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Watchdog number"
+        DESCRIPTION   
+	"RPT entry for a resource indicates that it supports watchdog timers,
+	then there must be at least one watchdog timer hosted by the resource,
+	with the watchdog number of SAHPI_DEFAULT_WATCHDOG_NUM (0x00000). If
+	additional watchdog timers are hosted by the resource, they may have 
+	any watchdog number, and may be located by watchdog records in the RDR
+	repository. Note: The SAHPI_DEFAULT_WATCHDOG_NUM. is defined as 0x0000000."
         ::= {saHpiWatchdogEntry 1}
 
  
