@@ -254,17 +254,16 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 
 	  /* Bug 872437 segfault when populating inventory entries using snmp_bc
 	   *
-	   * The line below  */
-	  if (data->DataRecords[count+1] == NULL) /*
-	   * was used as method to stop the loop. Unfortunatly (foruntatly?)
-	   * GCC translates that to a pointer to the count+1 byte in the
-	   * FIRST DataRecords structure. Which means for example
-	   * that data->DataRecord[2] actually gives us 
-	   * data->DataRecords->DataLength
-	   * 
-	   * The reason why we check for data->DataRecord is b/c on the utils
-	   * 'hpifru.c' does it too. Bad joss.
-	   */
+	   * This line below can segfault when using certain plugins that do *not*
+	   * set the last entry to be NULL. Because they assume that there will be only
+	   * one record data. Which would have been fine, except that the 'count+1' 
+	   * resolves the to an address right smack in the data entries for the data.
+	   * Thefore instead of finding a nice 0x0000..00 value, we get the values of 
+	   * of the first item and end up crashing or looping forever. 
+	   * Perhaps we should put some logic to detect that kind of situation, but
+	   * why bother - this way the plugin writer finds an bug in his/her code.*/
+	  DEBUGMSGTL((AGENT,"Approaching possible seg fault invocation. If the plugin was writen improperly this will crash the application."));
+	  if (data->DataRecords[count+1] == NULL) 
 	  { 
 	    stop = SAHPI_TRUE;
 	  }
@@ -400,6 +399,7 @@ saHpiInventoryTable_modify_context (SaHpiEntryIdT rdr_id,
   long hash;
   SaHpiInventDataRecordT data;
   long len;
+  integer64 time_attr;
 
   if (entry && ctx)
     {
@@ -481,67 +481,99 @@ saHpiInventoryTable_modify_context (SaHpiEntryIdT rdr_id,
 	      ctx->saHpiInventoryValidity = MIB_OVERFLOW;
 	      break;
 	    default:
-	      ctx->saHpiInventoryValidity = MIB_INVALID;
+	      ctx->saHpiInventoryValidity = MIB_UNDEFINED;
 	    }
 
 	  // If we receive data-record that is invalid, these entries are
 	  // still safe - but the data might be corrupted - *unless* you
 	  // memset to 0x00 before you put data in it.
-	  ctx->saHpiInventoryRecordType = data.RecordType;
+	  ctx->saHpiInventoryRecordType = data.RecordType+1;
 
 	  switch (data.RecordType)
 	    {
 	    case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
+		
 	      ctx->saHpiInventoryAttributes_len =
 		(data.DataLength <
 		 SAHPI_INVENTORY_ATTRIBUTES_MAX) ? data.
-		DataLength : SAHPI_INVENTORY_ATTRIBUTES_MAX;
+		DataLength  : SAHPI_INVENTORY_ATTRIBUTES_MAX;
 
-	      memcpy (ctx->saHpiInventoryAttributes,
+		/* Copy variable data. */
+	      memcpy (ctx->saHpiInventoryAttributes+ sizeof (SaHpiUint32T),
 		      data.RecordData.InternalUse.Data, data.DataLength);
 	      break;
 	    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
-	      ctx->saHpiInventoryAttributes_len = 1 + sizeof (SaHpiTimeT);
-	      ctx->saHpiInventoryAttributes[0] =
-		data.RecordData.ChassisInfo.Type;
-	      // Normalize the Mfg.
-	      memcpy (ctx->saHpiInventoryAttributes + 1,
-		      &data.RecordData.ChassisInfo.GeneralData.MfgDateTime,
+	      /* Add +1 (MIB CR: #55) and normalize */
+	      data.RecordData.ChassisInfo.Type = htonl(data.RecordData.ChassisInfo.Type+1);
+	      memcpy (ctx->saHpiInventoryAttributes,
+		      &data.RecordData.ChassisInfo.Type,
+		      sizeof(SaHpiInventChassisTypeT));
+	      /* Normalize the Time. */
+
+              time_attr.low = data.RecordData.ChassisInfo.GeneralData.MfgDateTime & 0xffffffff;
+              time_attr.high = data.RecordData.ChassisInfo.GeneralData.MfgDateTime >> 32;
+
+	      /* Convert to network byte order */
+	      time_attr.low = htonl(time_attr.low);
+	      time_attr.high = htonl(time_attr.high);
+
+	      ctx->saHpiInventoryAttributes_len +=  sizeof (SaHpiTimeT);
+	      memcpy (ctx->saHpiInventoryAttributes + sizeof(SaHpiInventChassisTypeT),
+		      &time_attr,
 		      sizeof (SaHpiTimeT));
 
+	      /* Copy the rest of the objects */
 	      update_context_on_inventory_data (&data.RecordData.ChassisInfo.
 						GeneralData, ctx);
 	      break;
 	    case SAHPI_INVENT_RECTYPE_BOARD_INFO:
 	      ctx->saHpiInventoryAttributes_len = sizeof (SaHpiTimeT);
+
+              time_attr.low = data.RecordData.BoardInfo.MfgDateTime & 0xffffffff;
+              time_attr.high = data.RecordData.BoardInfo.MfgDateTime >> 32;
+	      /* Convert to network byte order */
+	      time_attr.low = htonl(time_attr.low);
+	      time_attr.high = htonl(time_attr.high);
 	      memcpy (ctx->saHpiInventoryAttributes,
-		      &data.RecordData.BoardInfo.MfgDateTime,
+		      &time_attr,
 		      sizeof (SaHpiTimeT));
+
 	      update_context_on_inventory_data (&data.RecordData.BoardInfo,
 						ctx);
 	      break;
 	    case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
 	      ctx->saHpiInventoryAttributes_len = sizeof (SaHpiTimeT);
+	      /* Normalize the value as two 32 bit longs */
+              time_attr.low = data.RecordData.ProductInfo.MfgDateTime & 0xffffffff;
+              time_attr.high = data.RecordData.ProductInfo.MfgDateTime >> 32;
+	      /* Convert to network byte order */
+	      time_attr.low = htonl(time_attr.low);
+	      time_attr.high = htonl(time_attr.high);
+
 	      memcpy (ctx->saHpiInventoryAttributes,
-		      &data.RecordData.ProductInfo.MfgDateTime,
+		      &time_attr,
 		      sizeof (SaHpiTimeT));
+
 	      update_context_on_inventory_data (&data.RecordData.ProductInfo,
 						ctx);
 	      break;
 	    case SAHPI_INVENT_RECTYPE_OEM:
+
 	      ctx->saHpiInventoryAttributes_len =
 		sizeof (SaHpiManufacturerIdT);
+		/* Convert to network order */
 	      data.RecordData.OemData.MId =
 		htonl (data.RecordData.OemData.MId);
 	      memcpy (ctx->saHpiInventoryAttributes,
 		      &data.RecordData.OemData.MId,
 		      sizeof (SaHpiManufacturerIdT));
-	      // It ought to be only 1 byt eof data, but you never know.
-	      len = ((data.DataLength - sizeof (SaHpiManufacturerIdT)) >
+
+	      /* It ought to be only 1 byte of data, but you never know. */
+	      len = ((data.DataLength + sizeof (SaHpiManufacturerIdT)) >
 		     SAHPI_INVENTORY_ATTRIBUTES_MAX) ?
 		SAHPI_INVENTORY_ATTRIBUTES_MAX :
-		(data.DataLength - sizeof (SaHpiManufacturerIdT));
-
+		(data.DataLength + sizeof (SaHpiManufacturerIdT));
+	 	/* Copying the variable length data */
 	      memcpy (ctx->saHpiInventoryAttributes +
 		      ctx->saHpiInventoryAttributes_len,
 		      &data.RecordData.OemData.Data, len);
@@ -571,7 +603,7 @@ update_context_on_inventory_data (SaHpiInventGeneralDataT * data,
   if (data->Manufacturer)
     {
       ctx->saHpiInventoryTextType = data->Manufacturer->DataType + 1;
-      ctx->saHpiInventoryTextLanguage = data->Manufacturer->Language;
+      ctx->saHpiInventoryTextLanguage = data->Manufacturer->Language +1 ;
 
       ctx->saHpiInventoryManufacturer_len = data->Manufacturer->DataLength;
       memcpy (ctx->saHpiInventoryManufacturer, data->Manufacturer->Data,
@@ -665,7 +697,7 @@ copy_data (saHpiInventoryTable_context * ctx,
 
   memset (buf, 0x00, l);
   buf->DataType = ctx->saHpiInventoryTextType - 1;
-  buf->Language = ctx->saHpiInventoryTextLanguage;
+  buf->Language = ctx->saHpiInventoryTextLanguage - 1;
   buf->DataLength = length;
 
   memcpy (buf->Data, data, length);
@@ -749,7 +781,7 @@ set_inventory (saHpiInventoryTable_context * ctx)
   SaHpiInventoryDataT *data = NULL;
   size_t initial_size;
   SaHpiUint32T data_len;
-
+  integer64 time_attr;
 
   if (ctx)
     {
@@ -853,33 +885,51 @@ set_inventory (saHpiInventoryTable_context * ctx)
 	}
       // We have a GO
 
-      // We 'assume' (this could be dangerous) that since the 
-      // record is not NULL all the data that is given (for example
-      // some of the SaHpiTextBufferT* data is within the 'data_len'  (in our
-      // memory hole).
-      // Therefore, for our records we will use the memory location
-      // past 'data_len' (memory hole) to store our entries. We know we have enough
-      // space for 8*255 + SNMP_MAX_MSG_SIZE octets (we have did our calculation 
-      // and size testing above.
+      /* We 'assume' (this could be dangerous) that since the 
+      	record is not NULL all the data that is given (for example
+      	some of the SaHpiTextBufferT* data is within the 'data_len'  (in our
+        memory hole).
+        Therefore, for our records we will use the memory location
+        past 'data_len' (memory hole) to store our entries. We know we have enough
+        space for 8*255 + SNMP_MAX_MSG_SIZE octets (we have did our calculation 
+        and size testing before giving the space to the SaHpi call). */
 
-      data_rec->RecordType = ctx->saHpiInventoryRecordType;
+      data_rec->RecordType = ctx->saHpiInventoryRecordType-1;
       switch (data_rec->RecordType)
 	{
 	case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
-	  memcpy (ctx->saHpiInventoryAttributes,
-		  &data_rec->RecordData.InternalUse.Data,
-		  sizeof (SaHpiUint8T));
-	  length = sizeof (SaHpiUint8T);
+
+		length = ctx->saHpiInventoryAttributes_len;
+		DEBUGMSGTL((AGENT,"This instruction might seg-fault the program. This is due unclear SAF spec."));
+	/* Lastly copy the data */
+	 	memcpy (ctx->saHpiInventoryAttributes+sizeof(SaHpiUint32T),
+		 	&data_rec->RecordData.InternalUse.Data,
+		 	length);
 	  break;
 	case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
-	  data_rec->RecordData.ChassisInfo.Type =
-	    ctx->saHpiInventoryAttributes[0];
-	  length = 1;
-	  memcpy (&data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime,
-		  ctx->saHpiInventoryAttributes + 1, sizeof (SaHpiTimeT));
+	/*
+	Copy the data and convert back to host order */
+	memcpy (ctx->saHpiInventoryAttributes,
+	  	&data_rec->RecordData.ChassisInfo.Type,
+		sizeof(SaHpiInventChassisTypeT));
+	
+	data_rec->RecordData.ChassisInfo.Type = ntohl(data_rec->RecordData.ChassisInfo.Type)-1;
+
+	length = sizeof(SaHpiInventChassisTypeT);
+	/* Copy the manufacturer date. */
+	  memcpy (&time_attr,
+		  ctx->saHpiInventoryAttributes + sizeof(SaHpiInventChassisTypeT), sizeof (SaHpiTimeT));
 	  length += sizeof (SaHpiTimeT);
-	  // The location where pointer information will be stored is:
-	  // start address of data + 'data_len'.
+
+	/* Convert back to our host type */
+
+	data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime = time_attr.high;
+	data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime = 
+		data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime << 32;
+	data_rec->RecordData.ChassisInfo.GeneralData.MfgDateTime += time_attr.low;
+	
+	 /* The location where pointer information will be stored is:
+	   start address of data + 'data_len'. */
 	  rc =
 	    update_inventory_data_on_context (&data_rec->RecordData.
 					      ChassisInfo.GeneralData, ctx,
@@ -888,9 +938,18 @@ set_inventory (saHpiInventoryTable_context * ctx)
 					      &length);
 	  break;
 	case SAHPI_INVENT_RECTYPE_BOARD_INFO:
-	  memcpy (&data_rec->RecordData.BoardInfo.MfgDateTime,
+
+	/* Copy the manufacturere date. */
+	
+	  memcpy (&time_attr,
 		  ctx->saHpiInventoryAttributes, sizeof (SaHpiTimeT));
 	  length = sizeof (SaHpiTimeT);
+	/* Convert back to our host type */
+
+	data_rec->RecordData.BoardInfo.MfgDateTime = time_attr.high;
+	data_rec->RecordData.BoardInfo.MfgDateTime = 
+		data_rec->RecordData.BoardInfo.MfgDateTime << 32;
+	data_rec->RecordData.BoardInfo.MfgDateTime += time_attr.low;
 
 	  rc =
 	    update_inventory_data_on_context (&data_rec->RecordData.BoardInfo,
@@ -899,9 +958,16 @@ set_inventory (saHpiInventoryTable_context * ctx)
 					      &length);
 	  break;
 	case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
-	  memcpy (&data_rec->RecordData.ProductInfo.MfgDateTime,
+	  memcpy (&time_attr,
 		  ctx->saHpiInventoryAttributes, sizeof (SaHpiTimeT));
 	  length = sizeof (SaHpiTimeT);
+	/* Convert back to our host type */
+
+	data_rec->RecordData.ProductInfo.MfgDateTime = time_attr.high;
+	data_rec->RecordData.ProductInfo.MfgDateTime = 
+		data_rec->RecordData.ProductInfo.MfgDateTime << 32;
+	data_rec->RecordData.ProductInfo.MfgDateTime += time_attr.low;
+
 	  rc =
 	    update_inventory_data_on_context (&data_rec->RecordData.
 					      ProductInfo, ctx,
@@ -910,22 +976,27 @@ set_inventory (saHpiInventoryTable_context * ctx)
 					      &length);
 	  break;
 	case SAHPI_INVENT_RECTYPE_OEM:
-	  // This is iffy. The spec mentions that OemData.Data is just one
-	  // byte, but in the comment it mentions opaque variable lenght data.
-	  // Go figure :-(
+	  /* This is iffy. The spec mentions that OemData.Data is just one
+	   byte, but in the comment it mentions opaque variable lenght data.
+	   Go figure :-( */
+
 	  memcpy (&data_rec->RecordData.OemData.MId,
 		  ctx->saHpiInventoryAttributes,
 		  sizeof (SaHpiManufacturerIdT));
-
+	 /* Convert back to host order */
 	  data_rec->RecordData.OemData.MId =
 	    ntohl (data_rec->RecordData.OemData.MId);
+
 	  length = sizeof (SaHpiManufacturerIdT);
 
-	  // We copy only the first byte. This might change in the future.
+	  /* We copy n-bytes of the field. */
 
-	  data_rec->RecordData.OemData.Data[0] =
-	    ctx->saHpiInventoryAttributes[length];
+	  memcpy (&data_rec->RecordData.OemData.Data,
+		  ctx->saHpiInventoryAttributes +  length,
+		  ctx->saHpiInventoryAttributes_len - length);
+
 	  length = ctx->saHpiInventoryAttributes_len;
+
 	  break;
 	default:
 	  return AGENT_ERR_NULL_DATA;
@@ -1415,10 +1486,10 @@ saHpiInventoryTable_set_reserve2 (netsnmp_request_group * rg)
 	{
 
 	case COLUMN_SAHPIINVENTORYATTRIBUTES:
-	  switch (ctx->saHpiInventoryRecordType)
+	  switch (ctx->saHpiInventoryRecordType-1)
 	    {
 	    case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
-	      if (var->val_len != SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX)
+	      if (var->val_len > SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX)
 		rc = SNMP_ERR_WRONGLENGTH;
 	      break;
 	    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
@@ -1434,7 +1505,9 @@ saHpiInventoryTable_set_reserve2 (netsnmp_request_group * rg)
 		rc = SNMP_ERR_WRONGLENGTH;
 	      break;
 	    case SAHPI_INVENT_RECTYPE_OEM:
-	      if (var->val_len != SAHPI_INVENT_RECTYPE_OEM_MAX)
+	      if (var->val_len > SAHPI_INVENT_RECTYPE_OEM_MAX)
+		rc = SNMP_ERR_WRONGLENGTH;
+	      if (var->val_len < SAHPI_INVENT_RECTYPE_OEM_MIN)
 		rc = SNMP_ERR_WRONGLENGTH;
 	      break;
 	    default:
@@ -1445,7 +1518,7 @@ saHpiInventoryTable_set_reserve2 (netsnmp_request_group * rg)
 	  break;
 
 	case COLUMN_SAHPIINVENTORYTEXTTYPE:
-	  switch (ctx->saHpiInventoryRecordType)
+	  switch (ctx->saHpiInventoryRecordType-1)
 	    {
 	    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
 	    case SAHPI_INVENT_RECTYPE_BOARD_INFO:
@@ -1463,12 +1536,12 @@ saHpiInventoryTable_set_reserve2 (netsnmp_request_group * rg)
 	    }
 	  break;
 	case COLUMN_SAHPIINVENTORYTEXTLANGUAGE:
-	  switch (ctx->saHpiInventoryRecordType)
+	  switch (ctx->saHpiInventoryRecordType-1)
 	    {
 	    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
 	    case SAHPI_INVENT_RECTYPE_BOARD_INFO:
 	    case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
-	      if (((*var->val.integer < 0) || (*var->val.integer > 136)))
+	      if (((*var->val.integer < 1) || (*var->val.integer > 137)))
 		{
 		  rc = SNMP_ERR_BADVALUE;
 		}
@@ -1490,7 +1563,7 @@ saHpiInventoryTable_set_reserve2 (netsnmp_request_group * rg)
 	case COLUMN_SAHPIINVENTORYFILEID:
 	case COLUMN_SAHPIINVENTORYASSETTAG:
 	case COLUMN_SAHPIINVENTORYCUSTOMFIELD:
-	  switch (ctx->saHpiInventoryRecordType)
+	  switch (ctx->saHpiInventoryRecordType-1)
 	    {
 	    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
 	      break;
