@@ -13,6 +13,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			hpiSubagent.c \
 			hpiCheckIndice.c \
 			hpiDomain.c \
+			hpiPopulateRpt.c \
+			hpiPopulateRdr.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnunciatorTable.c \
 			saHpiAreaTable.c \

@@ -1,5 +1,5 @@
 /*
-* (C) Copyright IBM Corp. 2003
+* (C) Copyright IBM Corp. 2004
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,6 +19,11 @@
 #include <SaHpi.h>
 #include <glib.h>
 
+//*******************************************************
+//*******************************************************
+// saHpiDomainReferenceTable support fucntions
+//*******************************************************
+//*******************************************************
 struct sa_domain_table {
 	SaHpiDomainIdT 	did;
 	SaHpiSessionIdT sid;
@@ -31,7 +36,8 @@ struct sa_resource_table {
 };
 
 int populate_drt(void);
-
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did);
+
+
 
 #endif /*_HPI_DOMAIN_ */
