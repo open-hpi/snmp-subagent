@@ -22,7 +22,6 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <net-snmp/library/snmp_assert.h>
 
-#include <epath_utils.h>
 #include <SaHpi.h>
 
 #include <hpiSubagent.h>

@@ -45,7 +45,8 @@ static SaHpiSessionIdT session_id;
 static SaHpiRptInfoT rpt_info;
 static SaErrorT err;
 
-static const char *version = "$Id$";
+static const char *version =
+  "$Id$";
 /*
  * Configuration options. Changed by config file.
  */
@@ -266,6 +267,207 @@ get_error_string (SaErrorT error)
       return "(Invalid error code)";
     }
 }
+
+
+static gchar *eshort_names[] = {
+  "UNSPECIFIED",
+  "OTHER",
+  "UNKNOWN",
+  "PROCESSOR",
+  "DISK_BAY",
+  "PERIPHERAL_BAY",
+  "SYS_MGMNT_MODULE",
+  "SYSTEM_BOARD",
+  "MEMORY_MODULE",
+  "PROCESSOR_MODULE",
+  "POWER_SUPPLY",
+  "ADD_IN_CARD",
+  "FRONT_PANEL_BOARD",
+  "BACK_PANEL_BOARD",
+  "POWER_SYSTEM_BOARD",
+  "DRIVE_BACKPLANE",
+  "SYS_EXPANSION_BOARD",
+  "OTHER_SYSTEM_BOARD",
+  "PROCESSOR_BOARD",
+  "POWER_UNIT",
+  "POWER_MODULE",
+  "POWER_MGMNT",
+  "CHASSIS_BACK_PANEL_BOARD",
+  "SYSTEM_CHASSIS",
+  "SUB_CHASSIS",
+  "OTHER_CHASSIS_BOARD",
+  "DISK_DRIVE_BAY",
+  "PERIPHERAL_BAY_2",
+  "DEVICE_BAY",
+  "COOLING_DEVICE",
+  "COOLING_UNIT",
+  "INTERCONNECT",
+  "MEMORY_DEVICE",
+  "SYS_MGMNT_SOFTWARE",
+  "BIOS",
+  "OPERATING_SYSTEM",
+  "SYSTEM_BUS",
+  "GROUP",
+  "REMOTE",
+  "EXTERNAL_ENVIRONMENT",
+  "BATTERY",
+  "CHASSIS_SPECIFIC",		/* Jumps to 144 */
+  "BOARD_SET_SPECIFIC",		/* Jumps to 176 */
+  "OEM_SYSINT_SPECIFIC",	/* Jumps to 208 */
+  "ROOT",			/* Jumps to 65535 and continues from there... */
+  "RACK",
+  "SUBRACK",
+  "COMPACTPCI_CHASSIS",
+  "ADVANCEDTCA_CHASSIS",
+  "SYSTEM_SLOT",
+  "SBC_BLADE",
+  "IO_BLADE",
+  "DISK_BLADE",
+  "DISK_DRIVE",
+  "FAN",
+  "POWER_DISTRIBUTION_UNIT",
+  "SPEC_PROC_BLADE",
+  "IO_SUBBOARD",
+  "SBC_SUBBOARD",
+  "ALARM_MANAGER",
+  "ALARM_MANAGER_BLADE",
+  "SUBBOARD_CARRIER_BLADE",
+};
+
+#define EPATHSTRING_START_DELIMITER "{"
+#define EPATHSTRING_END_DELIMITER "}"
+#define EPATHSTRING_VALUE_DELIMITER ","
+#define ESHORTNAMES_BEFORE_JUMP 40
+#define ESHORTNAMES_FIRST_JUMP 41
+#define ESHORTNAMES_SECOND_JUMP 42
+#define ESHORTNAMES_THIRD_JUMP 43
+#define ESHORTNAMES_LAST_JUMP 44
+
+
+static unsigned int
+entitytype2index (unsigned int i)
+{
+  if (i <= ESHORTNAMES_BEFORE_JUMP)
+    {
+      return i;
+    }
+  else if (i == (unsigned int) SAHPI_ENT_CHASSIS_SPECIFIC)
+    {
+      return ESHORTNAMES_FIRST_JUMP;
+    }
+  else if (i == (unsigned int) SAHPI_ENT_BOARD_SET_SPECIFIC)
+    {
+      return ESHORTNAMES_SECOND_JUMP;
+    }
+  else if (i == (unsigned int) SAHPI_ENT_OEM_SYSINT_SPECIFIC)
+    {
+      return ESHORTNAMES_THIRD_JUMP;
+    }
+  else
+    {
+      return (i - (unsigned int) SAHPI_ENT_ROOT + ESHORTNAMES_LAST_JUMP);
+    }
+}
+
+/***********************************************************************
+ * entitypath2string
+ *  
+ * Parameters:
+ *   epathptr IN   Pointer to HPI's entity path structure
+ *   epathstr OUT  Pointer to canonical entity path string
+ *   strsize  IN   Canonical string length
+ *
+ * Returns:
+ *   >0  Number of characters written to canonical entity path string
+ *   -1  Error return
+ ***********************************************************************/
+int
+entitypath2string (const SaHpiEntityPathT * epathptr, gchar * epathstr,
+		   const gint strsize)
+{
+
+  gchar *instance_str, *catstr, *tmpstr;
+  gint err, i, strcount = 0, rtncode = 0;
+
+  if (epathstr == NULL || strsize <= 0)
+    {
+      DEBUGMSGTL ((AGENT, "Null string or invalid string size"));
+      return (-1);
+    }
+
+  if (epathptr == NULL)
+    {
+      epathstr = "";
+      return 0;
+    }
+
+  instance_str = (gchar *) g_malloc0 (MAX_INSTANCE_DIGITS + 1);
+  tmpstr = (gchar *) g_malloc0 (strsize);
+  if (instance_str == NULL || tmpstr == NULL)
+    {
+      DEBUGMSGTL ((AGENT, "Out of memory"));
+      rtncode = -1;
+      goto CLEANUP;
+    }
+
+  for (i = (SAHPI_MAX_ENTITY_PATH - 1); i >= 0; i--)
+    {
+      guint num_digits, work_instance_num;
+
+      /* Find last element of structure; Current choice not good,
+         since type=instance=0 is valid */
+      if (epathptr->Entry[i].EntityType == 0)
+	{
+	  continue;
+	}
+
+      /* Validate and convert data */
+      work_instance_num = epathptr->Entry[i].EntityInstance;
+      for (num_digits = 1; (work_instance_num = work_instance_num / 10) > 0;
+	   num_digits++);
+
+      if (num_digits > MAX_INSTANCE_DIGITS)
+	{
+	  rtncode = -1;
+	  goto CLEANUP;
+	}
+      memset (instance_str, 0, MAX_INSTANCE_DIGITS + 1);
+      err = snprintf (instance_str, MAX_INSTANCE_DIGITS + 1,
+		      "%d", epathptr->Entry[i].EntityInstance);
+
+      strcount = strcount +
+	strlen (EPATHSTRING_START_DELIMITER) +
+	strlen (eshort_names
+		[entitytype2index (epathptr->Entry[i].EntityType)]) +
+	strlen (EPATHSTRING_VALUE_DELIMITER) + strlen (instance_str) +
+	strlen (EPATHSTRING_END_DELIMITER);
+
+      if (strcount > strsize - 1)
+	{
+	  rtncode = -1;
+	  goto CLEANUP;
+	}
+
+      catstr = g_strconcat (EPATHSTRING_START_DELIMITER,
+			    eshort_names[entitytype2index
+					 (epathptr->Entry[i].EntityType)],
+			    EPATHSTRING_VALUE_DELIMITER, instance_str,
+			    EPATHSTRING_END_DELIMITER, NULL);
+
+      strcat (tmpstr, catstr);
+      g_free (catstr);
+    }
+  rtncode = strcount;
+  /* Write string */
+  memset (epathstr, 0, strsize);
+  strcpy (epathstr, tmpstr);
+
+CLEANUP:
+  g_free (instance_str);
+  g_free (tmpstr);
+
+  return (rtncode);
+}				/* End entitypath2string */
 
 SaErrorT
 rcSaHpi ()
@@ -508,22 +710,23 @@ main (int argc, char **argv)
       snmp_enable_calllog ();
       snmp_enable_syslog_ident (AGENT, LOG_DAEMON);
     }
-  snmp_log (LOG_INFO, "Starting %s\n",version);
+  snmp_log (LOG_INFO, "Starting %s\n", version);
   /* we're an agentx subagent? */
   if (agentx_subagent)
     {
       /* make us a agentx client. */
       rc = netsnmp_ds_set_boolean (NETSNMP_DS_APPLICATION_ID,
-			      NETSNMP_DS_AGENT_ROLE, 1);
+				   NETSNMP_DS_AGENT_ROLE, 1);
     }
 
   /* initialize the agent library */
   rc = init_agent (AGENT);
-  if (rc != 0) {
-	snmp_log(LOG_ERR,"Could not initialize connection to SNMP daemon. \n" \
-	"Perhaps you are running %s as non-root?\n", argv[0]);
-	exit(rc);
-  }
+  if (rc != 0)
+    {
+      snmp_log (LOG_ERR, "Could not initialize connection to SNMP daemon. \n"
+		"Perhaps you are running %s as non-root?\n", argv[0]);
+      exit (rc);
+    }
 
   /* Read configuration information here, before we initialize */
 
@@ -542,7 +745,7 @@ main (int argc, char **argv)
 				 NULL,
 				 "hpiSubagent MAX number of rows for Events.");
 
-   init_snmp (AGENT);
+  init_snmp (AGENT);
   /* Initialize tables */
   initialize_table_saHpiTable ();
   initialize_table_saHpiRdrTable ();
@@ -592,8 +795,8 @@ main (int argc, char **argv)
     }
 stop:
   /* at shutdown time */
-  snmp_log(LOG_INFO,"Stopping %s\n", version);
+  snmp_log (LOG_INFO, "Stopping %s\n", version);
   snmp_shutdown (AGENT);
- 
+
   return rc;
 }

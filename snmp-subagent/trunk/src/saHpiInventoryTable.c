@@ -73,6 +73,7 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 
   long stop;
   long count = 0;
+  long count_of_items = 0;
   oid index_oid[INVENTORY_INDEX_NR];
   oid column[2];
 
@@ -221,13 +222,14 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 	{
 	  // Oh no! Must delete some entries
 	  // Warning: Re-using 'stop' variable
+	  count_of_items = first_context->count_of_subitems;
+	  // 'first_context' *MIGHT* be removed ,thus we would lose the number.
 	  DEBUGMSGTL ((AGENT,
 		       "Deleting Inventory Records: Number iterated thru: %d, Number that exist in memory: %d\n",
-		       count, first_context->count_of_subitems));
+		       count, count_of_items));
 
-	  for (stop = count; stop < first_context->count_of_subitems; stop++)
+	  for (stop = count; stop <= count_of_items; stop++)
 	    {
-
 	      delete_inventory_row (first_context->domain_id,
 				    first_context->resource_id,
 				    first_context->saHpiInventoryEirId, stop);
@@ -295,7 +297,7 @@ delete_inventory_rows (SaHpiDomainIdT domain_id,
 		       SaHpiResourceIdT resource_id, SaHpiEirIdT num)
 {
   saHpiInventoryTable_context *ctx;
-  long i;
+  long i, count;
   int rc = AGENT_ERR_NOT_FOUND;
   oid inv_oid[INVENTORY_INDEX_NR];
   netsnmp_index index;
@@ -314,8 +316,9 @@ delete_inventory_rows (SaHpiDomainIdT domain_id,
 
   if (ctx)
     {
+      count = ctx->count_of_subitems;
       // Go thru all rows 
-      for (i = 0; i < ctx->count_of_subitems; i++)
+      for (i = 0; i <= count; i++)
 	{
 	  delete_inventory_row (domain_id, resource_id, num, i);
 	}

@@ -26,9 +26,6 @@
 #include <hpiSubagent.h>
 
 
-#include <glib.h>
-#include <epath_utils.h>
-
 #include <saHpiTable.h>
 #include <saHpiRdrTable.h>
 #include <saHpiEventTable.h>
@@ -101,8 +98,8 @@ populate_rpt ()
   SaHpiSessionIdT session;
   SaHpiRptEntryT rpt_entry;
   SaHpiRptInfoT rpt_info;
-  SaHpiEntryIdT next;
-  SaHpiEntryIdT current;
+  SaHpiEntryIdT next = SAHPI_FIRST_ENTRY;
+  SaHpiEntryIdT current = SAHPI_FIRST_ENTRY;
   SaHpiTimeT time;
   SaHpiBoolT state;
 
@@ -150,7 +147,7 @@ populate_rpt ()
 	  rpt_index.len = RPT_INDEX_NR;
 	  do
 	    {
-
+	      memset (&rpt_entry, 0x0, sizeof (SaHpiRptEntryT));
 	      current = next;
 
 	      err = saHpiRptEntryGet (session, current, &next, &rpt_entry);
@@ -352,6 +349,9 @@ populate_rpt ()
 	      // Try next one ?
 	      else
 		{
+		  DEBUGMSGTL ((AGENT, "saHpiRptEntryGet returned: %s\n",
+			       get_error_string (err)));
+		  next = SAHPI_LAST_ENTRY;
 		  err = AGENT_ERR_OPERATION;
 		}
 	    }
@@ -811,7 +811,7 @@ delete_rpt_row (SaHpiDomainIdT domain_id,
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
-      saHpiTable_delete_row(ctx); 
+      saHpiTable_delete_row (ctx);
       entry_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

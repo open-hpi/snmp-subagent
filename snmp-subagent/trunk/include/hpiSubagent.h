@@ -20,6 +20,7 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
+#include <glib.h>
 /*
  * Our Net-SNMP "call-sign"
  */
@@ -258,3 +259,14 @@ netsnmp_variable_list *build_notification (const netsnmp_index * index,
 					   const SaHpiResourceIdT resource_id,
 					   const oid * resource_id_oid,
 					   const size_t resource_id_oid_len);
+
+
+/*
+ * Taken from OpenHPI epath_utils.h
+ */
+#define MAX_INSTANCE_DIGITS 6
+
+int entitypath2string(const SaHpiEntityPathT *epathptr,
+                      gchar *epathstr,
+                      gint strsize);
+

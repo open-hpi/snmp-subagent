@@ -346,7 +346,7 @@ populate_event ()
       else
 
 	{
-	  DEBUGMSGTL ((AGENT, "%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ?
+	  DEBUGMSGTL ((AGENT, "%s (rc: %s)\n", (err == SA_ERR_HPI_TIMEOUT) ?
 		       "No more EVENT  entries. " :
 		       "Call to saHpiEventGet failed.",
 		       get_error_string (err)));
