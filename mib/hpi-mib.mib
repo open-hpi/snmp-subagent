@@ -107,14 +107,14 @@ hpiB MODULE-IDENTITY
         "HPI MIB for SAF-HPI B."
         ::= { enterprises 18568 1 1 1 6}
 
-hpiEntity       OBJECT IDENTIFIER ::= { hpiB 1 }
+hpiDomain       OBJECT IDENTIFIER ::= { hpiB 1 }
 hpiEvents       OBJECT IDENTIFIER ::= { hpiB 2 }
 hpiResources    OBJECT IDENTIFIER ::= { hpiB 3 }
 hpiNotifications OBJECT IDENTIFIER ::= { hpiB 4 }
 hpiMIBCompliances OBJECT IDENTIFIER ::= { hpiB 5 }
 
 -- The hotswap table:
-hpiHotSwap	OBJECT IDENTIFIER ::= { hpiEntity 11 }
+hpiHotSwap	OBJECT IDENTIFIER ::= { hpiDomain 11 }
 -- The events tables:
 events          OBJECT IDENTIFIER ::= { hpiEvents 1 }
 eventLog        OBJECT IDENTIFIER ::= { hpiEvents 2}
@@ -612,17 +612,21 @@ SaHpiWatchdogTimerUse ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
         "The textual convention of this columnar node are the 
-enumerations which represent the possible watchdog uses that may 
-have caused the watchdog to expire. 
+	enumerations which represent the possible watchdog uses that may 
+	have caused the watchdog to expire. 
 
-For instance, if watchdog is being used during power on self test 
-(POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
-will be set. Most specific uses for Watchdog timer by users of HPI 
-should indicate SAHPI_WTU_SMS_OS  if the use is to provide an 
-OS-healthy heartbeat, or SAHPI_WTU_OEM if it is used for some other 
-purpose.
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	For instance, if watchdog is being used during power on self test 
+	(POST), and it expires, the SAHPI_WTU_BIOS_POST expiration type 
+	will be set. Most specific uses for Watchdog timer by users of HPI 
+	should indicate SAHPI_WTU_SMS_OS  if the use is to provide an 
+	OS-healthy heartbeat, or SAHPI_WTU_OEM if it is used for some other 
+	purpose.
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B spec."
+
+	REFERENCE
+        "Derived from typedefs in SAI-HPI-B.01.01 section 8.11."
+
         SYNTAX          INTEGER {
                                 undefined(0),
                                 none (1),
@@ -1074,7 +1078,7 @@ saHpiDomainInfoEntryCount OBJECT-TYPE
         "The number of Domain entries present in the system. 
         This field is used to determine if new domains have been added
         or existing removed. "
-        ::= {hpiEntity 1}
+        ::= {hpiDomain 1}
 
 
 saHpiDomainInfoTable OBJECT-TYPE
@@ -1085,7 +1089,7 @@ saHpiDomainInfoTable OBJECT-TYPE
         "This table represents the management attributes common to all Domains
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-        ::= {hpiEntity 2}
+        ::= {hpiDomain 2}
         
 saHpiDomainInfoEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainInfoEntry
@@ -1373,7 +1377,7 @@ saHpiDomainReferenceEntryCount OBJECT-TYPE
         DESCRIPTION     "The number of DRT entries present in the system. 
         This field is used to determine if new resources have been added
         or existing removed. "
-        ::= {hpiEntity 3}
+        ::= {hpiDomain 3}
         
 saHpiDomainReferenceTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiDomainReferenceEntry
@@ -1392,7 +1396,7 @@ saHpiDomainReferenceTable OBJECT-TYPE
         controller generates an event when a domain is added to the DRT 
         (SAHPI_DOMAIN_REF_ADDED) and when a domain is removed from the DRT 
         (SAHPI_DOMAIN_REF_REMOVED)."
-        ::= {hpiEntity 4}
+        ::= {hpiDomain 4}
 
 saHpiDomainReferenceEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainReferenceEntry
@@ -1464,7 +1468,7 @@ saHpiDomainAlarmEntryCount OBJECT-TYPE
         "The number of DomainInfo entries present in the system. 
         This field is used to determine if new domains have been added
         or existing removed."
-        ::= {hpiEntity 5}
+        ::= {hpiDomain 5}
 
 
 saHpiDomainAlarmTable OBJECT-TYPE
@@ -1475,7 +1479,7 @@ saHpiDomainAlarmTable OBJECT-TYPE
         "This table represents the management attributes common to all Domains
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-        ::= {hpiEntity 6}
+        ::= {hpiDomain 6}
         
 saHpiDomainAlarmEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainAlarmEntry
@@ -1765,7 +1769,7 @@ saHpiResourceEntryCount OBJECT-TYPE
         DESCRIPTION     "The number of RPT entries present in the system. 
         This field is used to determine if new resources have been added
         or existing removed. "
-        ::= {hpiEntity 7}
+        ::= {hpiDomain 7}
 
 saHpiResourceTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiResourceEntry
@@ -1775,7 +1779,7 @@ saHpiResourceTable OBJECT-TYPE
         "This table represents the management attributes common to all entities
          within the managed platform.  The logical domain ID and the entity ID
          are used to address an entity."
-        ::= {hpiEntity 8}
+        ::= {hpiDomain 8}
 
 saHpiResourceEntry OBJECT-TYPE
         SYNTAX          SaHpiResourceEntry
@@ -2574,14 +2578,20 @@ saHpiHotSwapResetAction OBJECT-TYPE
     MAX-ACCESS  read-write
     STATUS      current
     DESCRIPTION
-        "This function gets the reset state of an entity, allowing the HPI User to determine if the entity is being held with its reset asserted. If a resource manages multiple entities, this function will address the entity which is identified in the RPT entry for the resource.
+        "This function gets the reset state of an entity, allowing the HPI User
+	 to determine if the entity is being held with its reset asserted. If 
+	 a resource manages multiple entities, this function will address the 
+	 entity which is identified in the RPT entry for the resource.
 
-coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be returned in saHpiResetAction. 
+		coldReset(1) and warmReset(2) are pulsed resets, 
+		
+	and are not valid values to be returned in saHpiResetAction. 
 
-        If the entity is not being held in reset (using resetAssert(3)), the appropriate value is resetDeAssert(4).
+        If the entity is not being held in reset (using resetAssert(3)), 
+	the appropriate value is resetDeAssert(4).
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B spec."
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
@@ -2677,7 +2687,6 @@ SaHpiEventEntry ::= SEQUENCE {
         saHpiEventRowPointer    RowPointer,
         saHpiEventSeverity      INTEGER,
         saHpiEventHistorical    TruthValue,
-        saHpiEventQueueStatus   Unsigned32,
         saHpiEventSaHpiTime     SaHpiTime,
         saHpiEventType          INTEGER
         }
@@ -2725,20 +2734,6 @@ saHpiEventHistorical OBJECT-TYPE
     DESCRIPTION
         "True if event log."
     ::= { saHpiEventEntry 4 }
-
-
-saHpiEventQueueStatus OBJECT-TYPE
-    SYNTAX      Unsigned32
-    MAX-ACCESS  not-accessible
-    STATUS      current
-    DESCRIPTION
-        "  This status word is returned to HPI Users that request it
-        when saHpiEventGet() is called.  It indicates if the event queue
-	status is SAHPI_EVT_QUEUE_OVERFLOW.
-	
-	SAHPI_EVT_QUEUE_OVERFLOW = 0x0001"
-	
-    ::= { saHpiEventEntry 5 }
     
 saHpiEventSaHpiTime     OBJECT-TYPE
     SYNTAX      SaHpiTime
@@ -2749,7 +2744,7 @@ saHpiEventSaHpiTime     OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= { saHpiEventEntry 6 }
+    ::= { saHpiEventEntry 5 }
 
 saHpiEventType          OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2769,7 +2764,7 @@ saHpiEventType          OBJECT-TYPE
         DESCRIPTION     "Event type. 
         Note: The enumerated named have +1 added as opposed to the 
         SA HPI spec for the same constants.  "
-        ::= {saHpiEventEntry 7}
+        ::= { saHpiEventEntry 6 }
 
 -- *********************************
 -- **
@@ -6253,7 +6248,7 @@ saHpiInventoryNumAreas OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-        "Number of area containted in IDR"
+        "Number of Area contained in IDR"
     REFERENCE
         " "
     ::= {saHpiInventoryEntry 6}
