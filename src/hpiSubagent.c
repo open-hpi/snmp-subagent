@@ -64,7 +64,7 @@ int MAX_EVENT_ENTRIES = 512;
 
 //Use syslog 
 static int do_syslog = AGENT_TRUE;
-
+static int do_fork = AGENT_FALSE;
 
 
 static RETSIGTYPE
@@ -702,11 +702,15 @@ main (int argc, char **argv)
   int agentx_subagent = AGENT_TRUE;
   char c;
   int rc = 0;
+  pid_t child;
   /* change this if you want to be a SNMP master agent */
 
-  while ((c = getopt (argc, argv, "ds?")) != EOF)
+  while ((c = getopt (argc, argv, "fds?")) != EOF)
     switch (c)
       {
+      case 'f':
+	do_fork = AGENT_TRUE;
+	break;
       case 'd':
 	debug_register_tokens (AGENT);
 	snmp_enable_stderrlog ();
@@ -719,6 +723,7 @@ main (int argc, char **argv)
       default:
 	printf ("Usage %s [-dfs]\n", argv[0]);
 	printf ("where -d enables debug mode\n");
+	printf ("where -f enables forking\n");
 	printf ("where -s disables logging via syslog facility.\n");
 	exit (1);
       }
@@ -798,7 +803,16 @@ main (int argc, char **argv)
   if (!agentx_subagent)
     init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
 
-
+  if (do_fork == AGENT_TRUE)
+    {
+	if ((child = fork()) < 0)
+	   {
+		snmp_log(LOG_ERR,"Could not fork!\n");
+		exit (-1);
+	   }
+	if (child != 0) 
+		exit (0);
+    }
   /* In case we recevie a request to stop (kill -TERM or kill -INT) */
   keep_running = 1;
   signal (SIGTERM, stop_server);
