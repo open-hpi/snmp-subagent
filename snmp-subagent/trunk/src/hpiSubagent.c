@@ -267,8 +267,9 @@ static state_category_string state_string[] = {
 
 int build_state_string (SaHpiEventCategoryT category,
                         SaHpiEventStateT state,
-                        char **str,
-                        size_t *len) {
+                        char *str,
+                        size_t *len,
+			size_t max_len) {
 
    char *temp;
    size_t idx = 0;
@@ -281,16 +282,17 @@ int build_state_string (SaHpiEventCategoryT category,
    temp = (char *) malloc (STATESTRING_MAX_LENGTH);
    if (temp == NULL) 
 	return AGENT_ERR_MEMORY_FAULT;
+
    if (category == SAHPI_EC_USER) 
 	category = SAHPI_EC_GENERIC;
    for (i = 0; i < STATESTRING_MAX_ENTRIES; i++) {
-     if ((state_string[i].category & category )== category) {
+     if (state_string[i].category == category) {
        /* Found category, time to match states. */
 	 /* Match the right states */
 	 if ((state_string[i].state & state )== state_string[i].state) {
 	   /* Found it */
 	   temp_len = strlen(state_string[i].str);	
-	   if (idx + temp_len + STATESTRING_VALUE_DELIMITER_LENGTH  > STATESTRING_MAX_LENGTH) {
+	   if (idx + temp_len + STATESTRING_VALUE_DELIMITER_LENGTH  > max_len) {
 	     rc = AGENT_ERR_MEMORY_FAULT;
 	     break;
 	   }
@@ -304,19 +306,16 @@ int build_state_string (SaHpiEventCategoryT category,
    
    if (idx > 0)
      idx = idx-2;
-   if (idx < STATESTRING_MAX_LENGTH) 
-     temp[idx] = 0x00;
+
+   if (idx < max_len) 
+     temp[idx] = 0x00;   
    else
-     temp[STATESTRING_MAX_LENGTH] = 0x00;
+     temp[max_len] = 0x00;
    
-   *str  = (char *) malloc (idx);
-   if (str == NULL) {
-     rc = AGENT_ERR_MEMORY_FAULT;
-   }
-   else {
-     memcpy(*str, temp, idx);
-     *len = idx;
-   }
+
+   memcpy(str, temp, idx);
+   *len = idx;
+
    free(temp);
    return rc;
 }
@@ -836,8 +835,9 @@ main (int argc, char **argv)
   char c;
   int rc = 0;
   pid_t child;
-  
+
   /* change this if you want to be a SNMP master agent */
+
 
   while ((c = getopt (argc, argv, "fds?")) != EOF)
     switch (c)
@@ -862,6 +862,7 @@ main (int argc, char **argv)
 	exit (1);
       }
   init_snmp_logging ();
+
   if (do_syslog == AGENT_TRUE)
     {
       snmp_enable_calllog ();

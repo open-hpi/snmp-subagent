@@ -288,15 +288,17 @@ typedef struct state_category_string_
  *
  * @param category [IN] The category in which this state has to be converted by.
  * @param state [IN] The state of the event.
- * @param str [OUT] The new value in string format.
+ * @param str [IN] The new value in string format.
  * @param len [OUT] length of the new string.
+ * @param max_len [IN] max length that can put in data.
  *
  * @return AGENT_ERR_NOERROR - operation went ok
  * @return AGENT_ERR_MEMORY_FAULT - Not enough memory to complete the operation.
  */
 int build_state_string (SaHpiEventCategoryT category,
 			SaHpiEventStateT state,
-			char **str,
-			size_t *len);
+			char *str,
+			size_t *len,
+			size_t max_len);
 			
 

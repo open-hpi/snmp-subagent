@@ -930,20 +930,7 @@ SaHpiEventEntry ::= SEQUENCE {
 	saHpiEventSensorCategory	INTEGER,
 	saHpiEventSensorAssertion	TruthValue,
 
-        saHpiEventSensorStateCategoryUnspecified INTEGER,
-        saHpiEventSensorStateCategoryThreshold INTEGER,
-        saHpiEventSensorStateCategoryUsage INTEGER,
-        saHpiEventSensorStateCategoryState INTEGER,
-        saHpiEventSensorStateCategoryPredFail INTEGER,
-        saHpiEventSensorStateCategoryLimit INTEGER,
-        saHpiEventSensorStateCategoryPerformance INTEGER,
-        saHpiEventSensorStateCategorySeverity INTEGER,
-        saHpiEventSensorStateCategoryPresence INTEGER,
-        saHpiEventSensorStateCategoryEnable INTEGER,
-        saHpiEventSensorStateCategoryAvailability INTEGER,
-        saHpiEventSensorStateCategoryRedundancy INTEGER,
-        saHpiEventSensorStateCategoryUser INTEGER,
-        saHpiEventSensorStateCategoryGeneric INTEGER,
+        saHpiEventSensorState 		OCTET STRING,
 
 	saHpiEventSensorOptionalData	Unsigned32,
 
@@ -959,7 +946,7 @@ SaHpiEventEntry ::= SEQUENCE {
 	saHpiEventSensorTriggerThresholdInterpreted OCTET STRING,
 	saHpiEventSensorTriggerThresholdEventState  OCTET STRING,
 
-	saHpiEventSensorPreviousState		Unsigned32,
+	saHpiEventSensorPreviousState		OCTET STRING,
 	saHpiEventSensorOem			Unsigned32,
 	saHpiEventSensorSpecific	Unsigned32,
 
@@ -1150,362 +1137,88 @@ saHpiEventSensorAssertion OBJECT-TYPE
         DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
         ::= {saHpiEventEntry 8}
 
-saHpiEventSensorStateCategoryUnspecified OBJECT-TYPE
-        SYNTAX          INTEGER (0..1)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for unspecified(0) category. 
+saHpiEventSensorState OBJECT-TYPE
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
 
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
+	Event states for the sensor.
 
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
+	A NULL value indicates not set/used.
 
-	Bit masks:
-			 
-			SAHPI_ES_UNSPECIFIED 0x0001
-	"		 
-        ::= {saHpiEventEntry 9}
+	The event status values are specified as a list of
+	possible string enumerations. For example for a sensor
+	that is category severity, this object might hold the values:
+	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
 
-saHpiEventSensorStateCategoryThreshold OBJECT-TYPE
-        SYNTAX          INTEGER (0..32)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for threshold(1) category. 
+	Depending on the category of the sensor, the possible values
+	of this object differ.
 
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
+	For the category = unspecified, the value can be:
+		'SAHPI_ES_UNSPECIFIED'
 
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
+	For threshold category, all of the possible values are:
+		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
+ 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
+ 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
 
-	When using these event states, the event state should match
-	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
-	event severity of SAHPI_MINOR).
+	For a usage category, all off the possible values are:
+		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
+
+	For state category, all of the possible values are:
+		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
+
+	For predictive failure category, all of the possible values are:
+		'SAHPI_ES_PRED_FAILURE_DEASSERT,
+		 SAHPI_ES_PRED_FAILURE_ASSERT'
+
+	For limit category, the possible values are: 	
+		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
+		 SAHPI_ES_LIMIT_EXCEEDED'
+
+	For performance category, the possible values are:
+		'SAHPI_ES_PERFORMANCE_MET, 
+		SAHPI_ES_PERFORMANCE_LAGS'
+
+	For severity category, the possible values are:
+		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
+		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
+		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
+		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
+		SAHPI_ES_INFORMATIONAL'
+
+	For presence category, the possible values are:
+		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
+
+	For enable category, the possible values are:
+		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
 			
-			 SAHPI_ES_LOWER_MINOR 0x0001
-			 SAHPI_ES_LOWER_MAJOR 0x0002
-			 SAHPI_ES_LOWER_CRIT  0x0004
-			 SAHPI_ES_UPPER_MINOR 0x0008
-			 SAHPI_ES_UPPER_MAJOR 0x0010
-			 SAHPI_ES_UPPER_CRIT  0x0020
-	"		
-        ::= {saHpiEventEntry 10}
+	For availability category, the possible values are: 
+		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
+		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
+		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
+		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
 
-saHpiEventSensorStateCategoryUsage OBJECT-TYPE
-        SYNTAX          INTEGER (0..4)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for usage(2) category. 
+	For redundancy category, the possible values are:
+		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
+		SAHPI_ES_REDUNDANCY_DEGRADED, 
+		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
 
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_IDLE   0x0001
-			 SAHPI_ES_ACTIVE 0x0002
-			 SAHPI_ES_BUSY   0x0004
-	"		
-        ::= {saHpiEventEntry 11}
-saHpiEventSensorStateCategoryState OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for  state(3) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_STATE_DEASSERTED 0x0001
-			 SAHPI_ES_STATE_ASSERTED   0x0002
-	"
-        ::= {saHpiEventEntry 12}
-saHpiEventSensorStateCategoryPredFail OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for predFail(4) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
-	"
-        ::= {saHpiEventEntry 13}
-
-saHpiEventSensorStateCategoryLimit OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for  limit(5) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
-	"
-        ::= {saHpiEventEntry 14}
-
-saHpiEventSensorStateCategoryPerformance OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for performance(6) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 SAHPI_ES_PERFORMANCE_MET   0x0001
-			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
-			
-	"		
-        ::= {saHpiEventEntry 15}
-
-saHpiEventSensorStateCategorySeverity OBJECT-TYPE
-        SYNTAX          INTEGER (0..256)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for severity(7) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	When using these event states, the event state should match
-	the event severity: 
-			
-			 SAHPI_ES_OK                  0x0001
-			 SAHPI_ES_MINOR_FROM_OK       0x0002
-			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
-			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
-			 SAHPI_ES_MINOR_FROM_MORE     0x0010
-			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SAHPI_ES_CRITICAL            0x0040
-			 SAHPI_ES_MONITOR             0x0080
-			 SAHPI_ES_INFORMATIONAL       0x0100
-	"		
-        ::= {saHpiEventEntry 16}
-saHpiEventSensorStateCategoryPresence OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for presence(8) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_ABSENT  0x0001
-			 SAHPI_ES_PRESENT 0x0002
-	"			
-        ::= {saHpiEventEntry 17}
-saHpiEventSensorStateCategoryEnable OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for enable(9) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_DISABLED 0x0001
-			 SAHPI_ES_ENABLED  0x0002
-	"		
-        ::= {saHpiEventEntry 18}
-saHpiEventSensorStateCategoryAvailability OBJECT-TYPE
-        SYNTAX          INTEGER (0..256)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for availability(10) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-
-			 SAHPI_ES_RUNNING       0x0001
-			 SAHPI_ES_TEST          0x0002
-			 SAHPI_ES_POWER_OFF     0x0004
-			 SAHPI_ES_ON_LINE       0x0008
-			 SAHPI_ES_OFF_LINE      0x0010
-			 SAHPI_ES_OFF_DUTY      0x0020
-			 SAHPI_ES_DEGRADED      0x0040
-			 SAHPI_ES_POWER_SAVE    0x0080
-			 SAHPI_ES_INSTALL_ERROR 0x0100
-	"
-        ::= {saHpiEventEntry 19}
-saHpiEventSensorStateCategoryRedundancy OBJECT-TYPE
-        SYNTAX          INTEGER (0..128)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for redundancy(11) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
-			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
-			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
-			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
-	"
-        ::= {saHpiEventEntry 20}
-saHpiEventSensorStateCategoryUser OBJECT-TYPE
-        SYNTAX          INTEGER (0..16384)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for user(126) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-	These event states are defined by the user of the
-	implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-        ::= {saHpiEventEntry 21}
-saHpiEventSensorStateCategoryGeneric OBJECT-TYPE
-        SYNTAX          INTEGER (0..16384)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for generic(127) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-	These event states are defined by the OEM of the
-	implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-        ::= {saHpiEventEntry 22}
+	For generic category, the possible values are:
+		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
+		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
+		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
+		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
+		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
+		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
+		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
+		SAHPI_ES_STATE_14'"
+	::= {saHpiEventEntry 9}	
 
 saHpiEventSensorOptionalData OBJECT-TYPE
         SYNTAX          Unsigned32(1..16)
@@ -1524,7 +1237,7 @@ saHpiEventSensorOptionalData OBJECT-TYPE
  	OEM               0x04
  	PREVIOUS_STATE    0x08
  	SENSOR_SPECIFIC   0x10 " 
-        ::= {saHpiEventEntry 23}
+        ::= {saHpiEventEntry 10}
 
 
 saHpiEventSensorTriggerReadingType OBJECT-TYPE
@@ -1547,7 +1260,7 @@ saHpiEventSensorTriggerReadingType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-        ::= {saHpiEventEntry 24}
+        ::= {saHpiEventEntry 11}
 
 saHpiEventSensorTriggerReadingRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -1556,7 +1269,7 @@ saHpiEventSensorTriggerReadingRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiEventTriggerReadingType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiEventEntry 25}
+	::= {saHpiEventEntry 12}
 
 saHpiEventSensorTriggerReadingInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -1574,7 +1287,7 @@ saHpiEventSensorTriggerReadingInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiEventTriggerReadingType = interpreted(2) then this object
 	contains the type that saHpiEventTriggerReadingInterpreted is in."
-	::= {saHpiEventEntry 26}
+	::= {saHpiEventEntry 13}
 
 saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -1586,7 +1299,7 @@ saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::={saHpiEventEntry 27}
+	::={saHpiEventEntry 14}
 
 
 saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
@@ -1726,7 +1439,7 @@ saHpiEventSensorTriggerReadingEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-        ::= {saHpiEventEntry 28}
+        ::= {saHpiEventEntry 15}
 
 
 saHpiEventSensorTriggerThresholdType OBJECT-TYPE
@@ -1749,7 +1462,7 @@ saHpiEventSensorTriggerThresholdType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-        ::= {saHpiEventEntry 29}
+        ::= {saHpiEventEntry 16}
 
 saHpiEventSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -1758,7 +1471,7 @@ saHpiEventSensorTriggerThresholdRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiEventTriggerThresholdType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiEventEntry 30}
+	::= {saHpiEventEntry 17}
 
 saHpiEventSensorTriggerThresholdInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -1776,7 +1489,7 @@ saHpiEventSensorTriggerThresholdInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiEventTriggerThresholdType = interpreted(2) then this object
 	contains the type that saHpiEventTriggerReadingInterpreted is in."
-	::= {saHpiEventEntry 31}
+	::= {saHpiEventEntry 18}
 
 saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -1788,7 +1501,7 @@ saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::={saHpiEventEntry 32}
+	::={saHpiEventEntry 19}
 
 
 saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
@@ -1928,139 +1641,29 @@ saHpiEventSensorTriggerThresholdEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-        ::= {saHpiEventEntry 33}
+        ::= {saHpiEventEntry 20}
 
 saHpiEventSensorPreviousState OBJECT-TYPE
-        SYNTAX          Unsigned32 (0..16384)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Event States
-			
-			 The following event states are specified relative to the categories listed 
-			 above. The event types are only valid for their given category. Each set of 
-			 events is labeled as to which category it belongs to.
-			 Each event will have only one event state associated with it. When retrieving 
-			 the event status or event enabled status a bit mask of all applicable event 
-			 states is used. Similarly, when setting the event enabled status a bit mask 
-			 of all applicable event states is used.
-			
-			 
-			 saHpiEventCategory == <any> 
-			
-			 SAHPI_ES_UNSPECIFIED 0x0000
-			 
-			 saHpiEventCategory == SAHPI_EC_THRESHOLD 
-			 When using these event states, the event state should match
-			 the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
-			 event severity of SAHPI_MINOR).
-			
-			 SAHPI_ES_LOWER_MINOR 0x0001
-			 SAHPI_ES_LOWER_MAJOR 0x0002
-			 SAHPI_ES_LOWER_CRIT  0x0004
-			 SAHPI_ES_UPPER_MINOR 0x0008
-			 SAHPI_ES_UPPER_MAJOR 0x0010
-			 SAHPI_ES_UPPER_CRIT  0x0020
-			
-			 saHpiEventCategory == SAHPI_EC_USAGE 
-			 SAHPI_ES_IDLE   0x0001
-			 SAHPI_ES_ACTIVE 0x0002
-			 SAHPI_ES_BUSY   0x0004
-			
-			 saHpiEventCategory == SAHPI_EC_STATE 
-			 SAHPI_ES_STATE_DEASSERTED 0x0001
-			 SAHPI_ES_STATE_ASSERTED   0x0002
-			
-			 saHpiEventCategory == SAHPI_EC_PRED_FAIL 
-			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
-			
-			 saHpiEventCategory == SAHPI_EC_LIMIT 
-			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
-			
-			 saHpiEventCategory == SAHPI_EC_PERFORMANCE 
-			 SAHPI_ES_PERFORMANCE_MET   0x0001
-			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
-			
-			
-			 saHpiEventCategory == SAHPI_EC_SEVERITY 
-			 When using these event states, the event state should match
-			 the event severity 
-			
-			 SAHPI_ES_OK                  0x0001
-			 SAHPI_ES_MINOR_FROM_OK       0x0002
-			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
-			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
-			 SAHPI_ES_MINOR_FROM_MORE     0x0010
-			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SAHPI_ES_CRITICAL            0x0040
-			 SAHPI_ES_MONITOR             0x0080
-			 SAHPI_ES_INFORMATIONAL       0x0100
-			
-			 saHpiEventCategory == SAHPI_EC_PRESENCE 
-			 SAHPI_ES_ABSENT  0x0001
-			 SAHPI_ES_PRESENT 0x0002
-			
-			 saHpiEventCategory == SAHPI_EC_ENABLE 
-			 SAHPI_ES_DISABLED 0x0001
-			 SAHPI_ES_ENABLED  0x0002
-			
-			 saHpiEventCategory == SAHPI_EC_AVAILABILITY 
-			 SAHPI_ES_RUNNING       0x0001
-			 SAHPI_ES_TEST          0x0002
-			 SAHPI_ES_POWER_OFF     0x0004
-			 SAHPI_ES_ON_LINE       0x0008
-			 SAHPI_ES_OFF_LINE      0x0010
-			 SAHPI_ES_OFF_DUTY      0x0020
-			 SAHPI_ES_DEGRADED      0x0040
-			 SAHPI_ES_POWER_SAVE    0x0080
-			 SAHPI_ES_INSTALL_ERROR 0x0100
-			
-			 saHpiEventCategory == SAHPI_EC_REDUNDANCY 
-			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
-			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
-			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
-			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
-			
-			
-			 saHpiEventCategory == SAHPI_EC_GENERIC || SAHPI_EC_USER
-			 These event states are defined by the OEM or the user of the
-			 implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-        ::= {saHpiEventEntry 34}
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	"
+	::= {saHpiEventEntry 21}
 
 saHpiEventSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor OEM event information "
-        ::= {saHpiEventEntry 35}
+        ::= {saHpiEventEntry 22}
 
 saHpiEventSensorSpecific OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor specific information "
-        ::= {saHpiEventEntry 36}
+        ::= {saHpiEventEntry 23}
 
 
 saHpiEventHotSwapState OBJECT-TYPE
@@ -2076,7 +1679,7 @@ saHpiEventHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Current state of the hot-swap device."
-        ::= {saHpiEventEntry 37}
+        ::= {saHpiEventEntry 24}
 
 saHpiEventPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
@@ -2091,14 +1694,14 @@ saHpiEventPreviousHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Previous state of the hot-swap device. "
-        ::= {saHpiEventEntry 38}
+        ::= {saHpiEventEntry 25}
 
 saHpiEventWatchdogNum OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The Watchdog number. "
-        ::= {saHpiEventEntry 39}
+        ::= {saHpiEventEntry 26}
 
 saHpiEventWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
@@ -2114,7 +1717,7 @@ saHpiEventWatchdogAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-        ::= {saHpiEventEntry 40}
+        ::= {saHpiEventEntry 27}
 
 saHpiEventWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2130,7 +1733,7 @@ saHpiEventWatchdogPreTimerAction OBJECT-TYPE
         DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
  			triggered by a watchdog pre-timer event. The actual meaning of these
  			operations may differ depending on the hardware architecture. "
-        ::= {saHpiEventEntry 41}
+        ::= {saHpiEventEntry 28}
 
 saHpiEventWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2154,7 +1757,7 @@ saHpiEventWatchdogUse OBJECT-TYPE
 			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-        ::= {saHpiEventEntry 42}
+        ::= {saHpiEventEntry 29}
 
 saHpiEventOemManufacturerIdT OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -2177,14 +1780,14 @@ saHpiEventOemManufacturerIdT OBJECT-TYPE
 			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
 				
-        ::= {saHpiEventEntry 43}
+        ::= {saHpiEventEntry 30}
 
 saHpiEventOemEventData OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
-        ::= {saHpiEventEntry 44}
+        ::= {saHpiEventEntry 31}
 
 
 saHpiEventUserEventData OBJECT-TYPE
@@ -2194,7 +1797,7 @@ saHpiEventUserEventData OBJECT-TYPE
         DESCRIPTION     "User events may be used for storing custom events 
 			created by the application  middleware;
 			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
-        ::= {saHpiEventEntry 45}
+        ::= {saHpiEventEntry 32}
 
 saHpiEventDelete OBJECT-TYPE
 	SYNTAX		RowStatus
@@ -2202,7 +1805,7 @@ saHpiEventDelete OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiEventEntry 46}
+	::= {saHpiEventEntry 33}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -2356,20 +1959,7 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogSensorCategory	INTEGER,
 	saHpiSystemEventLogSensorAssertion	TruthValue,
 
-        saHpiSystemEventLogSensorStateCategoryUnspecified INTEGER,
-        saHpiSystemEventLogSensorStateCategoryThreshold INTEGER,
-        saHpiSystemEventLogSensorStateCategoryUsage INTEGER,
-        saHpiSystemEventLogSensorStateCategoryState INTEGER,
-        saHpiSystemEventLogSensorStateCategoryPredFail INTEGER,
-        saHpiSystemEventLogSensorStateCategoryLimit INTEGER,
-        saHpiSystemEventLogSensorStateCategoryPerformance INTEGER,
-        saHpiSystemEventLogSensorStateCategorySeverity INTEGER,
-        saHpiSystemEventLogSensorStateCategoryPresence INTEGER,
-        saHpiSystemEventLogSensorStateCategoryEnable INTEGER,
-        saHpiSystemEventLogSensorStateCategoryAvailability INTEGER,
-        saHpiSystemEventLogSensorStateCategoryRedundancy INTEGER,
-        saHpiSystemEventLogSensorStateCategoryUser INTEGER,
-        saHpiSystemEventLogSensorStateCategoryGeneric INTEGER,
+        saHpiSystemEventLogSensorState OCTET STRING,
 
 	saHpiSystemEventLogSensorOptionalData	Unsigned32,
 
@@ -2385,7 +1975,7 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogSensorTriggerThresholdInterpreted OCTET STRING,
 	saHpiSystemEventLogSensorTriggerThresholdEventState  OCTET STRING,
 
-	saHpiSystemEventLogSensorPreviousState		Unsigned32,
+	saHpiSystemEventLogSensorPreviousState		OCTET STRING,
 	saHpiSystemEventLogSensorOem			Unsigned32,
 	saHpiSystemEventLogSensorSpecific	Unsigned32,
 
@@ -2607,362 +2197,88 @@ saHpiSystemEventLogSensorAssertion OBJECT-TYPE
         DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
 	::= {saHpiSystemEventLogEntry 9}
 
-saHpiSystemEventLogSensorStateCategoryUnspecified OBJECT-TYPE
-        SYNTAX          INTEGER (0..1)
+saHpiSystemEventLogSensorState OBJECT-TYPE
+        SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
-	Event state for unspecified(0) category. 
 
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
+	Event states for the sensor.
 
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
+	A NULL value indicates not set/used.
 
-	Bit masks:
-			 
-			SAHPI_ES_UNSPECIFIED 0x0001
-	"		 
+	The event status values are specified as a list of
+	possible string enumerations. For example for a sensor
+	that is category severity, this object might hold the values:
+	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
+
+	Depending on the category of the sensor, the possible values
+	of this object differ.
+
+	For the category = unspecified, the value can be:
+		'SAHPI_ES_UNSPECIFIED'
+
+	For threshold category, all of the possible values are:
+		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
+ 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
+ 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
+
+	For a usage category, all off the possible values are:
+		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
+
+	For state category, all of the possible values are:
+		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
+
+	For predictive failure category, all of the possible values are:
+		'SAHPI_ES_PRED_FAILURE_DEASSERT,
+		 SAHPI_ES_PRED_FAILURE_ASSERT'
+
+	For limit category, the possible values are: 	
+		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
+		 SAHPI_ES_LIMIT_EXCEEDED'
+
+	For performance category, the possible values are:
+		'SAHPI_ES_PERFORMANCE_MET, 
+		SAHPI_ES_PERFORMANCE_LAGS'
+
+	For severity category, the possible values are:
+		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
+		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
+		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
+		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
+		SAHPI_ES_INFORMATIONAL'
+
+	For presence category, the possible values are:
+		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
+
+	For enable category, the possible values are:
+		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
+			
+	For availability category, the possible values are: 
+		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
+		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
+		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
+		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
+
+	For redundancy category, the possible values are:
+		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
+		SAHPI_ES_REDUNDANCY_DEGRADED, 
+		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
+
+	For generic category, the possible values are:
+		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
+		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
+		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
+		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
+		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
+		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
+		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
+		SAHPI_ES_STATE_14'"
 	::= {saHpiSystemEventLogEntry 10}
-
-saHpiSystemEventLogSensorStateCategoryThreshold OBJECT-TYPE
-        SYNTAX          INTEGER (0..32)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for threshold(1) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	When using these event states, the event state should match
-	the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
-	event severity of SAHPI_MINOR).
-			
-			 SAHPI_ES_LOWER_MINOR 0x0001
-			 SAHPI_ES_LOWER_MAJOR 0x0002
-			 SAHPI_ES_LOWER_CRIT  0x0004
-			 SAHPI_ES_UPPER_MINOR 0x0008
-			 SAHPI_ES_UPPER_MAJOR 0x0010
-			 SAHPI_ES_UPPER_CRIT  0x0020
-	"		
-	::= {saHpiSystemEventLogEntry 11}
-
-saHpiSystemEventLogSensorStateCategoryUsage OBJECT-TYPE
-        SYNTAX          INTEGER (0..4)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for usage(2) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_IDLE   0x0001
-			 SAHPI_ES_ACTIVE 0x0002
-			 SAHPI_ES_BUSY   0x0004
-	"		
-	::= {saHpiSystemEventLogEntry 12}
-saHpiSystemEventLogSensorStateCategoryState OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for  state(3) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_STATE_DEASSERTED 0x0001
-			 SAHPI_ES_STATE_ASSERTED   0x0002
-	"
-	::= {saHpiSystemEventLogEntry 13}
-saHpiSystemEventLogSensorStateCategoryPredFail OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for predFail(4) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
-	"
-	::= {saHpiSystemEventLogEntry 14}
-
-saHpiSystemEventLogSensorStateCategoryLimit OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for  limit(5) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
-	"
-	::= {saHpiSystemEventLogEntry 15}
-
-saHpiSystemEventLogSensorStateCategoryPerformance OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for performance(6) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 SAHPI_ES_PERFORMANCE_MET   0x0001
-			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
-			
-	"		
-	::= {saHpiSystemEventLogEntry 16}
-
-saHpiSystemEventLogSensorStateCategorySeverity OBJECT-TYPE
-        SYNTAX          INTEGER (0..256)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for severity(7) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	When using these event states, the event state should match
-	the event severity: 
-			
-			 SAHPI_ES_OK                  0x0001
-			 SAHPI_ES_MINOR_FROM_OK       0x0002
-			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
-			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
-			 SAHPI_ES_MINOR_FROM_MORE     0x0010
-			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SAHPI_ES_CRITICAL            0x0040
-			 SAHPI_ES_MONITOR             0x0080
-			 SAHPI_ES_INFORMATIONAL       0x0100
-	"		
-	::= {saHpiSystemEventLogEntry 17}
-saHpiSystemEventLogSensorStateCategoryPresence OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for presence(8) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_ABSENT  0x0001
-			 SAHPI_ES_PRESENT 0x0002
-	"			
-	::= {saHpiSystemEventLogEntry 18}
-saHpiSystemEventLogSensorStateCategoryEnable OBJECT-TYPE
-        SYNTAX          INTEGER (0..2)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for enable(9) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_DISABLED 0x0001
-			 SAHPI_ES_ENABLED  0x0002
-	"		
-	::= {saHpiSystemEventLogEntry 19}
-saHpiSystemEventLogSensorStateCategoryAvailability OBJECT-TYPE
-        SYNTAX          INTEGER (0..256)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for availability(10) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-
-			 SAHPI_ES_RUNNING       0x0001
-			 SAHPI_ES_TEST          0x0002
-			 SAHPI_ES_POWER_OFF     0x0004
-			 SAHPI_ES_ON_LINE       0x0008
-			 SAHPI_ES_OFF_LINE      0x0010
-			 SAHPI_ES_OFF_DUTY      0x0020
-			 SAHPI_ES_DEGRADED      0x0040
-			 SAHPI_ES_POWER_SAVE    0x0080
-			 SAHPI_ES_INSTALL_ERROR 0x0100
-	"
-	::= {saHpiSystemEventLogEntry 20}
-saHpiSystemEventLogSensorStateCategoryRedundancy OBJECT-TYPE
-        SYNTAX          INTEGER (0..128)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for redundancy(11) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
-			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
-			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
-			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
-	"
-	::= {saHpiSystemEventLogEntry 21}
-saHpiSystemEventLogSensorStateCategoryUser OBJECT-TYPE
-        SYNTAX          INTEGER (0..16384)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for user(126) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-	These event states are defined by the user of the
-	implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 22}
-saHpiSystemEventLogSensorStateCategoryGeneric OBJECT-TYPE
-        SYNTAX          INTEGER (0..16384)
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "
-	Event state for generic(127) category. 
-
- 	A zero value indicates not set/used.
-	
-	When retrieving the event status or event enabled status a 
-	bit mask of all applicable event states is used. 
-
-	Similarly, when setting the event enabled status a bit mask 
-	of all applicable event states is used.
-
-	Bit masks:
-			 
-	These event states are defined by the OEM of the
-	implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 23}
 
 saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
         SYNTAX          Unsigned32(1..16)
@@ -2981,8 +2297,7 @@ saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
  	OEM               0x04
  	PREVIOUS_STATE    0x08
  	SENSOR_SPECIFIC   0x10 " 
-	::= {saHpiSystemEventLogEntry 24}
-
+	::= {saHpiSystemEventLogEntry 11}
 
 saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
         SYNTAX          Unsigned32(1..4)
@@ -3004,7 +2319,7 @@ saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-	::= {saHpiSystemEventLogEntry 25}
+	::= {saHpiSystemEventLogEntry 12}
 
 saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3013,7 +2328,7 @@ saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerReadingType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiSystemEventLogEntry 26}
+	::= {saHpiSystemEventLogEntry 13}
 
 saHpiSystemEventLogSensorTriggerReadingInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3031,7 +2346,7 @@ saHpiSystemEventLogSensorTriggerReadingInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerReadingType = interpreted(2) then this object
 	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	::= {saHpiSystemEventLogEntry 27}
+	::= {saHpiSystemEventLogEntry 14}
 
 saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -3043,7 +2358,7 @@ saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::= {saHpiSystemEventLogEntry 28}
+	::= {saHpiSystemEventLogEntry 15}
 
 
 saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
@@ -3183,7 +2498,7 @@ saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-	::= {saHpiSystemEventLogEntry 29}
+	::= {saHpiSystemEventLogEntry 16}
 
 
 saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
@@ -3206,7 +2521,7 @@ saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-	::= {saHpiSystemEventLogEntry 30}
+	::= {saHpiSystemEventLogEntry 17}
 
 saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3215,7 +2530,7 @@ saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiSystemEventLogEntry 31}
+	::= {saHpiSystemEventLogEntry 18}
 
 saHpiSystemEventLogSensorTriggerThresholdInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3233,7 +2548,7 @@ saHpiSystemEventLogSensorTriggerThresholdInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = interpreted(2) then this object
 	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	::= {saHpiSystemEventLogEntry 32}
+	::= {saHpiSystemEventLogEntry 19}
 
 saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -3245,7 +2560,7 @@ saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::= {saHpiSystemEventLogEntry 33}
+	::= {saHpiSystemEventLogEntry 20}
 
 
 saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
@@ -3385,139 +2700,103 @@ saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-	::= {saHpiSystemEventLogEntry 34}
+	::= {saHpiSystemEventLogEntry 21}
 
 saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
-        SYNTAX          Unsigned32 (0..16384)
+        SYNTAX          OCTET STRING
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Event States
+        DESCRIPTION     "
+	Event states for the sensor.
+
+	A NULL value indicates not set/used.
+
+	The event status values are specified as a list of
+	possible string enumerations. For example for a sensor
+	that is category severity, this object might hold the values:
+	SAHPI_ES_MINOR_FROM_MORE,SAHPI_ES_MINOR_FROM_MORE'
+
+	Depending on the category of the sensor, the possible values
+	of this object differ.
+
+	For the category = unspecified, the value can be:
+		'SAHPI_ES_UNSPECIFIED'
+
+	For threshold category, all of the possible values are:
+		'SAHPI_ES_LOWER_MINOR,SAHPI_ES_LOWER_MAJOR,
+ 		SAHPI_ES_LOWER_MAJOR,SAHPI_ES_UPPER_MINOR,
+ 		SAHPI_ES_UPPER_MINOR,SAHPI_ES_UPPER_MINOR'
+
+	For a usage category, all off the possible values are:
+		'SAHPI_ES_IDLE, SAHPI_ES_ACTIVE, SAHPI_ES_BUSY'
+
+	For state category, all of the possible values are:
+		'SAHPI_ES_STATE_DEASSERTED, SAHPI_ES_STATE_ASSERTED'
+
+	For predictive failure category, all of the possible values are:
+		'SAHPI_ES_PRED_FAILURE_DEASSERT,
+		 SAHPI_ES_PRED_FAILURE_ASSERT'
+
+	For limit category, the possible values are: 	
+		'SAHPI_ES_LIMIT_NOT_EXCEEDED,
+		 SAHPI_ES_LIMIT_EXCEEDED'
+
+	For performance category, the possible values are:
+		'SAHPI_ES_PERFORMANCE_MET, 
+		SAHPI_ES_PERFORMANCE_LAGS'
+
+	For severity category, the possible values are:
+		'SAHPI_ES_OK, SAHPI_ES_MINOR_FROM_OK,
+		SAHPI_ES_MAJOR_FROM_LESS, SAHPI_ES_CRITICAL_FROM_LESS,
+		SAHPI_ES_MINOR_FROM_MORE, SAHPI_ES_MAJOR_FROM_CRITICAL,
+		SAHPI_ES_CRITICAL, SAHPI_ES_MONITOR
+		SAHPI_ES_INFORMATIONAL'
+
+	For presence category, the possible values are:
+		'SAHPI_ES_ABSENT, SAHPI_ES_PRESENT'
+
+	For enable category, the possible values are:
+		'SAHPI_ES_DISABLED, SAHPI_ES_ENABLED'
 			
-			 The following event states are specified relative to the categories listed 
-			 above. The event types are only valid for their given category. Each set of 
-			 events is labeled as to which category it belongs to.
-			 Each event will have only one event state associated with it. When retrieving 
-			 the event status or event enabled status a bit mask of all applicable event 
-			 states is used. Similarly, when setting the event enabled status a bit mask 
-			 of all applicable event states is used.
-			
-			 
-			 saHpiSystemEventLogCategory == <any> 
-			
-			 SAHPI_ES_UNSPECIFIED 0x0000
-			 
-			 saHpiSystemEventLogCategory == SAHPI_EC_THRESHOLD 
-			 When using these event states, the event state should match
-			 the event severity (for example SAHPI_ES_LOWER_MINOR should have an 
-			 event severity of SAHPI_MINOR).
-			
-			 SAHPI_ES_LOWER_MINOR 0x0001
-			 SAHPI_ES_LOWER_MAJOR 0x0002
-			 SAHPI_ES_LOWER_CRIT  0x0004
-			 SAHPI_ES_UPPER_MINOR 0x0008
-			 SAHPI_ES_UPPER_MAJOR 0x0010
-			 SAHPI_ES_UPPER_CRIT  0x0020
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_USAGE 
-			 SAHPI_ES_IDLE   0x0001
-			 SAHPI_ES_ACTIVE 0x0002
-			 SAHPI_ES_BUSY   0x0004
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_STATE 
-			 SAHPI_ES_STATE_DEASSERTED 0x0001
-			 SAHPI_ES_STATE_ASSERTED   0x0002
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_PRED_FAIL 
-			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
-			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_LIMIT 
-			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
-			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_PERFORMANCE 
-			 SAHPI_ES_PERFORMANCE_MET   0x0001
-			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
-			
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_SEVERITY 
-			 When using these event states, the event state should match
-			 the event severity 
-			
-			 SAHPI_ES_OK                  0x0001
-			 SAHPI_ES_MINOR_FROM_OK       0x0002
-			 SAHPI_ES_MAJOR_FROM_LESS     0x0004
-			 SAHPI_ES_CRITICAL_FROM_LESS  0x0008
-			 SAHPI_ES_MINOR_FROM_MORE     0x0010
-			 SAHPI_ES_MAJOR_FROM_CRITICAL 0x0020
-			 SAHPI_ES_CRITICAL            0x0040
-			 SAHPI_ES_MONITOR             0x0080
-			 SAHPI_ES_INFORMATIONAL       0x0100
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_PRESENCE 
-			 SAHPI_ES_ABSENT  0x0001
-			 SAHPI_ES_PRESENT 0x0002
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_ENABLE 
-			 SAHPI_ES_DISABLED 0x0001
-			 SAHPI_ES_ENABLED  0x0002
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_AVAILABILITY 
-			 SAHPI_ES_RUNNING       0x0001
-			 SAHPI_ES_TEST          0x0002
-			 SAHPI_ES_POWER_OFF     0x0004
-			 SAHPI_ES_ON_LINE       0x0008
-			 SAHPI_ES_OFF_LINE      0x0010
-			 SAHPI_ES_OFF_DUTY      0x0020
-			 SAHPI_ES_DEGRADED      0x0040
-			 SAHPI_ES_POWER_SAVE    0x0080
-			 SAHPI_ES_INSTALL_ERROR 0x0100
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_REDUNDANCY 
-			 SAHPI_ES_FULLY_REDUNDANT                  0x0001
-			 SAHPI_ES_REDUNDANCY_LOST                  0x0002
-			 SAHPI_ES_REDUNDANCY_DEGRADED              0x0004
-			 SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
-			 SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
-			 SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
-			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
-			
-			
-			 saHpiSystemEventLogCategory == SAHPI_EC_GENERIC || SAHPI_EC_USER
-			 These event states are defined by the OEM or the user of the
-			 implementation. 
-			
-			 SAHPI_ES_STATE_00  0x0001
-			 SAHPI_ES_STATE_01  0x0002
-			 SAHPI_ES_STATE_02  0x0004
-			 SAHPI_ES_STATE_03  0x0008
-			 SAHPI_ES_STATE_04  0x0010
-			 SAHPI_ES_STATE_05  0x0020
-			 SAHPI_ES_STATE_06  0x0040
-			 SAHPI_ES_STATE_07  0x0080
-			 SAHPI_ES_STATE_08  0x0100
-			 SAHPI_ES_STATE_09  0x0200
-			 SAHPI_ES_STATE_10  0x0400
-			 SAHPI_ES_STATE_11  0x0800
-			 SAHPI_ES_STATE_12  0x1000
-			 SAHPI_ES_STATE_13  0x2000
-			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 35}
+	For availability category, the possible values are: 
+		'SAHPI_ES_RUNNING, SAHPI_ES_TEST, SAHPI_ES_POWER_OFF,
+		SAHPI_ES_ON_LINE, SAHPI_ES_OFF_LINE,
+		SAHPI_ES_OFF_DUTY, SAHPI_ES_DEGRADED,
+		SAHPI_ES_POWER_SAVE, SAHPI_ES_INSTALL_ERROR'
+
+	For redundancy category, the possible values are:
+		'SAHPI_ES_FULLY_REDUNDANT, SAHPI_ES_REDUNDANCY_LOST,
+		SAHPI_ES_REDUNDANCY_DEGRADED, 
+		SAHPI_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES,
+		SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL,
+		SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON'
+
+	For generic category, the possible values are:
+		'SAHPI_ES_STATE_00, SAHPI_ES_STATE_01,
+		SAHPI_ES_STATE_02, SAHPI_ES_STATE_03,
+		SAHPI_ES_STATE_04, SAHPI_ES_STATE_05,
+		SAHPI_ES_STATE_06, SAHPI_ES_STATE_07,
+		SAHPI_ES_STATE_08, SAHPI_ES_STATE_09,
+		SAHPI_ES_STATE_10, SAHPI_ES_STATE_11,
+		SAHPI_ES_STATE_12, SAHPI_ES_STATE_13,
+		SAHPI_ES_STATE_14'"
+	::= {saHpiSystemEventLogEntry 22}
 
 saHpiSystemEventLogSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor OEM event information "
-	::= {saHpiSystemEventLogEntry 36}
+	::= {saHpiSystemEventLogEntry 23}
 
 saHpiSystemEventLogSensorSpecific OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor specific information "
-	::= {saHpiSystemEventLogEntry 37}
+	::= {saHpiSystemEventLogEntry 24}
 
 
 saHpiSystemEventLogHotSwapState OBJECT-TYPE
@@ -3533,7 +2812,7 @@ saHpiSystemEventLogHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Current state of the hot-swap device."
-	::= {saHpiSystemEventLogEntry 38}
+	::= {saHpiSystemEventLogEntry 25}
 
 saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
@@ -3548,14 +2827,14 @@ saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Previous state of the hot-swap device. "
-	::= {saHpiSystemEventLogEntry 39}
+	::= {saHpiSystemEventLogEntry 26}
 
 saHpiSystemEventLogWatchdogNum OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The Watchdog number. "
-	::= {saHpiSystemEventLogEntry 40}
+	::= {saHpiSystemEventLogEntry 27}
 
 saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
@@ -3571,7 +2850,7 @@ saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-	::= {saHpiSystemEventLogEntry 41}
+	::= {saHpiSystemEventLogEntry 28}
 
 saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -3587,7 +2866,7 @@ saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
  			triggered by a watchdog pre-timer event. The actual meaning of these
  			operations may differ depending on the hardware architecture. "
-	::= {saHpiSystemEventLogEntry 42}
+	::= {saHpiSystemEventLogEntry 29}
 
 saHpiSystemEventLogWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3611,7 +2890,7 @@ saHpiSystemEventLogWatchdogUse OBJECT-TYPE
 			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-	::= {saHpiSystemEventLogEntry 43}
+	::= {saHpiSystemEventLogEntry 30}
 
 saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3634,14 +2913,14 @@ saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
 			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
 				
-	::= {saHpiSystemEventLogEntry 44}
+	::= {saHpiSystemEventLogEntry 31}
 
 saHpiSystemEventLogOemEventData OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
-	::= {saHpiSystemEventLogEntry 45}
+	::= {saHpiSystemEventLogEntry 32}
 
 
 saHpiSystemEventLogUserEventData OBJECT-TYPE
@@ -3651,7 +2930,7 @@ saHpiSystemEventLogUserEventData OBJECT-TYPE
         DESCRIPTION     "User events may be used for storing custom events 
 			created by the application  middleware;
 			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
-	::= {saHpiSystemEventLogEntry 46}
+	::= {saHpiSystemEventLogEntry 33}
 
 saHpiSystemEventLogDelete OBJECT-TYPE
 	SYNTAX		RowStatus
@@ -3659,7 +2938,7 @@ saHpiSystemEventLogDelete OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiSystemEventLogEntry 47}
+	::= {saHpiSystemEventLogEntry 34}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -6446,6 +5725,7 @@ saHpiSensorNotification NOTIFICATION-TYPE
 		saHpiEventIndex,
 		saHpiEventSeverity,
 		saHpiEventSensorCategory,
+		saHpiEventSensorState,
 		saHpiEventSensorNum,
 		saHpiEventSensorType,
 		saHpiEventSensorOptionalData,
@@ -6597,20 +5877,7 @@ saHpiEventGroup OBJECT-GROUP
 		saHpiEventSensorType,
 		saHpiEventSensorCategory,
 		saHpiEventSensorAssertion,
-		saHpiEventSensorStateCategoryUnspecified,
-                saHpiEventSensorStateCategoryThreshold,
-                saHpiEventSensorStateCategoryUsage,
-                saHpiEventSensorStateCategoryState,
-                saHpiEventSensorStateCategoryPredFail,
-                saHpiEventSensorStateCategoryLimit ,
-                saHpiEventSensorStateCategoryPerformance,
-                saHpiEventSensorStateCategorySeverity,
-                saHpiEventSensorStateCategoryPresence,
-                saHpiEventSensorStateCategoryEnable,
-                saHpiEventSensorStateCategoryAvailability,
-                saHpiEventSensorStateCategoryRedundancy,
-                saHpiEventSensorStateCategoryUser,
-                saHpiEventSensorStateCategoryGeneric,
+		saHpiEventSensorState,
 		saHpiEventSensorOptionalData,
 		saHpiEventSensorTriggerReadingType,
 		saHpiEventSensorTriggerReadingRaw,
@@ -6660,20 +5927,7 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogSensorType,
 		saHpiSystemEventLogSensorCategory,
 		saHpiSystemEventLogSensorAssertion,
-		saHpiSystemEventLogSensorStateCategoryUnspecified,
-		saHpiSystemEventLogSensorStateCategoryThreshold,
-		saHpiSystemEventLogSensorStateCategoryUsage,
-		saHpiSystemEventLogSensorStateCategoryState,
-		saHpiSystemEventLogSensorStateCategoryPredFail,
-		saHpiSystemEventLogSensorStateCategoryLimit,
-		saHpiSystemEventLogSensorStateCategoryPerformance,
-		saHpiSystemEventLogSensorStateCategorySeverity,
-		saHpiSystemEventLogSensorStateCategoryPresence,
-		saHpiSystemEventLogSensorStateCategoryEnable,
-		saHpiSystemEventLogSensorStateCategoryAvailability,
-		saHpiSystemEventLogSensorStateCategoryRedundancy,
-		saHpiSystemEventLogSensorStateCategoryUser,
-		saHpiSystemEventLogSensorStateCategoryGeneric,
+		saHpiSystemEventLogSensorState,
 		saHpiSystemEventLogSensorOptionalData,
 		saHpiSystemEventLogSensorTriggerReadingType,
 		saHpiSystemEventLogSensorTriggerReadingRaw,
