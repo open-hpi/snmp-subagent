@@ -171,6 +171,32 @@ memory_fixed:
 
 }
 
+int
+delete_inventory_row(SaHpiDomainIdT domain_id,
+		     SaHpiResourceIdT resource_id,
+		     SaHpiEirIdT num)
+{
+  saHpiInventoryTable_context *ctx;
+
+  oid inv_oid[1];
+  netsnmp_index index;
+
+  DEBUGMSGTL((AGENT,"- delete_inventory_row\n"));
+
+  inv_oid[1] = num;
+  index.oids = (oid *) &inv_oid;
+  index.len = 1;
+  ctx = CONTAINER_FIND(cb.container, &index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    inventory_count = CONTAINER_SIZE(cb.container);
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NOT_FOUND;
+  
+}
+
 int  
 saHpiInventoryTable_modify_context(
 				   SaHpiInventoryRecT *entry,SaHpiResourceIdT resource_id,
@@ -203,9 +229,13 @@ saHpiInventoryTable_modify_context(
       }
     }
 
+    if (hash == 0)
+      hash = 1;
     ctx->hash = hash;
 
     DEBUGMSGTL((AGENT,"Creating columns for: %d\n", entry->EirId));
+    ctx->resource_id = resource_id;
+    ctx->domain_id = 0;
     ctx->saHpiInventoryRDR_len = rdr_entry_oid_len*sizeof(oid);
     memcpy(ctx->saHpiInventoryRDR, rdr_entry, ctx->saHpiInventoryRDR_len);
    
@@ -226,7 +256,6 @@ saHpiInventoryTable_modify_context(
 	ctx->saHpiInventoryFileId_len = 0;
 	ctx->saHpiInventoryAssetTag_len = 0;
 	ctx->saHpiInventoryCustomField_len = 0;
-	// MIB, #007 comment. Awaiting
 	ctx->saHpiInventoryTextType = 0;
 	ctx->saHpiInventoryTextLanguage = 0;
 
