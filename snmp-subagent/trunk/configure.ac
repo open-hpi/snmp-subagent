@@ -105,7 +105,6 @@ fi
 AC_SUBST(ac_configure_args)
 
 AC_CONFIG_FILES([Makefile 
-    docs/Makefile
     src/Makefile
     openhpi-subagent.spec])
 AC_OUTPUT
