@@ -511,6 +511,7 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
 
 saHpiResourceTagTextType OBJECT-TYPE 
 	SYNTAX		INTEGER {
+				undefined(0),
 				binary(1), 
 				bcdplus(2), 
 				ascii6(3),
@@ -4008,6 +4009,7 @@ saHpiInventoryAttributes OBJECT-TYPE
 
 saHpiInventoryTextType OBJECT-TYPE 
 	SYNTAX		INTEGER {
+				undefined(0),
 				binary(1), 
 				bcdplus(2), 
 				ascii6(3),
