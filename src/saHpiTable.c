@@ -645,6 +645,7 @@ int set_clear_events(saHpiTable_context *ctx) {
     rc = saHpiEventLogClear(session_id,
 			    ctx->saHpiResourceID);
 
+
     if (rc != SA_OK) {
       snmp_log(LOG_ERR,"Call to saHpiEventLogClear failed with return code: %d.\n", rc);
       DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogClear' rc: %d\n", rc));
@@ -1161,7 +1162,7 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
     
       if ( row_ctx->hash == 0) {
 	// The row doesn't exist.
-	rc =  SNMP_ERR_NOSUCHNAME;
+	//rc =  SNMP_ERR_NOSUCHNAME;
 	var = current->ri->requestvb;
 
 	// SNMPv2-TC has a diagram of actions for non-existing rows.
@@ -1173,9 +1174,9 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 	  rc = SNMP_ERR_INCONSISTENTNAME;
 	if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
 	  rc = SNMP_ERR_WRONGVALUE;
-	if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
+	//if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
 	  // IBM-KR: TODO, this ought to be SNMP_ERR_NOERROR. ?
-	  rc = SNMP_ERR_INCONSISTENTNAME;
+	// rc = SNMP_ERR_INCONSISTENTNAME;
 	
 	if (rc)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
@@ -1188,7 +1189,7 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiTable_set_reserve2(netsnmp_request_group * rg)
 {
-  //  saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
+
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
@@ -1279,11 +1280,11 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 {
       netsnmp_variable_list *var;
     saHpiTable_context *row_ctx = (saHpiTable_context *) rg->existing_row;
-    //    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
 
     int rc = SNMP_ERR_NOERROR;
-    long count;
+
+
     DEBUGMSGTL((AGENT,"saHpiTable_set_action. Entry.\n"));
     for (current = rg->list; current; current = current->next) {
 
@@ -1326,20 +1327,25 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 
         case COLUMN_SAHPICLEAREVENTS:
             /** RowStatus = ASN_INTEGER */
-            row_ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE;
-	    if (set_clear_events(row_ctx) != AGENT_ERR_NOERROR) {
-	      rc=SNMP_ERR_GENERR;
-	    } else 
-	      {
-		// Success. Now its time to remove the events and SEL entries.
-
-		delete_SEL_row(row_ctx->saHpiDomainID,
-			       row_ctx->saHpiResourceID);
-
-		DEBUGMSGTL((AGENT,"Deleted %d,%d from SEL.\n",
-			    row_ctx->saHpiDomainID, row_ctx->saHpiResourceID));
-	      }
-	
+	  row_ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE;
+	  // If the row doesn't have the hash value, its our internal ones,
+	  // and we will discard it.
+	    if (row_ctx->hash == 0) 
+	      rg->row_deleted = 1;
+	    else {
+	      // For rows that exist, try to clear the events 
+	      if (set_clear_events(row_ctx) != AGENT_ERR_NOERROR) {
+		rc=SNMP_ERR_GENERR;
+	      } else 
+		{ // and if it succeded, clear the SEL rows.
+		  // Success. Now its time to remove the events and SEL entries.
+		  if (delete_SEL_row(row_ctx->saHpiDomainID,
+				     row_ctx->saHpiResourceID) != AGENT_ERR_NOERROR)
+		    {
+		      rc = SNMP_ERR_GENERR;
+		    }
+		}
+	    }	
 	    
             break;
 

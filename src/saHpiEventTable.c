@@ -315,16 +315,17 @@ int populate_event() {
 
 unsigned long purge_event( void ) {
   
-  unsigned long count = 0;
 
+  unsigned long count = 0;
   unsigned long i;
+
   saHpiEventTable_context *event_context;
-  MAX_EVENT_ENTRIES = 4;
   DEBUGMSGTL((AGENT,"purge_event. Entry.\n"));
+  
   if ((i = CONTAINER_SIZE(cb.container)) > MAX_EVENT_ENTRIES) {
     // Delete 'count' entries.    
     i = i - MAX_EVENT_ENTRIES;
-    DEBUGMSGTL((AGENT,"Deleting %d EVENT rows.\n", i));
+    DEBUGMSGTL((AGENT,"Deleting %d EVENT row(s).\n", i));
     count = i;
     while (i > 0) {
       event_context = CONTAINER_FIRST(cb.container);
@@ -332,6 +333,7 @@ unsigned long purge_event( void ) {
       i--;      
     }
   }
+  
   DEBUGMSGTL((AGENT,"purge_event. Exit. (purged: %d)\n",count));
   return count;
 }
@@ -742,7 +744,6 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
       *var_trap_oid = saHpiUserNotification_oid;
 
     }
-
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
