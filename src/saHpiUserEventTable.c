@@ -238,53 +238,23 @@ saHpiUserEventTable_extract_index( saHpiUserEventTable_context * ctx, netsnmp_in
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiEventSeverity;
 
        memset( &var_saHpiEventSeverity, 0x00, sizeof(var_saHpiEventSeverity) );
        var_saHpiEventSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventSeverity.next_variable = &var_XX;
-#endif
+       var_saHpiEventSeverity.next_variable = &var_saHpiEventHistorical;
 
        memset( &var_saHpiEventHistorical, 0x00, sizeof(var_saHpiEventHistorical) );
        var_saHpiEventHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiEventHistorical.next_variable = &var_saHpiUserEventTimestamp;
 
        memset( &var_saHpiUserEventTimestamp, 0x00, sizeof(var_saHpiUserEventTimestamp) );
        var_saHpiUserEventTimestamp.type = ASN_OCTET_STR; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiUserEventTimestamp.next_variable = &var_XX;
-#endif
+       var_saHpiUserEventTimestamp.next_variable = NULL;
 
 
     /*
@@ -309,42 +279,21 @@ saHpiUserEventTable_extract_index( saHpiUserEventTable_context * ctx, netsnmp_in
                     memcpy( ctx->saHpiUserEventTimestamp, var_saHpiUserEventTimestamp.val.string, var_saHpiUserEventTimestamp.val_len );
                 ctx->saHpiUserEventTimestamp_len = var_saHpiUserEventTimestamp.val_len;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventSeverity.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiEventHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( XXX_check_value( var_saHpiUserEventTimestamp.val.string, XXX ) ) {
-          *    err = -1;
-          * }
-          */
+
+		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+
+		if(!err)
+			err = saHpiResourceId_check_index(*var_saHpiResourceId.val.integer);
+
+		if(!err)
+			err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
+
+		if(!err)
+			err = saHpiEventHistorical_check_index(*var_saHpiEventHistorical.val.integer);
+
+		if(!err)
+			err = saHpiTimeString_check_index(&var_saHpiUserEventTimestamp);
     }
 
     /*
