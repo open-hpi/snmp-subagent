@@ -244,21 +244,21 @@ static state_category_string state_string[] = {
     {SAHPI_EC_REDUNDANCY, SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES, "SAHPI_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES"},
     {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL, "SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL"},
     {SAHPI_EC_REDUNDANCY, SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON, "SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_00, "SAHPI_ES_STATE_00"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_01, "SAHPI_ES_STATE_01"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_02, "SAHPI_ES_STATE_02"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_03, "SAHPI_ES_STATE_03"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_04, "SAHPI_ES_STATE_04"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_05, "SAHPI_ES_STATE_05"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_06, "SAHPI_ES_STATE_06"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_07, "SAHPI_ES_STATE_07"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_08, "SAHPI_ES_STATE_08"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_09, "SAHPI_ES_STATE_09"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_10, "SAHPI_ES_STATE_10"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_11, "SAHPI_ES_STATE_11"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_12, "SAHPI_ES_STATE_12"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_13, "SAHPI_ES_STATE_13"},
-    {SAHPI_EC_GENERIC || SAHPI_EC_USER, SAHPI_ES_STATE_14, "SAHPI_ES_STATE_14"}};
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_00, "SAHPI_ES_STATE_00"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_01, "SAHPI_ES_STATE_01"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_02, "SAHPI_ES_STATE_02"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_03, "SAHPI_ES_STATE_03"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_04, "SAHPI_ES_STATE_04"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_05, "SAHPI_ES_STATE_05"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_06, "SAHPI_ES_STATE_06"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_07, "SAHPI_ES_STATE_07"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_08, "SAHPI_ES_STATE_08"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_09, "SAHPI_ES_STATE_09"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_10, "SAHPI_ES_STATE_10"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_11, "SAHPI_ES_STATE_11"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_12, "SAHPI_ES_STATE_12"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_13, "SAHPI_ES_STATE_13"},
+    {SAHPI_EC_GENERIC , SAHPI_ES_STATE_14, "SAHPI_ES_STATE_14"}};
 
 #define STATESTRING_VALUE_DELIMITER ", "
 #define STATESTRING_VALUE_DELIMITER_LENGTH 2
@@ -270,49 +270,55 @@ int build_state_string (SaHpiEventCategoryT category,
                         char **str,
                         size_t *len) {
 
-   char temp[STATESTRING_MAX_LENGTH];
+   char *temp;
    size_t idx = 0;
    size_t temp_len;
-   int i,j; 
+   int i; 
 
    int rc = AGENT_ERR_NOERROR; 
    *len = 0;
+   idx = 0;
+   temp = (char *) malloc (STATESTRING_MAX_LENGTH);
+   if (temp == NULL) 
+	return AGENT_ERR_MEMORY_FAULT;
+   if (category == SAHPI_EC_USER) 
+	category = SAHPI_EC_GENERIC;
    for (i = 0; i < STATESTRING_MAX_ENTRIES; i++) {
-     if ((state_string[i].category && category )== state_string[i].category) {
+     if ((state_string[i].category & category )== category) {
        /* Found category, time to match states. */
-       for (j = i; j < STATESTRING_MAX_ENTRIES || 
-	      state_string[i].category == state_string[j].category;j++) {
 	 /* Match the right states */
-	 if ((state_string[j].state && state )== state_string[j].state) {
+	 if ((state_string[i].state & state )== state_string[i].state) {
 	   /* Found it */
-	   temp_len = strlen(state_string[j].str);	
+	   temp_len = strlen(state_string[i].str);	
 	   if (idx + temp_len + STATESTRING_VALUE_DELIMITER_LENGTH  > STATESTRING_MAX_LENGTH) {
 	     rc = AGENT_ERR_MEMORY_FAULT;
 	     break;
 	   }
-	   memcpy(&temp+idx, state_string[j].str, temp_len);
-	   idx += temp_len;
-	   memcpy(&temp+idx, STATESTRING_VALUE_DELIMITER,  STATESTRING_VALUE_DELIMITER_LENGTH);
-	   idx += STATESTRING_VALUE_DELIMITER_LENGTH;
+	   memcpy(temp+idx, state_string[i].str, temp_len);
+	   idx = idx + temp_len;
+	   memcpy(temp+idx, STATESTRING_VALUE_DELIMITER, STATESTRING_VALUE_DELIMITER_LENGTH);
+	   idx = idx + STATESTRING_VALUE_DELIMITER_LENGTH;
 	 }
-       }
      }
    }
-   if (idx > STATESTRING_MAX_LENGTH)
+   
+   if (idx > 0)
+     idx = idx-2;
+   if (idx < STATESTRING_MAX_LENGTH) 
      temp[idx] = 0x00;
    else
      temp[STATESTRING_MAX_LENGTH] = 0x00;
    
-   DEBUGMSGTL((AGENT,"String %d is [%s]\n", idx, temp));
    *str  = (char *) malloc (idx);
    if (str == NULL) {
      rc = AGENT_ERR_MEMORY_FAULT;
    }
    else {
-     memcpy(*str, &temp, idx);
+     memcpy(*str, temp, idx);
      *len = idx;
    }
-   return rc;                                                                                
+   free(temp);
+   return rc;
 }
 long
 calculate_hash_value (void *data, int len)
@@ -830,6 +836,7 @@ main (int argc, char **argv)
   char c;
   int rc = 0;
   pid_t child;
+  
   /* change this if you want to be a SNMP master agent */
 
   while ((c = getopt (argc, argv, "fds?")) != EOF)
@@ -907,7 +914,6 @@ main (int argc, char **argv)
 
   initialize_table_saHpiSystemEventLogTable ();
   initialize_table_saHpiEventTable ();
-
 
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
