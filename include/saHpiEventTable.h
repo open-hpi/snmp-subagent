@@ -201,12 +201,7 @@ extern          "C" {
  */
 
     void            initialize_table_saHpiEventTable(void);
-  /*
-    const saHpiEventTable_context *saHpiEventTable_get_by_idx(netsnmp_index
-                                                              *);
-    const saHpiEventTable_context
-        *saHpiEventTable_get_by_idx_rs(netsnmp_index *, int row_status);
-	*/
+
     int             saHpiEventTable_get_value(netsnmp_request_info *,
                                               netsnmp_index *,
                                               netsnmp_table_request_info
@@ -230,12 +225,6 @@ delete_event_row(SaHpiDomainIdT domain_id,
 		 SaHpiResourceIdT resource_id,
 		 SaHpiSelEntryIdT num);
   
-int
-saHpiEventTable_modify_context(SaHpiSelEntryIdT,
-			       SaHpiEventT *,
-			       SaHpiRptEntryT *t,
-			       SaHpiRdrT *,
-			       saHpiEventTable_context *ctx);
 				
   int
 event_count_entries_handler(netsnmp_mib_handler *handler,

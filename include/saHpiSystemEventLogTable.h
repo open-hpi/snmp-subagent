@@ -41,7 +41,7 @@ extern          "C" {
         unsigned long   saHpiSystemEventLogEntryId;
 
         /** TimeStamp = ASN_TIMETICKS */
-        unsigned long   saHpiSystemEventLogTimestamp;
+        integer64   saHpiSystemEventLogTimestamp;
 
         /** RowPointer = ASN_OBJECT_ID */
         oid             saHpiSystemEventLogged[MAX_OID_LEN];

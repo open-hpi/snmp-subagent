@@ -114,7 +114,11 @@ int
 int
 delete_hotswap_row(SaHpiDomainIdT ,
 		   SaHpiResourceIdT);
-		   
+
+int
+update_hotswap_event(SaHpiDomainIdT,
+		     SaHpiResourceIdT,
+		     SaHpiHotSwapEventT *);
 /*************************************************************
  * oid declarations
  */

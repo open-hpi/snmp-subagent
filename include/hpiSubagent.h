@@ -218,3 +218,13 @@ int build_full_oid(oid *prefix, size_t prefix_len,
 		   oid *column, size_t column_len,
 		   netsnmp_index *index,
 		   oid *out_oid, size_t in_len, size_t *out_len);
+
+#ifndef TRAP_VARS_HAVE
+#define TRAP_VARS_HAVE
+typedef struct trap_vars_ {
+  int column;
+  u_char type;
+  u_char *value;
+  size_t value_len;
+} trap_vars;
+#endif
