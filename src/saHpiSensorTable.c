@@ -165,6 +165,8 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 					}
 				}
 			}
+			free(array->array);
+			free(array); array = NULL;
 		}
 		// restoree it to its previous glory.
 		sensor_index.len =  SENSOR_INDEX_NR;
@@ -173,7 +175,6 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       if (!sensor_context)
 	{
 	  // New entry. Add it
-	  DEBUGMSGTL((AGENT,"1 MEMOEY"));
 	  sensor_context = saHpiSensorTable_create_row (&sensor_index);
 	}
       if (!sensor_context)
@@ -241,7 +242,6 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 					   rdr_entry_oid, rdr_entry_oid_len,
 					   sensor_context) == AGENT_NEW_ENTRY)
 	{
-	DEBUGMSGTL((AGENT,"2 MEMORY"));
 	  CONTAINER_INSERT (cb.container, sensor_context);
 	  sensor_count = CONTAINER_SIZE (cb.container);
 

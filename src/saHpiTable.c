@@ -835,7 +835,7 @@ update_event_status_flag (SaHpiDomainIdT domain_id,
   int rc = AGENT_ERR_NOT_FOUND;
   unsigned long i = 0;
 
-  DEBUGMSGTL ((AGENT, "update_event_status_flag (%d, %d, %d).\n",
+  DEBUGMSGTL ((AGENT, "Entry: update_event_status_flag (%d, %d, %d).\n",
 	       domain_id, resource_id, event_status));
 
   rpt_oid[0] = domain_id;
@@ -844,8 +844,7 @@ update_event_status_flag (SaHpiDomainIdT domain_id,
   // Possible more indexs?
   rpt_index.oids = (oid *) & rpt_oid;
   rpt_index.len = RPT_INDEX_NR - 1;
-
-  array = CONTAINER_GET_SUBSET (cb.container, &rpt_index);
+  array = (netsnmp_void_array *) CONTAINER_GET_SUBSET (cb.container, &rpt_index);
   if (array != NULL)
     {
       if (array->size > 0)
@@ -857,8 +856,10 @@ update_event_status_flag (SaHpiDomainIdT domain_id,
 	    }
 	  rc = AGENT_ERR_NOERROR;
 	}
+      free(array->array);
+      free(array); array = NULL;
     }
-  DEBUGMSGTL ((AGENT, "update_event_status_flag (rc: %d, updated: %d).\n",
+  DEBUGMSGTL ((AGENT, "Exit: update_event_status_flag (rc: %d, updated: %d).\n",
 	       rc, i));
   return rc;
 }
