@@ -48,16 +48,127 @@ oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
 size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
 
-void populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid) 
+int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid) 
 {
 	SaErrorT rv;
 	SaHpiDomainInfoT domain_info;
+	
+	oid domain_info_oid[DOMAIN_INFO_INDEX_NR];
+	netsnmp_index domain_info_index;
+	saHpiDomainInfoTable_context *domain_info_context;
 
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "saHpiDomainInfoGet rv = %d\n",rv));
-		return;
+		DEBUGMSGTL ((AGENT, "saHpiDomainInfoGet Failed: rv = %d\n",rv));
+		return AGENT_ERR_INTERNAL_ERROR;
 	}
+	
+	domain_info_oid[0] = domain_info.DomainId;
+	domain_info_index.oids = (oid *) & domain_info_oid;
+	
+	/* See if it exists. */
+	domain_info_context = NULL;
+	domain_info_context = CONTAINER_FIND (cb.container, &domain_info_index);
+	if (!domain_info_context) { 
+		// New entry. Add it
+		domain_info_context = saHpiDomainInfoTable_create_row ( &domain_info_index);
+	}
+	if (!domain_info_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a RPT row!");
+		return AGENT_ERR_INTERNAL_ERROR;
+	}	
+			
+
+	/** SaHpiDomainId = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainId;
+
+        /** BITS = ASN_OCTET_STR */
+            domain_info_context->saHpiDomainCapabilities[65535];
+            domain_info_context->saHpiDomainCapabilities_len;
+
+        /** TruthValue = ASN_INTEGER */
+            domain_info_context->saHpiDomainIsPeer;
+
+        /** SaHpiTextType = ASN_INTEGER */
+            domain_info_context->saHpiDomainTagTextType;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+            domain_info_context->saHpiDomainTagTextLanguage;
+
+        /** SaHpiText = ASN_OCTET_STR */
+            domain_info_context->saHpiDomainTag[65535];
+            domain_info_context->saHpiDomainTag_len;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainReferenceUpdateCount;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+    /** TODO: Is this type correct? */
+            domain_info_context->saHpiDomainReferenceUpdateTimestamp;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainResourcePresenceUpdateCount;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+    /** TODO: Is this type correct? */
+            domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainAlarmUpdateCount;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+    /** TODO: Is this type correct? */
+           domain_info_context->saHpiDomainAlarmUpdateTimestamp;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainActiveAlarms;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainCriticalAlarms;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainMajorAlarms;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainMinorAlarms;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+            domain_info_context->saHpiDomainAlarmUserLimit;
+
+        /** TruthValue = ASN_INTEGER */
+            domain_info_context->saHpiDomainAlarmOverflow;
+
+        /** SaHpiGuid = ASN_OCTET_STR */
+            domain_info_context->saHpiDomainGuid[65535];
+            domain_info_context->saHpiDomainGuid_len;
+	
+	CONTAINER_INSERT (cb.container, rpt_context);
+	
+Add scalars here?	
+					  // Add two more entries: entryCount, and entryUpdate
+				  snmp_varlist_add_variable (&trap_var,
+							     saHpiEntryCount_oid,
+							     OID_LENGTH
+							     (saHpiEntryCount_oid),
+							     ASN_COUNTER,
+							     (u_char *) &
+							     entry_count,
+							     sizeof
+							     (entry_count));
+				  snmp_varlist_add_variable (&trap_var,
+							     saHpiEntryUpdateCount_oid,
+							     OID_LENGTH
+							     (saHpiEntryUpdateCount_oid),
+							     ASN_UNSIGNED,
+							     (u_char *) &
+							     update_entry_count,
+							     sizeof
+							     (update_entry_count));
+				  DEBUGMSGTL ((AGENT,
+					       "Sending the TRAP message\n"));
+				  send_v2trap (trap_var);
+				  snmp_free_varbind (trap_var);
+Add scalars here?	
 		
 	DEBUGMSGTL ((AGENT, 
 		"WARNING: populate_saHpiDomainInfoTable: not implemented!"));
@@ -372,7 +483,6 @@ int saHpiDomainInfoTable_can_delete(saHpiDomainInfoTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiDomainInfoTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -413,6 +523,9 @@ saHpiDomainInfoTable_create_row( netsnmp_index* hdr)
      * yourself to use.  If you allocated memory earlier,
      * make sure you free it for earlier error cases!
      */
+     
+     
+     DEBUGMSGTL ((AGENT, "saHpiDomainInfoTable_create_row: should set to init values"));
     /**
      ctx->saHpiDomainTagTextType = 0;
      ctx->saHpiDomainTagTextLanguage = 0;
@@ -421,7 +534,6 @@ saHpiDomainInfoTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
