@@ -208,8 +208,19 @@ populate_inventory (SaHpiInventoryRecT * inventory,
 	      inventory_count = CONTAINER_SIZE (cb.container);
 	    }
 
-	  // End case.
-	  if (data->DataRecords[count] == NULL)
+	  /* Bug 872437 segfault when populating inventory entries using snmp_bc
+	   *
+	   * The line below 
+	  if (data->DataRecords[count+1] == NULL) 
+	   * was used as method to stop the loop. Unfortunatly (foruntatly?)
+	   * GCC translates that to a pointer to the count+1 byte in the
+	   * FIRST DataRecords structure. Which means for example
+	   * that data->DataRecord[2] actually gives us 
+	   * data->DataRecords->DataLength
+	   * 
+	   * The reason why we check for data->DataRecord is b/c on the utils
+	   * 'hpifru.c' does it too. Bad joss.
+	   */
 	    stop = SAHPI_TRUE;
 	}			// End of loop. No more record changing/adding.
 
