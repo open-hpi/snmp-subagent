@@ -33,6 +33,7 @@
 		These include generic functions for sorting, getting an item, checking for
 		correct boundary conditions, and generating the index tuple.
 		</para>
+	  </listitem>
 	  <listitem>
 	  	<para>
 		Object IDentifier for the table.
@@ -58,6 +59,7 @@
       </para>
       <para>
       The first named variables of the structure is the <emphasis>index</emphasis> variable.
+      </para>
 	<programlisting role='C'>
       typedef struct netSnmpIETFWGTable_context_s {
     	netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -199,6 +201,7 @@ int netSnmpIETFWGTable_get_value(netsnmp_request_info *,
 	    The next set of functions are controlled by a set of #define statements. 
 	    These operations are for writing, deleting, creating, and retrieving secondary index 
 	    of rows. 
+           </para>
 <programlisting role='C'>
 #ifdef netSnmpIETFWGTable_SET_HANDLING
 
@@ -256,6 +259,7 @@ netSnmpIETFWGTable_context *
 		    </para>
 		  </listitem>
 	    </itemizedlist>
+     </sect2>
      <sect2>
       <title>Object IDentifier of the table</title>
       <para>
