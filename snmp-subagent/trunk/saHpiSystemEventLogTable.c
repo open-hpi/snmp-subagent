@@ -22,7 +22,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/library/snmp_assert.h>
-
+#include <saHpiTable.h>
 #include "saHpiSystemEventLogTable.h"
 #include <saHpiEventTable.h>
 
@@ -52,8 +52,9 @@ static oid      saHpiSystemEventLogDeleteEntrySupported_oid[] =
   { 1, 3, 6, 1, 3, 90, 2, 2, 8, 0 };
 static u_long event_log_entries = 0;
 static u_long event_log_size = 0;
-static long long event_log_update_timestamp = SAHPI_TIME_UNSPECIFIED;
-static long long event_log_current_timestamp = SAHPI_TIME_UNSPECIFIED;
+static integer64 event_log_update_timestamp;
+static integer64 event_log_current_timestamp;
+
 static int event_log_enabled = 0;
 static int event_log_overflow_flag = 0;
 static int event_log_overflow_action = 0;
@@ -92,8 +93,25 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
     //event_log_entries = info.Entries;
     event_log_size = info.Size;
-    event_log_update_timestamp = info.UpdateTimestamp;
-    event_log_current_timestamp = info.CurrentTime;
+    memcpy(&event_log_update_timestamp,
+	   &info.UpdateTimestamp,
+	   sizeof(SaHpiTimeT));
+    event_log_update_timestamp.low = 
+      htonl(event_log_update_timestamp.low);
+
+    event_log_update_timestamp.high =
+      htonl(event_log_update_timestamp.high);
+
+    memcpy(&event_log_current_timestamp,
+	   &info.CurrentTime,
+	   sizeof(SaHpiTimeT));
+    
+    event_log_current_timestamp.low = 
+      htonl(event_log_current_timestamp.low);
+
+    event_log_current_timestamp.high =
+      htonl(event_log_current_timestamp.high);
+
     event_log_enabled = (info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
     event_log_overflow_flag = (info.OverflowFlag == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
     event_log_overflow_action = info.OverflowAction + 1;
@@ -103,7 +121,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 
     entry_id = SAHPI_OLDEST_ENTRY;
     while ((err == SA_OK) && (entry_id != SAHPI_NO_MORE_ENTRIES)) {
-      /*
+      /* Moved to RPT table.
       err = saHpiEventLogStateGet(session_id,
 				  rpt_entry->ResourceId,
 				  &state);
@@ -121,7 +139,8 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 				  &sel,
 				  &rdr_entry,
 				  NULL);
-
+      
+      if (entry_id == prev_entry_id) return AGENT_ERR_OPERATION;
       if (err == SA_OK) {
 	// The MIB containst the order of indexes
 	sel_oid[0] = rpt_entry->DomainId;
@@ -137,6 +156,13 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 	  // New entry. Add it
 	  sel_context = saHpiSystemEventLogTable_create_row(&sel_index);
 	}
+
+	// Notify RPT table that this row is active.
+	update_clear_event(rpt_entry->DomainId,
+			   rpt_entry->ResourceId,
+			   sel.EntryId,
+			   SNMP_ROW_ACTIVE);
+
 	// Now create the 'event' and get its OID to be copied to our
 	// SystemEventLogged OID
 
@@ -207,6 +233,11 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
     memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
+    // Notify RPT table that we are active.
+    update_clear_event(rpt->DomainId,
+		       rpt->ResourceId,
+		       sel->EntryId,
+		       SNMP_ROW_ACTIVE);
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
@@ -244,10 +275,10 @@ set_timestamp() {
   SaHpiSessionIdT session_id;
   SaErrorT rc;
   SaHpiTimeT time;
+  
 
-
-
-    time = event_log_current_timestamp;
+  DEBUGMSGTL((AGENT,"IBM-KR: DEPRECATED\n"));
+  //time = event_log_current_timestamp;
       // Get the seesion_id
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
@@ -289,6 +320,7 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   ctx = CONTAINER_FIND(cb.container, &sel_index);
 
   if (ctx) {
+    // Notify
     CONTAINER_REMOVE(cb.container, ctx);
     event_log_entries = CONTAINER_SIZE(cb.container);
     return AGENT_ERR_NOERROR;
@@ -741,6 +773,11 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 	      delete_event_row(row_ctx->domain_id,
 			       row_ctx->resource_id,
 			       row_ctx->saHpiSystemEventLogEntryId);
+	      // Notify the RPT table.
+	      update_clear_event(row_ctx->domain_id,
+				 row_ctx->resource_id,
+				 row_ctx->saHpiSystemEventLogEntryId,
+				 SNMP_ROW_NOTINSERVICE);
 
 	      // Now we have to send off an event?
 	      // IBM-KR: TODO
@@ -959,7 +996,7 @@ initialize_table_saHpiSystemEventLogTable(void)
 					 event_log_current_timestamp_handler,
 					 saHpiSystemEventLogCurrentTime_oid,
 					 OID_LENGTH(saHpiSystemEventLogCurrentTime_oid),
-					 HANDLER_CAN_RWRITE));
+					 HANDLER_CAN_RONLY));
     
     netsnmp_register_read_only_int_instance("event_log_enabled",
 					      saHpiSystemEventLogEnabled_oid,
@@ -1059,7 +1096,7 @@ event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_request_info *requests) {
 
   if (reqinfo->mode ==  MODE_GET)
-    snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
+    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER64,
 			     (u_char *) &event_log_update_timestamp,
 			     sizeof(event_log_update_timestamp));
     
@@ -1071,7 +1108,7 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_handler_registration *reginfo,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests) {
-
+  /*
   netsnmp_variable_list *var;
   int rc = SNMP_ERR_NOERROR;
   u_long *timetick_cache = NULL;
@@ -1148,8 +1185,15 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
       netsnmp_set_request_error(reqinfo, requests, rc);
     requests = requests->next;
   }
-
-  return rc;
+  */
+  
+  if (reqinfo->mode ==  MODE_GET)
+    snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER64,
+			     (u_char *) &event_log_current_timestamp,
+			     sizeof(event_log_current_timestamp));
+    
+  return SNMP_ERR_NOERROR;
+  //return rc;
 }
 
 

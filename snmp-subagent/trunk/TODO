@@ -1,0 +1,5 @@
+Move *.c to src
+Move *.h to include
+Test -endian on differnt machines. Pay attention to Time.
+Check the SaHpiTime
+Check the time in RPT table - modify it too.

@@ -22,6 +22,7 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 
 #include <net-snmp/library/snmp_assert.h>
+#include <saHpiTable.h>
 #include "saHpiEventTable.h"
 #include <saHpiSystemEventLogTable.h>
 static netsnmp_handler_registration *my_handler = NULL;
@@ -165,7 +166,17 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
     ctx->saHpiEventIndex = entry_id;
 
     ctx->saHpiEventType = event_entry->EventType + 1;
-    ctx->saHpiEventTimestamp = event_entry->Timestamp;
+
+    memcpy(&ctx->saHpiEventTimestamp,
+	   &event_entry->Timestamp,
+	   sizeof(SaHpiTimeT));
+
+    ctx->saHpiEventTimestamp.low =
+      htonl(ctx->saHpiEventTimestamp.low);
+    
+    ctx->saHpiEventTimestamp.high =
+      htonl(ctx->saHpiEventTimestamp.high);
+
     ctx->saHpiEventSeverity = event_entry->Severity;
 
     if (event_entry->EventType == SAHPI_ET_SENSOR) {
@@ -343,6 +354,12 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
 	     SAHPI_USER_EVENT_DATA_SIZE);
       ctx->saHpiEventUserEventData_len = SAHPI_USER_EVENT_DATA_SIZE;
     }
+
+ // Notify RPT table that we are active.
+    update_clear_event(rpt_entry->DomainId,
+		       rpt_entry->ResourceId,
+		       entry_id,
+		       SNMP_ROW_ACTIVE);
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
@@ -693,7 +710,6 @@ saHpiEventTable_can_delete(saHpiEventTable_context * undo_ctx,
                            netsnmp_request_group * rg)
 {
 
-  DEBUGMSGTL((AGENT,"Delete?\n"));
    
     return 1;
 }
@@ -1001,6 +1017,12 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 	  delete_SEL_row(row_ctx->domain_id,
 			 row_ctx->resource_id,
 			 row_ctx->saHpiEventIndex);
+
+	  // Update our RPT table
+	  update_clear_event(row_ctx->domain_id,
+			     row_ctx->resource_id,
+			     row_ctx->saHpiEventIndex,
+			     SNMP_ROW_NOTINSERVICE);
 	}
       } else // The rest of SNMP_ROW operations (4,5)
 	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
@@ -1195,8 +1217,8 @@ saHpiEventTable_get_value(netsnmp_request_info *request,
         break;
 
     case COLUMN_SAHPIEVENTTIMESTAMP:
-            /** TimeStamp = ASN_TIMETICKS */
-        snmp_set_var_typed_value(var, ASN_TIMETICKS,
+            /** HpiTimeStamp = ASN_COUNTER64 */
+        snmp_set_var_typed_value(var, ASN_COUNTER64,
                                  (char *) &context->saHpiEventTimestamp,
                                  sizeof(context->saHpiEventTimestamp));
         break;

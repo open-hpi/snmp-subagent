@@ -49,8 +49,8 @@ extern          "C" {
         /** INTEGER = ASN_INTEGER */
         long            saHpiEventType;
 
-        /** TimeStamp = ASN_TIMETICKS */
-        unsigned long   saHpiEventTimestamp;
+        /** HpiTimeStamp = ASN_COUNTER64 */
+        integer64   saHpiEventTimestamp;
 
         /** INTEGER = ASN_INTEGER */
         long            saHpiEventSeverity;

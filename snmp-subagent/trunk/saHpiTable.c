@@ -293,7 +293,7 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry,
     ctx->saHpiResourceTag_len = len;
 
     // IBM-KR: Shouldn't we change this depending on the events?
-    ctx->saHpiClearEvents = SNMP_ROW_NONEXISTENT; 
+    ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE; 
     ctx->saHpiParamControl = PARAM_UNDEFINED;
 
     memcpy(&ctx->saHpiEventLogTime, time, sizeof(SaHpiTimeT));
@@ -510,7 +510,11 @@ update_clear_event(SaHpiDomainIdT domain_id,
 
   rpt_oid[0]=domain_id;
   rpt_oid[1]=resource_id;	
-  rpt_oid[2]=num;
+  // Ignore the 'num' - its differnt index value than
+  // The RPT used one.
+  // IBM-KR: FIX THIS
+  DEBUGMSGTL((AGENT,"IBM-KR: TODO"));
+  rpt_oid[2]=resource_id;
 
   // Possible more indexs?
   rpt_index.oids = (oid *)&rpt_oid;
@@ -1195,7 +1199,7 @@ saHpiTable_set_action(netsnmp_request_group * rg)
 
         case COLUMN_SAHPICLEAREVENTS:
             /** RowStatus = ASN_INTEGER */
-            row_ctx->saHpiClearEvents = *var->val.integer;
+            row_ctx->saHpiClearEvents = SNMP_ROW_NOTINSERVICE;
 	    if (set_clear_events(row_ctx) != AGENT_ERR_NOERROR) {
 	      rc=SNMP_ERR_GENERR;
 	    } else 
