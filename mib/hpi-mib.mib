@@ -5805,13 +5805,12 @@ SaHpiSensorEntry ::= SEQUENCE {
          
         saHpiSensorEventEnable                  TruthValue,       
         saHpiSensorEventCtrl                    INTEGER,  
-        saHpiSensorSupportedStates                         SaHpiEventState,   
+        saHpiSensorSupportedEventStates         SaHpiEventState,   
        
-        saHpiSensorAssertEventMask                    SaHpiEventState,   
-        saHpiSensorDeassertEventMask                  SaHpiEventState,   
+        saHpiSensorAssertEventMask              SaHpiEventState,   
+        saHpiSensorDeassertEventMask            SaHpiEventState,   
         
         saHpiSensorEventsCategoryControl        INTEGER,
-        saHpiSensorEventsSupported              SaHpiEventState,
         
         saHpiSensorIsSupported                  TruthValue, 
 
@@ -5914,7 +5913,7 @@ saHpiSensorEventCtrl    OBJECT-TYPE
 	SAI-HPI-B.01.01 section 8.5."
         ::= {saHpiSensorEntry 6}
 
-saHpiSensorSupportedStates         OBJECT-TYPE
+saHpiSensorSupportedEventStates         OBJECT-TYPE
         SYNTAX          SaHpiEventState
         MAX-ACCESS      read-write
         STATUS          current
@@ -6035,21 +6034,12 @@ saHpiSensorEventsCategoryControl OBJECT-TYPE
 	SAI-HPI-B.01.01 spec."
         ::= {saHpiSensorEntry 11}
 
-saHpiSensorEventsSupported OBJECT-TYPE
-        SYNTAX          SaHpiEventState
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     
-        "Refer to the textual convention for full details"
-        ::= {saHpiSensorEntry 12}
-
-
 saHpiSensorIsSupported  OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if sensor data readings are supported."
-        ::= {saHpiSensorEntry 13}
+        ::= {saHpiSensorEntry 12}
         
 
 saHpiSensorReadingType  OBJECT-TYPE
@@ -6058,7 +6048,7 @@ saHpiSensorReadingType  OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "Type of value for sensor reading."
-        ::= {saHpiSensorEntry 14}
+        ::= {saHpiSensorEntry 13}
 
 saHpiSensorBaseUnits    OBJECT-TYPE
         SYNTAX          SaHpiSensorUnits
@@ -6067,7 +6057,7 @@ saHpiSensorBaseUnits    OBJECT-TYPE
         DESCRIPTION     
         "This columnar node provides the sensor data base units,
 	(meters, etc.)"
-        ::= {saHpiSensorEntry 15}
+        ::= {saHpiSensorEntry 14}
         
 saHpiSensorModifierUnits        OBJECT-TYPE
         SYNTAX          SaHpiSensorUnits
@@ -6081,7 +6071,7 @@ saHpiSensorModifierUnits        OBJECT-TYPE
 	futher insite. "
 	REFERENCE
 	"SAI-HPI-B.01.01 section 8.5."	
-        ::= {saHpiSensorEntry 16}
+        ::= {saHpiSensorEntry 15}
         
 saHpiSensorModifierUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -6103,14 +6093,14 @@ saHpiSensorModifierUse OBJECT-TYPE
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 section 8.5."
-        ::= {saHpiSensorEntry 17}
+        ::= {saHpiSensorEntry 16}
 
 saHpiSensorPercentage OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Is the value a percentage."
-        ::= {saHpiSensorEntry 18}
+        ::= {saHpiSensorEntry 17}
 
 saHpiSensorRangeFlags   OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -6122,7 +6112,7 @@ saHpiSensorRangeFlags   OBJECT-TYPE
         nothing if the sensor does not support any ranges.
 	If more than one range is supported then the strings
 	tokens are comma (',') or semicolon (';') delimited"
-        ::= {saHpiSensorEntry 19}
+        ::= {saHpiSensorEntry 18}
         
 saHpiSensorAccuracyFactor     OBJECT-TYPE
         SYNTAX          Float64
@@ -6133,7 +6123,7 @@ saHpiSensorAccuracyFactor     OBJECT-TYPE
         (e.g. 0.05 = 5%) and represents statistically how close the measured 
         reading is to the actual value. It is an interpreted value that 
         figures in all sensor accuracies, resolutions, and tolerances."
-        ::= {saHpiSensorEntry 20}
+        ::= {saHpiSensorEntry 19}
         
 saHpiSensorOem                OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6141,7 +6131,7 @@ saHpiSensorOem                OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Reserved for OEM use."
 
-        ::= {saHpiSensorEntry 21}
+        ::= {saHpiSensorEntry 20}
         
             
 saHpiSensorRDR OBJECT-TYPE
@@ -6149,7 +6139,7 @@ saHpiSensorRDR OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Forward pointer to the RDR OID."
-        ::= {saHpiSensorEntry 22}
+        ::= {saHpiSensorEntry 21}
 
 --
 -- /*******************************************************************************
@@ -8630,7 +8620,6 @@ saHpiSensorGroup OBJECT-GROUP
 		saHpiSensorAssertEventMask,
 		saHpiSensorDeassertEventMask,
 		saHpiSensorEventsCategoryControl,
-		saHpiSensorEventsSupported,
 		saHpiSensorIsSupported,
 		saHpiSensorReadingType,
 		saHpiSensorBaseUnits,
