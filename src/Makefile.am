@@ -13,62 +13,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			hpiSubagent.c \
 			hpiCheckIndice.c \
 			hpiSubagent.c \
-			saHpiAnnouncementEventLogTable.c \
-			saHpiAnnouncementTable.c \
-			saHpiAnnunciatorTable.c \
-			saHpiAreaTable.c \
-			saHpiAutoInsertTimeoutTable.c \
-			saHpiCtrlAnalogTable.c \
-			saHpiCtrlDigitalTable.c \
-			saHpiCtrlDiscreteTable.c \
-			saHpiCtrlOemTable.c \
-			saHpiCtrlStreamTable.c \
-			saHpiCtrlTextTable.c \
-			saHpiCurrentSensorStateTable.c \
-			saHpiDomainAlarmTable.c \
-			saHpiDomainEventLogTable.c \
-			saHpiDomainEventTable.c \
-			saHpiDomainInfoTable.c \
-			saHpiDomainReferenceTable.c \
-			saHpiEventLogInfoTable.c \
-			saHpiEventLogTable.c \
-			saHpiEventTable.c \
-			saHpiFieldTable.c \
-			saHpiHotSwapEventLogTable.c \
-			saHpiHotSwapEventTable.c \
-			saHpiHotSwapTable.c \
-			saHpiInventoryTable.c \
-			saHpiOEMEventLogTable.c \
-			saHpiOEMEventTable.c \
-			saHpiRdrTable.c \
-			saHpiResourceEventLogTable.c \
-			saHpiResourceEventTable.c \
-			saHpiResourceTable.c \
-			saHpiSensorEnableChangeEventLogTable.c \
-			saHpiSensorEnableChangeEventTable.c \
-			saHpiSensorEventLogTable.c \
-			saHpiSensorEventTable.c \
-			saHpiSensorReadingMaxTable.c \
-			saHpiSensorReadingMinTable.c \
-			saHpiSensorReadingNominalTable.c \
-			saHpiSensorReadingNormalMaxTable.c \
-			saHpiSensorReadingNormalMinTable.c \
-			saHpiSensorTable.c \
-			saHpiSensorThdLowCriticalTable.c \
-			saHpiSensorThdLowMajorTable.c \
-			saHpiSensorThdLowMinorTable.c \
-			saHpiSensorThdNegHysteresisTable.c \
-			saHpiSensorThdPosHysteresisTable.c \
-			saHpiSensorThdUpCriticalTable.c \
-			saHpiSensorThdUpMajorTable.c \
-			saHpiSensorThdUpMinorTable.c \
-			saHpiSoftwareEventLogTable.c \
-			saHpiSoftwareEventTable.c \
-			saHpiUserEventLogTable.c \
-			saHpiUserEventTable.c \
-			saHpiWatchdogEventLogTable.c \
-			saHpiWatchdogEventTable.c \
-			saHpiWatchdogTable.c 
+			saHpiDomainInfoTable.c			
+
 
 hpiSubagent_LDADD	= 
 hpiSubagent_LDFLAGS	= 
@@ -77,3 +23,58 @@ clean:
 	rm -f *~
 	rm -f *.o
 
+#			saHpiAnnouncementEventLogTable.c \
+#			saHpiAnnouncementTable.c \
+#			saHpiAnnunciatorTable.c \
+#			saHpiAutoInsertTimeoutTable.c \
+#			saHpiCtrlAnalogTable.c \
+#			saHpiCtrlDigitalTable.c \
+#			saHpiCtrlDiscreteTable.c \
+#			saHpiCtrlOemTable.c \
+#			saHpiCtrlStreamTable.c \
+#			saHpiCtrlTextTable.c \
+#			saHpiCurrentSensorStateTable.c \
+#			saHpiDomainAlarmTable.c \
+#			saHpiDomainEventLogTable.c \
+#			saHpiDomainEventTable.c \
+#			saHpiDomainInfoTable.c 
+#			saHpiDomainReferenceTable.c \
+#			saHpiEventLogInfoTable.c \
+#			saHpiEventLogTable.c \
+#			saHpiEventTable.c \
+#			saHpiFieldTable.c \
+#			saHpiHotSwapEventLogTable.c \
+#			saHpiHotSwapEventTable.c \
+#			saHpiHotSwapTable.c \
+#			saHpiInventoryTable.c \
+#			saHpiOEMEventLogTable.c \
+#			saHpiOEMEventTable.c \
+#			saHpiRdrTable.c \
+#			saHpiResourceEventLogTable.c \
+#			saHpiResourceEventTable.c \
+#			saHpiResourceTable.c \
+#			saHpiSensorEnableChangeEventLogTable.c \
+#			saHpiSensorEnableChangeEventTable.c \
+#			saHpiSensorEventLogTable.c \
+#			saHpiSensorEventTable.c \
+#			saHpiSensorReadingMaxTable.c \
+#			saHpiSensorReadingMinTable.c \
+#			saHpiSensorReadingNominalTable.c \
+#			saHpiSensorReadingNormalMaxTable.c \
+#			saHpiSensorReadingNormalMinTable.c \
+#			saHpiSensorTable.c \
+#			saHpiSensorThdLowCriticalTable.c \
+#			saHpiSensorThdLowMajorTable.c \
+#			saHpiSensorThdLowMinorTable.c \
+#			saHpiSensorThdNegHysteresisTable.c \
+#			saHpiSensorThdPosHysteresisTable.c \
+#			saHpiSensorThdUpCriticalTable.c \
+#			saHpiSensorThdUpMajorTable.c \
+#			saHpiSensorThdUpMinorTable.c \
+#			saHpiSoftwareEventLogTable.c \
+#			saHpiSoftwareEventTable.c \
+#			saHpiUserEventLogTable.c \
+#			saHpiUserEventTable.c \
+#			saHpiWatchdogEventLogTable.c \
+#			saHpiWatchdogEventTable.c \
+#			saHpiWatchdogTable.c 
