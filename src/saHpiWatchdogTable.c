@@ -36,7 +36,7 @@ static size_t saHpiWatchdogTable_oid_len =
 OID_LENGTH (saHpiWatchdogTable_oid);
 
 //{ 1, 3, 6, 1, 3, 90, 3, 9, 0 }; 
-static oid saHpiWatchdogCount_oid[] = { hpiResources_OID, 9, 0 };
+static oid saHpiWatchdogCount_oid[] = { hpiResources_OID, 10, 0 };
 static u_long watchdog_count;
 
 static int

@@ -43,31 +43,7 @@ extern "C"
    * MAX values from the MIB.
    */
 #define SAHPISENSORFACTORS_MAX 10
-#define SAHPI_RANGE_VALUES_MAX 5
-#define SAHPI_RANGE_RAW_MAX  20
-#define SAHPI_RANGE_INTERPRETED_MAX 165
-#define SAHPI_RANGE_EVENT_SENSOR_MAX  15
-#define THRESHOLD_RAW_MAX  32
-#define THRESHOLD_INTERPRETED_MAX 264
 #define SENSOR_EVENTS_SUPPORTED_MAX 255
-  /*
-   * Position of values within a OCTET
-   */
-#define POS_MAX 0
-#define POS_MIN 1
-#define POS_NOMINAL 2
-#define POS_MAX_NOM 3
-#define POS_MIN_NOM 4
-
-#define POS_LOW_CRITICAL 0
-#define POS_LOW_MAJOR 1
-#define POS_LOW_MINOR 2
-#define POS_UP_CRITICAL 3
-#define POS_UP_MAJOR 4
-#define POS_UP_MINOR 5
-#define POS_POS_THD_HYSTERESIS 6
-#define POS_NEG_THD_HYSTERESIS 7
-
 
   typedef struct saHpiSensorTable_context_s
   {
@@ -135,52 +111,6 @@ extern "C"
 	 /** TruthValue = ASN_INTEGER */
     long saHpiSensorPercentage;
 
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorRangeFlags;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char
-      saHpiSensorRangeReadingValuesPresent[SAHPI_RANGE_VALUES_MAX];
-    long saHpiSensorRangeReadingValuesPresent_len;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char saHpiSensorRangeReadingRaw[SAHPI_RANGE_RAW_MAX];
-    long saHpiSensorRangeReadingRaw_len;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char
-      saHpiSensorRangeReadingInterpreted[SAHPI_RANGE_INTERPRETED_MAX];
-    long saHpiSensorRangeReadingInterpreted_len;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char
-      saHpiSensorRangeReadingEventSensor[SAHPI_RANGE_EVENT_SENSOR_MAX];
-    long saHpiSensorRangeReadingEventSensor_len;
-
-
-    long saHpiSensorThresholdDefnIsThreshold;
-
-
-
-    long saHpiSensorThresholdDefnTholdCapabilities;
-
-
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorThresholdDefnReadThold;
-
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorThresholdDefnWriteThold;
-
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorThresholdDefnFixedThold;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char saHpiSensorThresholdRaw[THRESHOLD_RAW_MAX];
-    long saHpiSensorThresholdRaw_len;
-
-	/** OCTETSTR = ASN_OCTET_STR */
-    unsigned char saHpiSensorThresholdInterpreted[THRESHOLD_INTERPRETED_MAX];
-    long saHpiSensorThresholdInterpreted_len;
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
     unsigned long saHpiSensorOEM;
@@ -235,7 +165,7 @@ extern "C"
     delete_sensor_row (SaHpiDomainIdT domain_id,
 		       SaHpiResourceIdT resource_id, SaHpiSensorNumT num);
 
-  int set_sensor (saHpiSensorTable_context * ctx);
+  //  int set_sensor (saHpiSensorTable_context * ctx);
 
   int set_sensor_event (saHpiSensorTable_context * ctx);
 
@@ -245,7 +175,7 @@ extern "C"
  */
   //   extern oid      saHpiSensorTable_oid[];
   //  extern size_t   saHpiSensorTable_oid_len;
-//1,3,6,1,3,90,3,6
+
 #define saHpiSensorTable_TABLE_OID hpiResources_OID,6
 
 /*************************************************************
@@ -270,22 +200,11 @@ extern "C"
 #define COLUMN_SAHPISENSORFACTORS 17
 #define COLUMN_SAHPISENSORFACTORSLINEARIZATION 18
 #define COLUMN_SAHPISENSORPERCENTAGE 19
-#define COLUMN_SAHPISENSORRANGEFLAGS 20
-#define COLUMN_SAHPISENSORRANGEREADINGVALUESPRESENT 21
-#define COLUMN_SAHPISENSORRANGEREADINGRAW 22
-#define COLUMN_SAHPISENSORRANGEREADINGINTERPRETED 23
-#define COLUMN_SAHPISENSORRANGEREADINGEVENTSENSOR 24
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNISTHRESHOLD 25
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES 26
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNREADTHOLD 27
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNWRITETHOLD 28
-#define COLUMN_SAHPISENSORTHRESHOLDDEFNFIXEDTHOLD 29
-#define COLUMN_SAHPISENSORTHRESHOLDRAW 30
-#define COLUMN_SAHPISENSORTHRESHOLDINTERPRETED 31
-#define COLUMN_SAHPISENSOROEM 32
-#define COLUMN_SAHPISENSORRDR 33
+#define COLUMN_SAHPISENSOROEM 20
+#define COLUMN_SAHPISENSORRDR 21
 #define saHpiSensorTable_COL_MIN 1
-#define saHpiSensorTable_COL_MAX 33
+#define saHpiSensorTable_COL_MAX 21
+
 
 
   int

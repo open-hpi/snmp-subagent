@@ -33,7 +33,7 @@ static netsnmp_table_array_callbacks cb;
 static oid saHpiInventoryTable_oid[] = { saHpiInventoryTable_TABLE_OID };
 static size_t saHpiInventoryTable_oid_len =
 OID_LENGTH (saHpiInventoryTable_oid);
-static oid saHpiInventoryCount_oid[] = { hpiResources_OID, 7, 0 };
+static oid saHpiInventoryCount_oid[] = { hpiResources_OID, 8, 0 };
 
 static u_long inventory_count = 0;
 
