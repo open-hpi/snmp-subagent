@@ -6,6 +6,8 @@ AM_CFLAGS 		= @CFLAGS@
 
 bin_PROGRAMS		= hpiSubagent
 
+SUBDIRS                 = t
+
 hpiSubagent_SOURCES	= saHpiHotSwapTable.c \
 	saHpiEventTable.c saHpiSystemEventLogTable.c saHpiWatchdogTable.c \
 	saHpiSensorTable.c saHpiInventoryTable.c saHpiCtrlTable.c hpiSubagent.c \
