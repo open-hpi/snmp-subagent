@@ -103,7 +103,7 @@ extern "C"
   extern oid saHpiSensorThdUpMajorTable_oid[];
   extern size_t saHpiSensorThdUpMajorTable_oid_len;
 
-#define saHpiSensorThdUpMajorTable_TABLE_OID hpiSensor_OID,12
+#define saHpiSensorThdUpMajorTable_TABLE_OID hpiSensor_OID,11
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpMajorTable
