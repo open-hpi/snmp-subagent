@@ -1573,7 +1573,7 @@ int populate_dat(void) {
 			entitypath2string(
 			    &alarm_entry.AlarmCond.Entity,
 			    domain_alarm_ctx->saHpiDomainAlarmCondEntityPath, 
-			    65535);
+			    SAHPI_MAX_TEXT_BUFFER_LENGTH);
 
 		/* saHpiDomainAlarmCondSensorNum */
 		domain_alarm_ctx->saHpiDomainAlarmCondSensorNum =
@@ -1622,11 +1622,11 @@ int populate_dat(void) {
 
 		/* saHpiDomainAlarmCondTextType */
 		domain_alarm_ctx->saHpiDomainAlarmCondTextType =
-			alarm_entry.AlarmCond.Data.DataType;
+			alarm_entry.AlarmCond.Data.DataType+1;
 
 		/* saHpiDomainAlarmCondTextLanguage */
 		domain_alarm_ctx->saHpiDomainAlarmCondTextLanguage =
-			alarm_entry.AlarmCond.Data.Language;
+			alarm_entry.AlarmCond.Data.Language+1;
 
 		/* saHpiDomainAlarmCondText */
 		memcpy(domain_alarm_ctx->saHpiDomainAlarmCondText,
