@@ -2130,8 +2130,7 @@ saHpiAutoTimeoutEntry OBJECT-TYPE
 	::= { saHpiAutoTimeOutTable 1 }
 
 SaHpiAutoTimeoutEntry ::= SEQUENCE {
-	saHpiHotSwapInsertTimeout   SaHpiTime,
-	saHpiHotSwapExtractTimeout  SaHpiTime
+	saHpiHotSwapInsertTimeout   SaHpiTime
     }
     
 saHpiHotSwapInsertTimeout OBJECT-TYPE
@@ -2166,41 +2165,6 @@ saHpiHotSwapInsertTimeout OBJECT-TYPE
 
     ::= { saHpiAutoTimeoutEntry 1 }
 
-
-saHpiHotSwapExtractTimeout OBJECT-TYPE
-        SYNTAX      SaHpiTime
-        MAX-ACCESS  read-write
-        STATUS      current
-        DESCRIPTION
-        "This function allows the HPI User to configure a timeout for how 
-        long to wait before the default auto-extraction policy is invoked. 
-        This function accepts a parameter instructing the resource to impose
-        a delay before performing its default hot swap policy for 
-        auto-extraction. The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE
-        to direct the resource to proceed immediately to auto-extraction, or
-        to SAHPI_TIMEOUT_BLOCK to prevent auto-extraction from ever occurring
-        on a resource. If the parameter is set to another value, then it
-        defines the number of nanoseconds between the time a hot swap event 
-        with saHpiHotSwapState = extractionPending(5) is generated and the 
-        time that the auto-extraction policy will be invoked for the
-        resource. If, during this time period, a saHpiHotSwapPolicyCancel 
-        function call is processed, the timer will be stopped, and the 
-        auto-extraction policy will not be invoked. 
-
-        Once the auto-extraction process begins, the HPI User will not be 
-        allowed to take control of the extraction process; hence, the 
-        timeout should be set appropriately to allow for this condition. 
-
-        Note that the timeout period begins when the hot swap event with 
-        saHpiHotSwapState = extractionPending(4) is initially generated.
-        "
-
-        REFERENCE 
-        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
-    
-        ::= {saHpiAutoTimeoutEntry 2}
-
-
 saHpiHotSwapCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
@@ -2232,19 +2196,22 @@ saHpiHotSwapEntry OBJECT-TYPE
 
 SaHpiHotSwapEntry ::= SEQUENCE {
 
-    saHpiHotSwapIndicator      INTEGER,
+	saHpiHotSwapIndicator      	INTEGER,
 
-    saHpiHotSwapState          INTEGER,
-    saHpiHotSwapPreviousState  INTEGER,
+	saHpiHotSwapState          	SaHpiHotSwapState,
+	saHpiHotSwapPreviousState  	SaHpiHotSwapState,
+    
+	saHpiHotSwapExtractTimeout  	SaHpiTime,
 
-    saHpiHotSwapActionRequest  	INTEGER,
-    saHpiHotSwapPolicyCancel    INTEGER,
-    saHpiHotSwapResourceRequest INTEGER,
 
-    saHpiHotSwapResetAction     INTEGER,
-    saHpiHotSwapPowerAction     INTEGER,
-    saHpiHotSwapRTP            	RowPointer
-    }
+	saHpiHotSwapActionRequest  	INTEGER,
+	saHpiHotSwapPolicyCancel    	INTEGER,
+	saHpiHotSwapResourceRequest 	INTEGER,
+
+	saHpiHotSwapResetAction     	INTEGER,
+	saHpiHotSwapPowerAction     	INTEGER,
+	saHpiHotSwapRTP            	RowPointer
+	}
 
 
 saHpiHotSwapIndicator OBJECT-TYPE
@@ -2279,35 +2246,55 @@ saHpiHotSwapIndicator OBJECT-TYPE
         "Derived from typedef in the SAI-HPI-B.00.90 page 150-151."
     ::= {saHpiHotSwapEntry 1}
 
+
 saHpiHotSwapState 	OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined(0),
-				inactive(1),
-				insertionPending(2),
-				active(3),
-				extractionPending(4),
-				notPresent(5)
-                        }
-        MAX-ACCESS  read-create
+        SYNTAX          SaHpiHotSwapState
+	MAX-ACCESS  read-create
         STATUS      current
         DESCRIPTION
 	""
         ::= { saHpiHotSwapEntry 2 }
 
 saHpiHotSwapPreviousState	OBJECT-TYPE
-        SYNTAX          INTEGER {
-                                undefined(0),
-				inactive(1),
-				insertionPending(2),
-				active(3),
-				extractionPending(4),
-				notPresent(5)
-                        }
-        MAX-ACCESS  read-create
-        STATUS      current
+        SYNTAX         	SaHpiHotSwapState        
+	MAX-ACCESS  read-create
+        STATUS      	current
         DESCRIPTION
 	""
         ::= { saHpiHotSwapEntry 3 }
+	
+saHpiHotSwapExtractTimeout OBJECT-TYPE
+        SYNTAX      SaHpiTime
+        MAX-ACCESS  read-write
+        STATUS      current
+        DESCRIPTION
+        "This function allows the HPI User to configure a timeout for how 
+        long to wait before the default auto-extraction policy is invoked. 
+        This function accepts a parameter instructing the resource to impose
+        a delay before performing its default hot swap policy for 
+        auto-extraction. The parameter may be set to SAHPI_TIMEOUT_IMMEDIATE
+        to direct the resource to proceed immediately to auto-extraction, or
+        to SAHPI_TIMEOUT_BLOCK to prevent auto-extraction from ever occurring
+        on a resource. If the parameter is set to another value, then it
+        defines the number of nanoseconds between the time a hot swap event 
+        with saHpiHotSwapState = extractionPending(5) is generated and the 
+        time that the auto-extraction policy will be invoked for the
+        resource. If, during this time period, a saHpiHotSwapPolicyCancel 
+        function call is processed, the timer will be stopped, and the 
+        auto-extraction policy will not be invoked. 
+
+        Once the auto-extraction process begins, the HPI User will not be 
+        allowed to take control of the extraction process; hence, the 
+        timeout should be set appropriately to allow for this condition. 
+
+        Note that the timeout period begins when the hot swap event with 
+        saHpiHotSwapState = extractionPending(4) is initially generated.
+        "
+
+        REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-B.00.90 pages 145,146"
+    
+        ::= {saHpiHotSwapEntry 4}
 
 saHpiHotSwapActionRequest OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2329,7 +2316,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
 
         REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 149."
-        ::= { saHpiHotSwapEntry 4 }
+        ::= { saHpiHotSwapEntry 5 }
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
         SYNTAX      INTEGER {
@@ -2361,7 +2348,7 @@ saHpiHotSwapPolicyCancel OBJECT-TYPE
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 139."
-    ::= { saHpiHotSwapEntry 5 }
+    ::= { saHpiHotSwapEntry 6 }
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2382,7 +2369,7 @@ Because a resource that supports the simplified hot swap model will never transi
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.00.90 page 140-141."
-    ::= { saHpiHotSwapEntry 6 }
+    ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapResetAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2403,7 +2390,7 @@ coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be 
 
     REFERENCE
         "Derieved from SA-HPI-B.01.01 page 164."
-    ::= { saHpiHotSwapEntry 7 }
+    ::= { saHpiHotSwapEntry 8 }
 
 saHpiHotSwapPowerAction OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2424,13 +2411,14 @@ Not all resources supporting hot swap will necessarily support this function. In
 This function may also be supported for non-FRU entities if power control is available for those entities."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 168-169."
-        ::= { saHpiHotSwapEntry 8 }
+        ::= { saHpiHotSwapEntry 9 }
+	
 saHpiHotSwapRTP OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "OID for RTP"
-        ::= { saHpiHotSwapEntry 9 }
+        ::= { saHpiHotSwapEntry 10 }
 
 
         
@@ -7273,7 +7261,6 @@ saHpiAnnunciatorRDR OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Forward pointer to the RDR OID."
         ::= {saHpiAnnunciatorEntry 7}
-        
 
 --
 -- /*******************************************************************************
