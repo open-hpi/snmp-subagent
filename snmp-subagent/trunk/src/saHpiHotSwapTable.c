@@ -16,7 +16,6 @@
  *
  * $Id$
  *
- *
  */
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
@@ -24,19 +23,281 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
-#include "saHpiHotSwapTable.h"
+#include <saHpiHotSwapTable.h>
+#include <SaHpi.h>
 #include <hpiSubagent.h>
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
-oid             saHpiHotSwapTable_oid[] = { saHpiHotSwapTable_TABLE_OID };
-size_t          saHpiHotSwapTable_oid_len =
-OID_LENGTH(saHpiHotSwapTable_oid);
+static oid             saHpiHotSwapTable_oid[] = { saHpiHotSwapTable_TABLE_OID };
+static size_t          saHpiHotSwapTable_oid_len = OID_LENGTH(saHpiHotSwapTable_oid);
+
+static int
+saHpiHotSwapTable_modify_context(SaHpiRptEntryT *rpt_entry,
+				 oid *rpt_oid, size_t rpt_oid_len,
+				 saHpiHotSwapTable_context *ctx);
 
 
+int
+populate_hotswap(SaHpiRptEntryT *rpt_entry,
+		 oid *rpt_oid, size_t rpt_oid_len) {
+
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+
+  oid index_oid[HOTSWAP_INDEX_NR];
 
 
+  netsnmp_index	                   hotswap_index;
+  saHpiHotSwapTable_context	*hotswap_context; 
+
+  DEBUGMSGTL((AGENT,"\n\t--- populate_hotswap. Entry\n"));
+  if ( (rc = getSaHpiSession(&session_id)) == AGENT_ERR_NOERROR) {
+
+
+    index_oid[0] = rpt_entry->DomainId;
+    index_oid[1] = rpt_entry->ResourceId;
+
+    hotswap_index.oids = (oid *)&index_oid;
+    hotswap_index.len = HOTSWAP_INDEX_NR;  
+    hotswap_context = CONTAINER_FIND(cb.container, &hotswap_index);
+    
+    if (!hotswap_context) {
+      // Couldn't find it. Add new entry.
+      hotswap_context = saHpiHotSwapTable_create_row(&hotswap_index);
+    }
+
+    if (!hotswap_context) {
+      snmp_log(LOG_ERR,"Not enough memory for a HotSwap row!\n");
+      return AGENT_ERR_MEMORY_FAULT;
+    }
+
+    if (saHpiHotSwapTable_modify_context(rpt_entry,
+					 rpt_oid,
+					 rpt_oid_len,
+					 hotswap_context) 
+	== AGENT_NEW_ENTRY) {
+      
+      CONTAINER_INSERT(cb.container, hotswap_context);
+      /*
+	IBM-KR: TODO
+	notifications
+      */
+    }
+
+  }
+
+  DEBUGMSGTL((AGENT,"\n\t--- populate_hotswap: Exit (rc: %d).\n", rc));
+  return rc;
+}
+
+static int
+saHpiHotSwapTable_modify_context(SaHpiRptEntryT *rpt_entry,
+				 oid *rpt_oid, size_t rpt_oid_len,
+				 saHpiHotSwapTable_context *ctx){
+
+  long hash;
+  int rc;
+  SaHpiSessionIdT session_id;
+  SaHpiHsIndicatorStateT indication_state;
+  SaHpiHsPowerStateT power_state;
+  SaHpiResetActionT reset_action;
+  SaHpiHsStateT state;
+  // These are 64-bite
+  SaHpiTimeoutT insert_t;
+  SaHpiTimeoutT extract_t;
+
+  if (rpt_entry && ctx) {
+    hash = calculate_hash_value(rpt_entry,  sizeof(SaHpiRptEntryT)
+				-sizeof(SaHpiTextBufferT));
+     DEBUGMSGTL((AGENT," Hash value: %d, in ctx: %d\n", hash, ctx->hash));
+
+    if (ctx->hash != 0) {
+      // Only do the check if the hash value is something else than zero.
+      // 'zero' value is only for newly created records, and in some
+      // rare instances when the hash has rolled to zero - in which
+      // case we will just consider the worst-case scenario and update
+      // the record and not trust the hash value.
+      if (hash == ctx->hash) {
+	// The same data. No need to change.
+	return AGENT_ENTRY_EXIST;
+      }
+    }   
+    
+    if (hash == 0)
+      hash = 1;
+    ctx->hash = hash;
+
+    ctx->resource_id = rpt_entry->ResourceId;
+    ctx->domain_id = rpt_entry->DomainId;
+    
+     // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));	
+      return rc;
+    }
+
+    // Indicator
+    DEBUGMSGTL((AGENT,"Calling saHpiHotSwapIndicatorStateGet with %d\n", 
+		rpt_entry->ResourceId));
+
+    rc = saHpiHotSwapIndicatorStateGet(session_id,
+				       rpt_entry->ResourceId,
+				       &indication_state);
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiHotSwapIndicatorStateGet failed with rc: %d\n", rc));
+    } 
+    else 
+      ctx->saHpiHotSwapIndicator = indication_state+1;
+
+
+    // PowerState
+    DEBUGMSGTL((AGENT,"Calling saHpiResourcePowerStateGet with %d\n",
+		rpt_entry->ResourceId));
+
+    rc = saHpiResourcePowerStateGet(session_id,
+				    rpt_entry->ResourceId,
+				    &power_state);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiResourcePowerStateGet failed with %d\n",
+		  rc));
+    }
+    else 
+      ctx->saHpiHotSwapPowerState = power_state+1;
+
+    // ResetState
+    DEBUGMSGTL((AGENT,"Calling saHpiResourceResetStateGet with %d\n",
+		rpt_entry->ResourceId));
+
+    rc = saHpiResourceResetStateGet     (session_id,
+				    rpt_entry->ResourceId,
+				    &reset_action);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiResourceResetStateGet failed with %d\n",
+		  rc));
+    }
+    else 
+      ctx->saHpiHotSwapResetState = reset_action+1;
+
+
+    // State
+    DEBUGMSGTL((AGENT,"Calling saHpiHotSwapStateGet with %d\n",
+		rpt_entry->ResourceId));
+
+    rc = saHpiHotSwapStateGet(session_id,
+			      rpt_entry->ResourceId,
+			      &state);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiHotSwapStateGet failed with %d\n",
+		  rc));
+    }
+    else {
+      ctx->saHpiHotSwapState = state+1;
+      // We don't know the previous state?
+      // IBM-KR: TODO, verify
+      ctx->saHpiHotSwapPreviousState = 0;
+    }
+
+    ctx->saHpiHotSwapEventSeverity = rpt_entry->ResourceSeverity+1;
+
+    // InsertTimeout
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoInsertTimeoutGet with %d\n",
+		rpt_entry->ResourceId));
+
+    rc =   saHpiAutoInsertTimeoutGet(session_id,
+				     //	     rpt_entry->ResourceId,
+				     &insert_t);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiAutoInsertTimeoutGet failed with %d\n",
+		  rc));
+    }
+    else 
+      // IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
+      // Should we make it 64-bit?
+      ctx->saHpiHotSwapInsertTimeout = insert_t;
+
+    // Extract timeout
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoExtractTimeoutGet with %d\n",
+		rpt_entry->ResourceId));
+
+    rc =   saHpiAutoExtractTimeoutGet(session_id,
+				     rpt_entry->ResourceId,
+				     &extract_t);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiAutoExtractTimeoutGet failed with %d\n",
+		  rc));
+    }
+    else 
+      // IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
+      // Should we make it 64-bit?
+      ctx->saHpiHotSwapExtractTimeout = extract_t;
+
+    ctx->saHpiHotSwapActionRequest = 0;
+
+    // Copy the RPT OID.
+    ctx->saHpiHotSwapRTP_len = rpt_oid_len*sizeof(oid);
+    memcpy(ctx->saHpiHotSwapRTP, rpt_oid, ctx->saHpiHotSwapRTP_len);
+  
+    return AGENT_NEW_ENTRY;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+
+/*
+int
+set_hotswap_indicator(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling  with %d\n", ctx->resource_id ));
+    rc =   (session_id, 
+	    ctx->resource_id,
+	    &wdog);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to  failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call  failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+
+    // Get the new value
+    DEBUGMSGTL((AGENT,"Calling with %d\n", ctx->resource_id ));
+ 
+    rc =  (session_id, ctx->resource_id,
+	   &wdog);
+
+ 
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // Update the new value to ctx.
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+*/
 /************************************************************
  * the *_row_copy routine
  */
@@ -63,30 +324,35 @@ saHpiHotSwapTable_row_copy(saHpiHotSwapTable_context * dst,
     /*
      * copy components into the context structure
      */
+    /** TODO: add code for external index(s)! */
     dst->saHpiHotSwapIndicator = src->saHpiHotSwapIndicator;
 
-    dst->saHpiPowerState = src->saHpiPowerState;
+    dst->saHpiHotSwapPowerState = src->saHpiHotSwapPowerState;
 
-    dst->saHpiResetState = src->saHpiResetState;
+    dst->saHpiHotSwapResetState = src->saHpiHotSwapResetState;
 
     dst->saHpiHotSwapState = src->saHpiHotSwapState;
 
-    dst->saHpiPreviousHotSwapState = src->saHpiPreviousHotSwapState;
+    dst->saHpiHotSwapPreviousState = src->saHpiHotSwapPreviousState;
 
     dst->saHpiHotSwapEventSeverity = src->saHpiHotSwapEventSeverity;
 
-    dst->saHpiInsertTimeout = src->saHpiInsertTimeout;
+    dst->saHpiHotSwapInsertTimeout = src->saHpiHotSwapInsertTimeout;
 
-    dst->saHpiExtractTimeout = src->saHpiExtractTimeout;
+    dst->saHpiHotSwapExtractTimeout = src->saHpiHotSwapExtractTimeout;
 
-    dst->saHpiActionRequest = src->saHpiActionRequest;
+    dst->saHpiHotSwapActionRequest = src->saHpiHotSwapActionRequest;
 
     memcpy(src->saHpiHotSwapRTP, dst->saHpiHotSwapRTP,
            src->saHpiHotSwapRTP_len);
     dst->saHpiHotSwapRTP_len = src->saHpiHotSwapRTP_len;
 
+    dst->domain_id = src->domain_id;
+    dst->hash = src->hash;
+    dst->resource_id = src->resource_id;
     return 0;
 }
+
 
 /*
  * the *_extract_index routine
@@ -98,6 +364,7 @@ saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
     /*
      * temporary local storage for extracting oid index
      */
+    /** TODO: add storage for external index(s)! */
     netsnmp_variable_list var_saHpiDomainID;
     netsnmp_variable_list var_saHpiResourceID;
     int             err;
@@ -117,9 +384,10 @@ saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
     /**
      * Create variable to hold each component of the index
      */
+       /** TODO: add code for external index(s)! */
     memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
-    var_saHpiDomainID.type = ASN_UNSIGNED;     
-    var_saHpiDomainID.next_variable = &var_saHpiDomainID;
+    var_saHpiDomainID.type = ASN_UNSIGNED;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
 
     memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
     var_saHpiResourceID.type = ASN_UNSIGNED;
@@ -129,55 +397,35 @@ saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
      * parse the oid into the individual components
      */
     err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
+    DEBUGMSGTL((AGENT,"err is %d\n", err));
     if (err == SNMP_ERR_NOERROR) {
         /*
          * copy components into the context structure
          */
+              /** skipping external index saHpiDomainID */
+
+              /** skipping external index saHpiResourceID */
+
+
+        /*
+         * TODO: check index for valid values. For EXAMPLE:
+         *
+         * if ( *var_saHpiDomainID.val.integer != XXX ) {
+         *    err = -1;
+         * }
+         */
       
+         
     }
 
-    
+    /*
+     * parsing may have allocated memory. free it.
+     */
     snmp_reset_var_buffers(&var_saHpiDomainID);
 
     return err;
 }
 
-/************************************************************
- * the *_can_activate routine is called
- * when a row is changed to determine if all the values
- * set are consistent with the row's rules for a row status
- * of ACTIVE.
- *
- * return 1 if the row could be ACTIVE
- * return 0 if the row is not ready for the ACTIVE state
- */
-int
-saHpiHotSwapTable_can_activate(saHpiHotSwapTable_context * undo_ctx,
-                               saHpiHotSwapTable_context * row_ctx,
-                               netsnmp_request_group * rg)
-{
-
-    return 1;
-}
-
-/************************************************************
- * the *_can_deactivate routine is called when a row that is
- * currently ACTIVE is set to a state other than ACTIVE. If
- * there are conditions in which a row should not be allowed
- * to transition out of the ACTIVE state (such as the row being
- * referred to by another row or table), check for them here.
- *
- * return 1 if the row can be set to a non-ACTIVE state
- * return 0 if the row must remain in the ACTIVE state
- */
-int
-saHpiHotSwapTable_can_deactivate(saHpiHotSwapTable_context * undo_ctx,
-                                 saHpiHotSwapTable_context * row_ctx,
-                                 netsnmp_request_group * rg)
-{
-  
-    return 1;
-}
 
 /************************************************************
  * the *_can_delete routine is called to determine if a row
@@ -191,11 +439,7 @@ saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context * undo_ctx,
                              saHpiHotSwapTable_context * row_ctx,
                              netsnmp_request_group * rg)
 {
-  /*
-    if (saHpiHotSwapTable_can_deactivate(undo_ctx, row_ctx, rg) != 1)
-        return 0;
-  */
-   
+  
     return 1;
 }
 
@@ -222,25 +466,22 @@ saHpiHotSwapTable_create_row(netsnmp_index * hdr)
     if (!ctx)
         return NULL;
 
-    /*
-     * TODO: check indexes, if necessary.
-     */
+   
     if (saHpiHotSwapTable_extract_index(ctx, hdr)) {
         free(ctx->index.oids);
         free(ctx);
         return NULL;
     }
 
-   
      ctx->saHpiHotSwapIndicator = 0;
-     ctx->saHpiPowerState = 0;
-     ctx->saHpiResetState = 0;
+     ctx->saHpiHotSwapPowerState = 0;
+     ctx->saHpiHotSwapResetState = 0;
      ctx->saHpiHotSwapState = 0;
-     ctx->saHpiPreviousHotSwapState = 0;
-     ctx->saHpiInsertTimeout = 0;
-     ctx->saHpiExtractTimeout = 0;
-     ctx->saHpiActionRequest = 0;
-
+     ctx->saHpiHotSwapPreviousState = 0;
+     ctx->saHpiHotSwapInsertTimeout = 0;
+     ctx->saHpiHotSwapExtractTimeout = 0;
+     ctx->saHpiHotSwapActionRequest = 0;
+     ctx->hash = 0;
 
     return ctx;
 }
@@ -275,12 +516,10 @@ saHpiHotSwapTable_duplicate_row(saHpiHotSwapTable_context * row_ctx)
 netsnmp_index  *
 saHpiHotSwapTable_delete_row(saHpiHotSwapTable_context * ctx)
 {
-   
 
     if (ctx->index.oids)
         free(ctx->index.oids);
 
-   
     free(ctx);
 
     return NULL;
@@ -313,12 +552,7 @@ saHpiHotSwapTable_set_reserve1(netsnmp_request_group * rg)
     int             rc;
 
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_reserve1: Entry.\n"));
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -333,18 +567,18 @@ saHpiHotSwapTable_set_reserve1(netsnmp_request_group * rg)
                                                        saHpiHotSwapIndicator));
             break;
 
-        case COLUMN_SAHPIPOWERSTATE:
+        case COLUMN_SAHPIHOTSWAPPOWERSTATE:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->
-                                                       saHpiPowerState));
+                                                       saHpiHotSwapPowerState));
             break;
 
-        case COLUMN_SAHPIRESETSTATE:
+        case COLUMN_SAHPIHOTSWAPRESETSTATE:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->
-                                                       saHpiResetState));
+                                                       saHpiHotSwapResetState));
             break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
@@ -353,38 +587,34 @@ saHpiHotSwapTable_set_reserve1(netsnmp_request_group * rg)
                                                 sizeof(row_ctx->
                                                        saHpiHotSwapState));
             break;
-
-        case COLUMN_SAHPIPREVIOUSHOTSWAPSTATE:
+ 	    
+        case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
             /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->
-                                                       saHpiPreviousHotSwapState));
-            break;
-
-        case COLUMN_SAHPIINSERTTIMEOUT:
+       case COLUMN_SAHPIHOTSWAPEVENTSEVERITY:
+	 rc = SNMP_ERR_NOTWRITABLE;
+	  break;
+        case COLUMN_SAHPIHOTSWAPINSERTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
                                                 sizeof(row_ctx->
-                                                       saHpiInsertTimeout));
+                                                       saHpiHotSwapInsertTimeout));
             break;
 
-        case COLUMN_SAHPIEXTRACTTIMEOUT:
+        case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
                                                 sizeof(row_ctx->
-                                                       saHpiExtractTimeout));
+                                                       saHpiHotSwapExtractTimeout));
             break;
 
-        case COLUMN_SAHPIACTIONREQUEST:
+        case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->
-                                                       saHpiActionRequest));
+                                                       saHpiHotSwapActionRequest));
             break;
-
-	case COLUMN_SAHPIHOTSWAPRTP:
-	case COLUMN_SAHPIHOTSWAPEVENTSEVERITY:
-	  rc = SNMP_ERR_NOTWRITABLE;
+         case COLUMN_SAHPIHOTSWAPRTP:
+	  rc  = SNMP_ERR_NOTWRITABLE;
 	  break;
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
@@ -397,33 +627,32 @@ saHpiHotSwapTable_set_reserve1(netsnmp_request_group * rg)
                                            rc);
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
-
     for (current = rg->list; current; current = current->next) {
-       
+
       // The nice thing about this API is that _row_copy() is called
       // for this row - if the API has matched the index with an
       // already existing entry. We check the 'hash' value. If its
       // 0 the API couldn't find the right context.
 
-      if ( row_ctx->hash == 0) {
-	rc = SNMP_ERR_NOSUCHNAME;
-	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-				       rc);
-      } 
+       if ( row_ctx->hash == 0) {
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					  SNMP_ERR_NOSUCHNAME);
+       }
     }
-    
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_reserve1: Exit.\n"));
 }
 
 void
 saHpiHotSwapTable_set_reserve2(netsnmp_request_group * rg)
 {
+
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
 
     rg->rg_void = rg->list->ri;
-
-
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_reserve2: Entry.\n"));
+  
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -432,53 +661,52 @@ saHpiHotSwapTable_set_reserve2(netsnmp_request_group * rg)
         switch (current->tri->colnum) {
 
         case COLUMN_SAHPIHOTSWAPINDICATOR:
-           if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 2))) {	    
+	  if ((*var->val.integer < 1) || 
+	      (*var->val.integer > 2))
 	    rc = SNMP_ERR_BADVALUE;
-	  }
+
             break;
 
-        case COLUMN_SAHPIPOWERSTATE:
-	  if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 3))) {	    
+        case COLUMN_SAHPIHOTSWAPPOWERSTATE:
+	  if ((*var->val.integer < 1) || 
+	      (*var->val.integer > 3)) 
 	    rc = SNMP_ERR_BADVALUE;
-	  }
             break;
 
-        case COLUMN_SAHPIRESETSTATE:
-	  if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 4))) {	    
+        case COLUMN_SAHPIHOTSWAPRESETSTATE:
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 4)) 
 	    rc = SNMP_ERR_BADVALUE;
-	  }
-          
+
             break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
-	  if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 6))) {	    
+            /** INTEGER = ASN_INTEGER */
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 6))
+	    rc = SNMP_ERR_BADVALUE;	    
+            break;
+
+        case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
+            /** INTEGER = ASN_INTEGER */
+	  // Its  read-only object.
+            break;
+
+        case COLUMN_SAHPIHOTSWAPINSERTTIMEOUT:	  
+            /** UNSIGNED32 = ASN_UNSIGNED */
+
+            break;
+
+        case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+
+            break;
+
+        case COLUMN_SAHPIHOTSWAPACTIONREQUEST: 	  
+            /** INTEGER = ASN_INTEGER */
+	  if ((*var->val.integer < 1) ||
+	      (*var->val.integer > 2))
 	    rc = SNMP_ERR_BADVALUE;
-	  } 
-            break;
-
-        case COLUMN_SAHPIPREVIOUSHOTSWAPSTATE:
-          if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 6))) {	    
-	    rc = SNMP_ERR_BADVALUE;
-	  }
-            break;
-
-        case COLUMN_SAHPIINSERTTIMEOUT:          
-            break;
-
-        case COLUMN_SAHPIEXTRACTTIMEOUT:         
-            break;
-
-        case COLUMN_SAHPIACTIONREQUEST:
-           // Not include undefined(0) since its non-compliant.
-	  if ( ((*var->val.integer < 1) || 
-		(*var->val.integer > 2))) {	    
-	    rc = SNMP_ERR_BADVALUE;
-	  }
             break;
 
         default:/** We shouldn't get here */
@@ -490,7 +718,11 @@ saHpiHotSwapTable_set_reserve2(netsnmp_request_group * rg)
                                            rc);
     }
 
-    
+    /*
+     * done with all the columns. Could check row related
+     * requirements here.
+     */
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_reserve2: Exit.\n"));
 }
 
 /************************************************************
@@ -513,6 +745,9 @@ saHpiHotSwapTable_set_action(netsnmp_request_group * rg)
 
     netsnmp_request_group_item *current;
 
+    int             rc = SNMP_ERR_NOERROR;
+
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_reserve: Entry.\n"));
 
     for (current = rg->list; current; current = current->next) {
 
@@ -523,16 +758,17 @@ saHpiHotSwapTable_set_action(netsnmp_request_group * rg)
         case COLUMN_SAHPIHOTSWAPINDICATOR:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapIndicator = *var->val.integer;
+	    
             break;
 
-        case COLUMN_SAHPIPOWERSTATE:
+        case COLUMN_SAHPIHOTSWAPPOWERSTATE:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiPowerState = *var->val.integer;
+            row_ctx->saHpiHotSwapPowerState = *var->val.integer;
             break;
 
-        case COLUMN_SAHPIRESETSTATE:
+        case COLUMN_SAHPIHOTSWAPRESETSTATE:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiResetState = *var->val.integer;
+            row_ctx->saHpiHotSwapResetState = *var->val.integer;
             break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
@@ -540,38 +776,37 @@ saHpiHotSwapTable_set_action(netsnmp_request_group * rg)
             row_ctx->saHpiHotSwapState = *var->val.integer;
             break;
 
-        case COLUMN_SAHPIPREVIOUSHOTSWAPSTATE:
+        case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiPreviousHotSwapState = *var->val.integer;
+            row_ctx->saHpiHotSwapPreviousState = *var->val.integer;
             break;
 
-        case COLUMN_SAHPIINSERTTIMEOUT:
+        case COLUMN_SAHPIHOTSWAPINSERTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiInsertTimeout = *var->val.integer;
+            row_ctx->saHpiHotSwapInsertTimeout = *var->val.integer;
             break;
 
-        case COLUMN_SAHPIEXTRACTTIMEOUT:
+        case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiExtractTimeout = *var->val.integer;
+            row_ctx->saHpiHotSwapExtractTimeout = *var->val.integer;
             break;
 
-        case COLUMN_SAHPIACTIONREQUEST:
+        case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiActionRequest = *var->val.integer;
+            row_ctx->saHpiHotSwapActionRequest = *var->val.integer;
             break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
-
-	// NOT IMPLEMENTED
-	// IBM-KR:
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-				       current->ri,
-				       SNMP_ERR_GENERR);
-
     }
 
+    if (rc)
+        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+				       current->ri,
+				       rc);
+
+    DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_action: Exit.\n"));
 }
 
 /************************************************************
@@ -594,7 +829,7 @@ saHpiHotSwapTable_set_action(netsnmp_request_group * rg)
 void
 saHpiHotSwapTable_set_commit(netsnmp_request_group * rg)
 {
- 
+  
 }
 
 /************************************************************
@@ -608,7 +843,7 @@ saHpiHotSwapTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiHotSwapTable_set_free(netsnmp_request_group * rg)
 {
-  
+   
 }
 
 /************************************************************
@@ -632,8 +867,10 @@ saHpiHotSwapTable_set_free(netsnmp_request_group * rg)
 void
 saHpiHotSwapTable_set_undo(netsnmp_request_group * rg)
 {
-  
+ 
 }
+
+
 
 
 /************************************************************
@@ -675,7 +912,7 @@ initialize_table_saHpiHotSwapTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-   
+
     /*
      * internal indexes
      */
@@ -694,13 +931,8 @@ initialize_table_saHpiHotSwapTable(void)
     cb.container = netsnmp_container_find("saHpiHotSwapTable_primary:"
                                           "saHpiHotSwapTable:"
                                           "table_container");
-    /*
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiHotSwapTable_secondary:"
-                                 "saHpiHotSwapTable:" "table_container"));
-    cb.container->next->compare = saHpiHotSwapTable_cmp;
-    */
+
+
 
     cb.create_row = (UserRowMethod *) saHpiHotSwapTable_create_row;
 
@@ -709,10 +941,7 @@ initialize_table_saHpiHotSwapTable(void)
     cb.row_copy =
         (Netsnmp_User_Row_Operation *) saHpiHotSwapTable_row_copy;
 
-    cb.can_activate =
-        (Netsnmp_User_Row_Action *) saHpiHotSwapTable_can_activate;
-    cb.can_deactivate =
-        (Netsnmp_User_Row_Action *) saHpiHotSwapTable_can_deactivate;
+
     cb.can_delete =
         (Netsnmp_User_Row_Action *) saHpiHotSwapTable_can_delete;
 
@@ -751,18 +980,18 @@ saHpiHotSwapTable_get_value(netsnmp_request_info *request,
                                  sizeof(context->saHpiHotSwapIndicator));
         break;
 
-    case COLUMN_SAHPIPOWERSTATE:
+    case COLUMN_SAHPIHOTSWAPPOWERSTATE:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiPowerState,
-                                 sizeof(context->saHpiPowerState));
+                                 (char *) &context->saHpiHotSwapPowerState,
+                                 sizeof(context->saHpiHotSwapPowerState));
         break;
 
-    case COLUMN_SAHPIRESETSTATE:
+    case COLUMN_SAHPIHOTSWAPRESETSTATE:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiResetState,
-                                 sizeof(context->saHpiResetState));
+                                 (char *) &context->saHpiHotSwapResetState,
+                                 sizeof(context->saHpiHotSwapResetState));
         break;
 
     case COLUMN_SAHPIHOTSWAPSTATE:
@@ -772,13 +1001,13 @@ saHpiHotSwapTable_get_value(netsnmp_request_info *request,
                                  sizeof(context->saHpiHotSwapState));
         break;
 
-    case COLUMN_SAHPIPREVIOUSHOTSWAPSTATE:
+    case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->
-                                 saHpiPreviousHotSwapState,
+                                 saHpiHotSwapPreviousState,
                                  sizeof(context->
-                                        saHpiPreviousHotSwapState));
+                                        saHpiHotSwapPreviousState));
         break;
 
     case COLUMN_SAHPIHOTSWAPEVENTSEVERITY:
@@ -790,25 +1019,31 @@ saHpiHotSwapTable_get_value(netsnmp_request_info *request,
                                         saHpiHotSwapEventSeverity));
         break;
 
-    case COLUMN_SAHPIINSERTTIMEOUT:
+    case COLUMN_SAHPIHOTSWAPINSERTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiInsertTimeout,
-                                 sizeof(context->saHpiInsertTimeout));
+                                 (char *) &context->
+                                 saHpiHotSwapInsertTimeout,
+                                 sizeof(context->
+                                        saHpiHotSwapInsertTimeout));
         break;
 
-    case COLUMN_SAHPIEXTRACTTIMEOUT:
+    case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->saHpiExtractTimeout,
-                                 sizeof(context->saHpiExtractTimeout));
+                                 (char *) &context->
+                                 saHpiHotSwapExtractTimeout,
+                                 sizeof(context->
+                                        saHpiHotSwapExtractTimeout));
         break;
 
-    case COLUMN_SAHPIACTIONREQUEST:
+    case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->saHpiActionRequest,
-                                 sizeof(context->saHpiActionRequest));
+                                 (char *) &context->
+                                 saHpiHotSwapActionRequest,
+                                 sizeof(context->
+                                        saHpiHotSwapActionRequest));
         break;
 
     case COLUMN_SAHPIHOTSWAPRTP:
