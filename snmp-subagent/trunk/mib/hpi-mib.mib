@@ -4598,25 +4598,27 @@ saHpiRdrIdString OBJECT-TYPE
 
 --/*******************************************************************************
 -- * ********************************************************************************
--- * ********** ********** ********** Control Resource Data Records **********
+-- * ********** ********** ********** Control Resource and States tables **********
 -- * ********** **********
 -- * ********************************************************************************
 -- * *******************************************************************************/
 
-
+--
+-- Digital 
+--
 
 saHpiCtrlDigitalEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of digital control records in the system."
+        DESCRIPTION     "The number of digital controls in the system."
         ::= {hpiControl 1}
 
 saHpiCtrlDigitalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiCtrlDigitalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table of digital Control Resource Data Records and its states."
+        DESCRIPTION     "A table of digital controls and its states."
         ::= {hpiControl 2}
                 
 
@@ -4625,7 +4627,7 @@ saHpiCtrlDigitalEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the digital control resource data record and its states table."
+                "Definition of the digital control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlDigitalTable 1}
 
@@ -4635,9 +4637,7 @@ SaHpiCtrlDigitalEntry ::= SEQUENCE {
         saHpiCtrlDigitalOutputType		SaHpiCtrlOutputType,
 
         saHpiCtrlDigitalMode     		SaHpiCtrlMode,        
-
         saHpiCtrlDigitalIsReadOnly 		TruthValue,
-
         saHpiCtrlDigitalIsWriteOnly		TruthValue,
 
 		saHpiCtrlDigitalDefaultState	SaHpiCtrlStateDigital,
@@ -4653,7 +4653,8 @@ saHpiCtrlNum OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "The control number "
+        DESCRIPTION     
+	"The control number "
         ::= {saHpiCtrlDigitalEntry 1}
 
 
@@ -4663,8 +4664,8 @@ saHpiCtrlDigitalOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-		"Refer to the textual convention for more details on the
-		enumerations.
+	"Refer to the textual convention for more details on the
+	enumerations.
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
@@ -4677,79 +4678,81 @@ saHpiCtrlDigitalMode OBJECT-TYPE
         STATUS          current
         DESCRIPTION 
 	   
-	"If this columnar node is written to when the saHpiCtrlDigitalIsReadOnly 
-	flag is TRUE the an SNMP error of notWritable is returned.  
-
-	This object describes how the control is managed.  The control may 
+	"This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
 	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
 	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
-	saHpiCtrlReadOnly flag set as part of the default control mode.
+	saHpiCtrlDigitalReadOnly flag set as part of the default control mode.
 	
 	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
-	The CtrlState parameter must be of the correct type for the specified 
-	control.  
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
-	REFERENCE "See section 7.3 and 7.3.3."
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
+
         ::= {saHpiCtrlDigitalEntry 3}
         
 saHpiCtrlDigitalIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if mode is read-only"
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE
+    "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+
         ::= {saHpiCtrlDigitalEntry 4}
         
 saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if Control is write-only"
+        DESCRIPTION     
+	"Indicates if Control is write-only"
 	
-	REFERENCE "See remarks section 7.3.2."
+		REFERENCE
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+	
         ::= {saHpiCtrlDigitalEntry 5}
 
 saHpiCtrlDigitalDefaultState          OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default resource data records 
-	 	of the digital control.
+        DESCRIPTION     
+   "This object represents the default digital control state.
 
-		Refer to the textual convention for more details on the
-		enumerations.
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+	Refer to the textual convention for more details on the
+	enumerations."
+
+    	REFERENCE 
+	"See section 7.1.1, 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+
         ::= {saHpiCtrlDigitalEntry 6}
 
 saHpiCtrlDigitalState OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current setting of the control.  
-        Use this object to change the values of the data.
+        DESCRIPTION     
+	"This object represents the current digital state of the control.  
+    Write to this object to change the digital state..
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
 	auto(1) SNMP will return a notWriteable error code.
 
-		Refer to the textual convention for more details on the
-		enumerations.
+	Refer to the textual convention for more details on the
+	enumerations."
 
-        "
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
-	7.3.3, 8.7 and 8.8."
+    	REFERENCE 
+	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
         ::= {saHpiCtrlDigitalEntry 7}
 
@@ -4757,7 +4760,10 @@ saHpiCtrlDigitalOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Reserved for OEM use"
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDigitalEntry 8}
 
 
@@ -4765,22 +4771,26 @@ saHpiCtrlDigitalRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        DESCRIPTION     
+	"Pointer to Resource Table for this digital control."
         ::= {saHpiCtrlDigitalEntry 9}
 
+---
+--- Discrete
+---
 
 saHpiCtrlDiscreteEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of discrete control records in the system."
+        DESCRIPTION     "The number of discrete controls  in the system."
         ::= {hpiControl 3}
 
 saHpiCtrlDiscreteTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiCtrlDiscreteEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table of discrete Control Resource Data Records and its states."
+        DESCRIPTION     "A table of discrete controls and its states."
         ::= {hpiControl 4}
                 
 
@@ -4789,7 +4799,7 @@ saHpiCtrlDiscreteEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the discrete control resource data record and its states table."
+                "Definition of the discrete control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlDiscreteTable 1}
 
@@ -4799,16 +4809,15 @@ SaHpiCtrlDiscreteEntry ::= SEQUENCE {
 
         saHpiCtrlDiscreteMode     		SaHpiCtrlMode,        
 
-        saHpiCtrlDiscreteIsReadOnly 		TruthValue,
-
-        saHpiCtrlDiscreteIsWriteOnly		TruthValue,
+        saHpiCtrlDiscreteIsReadOnly 	TruthValue,
+        saHpiCtrlDiscreteIsWriteOnly	TruthValue,
 
 		saHpiCtrlDiscreteDefaultState	Unsigned32,
 		saHpiCtrlDiscreteState			Unsigned32,
 
-        saHpiCtrlDiscreteOem             Unsigned32, 
+        saHpiCtrlDiscreteOem            Unsigned32, 
    
-        saHpiCtrlDiscreteRDR             RowPointer
+        saHpiCtrlDiscreteRDR            RowPointer
 }
 
 
@@ -4817,8 +4826,8 @@ saHpiCtrlDiscreteOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-		"Refer to the textual convention for more details on the
-		enumerations.
+	"Refer to the textual convention for more details on the
+	enumerations.
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
@@ -4830,77 +4839,74 @@ saHpiCtrlDiscreteMode OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION 
-	   
-	"If this columnar node is written to when the saHpiCtrlDiscreteIsReadOnly 
-	flag is TRUE the an SNMP error of notWritable is returned.  
-
-	This object describes how the control is managed.  The control may 
+	"This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
 	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
 	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
-	saHpiCtrlReadOnly flag set as part of the default control mode.
+	saHpiCtrlDiscreteReadOnly flag set as part of the default control mode.
 	
 	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
-	The CtrlState parameter must be of the correct type for the specified 
-	control.  
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
-	REFERENCE "See section 7.3 and 7.3.3."
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDiscreteEntry 2}
         
 saHpiCtrlDiscreteIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if mode is read-only"
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE 
+    "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDiscreteEntry 3}
         
 saHpiCtrlDiscreteIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if Control is write-only"
+        DESCRIPTION     
+	"Indicates if Control is write-only"
 	
-	REFERENCE "See remarks section 7.3.2."
+		REFERENCE 
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDiscreteEntry 4}
 
 saHpiCtrlDiscreteDefaultState          OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default value of resource data records 
-	 	of the discrete control.
+        DESCRIPTION     
+	"This object represents the default value of the discrete 
+	control resource. 
 
-		Refer to the textual convention for more details on the
-		enumerations.
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+	Refer to the textual convention for more details on the
+	enumerations. " 
+    	REFERENCE 
+	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDiscreteEntry 5}
 
 saHpiCtrlDiscreteState OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current discrete setting of the control.  
-        Use this object to change the values of the data.
+        DESCRIPTION     
+	"This object represents the current discrete state of the control.  
+    Write to this object to change the values of the state.
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code.
+	auto(1) SNMP will return a notWriteable error code."
 
-        "
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
-	7.3.3, 8.7 and 8.8."
+    	REFERENCE 
+	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
         ::= {saHpiCtrlDiscreteEntry 6}
 
@@ -4908,7 +4914,10 @@ saHpiCtrlDiscreteOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Reserved for OEM use"
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlDiscreteEntry 7}
 
 
@@ -4916,22 +4925,26 @@ saHpiCtrlDiscreteRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        DESCRIPTION     
+	"Pointer to Resource Table for this discrete control entry."
         ::= {saHpiCtrlDiscreteEntry 8}
 
+--
+-- Analog
+--
 
 saHpiCtrlAnalogEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of analog control records in the system."
+        DESCRIPTION     "The number of analog controls in the system."
         ::= {hpiControl 6}
 
 saHpiCtrlAnalogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiCtrlAnalogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table of analog Control Resource Data Records and its states."
+        DESCRIPTION     "A table of analog controls and its states."
         ::= {hpiControl 7}
                 
 
@@ -4940,7 +4953,7 @@ saHpiCtrlAnalogEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the analog control resource data record and its states table."
+                "Definition of the analog control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlAnalogTable 1}
 
@@ -4951,18 +4964,17 @@ SaHpiCtrlAnalogEntry ::= SEQUENCE {
         saHpiCtrlAnalogMode     		SaHpiCtrlMode,        
 
         saHpiCtrlAnalogIsReadOnly 		TruthValue,
-
         saHpiCtrlAnalogIsWriteOnly		TruthValue,
 
-		saHpiCtrlAnalogDefaultMinState		INTEGER,
-		saHpiCtrlAnalogDefaultMaxState		INTEGER,
+		saHpiCtrlAnalogDefaultMinState	INTEGER,
+		saHpiCtrlAnalogDefaultMaxState	INTEGER,
 		saHpiCtrlAnalogDefaultState		INTEGER,
 
 		saHpiCtrlAnalogState			INTEGER,
 
-        saHpiCtrlAnalogOem             Unsigned32, 
+        saHpiCtrlAnalogOem             	Unsigned32, 
    
-        saHpiCtrlAnalogRDR             RowPointer
+        saHpiCtrlAnalogRDR             	RowPointer
 }
 
 
@@ -4971,8 +4983,8 @@ saHpiCtrlAnalogOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-		"Refer to the textual convention for more details on the
-		enumerations.
+	"Refer to the textual convention for more details on the
+	enumerations.
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
@@ -4984,101 +4996,92 @@ saHpiCtrlAnalogMode OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION 
-	   
-	"If this columnar node is written to when the saHpiCtrlAnalogIsReadOnly 
-	flag is TRUE the an SNMP error of notWritable is returned.  
 
-	This object describes how the control is managed.  The control may 
+	"This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
 	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
 	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
 	will manage the control, or relinquish the management to the 
 	implementation.  But, other controls do not allow the mode to be 
 	changed.  These static-mode controls are indicated with the 
-	saHpiCtrlReadOnly flag set as part of the default control mode.
+	saHpiCtrlAnalogReadOnly flag set as part of the default control mode.
 	
 	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
-	The CtrlState parameter must be of the correct type for the specified 
-	control.  
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
-	REFERENCE "See section 7.3 and 7.3.3."
+		REFERENCE 
+	"See section 7.3.2 and 7.3.3. from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 2}
         
 saHpiCtrlAnalogIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if mode is read-only"
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE
+    "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 3}
         
 saHpiCtrlAnalogIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if Control is write-only"
-	
-	REFERENCE "See remarks section 7.3.2."
+        DESCRIPTION     
+	"Indicates if Control is write-only"
+		REFERENCE 
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 4}
 
 saHpiCtrlAnalogDefaultMinState          OBJECT-TYPE
         SYNTAX          INTEGER 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default min value of resource data records 
-	 	of the analog control.
-
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        DESCRIPTION     
+	"This object represents the default minum value of this
+	analog control." 
+   	 	REFERENCE 
+    "See section 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 5}
 
 saHpiCtrlAnalogDefaultMaxState          OBJECT-TYPE
         SYNTAX          INTEGER 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default max value of resource data records 
-	 	of the analog control.
-
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        DESCRIPTION     
+	"This object represents the default maximum value of this
+	analog control."
+    	REFERENCE 
+    "See section 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 6}
 
 saHpiCtrlAnalogDefaultState          OBJECT-TYPE
         SYNTAX          INTEGER 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default value of resource data records 
-	 	of the analog control.
-
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        DESCRIPTION     
+	"This object represents the default value of this analog control."
+    	REFERENCE 
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 7}
 
 saHpiCtrlAnalogState OBJECT-TYPE
         SYNTAX          INTEGER 
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current analog setting of the control.  
-        Use this object to change the values of the data.
+        DESCRIPTION     
+	"This object represents the current state of the analog control.  
+    Write to this object to change the state.
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code.
+	auto(1) SNMP will return a notWriteable error code."
 
-        "
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
-	7.3.3, 8.7 and 8.8."
+    	REFERENCE 
+    "See section 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
         ::= {saHpiCtrlAnalogEntry 8}
 
@@ -5086,7 +5089,10 @@ saHpiCtrlAnalogOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Reserved for OEM use"
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlAnalogEntry 9}
 
 
@@ -5094,22 +5100,26 @@ saHpiCtrlAnalogRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        DESCRIPTION     
+	"Pointer to Resource Table for this analog control."
         ::= {saHpiCtrlAnalogEntry 10}
 
+--
+-- Stream
+--
 
 saHpiCtrlStreamEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of stream control records in the system."
+        DESCRIPTION     "The number of stream controls in the system."
         ::= {hpiControl 8}
 
 saHpiCtrlStreamTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiCtrlStreamEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table of stream Control Resource Data Records and its states."
+        DESCRIPTION     "A table of stream controls and its states."
         ::= {hpiControl 9}
                 
 
@@ -5118,7 +5128,7 @@ saHpiCtrlStreamEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-                "Definition of the stream control resource data record and its states table."
+                "Definition of the stream control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlStreamTable 1}
 
@@ -5129,7 +5139,6 @@ SaHpiCtrlStreamEntry ::= SEQUENCE {
         saHpiCtrlStreamMode     		SaHpiCtrlMode,        
 
         saHpiCtrlStreamIsReadOnly 		TruthValue,
-
         saHpiCtrlStreamIsWriteOnly		TruthValue,
 
 		saHpiCtrlStreamDefaultRepeat	TruthValue,
@@ -5149,8 +5158,8 @@ saHpiCtrlStreamOutputType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-		"Refer to the textual convention for more details on the
-		enumerations.
+	"Refer to the textual convention for more details on the
+	enumerations.
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
@@ -5162,11 +5171,8 @@ saHpiCtrlStreamMode OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION 
-	   
-	"If this columnar node is written to when the saHpiCtrlStreamIsReadOnly 
-	flag is TRUE the an SNMP error of notWritable is returned.  
-
-	This object describes how the control is managed.  The control may 
+	
+	"This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
 	may be managed by the HPI SNMP Manager (manual mode).  Some controls allow 
 	their modes to be changed, allowing the HPI SNMP Manager to determine if they 
@@ -5177,97 +5183,93 @@ saHpiCtrlStreamMode OBJECT-TYPE
 	
 	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
-	The CtrlState parameter must be of the correct type for the specified 
-	control.  
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
 	
-	REFERENCE "See section 7.3 and 7.3.3."
+		REFERENCE 
+    "See section 7.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 2}
         
 saHpiCtrlStreamIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if mode is read-only"
+        DESCRIPTION     
+	"Indicates if mode is read-only"
+		REFERENCE
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 3}
         
 saHpiCtrlStreamIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Indicates if Control is write-only"
-	
-	REFERENCE "See remarks section 7.3.2."
+        DESCRIPTION     
+	"Indicates if Control is write-only"
+		REFERENCE 
+    "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 4}
 
 saHpiCtrlStreamDefaultRepeat          OBJECT-TYPE
         SYNTAX          TruthValue 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default repeat flag of resource data records 
-	 	of the stream control.
-
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        DESCRIPTION     
+	"This object represents the default repeat flag of stream control."
+    	REFERENCE 
+    "See section 7.1.1, 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 5}
 
 saHpiCtrlStreamDefaultState         OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        This object represents the default value of resource data records 
-	 	of the stream control.
-
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+        DESCRIPTION     
+	"This object represents the default value of the stream control." 
+    	REFERENCE 
+    "See section 7.1.1, 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 6}
 
 saHpiCtrlStreamRepeat          OBJECT-TYPE
         SYNTAX          TruthValue 
         MAX-ACCESS      read-write 
         STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current stream setting of the control.  
-        Use this object to change the repeat value of the stream data.
+        DESCRIPTION     
+	"This object represents the current repeat flag of the stream control. 
+	Write to this object to change the repeat value of the stream data.
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code.
-        " 
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.1.1 and 8.8."
+	auto(1) SNMP will return a notWriteable error code." 
+    	REFERENCE 
+    "See section 7.3.2, 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 7}
 
 saHpiCtrlStreamState OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "
-        This attribute represents the current stream setting of the control.  
-        Use this object to change the values of the data.
+        DESCRIPTION     
+	"This object represents the current state of the stream control.  
+    Write to this object to change the state of the stream control.
 	
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
-	auto(1) SNMP will return a notWriteable error code.
+	auto(1) SNMP will return a notWriteable error code."
 
-        "
-    REFERENCE 
-        "Derived from typedef described in the SAI-HPI-B.01.01 sections 7.3.2, 
-	7.3.3, 8.7 and 8.8."
-         
+    	REFERENCE 
+    "See section 7.3.2, 7.3.3, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 8}
 
 saHpiCtrlStreamOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Reserved for OEM use"
+        DESCRIPTION     
+	"Reserved for OEM use"
+		REFERENCE		
+	"See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlStreamEntry 9}
 
 
@@ -5275,15 +5277,20 @@ saHpiCtrlStreamRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+        DESCRIPTION     
+	"Pointer to Resource Table for this stream control."
         ::= {saHpiCtrlStreamEntry 10}
+
+---
+--- Text
+---
 
 saHpiCtrlTextEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The number of text control records in the system."
+	"The number of text controls  in the system."
         ::= {hpiControl 10}
 
 saHpiCtrlTextTable OBJECT-TYPE
@@ -5291,7 +5298,7 @@ saHpiCtrlTextTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
-	"A table of text Control Resource Data Records and its states."
+	"A table of text controls and its states."
         ::= {hpiControl 11}
                 
 
@@ -5300,7 +5307,7 @@ saHpiCtrlTextEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-    "Definition of the text control resource data record and its states table."
+    "Definition of the text control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlTextTable 1}
 
@@ -5311,7 +5318,6 @@ SaHpiCtrlTextEntry ::= SEQUENCE {
         saHpiCtrlTextMode     			SaHpiCtrlMode,        
 
         saHpiCtrlTextIsReadOnly 		TruthValue,
-
         saHpiCtrlTextIsWriteOnly		TruthValue,
 
 		saHpiCtrlTextMaxChars			Unsigned8,
@@ -5352,11 +5358,8 @@ saHpiCtrlTextMode OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION 
-	   
-	"If this columnar node is written to when the saHpiCtrlTextIsReadOnly 
-	flag is TRUE the an SNMP error of notWritable is returned.  
 
-	This object describes how the control is managed.  The control may 
+	"This object describes how the control is managed.  The control may 
 	be managed automatically by the implementation (auto mode).  Or it 
 	may be managed by the HPI User (manual mode).  Some controls allow 
 	their modes to be changed, allowing the HPI User to determine if they 
@@ -5367,8 +5370,6 @@ saHpiCtrlTextMode OBJECT-TYPE
 	
 	When the mode is set to auto(1), the state input is 
 	ignored. Ignored state inputs are not checked by the implementation. 
-	The CtrlState parameter must be of the correct type for the specified 
-	control.  
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
@@ -5394,7 +5395,7 @@ saHpiCtrlTextIsWriteOnly  OBJECT-TYPE
         DESCRIPTION     
 	"Indicates if Control is write-only"
 		REFERENCE 		
-	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+	"See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlTextEntry 4}
 
 saHpiCtrlTextMaxChars          OBJECT-TYPE
@@ -5402,9 +5403,10 @@ saHpiCtrlTextMaxChars          OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-    "This object represents the maximum chars per line.
+    "This object represents the maximum characters per line for this
+	text control.
 
-	If the saHpiCtrlTextType is unicode(1), there will 
+	Note: If the saHpiCtrlTextType is unicode(1), there will 
 	be two bytes required for each character.  This field 
 	reports the number of characters per line- not the 
 	number of bytes.  saHpiCtrlTextMaxChars must not be
@@ -5420,7 +5422,7 @@ saHpiCtrlTextMaxLines         OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"This object represents the maximum number of line of the 
+	"This object represents the maximum number of lines of the 
 	text control." 
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -5431,7 +5433,7 @@ saHpiCtrlTextLanguage          OBJECT-TYPE
         MAX-ACCESS      read-only 
         STATUS          current
         DESCRIPTION     
-    "This attribute represents the default text language setting 
+    "This object represents the default text language setting 
 	of the control text. " 
     	REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -5475,7 +5477,9 @@ saHpiCtrlTextDefault	OBJECT-TYPE
 		MAX-ACCESS	read-only
 		STATUS		current
 		DESCRIPTION
-	"The default text of a control text resource."
+	"The default text of a control text resource. 
+	Refer to saHpiCtrlTextDefaultLine for the line number, saHpiCtrlTextLanguage for the
+	language setting and saHpiCtrlTextType for the text type."
 		REFERENCE 
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 		::= {saHpiCtrlTextEntry 10}
@@ -5486,7 +5490,7 @@ saHpiCtrlTextLine OBJECT-TYPE
 		MAX-ACCESS	read-write
 		STATUS		current
 		DESCRIPTION
-		"The current line number of text. Refer to saHpiCtrlTextState for usage examples.
+	"The current line number of text. Refer to saHpiCtrlTextState for usage examples.
 
 	If the line number passed in is 255, then saHpiCtrlTextState columnar node will 
 	containt the entire text of the control, or as much of it as will fit in a single 
@@ -5533,7 +5537,10 @@ saHpiCtrlTextState OBJECT-TYPE
 	which can be accomplished by setting: saHpiCtrlTextLine = 255; saHpiCtrlState = '';
 
 	Note that the number of lines and columns in a text control can be obtained from 
-	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. "
+	the saHpiCtrlTextMaxLines and saHpiCtrlTextMaxChars. 
+
+	Note that the saHpiCtrlTextLanguage object has the language setting and 
+	saHpiCtrlTextType objecthas the text type."
 
 		REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
@@ -5555,15 +5562,19 @@ saHpiCtrlTextRDR OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Pointer to RDR for this Control Resource Data Record."
+	"Pointer to Resource Table for this text control."
         ::= {saHpiCtrlTextEntry 14}
+
+---
+--- OEM
+---
 
 saHpiCtrlOemEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"The number of OEM control records in the system."
+	"The number of OEM controls in the system."
         ::= {hpiControl 12}
 
 saHpiCtrlOemTable OBJECT-TYPE
@@ -5571,7 +5582,7 @@ saHpiCtrlOemTable OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     
-	"A table of OEM Control Resource Data Records and its states."
+	"A table of OEM controls and its states."
         ::= {hpiControl 13}
                 
 
@@ -5580,7 +5591,7 @@ saHpiCtrlOemEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-    "Definition of the OEM control resource data record and its states table."
+    "Definition of the OEM control table."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiCtrlNum }
         ::= {saHpiCtrlOemTable 1}
 
@@ -5665,7 +5676,7 @@ saHpiCtrlOemIsWriteOnly  OBJECT-TYPE
         DESCRIPTION     
 	"Indicates if Control is write-only"
 		REFERENCE 		
-	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
+	"See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlOemEntry 4}
 
 saHpiCtrlOemManufacturerId          OBJECT-TYPE
@@ -5674,7 +5685,7 @@ saHpiCtrlOemManufacturerId          OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
     "This object represents the OEM's manufacturer ID for
-	this oem control resource. 
+	this OEM control. 
 
 	Refer to the textual convention for more details."
     	REFERENCE 
@@ -5691,13 +5702,15 @@ saHpiCtrlOemDefaultConfigData         OBJECT-TYPE
 	"See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
         ::= {saHpiCtrlOemEntry 6}
 
+-- IBMKR: Is this trully needed? There can be potential  _three_ ManafacturerID objects.
+
 saHpiCtrlOemDefaultMId          OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
         MAX-ACCESS      read-only 
         STATUS          current
         DESCRIPTION     
     "This object represents the OEM's manufacturer ID for
-	this oem control resource. 
+	this OEM control resource. 
 
 	Refer to the textual convention for more details."
     	REFERENCE 
@@ -5719,7 +5732,7 @@ saHpiCtrlOemState OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-        "This object allows to write to the OEM control state setting.
+    "This object allows to write to the OEM control state setting.
 
 	You may not change the state of the control unless the Mode is set to
 	manual(2).  If a write is attempted when the mode is set to
@@ -5745,7 +5758,7 @@ saHpiCtrlOemRDR OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-	"Pointer to RDR for this Control Resource Data Record."
+	"Pointer to Resource Table for this OEM control."
         ::= {saHpiCtrlOemEntry 11}
 
 
