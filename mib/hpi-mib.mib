@@ -3656,6 +3656,8 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorPercentage 			TruthValue,
 
 	saHpiSensorRangeFlags			OCTET STRING,
+	saHpiSensorHasThresholds		TruthValue,
+	saHpiSensorThresholdCapabilities	INTEGER,
 	saHpiSensorOEM				Unsigned32,
 	saHpiSensorRDR				RowPointer
 	}
@@ -4250,19 +4252,44 @@ saHpiSensorRangeFlags OBJECT-TYPE
 	nothing if the sensor does not support any ranges."
 	::= {saHpiSensorEntry 20}
 
+saHpiSensorHasThresholds OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " True if the sensor supports threshold values."
+        ::= {saHpiSensorEntry 21}
+
+saHpiSensorThresholdCapabilities OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undefined(0),
+				raw(2),
+				interpreted(3),
+				rawAndInterpreted(4)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	If set to raw(2) the raw value in the
+	threshold tables is used for reading/writing. 
+	If set to interpreted(3) the interpreted value in the
+	threshold tables is used for reading/writing. 
+	If set to rawAndInterpreted(4) both raw value and interpreted
+	value can be used for reading/writing."
+	::= {saHpiSensorEntry 22}
+	
 saHpiSensorOEM OBJECT-TYPE
         SYNTAX          Unsigned32 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " Reserved for OEM use."
-        ::= {saHpiSensorEntry 21}
+        ::= {saHpiSensorEntry 23}
 
 saHpiSensorRDR OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"Forward pointer to the RDR OID."
-	::= {saHpiSensorEntry 22}
+	::= {saHpiSensorEntry 24}
 
 --
 -- /*******************************************************************************
@@ -7629,6 +7656,8 @@ saHpiSensorGroup	OBJECT-GROUP
 		saHpiSensorFactorsLinearization,
 		saHpiSensorPercentage,
 		saHpiSensorRangeFlags,
+		saHpiSensorHasThresholds,
+		saHpiSensorThresholdCapabilities,
 		saHpiSensorOEM,
 		saHpiSensorRDR
 	}
