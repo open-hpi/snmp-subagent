@@ -811,6 +811,7 @@ delete_rpt_row (SaHpiDomainIdT domain_id,
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiTable_delete_row(ctx); 
       entry_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

@@ -75,9 +75,9 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
   SaErrorT err;
   SaHpiSessionIdT session_id;
   SaHpiRdrT rdr_entry;
-  SaHpiSelEntryIdT entry_id;
-  SaHpiSelEntryIdT next_entry_id;
-  SaHpiSelEntryIdT prev_entry_id;
+  SaHpiSelEntryIdT entry_id = SAHPI_OLDEST_ENTRY;
+  SaHpiSelEntryIdT next_entry_id = SAHPI_OLDEST_ENTRY;
+  SaHpiSelEntryIdT prev_entry_id = SAHPI_OLDEST_ENTRY;
   SaHpiSelInfoT info;
   SaHpiSelEntryT sel;
   oid sel_oid[SEL_INDEX_NR];
@@ -204,7 +204,7 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 					 saHpiSystemEventLogTable_context *
 					 ctx)
 {
-  long hash;
+  long hash = 0;
   SaHpiEventT *event_entry;
   SaHpiSensorEventT sensor;
   SaHpiSensorReadingT reading;
@@ -583,6 +583,7 @@ delete_SEL_row (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id)
 	    {
 	      ctx = array->array[i];
 	      CONTAINER_REMOVE (cb.container, ctx);
+	      saHpiSystemEventLogTable_delete_row (ctx);
 	    }
 	  rc = AGENT_ERR_NOERROR;
 	}

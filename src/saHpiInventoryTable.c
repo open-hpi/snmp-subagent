@@ -278,6 +278,7 @@ delete_inventory_row (SaHpiDomainIdT domain_id,
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiInventoryTable_delete_row (ctx);
       inventory_count = CONTAINER_SIZE (cb.container);
       rc = AGENT_ERR_NOERROR;
     }

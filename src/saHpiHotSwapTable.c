@@ -658,6 +658,7 @@ delete_hotswap_row (SaHpiDomainIdT domain_id, SaHpiResourceIdT resource_id)
   if (ctx)
     {
       CONTAINER_REMOVE (cb.container, ctx);
+      saHpiHotSwapTable_delete_row (ctx);
       rc = AGENT_ERR_NOERROR;
     }
   DEBUGMSGTL ((AGENT, "delete_hotswap_row. Exit (rc: %d).\n", rc));
