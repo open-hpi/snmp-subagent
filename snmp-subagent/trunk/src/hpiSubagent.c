@@ -54,7 +54,6 @@ int alarm_interval = 5;
 
 // Max EVENT rows.
 int MAX_EVENT_ENTRIES = 512;
-// IBM-KR: TODO, add a configuration entry for this.
 
 static RETSIGTYPE
 stop_server (int a)
@@ -133,7 +132,7 @@ build_notification (const netsnmp_index * index,
   snmp_varlist_add_variable (&notification_vars,
 			     snmptrap, OID_LENGTH (snmptrap),
 			     ASN_OBJECT_ID,
-			     (u_char *) notification_oid,
+			     (u_char *) (oid *)notification_oid,
 			     notification_oid_len * sizeof (oid));
 
   // Next the DomainID
@@ -195,6 +194,68 @@ calculate_hash_value (void *data, int len)
   return hash;
 }
 
+
+const char * get_error_string(SaErrorT error)
+{
+        switch(error) {
+                case SA_ERR_HPI_ERROR:
+                        return "SA_ERR_HPI_ERROR";
+                case SA_ERR_HPI_UNSUPPORTED_API:
+                        return "SA_ERR_UNSUPPORTED_API";
+                case SA_ERR_HPI_BUSY:
+                        return "SA_ERR_HPI_BUSY";
+                case SA_ERR_HPI_INVALID:
+                        return "SA_ERR_HPI_INVALID";
+                case SA_ERR_HPI_INVALID_CMD:
+                        return "SA_ERR_HPI_INVALID_CMD";
+                case SA_ERR_HPI_TIMEOUT:
+                        return "SA_ERR_HPI_TIMEOUT";
+                case SA_ERR_HPI_OUT_OF_SPACE:
+                        return "SA_ERR_HPI_OUT_OF_SPACE";
+                case SA_ERR_HPI_DATA_TRUNCATED:
+                        return "SA_ERR_HPI_DATA_TRUNCATED";
+                case SA_ERR_HPI_DATA_LEN_INVALID:
+                        return "SA_ERR_HPI_DATA_LEN_INVALID";
+                case SA_ERR_HPI_DATA_EX_LIMITS:
+                        return "SA_ERR_HPI_DATA_EX_LIMITS";
+                case SA_ERR_HPI_INVALID_PARAMS:
+                        return "SA_ERR_HPI_INVALID_PARAMS";
+                case SA_ERR_HPI_INVALID_DATA:
+                        return "SA_ERR_HPI_INVALID_DATA";
+                case SA_ERR_HPI_NOT_PRESENT:
+                        return "SA_ERR_HPI_NOT_PRESENT";
+                case SA_ERR_HPI_INVALID_DATA_FIELD:
+                        return "SA_ERR_HPI_INVALID_DATA_FIELD";
+                case SA_ERR_HPI_INVALID_SENSOR_CMD:
+                        return "SA_ERR_HPI_INVALID_SENSOR_CMD";
+                case SA_ERR_HPI_NO_RESPONSE:
+                        return "SA_ERR_HPI_NO_RESPONSE";
+                case SA_ERR_HPI_DUPLICATE:
+                        return "SA_ERR_HPI_DUPLICATE";
+                case SA_ERR_HPI_UPDATING:
+                        return "SA_ERR_HPI_UPDATING";
+                case SA_ERR_HPI_INITIALIZING:
+                        return "SA_ERR_HPI_INITIALIZING";
+                case SA_ERR_HPI_UNKNOWN:
+                        return "SA_ERR_HPI_UNKNOWN";
+                case SA_ERR_HPI_INVALID_SESSION:
+                        return "SA_ERR_HPI_INVALID_SESSION";
+                case SA_ERR_HPI_INVALID_DOMAIN:
+                        return "SA_ERR_HPI_INVALID_DOMAIN";
+                case SA_ERR_HPI_INVALID_RESOURCE:
+                        return "SA_ERR_HPI_INVALID_RESOURCE";
+                case SA_ERR_HPI_INVALID_REQUEST:
+                        return "SA_ERR_HPI_INVALID_REQUEST";
+                case SA_ERR_HPI_ENTITY_NOT_PRESENT:
+                        return "SA_ERR_HPI_ENTITY_NOT_PRESENT";
+                case SA_ERR_HPI_UNINITIALIZED:
+                        return "SA_ERR_HPI_UNINITIALIZED";
+                default:
+			DEBUGMSGTL((AGENT,"Invalid error code=%d\n", error));
+                        return "(Invalid error code)";
+        }
+}
+
 SaErrorT
 rcSaHpi ()
 {
@@ -208,10 +269,16 @@ closeSaHpiSession ()
   DEBUGMSGTL ((AGENT, "--- closeSaHpiSession: Entry. "));
   if (session_avail == AGENT_TRUE)
     {
+     err= saHpiUnsubscribe(session_id);
+     if (SA_OK != err)
+	{
+	 snmp_log (LOG_ERR,"saHpiUnsubscirbe error: %s.\n", get_error_string(err));
+	return AGENT_ERR_SESSION_CLOSE;
+      }
       err = saHpiFinalize ();
       if (SA_OK != err)
 	{
-	  DEBUGMSGTL ((AGENT, "saHpiFinalize error: %d ", err));
+	  snmp_log (LOG_ERR, "saHpiFinalize error: %s\n", get_error_string(err));
 	  return AGENT_ERR_SESSION_CLOSE;
 	}
       session_avail = AGENT_FALSE;
@@ -231,25 +298,23 @@ getSaHpiSession (SaHpiSessionIdT * out)
 
   if (session_avail == AGENT_FALSE)
     {
-      // IBM-KR: TODO
-      // These DEBUGMSGLT should be turned to snmp_log
       err = saHpiInitialize (&version);
       if (SA_OK != err)
 	{
-	  DEBUGMSGTL ((AGENT, "saHpiInitialize error: %d ", err));
+	  snmp_log (LOG_ERR, "saHpiInitialize error: %s\n", get_error_string(err));
 	  return AGENT_ERR_INIT;
 	}
       err = saHpiSessionOpen (SAHPI_DEFAULT_DOMAIN_ID, &session_id, NULL);
       if (SA_OK != err)
 	{
-	  DEBUGMSGTL ((AGENT, "saHpiSessionOpen error: %d ", err));
+	  snmp_log (LOG_ERR, "saHpiSessionOpen error: %s\n", get_error_string(err));
 	  return AGENT_ERR_SESSION_OPEN;
 	}
       // Discover 
       err = saHpiResourcesDiscover (session_id);
       if (SA_OK != err)
 	{
-	  DEBUGMSGTL ((AGENT, "saHpiResourcesDiscover error: %d ", err));
+	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n", get_error_string(err));
 	  return AGENT_ERR_DISCOVER;
 	}
       //Subscribe to the Events
@@ -257,7 +322,7 @@ getSaHpiSession (SaHpiSessionIdT * out)
       err = saHpiSubscribe (session_id, SAHPI_FALSE);
       if (SA_OK != err)
 	{
-	  DEBUGMSGTL ((AGENT, "saHpiSubscribe failed. Return code: %d", err));
+	  snmp_log (LOG_ERR, "saHpiSubscribe failed. error: %s\n", get_error_string(err));
 	  return AGENT_ERR_SUBSCRIBE;
 	}
       session_avail = AGENT_TRUE;
@@ -292,7 +357,7 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
   err = saHpiRptInfoGet (session_id, &rpt_info_new);
   if (SA_OK != err)
     {
-      DEBUGMSGTL ((AGENT, "saHpiRptInfoGet error: %d ", err));
+      snmp_log (LOG_ERR, "saHpiRptInfoGet error: %s\n",get_error_string(err) );
       return AGENT_ERR_RPTGET;
     }
 
@@ -340,7 +405,7 @@ hpiSubagent_parse_config_traps (const char *token, char *cptr)
 	   !strncasecmp (cptr, "no", 2) || !strncasecmp (cptr, "false", 5))
     {
       x = AGENT_FALSE;
-      snmp_log (LOG_INFO, "No sending events during startup.\n");
+      snmp_log (LOG_INFO, "Not sending events during startup.\n");
     }
 
   if ((x != AGENT_TRUE) && (x != AGENT_FALSE))
@@ -386,7 +451,7 @@ hpiSubagent_parse_config_max_event (const char *token, char *cptr)
     }
   else
     {
-      snmp_log (LOG_INFO, "Max Event rows%d.\n", x);
+      snmp_log (LOG_INFO, "Max Event rows %d.\n", x);
       MAX_EVENT_ENTRIES = x;
     }
 }
@@ -397,13 +462,22 @@ int
 main (int argc, char **argv)
 {
   int agentx_subagent = AGENT_TRUE;
-
+  char c;
   /* change this if you want to be a SNMP master agent */
 
-  /* print log errors to AGENT );stderr */
-  debug_register_tokens (AGENT);
+   while ( (c = getopt( argc, argv,"d?")) != EOF )
+                switch(c) {
+                case 'd': debug_register_tokens (AGENT); 
   snmp_enable_stderrlog ();
   snmp_set_do_debugging (1);
+	break;
+                default:
+                        printf("Usage %s [-d]\n",argv[0]);
+                        printf("where -c clears the event log\n");
+                        exit(1);
+                }
+
+  /* print log errors to AGENT );stderr */
   /* we're an agentx subagent? */
   if (agentx_subagent)
     {
@@ -450,16 +524,17 @@ main (int argc, char **argv)
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
 
-  send_traps = AGENT_TRUE;
   if (populate_rpt () != AGENT_ERR_NOERROR)
     {
-      //goto stop;
+      snmp_log (LOG_ERR,"Could not retrieve RPT entries. Exiting\n.");
+      goto stop;
     }
   populate_event ();
 
   if (init_alarm () != AGENT_ERR_NOERROR)
     {
-      //    goto stop;
+      snmp_log (LOG_ERR,"Could not start our internal loop . Exiting\n.");
+      goto stop;
     }
   /* If we're going to be a snmp master agent, initial the ports */
 
@@ -479,7 +554,7 @@ main (int argc, char **argv)
       /*     --- OR ---  */
       agent_check_and_process (1);	/* 0 == don't block */
     }
-  //stop:
+stop:
   /* at shutdown time */
   snmp_shutdown (AGENT);
   return 1;
