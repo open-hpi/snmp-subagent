@@ -66,6 +66,14 @@ int MAX_EVENT_ENTRIES = 512;
 static int do_syslog = AGENT_TRUE;
 static int do_fork = AGENT_FALSE;
 
+/*
+ * Count of newly added RPT, RDR, Events and SEL entries since last  populate_ call
+ * to be global. Reset every time the respective populate_ call is made.
+ */
+u_long rdr_new_entry_count;
+u_long rpt_new_entry_count;
+u_long event_new_entry_count;
+u_long sel_new_entry_count;
 
 static RETSIGTYPE
 stop_server (int a)

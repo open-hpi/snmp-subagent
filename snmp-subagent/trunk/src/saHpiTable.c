@@ -36,6 +36,9 @@ static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
 extern int send_traps;
+extern u_long rpt_new_entry_count;
+extern u_long rdr_new_entry_count;
+extern u_long sel_new_entry_count;
 
 static u_long entry_count = 0;
 static u_long update_entry_count = -1;
@@ -97,7 +100,6 @@ populate_rpt ()
   SaHpiTimeT time;
   SaHpiBoolT state;
 
-
   int rc;
   long backup_count = entry_count;
 
@@ -121,7 +123,9 @@ populate_rpt ()
   netsnmp_variable_list *trap_var;
 
   DEBUGMSGTL ((AGENT, "--- populate_rpt: Entry.\n"));
-
+  rpt_new_entry_count = 0;
+  rdr_new_entry_count = 0;
+  sel_new_entry_count = 0;
   if (getSaHpiSession (&session) == AGENT_ERR_NOERROR)
     {
 
@@ -177,6 +181,7 @@ populate_rpt ()
 		    {
 		      // First time (entry_count is updated when this loop is finished)
 		      rpt_context = saHpiTable_create_row (&rpt_index);
+		      rpt_new_entry_count ++;
 		    }
 		  else
 		    {
@@ -189,8 +194,8 @@ populate_rpt ()
 		      if (!rpt_context)
 			{
 			  // New entry. Add it
-
 			  rpt_context = saHpiTable_create_row (&rpt_index);
+		          rpt_new_entry_count ++;
 			}
 		      if (!rpt_context)
 			{
@@ -305,7 +310,6 @@ populate_rpt ()
 		      rc = populate_rdr (&rpt_entry,
 					 DomainID_oid, DomainID_oid_len,
 					 ResourceID_oid, ResourceID_oid_len);
-
 		    }
 		  // if (rpt... blah
 
@@ -361,6 +365,16 @@ populate_rpt ()
 
   if (err == SA_OK)
     err = AGENT_ERR_NOERROR;
+
+  if (rpt_new_entry_count > 0) 
+  	snmp_log  (LOG_INFO,"Found %d RPT record%s.\n", rpt_new_entry_count,
+		(rpt_new_entry_count > 1)? "s" : "");
+  if (rdr_new_entry_count > 0)
+  	snmp_log  (LOG_INFO,"Found %d RDR record%s.\n", rdr_new_entry_count,
+		(rdr_new_entry_count > 1)? "s" : "");
+  if (sel_new_entry_count > 0)
+  	snmp_log  (LOG_INFO,"Found %d System Event Log record%s.\n", sel_new_entry_count,
+		(sel_new_entry_count > 1)? "s" : "");
 
   DEBUGMSGTL ((AGENT, "--- populate_rpt: Exit.\n"));
   return err;
@@ -448,7 +462,7 @@ purge_rpt (void)
 	}
       rpt_mutex = AGENT_FALSE;
     }
-  DEBUGMSGTL ((AGENT, "purge_rpt. Exit (count: %d).\n", count));
+  DEBUGMSGTL ((AGENT, "purge_rpt. Exit (purged: %d).\n", count));
   return count;
 }
 
@@ -1186,7 +1200,7 @@ saHpiTable_set_reserve1 (netsnmp_request_group * rg)
 
   netsnmp_variable_list *var;
   netsnmp_request_group_item *current;
-  int rc;
+  int rc = SNMP_ERR_NOERROR;
 
   DEBUGMSGTL ((AGENT, "saHpiTable_set_reserve1. Entry.\n"));
   for (current = rg->list; current; current = current->next)
