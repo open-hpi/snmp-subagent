@@ -1,0 +1,4853 @@
+HPI-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY, 
+	OBJECT-TYPE,
+	NOTIFICATION-TYPE,
+	Unsigned32,
+	Counter32  		FROM SNMPv2-SMI
+	DateAndTime,
+	TimeStamp,
+	RowPointer,
+	TruthValue		FROM SNMPv2-TC
+	MODULE-COMPLIANCE, 
+	OBJECT-GROUP,
+	NOTIFICATION-GROUP	FROM SNMPv2-CONF
+	experimental		FROM RFC1155-SMI;
+
+hpi MODULE-IDENTITY
+    LAST-UPDATED "200310291800Z"
+    ORGANIZATION "OpenHPI"
+    CONTACT-INFO "
+		Sean Dague
+	      		Postal: IBM
+				2455 South Road
+				Poughkeepsie, Ny 12601
+				US
+			Tel:	+1 845 433 2965
+			Fax:	+1 845 433 2379
+			E-mail: sdague@us.ibm.com
+
+		Tom Hernandez
+			Postal:	Motoral Computer Group
+				2900 S. Diablo Way
+				Tempe, Az 85282
+				US
+			E-mail:	MCX1243@motorola.com
+
+		Kurt Taylor
+			Postal: IBM
+				11400 Burnet Rd.
+				Austin, Tx 78758
+				US
+			Tel:    +1 512 838 2496
+			E-mail: krtaylor@us.ibm.com
+
+		Konrad Rzeszutek
+	       		Postal: IBM
+				1 Rogers St
+				Cambridge, Ma 02142
+				US
+			Tel:	+1 617 693 1718
+			E-mail: konradr@us.ibm.com
+        "
+    DESCRIPTION
+	"This MIB defines the HPI instrumentation based on
+	'Service Availability Forum Hardware Platform Interface'
+	(SA-HPI-A.01.01).
+
+	This MIB module defines a set of objects that allow the 
+         management of entities on a variety of hardware platforms.  The  
+         abstractions presented in this MIB are derived from the 
+                  Service Availability Forum Hardware Platform Interface 
+                  specification version 01.01.
+           
+         The MIB views a hardware platform as a collection of physical 
+                  entities that can be managed individually.  A logical 
+                  collection of entities comprises a management domain.
+
+         Each entity has a common set of attributes reflected in the 
+         entity table.  Entities may have additional categorical 
+                  attributes that may exist in one or more of the hotswap 
+                  table, control table, sensor table, watchdog table,
+		  inventory control table and config table.
+
+         The hotswap table defines management attributes
+         for an entity that supports hotswap, generally referred to as 
+                  a FRU.
+
+         The controls table defines variables for reading and setting 
+                  controls associated with an entity.
+
+         The sensors table defines variables for reading sensors 
+                  associated with an entity as well as controlling event 
+                  generation for that sensor.
+
+	The watchdog table defines variables for reading watchdog
+		  associated with an entitry.
+
+	The inventory control defines variables for reading inventory
+		resources.  "
+    ::= { experimental 90 }
+
+hpiEntity	OBJECT IDENTIFIER ::= { hpi 1 }
+
+--
+-- RPT Entry
+--
+
+saHpiTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	
+	"This table represents the management attributes common to all entities
+         within the managed platform.  The logical domain ID and the entity ID
+         are used to address an entity."
+	::= {hpiEntity 4}
+	
+saHpiEntryCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of RPT entries present in the system. 
+	This field is used to determine if new resources have been added
+	or existing removed. The same functionality is available using
+	notifications."
+	::= {hpiEntity 1}
+
+saHpiEntryUpdateCount OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This count is incremented any time the table
+	is changed. It rolls over to zero when the maximum value is reached.
+	The same functionality is available using notifications."
+	::= {hpiEntity 2}
+
+saHpiEntryUpdateTimestamp OBJECT-TYPE
+	SYNTAX		TimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This time is set any time the table is changed. 
+	If the implementation cannot supply an absolute timestamp, then it may
+	supply a timestamp relative to some system-defined epoch, such as 
+	system boot. The value SaHpi_TIME_UNSPECIFIED indicates that the 
+	time of the update cannot be determined.
+
+	Otherwise, If the value is less than or equal to 
+	SaHpi_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+
+	Unspecified or unknown time  is:
+			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			
+	Maximum time that can be specified as relative:
+			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 
+	Note: The same functionality - when the table is changed - is available
+	via notifications."
+	::= {hpiEntity 3}
+
+saHpiEntry OBJECT-TYPE
+	SYNTAX		SaHpiEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"This structure is used to store the RPT entry information.
+		The ResourceCapabilities field definies the capabilities of
+		the resource.  This field must be non-zero for all valid
+		resources.   The ResourceTag field is an informational value
+		that supplies the caller with naming  information for the
+		resource. This should be set to the  user-visible  name for a
+		resource, which can be used to identify the resource in
+		messages to a human operator.  For example, it could be set to
+		match a physical printed label attached to the primary  entity
+		which the resource manages. See section 5.2.6,
+		SaHpiResourceTagSet(), on page 33."
+	INDEX	{ saHpiDomainID, saHpiEntryID, saHpiResourceID }
+	::= {saHpiTable 1}
+
+SaHpiEntry ::= SEQUENCE {
+	saHpiDomainID		Unsigned32,
+	saHpiEntryID		Unsigned32,
+	saHpiResourceID		Unsigned32,
+	saHpiResourceEntityPath		OCTET STRING,
+	saHpiResourceCapabilities	Unsigned32,
+	saHpiResourceSeverity		INTEGER,
+
+	saHpiResourceInfoResourceRev		Unsigned32,
+	saHpiResourceInfoSpecificVer		Unsigned32,
+	saHpiResourceInfoDeviceSupport		Unsigned32,
+	saHpiResourceInfoManufacturerId		Unsigned32,
+	saHpiResourceInfoProductId		Unsigned32,
+	saHpiResourceInfoFirmwareMajorRev	Unsigned32,
+	saHpiResourceInfoFirmwareMinorRev	Unsigned32,
+	saHpiResourceInfoAuxFirmwareRev		Unsigned32,
+
+
+	saHpiResourceTagTextType	INTEGER,	
+	saHpiResourceTagTextLanguage	INTEGER,
+	saHpiResourceTag		OCTET STRING
+	}
+
+saHpiDomainID OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+	"The Domain ID is used when the resource is also a domain.
+ 	The SaHpi_UNSPECIFIED_DOMAIN_ID value may be used by an 
+	implementation when populating the ResourceId value for 
+	an RPT entry that is a domain only.
+
+	Note:
+ 		SaHpi_UNSPECIFIED_DOMAIN_ID  0xFFFFFFFF(4294967295) " 
+	::= {saHpiEntry 1}
+
+saHpiEntryID OBJECT-TYPE 
+	SYNTAX		Unsigned32	
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Entry ID for record"
+	::= {saHpiEntry 2}
+
+saHpiResourceID OBJECT-TYPE 
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Resource identifier."
+	::= {saHpiEntry 3}
+
+saHpiResourceEntityPath OBJECT-TYPE 
+	SYNTAX		OCTET STRING
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" 
+	If resource manages a FRU, entity path of the FRU.
+        If resource manages a single entity, entity path of 
+	that entity. 
+	If resource manages multiple entities, the entity path 
+	of the 'primary' entity managed by the resource.  
+	
+	Must be set to the same value in every domain which 
+	contains this resource.
+
+	This object converts HPI's saHpiEntityPathT structure 
+	and an OpenHPI canonical string. The canonical string is 
+	formed by removing the SaHpi_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	Order of significance is inverted to make entity paths 
+	look more like Unix directory structure. It is also assumed 
+	that {ROOT,0} exists implicitly before all of these entries. 
+	
+	For example:
+ 	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+
+	::= {saHpiEntry 4}
+
+saHpiResourceCapabilities OBJECT-TYPE 
+	SYNTAX		Unsigned32 
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" 
+	Resource Capabilities
+			
+	This definition defines the capabilities of a given resource. 
+	One resource may support any number of capabilities using 
+	the bit mask. Every resource must set at least one of 
+	these capabilities; ie. zero is not a valid value for a 
+	resource's capabilities.
+			
+	SaHpi_CAPABILITY_DOMAIN           (0x80000000)
+	SaHpi_CAPABILITY_RESOURCE         (0X40000000) 
+	SaHpi_CAPABILITY_EVT_DEASSERTS	  (0x00008000)
+	Indicates that all sensors on the resource have the property 
+	that their Assertion and Deassertion event enable flags are 
+	the same. That is, for all event states whose assertion 
+	triggers an event, it is guaranteed that the deassertion of 
+	that event will also trigger an event. Thus, the user may 
+	track the state of sensors on the resource by monitoring 
+	events rather than polling for state changes.
+
+	SaHpi_CAPABILITY_AGGREGATE_STATUS  (0x00002000) 
+	SaHpi_CAPABILITY_CONFIGURATION	   (0x00001000)
+	SaHpi_CAPABILITY_MANAGED_HOTSWAP   (0x00000800) 
+	Indicates that the resource supports managed hotswap. 
+	Since hotswap only makes sense for field-replaceable units, 
+	the SaHpi_CAPABILITY_FRU capability bit must also be set 
+	for this resource.
+
+	SaHpi_CAPABILITY_WATCHDOG          (0x00000400)
+	SaHpi_CAPABILITY_CONTROL           (0x00000200) 
+	SaHpi_CAPABILITY_FRU		   (0x00000100)
+	Indicates that the resource is a field-replaceable unit; 
+	i.e., it is capable of being removed and replaced in a 
+	live system. This does not necessarily imply that the 
+	resource supports managed hotswap.
+
+	SaHpi_CAPABILITY_INVENTORY_DATA     (0x00000008) 
+	SaHpi_CAPABILITY_SEL                (0x00000004) 
+	SaHpi_CAPABILITY_RDR		    (0x00000002) 
+	Indicates that a resource data record (RDR) repository is 
+	supplied by the resource. Since the existence of an RDR is 
+	mandatory, this capability must be asserted.         
+
+	SaHpi_CAPABILITY_SENSOR             (0x00000001)"
+	::= {saHpiEntry 5}
+
+saHpiResourceSeverity OBJECT-TYPE 
+	SYNTAX		INTEGER {
+        			critical (1),
+        			major(2),
+        			minor(4),
+        			informational(4),
+        			ok(5),
+        			debug(80)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" Indicates the criticality that should be 
+	raised when the resource is not responding.
+	
+	Note: The enumerated named have +1 added as opposed to the SA HPI 
+	spec for the same constants.  "
+	::= {saHpiEntry 6}
+
+
+saHpiResourceInfoResourceRev OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" 
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+
+	::= {saHpiEntry 7}
+
+saHpiResourceInfoSpecificVer OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 8}
+
+
+saHpiResourceInfoDeviceSupport OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" 
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 9}
+
+
+saHpiResourceInfoManufacturerId OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 10}
+
+
+saHpiResourceInfoProductId OBJECT-TYPE 
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 11}
+
+
+saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 12}
+
+saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" 
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 13}
+
+
+saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE 
+	SYNTAX		Unsigned32(0..255)
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	saHpiResourceInfo contains static configuration data 
+	concerning the management controller associated with 
+	the resource, or the resource itself. 
+	
+	Note this information is used to describe the resource; 
+	that is, the piece of infrastructure which manages an 
+	entity (or multiple entities) - NOT the entities for 
+	which the resource provides management. The purpose of the 
+	saHpiResourceInfoT structure is to provide information 
+	that the HPI user may need in order to interact 
+	correctly with the resource (e.g., recognize a 
+	specific management controller which may have defined 
+	OEM fields in sensors, OEM controls, etc.
+	
+	All of the fields in the following structure may or 
+	may not be used by a given resource."
+	::= {saHpiEntry 14}
+
+
+saHpiResourceTagTextType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				binary(1), 
+				bcdplus(2), 
+				ascii6(3),
+				language(4)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
+	encoded as:
+	 binary(1):
+		  String of bytes, any values legal
+
+         bcdplus(2)
+		String of 0-9, space, dash, period ONLY
+
+         ascii6(3)
+		Reduced ASCII character set: 0x20-0x5F ONLY
+
+         language(4)
+		ASCII or UNICODE depending on language
+	"
+	::= {saHpiEntry 15}
+
+saHpiResourceTagTextLanguage OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undef(0),
+				afar(1),
+				abkhazian(2),
+				afrikaans(3),
+				amharic(4),
+				arabic(5),
+				assamese(6),
+				aymara(7),
+				azerbaijani(8),
+				bashkir(9),
+				byelorussian(10),
+				bulgarian(11),
+				bihari(12),
+				bislama(13),
+				bengali(14),
+				tibetan(15),
+				breton(16),
+				catalan(17),
+				corsican(18),
+				czech(19),
+				welsh(20),
+				danish(21),
+				german(22),
+				bhutani(23),
+				greek(24),
+				english(25),
+				esperanto(26),
+				spanish(27),
+				estonian(28),
+				basque(29),
+				persian(30),
+				finnish(31),
+				fiji(32),
+				faeroese(33),
+				french(34),
+				frisian(35),
+				irish(36),
+				scotsgaelic(37),
+				galician(38),
+				guarani(39),
+				gujarati(40),
+				hausa(41),
+				hindi(42),
+				croatian(43),
+				hungarian(44),
+				armenian(45),
+				interlingua(46),
+				interlingue(47),
+				inupiak(48),
+				indonesian(49),
+				icelandic(50),
+				italian(51),
+				hebrew(52),
+				japanese(53),
+				yiddish(54),
+				javanese(55),
+				georgian(56),
+				kazakh(57),
+				greenlandic(58),
+				cambodian(59),
+				kannada(60),
+				korean(61),
+				kashmiri(62),
+				kurdish(63),
+				kirghiz(64),
+				latin(65),
+				lingala(66),
+				laothian(67),
+				lithuanian(68),
+				latvianlettish(69),
+				malagasy(70),
+				maori(71),
+				macedonian(72),
+				malayalam(73),
+				mongolian(74),
+				moldavian(75),
+				marathi(76),
+				malay(77),
+				maltese(78),
+				burmese(79),
+				nauru(80),
+				nepali(81),
+				dutch(82),
+				norwegian(83),
+				occitan(84),
+				afanoromo(85),
+				oriya(86),
+				punjabi(87),
+				polish(88),
+				pashtopushto(89),
+				portuguese(90),
+				quechua(91),
+				rhaetoromance(92),
+				kirundi(93),
+				romanian(94),
+				russian(95),
+				kinyarwanda(96),
+				sanskrit(97),
+				sindhi(98),
+				sangro(99),
+				serbocroatian(100),
+				singhalese(101),
+				slovak(102),
+				slovenian(103),
+				samoan(104),
+				shona(105),
+				somali(106),
+				albanian(107),
+				serbian(108),
+				siswati(109),
+				sesotho(110),
+				sudanese(111),
+				swedish(112),
+				swahili(113),
+				tamil(114),
+				telugu(115),
+				tajik(116),
+				thai(117),
+				tigrinya(118),
+				turkmen(119),
+				tagalog(120),
+				setswana(121),
+				tonga(122),
+				turkish(123),
+				tsonga(124),
+				tatar(125),
+				twi(126),
+				ukrainian(127),
+				urdu(128),
+				uzbek(129),
+				vietnamese(130),
+				volapuk(131),
+				wolof(132),
+				xhosa(133),
+				yoruba(134),
+				chinese(135),
+				zulu(136)
+			}
+        MAX-ACCESS      read-only
+	STATUS          current
+	DESCRIPTION     "
+	This enumeration lists all of the languages that can be 
+	associated with text.  Undef (0) indicates that 
+	the language is unspecified or unknown.  "
+	::= {saHpiEntry 16}
+
+saHpiResourceTag	OBJECT-TYPE
+	SYNTAX		OCTET STRING(SIZE(0..255))
+	MAX-ACCESS	read-only	
+	STATUS		current
+	DESCRIPTION	"Resource tag. The type of date is specified
+	by saHpiResourceTagTextType and saHpiResourceTagLanguage."
+	::= {saHpiEntry 17}
+
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********                        Events, Part 2                      **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+--
+
+hpiEvents	OBJECT IDENTIFIER ::= { hpi 2 }
+
+events		OBJECT IDENTIFIER ::= { hpiEvents 1 }
+
+saHpiEventCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of events present on this system."
+	::= {events 1}
+
+saHpiEventTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiEventEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"Event table. "
+	::= {events 2}
+
+saHpiEventEntry OBJECT-TYPE
+	SYNTAX		SaHpiEventEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION "
+ Sensor events may contain optional data items passed and stored with the
+ event. If these optional data items are present, they will be included with
+ the event data returned in response to a SaHpiEventGet() or
+ SaHpiEventLogEntryGet() function call. Also, the optional data items may be
+ included with the event data passed to the SaHpiEventLogEntryAdd() function.
+
+ Specific implementations of HPI may have restrictions on how much data may
+ be passed to SaHpiEventLogEntryAdd(). These restrictions should be documented
+ by the provider of the HPI interface."
+	INDEX	{ saHpiEventIndex, saHpiEventTimestamp  }
+	::= {saHpiEventTable 1}
+
+SaHpiEventEntry ::= SEQUENCE {
+	saHpiEventIndex		Unsigned32,
+	saHpiEventType		INTEGER,
+	saHpiEventTimestamp	TimeStamp,
+
+	saHpiEventSeverity	INTEGER,
+	saHpiEventSensorNum	Unsigned32,
+	saHpiEventSensorType	INTEGER,
+	saHpiEventCategory	INTEGER,
+	saHpiEventAssertion	TruthValue,
+
+        saHpiEventStateCategoryUnspecified INTEGER,
+        saHpiEventStateCategoryThreshold INTEGER,
+        saHpiEventStateCategoryUsage INTEGER,
+        saHpiEventStateCategoryState INTEGER,
+        saHpiEventStateCategoryPredFail INTEGER,
+        saHpiEventStateCategoryLimit INTEGER,
+        saHpiEventStateCategoryPerformance INTEGER,
+        saHpiEventStateCategorySeverity INTEGER,
+        saHpiEventStateCategoryPresence INTEGER,
+        saHpiEventStateCategoryEnable INTEGER,
+        saHpiEventStateCategoryAvailability INTEGER,
+        saHpiEventStateCategoryRedundancy INTEGER,
+        saHpiEventStateCategoryUser INTEGER,
+        saHpiEventStateCategoryGeneric INTEGER,
+
+	saHpiSensorOptionalData	Unsigned32,
+
+	saHpiEventTriggerReadingType	      Unsigned32,
+	saHpiEventTriggerReadingRaw	      Unsigned32,
+	saHpiEventTriggerReadingInterpretedType INTEGER,
+	saHpiEventTriggerReadingInterpreted   OCTET STRING,
+	saHpiEventTriggerReadingEventState    OCTET STRING,
+
+	saHpiEventTriggerThresholdType	      Unsigned32,
+	saHpiEventTriggerThresholdRaw	      Unsigned32,
+	saHpiEventTriggerThresholdInterpretedType INTEGER,
+	saHpiEventTriggerThresholdInterpreted OCTET STRING,
+	saHpiEventTriggerThresholdEventState  OCTET STRING,
+
+	saHpiEventPreviousState		Unsigned32,
+	saHpiEventOem			Unsigned32,
+	saHpiEventSensorSpecific	Unsigned32,
+
+	saHpiEventHotSwapState		INTEGER,
+	saHpiEventPreviousHotSwapState	INTEGER,
+
+	saHpiEventWatchdogNum		Unsigned32,
+	saHpiEventWatchdogAction	INTEGER,
+	saHpiEventWatchdogPreTimerAction INTEGER,
+	saHpiEventWatchdogUse		INTEGER,
+
+	saHpiEventOemManufacturerIdT	Unsigned32,
+	saHpiEventOemEventData		OCTET STRING,
+
+	saHpiEventUserEventData		OCTET STRING
+	}
+
+saHpiEventIndex OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Index of the event. "
+        ::= {saHpiEventEntry 1}
+
+saHpiEventType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				sensor(1),
+				hotswap(2),
+				watchdog(4),
+				oem(4),
+				user(5)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	The type of event.
+
+	Note:
+	User events may be used for storing custom events created by 
+	the application  middleware; eg. when injecting events into 
+	the event log using SaHpiEventLogEntryAdd(). 
+	
+	Note: The enumerated named have +1 added as opposed to the SA HPI 
+	spec for the same constants.  "
+        ::= {saHpiEventEntry 2}
+
+saHpiEventTimestamp OBJECT-TYPE
+        SYNTAX          TimeStamp 
+        MAX-ACCESS      read-only
+        STATUS          current
+	DESCRIPTION	"The time of the event.
+	Time in the format of a 64-bit unsigned integer.
+	If the implementation cannot supply an absolute timestamp, then it may
+	supply a timestamp relative to some system-defined epoch, such as 
+	system boot. The value SaHpi_TIME_UNSPECIFIED indicates that the 
+	time of the update cannot be determined.
+
+	Otherwise, If the value is less than or equal to 
+	SaHpi_TIME_MAX_RELATIVE, then it is relative; 
+	if it is greater than SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+
+	Unspecified or unknown time  is:
+			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			
+	Maximum time that can be specified as relative:
+			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 
+			 
+	Note: The same functionality - when the table is changed - 
+	is available via notifications."
+        ::= {saHpiEventEntry 3}
+
+saHpiEventSeverity OBJECT-TYPE
+        SYNTAX          INTEGER{
+				critical(1),
+				major(2),
+				minor(3),
+				informational(4),
+				ok(5),
+				debug(241)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Severity of event. 
+	Note: The enumerated named have +1 added as opposed to the SA HPI 
+	spec for the same constants.  "
+        ::= {saHpiEventEntry 4}
+
+
+saHpiEventSensorNum OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sensor number-index. 
+
+	Note: This object is only valid if saHpiEventType = sensor(1)"
+        ::= {saHpiEventEntry 5}
+
+saHpiEventSensorType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				temperature (1),
+				voltage (2),
+				current (3),
+				fan (4),
+				physicalSecurity (5),
+				platformViolation (6),
+				processor (7),
+				powerSupply (8),
+				powerUnit (9),
+				coolingDevice (10),
+				otherUnitsBasedSensor (11),
+				memory (12),
+				driveSlot (13),
+				postMemoryResize (14),
+				systemFwProgress (15),
+				eventLoggingDisabled (16),
+				reserved1 (17),
+				systemEvent (18),
+				criticalInterrupt (19),
+				button (20),
+				moduleBoard (21),
+				microcontrollerCoprocessor (22),
+				addinCard (23),
+				chassis (24),
+				chipSet (25),
+				otherFru (26),
+				cableInterconnect (27),
+				terminator (28),
+				systemBootInitiated (29),
+				bootError (30),
+				osBoot (31),
+				osCriticalStop (32),
+				slotConnector (33),
+				systemAcpiPowerState (34),
+				reserved2 (35),
+				platformAlert (36),
+				entityPresence (37),
+				monitorAsicIc (38),
+				lan (39),
+				managementSubsystemHealth (40),
+				battery (41),
+				operational (160),
+				oemSensor (192)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "General Sensor Type
+
+	Note: This object is only valid if saHpiEventType = sensor(1)"
+        ::= {saHpiEventEntry 6}
+
+saHpiEventCategory OBJECT-TYPE
+        SYNTAX          INTEGER {
+				unspecified (0),
+				threshold (1),
+				usage (2),
+				state (3),
+				predFail (4),
+				limit (5),
+				performance (6),
+				severity (7),
+				presence (8),
+				enable (9),
+				availability (10),
+				redundancy (11),
+				user (126),
+				generic (127)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " 
+	Sensor events contain an event category and event state. Depending on the
+ 	event category, the event states take on different meanings for events
+ 	generated by specific sensors.
+
+ 	The generic(127) category can be used for discrete sensors which have
+ 	state meanings other than those identified with other event categories."
+        ::= {saHpiEventEntry 7}
+
+saHpiEventAssertion OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
+        ::= {saHpiEventEntry 8}
+
+saHpiEventStateCategoryUnspecified OBJECT-TYPE
+        SYNTAX          INTEGER (0..1)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for unspecified(0) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			SaHpi_ES_UNSPECIFIED 0x0001
+	"		 
+        ::= {saHpiEventEntry 9}
+
+saHpiEventStateCategoryThreshold OBJECT-TYPE
+        SYNTAX          INTEGER (0..32)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for threshold(1) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	When using these event states, the event state should match
+	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+	event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+	"		
+        ::= {saHpiEventEntry 10}
+
+saHpiEventStateCategoryUsage OBJECT-TYPE
+        SYNTAX          INTEGER (0..4)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for usage(2) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+	"		
+        ::= {saHpiEventEntry 11}
+saHpiEventStateCategoryState OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for  state(3) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+	"
+        ::= {saHpiEventEntry 12}
+saHpiEventStateCategoryPredFail OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for predFail(4) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+	"
+        ::= {saHpiEventEntry 13}
+
+saHpiEventStateCategoryLimit OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for  limit(5) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+	"
+        ::= {saHpiEventEntry 14}
+
+saHpiEventStateCategoryPerformance OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for performance(6) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+	"		
+        ::= {saHpiEventEntry 15}
+
+saHpiEventStateCategorySeverity OBJECT-TYPE
+        SYNTAX          INTEGER (0..256)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for severity(7) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	When using these event states, the event state should match
+	the event severity: 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+	"		
+        ::= {saHpiEventEntry 16}
+saHpiEventStateCategoryPresence OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for presence(8) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+	"			
+        ::= {saHpiEventEntry 17}
+saHpiEventStateCategoryEnable OBJECT-TYPE
+        SYNTAX          INTEGER (0..2)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for enable(9) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+	"		
+        ::= {saHpiEventEntry 18}
+saHpiEventStateCategoryAvailability OBJECT-TYPE
+        SYNTAX          INTEGER (0..256)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for availability(10) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+	"
+        ::= {saHpiEventEntry 19}
+saHpiEventStateCategoryRedundancy OBJECT-TYPE
+        SYNTAX          INTEGER (0..128)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for redundancy(11) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+	"
+        ::= {saHpiEventEntry 20}
+saHpiEventStateCategoryUser OBJECT-TYPE
+        SYNTAX          INTEGER (0..16384)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for user(126) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+	These event states are defined by the user of the
+	implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000"
+        ::= {saHpiEventEntry 21}
+saHpiEventStateCategoryGeneric OBJECT-TYPE
+        SYNTAX          INTEGER (0..16384)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Event state for generic(127) category. 
+
+ 	A zero value indicates not set/used.
+	
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+
+	Bit masks:
+			 
+	These event states are defined by the OEM of the
+	implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000"
+        ::= {saHpiEventEntry 22}
+
+saHpiSensorOptionalData OBJECT-TYPE
+        SYNTAX          Unsigned32(1..16)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sensor Optional Data
+			
+	Sensor events may contain optional data items passed and stored with the 
+	 event. If these optional data items are present, they will be included with 
+	 the event data.
+
+	The bit-flags for data is:
+
+ 	TRIGGER_READING   0x01
+ 	TRIGGER_THRESHOLD 0x02
+ 	OEM               0x04
+ 	PREVIOUS_STATE    0x08
+ 	SENSOR_SPECIFIC   0x10 " 
+        ::= {saHpiEventEntry 23}
+
+
+saHpiEventTriggerReadingType OBJECT-TYPE
+        SYNTAX          Unsigned32(1..4)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Each sensor may support one or more of raw, 
+	interpreted, or event status representations of the sensor data. 	
+	For analog sensors the raw value is the raw value from the 
+	sensor (such as ticks per fan blade) and the interpreted 
+	value is the raw value converted in to a usable format 
+	(such as RPM). The interpreted value can be calculated by 
+	the HPI implementation using the sensor factors or by 
+	another OEM means.
+
+	The bit-flag that determines which date is active is: 
+
+	RAW         0x01
+ 	INTERPRETED 0x02
+ 	EVENT_STATE 0x04
+	"
+        ::= {saHpiEventEntry 24}
+
+saHpiEventTriggerReadingRaw OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerReadingType = raw(1) then this object
+	contains the raw value of the sensor as unsigned 32-bit integer"
+	::= {saHpiEventEntry 25}
+
+saHpiEventTriggerReadingInterpretedType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				uint8(1),
+            			uint16(2),
+            			uint32(3),
+            			int8(4),
+            			int16(5),
+            			int32(6),
+            			float32(7),
+            			buffer(8) 
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerReadingType = interpreted(2) then this object
+	contains the type that saHpiEventTriggerReadingInterpreted is in."
+	::= {saHpiEventEntry 26}
+
+saHpiEventTriggerReadingInterpreted OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..32)) 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerReadingType = interpreted(2) then this object
+	contains the Value of interpreted sensor reading.  
+	
+	Note that interpreted value must be used within context 
+	of type of interpreted value."
+	::={saHpiEventEntry 27}
+
+
+saHpiEventTriggerReadingEventState OBJECT-TYPE
+        SYNTAX          OCTET STRING ( SIZE (3))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerReadingType = eventState(3) then this object
+	contains the outstanding sensor event states. There are three
+	octets, and they are as follows:
+
+    1	- flags for the sensor event.
+				enabled(128),
+				scanEnabled(64),
+				busy(32)
+		The sensor status structure is used to determine if sensor 
+		scanning is enabled and if events are enabled. If events 
+		are enabled, the structure will have valid data for the 
+		outstanding sensor event states.  
+
+    2-3	- event states as unsigned 16-bit integer.
+	The following event states are specified relative to the 
+	categories listed in saHpiEventCategory. The event types 
+	are only valid for their given category. Each set of 
+	events is labeled as to which category it belongs to.
+	Each event will have only one event state associated with it. 
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+			
+			 
+	 saHpiEventCategory == <any> 
+			
+			SaHpi_ES_UNSPECIFIED 0x0000
+			 
+	saHpiEventCategory == threshold(1) 
+	When using these event states, the event state should match
+	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+	event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+			
+	 saHpiEventCategory == usage(2)
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+			
+	 saHpiEventCategory == state(3)
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+			
+	 saHpiEventCategory ==  predFail(4)
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+	
+	 saHpiEventCategory == limit(5) 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			
+	saHpiEventCategory ==  performance(6)
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+			
+	saHpiEventCategory == severity (7) 
+	When using these event states, the event state should match
+	the event severity 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+			
+	saHpiEventCategory == presence (8) 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+			
+	saHpiEventCategory == enable (9)
+ 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+			
+	saHpiEventCategory == availability (10)
+
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+			
+	saHpiEventCategory == redundancy(11)
+
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			
+			
+	saHpiEventCategory == generic(127) || user(126) 
+
+	These event states are defined by the OEM or the user of the
+	implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000
+	"
+        ::= {saHpiEventEntry 28}
+
+
+saHpiEventTriggerThresholdType OBJECT-TYPE
+        SYNTAX          Unsigned32(1..4)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Each sensor may support one or more of raw, 
+	interpreted, or event status representations of the sensor data. 	
+	For analog sensors the raw value is the raw value from the 
+	sensor (such as ticks per fan blade) and the interpreted 
+	value is the raw value converted in to a usable format 
+	(such as RPM). The interpreted value can be calculated by 
+	the HPI implementation using the sensor factors or by 
+	another OEM means.
+
+	The bit-flag that determines which date is active is: 
+
+	RAW         0x01
+ 	INTERPRETED 0x02
+ 	EVENT_STATE 0x04
+	"
+        ::= {saHpiEventEntry 29}
+
+saHpiEventTriggerThresholdRaw OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerThresholdType = raw(1) then this object
+	contains the raw value of the sensor as unsigned 32-bit integer"
+	::= {saHpiEventEntry 30}
+
+saHpiEventTriggerThresholdInterpretedType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				uint8(1),
+            			uint16(2),
+            			uint32(3),
+            			int8(4),
+            			int16(5),
+            			int32(6),
+            			float32(7),
+            			buffer(8) 
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerThresholdType = interpreted(2) then this object
+	contains the type that saHpiEventTriggerReadingInterpreted is in."
+	::= {saHpiEventEntry 31}
+
+saHpiEventTriggerThresholdInterpreted OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..32)) 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerThresholdType = interpreted(2) then this object
+	contains the Value of interpreted sensor reading.  
+	
+	Note that interpreted value must be used within context 
+	of type of interpreted value."
+	::={saHpiEventEntry 32}
+
+
+saHpiEventTriggerThresholdEventState OBJECT-TYPE
+        SYNTAX          OCTET STRING ( SIZE (3))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If saHpiEventTriggerThresholdType = eventState(3) then this object
+	contains the outstanding sensor event states. There are three
+	octets, and they are as follows:
+
+    1	- flags for the sensor event.
+				enabled(128),
+				scanEnabled(64),
+				busy(32)
+		The sensor status structure is used to determine if sensor 
+		scanning is enabled and if events are enabled. If events 
+		are enabled, the structure will have valid data for the 
+		outstanding sensor event states.  
+
+    2-3	- event states as unsigned 16-bit integer.
+	The following event states are specified relative to the 
+	categories listed in saHpiEventCategory. The event types 
+	are only valid for their given category. Each set of 
+	events is labeled as to which category it belongs to.
+	Each event will have only one event state associated with it. 
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+			
+			 
+	 saHpiEventCategory == <any> 
+			
+			SaHpi_ES_UNSPECIFIED 0x0000
+			 
+	saHpiEventCategory == threshold(1) 
+	When using these event states, the event state should match
+	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+	event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+			
+	 saHpiEventCategory == usage(2)
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+			
+	 saHpiEventCategory == state(3)
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+			
+	 saHpiEventCategory ==  predFail(4)
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+	
+	 saHpiEventCategory == limit(5) 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			
+	saHpiEventCategory ==  performance(6)
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+			
+	saHpiEventCategory == severity (7) 
+	When using these event states, the event state should match
+	the event severity 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+			
+	saHpiEventCategory == presence (8) 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+			
+	saHpiEventCategory == enable (9)
+ 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+			
+	saHpiEventCategory == availability (10)
+
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+			
+	saHpiEventCategory == redundancy(11)
+
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			
+			
+	saHpiEventCategory == generic(127) || user(126) 
+
+	These event states are defined by the OEM or the user of the
+	implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000
+	"
+        ::= {saHpiEventEntry 33}
+
+saHpiEventPreviousState OBJECT-TYPE
+        SYNTAX          Unsigned32 (0..16384)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Event States
+			
+			 The following event states are specified relative to the categories listed 
+			 above. The event types are only valid for their given category. Each set of 
+			 events is labeled as to which category it belongs to.
+			 Each event will have only one event state associated with it. When retrieving 
+			 the event status or event enabled status a bit mask of all applicable event 
+			 states is used. Similarly, when setting the event enabled status a bit mask 
+			 of all applicable event states is used.
+			
+			 
+			 saHpiEventCategory == <any> 
+			
+			 SaHpi_ES_UNSPECIFIED 0x0000
+			 
+			 saHpiEventCategory == SaHpi_EC_THRESHOLD 
+			 When using these event states, the event state should match
+			 the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+			 event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+			
+			 saHpiEventCategory == SaHpi_EC_USAGE 
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+			
+			 saHpiEventCategory == SaHpi_EC_STATE 
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_PRED_FAIL 
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_LIMIT 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_PERFORMANCE 
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+			
+			 saHpiEventCategory == SaHpi_EC_SEVERITY 
+			 When using these event states, the event state should match
+			 the event severity 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+			
+			 saHpiEventCategory == SaHpi_EC_PRESENCE 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_ENABLE 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_AVAILABILITY 
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+			
+			 saHpiEventCategory == SaHpi_EC_REDUNDANCY 
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			
+			
+			 saHpiEventCategory == SaHpi_EC_GENERIC || SaHpi_EC_USER
+			 These event states are defined by the OEM or the user of the
+			 implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000"
+        ::= {saHpiEventEntry 34}
+
+saHpiEventOem OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sensor OEM event information "
+        ::= {saHpiEventEntry 35}
+
+saHpiEventSensorSpecific OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sensor specific information "
+        ::= {saHpiEventEntry 36}
+
+
+saHpiEventHotSwapState OBJECT-TYPE
+        SYNTAX          INTEGER {
+				inactive (0),
+				insertionPending (1),
+				activeHealthy (2),
+				activeUnhealthy (3),
+				extractionPending (4),
+				notPresent (5)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Current state of the hot-swap device."
+        ::= {saHpiEventEntry 37}
+
+saHpiEventPreviousHotSwapState OBJECT-TYPE
+        SYNTAX           INTEGER{
+				inactive (0),
+				insertionPending (1),
+				activeHealthy (2),
+				activeUnhealthy (3),
+				extractionPending (4),
+				notPresent (5)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Previous state of the hot-swap device. "
+        ::= {saHpiEventEntry 38}
+
+saHpiEventWatchdogNum OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The Watchdog number. "
+        ::= {saHpiEventEntry 39}
+
+saHpiEventWatchdogAction OBJECT-TYPE
+        SYNTAX          INTEGER{ 
+				noAction (0),
+				reset (1),
+				powerDown (2),
+				powerCycle (3),
+				timerInt (8)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	These enumerations represent the possible actions to be taken upon watchdog
+ 	timer timeout and the events that are generated for watchdog actions. "
+        ::= {saHpiEventEntry 40}
+
+saHpiEventWatchdogPreTimerAction OBJECT-TYPE
+        SYNTAX          INTEGER{
+				none (0),
+				smi (1),
+				nmi (2),
+				messageInterrupt (3),
+				oem (15)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
+ 			triggered by a watchdog pre-timer event. The actual meaning of these
+ 			operations may differ depending on the hardware architecture. "
+        ::= {saHpiEventEntry 41}
+
+saHpiEventWatchdogUse OBJECT-TYPE
+        SYNTAX          INTEGER {
+				none (0),
+				biosFrb2 (1),
+				biosPost (2),
+				osLoad (3),
+				smsOs (4),
+				oem (5),
+				unspecified (15)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Watchdog Timer Use 
+			
+			 These enumerations represent the possible watchdog users that may have caused 
+			 the watchdog to expire. For instance, if watchdog is being used during power 
+			 on self test (POST), and it expires, the SaHpi_WTU_BIOS_POST expiration type 
+			 will be set. Most specific uses for Watchdog timer by users of HPI should 
+			 indicate SaHpi_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
+			 or SaHpi_WTU_OEM if it is used for some other purpose."
+			
+        ::= {saHpiEventEntry 42}
+
+saHpiEventOemManufacturerIdT OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " 
+			 Identifier for the manufacturer 
+			
+			 This is the IANA-assigned private enterprise number for the
+			 manufacturer of the resource or FRU, or of the manufacturer
+			 defining an OEM control or event type. A list of current
+			 IANA-assigned private enterprise numbers may be obtained at
+			
+			     http:www.iana.orgassignmentsenterprise-numbers
+			
+			 If a manufacturer does not currently have an assigned number, one
+			 may be obtained by following the instructions located at
+			
+			     http:www.iana.orgcgi-binenterprise.pl
+			Its SaHpi_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
+			"
+				
+        ::= {saHpiEventEntry 43}
+
+saHpiEventOemEventData OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..32))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Events provided by OEM."
+        ::= {saHpiEventEntry 44}
+
+
+saHpiEventUserEventData OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..32))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "User events may be used for storing custom events 
+			created by the application  middleware;
+			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
+        ::= {saHpiEventEntry 45}
+
+
+--/*******************************************************************************
+-- * ********************************************************************************
+-- * ********** ********** ********** System Event Log ********** **********
+-- * **********
+-- * ********************************************************************************
+-- * *******************************************************************************/
+
+systemEvents	OBJECT IDENTIFIER ::= { hpiEvents 2}
+
+saHpiSystemEventLogEntries OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" The Entries entry denotes the number of active entries contained in the log."
+	::= {systemEvents 1}
+
+saHpiSystemEventLogSize OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" The Size entry denotes the total number of entries the log is able to hold."
+	::= {systemEvents 2}
+
+saHpiSystemEventLogUpdateTimestamp OBJECT-TYPE
+	SYNTAX		TimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The UpdateTimestamp entry denotes the timestamp of the last addition,
+   			deletion or log clear operation.
+
+				This time is set any time the table is
+                                     changed. If the implementation cannot
+                                     supply an absolute timestamp, then it may
+                                     supply a timestamp relative to some system-
+                                     defined epoch, such as system boot. The
+                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     the time of the update cannot be determined.
+                                     Otherwise, If the value is less than or
+                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     is relative; if it is greater than
+                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+
+
+			 Unspecified or unknown time  is:
+			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			
+			 Maximum time that can be specified as relative 
+			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+	::= {systemEvents 3}
+
+saHpiSystemEventLogCurrentTime OBJECT-TYPE
+	SYNTAX		TimeStamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The CurrentTime entry denotes the log's idea of the current time; i.e the
+   			timestamp that would be placed on an entry if it was added now.
+				This time is set any time the table is
+                                     changed. If the implementation cannot
+                                     supply an absolute timestamp, then it may
+                                     supply a timestamp relative to some system-
+                                     defined epoch, such as system boot. The
+                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     the time of the update cannot be determined.
+                                     Otherwise, If the value is less than or
+                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     is relative; if it is greater than
+                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+
+
+			 Unspecified or unknown time  is:
+			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			
+			 Maximum time that can be specified as relative 
+			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+	::= {systemEvents 4}
+
+saHpiSystemEventLogEnabled OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The Enabled entry indicates whether the log is enabled. If the event log
+			   is 'disabled' no events generated within the HPI implementation will be
+			   added to the event log. Events may still be added to the event log with
+			   the SaHpiEventLogEntryAdd() function. When the event log is 'enabled'
+			   events may be automatically added to the event log as they are generated
+			   in a resource or a domain, however, it is implementation-specific which
+			   events are automatically added to any event log.  "
+	::= {systemEvents 5}
+
+saHpiSystemEventLogOverflowFlag OBJECT-TYPE
+	SYNTAX		TruthValue 	
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	" The OverflowFlag entry indicates the log has overflowed. Events have been 
+			   dropped or overwritten due to a table overflow. "
+	::= {systemEvents 6}
+
+saHpiSystemEventLogOverflowAction OBJECT-TYPE
+	SYNTAX		INTEGER{
+				drop(1),
+				wrap(2),
+				writeLast(3)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The OverflowAction entry indicates the behavior of the SEL when an overflow 
+			   occurs. 
+
+			    SaHpi_SEL_OVERFLOW_DROP,         New entries are dropped when log is full
+			    SaHpi_SEL_OVERFLOW_WRAP,         Log wraps when log is full 
+			    SaHpi_SEL_OVERFLOW_WRITELAST     Last entry overwritten when log is full "
+	::= {systemEvents 7}
+
+saHpiSystemEventLogDeleteEntrySupported OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The DeleteEntrySupported indicates whether the delete command is supported for 
+			   event log entries. Note that clearing an entire log is valid even if this
+			   flag is not set."
+	::= {systemEvents 8}
+
+saHpiSystemEventLogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiSystemEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table definining System Event Log records."
+        ::= {systemEvents 9}
+
+
+saHpiSystemEventLogEntry OBJECT-TYPE
+        SYNTAX          SaHpiSystemEventLogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 	"This section defines the types associated with the SEL."
+        INDEX   { saHpiSystemEventLogEntryId }
+
+        ::= {saHpiSystemEventLogTable 1}
+                                                 
+SaHpiSystemEventLogEntry ::= SEQUENCE {
+	saHpiSystemEventLogEntryId	Unsigned32,
+	saHpiSystemEventLogTimestamp	TimeStamp,
+	saHpiSystemEventLogged		RowPointer
+	}
+
+saHpiSystemEventLogEntryId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Entry ID for record
+
+ 			Reserved values for event log entry IDs
+
+ 			SaHpi_OLDEST_ENTRY    0x00000000
+ 			SaHpi_NEWEST_ENTRY    0xFFFFFFFF
+ 			SaHpi_NO_MORE_ENTRIES 0xFFFFFFFE
+			"
+        ::= {saHpiSystemEventLogEntry 1}
+
+saHpiSystemEventLogTimestamp OBJECT-TYPE
+        SYNTAX          TimeStamp
+        MAX-ACCESS      read-only
+        STATUS          current
+	DESCRIPTION	"This time is set any time the table is
+                                     changed. If the implementation cannot
+                                     supply an absolute timestamp, then it may
+                                     supply a timestamp relative to some system-
+                                     defined epoch, such as system boot. The
+                                     value SaHpi_TIME_UNSPECIFIED indicates that
+                                     the time of the update cannot be determined.
+                                     Otherwise, If the value is less than or
+                                     equal to SaHpi_TIME_MAX_RELATIVE, then it
+                                     is relative; if it is greater than
+                                     SaHpi_TIME_MAX_RELATIVE, then it is absolute.
+
+
+			 Unspecified or unknown time  is:
+			 SaHpi_TIME_UNSPECIFIED     0x8000000000000000
+			
+			 Maximum time that can be specified as relative 
+			 SaHpi_TIME_MAX_RELATIVE    0x0C00000000000000 "
+        ::= {saHpiSystemEventLogEntry 2}
+
+saHpiSystemEventLogged OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Forward pointer to the event."
+        ::= {saHpiSystemEventLogEntry 3}
+
+
+--
+-- BILL
+--
+
+saHpiHotSwapTable OBJECT-TYPE
+    SYNTAX SEQUENCE OF SaHpiHotSwapEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "This table represents management attributes common to all hot swappable 
+         entities in the managed platform.  The entries in this table are 
+         straight from the HPI spec.  This table builds upon information present 
+         in the Entity Table."
+    ::= { hpiEvents 4 }
+
+
+saHpiHotSwapEntry OBJECT-TYPE
+    SYNTAX SaHpiHotSwapEntry
+    MAX-ACCESS not-accessible
+    STATUS current
+    DESCRIPTION
+        "An entry describing a particular hot swappable entity."
+    INDEX {
+	saHpiDomainID, saHpiResourceID }
+    ::= { saHpiHotSwapTable 1 }
+
+
+SaHpiHotSwapEntry ::= SEQUENCE {
+    saHpiHotSwapIndicator      INTEGER,
+    saHpiPowerState            INTEGER,
+    saHpiResetState            INTEGER,
+    saHpiHotSwapState          INTEGER,
+    saHpiPreviousHotSwapState  INTEGER,
+    saHpiHotSwapEventSeverity  INTEGER,
+    saHpiInsertTimeout         Unsigned32,
+    saHpiExtractTimeout        Unsigned32,
+    saHpiActionRequest         INTEGER }
+
+
+saHpiHotSwapIndicator OBJECT-TYPE
+    SYNTAX INTEGER {
+            off(1),
+            on(2) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "The indicator (typically an LED) indicating that an entity is ready to
+                  be removed."
+    REFERENCE 
+        "Derived from typedef in the SAI-HPI-A.01.01 page 100."
+    ::= { saHpiHotSwapEntry 1 }
+
+
+saHpiPowerState OBJECT-TYPE
+    SYNTAX INTEGER {
+            off(1),
+            on(2),
+            cycle(3) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "Indicates the power state of the entity."
+    REFERENCE 
+        "Derived from typedef in the SAI-HPI-A.01.01 page 100."
+    ::= { saHpiHotSwapEntry 2 }
+
+
+saHpiResetState OBJECT-TYPE
+    SYNTAX INTEGER {
+            coldReset(1),
+            warmReset(2),
+            resetAssert(3),
+            resetDeassert(4) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "coldReset(write-only): Executes a cold reset on entity.
+
+         warmReset(write-only): Executes a warm reset on entity.
+
+         resetAssert: When written, assert entity's reset line.  When read, 
+                      indicates entity's reset line is asserted.
+
+         resetDeassert: When written, deassert entity's reset line.  When read, 
+                        indicates entity's reset line is deasserted."
+    REFERENCE 
+        "Derived from actions defined for function prototypes in the 
+         SAI-HPI-A.01.01 pages 73, 74."
+    ::= { saHpiHotSwapEntry 3 }
+
+
+saHpiHotSwapState OBJECT-TYPE
+    SYNTAX INTEGER {
+            inactive(1),
+            insertionPending(2),
+            activeHealthy(3),
+            activeUnhealthy(4),
+            extractionPending(5),
+            notPresent(6) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "The hot swap state of the resource.
+
+         inactive: Indicates the FRU is no longer active in the system, and that 
+                   it has completed the extraction process.
+
+         activeHealthy: Indicates the entity is now an active 
+                        member of the domain.  After a FRU completes the 
+                        hardware connection process, the associated entity 
+                        enters the activeHealthy state if there are no faults 
+                        present.  An entity will transition between 
+                        activeHealthy and activeUnhealthy as fault conditions                  
+                        are asserted or cleared on the FRU.
+
+         activeUnHealthy: Indicates the entity is now an active 
+                          member of the domain.  After a FRU completes the 
+                          hardware connection process, the associated entity 
+                          enters the activeUnhealthy state if there are faults 
+                          present.  An entity will transition between 
+                          activeHealthy and activeUnhealthy as fault conditions 
+                          are asserted or cleared on the FRU.
+
+         extrationPending: Indicates that the entity has requested extraction of 
+                           the associated FRU.  Typically an entity enters this 
+                           state when an ejector latch is opened or when a hot 
+                           swap button is pressed.
+
+         insertionPending: Indicates entity is transitioning from notPresent or 
+                           inactive to an active state as a result of being 
+                           physically inserted into the system.
+
+         notPresent: The entity is not present in the system."
+    REFERENCE 
+        "Derived from states described in the SAI-HPI-A.01.01 pages 62, 63."
+    ::= { saHpiHotSwapEntry 4 }
+
+saHpiPreviousHotSwapState OBJECT-TYPE
+    SYNTAX INTEGER {
+            inactive(1),
+            insertionPending(2),
+            activeHealthy(3),
+            activeUnhealthy(4),
+            extractionPending(5),
+            notPresent(6) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "The previous hot swap state of the resource.  See hotSwapState 
+         description for explanation of states."
+    REFERENCE 
+        "Derived from states described in the SAI-HPI-A.01.01 pages 62, 63."
+    ::= { saHpiHotSwapEntry 5 }
+
+saHpiHotSwapEventSeverity OBJECT-TYPE
+    SYNTAX INTEGER {
+            critical(1),
+            major(2),
+            minor(3),
+            informational(4),
+            ok(5),
+            debug(241) }
+    MAX-ACCESS read-only
+    STATUS current
+    DESCRIPTION
+        "Event severity."
+    REFERENCE 
+        "Derived from typedef saHpiSeverityT described in the SAI-HPI-A.01.01 
+         pages 100, 101."
+    ::= { saHpiHotSwapEntry 6 }
+
+
+saHpiInsertTimeout OBJECT-TYPE
+    SYNTAX Unsigned32
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "Indicates how long to wait (ns) after receiving a FRU insertion 
+         indication before the default auto-insertion policy is invoked."
+    REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-A.01.01 pages 65, 66."
+    ::= { saHpiHotSwapEntry 7 }
+
+
+saHpiExtractTimeout OBJECT-TYPE
+    SYNTAX Unsigned32
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "Indicates how long to wait (ns) after receiving a FRU extraction 
+         indication before the default auto-extraction policy is invoked."
+    REFERENCE 
+        "Derived from function prototypes in the SAI-HPI-A.01.01 pages 67, 68."
+    ::= { saHpiHotSwapEntry 8 }
+
+
+saHpiActionRequest OBJECT-TYPE
+    SYNTAX INTEGER {
+            insertion(1),
+            extraction(2) }
+    MAX-ACCESS read-create
+    STATUS current
+    DESCRIPTION
+        "This is set when the user wants to invoke either the auto-insertion or
+         auto-extraction policy without waiting for a FRU insertion/extraction 
+         first."
+    REFERENCE 
+        "Derived from function prototype in the SAI-HPI-A.01.01 page 69."
+    ::= {saHpiHotSwapEntry 9}
+
+--/*******************************************************************************
+-- * ********************************************************************************
+-- * ********** ********** ********** Resource Data Record ********** **********
+-- * **********
+-- * ********************************************************************************
+-- * *******************************************************************************/
+
+hpiResources	OBJECT IDENTIFIER ::= { hpi 3 }
+
+
+saHpiRdrCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Number of resource data records in this system."
+	::= {hpiResources 1}
+
+saHpiRdrTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiRdrEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table definining RDR records."
+        ::= {hpiResources 2}
+
+saHpiRdrEntry OBJECT-TYPE
+        SYNTAX          SaHpiRdrEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 	" The following describes the different types of records that exist within a
+         RDR repository and the RDR super-structure to all of the specific RDR types
+         (sensor, inventory data, watchdog, etc.)."
+        INDEX   { saHpiResourceID, saHpiRdrRecordId, saHpiRdrType }
+
+        ::= {saHpiRdrTable 1} 
+                                                 
+SaHpiRdrEntry ::= SEQUENCE {
+	saHpiRdrRecordId	Unsigned32,
+	saHpiRdrType		INTEGER,
+	saHpiRdrEntityPath	OCTET STRING,
+	saHpiRdr		RowPointer,
+	saHpiRdrId		Counter32,
+	saHpiRdrRTP		RowPointer
+	}
+
+saHpiRdrRecordId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Record Id for the RDR entry."
+        ::= {saHpiRdrEntry 1}
+
+saHpiRdrType OBJECT-TYPE
+        SYNTAX          INTEGER {
+              			noRecord (0),
+				ctrlRdr (1),
+        			sensorRdr (2),
+              			inventoryRdr (3),
+        	      		watchdogRdr (4)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Type of RDR entry."
+        ::= {saHpiRdrEntry 2}
+
+saHpiRdrEntityPath OBJECT-TYPE
+        SYNTAX          OCTET STRING
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	If resource manages a FRU, entity path of the FRU.
+        If resource manages a single entity, entity path of 
+	that entity. 
+	If resource manages multiple entities, the entity path 
+	of the 'primary' entity managed by the resource.  
+	
+	Must be set to the same value in every domain which 
+	contains this resource.
+
+	This object converts HPI's saHpiEntityPathT structure 
+	and an OpenHPI canonical string. The canonical string is 
+	formed by removing the SaHpi_ENT_ prefix from the 
+	HPI types, and creating tuples for the entity types. 
+	
+	Order of significance is inverted to make entity paths 
+	look more like Unix directory structure. It is also assumed 
+	that {ROOT,0} exists implicitly before all of these entries. 
+	
+	For example:
+ 	 {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
+        ::= {saHpiRdrEntry 3}
+
+
+saHpiRdr OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Forward pointer to one of the four types of tables:
+
+	     saHpiCtrlRec        
+	     saHpiSensorRec
+	     saHpiInventoryRec
+	     saHpiWatchdogRec"
+	::= {saHpiRdrEntry 4}
+
+saHpiRdrId OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Id of the RDR entry. "
+        ::= {saHpiRdrEntry 5}
+
+saHpiRdrRTP OBJECT-TYPE
+	SYNTAX          RowPointer
+	MAX-ACCESS      read-only
+	STATUS          current
+	DESCRIPTION     "Forward pointer to the RTP entry. Another method to match 
+	the RPT and RDR is to compare the EntityPath, but this is much easier. "
+	::= {saHpiRdrEntry 6}
+
+--/*******************************************************************************
+-- * ********************************************************************************
+-- * ********** ********** ********** Control Resource Data Records **********
+-- * ********** **********
+-- * ********************************************************************************
+-- * *******************************************************************************/
+
+saHpiCtrlCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of control resource data records in the system."
+	::= {hpiResources 3}
+
+saHpiCtrlTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiCtrlEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"A table definining Control Resource Data Records."
+	::= {hpiResources 4}
+		
+
+saHpiCtrlEntry OBJECT-TYPE
+	SYNTAX		SaHpiCtrlEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Definition of the control resource data record."
+	INDEX	{ saHpiCtrlNum }
+	::= {saHpiCtrlTable 1}
+
+
+SaHpiCtrlEntry ::= SEQUENCE {
+	saHpiCtrlNum		Unsigned32,
+	saHpiCtrlOutputType	INTEGER,
+	saHpiCtrlBool		TruthValue,
+	saHpiCtrlType		INTEGER,
+	saHpiCtrlState		OCTET STRING,
+	saHpiCtrlOem		Unsigned32, 
+	saHpiCtrlRDR		RowPointer
+}
+
+
+saHpiCtrlNum OBJECT-TYPE 
+	SYNTAX		Unsigned32	
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The control number "
+	::= {saHpiCtrlEntry 1}
+
+
+
+saHpiCtrlOutputType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				generic (1), 
+				led (2), 
+				fanSpeed (3), 
+				dryContactClosure (4),
+				powerSupplyInhibit (5),
+				audible (6), 
+				frontPanelLockout (7),
+				powerInterlock (8), 
+				powerState (9),
+				lcdDisplay (10), 
+				oem (11)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"
+	This enumeration defines the what the control's output will be.  "
+	::= {saHpiCtrlEntry 2}
+
+saHpiCtrlBool OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Ignore control completly (entity not present, disabled, etc) "
+	::= {saHpiCtrlEntry 3}
+
+saHpiCtrlType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+           			digital(1),
+            			discrete(2),
+            			analog(3),
+            			stream(4),
+            			text(5),
+            			oem(193)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"This enumerated type defines the different types of
+	generic controls. "
+	::= {saHpiCtrlEntry 4}
+
+
+saHpiCtrlState OBJECT-TYPE
+	SYNTAX		OCTET STRING (SIZE(1|4|12|9|261|275))
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+  	"This attribute represents the current setting of the control.  It must
+         be interpreted in the context of saHpiCtrlType.
+
+        digital  - The first octet will indicate its setting to be
+                     off(0)
+                     on(1),
+                     pulseOff(2),
+                     pulseOn(3),
+                     auto(255)
+        discrete - Unsigned 32bit integer. 
+
+        analog   - Analog control attributes are represented as follows:
+                     octet 1-4  - minimum value
+                     octet 5-8  - maximum value
+                     octet 9-12 - default value
+
+        stream   - A stream control is represented as follows:
+                     octet 1    - repeat flag
+                     octets 2-5 - bytes of data stored in the stream specified 
+                                  in network byte order.
+                     octets 6-9 - contain the stream data.
+
+        text     - Text control attributes are represented as follows:
+                     octet 1    - max characters
+                     octet 2    - max lines
+                     octet 3    - language. The values can be: 
+				Undef (0), Afar (1), Abkhazian (2), Afrikaans (3),
+				Amharic (4), Arabic (5), Assamese (6), Aymara (7),
+				Azerbaijani (8), Bashkir (9), Byelorussian (10),
+				Bulgarian (11), Bihari (12), Bislama (13),
+				Bengali (14), Tibetan (15), Breton (16), Catalan (17),
+				Corsican (18), Czech (19), Welsh (20), Danish (21),
+				German (22), Bhutani (23), Greek (24), English (25),
+				Esperanto (26), Spanish (27), Estonian (28), Basque (29),
+				Persian (30), Finnish (31), Fiji (32), Faeroese (33),
+				French (34), Frisian (35), Irish (36), Scotsgaelic (37),
+				Galician (38), Guarani (39), Gujarati (40), Hausa (41),
+				Hindi (42), Croatian (43), Hungarian (44), Armenian (45),
+				Interlingua (46), Interlingue (47), Inupiak (48), Indonesian (49),
+				Icelandic (50), Italian (51), Hebrew (52), Japanese (53),
+				Yiddish (54), Javanese (55), Georgian (56), Kazakh (57),
+				Greenlandic (58), Cambodian (59), Kannada (60), Korean (61),
+				Kashmiri (62), Kurdish (63), Kirghiz (64), Latin (65),
+				Lingala (66), Laothian (67), Lithuanian (68), Latvianlettish (69),
+				Malagasy (70), Maori (71), Macedonian (72), Malayalam (73),
+				Mongolian (74), Moldavian (75), Marathi (76), Malay (77),
+				Maltese (78), Burmese (79), Nauru (80), Nepali (81),
+				Dutch (82), Norwegian (83), Occitan (84), Afanoromo (85),
+				Oriya (86), Punjabi (87), Polish (88), Pashtopushto (89),
+				Portuguese (90), Quechua (91), Rhaetoromance (92), Kirundi (93),
+				Romanian (94), Russian (95), Kinyarwanda (96), Sanskrit (97),
+				Sindhi (98), Sangro (99), Serbocroatian (100), Singhalese (101),
+				Slovak (102), Slovenian (103), Samoan (104), Shona (105),
+				Somali (106), Albanian (107), Serbian (108), Siswati (109),
+				Sesotho (110), Sudanese (111), Swedish (112), Swahili (113),
+				Tamil (114), Telugu (115), Tajik (116), Thai (117),
+				Tigrinya (118), Turkmen (119), Tagalog (120), Setswana (121),
+				Tonga (122), Turkish (123), Tsonga (124), Tatar (125),
+				Twi (126), Ukrainian (127), Urdu (128), Uzbek (129),
+				Vietnamese (130), Volapuk (131), Wolof (132), Xhosa (133),
+				Yoruba (134), Chinese (135), Zulu (136)
+                     octet 4    - text encoding
+	 			binary(1):
+		  		  String of bytes, any values legal
+
+         			bcdplus(2)
+				  String of 0-9, space, dash, period ONLY
+         			ascii6(3)
+				  Reduced ASCII character set: 0x20-0x5F ONLY
+         			language(4)
+				  ASCII or UNICODE depending on language
+		     octet 5	- line number
+				(255 for all numbers)
+                     octets 6-261 - text to display
+
+        oem      - An oem control is represented as follows:
+                     octets 1-4   - manufacturer ID in network byte order
+                     octets 5-14  - config data
+		     octets 15-18 - the default manufacturere
+				    ID in network byte order
+		     octet 19	  - length of OEM specfic data
+		     octet 20-275 - OEM specific data
+	"
+    REFERENCE 
+        "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
+	 
+	::= {saHpiCtrlEntry 5}
+
+-- saHpiUint32T Oem; /* Reserved for OEM use */
+saHpiCtrlOem OBJECT-TYPE
+	SYNTAX		Unsigned32
+        MAX-ACCESS      read-only
+	STATUS          current
+	DESCRIPTION     "Reserved for OEM use"
+	::= {saHpiCtrlEntry 6}
+
+saHpiCtrlRDR OBJECT-TYPE
+	SYNTAX          RowPointer
+	MAX-ACCESS      read-only
+	STATUS          current
+	DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
+	::= {saHpiCtrlEntry 7}
+
+
+--/*******************************************************************************
+-- * ********************************************************************************
+-- * ********** ********** ********** Sensor Resource Data Records **********
+-- * ********** **********
+-- * ********************************************************************************
+-- * *******************************************************************************/
+
+
+saHpiSensorCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of sensor resource data records in the system."
+	::= {hpiResources 5}
+
+saHpiSensorTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiSensorEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     "A table definining Sensors records."
+        ::= {hpiResources 6}
+
+saHpiSensorEntry OBJECT-TYPE
+	SYNTAX		SaHpiSensorEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+        " This is the sensor resource data record which
+	describes all of the static  data associated with a sensor."
+        INDEX   { saHpiSensorIndex }
+        ::= {saHpiSensorTable 1}
+
+SaHpiSensorEntry ::= SEQUENCE {
+	saHpiSensorIndex			Unsigned32,
+	saHpiSensorType			INTEGER,
+	saHpiSensorCategory			INTEGER,
+	saHpiSensorEventsCategoryControl	INTEGER,
+	saHpiSensorEventsState			Unsigned32,
+	saHpiSensorIgnore			TruthValue,
+	saHpiSensorReadingFormats		Unsigned32,
+	saHpiSensorIsNumeric                   TruthValue,
+	saHpiSensorSignFormat                  INTEGER,
+	saHpiSensorBaseUnits                   INTEGER,
+	saHpiSensorModifierUnits               INTEGER,
+	saHpiSensorModifierUse                 INTEGER,
+
+	saHpiSensorFactorsStatic		TruthValue,
+	saHpiSensorFactors			OCTET STRING,
+	saHpiSensorFactorsLinearization	INTEGER,
+	saHpiSensorPercentage 			TruthValue,
+
+	saHpiSensorRangeFlags                  Unsigned32,
+	saHpiSensorRangeReadingValuesPresent	OCTET STRING,
+	saHpiSensorRangeReadingRaw		OCTET STRING,
+	saHpiSensorRangeReadingInterpreted	OCTET STRING,
+	saHpiSensorRangeReadingEventSensor	OCTET STRING,
+
+	saHpiSensorThresholdDefnIsThreshold		TruthValue,
+	saHpiSensorThresholdDefnTholdCapabilities	INTEGER,
+	saHpiSensorThresholdDefnReadThold	Unsigned32,
+	saHpiSensorThresholdDefnWriteThold	Unsigned32,
+	saHpiSensorThresholdDefnFixedThold	Unsigned32,
+	saHpiSensorThresholdRaw		OCTET STRING,
+	saHpiSensorThresholdInterpreted	OCTET STRING,
+	saHpiSensorOEM				Unsigned32,
+	saHpiSensorRDR				RowPointer
+	}
+
+
+saHpiSensorIndex OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The sensor number. "
+        ::= {saHpiSensorEntry 1}
+
+
+saHpiSensorType OBJECT-TYPE
+        SYNTAX          INTEGER {
+            temperature(1),
+            voltage(2),
+            current(3),
+            fan(4),
+            physicalSecurity(5),
+            platformViolation(6),
+            processor(7),
+            powerSupply(8),
+            powerUnit(9),
+            coolingDevice(10),
+            otherUnitsBasedSensor(11),
+            memory(12),
+            driveSlot(13),
+            postMemoryResize(14),
+            systemFwProgress(15),
+            eventLoggingDisabled(16),
+            reserved1(17),
+            systemEvent(18),
+            criticalInterrupt(19),
+            button(20),
+            moduleBoard(21),
+            microcontrollerCoProcessor(22),
+            addinCard(23),
+            chassis(24),
+            chipSet(25),
+            otherFru(26),
+            cableInterconnect(27),
+            terminator(28),
+            systemBootInitiated(29),
+            bootError(30),
+            osBoot(31),
+            osCriticalStop(32),
+            slotConnector(33),
+            systemACPIPowerState(34),
+            reserved2(35),
+            platformAlert(36),
+            entityPresence(37),
+            monitorAsicIC(38),
+            lan(39),
+            managementSubsystemHealth(40),
+            battery(41),
+            operational(161),
+            oemSensor(193)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "General sensor type. "
+        ::= {saHpiSensorEntry 2}
+
+saHpiSensorCategory OBJECT-TYPE
+        SYNTAX          INTEGER {
+			unspecified   (0), -- /* unspecified */
+			threshold  (1), -- /* threshold 
+			usage (2), --  /* usage state
+			state (3), --  /* generic state
+			predFail (4), --  /* predictive fail 
+			limit (5), -- /* limit events */
+			performance (6), --  /* performance 
+			severity (7), --/* severity  indicating events */
+			presence (8), -- /* device presence events */
+			enable (9),-- /* device enabled events */
+			availability (10), -- /* availability state events */
+			redundancy (11), --/* redundancy state events */
+			user (126),
+			generic (127)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sensors category.
+			
+			 Sensor events contain an event category and event state. Depending on the 
+			 event category, the event states take on different meanings for events 
+			 generated by specific sensors.
+			
+			 The SaHpi_EC_GENERIC category can be used for discrete sensors which have 
+			 state meanings other than those identified with other event categories.
+			
+			 SaHpi_EC_UNSPECIFIED  0x00  Unspecified 
+			 SaHpi_EC_THRESHOLD    0x01  Threshold events 
+			 SaHpi_EC_USAGE        0x02  Usage state events 
+			 SaHpi_EC_STATE        0x03  Generic state events 
+			 SaHpi_EC_PRED_FAIL    0x04  Predictive fail events 
+			 SaHpi_EC_LIMIT        0x05  Limit events 
+			 SaHpi_EC_PERFORMANCE  0x06  Performance events    
+			 SaHpi_EC_SEVERITY     0x07  Severity  indicating events 
+			 SaHpi_EC_PRESENCE     0x08  Device presence events 
+			 SaHpi_EC_ENABLE       0x09  Device enabled events 
+			 SaHpi_EC_AVAILABILITY 0x0A  Availability state events 
+			
+			 SaHpi_EC_REDUNDANCY   0x0B  Redundancy state events 
+			 SaHpi_EC_USER	       0x7E  User defined events 
+			 SaHpi_EC_GENERIC      0x7F  OEM defined events"
+        ::= {saHpiSensorEntry 3}
+
+saHpiSensorEventsCategoryControl OBJECT-TYPE
+        SYNTAX          INTEGER {
+				perEvent(1),
+				entireSensor(2),
+				globalDisable(3),
+				noEvents(4)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Event Control
+			
+			 This type defines how sensor event messages can be controlled (can be turned 
+			 off and on for each type of event, etc.).
+			
+			    perEvent(1) ,      Event message control per event 
+			    entireSensor(2),   Control for entire sensor only 
+			    globalDisable(3),  Global disable of events only 
+			    noEvents(4)        Events not supported 
+			"
+        ::= {saHpiSensorEntry 4}
+
+saHpiSensorEventsState OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Bit mask of event states supported.
+	The following event states are specified relative to the 
+	categories listed in saHpiSensorCategory. The event types 
+	are only valid for their given category. Each set of 
+	events is labeled as to which category it belongs to.
+	Each event will have only one event state associated with it. 
+	When retrieving the event status or event enabled status a 
+	bit mask of all applicable event states is used. 
+
+	Similarly, when setting the event enabled status a bit mask 
+	of all applicable event states is used.
+			
+			 
+	 saHpiSensorCategory == <any> 
+			
+			SaHpi_ES_UNSPECIFIED 0x0000
+			 
+	saHpiSensorCategory == threshold(1) 
+	When using these event states, the event state should match
+	the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+	event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+			
+	 saHpiSensorCategory == usage(2)
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+			
+	 saHpiSensorCategory == state(3)
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+			
+	 saHpiSensorCategory ==  predFail(4)
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+	
+	 saHpiSensorCategory == limit(5) 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			
+	saHpiSensorCategory ==  performance(6)
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+			
+	saHpiSensorCategory == severity (7) 
+	When using these event states, the event state should match
+	the event severity 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+			
+	saHpiSensorCategory == presence (8) 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+			
+	saHpiSensorCategory == enable (9)
+ 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+			
+	saHpiSensorCategory == availability (10)
+
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+			
+	saHpiSensorCategory == redundancy(11)
+
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			
+			
+	saHpiSensorCategory == generic(127) || user(126) 
+
+	These event states are defined by the OEM or the user of the
+	implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000"
+
+        ::= {saHpiSensorEntry 5}
+
+saHpiSensorIgnore OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Ignore sensor (entity not present, disabled, etc.)
+
+	IBM-KR: If this is 'false' then this sensor wouldn't show up at all, would it?"
+        ::= {saHpiSensorEntry 6}
+
+saHpiSensorReadingFormats OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..3)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Indicates if sensor supports readings in raw, interpreted,
+	and/or event status formats
+	 
+	SaHpi_SRF_RAW         0x01
+ 	SaHpi_SRF_INTERPRETED 0x02
+ 	SaHpi_SRF_EVENT_STATE 0x04
+
+	"
+        ::= {saHpiSensorEntry 7}
+
+saHpiSensorIsNumeric OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "If FALSE, rest of this structure is not meaningful."
+        ::= {saHpiSensorEntry 8}
+
+saHpiSensorSignFormat OBJECT-TYPE
+        SYNTAX          INTEGER {
+				unsigned(0),
+				sdf1SComplement(1),
+				sdf2SComplement(2)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sign Format
+			 
+	This type defines what the sign format of the sensor's raw value is 
+	(1's complement, unsigned, etc.).  "
+        ::= {saHpiSensorEntry 9}
+
+saHpiSensorBaseUnits OBJECT-TYPE
+        SYNTAX          INTEGER {
+				unspecified (0),
+				degreesC (1),
+				degreesF (2),
+				degreesK (3),
+				volts (4),
+				amps (5),
+				watts (6),
+				joules (7),
+				coulombs (8),
+				va (9),
+				nits (10),
+				lumen (11),
+				lux (12),
+				candela (13),
+				kpa (14),
+				psi (15),
+				newton (16),
+				cfm (17),
+				rpm (18),
+				hz (19),
+				microsecond (20),
+				millisecond (21),
+				second (22),
+				minute (23),
+				hour (24),
+				day (25),
+				week (26),
+				mil (27),
+				inches (28),
+				feet (29),
+				cuIn (30),
+				cuFeet (31),
+				mm (32),
+				cm (33),
+				m (34),
+				cuCm (35),
+				cuM (36),
+				liters (37),
+				fluidOunce (38),
+				radians (39),
+				steradians (40),
+				revolutions (41),
+				cycles (42),
+				gravities (43),
+				ounce (44),
+				pound (45),
+				ftLb (46),
+				ozIn (47),
+				gauss (48),
+				gilberts (49),
+				henry (50),
+				millihenry (51),
+				farad (52),
+				microfarad (53),
+				ohms (54),
+				siemens (55),
+				mole (56),
+				becquerel (57),
+				ppm (58),
+				reserved (59),
+				decibels (60),
+				dba (61),
+				dbc (62),
+				gray (63),
+				sievert (64),
+				colorTempDegK (65),
+				bit (66),
+				kilobit (67),
+				megabit (68),
+				gigabit (69),
+				byte (70),
+				kilobyte (71),
+				megabyte (72),
+				gigabyte (73),
+				word (74),
+				dword (75),
+				qword (76),
+				line (77),
+				hit (78),
+				miss (79),
+				retry (80),
+				reset (81),
+				overrun (82),
+				underrun (83),
+				collision (84),
+				packets (85),
+				messages (86),
+				characters (87),
+				errors (88),
+				correctableErrors (89),
+				uncorrectableErrors (90)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Base units (meters, etc.). 
+	This is a list of all the sensor units supported by HPI."
+        ::= {saHpiSensorEntry 10}
+
+saHpiSensorModifierUnits OBJECT-TYPE
+        SYNTAX          INTEGER {
+				unspecified (0),
+				degreesC (1),
+				degreesF (2),
+				degreesK (3),
+				volts (4),
+				amps (5),
+				watts (6),
+				joules (7),
+				coulombs (8),
+				va (9),
+				nits (10),
+				lumen (11),
+				lux (12),
+				candela (13),
+				kpa (14),
+				psi (15),
+				newton (16),
+				cfm (17),
+				rpm (18),
+				hz (19),
+				microsecond (20),
+				millisecond (21),
+				second (22),
+				minute (23),
+				hour (24),
+				day (25),
+				week (26),
+				mil (27),
+				inches (28),
+				feet (29),
+				cuIn (30),
+				cuFeet (31),
+				mm (32),
+				cm (33),
+				m (34),
+				cuCm (35),
+				cuM (36),
+				liters (37),
+				fluidOunce (38),
+				radians (39),
+				steradians (40),
+				revolutions (41),
+				cycles (42),
+				gravities (43),
+				ounce (44),
+				pound (45),
+				ftLb (46),
+				ozIn (47),
+				gauss (48),
+				gilberts (49),
+				henry (50),
+				millihenry (51),
+				farad (52),
+				microfarad (53),
+				ohms (54),
+				siemens (55),
+				mole (56),
+				becquerel (57),
+				ppm (58),
+				reserved (59),
+				decibels (60),
+				dba (61),
+				dbc (62),
+				gray (63),
+				sievert (64),
+				colorTempDegK (65),
+				bit (66),
+				kilobit (67),
+				megabit (68),
+				gigabit (69),
+				byte (70),
+				kilobyte (71),
+				megabyte (72),
+				gigabyte (73),
+				word (74),
+				dword (75),
+				qword (76),
+				line (77),
+				hit (78),
+				miss (79),
+				retry (80),
+				reset (81),
+				overrun (82),
+				underrun (83),
+				collision (84),
+				packets (85),
+				messages (86),
+				characters (87),
+				errors (88),
+				correctableErrors (89),
+				uncorrectableErrors (90)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Modifier unit (second, etc.).  
+	This is a list of all the sensor units supported by HPI"
+        ::= {saHpiSensorEntry 11}
+
+saHpiSensorModifierUse OBJECT-TYPE
+        SYNTAX          INTEGER {
+				none(0),
+				basicOverModifier(1),
+				basicTimesModifier(2)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Modifier Unit Use (msec, etc.).
+			 
+	This type defines how the modifier unit is used. For example: 
+	base unit == meter, modifier unit == seconds, and
+	 modifier unit use == basicOverModifier(1). 
+	The resulting unit would be meters per second."			
+        ::= {saHpiSensorEntry 12}
+
+saHpiSensorFactorsStatic OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " True if the sensor factors are static. If 
+			factors vary over sensor range, and are not
+                        accessible through HPI."
+        ::= {saHpiSensorEntry 13}
+
+
+saHpiSensorFactors OBJECT-TYPE
+	SYNTAX		OCTET STRING(SIZE (1..10))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	This object represents certain attributes of the factor table.
+	It must be interpreted in the context saHpiSensorFactorsT 
+	(from the HPI specification). The information in this object
+	is determined based on saHpiSensorFactorsStatic.
+
+	Octets  are as follow:
+	1-2		M_Factor (16-bit signed integer)
+	3-4		B_Factor (16-bit signed integer)
+	5-6		Accuracy Factor (16-but unsigned integer)
+	7		Tolerance Factor (8-bit unsigned integer)
+	8		Accuracy Exponent (8-bit unsigned integer)
+	9		Result Exponent	(8-bit signed integer)
+	10		B Exponent	(8-bit signed integer) "	
+        ::= {saHpiSensorEntry 14}
+
+saHpiSensorFactorsLinearization OBJECT-TYPE
+        SYNTAX          INTEGER {
+				unspecified (0),
+				linear (1),
+				ln (2),
+				log10 (3),
+				log2 (4),
+				e (5),
+				exp10 (6),
+				exp2 (7),
+				oneoverx (8),
+				sqrx (9),
+				cubex (10),
+				sqrtx (11),
+				cubertx (12),
+				nonlinear (113),
+				oem (114)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Linearization"
+        ::= {saHpiSensorEntry 15}
+
+saHpiSensorPercentage OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Is value a percentage."
+        ::= {saHpiSensorEntry 16}
+
+saHpiSensorRangeFlags OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..255)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Sensor Range
+	Sensor range values can include minimum, maximum, 
+	normal minimum, normal 	 maximum, and nominal values.
+			
+			 MIN        0x10 
+			 MAX        0x08 
+			 NORMAL_MIN 0x04
+			 NORMAL_MAX 0x02 
+			 NOMINAL    0x01"
+        ::= {saHpiSensorEntry 17}
+
+
+saHpiSensorRangeReadingValuesPresent OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|5)) 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Each sensor may support one or more of raw, interpreted, or event status 
+	representations of the sensor data. For analog sensors the raw value is the 
+	raw value from the sensor (such as ticks per fan blade) and the interpreted 
+	value is the raw value converted in to a usable format (such as RPM). The 
+	interpreted value can be calculated by the HPI implementation using the 
+	sensor factors or by another OEM means.
+	
+	The five octets represent bit-flags of the maximum, minimum, nominal,
+	normalmax, and normal min. Each of the octets is the flag for the type
+	of sensor information is present.
+
+	The five octets are:
+
+
+	1	- maximum value sensor data is represented as		
+			 RAW         0x01
+			 INTERPRETED 0x02 
+			 EVENT_STATE 0x04
+
+	2	- minimum value sensor data is represented as		
+			 RAW         0x01
+			 INTERPRETED 0x02 
+			 EVENT_STATE 0x04
+	3	- nominal value sensor data is represented as		
+			 RAW         0x01
+			 INTERPRETED 0x02 
+			 EVENT_STATE 0x04
+	4	- maximum normal value sensor data is represented as		
+			 RAW         0x01
+			 INTERPRETED 0x02 
+			 EVENT_STATE 0x04
+	5	- minumum normal value sensor data is represented as		
+			 RAW         0x01
+			 INTERPRETED 0x02 
+			 EVENT_STATE 0x04
+
+	"
+        ::= {saHpiSensorEntry 18}
+
+saHpiSensorRangeReadingRaw OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|20))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Set of five raw reading of the sensor: maximum, minimum, nominal,
+	maximum nominal, minimum nominal. Each raw reading is represented as
+	32-bit unsigned integer. To determine which set of reading is active,
+	consult saHpiSensorRangeFlags."
+	
+        ::= {saHpiSensorEntry 19}
+
+saHpiSensorRangeReadingInterpreted OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|165))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Set of five interpreted sensor reading of the sensor setting: maximum, minimum, nominal,
+	maximum nominal, minimum nominal. Each interpreted reading is represented as
+	a combination of first octet representing which date type it is, followed by the
+	value. The combination uses exactly 33 octets, regardless of type.
+	To determine which set of reading is active, consult saHpiSensorRangeFlags.
+
+	Each combination consist of two pairs of data. The first octet
+	determines in which encoding the date is written. The types are:
+
+			
+		uint8 (1),
+		uint16 (2),
+		uint32 (3),
+		int8 (4),
+		int16 (5),
+		int32 (6),
+		float32 (7),
+		buffer (8)
+
+	Followed by the data represented as unsigned 8bit integer, or
+	16-bit unsigned integer, etc. Max length of data is 32 octets."
+
+
+        ::= {saHpiSensorEntry 20}
+
+saHpiSensorRangeReadingEventSensor OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|15))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " 
+	Set of five sensor status of the sensor setting: maximum, minimum, nominal,
+	maximum nominal, minimum nominal. Each sensor status is represented as
+	a combination of first octet representing if sensor scanning is enabled
+	and if events are enabled, followed by the event status.  
+	The combination uses exactly three octets. 
+	
+
+	To determine which set of reading is active, consult saHpiSensorRangeFlags.
+
+	Each combination consist of two pairs of data. The first octet
+	Is used to determine if sensor scanning is enabled and if 
+	events are enabled. If events are enabled, the two following octests  will 
+	have valid data for the outstanding sensor event states. 
+	The flags for the first octet are
+
+			SaHpi_SENSTAT_EVENTS_ENABLED(128),
+			SaHpi_SENSTAT_SCAN_ENABLED(64),
+			SaHpi_SENSTAT_BUSY(32)
+
+	The next two octets are event States
+			
+			 The following event states are specified relative to the categories listed 
+			 above. The event types are only valid for their given category. Each set of 
+			 events is labeled as to which category it belongs to.
+			 Each event will have only one event state associated with it. When retrieving 
+			 the event status or event enabled status a bit mask of all applicable event 
+			 states is used. Similarly, when setting the event enabled status a bit mask 
+			 of all applicable event states is used.
+			
+			 
+			 saHpiEventCategory == <any> 
+			
+			 SaHpi_ES_UNSPECIFIED 0x0000
+			 
+			 saHpiEventCategory == SaHpi_EC_THRESHOLD 
+			 When using these event states, the event state should match
+			 the event severity (for example SaHpi_ES_LOWER_MINOR should have an 
+			 event severity of SaHpi_MINOR).
+			
+			 SaHpi_ES_LOWER_MINOR 0x0001
+			 SaHpi_ES_LOWER_MAJOR 0x0002
+			 SaHpi_ES_LOWER_CRIT  0x0004
+			 SaHpi_ES_UPPER_MINOR 0x0008
+			 SaHpi_ES_UPPER_MAJOR 0x0010
+			 SaHpi_ES_UPPER_CRIT  0x0020
+			
+			 saHpiEventCategory == SaHpi_EC_USAGE 
+			 SaHpi_ES_IDLE   0x0001
+			 SaHpi_ES_ACTIVE 0x0002
+			 SaHpi_ES_BUSY   0x0004
+			
+			 saHpiEventCategory == SaHpi_EC_STATE 
+			 SaHpi_ES_STATE_DEASSERTED 0x0001
+			 SaHpi_ES_STATE_ASSERTED   0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_PRED_FAIL 
+			 SaHpi_ES_PRED_FAILURE_DEASSERT 0x0001
+			 SaHpi_ES_PRED_FAILURE_ASSERT   0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_LIMIT 
+			 SaHpi_ES_LIMIT_NOT_EXCEEDED 0x0001
+			 SaHpi_ES_LIMIT_EXCEEDED     0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_PERFORMANCE 
+			 SaHpi_ES_PERFORMANCE_MET   0x0001
+			 SaHpi_ES_PERFORMANCE_LAGS  0x0002
+			
+			
+			 saHpiEventCategory == SaHpi_EC_SEVERITY 
+			 When using these event states, the event state should match
+			 the event severity 
+			
+			 SaHpi_ES_OK                  0x0001
+			 SaHpi_ES_MINOR_FROM_OK       0x0002
+			 SaHpi_ES_MAJOR_FROM_LESS     0x0004
+			 SaHpi_ES_CRITICAL_FROM_LESS  0x0008
+			 SaHpi_ES_MINOR_FROM_MORE     0x0010
+			 SaHpi_ES_MAJOR_FROM_CRITICAL 0x0020
+			 SaHpi_ES_CRITICAL            0x0040
+			 SaHpi_ES_MONITOR             0x0080
+			 SaHpi_ES_INFORMATIONAL       0x0100
+			
+			 saHpiEventCategory == SaHpi_EC_PRESENCE 
+			 SaHpi_ES_ABSENT  0x0001
+			 SaHpi_ES_PRESENT 0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_ENABLE 
+			 SaHpi_ES_DISABLED 0x0001
+			 SaHpi_ES_ENABLED  0x0002
+			
+			 saHpiEventCategory == SaHpi_EC_AVAILABILITY 
+			 SaHpi_ES_RUNNING       0x0001
+			 SaHpi_ES_TEST          0x0002
+			 SaHpi_ES_POWER_OFF     0x0004
+			 SaHpi_ES_ON_LINE       0x0008
+			 SaHpi_ES_OFF_LINE      0x0010
+			 SaHpi_ES_OFF_DUTY      0x0020
+			 SaHpi_ES_DEGRADED      0x0040
+			 SaHpi_ES_POWER_SAVE    0x0080
+			 SaHpi_ES_INSTALL_ERROR 0x0100
+			
+			 saHpiEventCategory == SaHpi_EC_REDUNDANCY 
+			 SaHpi_ES_FULLY_REDUNDANT                  0x0001
+			 SaHpi_ES_REDUNDANCY_LOST                  0x0002
+			 SaHpi_ES_REDUNDANCY_DEGRADED              0x0004
+			 SaHpi_ES_REDUNDANCY_LOST_SUFFICIENT_RESOURCES  0x0008
+			 SaHpi_ES_NON_REDUNDANT_SUFFICIENT_RESOURCES 0x0010
+			 SaHpi_ES_NON_REDUNDANT_INSUFFICIENT_RESOURCES  0x0020
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
+			 SaHpi_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
+			
+			
+			 saHpiEventCategory == SaHpi_EC_GENERIC || SaHpi_EC_USER
+			 These event states are defined by the OEM or the user of the
+			 implementation. 
+			
+			 SaHpi_ES_STATE_00  0x0001
+			 SaHpi_ES_STATE_01  0x0002
+			 SaHpi_ES_STATE_02  0x0004
+			 SaHpi_ES_STATE_03  0x0008
+			 SaHpi_ES_STATE_04  0x0010
+			 SaHpi_ES_STATE_05  0x0020
+			 SaHpi_ES_STATE_06  0x0040
+			 SaHpi_ES_STATE_07  0x0080
+			 SaHpi_ES_STATE_08  0x0100
+			 SaHpi_ES_STATE_09  0x0200
+			 SaHpi_ES_STATE_10  0x0400
+			 SaHpi_ES_STATE_11  0x0800
+			 SaHpi_ES_STATE_12  0x1000
+			 SaHpi_ES_STATE_13  0x2000
+			 SaHpi_ES_STATE_14  0x4000"
+        ::= {saHpiSensorEntry 21}
+
+
+saHpiSensorThresholdDefnIsThreshold OBJECT-TYPE
+        SYNTAX          TruthValue
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "True if the sensor supports thresholds. If false,
+	 rest of structure is not meaningful."
+        ::= {saHpiSensorEntry 22}
+
+saHpiSensorThresholdDefnTholdCapabilities OBJECT-TYPE
+        SYNTAX          INTEGER {
+				raw(1),
+				interpretted(2)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "How the threshold values are written. Raw or in interpreted state"
+        ::= {saHpiSensorEntry 23}
+
+saHpiSensorThresholdDefnReadThold OBJECT-TYPE
+        SYNTAX          Unsigned32(1..128)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Threshold Support
+			
+			 These types define what threshold values are readable. 
+			
+			 SaHpi_STM_LOW_MINOR      0x01
+			 SaHpi_STM_LOW_MAJOR      0x02
+			 SaHpi_STM_LOW_CRIT       0x04
+			 SaHpi_STM_UP_MINOR       0x08
+			 SaHpi_STM_UP_MAJOR       0x10
+			 SaHpi_STM_UP_CRIT        0x20
+			 SaHpi_STM_UP_HYSTERESIS  0x40
+			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+        ::= {saHpiSensorEntry 24}
+
+saHpiSensorThresholdDefnWriteThold OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..128)
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Threshold Support
+			
+			 These types define what threshold values are writable. 
+			
+			 SaHpi_STM_LOW_MINOR      0x01
+			 SaHpi_STM_LOW_MAJOR      0x02
+			 SaHpi_STM_LOW_CRIT       0x04
+			 SaHpi_STM_UP_MINOR       0x08
+			 SaHpi_STM_UP_MAJOR       0x10
+			 SaHpi_STM_UP_CRIT        0x20
+			 SaHpi_STM_UP_HYSTERESIS  0x40
+			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+        ::= {saHpiSensorEntry 25}
+
+saHpiSensorThresholdDefnFixedThold OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..128) 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " Threshold Support
+			
+			 These types define what threshold values are  fixed. 
+
+			 SaHpi_STM_LOW_MINOR      0x01
+			 SaHpi_STM_LOW_MAJOR      0x02
+			 SaHpi_STM_LOW_CRIT       0x04
+			 SaHpi_STM_UP_MINOR       0x08
+			 SaHpi_STM_UP_MAJOR       0x10
+			 SaHpi_STM_UP_CRIT        0x20
+			 SaHpi_STM_UP_HYSTERESIS  0x40
+			 SaHpi_STM_LOW_HYSTERESIS 0x80 "
+        ::= {saHpiSensorEntry 26}
+
+
+saHpiSensorThresholdRaw OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|32))
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+	Set of eight raw values that can be set. The 
+	eight sets are ordered as following:
+
+	 LowCritical,
+	 LowMajor,
+	 LowMinor,
+	 UpCritical,
+	 UpMajor,
+	 UpMinor,
+	 PosThdHysteresis,
+	 NegThdHysteresis
+
+	Each raw value is a 32-bit unsigned integer that occupies
+	four octets. Each set occupies four octets. 
+
+	Note: Depending on saHpiSensorThresholdDefnFixedThold,
+	saHpiSensorThresholdDefnWriteThold  only selective sets
+	can be set.
+
+	Also the saHpiSensorThresholdDefnTholdCapabilities determines
+	if the threshold set can be set using raw values or interpreted.
+
+	And finally, make sure saHpiSensorThresholdDefnIsThreshold
+	is to true, otherwise the sensor does not support setting
+	threshold values.
+	"
+        ::= {saHpiSensorEntry 27}
+
+saHpiSensorThresholdInterpreted OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0|264))
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+	Set of eight tuples that can be set. The 
+	eight sets are ordered as following:
+
+	 LowCritical,
+	 LowMajor,
+	 LowMinor,
+	 UpCritical,
+	 UpMajor,
+	 UpMinor,
+	 PosThdHysteresis,
+	 NegThdHysteresis
+
+
+	Each tuple is a combination of a 8-bit integer representing 
+	the format of the data, followed by the data.
+
+	The tuple uses exactly 33 octets, regardless of the type.
+	The first octet is the type, which can be:
+		
+		uint8 (1),
+		uint16 (2),
+		uint32 (3),
+		int8 (4),
+		int16 (5),
+		int32 (6),
+		float32 (7),
+		buffer (8)
+
+	Which is then followed by the data represented as unsigned 8bit integer, or
+	16-bit unsigned integer, etc. Max length of data is 32 octets.
+
+	Since there are eight tuples, the length is 264 (8*33).
+
+	Note: Depending on saHpiSensorThresholdDefnFixedThold,
+	saHpiSensorThresholdDefnWriteThold  only selective sets
+	can be set.
+
+	Also the saHpiSensorThresholdDefnTholdCapabilities determines
+	if the threshold set can be set using raw values or interpreted.
+
+	And finally, make sure saHpiSensorThresholdDefnIsThreshold
+	is to true, otherwise the sensor does not support setting
+	threshold values.
+	"
+        ::= {saHpiSensorEntry 28}
+
+saHpiSensorOEM OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " Reserved for OEM use."
+        ::= {saHpiSensorEntry 29}
+
+saHpiSensorRDR OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Forward pointer to the RDR OID."
+	::= {saHpiSensorEntry 30}
+--
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********                    Entity Inventory Data                   **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+
+		
+saHpiInventoryCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of inventory resource data records present on this system."
+	::= {hpiResources 7}
+
+saHpiInventoryTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiInventoryEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"Table defining entity inventory resource data records."
+	::= {hpiResources 8}
+saHpiInventoryEntry OBJECT-TYPE
+	SYNTAX		SaHpiInventoryEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"These structures are used to read and write inventory data to entity inventory
+		repositories within a resource."
+	INDEX	{ saHpiInventoryEirId }
+	::= {saHpiInventoryTable 1}
+
+
+SaHpiInventoryEntry ::= SEQUENCE {
+	saHpiInventoryEirId		Unsigned32,
+	saHpiInventoryRecordType	INTEGER,
+	saHpiInventoryValidity		INTEGER,
+	saHpiInventoryAttributes	OCTET STRING,
+	saHpiInventoryTextType		INTEGER,
+	saHpiInventoryTextLanguage	INTEGER,
+	saHpiInventoryManufacturer	OCTET STRING,
+	saHpiInventoryProductName	OCTET STRING,
+	saHpiInventoryProductVersion	OCTET STRING,
+	saHpiInventoryModelNumber	OCTET STRING,
+	saHpiInventorySerialNumber	OCTET STRING,
+	saHpiInventoryPartNumber	OCTET STRING,
+	saHpiInventoryFileId		OCTET STRING,
+	saHpiInventoryAssetTag		OCTET STRING,
+	saHpiInventoryCustomField	OCTET STRING,
+	saHpiInventoryRDR		RowPointer
+	}
+
+saHpiInventoryEirId OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Identifier for an entity inventory repository. The  default is
+	SaHpi_DEFAULT_INVENTORY_ID  0x00 "
+        ::= {saHpiInventoryEntry 1}
+
+
+saHpiInventoryRecordType OBJECT-TYPE
+        SYNTAX          INTEGER {
+				internalUse(176),
+                                chassisInfo(177),
+                                boardInfo(178),
+                                productInfo(179),
+                                oem(192)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     " Inventory Record definitions"
+        ::= {saHpiInventoryEntry 2}
+
+saHpiInventoryValidity OBJECT-TYPE
+        SYNTAX          INTEGER{
+				valid(1),
+				invalid(0),
+				dataOverflow(2)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Indication as to whether data is complete and valid. "
+        ::= {saHpiInventoryEntry 3}
+
+saHpiInventoryAttributes OBJECT-TYPE
+	SYNTAX		OCTET STRING (SIZE(1|4|12|9|261|275))
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+  	"This attribute represents the current setting of the inventory.  It must
+         be interpreted in the context of saHpiInventoryRecordType.
+
+        internalUse  - The first octet will be variable length
+		opaque data.
+
+        chassisInfo  - Chassis informations are represented as follows:
+		octet 1		- determines the type of chassis:
+
+				other (1), unknown (2), desktop (3),
+				lowProfileDesktop (4), pizzaBox (5),
+				miniTower (6), tower (7), portable (8),
+				laptop (9), notebook (10), handheld (11),
+				dockingStation (12), allinone (13),
+				subnotebook (14), spaceSaving (15),
+				lunchBox (16), mainServer (17),
+				expansion (18), subchassis (19),
+				busExpansionChassis (20),
+				peripheralChassis (21), raidChassis (22),
+				rackmount (23)
+		octet 2-5	- manufacturing date/time represented
+			as 64-bit signed integer from 00:00:00, 
+			January 1, 1970, in a 64-bit signed integer. This format
+			is sufficient to represent times with nano-second resolution from the
+			year 1678 to 2262.
+			
+			The value -263, which is 0x8000000000000000, is used to indicate
+			unknownunspecified time.
+
+		The rest of information is provided in following objects
+
+		saHpiInventoryManufacturer
+		saHpiInventoryProductName
+		saHpiInventoryProductVersion
+		saHpiInventoryModelNumber
+		saHpiInventorySerialNumber
+		saHpiInventoryPartNumber
+		saHpiInventoryFileId
+		saHpiInventoryAssetTag
+		saHpiInventoryCustomField
+			 			
+	boardInfo- Textual information regarding the board.
+		octet 1-4	- manufacturing date/time represented
+			as 64-bit signed integer from 00:00:00, 
+			January 1, 1970, in a 64-bit signed integer. This format
+			is sufficient to represent times with nano-second resolution from the
+			year 1678 to 2262.
+			
+			The value -263, which is 0x8000000000000000, is used to indicate
+			unknownunspecified time.
+
+		The rest of information is provided in following objects
+
+		saHpiInventoryManufacturer
+		saHpiInventoryProductName
+		saHpiInventoryProductVersion
+		saHpiInventoryModelNumber
+		saHpiInventorySerialNumber
+		saHpiInventoryPartNumber
+		saHpiInventoryFileId
+		saHpiInventoryAssetTag
+		saHpiInventoryCustomField	 
+              
+
+		   
+	productInfo-The information of the product board represented as follows:
+
+		octet 1-4	- manufacturing date/time represented
+			as 64-bit signed integer from 00:00:00, 
+			January 1, 1970, in a 64-bit signed integer. This format
+			is sufficient to represent times with nano-second resolution from the
+			year 1678 to 2262.
+			
+			The value -263, which is 0x8000000000000000, is used to indicate
+			unknownunspecified time.
+
+		The rest of information is provided in following objects
+
+		saHpiInventoryManufacturer
+		saHpiInventoryProductName
+		saHpiInventoryProductVersion
+		saHpiInventoryModelNumber
+		saHpiInventorySerialNumber
+		saHpiInventoryPartNumber
+		saHpiInventoryFileId
+		saHpiInventoryAssetTag
+		saHpiInventoryCustomField
+			                 
+
+	oem	- OEM data represented as follows:
+		octet 1-4	-manufacturer ID in network byte order "
+        ::= {saHpiInventoryEntry 4}
+
+saHpiInventoryTextType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				binary(1), 
+				bcdplus(2), 
+				ascii6(3),
+				language(4)
+			}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
+	encoded as:
+	 binary(1):
+		  String of bytes, any values legal
+
+         bcdplus(2)
+		String of 0-9, space, dash, period ONLY
+
+         ascii6(3)
+		Reduced ASCII character set: 0x20-0x5F ONLY
+
+         language(4)
+		ASCII or UNICODE depending on language
+	"
+	::= {saHpiInventoryEntry 5}
+
+saHpiInventoryTextLanguage OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undef(0),
+				afar(1),
+				abkhazian(2),
+				afrikaans(3),
+				amharic(4),
+				arabic(5),
+				assamese(6),
+				aymara(7),
+				azerbaijani(8),
+				bashkir(9),
+				byelorussian(10),
+				bulgarian(11),
+				bihari(12),
+				bislama(13),
+				bengali(14),
+				tibetan(15),
+				breton(16),
+				catalan(17),
+				corsican(18),
+				czech(19),
+				welsh(20),
+				danish(21),
+				german(22),
+				bhutani(23),
+				greek(24),
+				english(25),
+				esperanto(26),
+				spanish(27),
+				estonian(28),
+				basque(29),
+				persian(30),
+				finnish(31),
+				fiji(32),
+				faeroese(33),
+				french(34),
+				frisian(35),
+				irish(36),
+				scotsgaelic(37),
+				galician(38),
+				guarani(39),
+				gujarati(40),
+				hausa(41),
+				hindi(42),
+				croatian(43),
+				hungarian(44),
+				armenian(45),
+				interlingua(46),
+				interlingue(47),
+				inupiak(48),
+				indonesian(49),
+				icelandic(50),
+				italian(51),
+				hebrew(52),
+				japanese(53),
+				yiddish(54),
+				javanese(55),
+				georgian(56),
+				kazakh(57),
+				greenlandic(58),
+				cambodian(59),
+				kannada(60),
+				korean(61),
+				kashmiri(62),
+				kurdish(63),
+				kirghiz(64),
+				latin(65),
+				lingala(66),
+				laothian(67),
+				lithuanian(68),
+				latvianlettish(69),
+				malagasy(70),
+				maori(71),
+				macedonian(72),
+				malayalam(73),
+				mongolian(74),
+				moldavian(75),
+				marathi(76),
+				malay(77),
+				maltese(78),
+				burmese(79),
+				nauru(80),
+				nepali(81),
+				dutch(82),
+				norwegian(83),
+				occitan(84),
+				afanoromo(85),
+				oriya(86),
+				punjabi(87),
+				polish(88),
+				pashtopushto(89),
+				portuguese(90),
+				quechua(91),
+				rhaetoromance(92),
+				kirundi(93),
+				romanian(94),
+				russian(95),
+				kinyarwanda(96),
+				sanskrit(97),
+				sindhi(98),
+				sangro(99),
+				serbocroatian(100),
+				singhalese(101),
+				slovak(102),
+				slovenian(103),
+				samoan(104),
+				shona(105),
+				somali(106),
+				albanian(107),
+				serbian(108),
+				siswati(109),
+				sesotho(110),
+				sudanese(111),
+				swedish(112),
+				swahili(113),
+				tamil(114),
+				telugu(115),
+				tajik(116),
+				thai(117),
+				tigrinya(118),
+				turkmen(119),
+				tagalog(120),
+				setswana(121),
+				tonga(122),
+				turkish(123),
+				tsonga(124),
+				tatar(125),
+				twi(126),
+				ukrainian(127),
+				urdu(128),
+				uzbek(129),
+				vietnamese(130),
+				volapuk(131),
+				wolof(132),
+				xhosa(133),
+				yoruba(134),
+				chinese(135),
+				zulu(136)
+			}
+        MAX-ACCESS      read-only
+	STATUS          current
+	DESCRIPTION     "
+	This enumeration lists all of the languages that can be 
+	associated with text.  Undef (0) indicates that 
+	the language is unspecified or unknown.  "
+	::= {saHpiInventoryEntry 6}
+
+saHpiInventoryManufacturer OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Manufacturer  of the inventory resource data record product.
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 7}
+
+saHpiInventoryProductName OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255)) 
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Product name of the inventory resource data record product.
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 8}
+
+saHpiInventoryProductVersion OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Product version of the inventory resource data record product.
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 9}
+
+saHpiInventoryModelNumber OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Model number of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 10}
+
+saHpiInventorySerialNumber OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Serial number of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 11}
+
+saHpiInventoryPartNumber OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Part number  of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 12}
+
+saHpiInventoryFileId OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	File id of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 13}
+
+saHpiInventoryAssetTag OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Asset tag of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 14}
+
+saHpiInventoryCustomField OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(1..255))
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "
+	Custom field of the inventory resource data record product.
+
+	It must be interpreted in the context of saHpiInventoryRecordType to 
+	figure out if this information is related to  chassisInfo(177),
+        boardInfo(178), or oductInfo(179) of the inventory item."
+        ::= {saHpiInventoryEntry 15}
+
+saHpiInventoryRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
+        ::= {saHpiInventoryEntry 16}
+--
+-- /*******************************************************************************
+-- ********************************************************************************
+-- **********                                                            **********
+-- **********                  Watchdog Resource Data Records            **********
+-- **********                                                            **********
+-- ********************************************************************************
+-- *******************************************************************************/
+--
+
+
+saHpiWatchdogCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of watchdogs present on this system."
+	::= {hpiResources 9}
+
+saHpiWatchdogTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiWatchdogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION	"Table of watchdog  resource data records."
+        ::= {hpiResources 10}
+
+saHpiWatchdogEntry OBJECT-TYPE
+        SYNTAX          SaHpiWatchdogEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     " When the 'Watchdog' capability is set in a resource, a watchdog with an
+ identifier of SaHpi_DEFAULT_WATCHDOG_NUM is required. All watchdogs must be
+ represented in the RDR repository with an saHpiWatchdogRecT, including the
+ watchdog with an identifier of SaHpi_DEFAULT_WATCHDOG_NUM."
+        INDEX   { saHpiWatchdogNum }
+        ::= {saHpiWatchdogTable 1}
+
+SaHpiWatchdogEntry ::= SEQUENCE {
+	saHpiWatchdogNum		Unsigned32,
+	saHpiWatchdogLog		TruthValue,
+	saHpiWatchdogRunning		TruthValue,
+	saHpiWatchdogTimerUse		INTEGER,
+	saHpiWatchdogTimerAction	INTEGER,
+	saHpiWatchdogPretimerInterrupt	INTEGER,
+	saHpiWatchdogPreTimeoutInterval	Unsigned32,
+	saHpiWatchdogTimerUseExpFlags	Unsigned32,
+	saHpiWatchdogTimerInitialCount	Unsigned32,
+	saHpiWatchdogTimerPresentCount	Unsigned32,
+	saHpiWatchdogOem		Unsigned32,
+	saHpiWatchdogRDR		RowPointer
+      }
+
+saHpiWatchdogNum OBJECT-TYPE
+        SYNTAX          Unsigned32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Watchdog number"
+        ::= {saHpiWatchdogEntry 1}
+
+ 
+saHpiWatchdogLog OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"
+	If you read this object, it means:
+	Log -  indicates whether or not the Watchdog is configured to
+               issue an event when it next times out. TRUE=event will
+               be issued on timeout.
+	If you set this object, it means:
+	Log -  indicates whether or not the Watchdog should  issue
+               an event when it next times out. TRUE=event will be
+               issued on timeout."
+	::= {saHpiWatchdogEntry 2}
+
+saHpiWatchdogRunning OBJECT-TYPE 
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"
+	If you read this object, it means:
+	Running -	indicates whether or not the Watchdog is currently
+                        running or stopped. TRUE=Watchdog is running.
+	If you set this object, it means:
+	Running -	indicates whether or not the Watchdog should be
+                        stopped before updating.
+                        TRUE =  Watchdog is not stopped. If it is already
+                                stopped, it will remain stopped, but if it is
+                                running, it will continue to run, with the
+                                countdown timer reset to the new InitialCount.
+                                Note that there is a race condition possible
+                                with this setting, so it should be used with
+                                care.
+                        FALSE = Watchdog is stopped. After this object 
+				is set, a subsequent read on this object
+				is required to start the timer.
+	"
+	::= {saHpiWatchdogEntry 3}
+
+saHpiWatchdogTimerUse OBJECT-TYPE
+        SYNTAX          INTEGER {
+				none (0),
+				biosFrb2 (1),
+				biosPost (2),
+				osLoad (3),
+				smsOs (4),
+				oem (5),
+				unspecified (15)
+			}
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "
+	If you read this object, it means:
+	TimerUse - indicates the current use of the timer; one of five
+                   preset uses which was included on the last
+                   SET object request, or through some
+                   other implementation-dependent means to start the
+                   Watchdog timer.  
+	If you set this object, it means:
+	TimerUse - indicates the current use of the timer. Will control
+                   which saHpiWatchdogTimerUseExpFlags is set if the timer expires"
+        ::= {saHpiWatchdogEntry 4}
+
+saHpiWatchdogTimerAction OBJECT-TYPE
+        SYNTAX          INTEGER {
+				noAction (0),
+				reset (1),
+				powerDown (2),
+				powerCycle (3)
+			}
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Indicates what action will be taken when the Watchdog
+                        times out."
+        ::= {saHpiWatchdogEntry 5}
+
+saHpiWatchdogPretimerInterrupt OBJECT-TYPE
+        SYNTAX          INTEGER {
+				none (0),
+				smi (1),
+				nmi (2),
+				messageInterrupt (3),
+				oem (15)
+			}
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "PretimerInterrupt -  indicates which action will be taken
+                        'PreTimeoutInterval' seconds prior to Watchdog timer
+                        expiration. "
+        ::= {saHpiWatchdogEntry 6}
+
+saHpiWatchdogPreTimeoutInterval OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "PreTimeoutInterval indicates how many  milliseconds prior to timer time
+                        out the PretimerInterrupt action will be taken. If
+                        'PreTimeoutInterval' = 0, the PretimerInterrupt action
+                        will occur concurrently with 'TimerAction.' HPI
+                        implementations may not be able to support millisecond
+                        resolution and may have a maximum value restriction.
+                        These restrictions should be documented by the
+                        provider of the HPI interface. "
+        ::= {saHpiWatchdogEntry 7}
+
+saHpiWatchdogTimerUseExpFlags OBJECT-TYPE
+        SYNTAX          Unsigned32 (1..32)
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "set of five bit flags which indicate that a Watchdog
+                        timer timeout has occurred while the corresponding
+                        TimerUse value was set. Once set, these flags stay
+                        set until specifically cleared with a
+                        SET on this object, or by some other
+                        implementation-dependent means.
+
+	Bit flags are:
+
+	SaHpi_WATCHDOG_EXP_BIOS_FRB2   0x02
+ 	SaHpi_WATCHDOG_EXP_BIOS_POST   0x04
+ 	SaHpi_WATCHDOG_EXP_OS_LOAD     0x08
+ 	SaHpi_WATCHDOG_EXP_SMS_OS      0x10
+ 	SaHpi_WATCHDOG_EXP_OEM         0x20
+			"
+        ::= {saHpiWatchdogEntry 8}
+
+saHpiWatchdogTimerInitialCount OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "InitialCount -       The time, in milliseconds, 
+			before the timer will time
+                        out after a SaHpiWatchdogTimerReset() function call is
+                        made, or some other implementation-dependent strobe is
+                        sent to the Watchdog. HPI implementations may not be
+                        able to support millisecond resolution and may have a
+                        maximum value restriction. These restrictions should
+                        be documented by the provider of the HPI interface."
+        ::= {saHpiWatchdogEntry 9}
+
+saHpiWatchdogTimerPresentCount OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "PresentCount -       The remaining time in milliseconds before the timer
+                        will time out unless a SaHpiWatchdogTimerReset()
+                        function call is made, or some other implementation-
+                        dependent strobe is sent to the Watchdog.
+                        HPI implementations may not be able to support
+                        millisecond resolution on watchdog timers, but will
+                        return the number of clock ticks remaining times the
+                        number of milliseconds between each tick. "
+        ::= {saHpiWatchdogEntry 10}
+
+saHpiWatchdogOem OBJECT-TYPE
+        SYNTAX          Unsigned32 
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     "Reserved for OEM use"
+        ::= {saHpiWatchdogEntry 11}
+
+saHpiWatchdogRDR OBJECT-TYPE
+	SYNTAX		RowPointer
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Forward pointer to the RDR OID."
+	::= {saHpiWatchdogEntry 12}
+-- 
+-- Notifications
+--
+
+saHpiNotifications OBJECT IDENTIFIER ::= { hpi 4 }
+
+saHpiSensorNotification NOTIFICATION-TYPE
+	OBJECTS {	
+		saHpiEventIndex,
+		saHpiEventSeverity,
+		saHpiEventCategory,
+		saHpiEventSensorNum,
+		saHpiEventSensorType,
+		saHpiSensorOptionalData,
+		saHpiEventTriggerReadingRaw,
+		saHpiEventOem
+	}
+	STATUS current
+ 	DESCRIPTION
+	"Sensor event notification."
+	REFERENCE 
+	"Derived from typedefs in SAI-HPI-A.01.01 pages 101, 102."
+	::= { saHpiNotifications 1 }
+
+saHpiHotSwapNotification NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiEventIndex,
+		saHpiEventSeverity,
+		saHpiEventCategory,
+		saHpiEventHotSwapState,
+		saHpiEventPreviousHotSwapState
+	}
+	STATUS current
+	DESCRIPTION
+	"Hot swap notification."
+	::= { saHpiNotifications 2}
+
+saHpiWatchdogNotification NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiEventIndex,
+		saHpiEventSeverity,
+		saHpiEventCategory,	
+		saHpiEventWatchdogNum,
+		saHpiEventWatchdogAction,
+		saHpiEventWatchdogPreTimerAction,
+		saHpiEventWatchdogUse
+	}
+	STATUS current
+	DESCRIPTION
+	"Watchdog notification."
+	::= { saHpiNotifications 3}
+
+saHpiOEMNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiEventIndex,
+		saHpiEventSeverity,
+		saHpiEventCategory,	
+		saHpiEventOemManufacturerIdT,
+		saHpiEventOemEventData
+	}
+	STATUS current
+	DESCRIPTION
+	"OEM event notifications."
+	::= { saHpiNotifications 4}
+
+saHpiUserNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiEventIndex,
+		saHpiEventSeverity,
+		saHpiEventCategory,
+		saHpiEventUserEventData
+	}
+	STATUS current
+	DESCRIPTION
+	"User event notifications."
+	::= { saHpiNotifications 5}
+
+saHpiResourceNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiEntryID,
+		saHpiResourceID,
+		saHpiDomainID,
+		saHpiResourceEntityPath,
+		saHpiResourceCapabilities,
+		saHpiResourceSeverity,
+		saHpiEntryCount,
+		saHpiEntryUpdateCount
+	}
+	STATUS current
+	DESCRIPTION
+	"Resource (RPT) change event notifications."
+	::= { saHpiNotifications 6}
+
+saHpiResourceDataRecordNotifications NOTIFICATION-TYPE
+	OBJECTS {
+		saHpiResourceID,
+		saHpiRdrRecordId,
+		saHpiRdrType,
+		saHpiRdrEntityPath,
+		saHpiRdr,
+		saHpiRdrRTP,
+		saHpiRdrCount
+	}
+	STATUS current
+	DESCRIPTION
+	"Resource  Data Record change event notifications."
+	::= { saHpiNotifications 7}
+
+-- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----       
+--      OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2
+-- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+
+hpiMIBCompliances OBJECT IDENTIFIER ::= { hpi 5 }
+
+saHpiEntityGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiEntryCount,
+		saHpiEntryUpdateCount,
+		saHpiEntryUpdateTimestamp,
+		saHpiDomainID ,
+		saHpiEntryID ,
+		saHpiResourceID ,
+		saHpiResourceEntityPath ,
+		saHpiResourceCapabilities ,
+		saHpiResourceSeverity ,
+		saHpiResourceInfoResourceRev ,
+		saHpiResourceInfoSpecificVer ,
+		saHpiResourceInfoDeviceSupport ,
+		saHpiResourceInfoManufacturerId ,
+		saHpiResourceInfoProductId ,
+		saHpiResourceInfoFirmwareMajorRev ,
+		saHpiResourceInfoFirmwareMinorRev ,
+		saHpiResourceInfoAuxFirmwareRev ,
+		saHpiResourceTagTextType ,
+		saHpiResourceTagTextLanguage,
+		saHpiResourceTag
+	}
+	STATUS current
+	DESCRIPTION
+		"Entity group"
+	::=  { hpiMIBCompliances 1}
+
+saHpiEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiEventCount,
+		saHpiEventIndex,
+		saHpiEventType,
+		saHpiEventTimestamp,
+		saHpiEventSeverity,
+		saHpiEventSensorNum,
+		saHpiEventSensorType,
+		saHpiEventCategory,
+		saHpiEventAssertion,
+		saHpiEventStateCategoryUnspecified,
+                saHpiEventStateCategoryThreshold,
+                saHpiEventStateCategoryUsage,
+                saHpiEventStateCategoryState,
+                saHpiEventStateCategoryPredFail,
+                saHpiEventStateCategoryLimit ,
+                saHpiEventStateCategoryPerformance,
+                saHpiEventStateCategorySeverity,
+                saHpiEventStateCategoryPresence,
+                saHpiEventStateCategoryEnable,
+                saHpiEventStateCategoryAvailability,
+                saHpiEventStateCategoryRedundancy,
+                saHpiEventStateCategoryUser,
+                saHpiEventStateCategoryGeneric,
+		saHpiSensorOptionalData,
+		saHpiEventTriggerReadingType,
+		saHpiEventTriggerReadingRaw,
+		saHpiEventTriggerReadingInterpretedType,
+		saHpiEventTriggerReadingInterpreted,
+		saHpiEventTriggerReadingEventState,
+		saHpiEventTriggerThresholdType,
+		saHpiEventTriggerThresholdRaw,
+		saHpiEventTriggerThresholdInterpretedType,
+		saHpiEventTriggerThresholdInterpreted,
+		saHpiEventTriggerThresholdEventState,
+		saHpiEventPreviousState,
+		saHpiEventOem,
+		saHpiEventSensorSpecific,
+		saHpiEventHotSwapState,
+		saHpiEventPreviousHotSwapState,
+		saHpiEventWatchdogNum,
+		saHpiEventWatchdogAction,
+		saHpiEventWatchdogPreTimerAction,
+		saHpiEventWatchdogUse,
+		saHpiEventOemManufacturerIdT,
+		saHpiEventOemEventData,
+		saHpiEventUserEventData
+	}
+	STATUS current
+	DESCRIPTION
+		"Event group"
+	::= { hpiMIBCompliances 2}
+
+saHpiSystemEventGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiSystemEventLogEntries,
+		saHpiSystemEventLogSize,
+		saHpiSystemEventLogUpdateTimestamp,
+		saHpiSystemEventLogCurrentTime,
+		saHpiSystemEventLogEnabled,
+		saHpiSystemEventLogOverflowFlag,
+		saHpiSystemEventLogOverflowAction,
+		saHpiSystemEventLogDeleteEntrySupported,
+		saHpiSystemEventLogEntryId,
+		saHpiSystemEventLogTimestamp,
+		saHpiSystemEventLogged
+	}
+	STATUS current
+	DESCRIPTION 
+		"System event group"
+	::=  { hpiMIBCompliances 3}
+
+saHpiHotSwapGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiHotSwapIndicator,
+		saHpiPowerState,
+		saHpiResetState,
+		saHpiHotSwapState,
+		saHpiPreviousHotSwapState,
+		saHpiHotSwapEventSeverity,
+		saHpiInsertTimeout,
+		saHpiExtractTimeout,
+		saHpiActionRequest
+	}
+	STATUS current
+	DESCRIPTION
+		"Hotswap group"
+	::=  { hpiMIBCompliances 4}
+
+saHpiResourceDataRecordGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiRdrCount,
+		saHpiRdrRecordId,
+		saHpiRdrType,
+		saHpiRdrEntityPath,
+		saHpiRdr,
+		saHpiRdrId,
+		saHpiRdrRTP
+	}
+	STATUS current
+	DESCRIPTION
+		"Resource Data Record group"
+	::=  { hpiMIBCompliances 5}
+
+saHpiSensorGroup	OBJECT-GROUP
+	OBJECTS {
+		saHpiSensorCount,
+		saHpiSensorIndex,
+		saHpiSensorType,
+		saHpiSensorCategory,
+		saHpiSensorEventsCategoryControl,
+		saHpiSensorEventsState,
+		saHpiSensorIgnore,
+		saHpiSensorReadingFormats,
+		saHpiSensorIsNumeric,
+		saHpiSensorSignFormat,
+		saHpiSensorBaseUnits,
+		saHpiSensorModifierUnits,
+		saHpiSensorModifierUse,
+		saHpiSensorFactorsStatic,
+		saHpiSensorFactors,
+		saHpiSensorFactorsLinearization,
+		saHpiSensorPercentage,
+		saHpiSensorRangeFlags,
+		saHpiSensorRangeReadingValuesPresent,
+		saHpiSensorRangeReadingRaw,
+		saHpiSensorRangeReadingInterpreted,
+		saHpiSensorRangeReadingEventSensor,
+		saHpiSensorThresholdDefnIsThreshold,
+		saHpiSensorThresholdDefnTholdCapabilities,
+		saHpiSensorThresholdDefnReadThold,
+		saHpiSensorThresholdDefnWriteThold,
+		saHpiSensorThresholdDefnFixedThold,
+		saHpiSensorThresholdRaw,
+		saHpiSensorThresholdInterpreted,
+		saHpiSensorOEM,
+		saHpiSensorRDR
+	}
+	STATUS current
+	DESCRIPTION
+		"Sensors groups."
+	::=  { hpiMIBCompliances 6}
+
+saHpiCtrlGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiCtrlCount,
+		saHpiCtrlNum ,
+		saHpiCtrlOutputType ,
+		saHpiCtrlBool ,
+		saHpiCtrlType ,
+		saHpiCtrlState,
+		saHpiCtrlOem,
+		saHpiCtrlRDR
+	}
+	STATUS current
+	DESCRIPTION
+		"Control group."
+	::=  { hpiMIBCompliances 7}
+
+saHpiInventoryGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiInventoryCount,
+		saHpiInventoryEirId,
+		saHpiInventoryRecordType,
+		saHpiInventoryValidity,
+		saHpiInventoryAttributes,
+		saHpiInventoryTextType ,
+		saHpiInventoryTextLanguage,
+		saHpiInventoryManufacturer,
+		saHpiInventoryProductName,
+		saHpiInventoryProductVersion,
+		saHpiInventoryModelNumber,
+		saHpiInventorySerialNumber,
+		saHpiInventoryPartNumber,
+		saHpiInventoryFileId,
+		saHpiInventoryAssetTag,
+		saHpiInventoryCustomField,
+		saHpiInventoryRDR
+	}
+	STATUS current
+	DESCRIPTION
+		"Inventory group."
+	::=  { hpiMIBCompliances 8}
+
+saHpiWatchdogGroup OBJECT-GROUP
+	OBJECTS {
+		saHpiWatchdogCount,
+		saHpiWatchdogNum,
+		saHpiWatchdogLog ,
+		saHpiWatchdogRunning ,
+		saHpiWatchdogTimerUse,
+		saHpiWatchdogTimerAction,
+		saHpiWatchdogPretimerInterrupt,
+		saHpiWatchdogPreTimeoutInterval,
+		saHpiWatchdogTimerUseExpFlags,
+		saHpiWatchdogTimerInitialCount,
+		saHpiWatchdogTimerPresentCount,
+		saHpiWatchdogOem,
+		saHpiWatchdogRDR
+	}
+	STATUS current
+	DESCRIPTION
+		"Watchdog group."
+	::=  { hpiMIBCompliances 9}
+
+saHpiNotificationGroup NOTIFICATION-GROUP
+	NOTIFICATIONS {
+		saHpiSensorNotification,
+		saHpiHotSwapNotification,
+		saHpiWatchdogNotification,
+		saHpiOEMNotifications,
+		saHpiUserNotifications,
+		saHpiResourceNotifications,
+		saHpiResourceDataRecordNotifications
+	}
+	STATUS	current
+	DESCRIPTION
+	"Notification group"
+	::=  { hpiMIBCompliances 10}
+	
+saHpiMIBCompliance MODULE-COMPLIANCE
+	STATUS current
+	DESCRIPTION
+	"The compliance statement for SMIv2 compliance of Platform MIB."
+	MODULE
+	MANDATORY-GROUPS {
+		saHpiEntityGroup,
+		saHpiEventGroup,
+		saHpiSystemEventGroup,
+		saHpiHotSwapGroup,
+		saHpiResourceDataRecordGroup,
+		saHpiSensorGroup,
+		saHpiCtrlGroup,
+		saHpiInventoryGroup,
+		saHpiWatchdogGroup,
+		saHpiNotificationGroup
+	}
+	::=  { hpiMIBCompliances 11}
+END
