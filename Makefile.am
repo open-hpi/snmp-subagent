@@ -66,9 +66,9 @@ EXTRA_DIST	= $(shell find include -name '*.h') \
 
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/snmp
-	$(INSTALL_DATA) hpiSubagent.conf $(DESTDIR)$(sysconfdir)/snmp
+	$(INSTALL_DATA) $(top_srcdir)/hpiSubagent.conf $(DESTDIR)$(sysconfdir)/snmp
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/init.d/
-	$(INSTALL_PROGRAM) -m 755 openhpi-subagent.rc $(DESTDIR)$(sysconfdir)/init.d/openhpi-subagent
+	$(INSTALL_PROGRAM) -m 755 $(top_srcdir)/openhpi-subagent.rc $(DESTDIR)$(sysconfdir)/init.d/openhpi-subagent
 
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
