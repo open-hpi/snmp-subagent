@@ -6226,7 +6226,12 @@ saHpiCurrentSensorStateDataPresent  OBJECT-TYPE
 		saHpiCurrentSensorStateEventState.
 		
 	noData(4) - The sensor does not support reading current values 
-		nor events.
+		nor events.  
+		
+	See SAI-HPI-B.01.01 SaHpiSensorReadingT, this columnar node is analogous to 
+	field 'IsSupported' in  SaHpiSensorReadingT.  'IsSupported' is set when a 
+	sensor reading/threshold value is available.  Otherwise, if no reading or 
+	threshold is supported, this flag is set to False.
 	"
         ::= {saHpiCurrentSensorStateEntry 1}
 
@@ -6667,8 +6672,10 @@ saHpiSensorThdLowCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowCriticalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining the lower critical threshold value for 
-	a given sensor."
+        DESCRIPTION     "A table definining the lower critical threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 
         ::= {hpiSensor 7}
@@ -6749,7 +6756,10 @@ saHpiSensorThdLowMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMajorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining lower major threshold values."
+        DESCRIPTION     "A table definining the lower major threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
 	REFERENCE
 	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 	
         ::= {hpiSensor 8}
@@ -6833,7 +6843,11 @@ saHpiSensorThdLowMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowMinorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining lower minor threshold values."
+        DESCRIPTION     "A table definining the lower minor threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
+
         ::= {hpiSensor 9}
 
 saHpiSensorThdLowMinorEntry OBJECT-TYPE
@@ -6913,7 +6927,10 @@ saHpiSensorThdUpCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpCriticalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table defining upper critical threshold values."
+        DESCRIPTION     "A table definining the upper critical threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
         ::= {hpiSensor 10}
 
 saHpiSensorThdUpCriticalEntry OBJECT-TYPE
@@ -6991,7 +7008,10 @@ saHpiSensorThdUpMajorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMajorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table defining upper major threshold values."
+        DESCRIPTION     "A table definining the upper major threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
         ::= {hpiSensor 11}
 
 saHpiSensorThdUpMajorEntry OBJECT-TYPE
@@ -7070,7 +7090,10 @@ saHpiSensorThdUpMinorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdUpMinorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table defining upper minor threshold values."
+        DESCRIPTION     "A table definining the upper minor threshold value.
+	If SAI-HPI-B.01.01 SaHpiSensorThdDefnT field IsAccessible == FALSE then 
+	no threshold record is created.  Also see saHpiCurrentSensorStateDataPresent
+	for dependencies."
         ::= {hpiSensor 12}
 
 saHpiSensorThdUpMinorEntry OBJECT-TYPE
