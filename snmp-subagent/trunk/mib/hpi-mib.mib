@@ -4931,13 +4931,14 @@ saHpiWatchdogRunning OBJECT-TYPE
 
 saHpiWatchdogTimerUse OBJECT-TYPE
         SYNTAX          INTEGER {
-				none (0),
-				biosFrb2 (1),
-				biosPost (2),
-				osLoad (3),
-				smsOs (4),
-				oem (5),
-				unspecified (15)
+				undefined(0),
+				none (1),
+				biosFrb2 (2),
+				biosPost (4),
+				osLoad (5),
+				smsOs (6),
+				oem (7),
+				unspecified (16)
 			}
         MAX-ACCESS      read-write
         STATUS          current
@@ -4958,10 +4959,11 @@ saHpiWatchdogTimerUse OBJECT-TYPE
 
 saHpiWatchdogTimerAction OBJECT-TYPE
         SYNTAX          INTEGER {
-				noAction (0),
-				reset (1),
-				powerDown (2),
-				powerCycle (3)
+				undefined(0),
+				noAction (1),
+				reset (2),
+				powerDown (3),
+				powerCycle (4)
 			}
         MAX-ACCESS      read-write
         STATUS          current
@@ -4974,11 +4976,12 @@ saHpiWatchdogTimerAction OBJECT-TYPE
 
 saHpiWatchdogPretimerInterrupt OBJECT-TYPE
         SYNTAX          INTEGER {
-				none (0),
-				smi (1),
-				nmi (2),
-				messageInterrupt (3),
-				oem (15)
+				undefined(0),
+				none (1),
+				smi (2),
+				nmi (3),
+				messageInterrupt (4),
+				oem (16)
 			}
         MAX-ACCESS      read-write
         STATUS          current
