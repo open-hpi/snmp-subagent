@@ -475,6 +475,23 @@ SaHpiTimeString ::= TEXTUAL-CONVENTION
         "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
     SYNTAX      OCTET STRING(SIZE(0..255))
 
+SaHpiStatusCondType ::= TEXTUAL-CONVENTION
+	STATUS      current
+	DESCRIPTION
+	"Enumeration of Announcement Types
+		SAHPI_STATUS_COND_TYPE_SENSOR,
+		SAHPI_STATUS_COND_TYPE_RESOURCE,
+		SAHPI_STATUS_COND_TYPE_OEM,
+		SAHPI_STATUS_COND_TYPE_USER"
+	REFERENCE
+	"Derived from SAI-HPI-B.01.01 section 8.15."
+	SYNTAX	INTEGER {
+			undefined (0),
+			sensor (1),
+			resource (2),
+			oem (3),
+			user (4)
+		}
 
 SaHpiEventCategory ::= TEXTUAL-CONVENTION
     STATUS      current
