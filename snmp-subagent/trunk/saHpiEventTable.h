@@ -222,7 +222,7 @@ populate_event(SaHpiSelEntryIdT,
 	       size_t *);
 
 
-  int delete_entry(saHpiEventTable_context *ctx);
+  int delete_event_entry(saHpiEventTable_context *ctx);
 
 
 int
