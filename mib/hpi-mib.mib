@@ -1780,7 +1780,7 @@ saHpiDomainAlarmEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "This table is used to store alarm information."
-        INDEX   { saHpiDomainId, saHpiDomainAlarmId }
+        INDEX   { saHpiDomainId, saHpiDomainAlarmId, saHpiDomainAlarmSeverity }
         ::= {saHpiDomainAlarmTable 1}
         
 SaHpiDomainAlarmEntry ::= SEQUENCE {
