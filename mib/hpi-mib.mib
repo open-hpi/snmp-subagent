@@ -1953,7 +1953,7 @@ SaHpiResourceEntry ::= SEQUENCE {
         saHpiResourceTagTextLanguage            SaHpiTextLanguage,
         saHpiResourceTag                        SaHpiText,
         
-        saHpiResourceParamControl                       INTEGER
+        saHpiResourceParmControl                       INTEGER
 
         }
 
@@ -2280,7 +2280,7 @@ saHpiResourceTag        OBJECT-TYPE
 	::=   {saHpiResourceEntry 19 }
 
 
-saHpiResourceParamControl OBJECT-TYPE
+saHpiResourceParmControl OBJECT-TYPE
         SYNTAX          INTEGER {
                                 undefined(0),
                                 restoreDefaultParm(1),
@@ -7339,7 +7339,8 @@ saHpiInventoryEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "The number of inventory resource data records present on this system."
+        DESCRIPTION     "The number of inventory resource data records 
+	managed by the underlying management system."
         ::= {hpiInventory 1}
 
 saHpiInventoryTable OBJECT-TYPE
@@ -8453,7 +8454,7 @@ saHpiResourceGroup OBJECT-GROUP
 		saHpiResourceTagTextType,
 		saHpiResourceTagTextLanguage,
 		saHpiResourceTag,
-		saHpiResourceParamControl
+		saHpiResourceParmControl
 	}
 	STATUS	current
 	DESCRIPTION
