@@ -717,6 +717,8 @@ non-volatile storage will survive power cycles and resource resets.
 non-volatile storage. Resource
 configuration parameters include sensor thresholds and sensor 
 configurations, as well as resource-specific."
+	REFERENCE
+	"Derieved from SA-HPI-A.01.01 page 72."
 	::={saHpiEntry 18}
 
 
@@ -2649,6 +2651,9 @@ SaHpiCtrlEntry ::= SEQUENCE {
 	saHpiCtrlState		OCTET STRING,
 	saHpiCtrlAttributes	OCTET STRING,
 	saHpiCtrlOem		Unsigned32, 
+	saHpiCtrlTextType	INTEGER,
+	saHpiCtrlTextLanguage	INTEGER,
+	saHpiCtrlText		OCTET STRING,
 	saHpiCtrlRDR		RowPointer
 }
 
@@ -2706,7 +2711,7 @@ saHpiCtrlType OBJECT-TYPE
 
 
 saHpiCtrlState OBJECT-TYPE
-	SYNTAX		OCTET STRING (SIZE(1|4|9|261|259))
+	SYNTAX		OCTET STRING (SIZE(1|4|9))
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	"
@@ -2751,57 +2756,17 @@ saHpiCtrlState OBJECT-TYPE
 				the control will 'wrap' to the next line 
 				(still clearing the trailing characters on the
 				last line written).
-                     octet 2    - Language. The value can be: 
-				Undef (0), Afar (1), Abkhazian (2), Afrikaans (3),
-				Amharic (4), Arabic (5), Assamese (6), Aymara (7),
-				Azerbaijani (8), Bashkir (9), Byelorussian (10),
-				Bulgarian (11), Bihari (12), Bislama (13),
-				Bengali (14), Tibetan (15), Breton (16), Catalan (17),
-				Corsican (18), Czech (19), Welsh (20), Danish (21),
-				German (22), Bhutani (23), Greek (24), English (25),
-				Esperanto (26), Spanish (27), Estonian (28), Basque (29),
-				Persian (30), Finnish (31), Fiji (32), Faeroese (33),
-				French (34), Frisian (35), Irish (36), Scotsgaelic (37),
-				Galician (38), Guarani (39), Gujarati (40), Hausa (41),
-				Hindi (42), Croatian (43), Hungarian (44), Armenian (45),
-				Interlingua (46), Interlingue (47), Inupiak (48), Indonesian (49),
-				Icelandic (50), Italian (51), Hebrew (52), Japanese (53),
-				Yiddish (54), Javanese (55), Georgian (56), Kazakh (57),
-				Greenlandic (58), Cambodian (59), Kannada (60), Korean (61),
-				Kashmiri (62), Kurdish (63), Kirghiz (64), Latin (65),
-				Lingala (66), Laothian (67), Lithuanian (68), Latvianlettish (69),
-				Malagasy (70), Maori (71), Macedonian (72), Malayalam (73),
-				Mongolian (74), Moldavian (75), Marathi (76), Malay (77),
-				Maltese (78), Burmese (79), Nauru (80), Nepali (81),
-				Dutch (82), Norwegian (83), Occitan (84), Afanoromo (85),
-				Oriya (86), Punjabi (87), Polish (88), Pashtopushto (89),
-				Portuguese (90), Quechua (91), Rhaetoromance (92), Kirundi (93),
-				Romanian (94), Russian (95), Kinyarwanda (96), Sanskrit (97),
-				Sindhi (98), Sangro (99), Serbocroatian (100), Singhalese (101),
-				Slovak (102), Slovenian (103), Samoan (104), Shona (105),
-				Somali (106), Albanian (107), Serbian (108), Siswati (109),
-				Sesotho (110), Sudanese (111), Swedish (112), Swahili (113),
-				Tamil (114), Telugu (115), Tajik (116), Thai (117),
-				Tigrinya (118), Turkmen (119), Tagalog (120), Setswana (121),
-				Tonga (122), Turkish (123), Tsonga (124), Tatar (125),
-				Twi (126), Ukrainian (127), Urdu (128), Uzbek (129),
-				Vietnamese (130), Volapuk (131), Wolof (132), Xhosa (133),
-				Yoruba (134), Chinese (135), Zulu (136)
-                     octet 3    - text encoding
-	 			binary(1):
-		  		  String of bytes, any values legal
-         			bcdplus(2)
-				  String of 0-9, space, dash, period ONLY
-         			ascii6(3)
-				  Reduced ASCII character set: 0x20-0x5F ONLY
-         			language(4)
-				  ASCII or UNICODE depending on language
-                     octets 4-n - text to display/write. Where max(n) is 259.
+
+		The data will be in saHpiCtrlTextType, 
+		saHpiCtrlTextLanguage, and saHpiCtrlText.
+
 
         oem      - An oem control is represented as follows:
                      octets 1-4   - manufacturer ID in network byte order
-		     octet  5	  - length of data.
-                     octets 5-n   -  control data (where max(n) is 261).
+
+		The data will be put in saHpiCtrlTextType, 
+		saHpiCtrlTextLanguage, and saHpiCtrlText.
+		
 	"
     REFERENCE 
         "Derived from typedef described in the SAI-HPI-A.01.01 pages 93, 94."
@@ -2825,10 +2790,10 @@ saHpiCtrlAttributes	OBJECT-TYPE
 	text	- Text control attributes are represented as follows:
 		  octet 1	- max characters	
 		  octet 2	- max lines.
-		  octet 3	- Language. Consult saHpiCtrlState for
+		  octet 3	- Language. Consult saHpiCtrlTextLangauge for
 				  values.
 
-		  octet 4 	- encoding. Consult saHpiCtrlState for
+		  octet 4 	- encoding. Consult saHpiCtrlTextType for
 				  values.
 
 		  octet 5-n	- Text to display (where max(n) is 260).
@@ -2846,12 +2811,229 @@ saHpiCtrlOem OBJECT-TYPE
 	DESCRIPTION     "Reserved for OEM use"
 	::= {saHpiCtrlEntry 7}
 
+saHpiCtrlTextType OBJECT-TYPE 
+	SYNTAX		INTEGER {
+				undefined(0),
+				binary(1), 
+				bcdplus(2), 
+				ascii6(3),
+				language(4)
+			}
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"
+	Defines the type of data the saHpiCtrlText is
+	encoded as:
+	 binary(1):
+		  String of bytes, any values legal
+
+         bcdplus(2)
+		String of 0-9, space, dash, period ONLY
+
+         ascii6(3)
+		Reduced ASCII character set: 0x20-0x5F ONLY
+
+         language(4)
+		ASCII or UNICODE depending on language
+	"
+	::= {saHpiCtrlEntry 8}
+
+saHpiCtrlTextLanguage OBJECT-TYPE
+	SYNTAX		INTEGER {
+				undef(0),
+				afar(1),
+				abkhazian(2),
+				afrikaans(3),
+				amharic(4),
+				arabic(5),
+				assamese(6),
+				aymara(7),
+				azerbaijani(8),
+				bashkir(9),
+				byelorussian(10),
+				bulgarian(11),
+				bihari(12),
+				bislama(13),
+				bengali(14),
+				tibetan(15),
+				breton(16),
+				catalan(17),
+				corsican(18),
+				czech(19),
+				welsh(20),
+				danish(21),
+				german(22),
+				bhutani(23),
+				greek(24),
+				english(25),
+				esperanto(26),
+				spanish(27),
+				estonian(28),
+				basque(29),
+				persian(30),
+				finnish(31),
+				fiji(32),
+				faeroese(33),
+				french(34),
+				frisian(35),
+				irish(36),
+				scotsgaelic(37),
+				galician(38),
+				guarani(39),
+				gujarati(40),
+				hausa(41),
+				hindi(42),
+				croatian(43),
+				hungarian(44),
+				armenian(45),
+				interlingua(46),
+				interlingue(47),
+				inupiak(48),
+				indonesian(49),
+				icelandic(50),
+				italian(51),
+				hebrew(52),
+				japanese(53),
+				yiddish(54),
+				javanese(55),
+				georgian(56),
+				kazakh(57),
+				greenlandic(58),
+				cambodian(59),
+				kannada(60),
+				korean(61),
+				kashmiri(62),
+				kurdish(63),
+				kirghiz(64),
+				latin(65),
+				lingala(66),
+				laothian(67),
+				lithuanian(68),
+				latvianlettish(69),
+				malagasy(70),
+				maori(71),
+				macedonian(72),
+				malayalam(73),
+				mongolian(74),
+				moldavian(75),
+				marathi(76),
+				malay(77),
+				maltese(78),
+				burmese(79),
+				nauru(80),
+				nepali(81),
+				dutch(82),
+				norwegian(83),
+				occitan(84),
+				afanoromo(85),
+				oriya(86),
+				punjabi(87),
+				polish(88),
+				pashtopushto(89),
+				portuguese(90),
+				quechua(91),
+				rhaetoromance(92),
+				kirundi(93),
+				romanian(94),
+				russian(95),
+				kinyarwanda(96),
+				sanskrit(97),
+				sindhi(98),
+				sangro(99),
+				serbocroatian(100),
+				singhalese(101),
+				slovak(102),
+				slovenian(103),
+				samoan(104),
+				shona(105),
+				somali(106),
+				albanian(107),
+				serbian(108),
+				siswati(109),
+				sesotho(110),
+				sudanese(111),
+				swedish(112),
+				swahili(113),
+				tamil(114),
+				telugu(115),
+				tajik(116),
+				thai(117),
+				tigrinya(118),
+				turkmen(119),
+				tagalog(120),
+				setswana(121),
+				tonga(122),
+				turkish(123),
+				tsonga(124),
+				tatar(125),
+				twi(126),
+				ukrainian(127),
+				urdu(128),
+				uzbek(129),
+				vietnamese(130),
+				volapuk(131),
+				wolof(132),
+				xhosa(133),
+				yoruba(134),
+				chinese(135),
+				zulu(136)
+			}
+        MAX-ACCESS      read-write
+	STATUS          current
+	DESCRIPTION     "
+	This enumeration lists all of the languages that can be 
+	associated with text.  Undef (0) indicates that 
+	the language is unspecified or unknown.  "
+	::= {saHpiCtrlEntry 9}
+
+saHpiCtrlText OBJECT-TYPE
+        SYNTAX          OCTET STRING(SIZE(0..255))
+        MAX-ACCESS      read-write
+        STATUS          current
+        DESCRIPTION     
+	"This value is only filled if the saHpiCtrlType
+	is set to text(5) or oem(193). 
+
+	if saHpiCtrlType == text(5),
+		
+The value will contain the line of text (the line
+number is determined by saHpiCtrlState)  or if the line number
+passed is 255,  this object will have the entire text of the control, 
+or as much of it as will fit in this object.
+
+This value will consist of the text of all the lines concatenated, 
+using the maximum number of characters for each line 
+(no trimming of trailing blanks).
+
+Note that depending on the data type and language, the text may be
+encoded in 2-byte Unicode, which requires two bytes of data per
+character. 
+Note that the number of lines and columns in a text control
+can be obtained from the saHpiCtrlAttributes.
+
+When writing, if less than a full line of data is written, 
+the control will clear all spaces beyond those written on the line. 
+Thus writing a zero-length string will clear the addressed line. 
+It is also possible to include more characters in the text passed 
+in than will fit on one line; in this case, the control will
+'wrap' to the next line (still clearing the trailing characters 
+on the last line written).	
+
+	if saHpiCtrlType == oem(193),
+
+	The OEM data is restricted to 255.
+	"
+	REFERENCE
+	"Derieved from typedef and function calls described in
+	SAI-HPI-A.01.01 pages 93,94."
+	::= {saHpiCtrlEntry 10}
+
 saHpiCtrlRDR OBJECT-TYPE
 	SYNTAX          RowPointer
 	MAX-ACCESS      read-only
 	STATUS          current
 	DESCRIPTION     "Pointer to RDR for this Control Resource Data Record."
-	::= {saHpiCtrlEntry 8}
+	::= {saHpiCtrlEntry 11}
 
 
 --/*******************************************************************************
@@ -5093,6 +5275,9 @@ saHpiCtrlGroup OBJECT-GROUP
 		saHpiCtrlState,
 		saHpiCtrlAttributes,
 		saHpiCtrlOem,
+		saHpiCtrlTextType,
+		saHpiCtrlTextLanguage,
+		saHpiCtrlText,
 		saHpiCtrlRDR
 	}
 	STATUS current
