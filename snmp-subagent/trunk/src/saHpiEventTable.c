@@ -179,22 +179,19 @@ int populate_event() {
     return rc;
   }
 
-  //Subscribe to the Events
-
-  err = saHpiSubscribe( session_id, SAHPI_FALSE);
 
   while ( eventflag == AGENT_TRUE ) {
     memset(&event, 0x20, sizeof(SaHpiEventT));
     err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
     if (err == SA_OK) {
-      /*  
+      /*
 	rpt.ResourceCapabilities = 0;
 	event.Source = 200;
 	event.EventType = SAHPI_ET_USER;
 	event.Timestamp = -1;
 	event.Severity = 3;
 	strncpy(event.EventDataUnion.UserEvent.UserEventData,"Grozny smok.", 12);
-      */      
+      */
       if (rpt.ResourceCapabilities == 0) { // OEM or USER type event
 	rpt.ResourceId = 0;
 	rpt.DomainId = 0;
@@ -311,21 +308,18 @@ int populate_event() {
       }
     
   } // while loop
-  
-  err = saHpiUnsubscribe( session_id);
-  if (err != SA_OK) {
-    DEBUGMSGTL((AGENT,"Failed to unsubscribe. Return code: %d.\n", err));
-  }
-  return rc;
+
+    return rc;
 }
   
+
 unsigned long purge_event( void ) {
   
   unsigned long count = 0;
 
   unsigned long i;
   saHpiEventTable_context *event_context;
-  
+  MAX_EVENT_ENTRIES = 4;
   DEBUGMSGTL((AGENT,"purge_event. Entry.\n"));
   if ((i = CONTAINER_SIZE(cb.container)) > MAX_EVENT_ENTRIES) {
     // Delete 'count' entries.    
