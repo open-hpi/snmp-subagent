@@ -91,7 +91,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             long saHpiDomainAlarmOverflow;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainGuid[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            unsigned char saHpiDomainGuid[16];
             long saHpiDomainGuid_len;
 
 
