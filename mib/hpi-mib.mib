@@ -20,7 +20,7 @@ IMPORTS
         enterprises             FROM RFC1155-SMI;
 
 
-hpiB MODULE-IDENTITY
+hpiB0101 MODULE-IDENTITY
     LAST-UPDATED "200410180000Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
@@ -118,12 +118,12 @@ hpiB MODULE-IDENTITY
         "HPI MIB for SAF-HPI B."
         ::= { enterprises 18568 1 1 1 6}
 
-hpiAdministration	OBJECT IDENTIFIER ::= { hpiB 1 }
-hpiDomain       	OBJECT IDENTIFIER ::= { hpiB 2 }
-hpiEvents       	OBJECT IDENTIFIER ::= { hpiB 3 }
-hpiResources    	OBJECT IDENTIFIER ::= { hpiB 4 }
-hpiNotifications 	OBJECT IDENTIFIER ::= { hpiB 5 }
-hpiMIBCompliances 	OBJECT IDENTIFIER ::= { hpiB 6 }
+hpiAdministration	OBJECT IDENTIFIER ::= { hpiB0101 1 }
+hpiDomain       	OBJECT IDENTIFIER ::= { hpiB0101 2 }
+hpiEvents       	OBJECT IDENTIFIER ::= { hpiB0101 3 }
+hpiResources    	OBJECT IDENTIFIER ::= { hpiB0101 4 }
+hpiNotifications 	OBJECT IDENTIFIER ::= { hpiB0101 5 }
+hpiMIBCompliances 	OBJECT IDENTIFIER ::= { hpiB0101 6 }
 
 -- The hotswap table:
 hpiHotSwap	OBJECT IDENTIFIER ::= { hpiDomain 11 }
