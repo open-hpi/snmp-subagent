@@ -962,8 +962,7 @@ saHpiCtrlTable_set_action(netsnmp_request_group * rg)
      netsnmp_variable_list *var;
     saHpiCtrlTable_context *row_ctx =
         (saHpiCtrlTable_context *) rg->existing_row;
-    saHpiCtrlTable_context *undo_ctx =
-        (saHpiCtrlTable_context *) rg->undo_info;
+
     netsnmp_request_group_item *current;
 
     int             rc = SNMP_ERR_NOERROR;
