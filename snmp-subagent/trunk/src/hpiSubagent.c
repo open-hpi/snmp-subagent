@@ -283,7 +283,6 @@ main (int argc, char **argv) {
 				NULL,
 				"hpiSubagent time in seconds before HPI API is queried for information.");
   init_snmp(AGENT);
-  /* initialize mib code here */
   /* Initialize tables */
   initialize_table_saHpiTable();
   initialize_table_saHpiRdrTable();
@@ -295,11 +294,11 @@ main (int argc, char **argv) {
 
   initialize_table_saHpiSystemEventLogTable();
   initialize_table_saHpiEventTable();
-  /*
+  
   if (populate_rpt() != AGENT_ERR_NOERROR) {
     //goto stop;
     } 
-
+  /*
   if (init_alarm() != AGENT_ERR_NOERROR) {
     goto stop;
   } */
