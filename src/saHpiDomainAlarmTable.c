@@ -38,6 +38,10 @@
 
 #include "saHpiDomainAlarmTable.h"
 #include "hpiCheckIndice.h"
+#include "SaHpi.h"
+#include "saHpiDomainReferenceTable.h"
+#include "epath_utils.h"
+#include "sahpi_event_utils.h"
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -1493,5 +1497,151 @@ saHpiDomainAlarmTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiDomainAlarmTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+
+//*******************************************************
+//*******************************************************
+// saHpiDomainAlarmTable support fucntions
+//*******************************************************
+//*******************************************************
+int populate_dat(void) {
+
+	oid 		
+		domain_alarm_oids[DOMAIN_ALARM_INDEX_LEN];
+	netsnmp_index 
+		domain_alarm_index;
+	saHpiDomainAlarmTable_context  
+		*domain_alarm_ctx;
+
+	int rval = 0;
+	SaHpiSessionIdT sid;
+
+	SaHpiAlarmT alarm_entry;
+	memset(&alarm_entry, 0, sizeof(alarm_entry));
+
+	sid = get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID);
+
+	alarm_entry.AlarmId = SAHPI_FIRST_ENTRY;
+	while (SA_OK == saHpiAlarmGetNext (sid, 
+					   SAHPI_ALL_SEVERITIES,
+					   FALSE,
+					   &alarm_entry) ) { 
+			
+		/* create domain tuple/ index */
+		/* saHpiDomainId, saHpiResourceId, saHpiDomainAlarmId */
+
+		domain_alarm_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID;
+		domain_alarm_oids[1] = alarm_entry.AlarmCond.ResourceId;
+		domain_alarm_oids[2] = alarm_entry.AlarmId;
+
+		domain_alarm_index.len =  DOMAIN_REF_INDEX_LEN;
+		domain_alarm_index.oids = (oid *) & domain_alarm_oids;  
+
+		/* See if it exists. */
+		domain_alarm_ctx = NULL;
+		domain_alarm_ctx = CONTAINER_FIND (
+			cb.container, 
+			&domain_alarm_index);
+		// If we don't find it - we create it.
+
+		if (!domain_alarm_ctx) 
+			/* New entry. Add it */
+			domain_alarm_ctx = 
+				saHpiDomainAlarmTable_create_row (
+					&domain_alarm_index);
+
+		/* fill in values in ctx*/
+	       	/* saHpiDomainAlarmTimestamp */
+		domain_alarm_ctx->saHpiDomainAlarmTimestamp =
+			alarm_entry.Timestamp;
+
+		/* saHpiDomainAlarmSeverity */
+		domain_alarm_ctx->saHpiDomainAlarmSeverity =
+			alarm_entry.Severity;
+
+		/* saHpiDomainAlarmAcknowledged */
+		domain_alarm_ctx->saHpiDomainAlarmAcknowledged = 
+			alarm_entry.Acknowledged;
+
+		/* saHpiDomainAlarmCondStatusCondType */
+		domain_alarm_ctx->saHpiDomainAlarmCondStatusCondType =
+			alarm_entry.AlarmCond.Type;
+
+		/* saHpiDomainAlarmCondEntityPath */
+		domain_alarm_ctx->saHpiDomainAlarmCondEntityPath_len = 
+			entitypath2string(
+			    &alarm_entry.AlarmCond.Entity,
+			    domain_alarm_ctx->saHpiDomainAlarmCondEntityPath, 
+			    65535);
+
+		/* saHpiDomainAlarmCondSensorNum */
+		domain_alarm_ctx->saHpiDomainAlarmCondSensorNum =
+			alarm_entry.AlarmCond.SensorNum;
+
+		/* saHpiDomainAlarmCondEventState */
+		if (alarm_entry.AlarmCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+			SaHpiEntryIdT EntryId;
+			SaHpiEntryIdT NextEntryId;
+
+			SaHpiRdrT Rdr;	
+			saHpiRdrGet(sid,
+				    alarm_entry.AlarmCond.ResourceId,
+				    EntryId, 
+				    &NextEntryId, 
+				    &Rdr);
+
+			SaHpiTextBufferT event_state;
+			oh_decode_eventstate(
+				alarm_entry.AlarmCond.EventState,
+				Rdr.RdrTypeUnion.SensorRec.Category,
+				&event_state);
+
+				memcpy(domain_alarm_ctx->saHpiDomainAlarmCondEventState,
+				       event_state.Data,
+				       event_state.DataLength);
+
+				domain_alarm_ctx->saHpiDomainAlarmCondEventState_len = 
+					event_state.DataLength;
+		}
+
+		/* saHpiDomainAlarmCondNameValue */ 
+		if (alarm_entry.AlarmCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+			memcpy(domain_alarm_ctx->saHpiDomainAlarmCondNameValue,
+			       alarm_entry.AlarmCond.Name.Value,
+			       alarm_entry.AlarmCond.Name.Length);
+			domain_alarm_ctx->saHpiDomainAlarmCondNameValue_len =
+				alarm_entry.AlarmCond.Name.Length;
+		}
+
+		/* saHpiDomainAlarmCondMid */
+		if (alarm_entry.AlarmCond.Type == SAHPI_STATUS_COND_TYPE_OEM) {
+			domain_alarm_ctx->saHpiDomainAlarmCondMid = 
+				alarm_entry.AlarmCond.Mid;
+		}
+
+		/* saHpiDomainAlarmCondTextType */
+		domain_alarm_ctx->saHpiDomainAlarmCondTextType =
+			alarm_entry.AlarmCond.Data.DataType;
+
+		/* saHpiDomainAlarmCondTextLanguage */
+		domain_alarm_ctx->saHpiDomainAlarmCondTextLanguage =
+			alarm_entry.AlarmCond.Data.Language;
+
+		/* saHpiDomainAlarmCondText */
+		memcpy(domain_alarm_ctx->saHpiDomainAlarmCondText,
+		       alarm_entry.AlarmCond.Data.Data,
+		       alarm_entry.AlarmCond.Data.DataLength);
+		domain_alarm_ctx->saHpiDomainAlarmCondText_len =
+			alarm_entry.AlarmCond.Data.DataLength;
+
+		/* commit/add */
+		CONTAINER_INSERT(cb.container, domain_alarm_ctx);
+
+	}
+
+	return rval;
+
+}
+
 
 

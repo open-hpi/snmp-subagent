@@ -179,6 +179,15 @@ saHpiDomainAlarmTable_context * saHpiDomainAlarmTable_create_row( netsnmp_index*
 saHpiDomainAlarmTable_context * saHpiDomainAlarmTable_get( const char *name, int len );
 #endif
 
+//*******************************************************
+//*******************************************************
+// saHpiDomainAlarmTable support fucntions
+//*******************************************************
+//*******************************************************
+#define DOMAIN_ALARM_INDEX_LEN 3
+int populate_dat(void);
+
+
 #ifdef __cplusplus
 };
 #endif
