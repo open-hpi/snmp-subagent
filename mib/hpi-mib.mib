@@ -6404,7 +6404,7 @@ saHpiSensorReadingMaxIsSupported      OBJECT-TYPE
 
 saHpiSensorReadingMaxType       OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingType
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
@@ -6412,7 +6412,7 @@ saHpiSensorReadingMaxType       OBJECT-TYPE
 
 saHpiSensorReadingMaxValue      OBJECT-TYPE
         SYNTAX          SaHpiSensorReadingValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "See Definition in TEXTUAL-CONVENTION."
