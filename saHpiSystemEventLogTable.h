@@ -91,6 +91,8 @@ set_logstate(saHpiSystemEventLogTable_context *ctx);
 int 
 set_clear_event_table(saHpiSystemEventLogTable_context *ctx);
 
+int
+set_timestamp();
 
 int
 delete_SEL_row(SaHpiDomainIdT domain_id,

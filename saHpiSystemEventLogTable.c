@@ -59,6 +59,8 @@ static int event_log_overflow_flag = 0;
 static int event_log_overflow_action = 0;
 static int event_log_delete_entry_supported = 0;
 
+static SaHpiResourceIdT timestamp_resource_id;
+
 int populate_sel(SaHpiRptEntryT *rpt_entry){
   
   SaErrorT     err;
@@ -96,6 +98,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
     event_log_overflow_flag = (info.OverflowFlag == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
     event_log_overflow_action = info.OverflowAction + 1;
     event_log_delete_entry_supported = info.DeleteEntrySupported;
+    timestamp_resource_id = rpt_entry->ResourceId;
     // Fill the data
 
     entry_id = SAHPI_OLDEST_ENTRY;
@@ -260,6 +263,36 @@ set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
     return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
+
+}
+
+
+int
+set_timestamp() {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiTimeT time;
+
+
+
+    time = event_log_current_timestamp;
+      // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    DEBUGMSGTL((AGENT,"Calling 'saHpiEventLogTimeSet'  with %d\n", time));
+    
+    rc = saHpiEventLogTimeSet(session_id,
+			      timestamp_resource_id,
+			      time);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error for 'saHpiEventLogTimeSet' is %d\n", rc)); 
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
 
 }
 
@@ -950,12 +983,12 @@ initialize_table_saHpiSystemEventLogTable(void)
 					 OID_LENGTH(saHpiSystemEventLogUpdateTimestamp_oid),
 					 HANDLER_CAN_RONLY));
     
-    netsnmp_register_read_only_instance(netsnmp_create_handler_registration
+    netsnmp_register_instance(netsnmp_create_handler_registration
 					("event_log_current_timestamp",
 					 event_log_current_timestamp_handler,
 					 saHpiSystemEventLogCurrentTime_oid,
 					 OID_LENGTH(saHpiSystemEventLogCurrentTime_oid),
-					 HANDLER_CAN_RONLY));
+					 HANDLER_CAN_RWRITE));
     
     netsnmp_register_read_only_int_instance("event_log_enabled",
 					      saHpiSystemEventLogEnabled_oid,
@@ -1068,13 +1101,84 @@ event_log_current_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_agent_request_info *reqinfo,
 			 netsnmp_request_info *requests) {
 
-  if (reqinfo->mode == MODE_GET)
-    snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
-			     (u_char *) &event_log_current_timestamp,
-			     sizeof(event_log_current_timestamp));
-  
+  netsnmp_variable_list *var;
+  int rc = SNMP_ERR_NOERROR;
+  u_long *timetick_cache = NULL;
 
-  return SNMP_ERR_NOERROR;
+  while (requests) {
+    var = requests->requestvb;
+    rc = SNMP_ERR_NOERROR;
+    switch (reqinfo->mode) {
+    case MODE_GET:
+      // Row checked here:
+      if (netsnmp_oid_equals(var->name, var->name_length,
+			     saHpiSystemEventLogCurrentTime_oid,
+			     OID_LENGTH(saHpiSystemEventLogCurrentTime_oid)) == 0) {
+	snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
+				 (u_char *) &event_log_current_timestamp,
+				 sizeof(event_log_current_timestamp));
+
+      } else
+	rc = SNMP_ERR_NOSUCHNAME;
+      break;
+    case MODE_GETNEXT:
+
+      if (netsnmp_oid_equals(var->name, var->name_length,
+			     saHpiSystemEventLogCurrentTime_oid,
+			     OID_LENGTH(saHpiSystemEventLogCurrentTime_oid)) < 0) {
+	snmp_set_var_objid(var, saHpiSystemEventLogCurrentTime_oid, 
+			   OID_LENGTH(saHpiSystemEventLogCurrentTime_oid));
+	snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
+				 (u_char *) &event_log_current_timestamp,
+				 sizeof(event_log_current_timestamp));
+      }
+
+    case MODE_SET_RESERVE1:
+
+      rc = netsnmp_check_vb_type_and_size(var, ASN_TIMETICKS,
+					  sizeof(long));
+
+
+      break;
+    case MODE_SET_RESERVE2:
+
+      memdup((u_char **)&timetick_cache,
+	     (u_char *)&event_log_current_timestamp, 
+	     sizeof(event_log_current_timestamp));
+      if (timetick_cache == NULL)
+	rc = SNMP_ERR_RESOURCEUNAVAILABLE;
+      else {
+	netsnmp_request_add_list_data(requests,
+				      netsnmp_create_data_list("timestamp_cache",
+							       timetick_cache, free));
+      }
+	break;
+      case MODE_SET_ACTION:	
+
+	event_log_current_timestamp = *var->val.integer;
+	if (set_timestamp()  != AGENT_ERR_NOERROR)
+	  rc = SNMP_ERR_GENERR;
+	break;
+
+      case MODE_SET_UNDO:
+
+	event_log_current_timestamp = * ((u_long *) netsnmp_request_get_list_data(requests,"timestamp_cache"));
+	// We don't really care about the return code here.
+	(void *)set_timestamp();
+	break;
+      case MODE_SET_COMMIT:
+      case MODE_SET_FREE:
+
+	break;	
+	  
+      }
+
+    if (rc)
+      netsnmp_set_request_error(reqinfo, requests, rc);
+    requests = requests->next;
+  }
+
+  return rc;
 }
 
 
