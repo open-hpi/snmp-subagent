@@ -27,7 +27,7 @@
 
 #include <saHpiTable.h>
 #include <saHpiRdrTable.h>
-
+#include <saHpiSystemEventLogTable.h>
 
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
@@ -68,13 +68,11 @@ saHpiTable_cmp(const void *lhs, const void *rhs)
     saHpiTable_context *context_l = (saHpiTable_context *) lhs;
     saHpiTable_context *context_r = (saHpiTable_context *) rhs;
 
-    DEBUGMSGTL((AGENT,"--- saHpiTable_cmp: Entry. "));
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
+
+    
     int             rc;
 
+    DEBUGMSGTL((AGENT,"--- saHpiTable_cmp: Entry. "));
     if (context_l->saHpiDomainID < context_r->saHpiDomainID)
 	return -1;
     rc = (context_l->saHpiDomainID == context_r->saHpiDomainID) ? 0: 1;
@@ -82,17 +80,17 @@ saHpiTable_cmp(const void *lhs, const void *rhs)
     if (rc != 0) 
 	return rc;
 
-    if (context_l->saHpiEntryID < context_r->saHpiEntryID)
-	return -1;
-    rc = (context_l->saHpiEntryID == context_r->saHpiEntryID) ? 0: 1;
-    
-    if (rc != 0) 
-	return rc;
-    
     if (context_l->saHpiResourceID < context_r->saHpiResourceID)
 	return -1;
 
-    return (context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0: 1;
+    rc =(context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0: 1;
+
+    if (rc != 0)
+      return rc;
+
+    if (context_l->saHpiEntryID < context_r->saHpiEntryID)
+	return -1;
+    return (context_l->saHpiEntryID == context_r->saHpiEntryID) ? 0: 1;
     
 }
 
@@ -171,10 +169,11 @@ populate_rpt() {
 	 err = saHpiRptEntryGet(session, current, &next, &rpt_entry);
 	 if (SA_OK == err) {
 	   // Construct the index from the entry. Look in the MIB for new index values
-	   rpt_oid[COLUMN_SAHPIDOMAINID-1]=rpt_entry.DomainId;
-	   rpt_oid[COLUMN_SAHPIENTRYID-1]=rpt_entry.EntryId;
-	   rpt_oid[COLUMN_SAHPIRESOURCEID-1]=rpt_entry.ResourceId;	
-	 
+	   // Comment #020 changed the index order.
+	   rpt_oid[0]=rpt_entry.DomainId;
+	   rpt_oid[1]=rpt_entry.ResourceId;	
+	   rpt_oid[2]=rpt_entry.EntryId;
+ 
 	   rpt_index.oids = (oid *)&rpt_oid;
 	   if (backup_count == 0) {	 
 	     // First time (entry_count is updated when this loop is finished)
@@ -214,6 +213,7 @@ populate_rpt() {
 	   if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
 	     // Generate our full OID for the first object.
 	     column[0] = 1;
+	     // Point to first object.
 	     column[1] = COLUMN_SAHPIDOMAINID;
 	     
 	     build_full_oid(saHpiTable_oid, saHpiTable_oid_len,
@@ -226,6 +226,7 @@ populate_rpt() {
 	   }
 	   // if (rpt... blah
 	   //
+	   populate_sel(&rpt_entry);
 	 }	        
      } while (next != SAHPI_LAST_ENTRY);
 
@@ -513,17 +514,19 @@ saHpiTable_extract_index(saHpiTable_context * ctx, netsnmp_index * hdr)
     /**
      * Create variable to hold each component of the index
      */
-  memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
-    var_saHpiResourceID.type = ASN_UNSIGNED;
-    var_saHpiResourceID.next_variable = NULL;
 
+    // Order changed per #020 comment.
     memset(&var_saHpiDomainID, 0x00, sizeof(var_saHpiDomainID));
     var_saHpiDomainID.type = ASN_UNSIGNED;
-    var_saHpiDomainID.next_variable = &var_saHpiEntryID;
+    var_saHpiDomainID.next_variable = &var_saHpiResourceID;
+
+    memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
+    var_saHpiResourceID.type = ASN_UNSIGNED;
+    var_saHpiResourceID.next_variable = &var_saHpiEntryID;
 
     memset(&var_saHpiEntryID, 0x00, sizeof(var_saHpiEntryID));
     var_saHpiEntryID.type = ASN_UNSIGNED;
-    var_saHpiEntryID.next_variable = &var_saHpiResourceID;
+    var_saHpiEntryID.next_variable = NULL;
 
     err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
 
@@ -537,15 +540,15 @@ saHpiTable_extract_index(saHpiTable_context * ctx, netsnmp_index * hdr)
         ctx->saHpiEntryID = *var_saHpiEntryID.val.integer;
 
         ctx->saHpiResourceID = *var_saHpiResourceID.val.integer;
-
-         if ( *var_saHpiEntryID.val.integer != SAHPI_LAST_ENTRY ) {
-	     DEBUGMSGTL((AGENT, "saHpiEntryID == SAHPI_LAST_ENTRY "));
+	
+        // if ( *var_saHpiEntryID.val.integer != SAHPI_LAST_ENTRY ) {
+	//    DEBUGMSGTL((AGENT, "saHpiEntryID == SAHPI_LAST_ENTRY "));
 	     //            err = -1;
-         }
-         if ( *var_saHpiEntryID.val.integer !=  SAHPI_FIRST_ENTRY) {
-	     DEBUGMSGTL((AGENT, "saHpiEntryID == SAHPI_FIRST_ENTRY "));
+        // }
+        // if ( *var_saHpiEntryID.val.integer !=  SAHPI_FIRST_ENTRY) {
+	//     DEBUGMSGTL((AGENT, "saHpiEntryID == SAHPI_FIRST_ENTRY "));
 	     //             err = -1;
-         }
+        // }
 	
     }
 
@@ -806,10 +809,11 @@ initialize_table_saHpiTable(void)
      */
         /** index: saHpiDomainID */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+      /** index: saHpiResourceID */
+    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiEntryID */
     netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceID */
-    netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+  
 
     table_info->min_column = saHpiTable_COL_MIN;
     table_info->max_column = saHpiTable_COL_MAX;
