@@ -886,7 +886,7 @@ int populate_drt(void) {
 		domain_ref_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID; 
 		domain_ref_oids[1] = DrtEntry.DomainId; 
 		domain_refer_index.len =  DOMAIN_REF_INDEX_LEN;
-		domain_refer_index.oids = (oid *) & domain_refer_index;  
+		domain_refer_index.oids = (oid *) & domain_ref_oids;  
 
 		/* See if it exists. */
 		domain_ref_ctx = NULL;
@@ -916,10 +916,12 @@ int populate_drt(void) {
 }
 
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
-	if (populate_drt_call  == TRUE) 
+	if (populate_drt_call  == TRUE) {
 		return top_drt.did;
-	else
+	} else {
+		exit(-1);
 		return -1;
+	}
 }
 
 
