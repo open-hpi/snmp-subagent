@@ -7078,9 +7078,7 @@ saHpiSensorThdUpMinorEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor threshold data which defines  degraded status
-        status at the upper end of the range that impacts the functional status 
-        of the sensor."
+        "Sensor threshold data for upper minor thresholds."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorThdUpMinorTable 1}
 
