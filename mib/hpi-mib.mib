@@ -5599,16 +5599,17 @@ saHpiSensorModifierUse OBJECT-TYPE
                         }
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Modifier Unit Use (msec, etc.).
+        DESCRIPTION     
+	"Modifier Unit Use (m/sec, etc.).
                          
-This type defines how the modifier unit is used. For example: 
-base unit == meter, modifier unit == seconds, and
-modifier unit use == basicOverModifier(1). 
+	This type defines how the modifier unit is used. For example: 
+	base unit == meter, modifier unit == seconds, and
+	modifier unit use == basicOverModifier(1). 
 
-The resulting unit would be meters per second.
+	The resulting unit would be meters per second.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to
+	SAI-HPI-B.01.01 section 8.5."
         ::= {saHpiSensorEntry 17}
 
 saHpiSensorPercentage OBJECT-TYPE
