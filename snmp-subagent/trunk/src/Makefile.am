@@ -1,6 +1,6 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES 		= -I$(top_srcdir)/include 
+INCLUDES 		= -I$(top_srcdir)/include -I../../openhpi/include 
 
 AM_CFLAGS 		= @CFLAGS@
 
@@ -8,7 +8,8 @@ bin_PROGRAMS		= hpiSubagent
 
 SUBDIRS                 = 
 
-hpiSubagent_SOURCES	= hpiB.c \
+hpiSubagent_SOURCES	= alarm.c \
+			hpiB.c \
 			hpiSubagent.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnunciatorTable.c \
