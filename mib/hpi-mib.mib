@@ -1877,7 +1877,6 @@ saHpiResourceEntry OBJECT-TYPE
 	"See SAI-HPI-B.01.01 section 6.3"
 		
         INDEX   { saHpiDomainId, 
-		saHpiResourceId ,
 		saHpiResourceEntryId 
 		}
         ::= {saHpiResourceTable 1}
