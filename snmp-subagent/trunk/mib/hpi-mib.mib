@@ -568,8 +568,8 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 	saHpiDomainCapabilities Unsigned32,
 	saHpiIsPeer		TruthValue,         
 				      				      
-	saHpiDomainTagTextType		INTEGER,	
-	saHpiDomainTagTextLanguage	INTEGER,
+	saHpiDomainTagTextType		SaHpiTextType,	
+	saHpiDomainTagTextLanguage	SaHpiTextLanguage,
 	saHpiDomainTag			OCTET STRING,         
 				      
 	saHpiDrtUpdateCount	Unsigned32, 				      			      
@@ -626,205 +626,17 @@ saHpiIsPeer OBJECT-TYPE
         ::= {saHpiDomainInfoEntry 3}
 
 saHpiDomainTagTextType OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				undefined(0),
-				bcdplus(1), 
-				ascii6(2), 
-				text(3),
-				binary(4)
-			}
+	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Text Buffers
-
-       These structures are used for defining the type of data in the text buffer 
-       and the length of the buffer. Text buffers are used in the inventory data,
-       RDR, RPT, etc. for variable length strings of data.
-        
-       The encoding of the Data field in the SaHpiTextBufferT structure is defined
-       by the value of the DataType field in the buffer.  The following table
-       describes the various encodings:
-        
-          DataType                     Encoding
-          --------                     --------
-        
-         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
-      				 Buffer must contain even number of bytes.
-        
-         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
-      				 colon, comma, or underscore only.
-        
-         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
-        
-         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
-        
-         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
-        
-       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
-      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
-      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
-      	set defines the first 128 8-bit characters (00h-7Fh) and the 
-      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
-        
-       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
-      	use normal ASCII character encodings, but restrict the allowed
-      	characters to a subset of the entire ASCII character set. These
-      	encodings are used when the target device contains restrictions
-      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
-      	data may be stored externally as 4-bit values, and 
-      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
-      	But, regardless of how the data is stored externally, it is 
-      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
-	across the HPI."
+	DESCRIPTION	"See Definition"
 	::= {saHpiDomainInfoEntry 4}
 
 saHpiDomainTagTextLanguage OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				unknown (1),
-				afar (2),
-				abkhazian (3),
-				afrikaans (4),
-				amharic (5),
-				arabic (6),
-				assamese (7),
-				aymara (8),
-				azerbaijani (9),
-				bashkir (10),
-				byelorussian (11),
-				bulgarian (12),
-				bihari (13),
-				bislama (14),
-				bengali (15),
-				tibetan (16),
-				breton (17),
-				catalan (18),
-				corsican (19),
-				czech (20),
-				welsh (21),
-				danish (22),
-				german (23),
-				bhutani (24),
-				greek (25),
-				english (26),
-				esperanto (27),
-				spanish (28),
-				estonian (29),
-				basque (30),
-				persian (31),
-				finnish (32),
-				fiji (33),
-				faeroese (34),
-				french (35),
-				frisian (36),
-				irish (37),
-				scotsgaelic (38),
-				galician (39),
-				guarani (40),
-				gujarati (41),
-				hausa (42),
-				hindi (43),
-				croatian (44),
-				hungarian (45),
-				armenian (46),
-				interlingua (47),
-				interlingue (48),
-				inupiak (49),
-				indonesian (50),
-				icelandic (51),
-				italian (52),
-				hebrew (53),
-				japanese (54),
-				yiddish (55),
-				javanese (56),
-				georgian (57),
-				kazakh (58),
-				greenlandic (59),
-				cambodian (60),
-				kannada (61),
-				korean (62),
-				kashmiri (63),
-				kurdish (64),
-				kirghiz (65),
-				latin (66),
-				lingala (67),
-				laothian (68),
-				lithuanian (69),
-				latvianlettish (70),
-				malagasy (71),
-				maori (72),
-				macedonian (73),
-				malayalam (74),
-				mongolian (75),
-				moldavian (76),
-				marathi (77),
-				malay (78),
-				maltese (79),
-				burmese (80),
-				nauru (81),
-				nepali (82),
-				dutch (83),
-				norwegian (84),
-				occitan (85),
-				afanoromo (86),
-				oriya (87),
-				punjabi (88),
-				polish (89),
-				pashtopushto (90),
-				portuguese (91),
-				quechua (92),
-				rhaetoromance (93),
-				kirundi (94),
-				romanian (95),
-				russian (96),
-				kinyarwanda (97),
-				sanskrit (98),
-				sindhi (99),
-				sangro (100),
-				serbocroatian (101),
-				singhalese (102),
-				slovak (103),
-				slovenian (104),
-				samoan (105),
-				shona (106),
-				somali (107),
-				albanian (108),
-				serbian (109),
-				siswati (110),
-				sesotho (111),
-				sudanese (112),
-				swedish (113),
-				swahili (114),
-				tamil (115),
-				telugu (116),
-				tajik (117),
-				thai (118),
-				tigrinya (119),
-				turkmen (120),
-				tagalog (121),
-				setswana (122),
-				tonga (123),
-				turkish (124),
-				tsonga (125),
-				tatar (126),
-				twi (127),
-				ukrainian (128),
-				urdu (129),
-				uzbek (130),
-				vietnamese (131),
-				volapuk (132),
-				wolof (133),
-				xhosa (134),
-				yoruba (135),
-				chinese (136),
-				zulu (137)
-			}
+	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
-	DESCRIPTION     "
-	This enumeration lists all of the languages that can be 
-	associated with text.  undefined (0) indicates that 
-	the language is unspecified or unknown.  "
+	DESCRIPTION     "See Definition"
 	::= {saHpiDomainInfoEntry 5}
 
 saHpiDomainTag	OBJECT-TYPE
@@ -1073,8 +885,8 @@ SaHpiDatEntry ::= SEQUENCE {
 	       
 	saHpiAlarmCondMid               Unsigned32,
 	
-	saHpiAlarmCondDataTextType      INTEGER,
-	saHpiAlarmCondDataTextLanguage  INTEGER,
+	saHpiAlarmCondDataTextType      SaHpiTextType,
+	saHpiAlarmCondDataTextLanguage  SaHpiTextLanguage,
 	saHpiAlarmCondData    		OCTET STRING
 	}
 	
@@ -1218,205 +1030,18 @@ saHpiAlarmCondMid OBJECT-TYPE
 	::= {saHpiDatEntry 10}
 	
 saHpiAlarmCondDataTextType OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				undefined(0),
-				bcdplus(1), 
-				ascii6(2), 
-				text(3),
-				binary(4)
-			}
+	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Text Buffers
-
-       These structures are used for defining the type of data in the text buffer 
-       and the length of the buffer. Text buffers are used in the inventory data,
-       RDR, RPT, etc. for variable length strings of data.
-        
-       The encoding of the Data field in the SaHpiTextBufferT structure is defined
-       by the value of the DataType field in the buffer.  The following table
-       describes the various encodings:
-        
-          DataType                     Encoding
-          --------                     --------
-        
-         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
-      				 Buffer must contain even number of bytes.
-        
-         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
-      				 colon, comma, or underscore only.
-        
-         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
-        
-         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
-        
-         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
-        
-       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
-      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
-      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
-      	set defines the first 128 8-bit characters (00h-7Fh) and the 
-      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
-        
-       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
-      	use normal ASCII character encodings, but restrict the allowed
-      	characters to a subset of the entire ASCII character set. These
-      	encodings are used when the target device contains restrictions
-      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
-      	data may be stored externally as 4-bit values, and 
-      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
-      	But, regardless of how the data is stored externally, it is 
-      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
-		across the HPI."
+	DESCRIPTION	"See Definition"
 	::= {saHpiDatEntry 11}
 
 saHpiAlarmCondDataTextLanguage OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				unknown (1),
-				afar (2),
-				abkhazian (3),
-				afrikaans (4),
-				amharic (5),
-				arabic (6),
-				assamese (7),
-				aymara (8),
-				azerbaijani (9),
-				bashkir (10),
-				byelorussian (11),
-				bulgarian (12),
-				bihari (13),
-				bislama (14),
-				bengali (15),
-				tibetan (16),
-				breton (17),
-				catalan (18),
-				corsican (19),
-				czech (20),
-				welsh (21),
-				danish (22),
-				german (23),
-				bhutani (24),
-				greek (25),
-				english (26),
-				esperanto (27),
-				spanish (28),
-				estonian (29),
-				basque (30),
-				persian (31),
-				finnish (32),
-				fiji (33),
-				faeroese (34),
-				french (35),
-				frisian (36),
-				irish (37),
-				scotsgaelic (38),
-				galician (39),
-				guarani (40),
-				gujarati (41),
-				hausa (42),
-				hindi (43),
-				croatian (44),
-				hungarian (45),
-				armenian (46),
-				interlingua (47),
-				interlingue (48),
-				inupiak (49),
-				indonesian (50),
-				icelandic (51),
-				italian (52),
-				hebrew (53),
-				japanese (54),
-				yiddish (55),
-				javanese (56),
-				georgian (57),
-				kazakh (58),
-				greenlandic (59),
-				cambodian (60),
-				kannada (61),
-				korean (62),
-				kashmiri (63),
-				kurdish (64),
-				kirghiz (65),
-				latin (66),
-				lingala (67),
-				laothian (68),
-				lithuanian (69),
-				latvianlettish (70),
-				malagasy (71),
-				maori (72),
-				macedonian (73),
-				malayalam (74),
-				mongolian (75),
-				moldavian (76),
-				marathi (77),
-				malay (78),
-				maltese (79),
-				burmese (80),
-				nauru (81),
-				nepali (82),
-				dutch (83),
-				norwegian (84),
-				occitan (85),
-				afanoromo (86),
-				oriya (87),
-				punjabi (88),
-				polish (89),
-				pashtopushto (90),
-				portuguese (91),
-				quechua (92),
-				rhaetoromance (93),
-				kirundi (94),
-				romanian (95),
-				russian (96),
-				kinyarwanda (97),
-				sanskrit (98),
-				sindhi (99),
-				sangro (100),
-				serbocroatian (101),
-				singhalese (102),
-				slovak (103),
-				slovenian (104),
-				samoan (105),
-				shona (106),
-				somali (107),
-				albanian (108),
-				serbian (109),
-				siswati (110),
-				sesotho (111),
-				sudanese (112),
-				swedish (113),
-				swahili (114),
-				tamil (115),
-				telugu (116),
-				tajik (117),
-				thai (118),
-				tigrinya (119),
-				turkmen (120),
-				tagalog (121),
-				setswana (122),
-				tonga (123),
-				turkish (124),
-				tsonga (125),
-				tatar (126),
-				twi (127),
-				ukrainian (128),
-				urdu (129),
-				uzbek (130),
-				vietnamese (131),
-				volapuk (132),
-				wolof (133),
-				xhosa (134),
-				yoruba (135),
-				chinese (136),
-				zulu (137)
-			}
-        MAX-ACCESS      read-write
+	SYNTAX		SaHpiTextLanguage
+	MAX-ACCESS      read-write
 	STATUS          current
 	DESCRIPTION     
-	"This enumeration lists all of the languages that can be 
-	associated with text.  undefined (0) indicates that 
-	the language is unspecified or unknown."
+	"See Definition"
 	::= {saHpiDatEntry 12}
 
 saHpiAlarmCondData	OBJECT-TYPE
@@ -1508,8 +1133,8 @@ SaHpiEntry ::= SEQUENCE {
 	
 	saHpiResourceInfoGuid			OCTET STRING,
 	
-	saHpiResourceTagTextType		INTEGER,	
-	saHpiResourceTagTextLanguage		INTEGER,
+	saHpiResourceTagTextType		SaHpiTextType,	
+	saHpiResourceTagTextLanguage		SaHpiTextLanguage,
 	saHpiResourceTag			OCTET STRING,
 	
 	saHpiParamControl			INTEGER,
@@ -1870,205 +1495,17 @@ saHpiResourceInfoGuid 	OBJECT-TYPE
 
 
 saHpiResourceTagTextType OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				undefined(0),
-				bcdplus(1), 
-				ascii6(2), 
-				text(3),
-				binary(4)
-			}
+	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Text Buffers
-
-       These structures are used for defining the type of data in the text buffer 
-       and the length of the buffer. Text buffers are used in the inventory data,
-       RDR, RPT, etc. for variable length strings of data.
-        
-       The encoding of the Data field in the SaHpiTextBufferT structure is defined
-       by the value of the DataType field in the buffer.  The following table
-       describes the various encodings:
-        
-          DataType                     Encoding
-          --------                     --------
-        
-         SAHPI_TL_TYPE_UNICODE         16-bit Unicode, least significant byte first.
-      				 Buffer must contain even number of bytes.
-        
-         SAHPI_TL_TYPE_BCDPLUS         8-bit ASCII, '0'-'9' or space, dash, period,
-      				 colon, comma, or underscore only.
-        
-         SAHPI_TL_TYPE_ASCII6          8-bit ASCII, reduced set, 0x20=0x5f only.
-        
-         SAHPI_TL_TYPE_TEXT            8-bit ASCII+Latin 1
-        
-         SAHPI_TL_TYPE_BINARY          8-bit bytes, any values legal
-        
-       Note: 'ASCII+Latin 1' is derived from the first 256 characters of 
-      	Unicode 2.0. The first 256 codes of Unicode follow ISO 646 (ASCII)
-      	and ISO 8859/1 (Latin 1). The Unicode 'C0 Controls and Basic Latin'
-      	set defines the first 128 8-bit characters (00h-7Fh) and the 
-      	'C1 Controls and Latin 1 Supplement' defines the second 128 (80h-FFh).
-        
-       Note: The SAHPI_TL_TYPE_BCDPLUS and SAHPI_TL_TYPE_ASCII6 encodings
-      	use normal ASCII character encodings, but restrict the allowed
-      	characters to a subset of the entire ASCII character set. These
-      	encodings are used when the target device contains restrictions
-      	on which characters it can store or display.  SAHPI_TL_TYPE_BCDPLUS 
-      	data may be stored externally as 4-bit values, and 
-      	SAHPI_TL_TYPE_ASCII6 may be stored externally as 6-bit values. 
-      	But, regardless of how the data is stored externally, it is 
-      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
-		across the HPI."
+	DESCRIPTION	"See Definition."
 	::= {saHpiEntry 18}
 
 saHpiResourceTagTextLanguage OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				unknown (1),
-				afar (2),
-				abkhazian (3),
-				afrikaans (4),
-				amharic (5),
-				arabic (6),
-				assamese (7),
-				aymara (8),
-				azerbaijani (9),
-				bashkir (10),
-				byelorussian (11),
-				bulgarian (12),
-				bihari (13),
-				bislama (14),
-				bengali (15),
-				tibetan (16),
-				breton (17),
-				catalan (18),
-				corsican (19),
-				czech (20),
-				welsh (21),
-				danish (22),
-				german (23),
-				bhutani (24),
-				greek (25),
-				english (26),
-				esperanto (27),
-				spanish (28),
-				estonian (29),
-				basque (30),
-				persian (31),
-				finnish (32),
-				fiji (33),
-				faeroese (34),
-				french (35),
-				frisian (36),
-				irish (37),
-				scotsgaelic (38),
-				galician (39),
-				guarani (40),
-				gujarati (41),
-				hausa (42),
-				hindi (43),
-				croatian (44),
-				hungarian (45),
-				armenian (46),
-				interlingua (47),
-				interlingue (48),
-				inupiak (49),
-				indonesian (50),
-				icelandic (51),
-				italian (52),
-				hebrew (53),
-				japanese (54),
-				yiddish (55),
-				javanese (56),
-				georgian (57),
-				kazakh (58),
-				greenlandic (59),
-				cambodian (60),
-				kannada (61),
-				korean (62),
-				kashmiri (63),
-				kurdish (64),
-				kirghiz (65),
-				latin (66),
-				lingala (67),
-				laothian (68),
-				lithuanian (69),
-				latvianlettish (70),
-				malagasy (71),
-				maori (72),
-				macedonian (73),
-				malayalam (74),
-				mongolian (75),
-				moldavian (76),
-				marathi (77),
-				malay (78),
-				maltese (79),
-				burmese (80),
-				nauru (81),
-				nepali (82),
-				dutch (83),
-				norwegian (84),
-				occitan (85),
-				afanoromo (86),
-				oriya (87),
-				punjabi (88),
-				polish (89),
-				pashtopushto (90),
-				portuguese (91),
-				quechua (92),
-				rhaetoromance (93),
-				kirundi (94),
-				romanian (95),
-				russian (96),
-				kinyarwanda (97),
-				sanskrit (98),
-				sindhi (99),
-				sangro (100),
-				serbocroatian (101),
-				singhalese (102),
-				slovak (103),
-				slovenian (104),
-				samoan (105),
-				shona (106),
-				somali (107),
-				albanian (108),
-				serbian (109),
-				siswati (110),
-				sesotho (111),
-				sudanese (112),
-				swedish (113),
-				swahili (114),
-				tamil (115),
-				telugu (116),
-				tajik (117),
-				thai (118),
-				tigrinya (119),
-				turkmen (120),
-				tagalog (121),
-				setswana (122),
-				tonga (123),
-				turkish (124),
-				tsonga (125),
-				tatar (126),
-				twi (127),
-				ukrainian (128),
-				urdu (129),
-				uzbek (130),
-				vietnamese (131),
-				volapuk (132),
-				wolof (133),
-				xhosa (134),
-				yoruba (135),
-				chinese (136),
-				zulu (137)
-			}
+	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
-	DESCRIPTION     "
-	This enumeration lists all of the languages that can be 
-	associated with text.  undefined (0) indicates that 
-	the language is unspecified or unknown.  "
+	DESCRIPTION     "See Definition."
 	::= {saHpiEntry 19}
 
 saHpiResourceTag	OBJECT-TYPE
@@ -4420,8 +3857,8 @@ SaHpiCtrlEntry ::= SEQUENCE {
 	saHpiCtrlState		OCTET STRING,
 	saHpiCtrlAttributes	OCTET STRING,
 	saHpiCtrlOem		Unsigned32, 
-	saHpiCtrlTextType	INTEGER,
-	saHpiCtrlTextLanguage	INTEGER,
+	saHpiCtrlTextType	SaHpiTextType,
+	saHpiCtrlTextLanguage	SaHpiTextLanguage,
 	saHpiCtrlText		OCTET STRING,
 	saHpiCtrlRDR		RowPointer
 }
@@ -4615,179 +4052,17 @@ saHpiCtrlOem OBJECT-TYPE
 	::= {saHpiCtrlEntry 7}
 
 saHpiCtrlTextType OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				undefined(0),
-				binary(1), 
-				bcdplus(2), 
-				ascii6(3),
-				language(4)
-			}
+	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"
-	Defines the type of data the saHpiCtrlText is
-	encoded as:
-	 binary(1):
-		  String of bytes, any values legal
-
-         bcdplus(2)
-		String of 0-9, space, dash, period ONLY
-
-         ascii6(3)
-		Reduced ASCII character set: 0x20-0x5F ONLY
-
-         language(4)
-		ASCII or UNICODE depending on language
-	"
+	DESCRIPTION	"See Definition"
 	::= {saHpiCtrlEntry 8}
 
 saHpiCtrlTextLanguage OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				unknown (1),
-				afar (2),
-				abkhazian (3),
-				afrikaans (4),
-				amharic (5),
-				arabic (6),
-				assamese (7),
-				aymara (8),
-				azerbaijani (9),
-				bashkir (10),
-				byelorussian (11),
-				bulgarian (12),
-				bihari (13),
-				bislama (14),
-				bengali (15),
-				tibetan (16),
-				breton (17),
-				catalan (18),
-				corsican (19),
-				czech (20),
-				welsh (21),
-				danish (22),
-				german (23),
-				bhutani (24),
-				greek (25),
-				english (26),
-				esperanto (27),
-				spanish (28),
-				estonian (29),
-				basque (30),
-				persian (31),
-				finnish (32),
-				fiji (33),
-				faeroese (34),
-				french (35),
-				frisian (36),
-				irish (37),
-				scotsgaelic (38),
-				galician (39),
-				guarani (40),
-				gujarati (41),
-				hausa (42),
-				hindi (43),
-				croatian (44),
-				hungarian (45),
-				armenian (46),
-				interlingua (47),
-				interlingue (48),
-				inupiak (49),
-				indonesian (50),
-				icelandic (51),
-				italian (52),
-				hebrew (53),
-				japanese (54),
-				yiddish (55),
-				javanese (56),
-				georgian (57),
-				kazakh (58),
-				greenlandic (59),
-				cambodian (60),
-				kannada (61),
-				korean (62),
-				kashmiri (63),
-				kurdish (64),
-				kirghiz (65),
-				latin (66),
-				lingala (67),
-				laothian (68),
-				lithuanian (69),
-				latvianlettish (70),
-				malagasy (71),
-				maori (72),
-				macedonian (73),
-				malayalam (74),
-				mongolian (75),
-				moldavian (76),
-				marathi (77),
-				malay (78),
-				maltese (79),
-				burmese (80),
-				nauru (81),
-				nepali (82),
-				dutch (83),
-				norwegian (84),
-				occitan (85),
-				afanoromo (86),
-				oriya (87),
-				punjabi (88),
-				polish (89),
-				pashtopushto (90),
-				portuguese (91),
-				quechua (92),
-				rhaetoromance (93),
-				kirundi (94),
-				romanian (95),
-				russian (96),
-				kinyarwanda (97),
-				sanskrit (98),
-				sindhi (99),
-				sangro (100),
-				serbocroatian (101),
-				singhalese (102),
-				slovak (103),
-				slovenian (104),
-				samoan (105),
-				shona (106),
-				somali (107),
-				albanian (108),
-				serbian (109),
-				siswati (110),
-				sesotho (111),
-				sudanese (112),
-				swedish (113),
-				swahili (114),
-				tamil (115),
-				telugu (116),
-				tajik (117),
-				thai (118),
-				tigrinya (119),
-				turkmen (120),
-				tagalog (121),
-				setswana (122),
-				tonga (123),
-				turkish (124),
-				tsonga (125),
-				tatar (126),
-				twi (127),
-				ukrainian (128),
-				urdu (129),
-				uzbek (130),
-				vietnamese (131),
-				volapuk (132),
-				wolof (133),
-				xhosa (134),
-				yoruba (135),
-				chinese (136),
-				zulu (137)
-			}
+	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
-	DESCRIPTION     "
-	This enumeration lists all of the languages that can be 
-	associated with text.  Undef (0) indicates that 
-	the language is unspecified or unknown.  "
+	DESCRIPTION     "See Definition."
 	::= {saHpiCtrlEntry 9}
 
 saHpiCtrlText OBJECT-TYPE
@@ -7794,8 +7069,8 @@ SaHpiInventoryEntry ::= SEQUENCE {
 	saHpiInventoryRecordType	INTEGER,
 	saHpiInventoryValidity		INTEGER,
 	saHpiInventoryAttributes	OCTET STRING,
-	saHpiInventoryTextType		INTEGER,
-	saHpiInventoryTextLanguage	INTEGER,
+	saHpiInventoryTextType		SaHpiTextType,
+	saHpiInventoryTextLanguage	SaHpiTextLanguage,
 	saHpiInventoryManufacturer	OCTET STRING,
 	saHpiInventoryProductName	OCTET STRING,
 	saHpiInventoryProductVersion	OCTET STRING,
@@ -7955,178 +7230,17 @@ saHpiInventoryAttributes OBJECT-TYPE
         ::= {saHpiInventoryEntry 5}
 
 saHpiInventoryTextType OBJECT-TYPE 
-	SYNTAX		INTEGER {
-				undefined(0),
-				binary(1), 
-				bcdplus(2), 
-				ascii6(3),
-				language(4)
-			}
+	SYNTAX		SaHpiTextType
 	MAX-ACCESS	read-write
 	STATUS		current
-	DESCRIPTION	"Defines the type of data the saHpiResourceTag is
-	encoded as:
-	 binary(1):
-		  String of bytes, any values legal
-
-         bcdplus(2)
-		String of 0-9, space, dash, period ONLY
-
-         ascii6(3)
-		Reduced ASCII character set: 0x20-0x5F ONLY
-
-         language(4)
-		ASCII or UNICODE depending on language
-	"
+	DESCRIPTION	"See Definition"
 	::= {saHpiInventoryEntry 6}
 
 saHpiInventoryTextLanguage OBJECT-TYPE
-	SYNTAX		INTEGER {
-				undefined (0),
-				unknown (1),
-				afar (2),
-				abkhazian (3),
-				afrikaans (4),
-				amharic (5),
-				arabic (6),
-				assamese (7),
-				aymara (8),
-				azerbaijani (9),
-				bashkir (10),
-				byelorussian (11),
-				bulgarian (12),
-				bihari (13),
-				bislama (14),
-				bengali (15),
-				tibetan (16),
-				breton (17),
-				catalan (18),
-				corsican (19),
-				czech (20),
-				welsh (21),
-				danish (22),
-				german (23),
-				bhutani (24),
-				greek (25),
-				english (26),
-				esperanto (27),
-				spanish (28),
-				estonian (29),
-				basque (30),
-				persian (31),
-				finnish (32),
-				fiji (33),
-				faeroese (34),
-				french (35),
-				frisian (36),
-				irish (37),
-				scotsgaelic (38),
-				galician (39),
-				guarani (40),
-				gujarati (41),
-				hausa (42),
-				hindi (43),
-				croatian (44),
-				hungarian (45),
-				armenian (46),
-				interlingua (47),
-				interlingue (48),
-				inupiak (49),
-				indonesian (50),
-				icelandic (51),
-				italian (52),
-				hebrew (53),
-				japanese (54),
-				yiddish (55),
-				javanese (56),
-				georgian (57),
-				kazakh (58),
-				greenlandic (59),
-				cambodian (60),
-				kannada (61),
-				korean (62),
-				kashmiri (63),
-				kurdish (64),
-				kirghiz (65),
-				latin (66),
-				lingala (67),
-				laothian (68),
-				lithuanian (69),
-				latvianlettish (70),
-				malagasy (71),
-				maori (72),
-				macedonian (73),
-				malayalam (74),
-				mongolian (75),
-				moldavian (76),
-				marathi (77),
-				malay (78),
-				maltese (79),
-				burmese (80),
-				nauru (81),
-				nepali (82),
-				dutch (83),
-				norwegian (84),
-				occitan (85),
-				afanoromo (86),
-				oriya (87),
-				punjabi (88),
-				polish (89),
-				pashtopushto (90),
-				portuguese (91),
-				quechua (92),
-				rhaetoromance (93),
-				kirundi (94),
-				romanian (95),
-				russian (96),
-				kinyarwanda (97),
-				sanskrit (98),
-				sindhi (99),
-				sangro (100),
-				serbocroatian (101),
-				singhalese (102),
-				slovak (103),
-				slovenian (104),
-				samoan (105),
-				shona (106),
-				somali (107),
-				albanian (108),
-				serbian (109),
-				siswati (110),
-				sesotho (111),
-				sudanese (112),
-				swedish (113),
-				swahili (114),
-				tamil (115),
-				telugu (116),
-				tajik (117),
-				thai (118),
-				tigrinya (119),
-				turkmen (120),
-				tagalog (121),
-				setswana (122),
-				tonga (123),
-				turkish (124),
-				tsonga (125),
-				tatar (126),
-				twi (127),
-				ukrainian (128),
-				urdu (129),
-				uzbek (130),
-				vietnamese (131),
-				volapuk (132),
-				wolof (133),
-				xhosa (134),
-				yoruba (135),
-				chinese (136),
-				zulu (137)
-			}
+	SYNTAX		SaHpiTextLanguage
         MAX-ACCESS      read-write
 	STATUS          current
-	DESCRIPTION     "
-	This enumeration lists all of the languages that can be 
-	associated with text.  Undef (0) indicates that 
-	the language is unspecified or unknown.  "
+	DESCRIPTION     "See Definition"
 	::= {saHpiInventoryEntry 7}
 
 saHpiInventoryManufacturer OBJECT-TYPE
