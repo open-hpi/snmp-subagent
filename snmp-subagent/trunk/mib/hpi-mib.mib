@@ -2482,6 +2482,7 @@ SaHpiEventEntry ::= SEQUENCE {
         saHpiEventSaHpiTime     SaHpiTimeString,
         saHpiEventType          INTEGER
         }
+	
 saHpiEvent OBJECT-TYPE
     SYNTAX      RowPointer
     MAX-ACCESS  not-accessible
@@ -6085,12 +6086,12 @@ saHpiInventoryEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiInstrumentId
+                saHpiIdrId
         }
         ::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
-        saHpiInstrumentId               SaHpiInstrumentId,
+        saHpiIdrId	                SaHpiInstrumentId,
         saHpiIdrPersistent              TruthValue,
         saHpiInventoryOEM               Unsigned32,
         saHpiIdrUpdateCount             Unsigned32,
@@ -6099,7 +6100,7 @@ SaHpiInventoryEntry ::= SEQUENCE {
         saHpiInventoryRDR               RowPointer
         }
         
-saHpiInstrumentId       OBJECT-TYPE
+saHpiIdrId       	OBJECT-TYPE
         SYNTAX          SaHpiInstrumentId
         MAX-ACCESS      read-only
         STATUS          current
@@ -6171,7 +6172,7 @@ saHpiInventoryRDR OBJECT-TYPE
         
 -- **************************************
 -- **
--- ** Idr Area
+-- ** saHpiInventoryDataAreaTable
 -- **
 -- **************************************
 
@@ -6201,28 +6202,36 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
         The four-tuple index value consits of:
         - saHpiDomainId, which is the domain of the resource
         - saHpiResourceId, the id value for the resource
-        - saHpiInstrumentId, the id value of entity inventory 
-        - saHpiResourceEntryId, the id value of inventory data area.
-        "
+        - saHpiIdrId, the id value of entity inventory 
+        - saHpiAreaId, the id value of inventory data area.
+	
+	New Area's are Created when 'saHpiIdrAreaType' is written with
+	the appropriate index values's.  The 'AreadId' index is ignored. 
+
+	SAI-HPI-B.01.01, pages 98...100, 104."
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId, 
-                saHpiInstrumentId, 
-                saHpiEntryId
+                saHpiIdrId, 
+                saHpiAreaId
         }
         ::= {saHpiInventoryDataAreaTable 1}
 
--- IBMKR: Have a comment about creating new AreaIds
--- (saHpiIrdrAreaAdd())
-
 SaHpiInventoryDataAreaEntry ::= SEQUENCE {
-
+	saHpiAreaId			SaHpiInstrumentId,
         saHpiIdrAreaType                INTEGER,
         saHpiIdrDataAreaIsReadOnly      TruthValue,
         saHpiIdrDataAreaDelete          RowStatus,
         saHpiIdrNumDataFields           Unsigned32
         }
         
+saHpiAreaId       	OBJECT-TYPE
+        SYNTAX          SaHpiInstrumentId
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+        ::= {saHpiInventoryDataAreaEntry 1}
 
 saHpiIdrAreaType        OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -6242,7 +6251,7 @@ saHpiIdrAreaType        OBJECT-TYPE
         Note: The enumerated named have +1 added as opposed to the 
         SA HPI  spec for the same constants.  Inventory Data Area 
         type definitions."
-        ::= {saHpiInventoryDataAreaEntry 1}
+        ::= {saHpiInventoryDataAreaEntry 2}
 
 saHpiIdrDataAreaIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -6251,21 +6260,26 @@ saHpiIdrDataAreaIsReadOnly OBJECT-TYPE
         DESCRIPTION     
         "Describes if an area is read-only.  All area headers in a 
         read-only IDR are flagged as read-only as well."
-        ::= {saHpiInventoryDataAreaEntry 2}
+        ::= {saHpiInventoryDataAreaEntry 3}
 
 saHpiIdrDataAreaDelete OBJECT-TYPE 
         SYNTAX          RowStatus
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-            "This function is used to delete an Inventory Data Area, including the Area header and all fields contained with the area, from a particular Inventory Data Repository.
+	"This function is used to delete an Inventory Data Area, including the 
+	Area header and all fields contained with the area, from a particular 
+	Inventory Data Repository.
 
-Deleting an Inventory Data Area also deletes all fields contained within the area.  
-In some implementations, certain Areas are intrinsically read-only.  The ReadOnly flag, in the area header, indicates if the Area is read-only.
-If the Inventory Data Area is not read-only, but contains a Field that is read-only, the Area cannot be deleted.  An attempt to delete an Area that contains a read-only Field will return an error."
+	Deleting an Inventory Data Area also deletes all fields contained within 
+	the area.  In some implementations, certain Areas are intrinsically 
+	read-only.  The ReadOnly flag, in the area header, indicates if the Area
+	is read-only. If the Inventory Data Area is not read-only, but contains 
+	a Field that is read-only, the Area cannot be deleted.  An attempt to 
+	delete an Area that contains a read-only Field will return an error."
         REFERENCE
                 "Derieved from SA-HPI-B.01.01 page 114."
-        ::= {saHpiInventoryDataAreaEntry 3}
+        ::= {saHpiInventoryDataAreaEntry 4}
 
 saHpiIdrNumDataFields OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6273,10 +6287,13 @@ saHpiIdrNumDataFields OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         "Number of Fields contained in Area"
-        ::= {saHpiInventoryDataAreaEntry 4}
--- 
---
---
+        ::= {saHpiInventoryDataAreaEntry 5}
+	
+-- **************************************
+-- **
+-- ** saHpiInventoryField
+-- **
+-- **************************************
 
 saHpiInventoryFieldCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -6302,15 +6319,14 @@ saHpiInventoryFieldEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId,
-                saHpiInstrumentId,
--- Is AreHeaderT.AreadId the same as IdrFieldT.AreadId? Yes?Verify
-                saHpiEntryId,
-                saHpiEntryId
+                saHpiIdrId,
+                saHpiAreaId,
+                saHpiFieldId
         }
         ::= {saHpiInventoryFieldTable 1}
 
 SaHpiInventoryFieldEntry ::= SEQUENCE {
---IBMKR: Perhaps we should put the AreaHeader in here?
+	saHpiFieldId		SaHpiInstrumentId,
         saHpiFieldType          INTEGER,
         saHpiFieldIsReadOnly    TruthValue,
 
@@ -6319,7 +6335,15 @@ SaHpiInventoryFieldEntry ::= SEQUENCE {
         saHpiFieldText          SaHpiText,
         saHpiFieldDelete        RowStatus
         }
-        
+	
+saHpiFieldId       	OBJECT-TYPE
+        SYNTAX          SaHpiInstrumentId
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION
+        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+        ::= {saHpiInventoryFieldEntry 1}
+      
         
 saHpiFieldType OBJECT-TYPE
         SYNTAX          INTEGER {
