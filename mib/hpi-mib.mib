@@ -206,6 +206,24 @@ Unsigned8 ::= TEXTUAL-CONVENTION
 	    see typedef unsigned char SaHpiUint8T;"
 	SYNTAX	INTEGER(0..255)
 
+SaHpiManufacturerId ::= TEXTUAL-CONVENTION
+	STATUS	current
+	DESCRIPTION
+	    " Identifier for the manufacturer 
+
+	    This is the IANA-assigned private enterprise number for the
+	    manufacturer of the resource or FRU, or of the manufacturer
+	    defining an OEM control or event type. A list of current
+	    IANA-assigned private enterprise numbers may be obtained at
+
+	    http://www.iana.org/assignments/enterprise-numbers
+
+	    If a manufacturer does not currently have an assigned number, one
+	    may be obtained by following the instructions located at
+
+	    http://www.iana.org/cgi-bin/enterprise.pl"
+	SYNTAX Unsigned32
+
 SaHpiEventCategory ::= TEXTUAL-CONVENTION
 	STATUS	current
 	DESCRIPTION
