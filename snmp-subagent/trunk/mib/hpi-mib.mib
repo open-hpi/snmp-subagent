@@ -1083,6 +1083,47 @@ SaHpiGuid ::= TEXTUAL-CONVENTION
 	"Derieved from SAI-HPI-B.01.01 section 8.21."
         SYNTAX          OCTET STRING(SIZE(0..15))
 
+
+SaHpiCtrlStateDigital ::= TEXTUAL-CONVENTION
+	STATUS      current
+    DESCRIPTION 
+	"Defines the types of digital control states.
+
+ 	Any of the four states may be set using saHpiCtrlDigitalState 
+	columnar object. Only on(2) or off(1) are appropriate returns from 
+	saHpiCtrlDigitalState columnar object.
+
+	pulseOn(4) and pulseOff(3) are transitory and end in off(1) and on(2) states,
+ 	respectively.)
+
+	Explanations of states:
+
+	 off(1) - the control is off
+	 on(2)  - the control is on
+	 pulseOff(3) - the control is briefly turned off, and then turned back on
+	 pulseOn(4)  - the control is briefly turned on, and then turned back off"
+    SYNTAX INTEGER { undefined(0),
+                     off(1), on(2),
+                     pulseOff(3), pulseOn(4) }
+
+SaHpiCtrlOutputType ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION 
+	"This textual convention defines what the control's output will be. "
+	SYNTAX INTEGER { undefined (0), generic (1), 
+                     led (2), fanSpeed (3), 
+                     dryContactClosure (4),
+                     powerSupplyInhibit (5),
+                     audible (6), frontPanelLockout (7),
+                     powerInterlock (8), powerState (9),
+                     lcdDisplay (10), oem (11) }
+
+SaHpiCtrlMode ::= TEXTUAL-CONVENTION
+	STATUS	current
+	DESCRIPTION 
+	"Controls may be in either auto(1) mode or manual(2) mode."
+	SYNTAX INTEGER { undefined(0), auto(1), manual(2) }
+
 -- *************************************
 -- **
 -- **   Administration
