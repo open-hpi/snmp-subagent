@@ -44,6 +44,10 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiResourceTable_oid[] = { saHpiResourceTable_TABLE_OID };
 size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 
+void populate_saHpiResourceTable(void)
+{
+	dbg("WARNING: populate_saHpiResourceTable: not implemented!");
+}
 
 #ifdef saHpiResourceTable_IDX2
 /************************************************************
