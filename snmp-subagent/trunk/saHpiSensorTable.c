@@ -372,7 +372,10 @@ saHpiSensorTable_modify_context(
     ctx->saHpiSensorThresholdDefnWriteThold = thd.WriteThold;
     ctx->saHpiSensorThresholdDefnFixedThold = thd.FixedThold;
     
-   
+    ctx->saHpiSensorThresholdInterpreted_len = 0;
+    ctx->saHpiSensorThresholdRaw_len = 0;
+  
+   if (thd.IsThreshold == SAHPI_TRUE) 
     fill_sensor_threshold_info(ctx, sensor_threshold);
 
     
@@ -393,8 +396,6 @@ void fill_sensor_threshold_info(saHpiSensorTable_context *ctx,
   if (sensor_threshold) {
     memset(ctx->saHpiSensorThresholdInterpreted, 0x00, THRESHOLD_RAW_MAX);
     memset(ctx->saHpiSensorThresholdRaw, 0x00, THRESHOLD_INTERPRETED_MAX);
-    ctx->saHpiSensorThresholdInterpreted_len = 0;
-    ctx->saHpiSensorThresholdRaw_len = 0;
 
     sensor_thd[SENSOR_THD_LOW_MINOR].reading = 
       &sensor_threshold->LowMinor;
@@ -1119,6 +1120,11 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
         }
+
+	if (row_ctx->saHpiSensorThresholdDefnIsThreshold == MIB_FALSE) {
+		rc = SNMP_ERR_NOACCESS;
+	}
+
 	if (rc) {
 		netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
                                          rc);
