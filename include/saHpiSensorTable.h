@@ -128,11 +128,11 @@ extern "C"
     oid saHpiSensorRDR[MAX_OID_LEN];
     long saHpiSensorRDR_len;
 
-    long rdr_id;
-    long resource_id;
-    long domain_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiEntryIdT rdr_id;
+    SaHpiDomainIdT domain_id;
     long hash;
-    int flags;
+    SaHpiSensorRangeFlagsT flags;
 
   } saHpiSensorTable_context;
 

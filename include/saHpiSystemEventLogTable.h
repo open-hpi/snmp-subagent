@@ -181,8 +181,9 @@ extern "C"
     long saHpiSystemEventLogDelete;
 
     long hash;
-    unsigned long resource_id;
-    unsigned long domain_id;
+
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
 
   } saHpiSystemEventLogTable_context;
 

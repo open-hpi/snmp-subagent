@@ -82,8 +82,8 @@ extern "C"
     long saHpiHotSwapRTP_len;
 
     long hash;
-    long domain_id;
-    long resource_id;
+    SaHpiDomainIdT domain_id;
+    SaHpiResourceIdT resource_id;
 
   } saHpiHotSwapTable_context;
 

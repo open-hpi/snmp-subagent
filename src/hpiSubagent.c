@@ -428,7 +428,7 @@ build_reading_strings (SaHpiSensorReadingT * reading,
 {
 
   char format[SENSOR_READING_MAX_LEN];
-
+  size_t len;
 
   if (values_present) {
     *values_present = reading->ValuesPresent + 1;
@@ -464,7 +464,14 @@ build_reading_strings (SaHpiSensorReadingT * reading,
 	    memcpy (interpreted_reading,
 		    &reading->Interpreted.Value.SensorBuffer,
 		    SAHPI_SENSOR_BUFFER_LENGTH);
+	    /*
+	     * Old code: 
 	    *interpreted_reading_len = SAHPI_SENSOR_BUFFER_LENGTH;
+	     * Check to see how much of the string is actually 0x00 and 
+	     * do not count those
+	     */
+	    len = strlen(reading->Interpreted.Value.SensorBuffer);
+	    *interpreted_reading_len = ( len < SAHPI_SENSOR_BUFFER_LENGTH ) ? len : SAHPI_SENSOR_BUFFER_LENGTH;
 	  }
 	}
 
@@ -1234,9 +1241,10 @@ main (int argc, char **argv)
       rc = agent_check_and_process (1);	/* 0 == don't block */
     }
 stop:
+  closeSaHpiSession();
   /* at shutdown time */
   snmp_log (LOG_INFO, "Stopping %s\n", version);
   snmp_shutdown (AGENT);
-
+  
   return rc;
 }

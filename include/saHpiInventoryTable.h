@@ -143,9 +143,9 @@ extern "C"
     oid saHpiInventoryRDR[MAX_OID_LEN];
     long saHpiInventoryRDR_len;
 
-    long domain_id;
-    long resource_id;
-    long rdr_id;
+    SaHpiDomainIdT domain_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiEntryIdT rdr_id;
     long hash;
 
     long count_of_subitems;

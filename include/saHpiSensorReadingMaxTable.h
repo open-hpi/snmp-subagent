@@ -59,11 +59,10 @@ extern "C"
       saHpiSensorReadingMaxEventStatus[SENSOR_READING_EVENT_MAX];
     size_t saHpiSensorReadingMaxEventStatus_len;
 
-    long sensor_id;
-    long resource_id;
-    long domain_id;
     long hash;
-
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
+    SaHpiSensorNumT sensor_id;
 
   } saHpiSensorReadingMaxTable_context;
 
