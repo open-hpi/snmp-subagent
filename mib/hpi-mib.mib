@@ -7087,7 +7087,7 @@ saHpiFieldStatus        OBJECT-TYPE
     The status column has four defined values:
 
     - `active(1)', which indicates that the conceptual row is
-    	available for use by the managed device. For it to in such 
+    	available for use by the managed device. For it to be in such 
 	state, the columnar objects: saHpiFieldType, 
 	saHpiFieldTextType, saHpiTextLanguage, and saHpiFieldText 
        must have valid values.
