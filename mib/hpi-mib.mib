@@ -5153,24 +5153,15 @@ saHpiInventoryEntry OBJECT-TYPE
 	All inventory data contained in an inventory data repository (IDR)
 	must be represented in the RDR repository"
 	
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiIdrId  }
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiInstrumentId}
 	::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
-	saHpiIdrId			Unsigned32,
 	saHpiIdrPersistent              TruthValue,
 	saHpiInventoryOEM		Unsigned32,
 	saHpiInventoryRDR		RowPointer
 	}
 	
-saHpiIdrId OBJECT-TYPE
-	SYNTAX		Unsigned32
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Repository Identifier."
-	::= {saHpiInventoryEntry 1}
-
 saHpiIdrPersistent OBJECT-TYPE 
 	SYNTAX		TruthValue
 	MAX-ACCESS	read-write
@@ -5178,9 +5169,9 @@ saHpiIdrPersistent OBJECT-TYPE
 	DESCRIPTION	
 	"True indicates that updates to IDR are automatically and immediately 
 	persisted. False indicates that updates are notimmediately persisted; 
-	but optionally may be persisted via saHpiParmControl() function, as
+	but optionally may be persisted via saHpiParmControl function, as
         defined in implementation documentation."
-	::= {saHpiInventoryEntry 2}
+	::= {saHpiInventoryEntry 1}
 
 saHpiInventoryOEM OBJECT-TYPE
 	SYNTAX		Unsigned32
@@ -5189,14 +5180,14 @@ saHpiInventoryOEM OBJECT-TYPE
 	DESCRIPTION
 	"OEM value for the inventory record. This is manufacturere' 
 	specific value."
-	::= {saHpiInventoryEntry 3}
+	::= {saHpiInventoryEntry 2}
 
 saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 4}
+        ::= {saHpiInventoryEntry 3}
 	
 --
 --
@@ -5224,7 +5215,7 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
 	DESCRIPTION
 	"These structures are used to read and write inventory data respository 
 	data area records."
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiIdrId, saHpiAreaId }
+	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiInstrumentId, saHpiAreaId }
 	::= {saHpiInventoryDataAreaTable 1}
 
 
