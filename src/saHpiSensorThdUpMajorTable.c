@@ -40,18 +40,17 @@ OID_LENGTH (saHpiSensorThdUpMajorTable_oid);
 
 static int
 modify_saHpiSensorThdUpMajorTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdUpMajorTable_context
-					   * ctx);
+				       SaHpiResourceIdT resource_id,
+				       SaHpiSensorNumT sensor_num,
+				       SaHpiSensorThdDefnT * threshold_def,
+				       SaHpiSensorReadingT * reading,
+				       saHpiSensorThdUpMajorTable_context
+				       * ctx);
 
 int
 delete_ThdUpMajor_row (SaHpiDomainIdT domain_id,
-			   SaHpiResourceIdT resource_id,
-			   SaHpiSensorNumT sensor_num)
+		       SaHpiResourceIdT resource_id,
+		       SaHpiSensorNumT sensor_num)
 {
 
   saHpiSensorThdUpMajorTable_context *ctx;
@@ -85,10 +84,10 @@ delete_ThdUpMajor_row (SaHpiDomainIdT domain_id,
 
 int
 populate_ThdUpMajor (SaHpiDomainIdT domain_id,
-			 SaHpiResourceIdT resource_id,
-			 SaHpiSensorNumT sensor_id,
-			 SaHpiSensorThdDefnT *threshold_def,
-			 SaHpiSensorReadingT * reading)
+		     SaHpiResourceIdT resource_id,
+		     SaHpiSensorNumT sensor_id,
+		     SaHpiSensorThdDefnT * threshold_def,
+		     SaHpiSensorReadingT * reading)
 {
 
 
@@ -124,8 +123,7 @@ populate_ThdUpMajor (SaHpiDomainIdT domain_id,
 	  /* 
 	     New entry. Create it.
 	   */
-	  ctx =
-	    saHpiSensorThdUpMajorTable_create_row (&sensor_thd_index);
+	  ctx = saHpiSensorThdUpMajorTable_create_row (&sensor_thd_index);
 	}
       if (!ctx)
 	{
@@ -135,11 +133,11 @@ populate_ThdUpMajor (SaHpiDomainIdT domain_id,
 	}
 
       if (modify_saHpiSensorThdUpMajorTable_row (domain_id,
-						     resource_id,
-						     sensor_id,
-						     threshold_def,
-						     reading,
-						     ctx) == AGENT_NEW_ENTRY)
+						 resource_id,
+						 sensor_id,
+						 threshold_def,
+						 reading,
+						 ctx) == AGENT_NEW_ENTRY)
 	{
 	  /*
 	   * Add new entry.
@@ -159,13 +157,12 @@ populate_ThdUpMajor (SaHpiDomainIdT domain_id,
 
 int
 modify_saHpiSensorThdUpMajorTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdUpMajorTable_context
-					   * ctx)
+				       SaHpiResourceIdT resource_id,
+				       SaHpiSensorNumT sensor_num,
+				       SaHpiSensorThdDefnT * threshold_def,
+				       SaHpiSensorReadingT * reading,
+				       saHpiSensorThdUpMajorTable_context
+				       * ctx)
 {
 
   long hash = 0;
@@ -219,20 +216,21 @@ modify_saHpiSensorThdUpMajorTable_row (SaHpiDomainIdT domain_id,
 			     &ctx->saHpiSensorThdUpMajorRaw,
 			     ctx->saHpiSensorThdUpMajorInterpreted,
 			     &ctx->saHpiSensorThdUpMajorInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
 
-      ctx->saHpiSensorThdUpMajorIsReadable = 
-	((threshold_def->ReadThold & SAHPI_STM_UP_MAJOR) == SAHPI_STM_UP_MAJOR) ?
-	MIB_TRUE : MIB_FALSE;
-      
-      ctx->saHpiSensorThdUpMajorIsWritable = 
-	((threshold_def->WriteThold & SAHPI_STM_UP_MAJOR) == SAHPI_STM_UP_MAJOR) ?
-	MIB_TRUE : MIB_FALSE;
-  ctx->saHpiSensorThdUpMajorIsFixed = 
-	((threshold_def->FixedThold & SAHPI_STM_UP_MAJOR) == SAHPI_STM_UP_MAJOR) ?
-	MIB_TRUE : MIB_FALSE;
+      if (threshold_def)
+	{
+	  ctx->saHpiSensorThdUpMajorIsReadable =
+	    ((threshold_def->ReadThold & SAHPI_STM_UP_MAJOR) ==
+	     SAHPI_STM_UP_MAJOR) ? MIB_TRUE : MIB_FALSE;
 
+	  ctx->saHpiSensorThdUpMajorIsWritable =
+	    ((threshold_def->WriteThold & SAHPI_STM_UP_MAJOR) ==
+	     SAHPI_STM_UP_MAJOR) ? MIB_TRUE : MIB_FALSE;
+	  ctx->saHpiSensorThdUpMajorIsFixed =
+	    ((threshold_def->FixedThold & SAHPI_STM_UP_MAJOR) ==
+	     SAHPI_STM_UP_MAJOR) ? MIB_TRUE : MIB_FALSE;
+	}
       /* END */
       DEBUGMSGTL ((AGENT, "Modify saHpiSensorThdUpMajorTable_ctx: Exit"));
       if (update_entry == MIB_TRUE)
@@ -248,7 +246,9 @@ modify_saHpiSensorThdUpMajorTable_row (SaHpiDomainIdT domain_id,
 }
 
 
-int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
+int
+set_ThdUpMajor (saHpiSensorThdUpMajorTable_context * ctx)
+{
 
   SaHpiSensorThresholdsT thd;
   SaHpiSessionIdT session_id;
@@ -270,10 +270,11 @@ int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
       /*
        * Get the current threshold information
        */
-      DEBUGMSGTL((AGENT,"resource_id: %d, sensor_id: %d\n", ctx->resource_id, ctx->sensor_id));
-      rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+      DEBUGMSGTL ((AGENT, "resource_id: %d, sensor_id: %d\n",
+		   ctx->resource_id, ctx->sensor_id));
+      rc =
+	saHpiSensorThresholdsGet (session_id, ctx->resource_id,
+				  ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -286,25 +287,26 @@ int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
 	  return AGENT_ERR_OPERATION;
 	}
 
-	/* Update the correct entry.	 */
-      
-      if (thd.UpMajor.ValuesPresent & SAHPI_SRF_INTERPRETED) {
-	thd.UpMajor.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-	memcpy(&thd.UpMajor.Interpreted.Value.SensorBuffer,
-		&ctx->saHpiSensorThdUpMajorInterpreted,
-		ctx->saHpiSensorThdUpMajorInterpreted_len);
-	       
-      }
-      if (thd.UpMajor.ValuesPresent & SAHPI_SRF_RAW) {
-	thd.UpMajor.Raw = ctx->saHpiSensorThdUpMajorRaw;
-      }
+      /* Update the correct entry.     */
+
+      if (thd.UpMajor.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	{
+	  thd.UpMajor.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
+	  memcpy (&thd.UpMajor.Interpreted.Value.SensorBuffer,
+		  &ctx->saHpiSensorThdUpMajorInterpreted,
+		  ctx->saHpiSensorThdUpMajorInterpreted_len);
+
+	}
+      if (thd.UpMajor.ValuesPresent & SAHPI_SRF_RAW)
+	{
+	  thd.UpMajor.Raw = ctx->saHpiSensorThdUpMajorRaw;
+	}
 
       /*
        * Set the thresholds 
        */
       rc = saHpiSensorThresholdsSet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -324,8 +326,7 @@ int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
 
       memset (&thd, 0x00, sizeof (SaHpiSensorThresholdsT));
       rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -343,8 +344,7 @@ int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
 			     &ctx->saHpiSensorThdUpMajorRaw,
 			     ctx->saHpiSensorThdUpMajorInterpreted,
 			     &ctx->saHpiSensorThdUpMajorInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
 
 
       DEBUGMSGTL ((AGENT, "set_ThdUpMajor: Exit.\n"));
@@ -356,6 +356,7 @@ int set_ThdUpMajor (saHpiSensorThdUpMajorTable_context *ctx) {
 
 
 }
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -384,30 +385,27 @@ static int
   /*
    * copy components into the context structure
    */
-   dst->saHpiSensorThdUpMajorIsReadable =
-        src->saHpiSensorThdUpMajorIsReadable;
+  dst->saHpiSensorThdUpMajorIsReadable = src->saHpiSensorThdUpMajorIsReadable;
 
-    dst->saHpiSensorThdUpMajorIsWritable =
-        src->saHpiSensorThdUpMajorIsWritable;
+  dst->saHpiSensorThdUpMajorIsWritable = src->saHpiSensorThdUpMajorIsWritable;
 
-    dst->saHpiSensorThdUpMajorIsFixed =
-        src->saHpiSensorThdUpMajorIsFixed;
+  dst->saHpiSensorThdUpMajorIsFixed = src->saHpiSensorThdUpMajorIsFixed;
 
-    dst->saHpiSensorThdUpMajorValuesPresent =
-        src->saHpiSensorThdUpMajorValuesPresent;
+  dst->saHpiSensorThdUpMajorValuesPresent =
+    src->saHpiSensorThdUpMajorValuesPresent;
 
-    dst->saHpiSensorThdUpMajorRaw = src->saHpiSensorThdUpMajorRaw;
+  dst->saHpiSensorThdUpMajorRaw = src->saHpiSensorThdUpMajorRaw;
 
-    memcpy(dst->saHpiSensorThdUpMajorInterpreted,
-           src->saHpiSensorThdUpMajorInterpreted,
-           src->saHpiSensorThdUpMajorInterpreted_len);
-    dst->saHpiSensorThdUpMajorInterpreted_len =
-        src->saHpiSensorThdUpMajorInterpreted_len;
+  memcpy (dst->saHpiSensorThdUpMajorInterpreted,
+	  src->saHpiSensorThdUpMajorInterpreted,
+	  src->saHpiSensorThdUpMajorInterpreted_len);
+  dst->saHpiSensorThdUpMajorInterpreted_len =
+    src->saHpiSensorThdUpMajorInterpreted_len;
 
-    dst->resource_id = src->resource_id;
-    dst->domain_id = src->domain_id;
-    dst->sensor_id = src->sensor_id;
-    dst->hash = src->hash;
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  dst->sensor_id = src->sensor_id;
+  dst->hash = src->hash;
 
   return 0;
 }
@@ -480,9 +478,9 @@ int
       /*
        * copy index components into the context structure
        */
-	ctx->domain_id  = *var_saHpiDomainID.val.integer;
-	ctx->resource_id = *var_saHpiResourceID.val.integer;
-	ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
+      ctx->domain_id = *var_saHpiDomainID.val.integer;
+      ctx->resource_id = *var_saHpiResourceID.val.integer;
+      ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
     }
 
   /*
@@ -503,8 +501,7 @@ int
 int
   saHpiSensorThdUpMajorTable_can_delete
   (saHpiSensorThdUpMajorTable_context * undo_ctx,
-   saHpiSensorThdUpMajorTable_context * row_ctx,
-   netsnmp_request_group * rg)
+   saHpiSensorThdUpMajorTable_context * row_ctx, netsnmp_request_group * rg)
 {
 
   return 1;
@@ -539,9 +536,9 @@ saHpiSensorThdUpMajorTable_create_row (netsnmp_index * hdr)
       return NULL;
     }
   ctx->saHpiSensorThdUpMajorIsReadable = MIB_FALSE;
-  ctx->saHpiSensorThdUpMajorIsWritable= MIB_FALSE;
+  ctx->saHpiSensorThdUpMajorIsWritable = MIB_FALSE;
   ctx->saHpiSensorThdUpMajorIsFixed = MIB_FALSE;
-  ctx->saHpiSensorThdUpMajorValuesPresent= 0;
+  ctx->saHpiSensorThdUpMajorValuesPresent = 0;
   return ctx;
 }
 
@@ -550,7 +547,7 @@ saHpiSensorThdUpMajorTable_create_row (netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiSensorThdUpMajorTable_context
-  *saHpiSensorThdUpMajorTable_duplicate_row
+  * saHpiSensorThdUpMajorTable_duplicate_row
   (saHpiSensorThdUpMajorTable_context * row_ctx)
 {
   saHpiSensorThdUpMajorTable_context *dup;
@@ -612,19 +609,21 @@ void
 saHpiSensorThdUpMajorTable_set_reserve1 (netsnmp_request_group * rg)
 {
   saHpiSensorThdUpMajorTable_context *row_ctx =
-        (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
+    (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
 
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int             rc =0;
+  netsnmp_variable_list *var;
+  netsnmp_request_group_item *current;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_reserve1. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_reserve1. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
 	case COLUMN_SAHPISENSORTHDUPMAJORISREADABLE:
 	case COLUMN_SAHPISENSORTHDUPMAJORISWRITABLE:
@@ -633,78 +632,84 @@ saHpiSensorThdUpMajorTable_set_reserve1 (netsnmp_request_group * rg)
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->
-                                                       saHpiSensorThdUpMajorRaw));
-            break;
+	case COLUMN_SAHPISENSORTHDUPMAJORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+					       sizeof (row_ctx->
+						       saHpiSensorThdUpMajorRaw));
+	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	    if (var->type != ASN_OCTET_STR)
+	case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
 	    {
 	      rc = SNMP_ERR_WRONGTYPE;
 	    }
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorThdUpMajorTable_set_reserve1\n");
-        }
+	default:
+		/** We shouldn't get here */
+	  rc = SNMP_ERR_GENERR;
+	  snmp_log (LOG_ERR, "unknown column in "
+		    "saHpiSensorThdUpMajorTable_set_reserve1\n");
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
-        rg->status = SNMP_MAX(rg->status, current->ri->status);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+      rg->status = SNMP_MAX (rg->status, current->ri->status);
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_reserve1. Exit. (rc:%d) \n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMajorTable_set_reserve1. Exit. (rc:%d) \n",
+	       rc));
 }
 
 void
 saHpiSensorThdUpMajorTable_set_reserve2 (netsnmp_request_group * rg)
 {
- saHpiSensorThdUpMajorTable_context *row_ctx =
-        (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int             rc = 0;
+  saHpiSensorThdUpMajorTable_context *row_ctx =
+    (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  int rc = 0;
 
-    rg->rg_void = rg->list->ri;
+  rg->rg_void = rg->list->ri;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_reserve2. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_reserve2. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
-        case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
-        case COLUMN_SAHPISENSORTHDUPMAJORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
+      switch (current->tri->colnum)
+	{
+	case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
+	case COLUMN_SAHPISENSORTHDUPMAJORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
 	  if (row_ctx->saHpiSensorThdUpMajorIsWritable == MIB_FALSE)
-	  {
-	    rc = SNMP_ERR_NOACCESS;
-	  }
+	    {
+	      rc = SNMP_ERR_NOACCESS;
+	    }
 	  if (row_ctx->saHpiSensorThdUpMajorIsFixed == MIB_TRUE)
 	    {
-	    rc = SNMP_ERR_NOACCESS;
+	      rc = SNMP_ERR_NOACCESS;
 	    }
-	  
-	break;
+
+	  break;
 
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
     }
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_reserve2. Exit (rc:%d).\n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMajorTable_set_reserve2. Exit (rc:%d).\n",
+	       rc));
 }
 
 /************************************************************
@@ -721,51 +726,55 @@ saHpiSensorThdUpMajorTable_set_reserve2 (netsnmp_request_group * rg)
 void
 saHpiSensorThdUpMajorTable_set_action (netsnmp_request_group * rg)
 {
- netsnmp_variable_list *var;
-    saHpiSensorThdUpMajorTable_context *row_ctx =
-        (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  saHpiSensorThdUpMajorTable_context *row_ctx =
+    (saHpiSensorThdUpMajorTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
 
-    int             rc = 0;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_action. Entry\n")); 
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_action. Entry\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
+      var = current->ri->requestvb;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
-        case COLUMN_SAHPISENSORTHDUPMAJORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiSensorThdUpMajorRaw = *var->val.integer;
-	    if (set_ThdUpMajor(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
-            break;
+	case COLUMN_SAHPISENSORTHDUPMAJORRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  row_ctx->saHpiSensorThdUpMajorRaw = *var->val.integer;
+	  if (set_ThdUpMajor (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
+	  break;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiSensorThdUpMajorInterpreted,
-                   var->val.string, var->val_len);
-            row_ctx->saHpiSensorThdUpMajorInterpreted_len =
-                var->val_len;
-	    if (set_ThdUpMajor(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
+	case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  memcpy (row_ctx->saHpiSensorThdUpMajorInterpreted,
+		  var->val.string, var->val_len);
+	  row_ctx->saHpiSensorThdUpMajorInterpreted_len = var->val_len;
+	  if (set_ThdUpMajor (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
 
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
     }
 
-   
-    if (rc) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info *) rg->
-                                       rg_void, rc);
-        return;
+
+  if (rc)
+    {
+      netsnmp_set_mode_request_error (MODE_SET_BEGIN,
+				      (netsnmp_request_info *) rg->
+				      rg_void, rc);
+      return;
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdUpMajorTable_set_action. Exit (rc: %d)\n",rc)); 
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdUpMajorTable_set_action. Exit (rc: %d)\n", rc));
 }
 
 /************************************************************
@@ -895,8 +904,7 @@ initialize_table_saHpiSensorThdUpMajorTable (void)
   cb.get_value = saHpiSensorThdUpMajorTable_get_value;
   cb.container =
     netsnmp_container_find ("saHpiSensorThdUpMajorTable_primary:"
-			    "saHpiSensorThdUpMajorTable:"
-			    "table_container");
+			    "saHpiSensorThdUpMajorTable:" "table_container");
 
 
   cb.create_row = (UserRowMethod *) saHpiSensorThdUpMajorTable_create_row;
@@ -934,72 +942,104 @@ initialize_table_saHpiSensorThdUpMajorTable (void)
  */
 int
 saHpiSensorThdUpMajorTable_get_value (netsnmp_request_info * request,
-					  netsnmp_index * item,
-					  netsnmp_table_request_info
-					  * table_info)
+				      netsnmp_index * item,
+				      netsnmp_table_request_info * table_info)
 {
   netsnmp_variable_list *var = request->requestvb;
   saHpiSensorThdUpMajorTable_context *context =
     (saHpiSensorThdUpMajorTable_context *) item;
 
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
+  SaHpiSensorThresholdsT sensor_threshold;
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+    }
+  rc = saHpiSensorThresholdsGet (session_id,
+				 context->resource_id,
+				 context->sensor_id, &sensor_threshold);
+
+  if (rc != SA_OK)
+    {
+      snmp_log (LOG_ERR,
+		"Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+		get_error_string (rc));
+      DEBUGMSGTL ((AGENT,
+		   "Call to  SensorThresholdGet fails with return code: %s.\n",
+		   get_error_string (rc)));
+      return AGENT_ERR_OPERATION;
+    }
+  if (rc == AGENT_ERR_NOERROR)
+    {
+      modify_saHpiSensorThdUpMajorTable_row (context->domain_id,
+					     context->resource_id,
+					     context->sensor_id,
+					     NULL,
+					     &sensor_threshold.
+					     UpMajor, context);
+    }
+#endif
   switch (table_info->colnum)
     {
 
     case COLUMN_SAHPISENSORTHDUPMAJORISREADABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorIsReadable,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMajorIsReadable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMajorIsReadable,
+				sizeof (context->
+					saHpiSensorThdUpMajorIsReadable));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMAJORISWRITABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorIsWritable,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMajorIsWritable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMajorIsWritable,
+				sizeof (context->
+					saHpiSensorThdUpMajorIsWritable));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMAJORISFIXED:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorIsFixed,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMajorIsFixed));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMajorIsFixed,
+				sizeof (context->
+					saHpiSensorThdUpMajorIsFixed));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMAJORVALUESPRESENT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorValuesPresent,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMajorValuesPresent));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdUpMajorValuesPresent,
+				sizeof (context->
+					saHpiSensorThdUpMajorValuesPresent));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMAJORRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-	if (context->saHpiSensorThdUpMajorIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorRaw,
-                                 sizeof(context->
-                                        saHpiSensorThdUpMajorRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      if (context->saHpiSensorThdUpMajorIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				  (char *) &context->
+				  saHpiSensorThdUpMajorRaw,
+				  sizeof (context->saHpiSensorThdUpMajorRaw));
+      break;
 
     case COLUMN_SAHPISENSORTHDUPMAJORINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	if (context->saHpiSensorThdUpMajorIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorThdUpMajorInterpreted,
-                                 context->
-                                 saHpiSensorThdUpMajorInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      if (context->saHpiSensorThdUpMajorIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				  (char *) &context->
+				  saHpiSensorThdUpMajorInterpreted,
+				  context->
+				  saHpiSensorThdUpMajorInterpreted_len);
+      break;
 
     default:
 	    /** We shouldn't get here */

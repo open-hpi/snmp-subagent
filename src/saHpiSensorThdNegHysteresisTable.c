@@ -40,18 +40,18 @@ OID_LENGTH (saHpiSensorThdNegHysteresisTable_oid);
 
 static int
 modify_saHpiSensorThdNegHysteresisTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdNegHysteresisTable_context
-					   * ctx);
+					     SaHpiResourceIdT resource_id,
+					     SaHpiSensorNumT sensor_num,
+					     SaHpiSensorThdDefnT *
+					     threshold_def,
+					     SaHpiSensorReadingT * reading,
+					     saHpiSensorThdNegHysteresisTable_context
+					     * ctx);
 
 int
 delete_ThdNegHysteresis_row (SaHpiDomainIdT domain_id,
-			   SaHpiResourceIdT resource_id,
-			   SaHpiSensorNumT sensor_num)
+			     SaHpiResourceIdT resource_id,
+			     SaHpiSensorNumT sensor_num)
 {
 
   saHpiSensorThdNegHysteresisTable_context *ctx;
@@ -85,10 +85,10 @@ delete_ThdNegHysteresis_row (SaHpiDomainIdT domain_id,
 
 int
 populate_ThdNegHysteresis (SaHpiDomainIdT domain_id,
-			 SaHpiResourceIdT resource_id,
-			 SaHpiSensorNumT sensor_id,
-			 SaHpiSensorThdDefnT *threshold_def,
-			 SaHpiSensorReadingT * reading)
+			   SaHpiResourceIdT resource_id,
+			   SaHpiSensorNumT sensor_id,
+			   SaHpiSensorThdDefnT * threshold_def,
+			   SaHpiSensorReadingT * reading)
 {
 
 
@@ -135,11 +135,12 @@ populate_ThdNegHysteresis (SaHpiDomainIdT domain_id,
 	}
 
       if (modify_saHpiSensorThdNegHysteresisTable_row (domain_id,
-						     resource_id,
-						     sensor_id,
-						     threshold_def,
-						     reading,
-						     ctx) == AGENT_NEW_ENTRY)
+						       resource_id,
+						       sensor_id,
+						       threshold_def,
+						       reading,
+						       ctx) ==
+	  AGENT_NEW_ENTRY)
 	{
 	  /*
 	   * Add new entry.
@@ -151,7 +152,8 @@ populate_ThdNegHysteresis (SaHpiDomainIdT domain_id,
     }
   else
     rc = AGENT_ERR_OPERATION;
-  DEBUGMSGT ((AGENT, "\t--- populate_ThdNegHysteresis, Exit (rc: %d),\n", rc));
+  DEBUGMSGT ((AGENT, "\t--- populate_ThdNegHysteresis, Exit (rc: %d),\n",
+	      rc));
 
   return rc;
 }
@@ -159,20 +161,21 @@ populate_ThdNegHysteresis (SaHpiDomainIdT domain_id,
 
 int
 modify_saHpiSensorThdNegHysteresisTable_row (SaHpiDomainIdT domain_id,
-					   SaHpiResourceIdT resource_id,
-					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
-					   SaHpiSensorReadingT * reading,
-					   saHpiSensorThdNegHysteresisTable_context
-					   * ctx)
+					     SaHpiResourceIdT resource_id,
+					     SaHpiSensorNumT sensor_num,
+					     SaHpiSensorThdDefnT *
+					     threshold_def,
+					     SaHpiSensorReadingT * reading,
+					     saHpiSensorThdNegHysteresisTable_context
+					     * ctx)
 {
 
   long hash = 0;
   unsigned int update_entry = MIB_FALSE;
   //  char format[SENSOR_THD_INTER_MAX];
 
-  DEBUGMSGTL ((AGENT, "Modify saHpiSensorThdNegHysteresisTable_ctx: Entry.\n"));
+  DEBUGMSGTL ((AGENT,
+	       "Modify saHpiSensorThdNegHysteresisTable_ctx: Entry.\n"));
 
   if (ctx)
     {
@@ -219,22 +222,23 @@ modify_saHpiSensorThdNegHysteresisTable_row (SaHpiDomainIdT domain_id,
 			     &ctx->saHpiSensorThdNegHysteresisRaw,
 			     ctx->saHpiSensorThdNegHysteresisInterpreted,
 			     &ctx->saHpiSensorThdNegHysteresisInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
+      if (threshold_def)
+	{
+	  ctx->saHpiSensorThdNegHysteresisIsReadable =
+	    ((threshold_def->ReadThold & SAHPI_STM_LOW_HYSTERESIS) ==
+	     SAHPI_STM_LOW_HYSTERESIS) ? MIB_TRUE : MIB_FALSE;
 
-      ctx->saHpiSensorThdNegHysteresisIsReadable = 
-	((threshold_def->ReadThold & SAHPI_STM_LOW_HYSTERESIS) == SAHPI_STM_LOW_HYSTERESIS) ?
-	MIB_TRUE : MIB_FALSE;
-      
-      ctx->saHpiSensorThdNegHysteresisIsWritable = 
-	((threshold_def->WriteThold & SAHPI_STM_LOW_HYSTERESIS) == SAHPI_STM_LOW_HYSTERESIS) ?
-	MIB_TRUE : MIB_FALSE;
-  ctx->saHpiSensorThdNegHysteresisIsFixed = 
-	((threshold_def->FixedThold & SAHPI_STM_LOW_HYSTERESIS) == SAHPI_STM_LOW_HYSTERESIS) ?
-	MIB_TRUE : MIB_FALSE;
-
+	  ctx->saHpiSensorThdNegHysteresisIsWritable =
+	    ((threshold_def->WriteThold & SAHPI_STM_LOW_HYSTERESIS) ==
+	     SAHPI_STM_LOW_HYSTERESIS) ? MIB_TRUE : MIB_FALSE;
+	  ctx->saHpiSensorThdNegHysteresisIsFixed =
+	    ((threshold_def->FixedThold & SAHPI_STM_LOW_HYSTERESIS) ==
+	     SAHPI_STM_LOW_HYSTERESIS) ? MIB_TRUE : MIB_FALSE;
+	}
       /* END */
-      DEBUGMSGTL ((AGENT, "Modify saHpiSensorThdNegHysteresisTable_ctx: Exit"));
+      DEBUGMSGTL ((AGENT,
+		   "Modify saHpiSensorThdNegHysteresisTable_ctx: Exit"));
       if (update_entry == MIB_TRUE)
 	return AGENT_ENTRY_EXIST;
       return AGENT_NEW_ENTRY;
@@ -248,7 +252,9 @@ modify_saHpiSensorThdNegHysteresisTable_row (SaHpiDomainIdT domain_id,
 }
 
 
-int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
+int
+set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context * ctx)
+{
 
   SaHpiSensorThresholdsT thd;
   SaHpiSessionIdT session_id;
@@ -270,10 +276,11 @@ int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
       /*
        * Get the current threshold information
        */
-      DEBUGMSGTL((AGENT,"resource_id: %d, sensor_id: %d\n", ctx->resource_id, ctx->sensor_id));
-      rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+      DEBUGMSGTL ((AGENT, "resource_id: %d, sensor_id: %d\n",
+		   ctx->resource_id, ctx->sensor_id));
+      rc =
+	saHpiSensorThresholdsGet (session_id, ctx->resource_id,
+				  ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -286,25 +293,27 @@ int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
 	  return AGENT_ERR_OPERATION;
 	}
 
-	/* Negdate the correct entry.	 */
-      
-      if (thd.NegThdHysteresis.ValuesPresent & SAHPI_SRF_INTERPRETED) {
-	thd.NegThdHysteresis.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-	memcpy(&thd.NegThdHysteresis.Interpreted.Value.SensorBuffer,
-		&ctx->saHpiSensorThdNegHysteresisInterpreted,
-		ctx->saHpiSensorThdNegHysteresisInterpreted_len);
-	       
-      }
-      if (thd.NegThdHysteresis.ValuesPresent & SAHPI_SRF_RAW) {
-	thd.NegThdHysteresis.Raw = ctx->saHpiSensorThdNegHysteresisRaw;
-      }
+      /* Negdate the correct entry.    */
+
+      if (thd.NegThdHysteresis.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	{
+	  thd.NegThdHysteresis.Interpreted.Type =
+	    SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
+	  memcpy (&thd.NegThdHysteresis.Interpreted.Value.SensorBuffer,
+		  &ctx->saHpiSensorThdNegHysteresisInterpreted,
+		  ctx->saHpiSensorThdNegHysteresisInterpreted_len);
+
+	}
+      if (thd.NegThdHysteresis.ValuesPresent & SAHPI_SRF_RAW)
+	{
+	  thd.NegThdHysteresis.Raw = ctx->saHpiSensorThdNegHysteresisRaw;
+	}
 
       /*
        * Set the thresholds 
        */
       rc = saHpiSensorThresholdsSet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -324,8 +333,7 @@ int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
 
       memset (&thd, 0x00, sizeof (SaHpiSensorThresholdsT));
       rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -343,8 +351,7 @@ int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
 			     &ctx->saHpiSensorThdNegHysteresisRaw,
 			     ctx->saHpiSensorThdNegHysteresisInterpreted,
 			     &ctx->saHpiSensorThdNegHysteresisInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
 
 
       DEBUGMSGTL ((AGENT, "set_ThdNegHysteresis: Exit.\n"));
@@ -356,6 +363,7 @@ int set_ThdNegHysteresis (saHpiSensorThdNegHysteresisTable_context *ctx) {
 
 
 }
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -384,30 +392,30 @@ static int
   /*
    * copy components into the context structure
    */
-   dst->saHpiSensorThdNegHysteresisIsReadable =
-        src->saHpiSensorThdNegHysteresisIsReadable;
+  dst->saHpiSensorThdNegHysteresisIsReadable =
+    src->saHpiSensorThdNegHysteresisIsReadable;
 
-    dst->saHpiSensorThdNegHysteresisIsWritable =
-        src->saHpiSensorThdNegHysteresisIsWritable;
+  dst->saHpiSensorThdNegHysteresisIsWritable =
+    src->saHpiSensorThdNegHysteresisIsWritable;
 
-    dst->saHpiSensorThdNegHysteresisIsFixed =
-        src->saHpiSensorThdNegHysteresisIsFixed;
+  dst->saHpiSensorThdNegHysteresisIsFixed =
+    src->saHpiSensorThdNegHysteresisIsFixed;
 
-    dst->saHpiSensorThdNegHysteresisValuesPresent =
-        src->saHpiSensorThdNegHysteresisValuesPresent;
+  dst->saHpiSensorThdNegHysteresisValuesPresent =
+    src->saHpiSensorThdNegHysteresisValuesPresent;
 
-    dst->saHpiSensorThdNegHysteresisRaw = src->saHpiSensorThdNegHysteresisRaw;
+  dst->saHpiSensorThdNegHysteresisRaw = src->saHpiSensorThdNegHysteresisRaw;
 
-    memcpy(dst->saHpiSensorThdNegHysteresisInterpreted,
-           src->saHpiSensorThdNegHysteresisInterpreted,
-           src->saHpiSensorThdNegHysteresisInterpreted_len);
-    dst->saHpiSensorThdNegHysteresisInterpreted_len =
-        src->saHpiSensorThdNegHysteresisInterpreted_len;
+  memcpy (dst->saHpiSensorThdNegHysteresisInterpreted,
+	  src->saHpiSensorThdNegHysteresisInterpreted,
+	  src->saHpiSensorThdNegHysteresisInterpreted_len);
+  dst->saHpiSensorThdNegHysteresisInterpreted_len =
+    src->saHpiSensorThdNegHysteresisInterpreted_len;
 
-    dst->resource_id = src->resource_id;
-    dst->domain_id = src->domain_id;
-    dst->sensor_id = src->sensor_id;
-    dst->hash = src->hash;
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  dst->sensor_id = src->sensor_id;
+  dst->hash = src->hash;
 
   return 0;
 }
@@ -480,9 +488,9 @@ int
       /*
        * copy index components into the context structure
        */
-	ctx->domain_id  = *var_saHpiDomainID.val.integer;
-	ctx->resource_id = *var_saHpiResourceID.val.integer;
-	ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
+      ctx->domain_id = *var_saHpiDomainID.val.integer;
+      ctx->resource_id = *var_saHpiResourceID.val.integer;
+      ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
     }
 
   /*
@@ -539,9 +547,9 @@ saHpiSensorThdNegHysteresisTable_create_row (netsnmp_index * hdr)
       return NULL;
     }
   ctx->saHpiSensorThdNegHysteresisIsReadable = MIB_FALSE;
-  ctx->saHpiSensorThdNegHysteresisIsWritable= MIB_FALSE;
+  ctx->saHpiSensorThdNegHysteresisIsWritable = MIB_FALSE;
   ctx->saHpiSensorThdNegHysteresisIsFixed = MIB_FALSE;
-  ctx->saHpiSensorThdNegHysteresisValuesPresent= 0;
+  ctx->saHpiSensorThdNegHysteresisValuesPresent = 0;
   return ctx;
 }
 
@@ -550,7 +558,7 @@ saHpiSensorThdNegHysteresisTable_create_row (netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiSensorThdNegHysteresisTable_context
-  *saHpiSensorThdNegHysteresisTable_duplicate_row
+  * saHpiSensorThdNegHysteresisTable_duplicate_row
   (saHpiSensorThdNegHysteresisTable_context * row_ctx)
 {
   saHpiSensorThdNegHysteresisTable_context *dup;
@@ -612,19 +620,22 @@ void
 saHpiSensorThdNegHysteresisTable_set_reserve1 (netsnmp_request_group * rg)
 {
   saHpiSensorThdNegHysteresisTable_context *row_ctx =
-        (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
+    (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
 
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int             rc =0;
+  netsnmp_variable_list *var;
+  netsnmp_request_group_item *current;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_reserve1. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_reserve1. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
 	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALISREADABLE:
 	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALISWRITABLE:
@@ -633,78 +644,85 @@ saHpiSensorThdNegHysteresisTable_set_reserve1 (netsnmp_request_group * rg)
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
 
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->
-                                                       saHpiSensorThdNegHysteresisRaw));
-            break;
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+					       sizeof (row_ctx->
+						       saHpiSensorThdNegHysteresisRaw));
+	  break;
 
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	    if (var->type != ASN_OCTET_STR)
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
 	    {
 	      rc = SNMP_ERR_WRONGTYPE;
 	    }
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorThdNegHysteresisTable_set_reserve1\n");
-        }
+	default:
+		/** We shouldn't get here */
+	  rc = SNMP_ERR_GENERR;
+	  snmp_log (LOG_ERR, "unknown column in "
+		    "saHpiSensorThdNegHysteresisTable_set_reserve1\n");
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
-        rg->status = SNMP_MAX(rg->status, current->ri->status);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+      rg->status = SNMP_MAX (rg->status, current->ri->status);
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_reserve1. Exit. (rc:%d) \n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_reserve1. Exit. (rc:%d) \n",
+	       rc));
 }
 
 void
 saHpiSensorThdNegHysteresisTable_set_reserve2 (netsnmp_request_group * rg)
 {
- saHpiSensorThdNegHysteresisTable_context *row_ctx =
-        (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int             rc = 0;
+  saHpiSensorThdNegHysteresisTable_context *row_ctx =
+    (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  int rc = 0;
 
-    rg->rg_void = rg->list->ri;
+  rg->rg_void = rg->list->ri;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_reserve2. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_reserve2. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
+      switch (current->tri->colnum)
+	{
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
 	  if (row_ctx->saHpiSensorThdNegHysteresisIsWritable == MIB_FALSE)
-	  {
-	    rc = SNMP_ERR_NOACCESS;
-	  }
+	    {
+	      rc = SNMP_ERR_NOACCESS;
+	    }
 	  if (row_ctx->saHpiSensorThdNegHysteresisIsFixed == MIB_TRUE)
 	    {
-	    rc = SNMP_ERR_NOACCESS;
+	      rc = SNMP_ERR_NOACCESS;
 	    }
-	  
-	break;
+
+	  break;
 
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
     }
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_reserve2. Exit (rc:%d).\n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_reserve2. Exit (rc:%d).\n",
+	       rc));
 }
 
 /************************************************************
@@ -721,51 +739,57 @@ saHpiSensorThdNegHysteresisTable_set_reserve2 (netsnmp_request_group * rg)
 void
 saHpiSensorThdNegHysteresisTable_set_action (netsnmp_request_group * rg)
 {
- netsnmp_variable_list *var;
-    saHpiSensorThdNegHysteresisTable_context *row_ctx =
-        (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  saHpiSensorThdNegHysteresisTable_context *row_ctx =
+    (saHpiSensorThdNegHysteresisTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
 
-    int             rc = 0;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_action. Entry\n")); 
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_action. Entry\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
+      var = current->ri->requestvb;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiSensorThdNegHysteresisRaw = *var->val.integer;
-	    if (set_ThdNegHysteresis(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
-            break;
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  row_ctx->saHpiSensorThdNegHysteresisRaw = *var->val.integer;
+	  if (set_ThdNegHysteresis (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
+	  break;
 
-        case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiSensorThdNegHysteresisInterpreted,
-                   var->val.string, var->val_len);
-            row_ctx->saHpiSensorThdNegHysteresisInterpreted_len =
-                var->val_len;
-	    if (set_ThdNegHysteresis(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
+	case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  memcpy (row_ctx->saHpiSensorThdNegHysteresisInterpreted,
+		  var->val.string, var->val_len);
+	  row_ctx->saHpiSensorThdNegHysteresisInterpreted_len = var->val_len;
+	  if (set_ThdNegHysteresis (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
 
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
     }
 
-   
-    if (rc) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info *) rg->
-                                       rg_void, rc);
-        return;
+
+  if (rc)
+    {
+      netsnmp_set_mode_request_error (MODE_SET_BEGIN,
+				      (netsnmp_request_info *) rg->
+				      rg_void, rc);
+      return;
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdNegHysteresisTable_set_action. Exit (rc: %d)\n",rc)); 
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdNegHysteresisTable_set_action. Exit (rc: %d)\n",
+	       rc));
 }
 
 /************************************************************
@@ -899,11 +923,13 @@ initialize_table_saHpiSensorThdNegHysteresisTable (void)
 			    "table_container");
 
 
-  cb.create_row = (UserRowMethod *) saHpiSensorThdNegHysteresisTable_create_row;
+  cb.create_row =
+    (UserRowMethod *) saHpiSensorThdNegHysteresisTable_create_row;
 
   cb.duplicate_row =
     (UserRowMethod *) saHpiSensorThdNegHysteresisTable_duplicate_row;
-  cb.delete_row = (UserRowMethod *) saHpiSensorThdNegHysteresisTable_delete_row;
+  cb.delete_row =
+    (UserRowMethod *) saHpiSensorThdNegHysteresisTable_delete_row;
   cb.row_copy =
     (Netsnmp_User_Row_Operation *) saHpiSensorThdNegHysteresisTable_row_copy;
 
@@ -934,72 +960,106 @@ initialize_table_saHpiSensorThdNegHysteresisTable (void)
  */
 int
 saHpiSensorThdNegHysteresisTable_get_value (netsnmp_request_info * request,
-					  netsnmp_index * item,
-					  netsnmp_table_request_info
-					  * table_info)
+					    netsnmp_index * item,
+					    netsnmp_table_request_info
+					    * table_info)
 {
   netsnmp_variable_list *var = request->requestvb;
   saHpiSensorThdNegHysteresisTable_context *context =
     (saHpiSensorThdNegHysteresisTable_context *) item;
 
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
+  SaHpiSensorThresholdsT sensor_threshold;
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+    }
+  rc = saHpiSensorThresholdsGet (session_id,
+				 context->resource_id,
+				 context->sensor_id, &sensor_threshold);
+
+  if (rc != SA_OK)
+    {
+      snmp_log (LOG_ERR,
+		"Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+		get_error_string (rc));
+      DEBUGMSGTL ((AGENT,
+		   "Call to  SensorThresholdGet fails with return code: %s.\n",
+		   get_error_string (rc)));
+      return AGENT_ERR_OPERATION;
+    }
+  if (rc == AGENT_ERR_NOERROR)
+    {
+      modify_saHpiSensorThdNegHysteresisTable_row (context->domain_id,
+						   context->resource_id,
+						   context->sensor_id,
+						   NULL,
+						   &sensor_threshold.
+						   NegThdHysteresis, context);
+    }
+#endif
   switch (table_info->colnum)
     {
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALISREADABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisIsReadable,
-                                 sizeof(context->
-                                        saHpiSensorThdNegHysteresisIsReadable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdNegHysteresisIsReadable,
+				sizeof (context->
+					saHpiSensorThdNegHysteresisIsReadable));
+      break;
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALISWRITABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisIsWritable,
-                                 sizeof(context->
-                                        saHpiSensorThdNegHysteresisIsWritable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdNegHysteresisIsWritable,
+				sizeof (context->
+					saHpiSensorThdNegHysteresisIsWritable));
+      break;
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALISFIXED:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisIsFixed,
-                                 sizeof(context->
-                                        saHpiSensorThdNegHysteresisIsFixed));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdNegHysteresisIsFixed,
+				sizeof (context->
+					saHpiSensorThdNegHysteresisIsFixed));
+      break;
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALVALUESPRESENT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisValuesPresent,
-                                 sizeof(context->
-                                        saHpiSensorThdNegHysteresisValuesPresent));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdNegHysteresisValuesPresent,
+				sizeof (context->
+					saHpiSensorThdNegHysteresisValuesPresent));
+      break;
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-	if (context->saHpiSensorThdNegHysteresisIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisRaw,
-                                 sizeof(context->
-                                        saHpiSensorThdNegHysteresisRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      if (context->saHpiSensorThdNegHysteresisIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				  (char *) &context->
+				  saHpiSensorThdNegHysteresisRaw,
+				  sizeof (context->
+					  saHpiSensorThdNegHysteresisRaw));
+      break;
 
     case COLUMN_SAHPISENSORTHDNEGHYSTERESISICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	if (context->saHpiSensorThdNegHysteresisIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorThdNegHysteresisInterpreted,
-                                 context->
-                                 saHpiSensorThdNegHysteresisInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      if (context->saHpiSensorThdNegHysteresisIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				  (char *) &context->
+				  saHpiSensorThdNegHysteresisInterpreted,
+				  context->
+				  saHpiSensorThdNegHysteresisInterpreted_len);
+      break;
 
     default:
 	    /** We shouldn't get here */

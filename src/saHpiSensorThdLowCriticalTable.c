@@ -42,8 +42,8 @@ static int
 modify_saHpiSensorThdLowCriticalTable_row (SaHpiDomainIdT domain_id,
 					   SaHpiResourceIdT resource_id,
 					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
+					   SaHpiSensorThdDefnT *
+					   threshold_def,
 					   SaHpiSensorReadingT * reading,
 					   saHpiSensorThdLowCriticalTable_context
 					   * ctx);
@@ -87,7 +87,7 @@ int
 populate_ThdLowCritical (SaHpiDomainIdT domain_id,
 			 SaHpiResourceIdT resource_id,
 			 SaHpiSensorNumT sensor_id,
-			 SaHpiSensorThdDefnT *threshold_def,
+			 SaHpiSensorThdDefnT * threshold_def,
 			 SaHpiSensorReadingT * reading)
 {
 
@@ -124,8 +124,7 @@ populate_ThdLowCritical (SaHpiDomainIdT domain_id,
 	  /* 
 	     New entry. Create it.
 	   */
-	  ctx =
-	    saHpiSensorThdLowCriticalTable_create_row (&sensor_thd_index);
+	  ctx = saHpiSensorThdLowCriticalTable_create_row (&sensor_thd_index);
 	}
       if (!ctx)
 	{
@@ -161,8 +160,8 @@ int
 modify_saHpiSensorThdLowCriticalTable_row (SaHpiDomainIdT domain_id,
 					   SaHpiResourceIdT resource_id,
 					   SaHpiSensorNumT sensor_num,
-
-					   SaHpiSensorThdDefnT *threshold_def,
+					   SaHpiSensorThdDefnT *
+					   threshold_def,
 					   SaHpiSensorReadingT * reading,
 					   saHpiSensorThdLowCriticalTable_context
 					   * ctx)
@@ -219,20 +218,20 @@ modify_saHpiSensorThdLowCriticalTable_row (SaHpiDomainIdT domain_id,
 			     &ctx->saHpiSensorThdLowCriticalRaw,
 			     ctx->saHpiSensorThdLowCriticalInterpreted,
 			     &ctx->saHpiSensorThdLowCriticalInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
+      if (threshold_def)
+	{
+	  ctx->saHpiSensorThdLowCriticalIsReadable =
+	    ((threshold_def->ReadThold & SAHPI_STM_LOW_CRIT) ==
+	     SAHPI_STM_LOW_CRIT) ? MIB_TRUE : MIB_FALSE;
 
-      ctx->saHpiSensorThdLowCriticalIsReadable = 
-	((threshold_def->ReadThold & SAHPI_STM_LOW_CRIT) == SAHPI_STM_LOW_CRIT) ?
-	MIB_TRUE : MIB_FALSE;
-      
-      ctx->saHpiSensorThdLowCriticalIsWritable = 
-	((threshold_def->WriteThold & SAHPI_STM_LOW_CRIT) == SAHPI_STM_LOW_CRIT) ?
-	MIB_TRUE : MIB_FALSE;
-  ctx->saHpiSensorThdLowCriticalIsFixed = 
-	((threshold_def->FixedThold & SAHPI_STM_LOW_CRIT) == SAHPI_STM_LOW_CRIT) ?
-	MIB_TRUE : MIB_FALSE;
-
+	  ctx->saHpiSensorThdLowCriticalIsWritable =
+	    ((threshold_def->WriteThold & SAHPI_STM_LOW_CRIT) ==
+	     SAHPI_STM_LOW_CRIT) ? MIB_TRUE : MIB_FALSE;
+	  ctx->saHpiSensorThdLowCriticalIsFixed =
+	    ((threshold_def->FixedThold & SAHPI_STM_LOW_CRIT) ==
+	     SAHPI_STM_LOW_CRIT) ? MIB_TRUE : MIB_FALSE;
+	}
       /* END */
       DEBUGMSGTL ((AGENT, "Modify saHpiSensorThdLowCriticalTable_ctx: Exit"));
       if (update_entry == MIB_TRUE)
@@ -248,7 +247,9 @@ modify_saHpiSensorThdLowCriticalTable_row (SaHpiDomainIdT domain_id,
 }
 
 
-int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
+int
+set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context * ctx)
+{
 
   SaHpiSensorThresholdsT thd;
   SaHpiSessionIdT session_id;
@@ -270,10 +271,11 @@ int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
       /*
        * Get the current threshold information
        */
-      DEBUGMSGTL((AGENT,"resource_id: %d, sensor_id: %d\n", ctx->resource_id, ctx->sensor_id));
-      rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+      DEBUGMSGTL ((AGENT, "resource_id: %d, sensor_id: %d\n",
+		   ctx->resource_id, ctx->sensor_id));
+      rc =
+	saHpiSensorThresholdsGet (session_id, ctx->resource_id,
+				  ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -286,25 +288,27 @@ int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
 	  return AGENT_ERR_OPERATION;
 	}
 
-	/* Update the correct entry.	 */
-      
-      if (thd.LowCritical.ValuesPresent & SAHPI_SRF_INTERPRETED) {
-	thd.LowCritical.Interpreted.Type = SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
-	memcpy(&thd.LowCritical.Interpreted.Value.SensorBuffer,
-		&ctx->saHpiSensorThdLowCriticalInterpreted,
-		ctx->saHpiSensorThdLowCriticalInterpreted_len);
-	       
-      }
-      if (thd.LowCritical.ValuesPresent & SAHPI_SRF_RAW) {
-	thd.LowCritical.Raw = ctx->saHpiSensorThdLowCriticalRaw;
-      }
+      /* Update the correct entry.     */
+
+      if (thd.LowCritical.ValuesPresent & SAHPI_SRF_INTERPRETED)
+	{
+	  thd.LowCritical.Interpreted.Type =
+	    SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER;
+	  memcpy (&thd.LowCritical.Interpreted.Value.SensorBuffer,
+		  &ctx->saHpiSensorThdLowCriticalInterpreted,
+		  ctx->saHpiSensorThdLowCriticalInterpreted_len);
+
+	}
+      if (thd.LowCritical.ValuesPresent & SAHPI_SRF_RAW)
+	{
+	  thd.LowCritical.Raw = ctx->saHpiSensorThdLowCriticalRaw;
+	}
 
       /*
        * Set the thresholds 
        */
       rc = saHpiSensorThresholdsSet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -324,8 +328,7 @@ int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
 
       memset (&thd, 0x00, sizeof (SaHpiSensorThresholdsT));
       rc = saHpiSensorThresholdsGet (session_id,
-				     ctx->resource_id,
-				     ctx->sensor_id, &thd);
+				     ctx->resource_id, ctx->sensor_id, &thd);
 
       if (rc != SA_OK)
 	{
@@ -343,8 +346,7 @@ int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
 			     &ctx->saHpiSensorThdLowCriticalRaw,
 			     ctx->saHpiSensorThdLowCriticalInterpreted,
 			     &ctx->saHpiSensorThdLowCriticalInterpreted_len,
-			     SENSOR_THD_INTER_MAX,
-			     NULL, NULL, NULL, 0);
+			     SENSOR_THD_INTER_MAX, NULL, NULL, NULL, 0);
 
 
       DEBUGMSGTL ((AGENT, "set_ThdLowCritical: Exit.\n"));
@@ -356,6 +358,7 @@ int set_ThdLowCritical (saHpiSensorThdLowCriticalTable_context *ctx) {
 
 
 }
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -384,30 +387,30 @@ static int
   /*
    * copy components into the context structure
    */
-   dst->saHpiSensorThdLowCriticalIsReadable =
-        src->saHpiSensorThdLowCriticalIsReadable;
+  dst->saHpiSensorThdLowCriticalIsReadable =
+    src->saHpiSensorThdLowCriticalIsReadable;
 
-    dst->saHpiSensorThdLowCriticalIsWritable =
-        src->saHpiSensorThdLowCriticalIsWritable;
+  dst->saHpiSensorThdLowCriticalIsWritable =
+    src->saHpiSensorThdLowCriticalIsWritable;
 
-    dst->saHpiSensorThdLowCriticalIsFixed =
-        src->saHpiSensorThdLowCriticalIsFixed;
+  dst->saHpiSensorThdLowCriticalIsFixed =
+    src->saHpiSensorThdLowCriticalIsFixed;
 
-    dst->saHpiSensorThdLowCriticalValuesPresent =
-        src->saHpiSensorThdLowCriticalValuesPresent;
+  dst->saHpiSensorThdLowCriticalValuesPresent =
+    src->saHpiSensorThdLowCriticalValuesPresent;
 
-    dst->saHpiSensorThdLowCriticalRaw = src->saHpiSensorThdLowCriticalRaw;
+  dst->saHpiSensorThdLowCriticalRaw = src->saHpiSensorThdLowCriticalRaw;
 
-    memcpy(dst->saHpiSensorThdLowCriticalInterpreted,
-           src->saHpiSensorThdLowCriticalInterpreted,
-           src->saHpiSensorThdLowCriticalInterpreted_len);
-    dst->saHpiSensorThdLowCriticalInterpreted_len =
-        src->saHpiSensorThdLowCriticalInterpreted_len;
+  memcpy (dst->saHpiSensorThdLowCriticalInterpreted,
+	  src->saHpiSensorThdLowCriticalInterpreted,
+	  src->saHpiSensorThdLowCriticalInterpreted_len);
+  dst->saHpiSensorThdLowCriticalInterpreted_len =
+    src->saHpiSensorThdLowCriticalInterpreted_len;
 
-    dst->resource_id = src->resource_id;
-    dst->domain_id = src->domain_id;
-    dst->sensor_id = src->sensor_id;
-    dst->hash = src->hash;
+  dst->resource_id = src->resource_id;
+  dst->domain_id = src->domain_id;
+  dst->sensor_id = src->sensor_id;
+  dst->hash = src->hash;
 
   return 0;
 }
@@ -480,9 +483,9 @@ int
       /*
        * copy index components into the context structure
        */
-	ctx->domain_id  = *var_saHpiDomainID.val.integer;
-	ctx->resource_id = *var_saHpiResourceID.val.integer;
-	ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
+      ctx->domain_id = *var_saHpiDomainID.val.integer;
+      ctx->resource_id = *var_saHpiResourceID.val.integer;
+      ctx->sensor_id = *var_saHpiSensorIndex.val.integer;
     }
 
   /*
@@ -539,9 +542,9 @@ saHpiSensorThdLowCriticalTable_create_row (netsnmp_index * hdr)
       return NULL;
     }
   ctx->saHpiSensorThdLowCriticalIsReadable = MIB_FALSE;
-  ctx->saHpiSensorThdLowCriticalIsWritable= MIB_FALSE;
+  ctx->saHpiSensorThdLowCriticalIsWritable = MIB_FALSE;
   ctx->saHpiSensorThdLowCriticalIsFixed = MIB_FALSE;
-  ctx->saHpiSensorThdLowCriticalValuesPresent= 0;
+  ctx->saHpiSensorThdLowCriticalValuesPresent = 0;
   return ctx;
 }
 
@@ -550,7 +553,7 @@ saHpiSensorThdLowCriticalTable_create_row (netsnmp_index * hdr)
  * the *_duplicate row routine
  */
 saHpiSensorThdLowCriticalTable_context
-  *saHpiSensorThdLowCriticalTable_duplicate_row
+  * saHpiSensorThdLowCriticalTable_duplicate_row
   (saHpiSensorThdLowCriticalTable_context * row_ctx)
 {
   saHpiSensorThdLowCriticalTable_context *dup;
@@ -612,19 +615,22 @@ void
 saHpiSensorThdLowCriticalTable_set_reserve1 (netsnmp_request_group * rg)
 {
   saHpiSensorThdLowCriticalTable_context *row_ctx =
-        (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
+    (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
 
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int             rc =0;
+  netsnmp_variable_list *var;
+  netsnmp_request_group_item *current;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_reserve1. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdLowCriticalTable_set_reserve1. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
 	case COLUMN_SAHPISENSORTHDLOWCRITICALISREADABLE:
 	case COLUMN_SAHPISENSORTHDLOWCRITICALISWRITABLE:
@@ -633,78 +639,85 @@ saHpiSensorThdLowCriticalTable_set_reserve1 (netsnmp_request_group * rg)
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
 
-        case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->
-                                                       saHpiSensorThdLowCriticalRaw));
-            break;
+	case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  rc = netsnmp_check_vb_type_and_size (var, ASN_UNSIGNED,
+					       sizeof (row_ctx->
+						       saHpiSensorThdLowCriticalRaw));
+	  break;
 
-        case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	    if (var->type != ASN_OCTET_STR)
+	case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR)
 	    {
 	      rc = SNMP_ERR_WRONGTYPE;
 	    }
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorThdLowCriticalTable_set_reserve1\n");
-        }
+	default:
+		/** We shouldn't get here */
+	  rc = SNMP_ERR_GENERR;
+	  snmp_log (LOG_ERR, "unknown column in "
+		    "saHpiSensorThdLowCriticalTable_set_reserve1\n");
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
-        rg->status = SNMP_MAX(rg->status, current->ri->status);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
+      rg->status = SNMP_MAX (rg->status, current->ri->status);
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_reserve1. Exit. (rc:%d) \n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdLowCriticalTable_set_reserve1. Exit. (rc:%d) \n",
+	       rc));
 }
 
 void
 saHpiSensorThdLowCriticalTable_set_reserve2 (netsnmp_request_group * rg)
 {
- saHpiSensorThdLowCriticalTable_context *row_ctx =
-        (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int             rc = 0;
+  saHpiSensorThdLowCriticalTable_context *row_ctx =
+    (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  int rc = 0;
 
-    rg->rg_void = rg->list->ri;
+  rg->rg_void = rg->list->ri;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_reserve2. Entry.\n"));
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdLowCriticalTable_set_reserve2. Entry.\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+      var = current->ri->requestvb;
+      rc = SNMP_ERR_NOERROR;
 
-        switch (current->tri->colnum) {
-        case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
-        case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
+      switch (current->tri->colnum)
+	{
+	case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
+	case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
 	  if (row_ctx->saHpiSensorThdLowCriticalIsWritable == MIB_FALSE)
-	  {
-	    rc = SNMP_ERR_NOACCESS;
-	  }
+	    {
+	      rc = SNMP_ERR_NOACCESS;
+	    }
 	  if (row_ctx->saHpiSensorThdLowCriticalIsFixed == MIB_TRUE)
 	    {
-	    rc = SNMP_ERR_NOACCESS;
+	      rc = SNMP_ERR_NOACCESS;
 	    }
-	  
-	break;
+
+	  break;
 
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
 
-        if (rc)
-            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-                                           rc);
+      if (rc)
+	netsnmp_set_mode_request_error (MODE_SET_BEGIN, current->ri, rc);
     }
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_reserve2. Exit (rc:%d).\n",rc));
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdLowCriticalTable_set_reserve2. Exit (rc:%d).\n",
+	       rc));
 }
 
 /************************************************************
@@ -721,51 +734,56 @@ saHpiSensorThdLowCriticalTable_set_reserve2 (netsnmp_request_group * rg)
 void
 saHpiSensorThdLowCriticalTable_set_action (netsnmp_request_group * rg)
 {
- netsnmp_variable_list *var;
-    saHpiSensorThdLowCriticalTable_context *row_ctx =
-        (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
-    netsnmp_request_group_item *current;
+  netsnmp_variable_list *var;
+  saHpiSensorThdLowCriticalTable_context *row_ctx =
+    (saHpiSensorThdLowCriticalTable_context *) rg->existing_row;
+  netsnmp_request_group_item *current;
 
-    int             rc = 0;
+  int rc = 0;
 
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_action. Entry\n")); 
-    for (current = rg->list; current; current = current->next) {
+  DEBUGMSGTL ((AGENT, "saHpiSensorThdLowCriticalTable_set_action. Entry\n"));
+  for (current = rg->list; current; current = current->next)
+    {
 
-        var = current->ri->requestvb;
+      var = current->ri->requestvb;
 
-        switch (current->tri->colnum) {
+      switch (current->tri->colnum)
+	{
 
-        case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiSensorThdLowCriticalRaw = *var->val.integer;
-	    if (set_ThdLowCritical(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
-            break;
+	case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+	  row_ctx->saHpiSensorThdLowCriticalRaw = *var->val.integer;
+	  if (set_ThdLowCritical (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
+	  break;
 
-        case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiSensorThdLowCriticalInterpreted,
-                   var->val.string, var->val_len);
-            row_ctx->saHpiSensorThdLowCriticalInterpreted_len =
-                var->val_len;
-	    if (set_ThdLowCritical(row_ctx) != AGENT_ERR_NOERROR)
-	      rc = SNMP_ERR_GENERR;
+	case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  memcpy (row_ctx->saHpiSensorThdLowCriticalInterpreted,
+		  var->val.string, var->val_len);
+	  row_ctx->saHpiSensorThdLowCriticalInterpreted_len = var->val_len;
+	  if (set_ThdLowCritical (row_ctx) != AGENT_ERR_NOERROR)
+	    rc = SNMP_ERR_GENERR;
 
-            break;
+	  break;
 
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+	default:
+		/** We shouldn't get here */
+	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
+	}
     }
 
-   
-    if (rc) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info *) rg->
-                                       rg_void, rc);
-        return;
+
+  if (rc)
+    {
+      netsnmp_set_mode_request_error (MODE_SET_BEGIN,
+				      (netsnmp_request_info *) rg->
+				      rg_void, rc);
+      return;
     }
-    DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_set_action. Exit (rc: %d)\n",rc)); 
+  DEBUGMSGTL ((AGENT,
+	       "saHpiSensorThdLowCriticalTable_set_action. Exit (rc: %d)\n",
+	       rc));
 }
 
 /************************************************************
@@ -942,64 +960,99 @@ saHpiSensorThdLowCriticalTable_get_value (netsnmp_request_info * request,
   saHpiSensorThdLowCriticalTable_context *context =
     (saHpiSensorThdLowCriticalTable_context *) item;
 
+#ifdef GET_ROUTINE_CALLS_SNMP_GET
+  SaHpiSensorThresholdsT sensor_threshold;
+  SaHpiSessionIdT session_id;
+  int rc = AGENT_ERR_NOERROR;
+  rc = getSaHpiSession (&session_id);
+  if (rc != AGENT_ERR_NOERROR)
+    {
+      DEBUGMSGTL ((AGENT, "Call to getSaHpiSession failed with rc: %d\n",
+		   rc));
+    }
+  rc = saHpiSensorThresholdsGet (session_id,
+				 context->resource_id,
+				 context->sensor_id, &sensor_threshold);
+
+  if (rc != SA_OK)
+    {
+      snmp_log (LOG_ERR,
+		"Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+		get_error_string (rc));
+      DEBUGMSGTL ((AGENT,
+		   "Call to  SensorThresholdGet fails with return code: %s.\n",
+		   get_error_string (rc)));
+      return AGENT_ERR_OPERATION;
+    }
+  if (rc == AGENT_ERR_NOERROR)
+    {
+      modify_saHpiSensorThdLowCriticalTable_row (context->domain_id,
+						 context->resource_id,
+						 context->sensor_id,
+						 NULL,
+						 &sensor_threshold.
+						 LowCritical, context);
+    }
+#endif
+
   switch (table_info->colnum)
     {
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALISREADABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalIsReadable,
-                                 sizeof(context->
-                                        saHpiSensorThdLowCriticalIsReadable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdLowCriticalIsReadable,
+				sizeof (context->
+					saHpiSensorThdLowCriticalIsReadable));
+      break;
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALISWRITABLE:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalIsWritable,
-                                 sizeof(context->
-                                        saHpiSensorThdLowCriticalIsWritable));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdLowCriticalIsWritable,
+				sizeof (context->
+					saHpiSensorThdLowCriticalIsWritable));
+      break;
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALISFIXED:
-            /** TruthValue = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalIsFixed,
-                                 sizeof(context->
-                                        saHpiSensorThdLowCriticalIsFixed));
-        break;
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdLowCriticalIsFixed,
+				sizeof (context->
+					saHpiSensorThdLowCriticalIsFixed));
+      break;
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALVALUESPRESENT:
-            /** INTEGER = ASN_INTEGER */
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalValuesPresent,
-                                 sizeof(context->
-                                        saHpiSensorThdLowCriticalValuesPresent));
-        break;
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThdLowCriticalValuesPresent,
+				sizeof (context->
+					saHpiSensorThdLowCriticalValuesPresent));
+      break;
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALRAW:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-	if (context->saHpiSensorThdLowCriticalIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalRaw,
-                                 sizeof(context->
-                                        saHpiSensorThdLowCriticalRaw));
-        break;
+	    /** UNSIGNED32 = ASN_UNSIGNED */
+      if (context->saHpiSensorThdLowCriticalIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_UNSIGNED,
+				  (char *) &context->
+				  saHpiSensorThdLowCriticalRaw,
+				  sizeof (context->
+					  saHpiSensorThdLowCriticalRaw));
+      break;
 
     case COLUMN_SAHPISENSORTHDLOWCRITICALINTERPRETED:
-            /** OCTETSTR = ASN_OCTET_STR */
-	if (context->saHpiSensorThdLowCriticalIsReadable == MIB_TRUE)
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->
-                                 saHpiSensorThdLowCriticalInterpreted,
-                                 context->
-                                 saHpiSensorThdLowCriticalInterpreted_len);
-        break;
+	    /** OCTETSTR = ASN_OCTET_STR */
+      if (context->saHpiSensorThdLowCriticalIsReadable == MIB_TRUE)
+	snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				  (char *) &context->
+				  saHpiSensorThdLowCriticalInterpreted,
+				  context->
+				  saHpiSensorThdLowCriticalInterpreted_len);
+      break;
 
     default:
 	    /** We shouldn't get here */

@@ -196,7 +196,11 @@ GENERAL RELEASE NOTES and WHAT'S NEW
     893142      snmpd: send_trap: Unknown PDU type
     894664      Missing OEM variable for rdr inventory type
     904673      Add Sensor Readings Flags to saHpiSensorEntry
-	
+    908543      Add IsThreshold OID to saHpiSensroEntry	
+    908544      Add TholdCapabilities OID to saHpiSensorEntry
+    907712      Problems with SNMP agent & ipmidirect plugin
+    908561      Common sense checks missing
+
 Consult the ChangeLog for more details.
 
 ---------------------------------------------------------
