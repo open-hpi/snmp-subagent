@@ -332,15 +332,14 @@ SaHpiEventStates ::= TEXTUAL-CONVENTION
 
 SaHpiTextType ::= TEXTUAL-CONVENTION 
 	STATUS		current
-	DESCRIPTION	"Text Buffers
+	DESCRIPTION	"Text type
 
-	These structures are used for defining the type of data in the text buffer 
-	and the length of the buffer. Text buffers are used in the inventory data,
-	RDR, RPT, etc. for variable length strings of data.
+	This columnar node is  used for defining the type of data in the 
+	text buffer. Text buffers are used RDR, RPT, etc. for variable
+	length strings of data.
         
-	The encoding of the Data field in the SaHpiTextBufferT structure is defined
-	by the value of the DataType field in the buffer.  The following table
-	describes the various encodings:
+	The encoding of the SaHpiText type is defined by this enumeration.
+	The following table describes the various encodings:
         
           DataType                     Encoding
           --------                     --------
@@ -371,7 +370,7 @@ SaHpiTextType ::= TEXTUAL-CONVENTION
       	data may be stored externally as 4-bit values, and 
       	ASCII6 may be stored externally as 6-bit values. 
       	But, regardless of how the data is stored externally, it is 
-      	encoded as 8-bit ASCII in the SaHpiTextBufferT structure passed 
+      	encoded as 8-bit ASCII in the SaHpiText structure passed 
 	across the HPI."
 	SYNTAX		INTEGER {
 				undefined(0),
@@ -531,7 +530,8 @@ SaHpiTextLanguage ::= TEXTUAL-CONVENTION
 
 SaHpiSensorUnits ::= TEXTUAL-CONVENTION
 	STATUS		current
-	DESCRIPTION	"This is a list of all the sensor units supported by HPI."
+	DESCRIPTION	
+	    "This is a list of all the sensor units supported by HPI."
 	SYNTAX		INTEGER {
 				undefined(0),
 				unspecified(1), 
@@ -643,7 +643,7 @@ SaHpiSensorReadingType ::= TEXTUAL-CONVENTION
 SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     
-	"Sensor Reading Type
+ 	"Sensor Reading Type
 
 	These definitions list the available data types that can be
 	used for sensor readings. 
