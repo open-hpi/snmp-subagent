@@ -103,7 +103,7 @@ extern "C"
   extern oid saHpiSensorThdLowCriticalTable_oid[];
   extern size_t saHpiSensorThdLowCriticalTable_oid_len;
 
-#define saHpiSensorThdLowCriticalTable_TABLE_OID hpiSensor_OID,8
+#define saHpiSensorThdLowCriticalTable_TABLE_OID hpiSensor_OID,7
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowCriticalTable
