@@ -77,7 +77,7 @@ hpiB MODULE-IDENTITY
 	
 	This MIB defines the HPI instrumentation based on
         'Service Availability Forum Hardware Platform Interface'
-        (SA-HPI-B.01.01).
+        (SAI-HPI-B.01.01).
 
         This MIB module defines a set of objects that allow the 
         management of entities on a variety of hardware platforms.  The  
@@ -2283,7 +2283,7 @@ saHpiResourceParamControl OBJECT-TYPE
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
         REFERENCE
-        "Derieved from SA-HPI-B.01.01 section 7.8.and 8.18"
+        "Derieved from SAI-HPI-B.01.01 section 7.8.and 8.18"
 	::= {saHpiResourceEntry   20} 
 
 
@@ -2309,7 +2309,7 @@ saHpiAutoInsertTimeoutTable OBJECT-TYPE
 	saHpiAutoExtractTimeoutGet, and
 	saHpiAutoExtractTimeoutGet."
     
-    REFERENCE "Derieved from SA-HPI-B.01.01 section 7.7."
+    REFERENCE "Derieved from SAI-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
 
 saHpiAutoInsertTimeoutEntry OBJECT-TYPE
@@ -2611,7 +2611,7 @@ saHpiHotSwapResetAction OBJECT-TYPE
 	SAI-HPI-B spec."
 
     REFERENCE
-        "Derieved from SA-HPI-B.01.01 page 164."
+        "Derieved from SAI-HPI-B.01.01 page 164."
     ::= { saHpiHotSwapEntry 7 }
 
 saHpiHotSwapPowerAction OBJECT-TYPE
@@ -2646,7 +2646,7 @@ saHpiHotSwapPowerAction OBJECT-TYPE
 Note: Enumerated values are increased by one value compared to
 SAI-HPI-B.01.01 spec."
         REFERENCE
-                "Derieved from SA-HPI-B.01.01 page 168-169."
+                "Derieved from SAI-HPI-B.01.01 page 168-169."
         ::= { saHpiHotSwapEntry 8 }
 	
 saHpiHotSwapRowPointer OBJECT-TYPE
@@ -4287,7 +4287,7 @@ log for this resource.
         reset when this function is called."
 
     REFERENCE
-        "Derieved from SA-HPI-B.01.01 page 57."
+        "Derieved from SAI-HPI-B.01.01 page 57."
 
     ::= {saHpiEventLogInfoEntry 11}
 
@@ -4310,7 +4310,7 @@ saHpiEventLogInfoState OBJECT-TYPE
     on-specific which events are automatically added to any Event Log.
     "
     REFERENCE
-        "Derieved from SA-HPI-B.01.01 page 61,62."
+        "Derieved from SAI-HPI-B.01.01 page 61,62."
     ::= {saHpiEventLogInfoEntry 12}
 
 
@@ -7434,7 +7434,7 @@ saHpiAreaRowStatus OBJECT-TYPE
           cannot be deleted.  An attempt to delete an Area that 
           contains a read-only Field will return an error."
         REFERENCE
-                "Derieved from SA-HPI-B.01.01 page 114."
+                "Derieved from SAI-HPI-B.01.01 page 114."
         ::= {saHpiAreaEntry 4}
 
 saHpiAreaNumDataFields OBJECT-TYPE
