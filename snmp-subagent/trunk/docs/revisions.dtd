@@ -12,6 +12,14 @@
         marks of others.
 -->
 
+<!ENTITY subagent-rev-1_0 "
+<revision>
+  <revnumber>1.0</revnumber>
+  <date>2004-2-3</date>
+  <authorinitials>kr</authorinitials>
+  <revremark>First version</revremark>
+</revision>
+">
 <!ENTITY subagent-rev-0_1 "
 <revision>
   <revnumber>0.1</revnumber>
@@ -23,5 +31,6 @@
 <!ENTITY subagent-revisions "
 <revhistory>
   &subagent-rev-0_1;
+  &subagent-rev-1_1;
 </revhistory>
 ">
