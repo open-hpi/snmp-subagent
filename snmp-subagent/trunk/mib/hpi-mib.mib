@@ -4281,8 +4281,8 @@ SaHpiCtrlEntry ::= SEQUENCE {
         saHpiCtrlReadOnly       TruthValue,      
         saHpiCtrlWriteOnly      TruthValue,
  
-        saHpiCtrlMutable        OCTET STRING,
-        saHpiCtrlState          OCTET STRING,
+        saHpiCtrlState        OCTET STRING,
+        saHpiCtrlData          OCTET STRING,
         
         saHpiCtrlOem            Unsigned32, 
    
@@ -4348,32 +4348,33 @@ saHpiCtrlMode OBJECT-TYPE
                         }
         MAX-ACCESS      read-write
         STATUS          current
-        DESCRIPTION     "Indicates if the control comes up in Auto or Manual mode. 
-        TRUE = AUTO. FALSE = MANUAL"
+        DESCRIPTION     "
+This object describes how the control is managed.  The control may be managed automatically by the implementation (auto mode).  Or it may be managed by the HPI User (manual mode).  Some controls allow their modes to be changed, allowing the HPI User to determine if they will manage the control, or relinquish the management to the implementation.  But, other controls do not allow the mode to be changed.  These static-mode controls are indicated with the saHpiCtrlReadOnly flag set as part of the default control mode.
+	"
         ::= {saHpiCtrlEntry 4}
         
 saHpiCtrlReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if mode is read-only"
         ::= {saHpiCtrlEntry 5}
         
 saHpiCtrlWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indicates if mode is write-only"
         ::= {saHpiCtrlEntry 6}
 
-saHpiCtrlMutable OBJECT-TYPE
+saHpiCtrlState OBJECT-TYPE
         SYNTAX          OCTET STRING (SIZE(1|4|9))
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     "
         This attribute represents the current setting of the control.  It must
          be interpreted in the context of saHpiCtrlType.
-        if you wish to change the values of the data, this is the object
+        If you wish to change the values of the data, this is the object
         to use.
 
         digital  - Unsigned 32bit integer (4 octets) defined as:
@@ -4428,13 +4429,13 @@ saHpiCtrlMutable OBJECT-TYPE
          
         ::= {saHpiCtrlEntry 7}
 
-saHpiCtrlState          OBJECT-TYPE
+saHpiCtrlData          OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(4|9|12|262|270))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "
 
-        This object represents certain attributes of the control.
+        This object represents resource data records  of the control.
         It must be interpreted in the context of saHpiCtrlType.
         This object augments the data in saHpiCtrlState.
 
@@ -7050,8 +7051,8 @@ saHpiCtrlGroup OBJECT-GROUP
                 saHpiCtrlNum,
                 saHpiCtrlOutputType,
                 saHpiCtrlType,
-                saHpiCtrlMutable,
                 saHpiCtrlState,
+                saHpiCtrlData,
                 saHpiCtrlOem,
                 saHpiCtrlTextType,
                 saHpiCtrlTextLanguage,
