@@ -67,8 +67,7 @@ int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					//SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
-					oid *event_entry, 
-					size_t event_entry_oid_len,
+
 					saHpiSystemEventLogTable_context *ctx);
 
 
@@ -85,8 +84,6 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
   SaHpiSelInfoT info;
   SaHpiSelEntryT sel;
   oid sel_oid[SEL_INDEX_NR];
-  oid child_oid[MAX_OID_LEN];
-  size_t child_oid_len = 0;
   int rc;
   netsnmp_index sel_index;
   saHpiSystemEventLogTable_context *sel_context;
@@ -173,7 +170,7 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,
 						    rpt_entry,
-						    child_oid, child_oid_len,
+
 						    sel_context)
 	    == AGENT_NEW_ENTRY) {
 	  
@@ -200,10 +197,8 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
-					//SaHpiBoolT *state,
+
 					SaHpiRptEntryT *rpt,
-					oid *event_entry, 
-					size_t event_entry_oid_len,
 					saHpiSystemEventLogTable_context *ctx) {
   long hash;
 
@@ -233,14 +228,12 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     //    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
 
-    memcpy(&ctx->saHpiSystemEventLogTimestamp,
+    memcpy(&ctx->saHpiSystemEventLogAddedTimestamp,
 	   &sel->Timestamp,
 	   sizeof(SaHpiTimeT));
-    ctx->saHpiSystemEventLogTimestamp.low = htonl(ctx->saHpiSystemEventLogTimestamp.low);
-    ctx->saHpiSystemEventLogTimestamp.high = htonl(ctx->saHpiSystemEventLogTimestamp.high);
+    ctx->saHpiSystemEventLogAddedTimestamp.low = htonl(ctx->saHpiSystemEventLogAddedTimestamp.low);
+    ctx->saHpiSystemEventLogAddedTimestamp.high = htonl(ctx->saHpiSystemEventLogAddedTimestamp.high);
 
-    ctx->saHpiSystemEventLogged_len = event_entry_oid_len * sizeof(oid);
-    memcpy(ctx->saHpiSystemEventLogged, event_entry, ctx->saHpiSystemEventLogged_len);
 
     // Notify RPT table that we are active.
     update_event_status_flag(rpt->DomainId,
@@ -256,7 +249,7 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 }
 
 int 
-set_clear_event_table(saHpiSystemEventLogTable_context *ctx) {
+set_SEL_delete(saHpiSystemEventLogTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
   SaErrorT rc;
@@ -338,20 +331,160 @@ saHpiSystemEventLogTable_row_copy(saHpiSystemEventLogTable_context * dst,
     }
     dst->index.len = src->index.len;
 
-
-    /*
-     * copy components into the context structure
-     */
     dst->saHpiSystemEventLogEntryId = src->saHpiSystemEventLogEntryId;
+
+    dst->saHpiSystemEventLogAddedTimestamp =
+        src->saHpiSystemEventLogAddedTimestamp;
+
+    dst->saHpiSystemEventLogIndex = src->saHpiSystemEventLogIndex;
+
+    dst->saHpiSystemEventLogType = src->saHpiSystemEventLogType;
 
     dst->saHpiSystemEventLogTimestamp = src->saHpiSystemEventLogTimestamp;
 
-    memcpy(src->saHpiSystemEventLogged, dst->saHpiSystemEventLogged,
-           src->saHpiSystemEventLogged_len);
-    dst->saHpiSystemEventLogged_len = src->saHpiSystemEventLogged_len;
+    dst->saHpiSystemEventLogSeverity = src->saHpiSystemEventLogSeverity;
 
-    dst->saHpiSystemEventClearEventTable = src->saHpiSystemEventClearEventTable;
-    //    dst->saHpiSystemEventLogState = src->saHpiSystemEventLogState;
+    dst->saHpiSystemEventLogSensorNum = src->saHpiSystemEventLogSensorNum;
+
+    dst->saHpiSystemEventLogSensorType =
+        src->saHpiSystemEventLogSensorType;
+
+    dst->saHpiSystemEventLogSensorCategory =
+        src->saHpiSystemEventLogSensorCategory;
+
+    dst->saHpiSystemEventLogSensorAssertion =
+        src->saHpiSystemEventLogSensorAssertion;
+
+    dst->saHpiSystemEventLogSensorStateCategoryUnspecified =
+        src->saHpiSystemEventLogSensorStateCategoryUnspecified;
+
+    dst->saHpiSystemEventLogSensorStateCategoryThreshold =
+        src->saHpiSystemEventLogSensorStateCategoryThreshold;
+
+    dst->saHpiSystemEventLogSensorStateCategoryUsage =
+        src->saHpiSystemEventLogSensorStateCategoryUsage;
+
+    dst->saHpiSystemEventLogSensorStateCategoryState =
+        src->saHpiSystemEventLogSensorStateCategoryState;
+
+    dst->saHpiSystemEventLogSensorStateCategoryPredFail =
+        src->saHpiSystemEventLogSensorStateCategoryPredFail;
+
+    dst->saHpiSystemEventLogSensorStateCategoryLimit =
+        src->saHpiSystemEventLogSensorStateCategoryLimit;
+
+    dst->saHpiSystemEventLogSensorStateCategoryPerformance =
+        src->saHpiSystemEventLogSensorStateCategoryPerformance;
+
+    dst->saHpiSystemEventLogSensorStateCategorySeverity =
+        src->saHpiSystemEventLogSensorStateCategorySeverity;
+
+    dst->saHpiSystemEventLogSensorStateCategoryPresence =
+        src->saHpiSystemEventLogSensorStateCategoryPresence;
+
+    dst->saHpiSystemEventLogSensorStateCategoryEnable =
+        src->saHpiSystemEventLogSensorStateCategoryEnable;
+
+    dst->saHpiSystemEventLogSensorStateCategoryAvailability =
+        src->saHpiSystemEventLogSensorStateCategoryAvailability;
+
+    dst->saHpiSystemEventLogSensorStateCategoryRedundancy =
+        src->saHpiSystemEventLogSensorStateCategoryRedundancy;
+
+    dst->saHpiSystemEventLogSensorStateCategoryUser =
+        src->saHpiSystemEventLogSensorStateCategoryUser;
+
+    dst->saHpiSystemEventLogSensorStateCategoryGeneric =
+        src->saHpiSystemEventLogSensorStateCategoryGeneric;
+
+    dst->saHpiSystemEventLogSensorOptionalData =
+        src->saHpiSystemEventLogSensorOptionalData;
+
+    dst->saHpiSystemEventLogSensorTriggerReadingType =
+        src->saHpiSystemEventLogSensorTriggerReadingType;
+
+    dst->saHpiSystemEventLogSensorTriggerReadingRaw =
+        src->saHpiSystemEventLogSensorTriggerReadingRaw;
+
+    dst->saHpiSystemEventLogSensorTriggerReadingInterpretedType =
+        src->saHpiSystemEventLogSensorTriggerReadingInterpretedType;
+
+    memcpy(dst->saHpiSystemEventLogSensorTriggerReadingInterpreted,
+           src->saHpiSystemEventLogSensorTriggerReadingInterpreted,
+           src->saHpiSystemEventLogSensorTriggerReadingInterpreted_len);
+    dst->saHpiSystemEventLogSensorTriggerReadingInterpreted_len =
+        src->saHpiSystemEventLogSensorTriggerReadingInterpreted_len;
+
+    memcpy(dst->saHpiSystemEventLogSensorTriggerReadingEventState,
+           src->saHpiSystemEventLogSensorTriggerReadingEventState,
+           src->saHpiSystemEventLogSensorTriggerReadingEventState_len);
+    dst->saHpiSystemEventLogSensorTriggerReadingEventState_len =
+        src->saHpiSystemEventLogSensorTriggerReadingEventState_len;
+
+    dst->saHpiSystemEventLogSensorTriggerThresholdType =
+        src->saHpiSystemEventLogSensorTriggerThresholdType;
+
+    dst->saHpiSystemEventLogSensorTriggerThresholdRaw =
+        src->saHpiSystemEventLogSensorTriggerThresholdRaw;
+
+    dst->saHpiSystemEventLogSensorTriggerThresholdInterpretedType =
+        src->saHpiSystemEventLogSensorTriggerThresholdInterpretedType;
+
+    memcpy(dst->saHpiSystemEventLogSensorTriggerThresholdInterpreted,
+           src->saHpiSystemEventLogSensorTriggerThresholdInterpreted,
+           src->saHpiSystemEventLogSensorTriggerThresholdInterpreted_len);
+    dst->saHpiSystemEventLogSensorTriggerThresholdInterpreted_len =
+        src->saHpiSystemEventLogSensorTriggerThresholdInterpreted_len;
+
+    memcpy(dst->saHpiSystemEventLogSensorTriggerThresholdEventState,
+           src->saHpiSystemEventLogSensorTriggerThresholdEventState,
+           src->saHpiSystemEventLogSensorTriggerThresholdEventState_len);
+    dst->saHpiSystemEventLogSensorTriggerThresholdEventState_len =
+        src->saHpiSystemEventLogSensorTriggerThresholdEventState_len;
+
+    dst->saHpiSystemEventLogSensorPreviousState =
+        src->saHpiSystemEventLogSensorPreviousState;
+
+    dst->saHpiSystemEventLogSensorOem = src->saHpiSystemEventLogSensorOem;
+
+    dst->saHpiSystemEventLogSensorSpecific =
+        src->saHpiSystemEventLogSensorSpecific;
+
+    dst->saHpiSystemEventLogHotSwapState =
+        src->saHpiSystemEventLogHotSwapState;
+
+    dst->saHpiSystemEventLogPreviousHotSwapState =
+        src->saHpiSystemEventLogPreviousHotSwapState;
+
+    dst->saHpiSystemEventLogWatchdogNum =
+        src->saHpiSystemEventLogWatchdogNum;
+
+    dst->saHpiSystemEventLogWatchdogAction =
+        src->saHpiSystemEventLogWatchdogAction;
+
+    dst->saHpiSystemEventLogWatchdogPreTimerAction =
+        src->saHpiSystemEventLogWatchdogPreTimerAction;
+
+    dst->saHpiSystemEventLogWatchdogUse =
+        src->saHpiSystemEventLogWatchdogUse;
+
+    dst->saHpiSystemEventLogOemManufacturerIdT =
+        src->saHpiSystemEventLogOemManufacturerIdT;
+
+    memcpy(dst->saHpiSystemEventLogOemEventData,
+           src->saHpiSystemEventLogOemEventData,
+           src->saHpiSystemEventLogOemEventData_len);
+    dst->saHpiSystemEventLogOemEventData_len =
+        src->saHpiSystemEventLogOemEventData_len;
+
+    memcpy(dst->saHpiSystemEventLogUserEventData,
+           src->saHpiSystemEventLogUserEventData,
+           src->saHpiSystemEventLogUserEventData_len);
+    dst->saHpiSystemEventLogUserEventData_len =
+        src->saHpiSystemEventLogUserEventData_len;
+
+    dst->saHpiSystemEventLogDelete = src->saHpiSystemEventLogDelete;
+
     dst->resource_id = src->resource_id;
     dst->hash = src->hash;
     dst->domain_id = src->domain_id;
@@ -473,7 +606,7 @@ saHpiSystemEventLogTable_create_row(netsnmp_index * hdr)
     }
 
     ctx->hash =0;
-    ctx->saHpiSystemEventClearEventTable = SNMP_ROW_ACTIVE;
+    ctx-> saHpiSystemEventLogDelete = SNMP_ROW_ACTIVE;
 
     return ctx;
 }
@@ -557,17 +690,64 @@ saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
         switch (current->tri->colnum) {
 
 	case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
+	case COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP:
+	case COLUMN_SAHPISYSTEMEVENTLOGINDEX:
+	case COLUMN_SAHPISYSTEMEVENTLOGTYPE:
 	case COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP:
-	case COLUMN_SAHPISYSTEMEVENTLOGGED:
+	case COLUMN_SAHPISYSTEMEVENTLOGSEVERITY:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORNUM:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTYPE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORCATEGORY:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORASSERTION:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUNSPECIFIED:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYTHRESHOLD:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSAGE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPREDFAIL:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYLIMIT:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPERFORMANCE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSEVERITY:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPRESENCE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYENABLE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYAVAILABILITY:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYREDUNDANCY:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSER:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYGENERIC:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSOROPTIONALDATA:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGTYPE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGRAW:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETEDTYPE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETED:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGEVENTSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDTYPE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDRAW:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETED:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDEVENTSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORPREVIOUSSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSOROEM:
+	case COLUMN_SAHPISYSTEMEVENTLOGSENSORSPECIFIC:
+	case COLUMN_SAHPISYSTEMEVENTLOGHOTSWAPSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGPREVIOUSHOTSWAPSTATE:
+	case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGNUM:
+	case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGACTION:
+	case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGPRETIMERACTION:
+	case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGUSE:
+	case COLUMN_SAHPISYSTEMEVENTLOGOEMMANUFACTURERIDT:
+	case COLUMN_SAHPISYSTEMEVENTLOGOEMEVENTDATA:
+	case COLUMN_SAHPISYSTEMEVENTLOGUSEREVENTDATA:
+
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
 
-        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+	case COLUMN_SAHPISYSTEMEVENTLOGDELETE:
+
             /** TruthValue = ASN_INTEGER */
 	  rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
 					      sizeof(row_ctx->
-						     saHpiSystemEventClearEventTable));
-            break;
+						     saHpiSystemEventLogDelete));
+
+	  break;
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -604,10 +784,11 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 
         switch (current->tri->colnum) {
 
-        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+        case COLUMN_SAHPISYSTEMEVENTLOGDELETE:
             /** TruthValue = ASN_INTEGER */
 	  rc = netsnmp_check_vb_rowstatus(var,
-					  undo_ctx ? undo_ctx->saHpiSystemEventClearEventTable : 0 );
+					  undo_ctx ? undo_ctx->  saHpiSystemEventLogDelete : 0);
+	  
             break;
 
         default:/** We shouldn't get here */
@@ -631,7 +812,7 @@ saHpiSystemEventLogTable_set_reserve2(netsnmp_request_group * rg)
 	//rc =  SNMP_ERR_NOSUCHNAME;
 	var = current->ri->requestvb;
 	// Do the check only for one type of column:
-	if (current->tri->colnum == COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE) {
+	if (current->tri->colnum == COLUMN_SAHPISYSTEMEVENTLOGDELETE) {
 	  // SNMPv2-TC has a diagram of actions.
 	  if ((*var->val.integer == SNMP_ROW_CREATEANDGO)
 	      || (*var->val.integer == SNMP_ROW_ACTIVE)
@@ -683,15 +864,15 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 
         switch (current->tri->colnum) {
 
-        case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+	case COLUMN_SAHPISYSTEMEVENTLOGDELETE:
             /** TruthValue = ASN_INTEGER */
-            row_ctx->saHpiSystemEventClearEventTable = *var->val.integer;
+            row_ctx->saHpiSystemEventLogDelete = *var->val.integer;
 	    // This can erase many tables. Including this one.
 	    rg->row_deleted = 1;
 
 	    // Only do it for rows that exist.
 	    if (row_ctx->hash != 0) {
-	      if (set_clear_event_table(row_ctx) != AGENT_ERR_NOERROR) {
+	      if (set_SEL_delete(row_ctx) != AGENT_ERR_NOERROR) {
 		// Look in the SNMPv2-TC to find the diagram for this.
 		netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					       SNMP_ERR_INCONSISTENTVALUE);
@@ -940,7 +1121,6 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
     saHpiSystemEventLogTable_context *context =
         (saHpiSystemEventLogTable_context *) item;
 
-    DEBUGMSGTL((AGENT,"get_value\n"));
     switch (table_info->colnum) {
 
     case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
@@ -952,8 +1132,34 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
                                         saHpiSystemEventLogEntryId));
         break;
 
+    case COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP:
+            /** HpiTimeStamp = ASN_COUNTER64 */
+        snmp_set_var_typed_value(var, ASN_COUNTER64,
+                                 (char *) &context->
+                                 saHpiSystemEventLogAddedTimestamp,
+                                 sizeof(context->
+                                        saHpiSystemEventLogAddedTimestamp));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGINDEX:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogIndex,
+                                 sizeof(context->
+                                        saHpiSystemEventLogIndex));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGTYPE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogType,
+                                 sizeof(context->saHpiSystemEventLogType));
+        break;
+
     case COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP:
-            /** TimeStamp = ASN_TIMETICKS */
+            /** HpiTimeStamp = ASN_COUNTER64 */
         snmp_set_var_typed_value(var, ASN_COUNTER64,
                                  (char *) &context->
                                  saHpiSystemEventLogTimestamp,
@@ -961,30 +1167,393 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
                                         saHpiSystemEventLogTimestamp));
         break;
 
-    case COLUMN_SAHPISYSTEMEVENTLOGGED:
-            /** RowPointer = ASN_OBJECT_ID */
-        snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                                 (char *) &context->saHpiSystemEventLogged,
-                                 context->saHpiSystemEventLogged_len);
+    case COLUMN_SAHPISYSTEMEVENTLOGSEVERITY:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSeverity,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSeverity));
         break;
-  case COLUMN_SAHPISYSTEMEVENTCLEAREVENTTABLE:
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORNUM:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorNum,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorNum));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTYPE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorType,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorType));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORCATEGORY:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorCategory,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorCategory));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORASSERTION:
+            /** TruthValue = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorAssertion,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorAssertion));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUNSPECIFIED:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryUnspecified,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryUnspecified));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYTHRESHOLD:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryThreshold,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryThreshold));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSAGE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryUsage,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryUsage));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSTATE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryState,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryState));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPREDFAIL:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryPredFail,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryPredFail));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYLIMIT:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryLimit,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryLimit));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPERFORMANCE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryPerformance,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryPerformance));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYSEVERITY:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategorySeverity,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategorySeverity));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYPRESENCE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryPresence,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryPresence));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYENABLE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryEnable,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryEnable));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYAVAILABILITY:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryAvailability,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryAvailability));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYREDUNDANCY:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryRedundancy,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryRedundancy));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYUSER:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryUser,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryUser));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSTATECATEGORYGENERIC:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorStateCategoryGeneric,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorStateCategoryGeneric));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSOROPTIONALDATA:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorOptionalData,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorOptionalData));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGTYPE:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerReadingType,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerReadingType));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGRAW:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerReadingRaw,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerReadingRaw));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETEDTYPE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerReadingInterpretedType,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerReadingInterpretedType));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGINTERPRETED:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerReadingInterpreted,
+                                 context->
+                                 saHpiSystemEventLogSensorTriggerReadingInterpreted_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERREADINGEVENTSTATE:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerReadingEventState,
+                                 context->
+                                 saHpiSystemEventLogSensorTriggerReadingEventState_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDTYPE:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerThresholdType,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerThresholdType));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDRAW:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerThresholdRaw,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerThresholdRaw));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerThresholdInterpretedType,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorTriggerThresholdInterpretedType));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDINTERPRETED:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerThresholdInterpreted,
+                                 context->
+                                 saHpiSystemEventLogSensorTriggerThresholdInterpreted_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORTRIGGERTHRESHOLDEVENTSTATE:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorTriggerThresholdEventState,
+                                 context->
+                                 saHpiSystemEventLogSensorTriggerThresholdEventState_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORPREVIOUSSTATE:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorPreviousState,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorPreviousState));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSOROEM:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorOem,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorOem));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGSENSORSPECIFIC:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogSensorSpecific,
+                                 sizeof(context->
+                                        saHpiSystemEventLogSensorSpecific));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGHOTSWAPSTATE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogHotSwapState,
+                                 sizeof(context->
+                                        saHpiSystemEventLogHotSwapState));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGPREVIOUSHOTSWAPSTATE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogPreviousHotSwapState,
+                                 sizeof(context->
+                                        saHpiSystemEventLogPreviousHotSwapState));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGNUM:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogWatchdogNum,
+                                 sizeof(context->
+                                        saHpiSystemEventLogWatchdogNum));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGACTION:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogWatchdogAction,
+                                 sizeof(context->
+                                        saHpiSystemEventLogWatchdogAction));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGPRETIMERACTION:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogWatchdogPreTimerAction,
+                                 sizeof(context->
+                                        saHpiSystemEventLogWatchdogPreTimerAction));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGWATCHDOGUSE:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->
+                                 saHpiSystemEventLogWatchdogUse,
+                                 sizeof(context->
+                                        saHpiSystemEventLogWatchdogUse));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGOEMMANUFACTURERIDT:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSystemEventLogOemManufacturerIdT,
+                                 sizeof(context->
+                                        saHpiSystemEventLogOemManufacturerIdT));
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGOEMEVENTDATA:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogOemEventData,
+                                 context->
+                                 saHpiSystemEventLogOemEventData_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGUSEREVENTDATA:
+            /** OCTETSTR = ASN_OCTET_STR */
+        snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                 (char *) &context->
+                                 saHpiSystemEventLogUserEventData,
+                                 context->
+                                 saHpiSystemEventLogUserEventData_len);
+        break;
+
+    case COLUMN_SAHPISYSTEMEVENTLOGDELETE:
             /** RowStatus = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->
-                                 saHpiSystemEventClearEventTable,
+                                 saHpiSystemEventLogDelete,
                                  sizeof(context->
-                                        saHpiSystemEventClearEventTable));
+                                        saHpiSystemEventLogDelete));
         break;
-	/*
-    case COLUMN_SAHPISYSTEMEVENTLOGSTATE:
 
-        snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSystemEventLogState,
-                                 sizeof(context->
-                                        saHpiSystemEventLogState));
-        break;
-	*/
     default:/** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in "
                  "saHpiSystemEventLogTable_get_value\n");
@@ -992,6 +1561,7 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
     }
     return SNMP_ERR_NOERROR;
 }
+
 
 int
 event_log_update_timestamp_handler(netsnmp_mib_handler *handler,
