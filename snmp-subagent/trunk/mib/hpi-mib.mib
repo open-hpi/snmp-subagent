@@ -6470,9 +6470,9 @@ saHpiSensorThdUpMinorIsWritable OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
-        "Defines if sensor threshold information can be written to."
+        "Defines if sensor threshold information can be written to. "
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7.  "
         ::= {saHpiSensorThdUpMinorEntry 2}
         
 saHpiSensorThdUpMinorType               OBJECT-TYPE
