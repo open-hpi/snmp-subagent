@@ -7141,13 +7141,14 @@ saHpiWatchdogOem OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Reserved for OEM use"
         ::= {saHpiWatchdogEntry 12}
-
-saHpiWatchdogRDR OBJECT-TYPE
+	
+saHpiWatchdogRDR 	OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Forward pointer to the RDR OID."
         ::= {saHpiWatchdogEntry 13}
+
         
 --
 -- /*******************************************************************************
@@ -7188,8 +7189,9 @@ SaHpiAnnunciatorEntry ::= SEQUENCE {
         saHpiAnnunciatorType            INTEGER,
         saHpiAnnunciatorModeReadOnly    TruthValue,
         saHpiAnnunciatorMaxConditions   Unsigned32,
-        saHpiAnnunciatorMode          INTEGER,
-        saHpiAnnunciatorOem             Unsigned32
+        saHpiAnnunciatorMode          	INTEGER,
+        saHpiAnnunciatorOem             Unsigned32,
+	saHpiAnnunciatorRDR		RowPointer
       }
       
 saHpiAnnunciatorNum     OBJECT-TYPE
@@ -7264,6 +7266,13 @@ saHpiAnnunciatorOem     OBJECT-TYPE
         set.  0 means no fixed limit.  if True, Mode may not be 
         changed by HPI User."
         ::= {saHpiAnnunciatorEntry 6}
+	
+saHpiAnnunciatorRDR OBJECT-TYPE
+        SYNTAX          RowPointer
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Forward pointer to the RDR OID."
+        ::= {saHpiAnnunciatorEntry 7}
         
 
 --
