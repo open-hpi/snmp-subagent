@@ -23,7 +23,7 @@
 
 #include <net-snmp/library/snmp_assert.h>
 #include <saHpiTable.h>
-#include "saHpiSystemEventLogTable.h"
+#include <saHpiSystemEventLogTable.h>
 #include <saHpiEventTable.h>
 
 static netsnmp_handler_registration *my_handler = NULL;
@@ -71,9 +71,9 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					saHpiSystemEventLogTable_context *ctx);
 
 
-int populate_sel(SaHpiRptEntryT *rpt_entry,
-		 oid *DomainID_oid, const size_t DomainID_oid_len,
-		 oid *ResourceID_oid, const size_t ResourceID_oid_len) {
+int populate_sel(SaHpiRptEntryT *rpt_entry) {
+  //		 oid *DomainID_oid, const size_t DomainID_oid_len,
+  //		 oid *ResourceID_oid, const size_t ResourceID_oid_len) {
   
   SaErrorT     err;
   SaHpiSessionIdT session_id;
@@ -197,10 +197,16 @@ int populate_sel(SaHpiRptEntryT *rpt_entry,
 
 int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
-
 					SaHpiRptEntryT *rpt,
 					saHpiSystemEventLogTable_context *ctx) {
   long hash;
+  SaHpiEventT *event_entry;
+  SaHpiSensorEventT sensor;
+  SaHpiSensorReadingT reading;
+  SaHpiHotSwapEventT hotswap;
+  SaHpiWatchdogEventT watchdog;
+  SaHpiOemEventT oem;
+  SaHpiUserEventT user;
 
   if (sel && ctx) {
     hash = calculate_hash_value(sel, sizeof(SaHpiSelEntryT));
@@ -225,7 +231,6 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
 
-    //    ctx->saHpiSystemEventLogState = (*state == SAHPI_TRUE) ? MIB_TRUE: MIB_FALSE;
     ctx->saHpiSystemEventLogEntryId = sel->EntryId;
 
     memcpy(&ctx->saHpiSystemEventLogAddedTimestamp,
@@ -234,7 +239,226 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->saHpiSystemEventLogAddedTimestamp.low = htonl(ctx->saHpiSystemEventLogAddedTimestamp.low);
     ctx->saHpiSystemEventLogAddedTimestamp.high = htonl(ctx->saHpiSystemEventLogAddedTimestamp.high);
 
+    /* IBM-KR: TODO remove this ? */
+    ctx->saHpiSystemEventLogIndex = sel->EntryId;
 
+
+    event_entry = &(sel->Event);
+    if (event_entry != NULL) {
+
+      ctx->saHpiSystemEventLogType = event_entry->EventType + 1;
+
+      memcpy(&ctx->saHpiSystemEventLogTimestamp,
+	     &event_entry->Timestamp,
+	     sizeof(SaHpiTimeT));
+
+    ctx->saHpiSystemEventLogTimestamp.low =
+      htonl(ctx->saHpiSystemEventLogTimestamp.low);
+    
+    ctx->saHpiSystemEventLogTimestamp.high =
+      htonl(ctx->saHpiSystemEventLogTimestamp.high);
+
+    ctx->saHpiSystemEventLogSeverity = event_entry->Severity;
+
+    if (event_entry->EventType == SAHPI_ET_SENSOR) {
+      sensor = event_entry->EventDataUnion.SensorEvent;
+      ctx->saHpiSystemEventLogSensorNum = sensor.SensorNum;
+      ctx->saHpiSystemEventLogSensorType = sensor.SensorType;
+      ctx->saHpiSystemEventLogSensorCategory = sensor.EventCategory;
+      ctx->saHpiSystemEventLogSensorAssertion = (sensor.Assertion == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+      if (sensor.EventCategory & SAHPI_EC_THRESHOLD)
+	ctx->saHpiSystemEventLogSensorStateCategoryThreshold = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_USAGE) 
+	ctx->saHpiSystemEventLogSensorStateCategoryUsage = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_STATE) 
+	ctx->saHpiSystemEventLogSensorStateCategoryState = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_PRED_FAIL) 
+	ctx->saHpiSystemEventLogSensorStateCategoryPredFail = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_LIMIT) 
+	ctx->saHpiSystemEventLogSensorStateCategoryLimit = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_PERFORMANCE) 
+	ctx->saHpiSystemEventLogSensorStateCategoryPerformance = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_SEVERITY) 
+	ctx->saHpiSystemEventLogSensorStateCategorySeverity = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_PRESENCE) 
+	ctx->saHpiSystemEventLogSensorStateCategoryPresence = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_ENABLE) 
+	ctx->saHpiSystemEventLogSensorStateCategoryEnable = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_AVAILABILITY) 
+	ctx->saHpiSystemEventLogSensorStateCategoryAvailability = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_REDUNDANCY) 
+	ctx->saHpiSystemEventLogSensorStateCategoryRedundancy = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_USER) 
+	ctx->saHpiSystemEventLogSensorStateCategoryUser = sensor.EventState;
+      if (sensor.EventCategory & SAHPI_EC_GENERIC) 
+	ctx->saHpiSystemEventLogSensorStateCategoryGeneric = sensor.EventState;
+      /*
+	#define SAHPI_SOD_TRIGGER_READING   (SaHpiSensorOptionalDataT)0x01
+	#define SAHPI_SOD_TRIGGER_THRESHOLD (SaHpiSensorOptionalDataT)0x02
+	#define SAHPI_SOD_OEM               (SaHpiSensorOptionalDataT)0x04
+	#define SAHPI_SOD_PREVIOUS_STATE    (SaHpiSensorOptionalDataT)0x08
+	#define SAHPI_SOD_SENSOR_SPECIFIC   (SaHpiSensorOptionalDataT)0x10
+       */
+      ctx->saHpiSystemEventLogSensorOptionalData = sensor.OptionalDataPresent;
+      reading = sensor.TriggerReading;
+      ctx->saHpiSystemEventLogSensorTriggerReadingType = reading.ValuesPresent;
+
+      if (reading.ValuesPresent & SAHPI_SRF_RAW) {
+	ctx->saHpiSystemEventLogSensorTriggerReadingRaw = htonl(reading.Raw);
+      }
+      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED) {     
+	ctx->saHpiSystemEventLogSensorTriggerReadingInterpretedType = reading.Interpreted.Type + 1;
+	switch (reading.Interpreted.Type) {
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:       	
+	  reading.Interpreted.
+	    Value.
+	    SensorUint16 = htons(reading.Interpreted.
+				 Value.
+				 SensorUint16);	    
+	  break;							 
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+	  reading.Interpreted.
+	    Value.
+	    SensorUint32 = htonl(reading.Interpreted.
+				 Value.
+				 SensorUint32);
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
+	  break;
+	}
+	memcpy(ctx->saHpiSystemEventLogSensorTriggerReadingInterpreted,
+	       &reading.Interpreted.Value,
+	       SAHPI_SENSOR_BUFFER_LENGTH);      
+	ctx->saHpiSystemEventLogSensorTriggerReadingInterpreted_len = EVENT_TRIGGER_READING_INTERPRETED_MAX;
+      }          
+      if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE) {
+	ctx->saHpiSystemEventLogSensorTriggerReadingEventState[0] = reading.EventStatus.SensorStatus;
+	reading.EventStatus.SensorStatus = htons(reading.
+						 EventStatus.
+						 EventStatus);
+	memcpy(ctx->saHpiSystemEventLogSensorTriggerReadingEventState + 1,
+	       &reading.EventStatus.EventStatus, 2);
+	ctx->saHpiSystemEventLogSensorTriggerReadingEventState_len = EVENT_TRIGGER_READING_EVENT_STATE_MAX;		 		 
+      }
+      
+       
+      reading = sensor.TriggerThreshold;
+   
+      
+      if (reading.ValuesPresent & SAHPI_SRF_RAW) {
+	ctx->saHpiSystemEventLogSensorTriggerThresholdRaw = htonl(reading.Raw);
+      }
+      if (reading.ValuesPresent & SAHPI_SRF_INTERPRETED) {
+	ctx->saHpiSystemEventLogSensorTriggerThresholdInterpretedType = reading.Interpreted.Type + 1;
+	switch (reading.Interpreted.Type) {
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:       	
+	  reading.Interpreted.
+	    Value.
+	    SensorUint16 = htons(reading.Interpreted.
+				 Value.
+				 SensorUint16);	    
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
+	  reading.Interpreted.
+	    Value.
+	    SensorUint32 = htonl(reading.Interpreted.
+				 Value.
+				 SensorUint32);
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
+	case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
+	  break;
+	case SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER:
+	  break;
+	}
+	memcpy(ctx->saHpiSystemEventLogSensorTriggerThresholdInterpreted,
+	       &reading.Interpreted.Value,
+	       SAHPI_SENSOR_BUFFER_LENGTH);      
+	ctx->saHpiSystemEventLogSensorTriggerThresholdInterpreted_len = EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX;
+      }          
+      if (reading.ValuesPresent & SAHPI_SRF_EVENT_STATE) {
+	ctx->saHpiSystemEventLogSensorTriggerThresholdEventState[0] = reading.EventStatus.SensorStatus;
+	reading.EventStatus.SensorStatus = htons(reading.
+						 EventStatus.
+						 EventStatus);
+	memcpy(ctx->saHpiSystemEventLogSensorTriggerThresholdEventState + 1,
+	       &reading.EventStatus.EventStatus, 2);
+	ctx->saHpiSystemEventLogSensorTriggerThresholdEventState_len =EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX; 
+
+      }
+
+      ctx->saHpiSystemEventLogSensorPreviousState = sensor.PreviousState;
+      ctx->saHpiSystemEventLogSensorOem = sensor.Oem;
+      ctx->saHpiSystemEventLogSensorSpecific = sensor.SensorSpecific;
+      
+      
+
+    }
+
+    if (event_entry->EventType == SAHPI_ET_HOTSWAP) {
+      hotswap = event_entry->EventDataUnion.HotSwapEvent;
+      // CR: #022
+      ctx->saHpiSystemEventLogHotSwapState = hotswap.HotSwapState + 1;
+      ctx->saHpiSystemEventLogPreviousHotSwapState = hotswap.PreviousHotSwapState +1;
+
+
+      // Notify the HotSwap table about the event state
+       /*
+       IBM-KR: TODO should I? This is "historical" SEL entry 
+      update_hotswap_event(rpt_entry->DomainId,
+			   rpt_entry->ResourceId,
+			   &hotswap);
+	*/
+
+    }
+
+    if (event_entry->EventType == SAHPI_ET_WATCHDOG) {
+      watchdog = event_entry->EventDataUnion.WatchdogEvent;
+      ctx->saHpiSystemEventLogWatchdogNum = watchdog.WatchdogNum;
+      ctx->saHpiSystemEventLogWatchdogAction = watchdog.WatchdogAction+1;
+      ctx->saHpiSystemEventLogWatchdogPreTimerAction = watchdog.WatchdogPreTimerAction+1;
+      ctx-> saHpiSystemEventLogWatchdogUse = watchdog.WatchdogUse +1;
+
+      // Update the Watchdog table
+       /*
+      update_watchdog_row(rpt_entry->DomainId,
+			  rpt_entry->ResourceId,
+			  watchdog.WatchdogNum,
+			  &watchdog);
+			 */
+    }
+
+    if (event_entry->EventType == SAHPI_ET_OEM) {
+      oem = event_entry->EventDataUnion.OemEvent;
+      ctx->saHpiSystemEventLogOemManufacturerIdT= htonl(oem.MId);
+      memcpy(ctx->saHpiSystemEventLogOemEventData,
+	     oem.OemEventData,
+	     SAHPI_OEM_EVENT_DATA_SIZE);
+      ctx->saHpiSystemEventLogOemEventData_len = SAHPI_OEM_EVENT_DATA_SIZE;	     
+
+      
+    }
+
+    if (event_entry->EventType == SAHPI_ET_USER) {
+      user = event_entry->EventDataUnion.UserEvent;
+      memcpy(ctx->saHpiSystemEventLogUserEventData,
+	     user.UserEventData,
+	     SAHPI_USER_EVENT_DATA_SIZE);
+      ctx->saHpiSystemEventLogUserEventData_len = SAHPI_USER_EVENT_DATA_SIZE;
+
+    }
+    }
     // Notify RPT table that we are active.
     update_event_status_flag(rpt->DomainId,
 		       rpt->ResourceId,
