@@ -6,6 +6,7 @@ NET-SNMP-EXAMPLES-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
     MODULE-IDENTITY, OBJECT-TYPE, Integer32 FROM SNMPv2-SMI
+	TruthValue			FROM SNMPv2-TC
     netSnmp                                 FROM NET-SNMP-MIB;
 
 netSnmpExamples MODULE-IDENTITY
@@ -105,7 +106,9 @@ netSnmpIETFWGEntry OBJECT-TYPE
 NetSnmpIETFWGEntry ::= SEQUENCE {
 	nsIETFWGName	OCTET STRING,
 	nsIETFWGChair1	OCTET STRING,
-	nsIETFWGChair2	OCTET STRING
+	nsIETFWGChair2	OCTET STRING,
+	nsIETFWGProgress	INTEGER,
+	nsIETFWGWorking	TruthValue	
 }
 
 nsIETFWGName OBJECT-TYPE
@@ -133,6 +136,28 @@ nsIETFWGChair2 OBJECT-TYPE
 	working group."
     ::= { netSnmpIETFWGEntry 3 }
 
+nsIETFWGProgress OBJECT-TYPE
+    SYNTAX      INTEGER {
+			undefined(0),
+			proposed(1),
+			debated(2),
+			rewritting(3),
+			draft(4),
+			standard(5)					
+		}	
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Progress of a work-group"
+    ::= { netSnmpIETFWGEntry 4 }
+
+nsIETFWGWorking OBJECT-TYPE
+    SYNTAX      TruthValue
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+        "Is the work group still working?"
+    ::= { netSnmpIETFWGEntry 5 }
 --
 --  Example Notifications
 --
