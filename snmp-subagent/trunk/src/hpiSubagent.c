@@ -20,15 +20,35 @@
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <signal.h>
 
-#include <saHpiTable.h>
-#include <saHpiRdrTable.h>
-#include <saHpiSensorTable.h>
-#include <saHpiCtrlTable.h>
-#include <saHpiInventoryTable.h>
-#include <saHpiWatchdogTable.h>
+#include <hpiB_columns.h>
+#include <hpiB_enums.h>
+#include <hpiB.h>
+
+#include <saHpiDomainInfoTable.h>
+#include <saHpiDomainReferenceTable.h>
+#include <saHpiDomainAlarmTable.h>
+#include <saHpiResourceTable.h>
+#include <saHpiAutoTimeOutTable.h>
 #include <saHpiHotSwapTable.h>
-#include <saHpiSystemEventLogTable.h>
+
 #include <saHpiEventTable.h>
+#include <saHpiResourceEventTable.h>
+#include <saHpiDomainEventTable.h>
+#include <saHpiSensorEventTable.h>
+#include <saHpiSensorEnableChangeEventTable.h>
+#include <saHpiHotSwapEventTable.h>
+#include <saHpiWatchdogEventTable.h>
+#include <saHpiSoftwareEventTable.h>
+#include <saHpiOEMEventTable.h>
+#include <saHpiUserEventTable.h>
+#include <saHpiAnnouncementTable.h>
+			    
+#include <saHpiEventLogInfoTable.h>
+#include <saHpiEventLogTable.h>
+
+#include <saHpiRdrTable.h>
+#include <saHpiCtrlTable.h>
+#include <saHpiSensorTable.h>
 
 #include <saHpiSensorReadingCurrentTable.h>
 #include <saHpiSensorReadingMaxTable.h>
@@ -38,15 +58,19 @@
 #include <saHpiSensorReadingNormalMinTable.h>
 
 #include <saHpiSensorThdLowCriticalTable.h>
-#include <saHpiSensorThdLowMinorTable.h>
 #include <saHpiSensorThdLowMajorTable.h>
-
-#include <saHpiSensorThdUpCriticalTable.h>
-#include <saHpiSensorThdUpMinorTable.h>
-#include <saHpiSensorThdUpMajorTable.h>
-
-#include <saHpiSensorThdPosHysteresisTable.h>
+#include <saHpiSensorThdLowMinorTable.h>
 #include <saHpiSensorThdNegHysteresisTable.h>
+#include <saHpiSensorThdPosHysteresisTable.h>
+#include <saHpiSensorThdUpCriticalTable.h>
+#include <saHpiSensorThdUpMajorTable.h>
+#include <saHpiSensorThdUpMinorTable.h>
+
+#include <saHpiInventoryTable.h>
+#include <saHpiAreaTable.h>
+#include <saHpiFieldTable.h>
+#include <saHpiWatchdogTable.h>
+#include <saHpiAnnunciatorTable.h>
 
 #include <hpiSubagent.h>
 #include <alarm.h>
@@ -54,7 +78,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
+#if 0
 /*
  * Internal prototypes
  */
@@ -1109,7 +1133,7 @@ usage(char *applName)
 
   return;
 }
-
+#endif
 
 int
 main (int argc, char **argv)
