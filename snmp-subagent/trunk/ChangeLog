@@ -1,0 +1,26 @@
+2003-12-17  konradrzeszutek <konradr AT us DOT ibm DOT com>
+	* First release
+
+	* Support for full implementation of the HPI-MIB v1.3 
+	 (included). This means instrumentation of:
+	- Resource Presence Table entities,
+		- HotSwap capabilities,
+	- Resource Data Records,
+		- Sensors,
+		- Inventory,
+		- Control,
+		- Watchdog
+	- Events and System Event Log
+
+	* NOTE: The OID of the HPI-MIB v1.3 is 'experimental.90.'
+	  This MIB branch location *WILL* change in the next
+	  release. Consider this a technology review code.
+
+	* Support for user configurable options:
+		 - update timer for new RPT/RDR/Events ,
+		 - maximum events held in eventw row before they are
+		   automatically removed,
+		 - sending of new found RPT/RDR/Events during startup.
+
+	* Example code for retrieving instrumentation information
+	  using SNMP.
