@@ -2861,11 +2861,10 @@ saHpiDomainEventEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION 
-            "Domain events."
+        DESCRIPTION "Domain events."
         INDEX   { 
                 saHpiDomainId,
-		saHpiEntryId
+		saHpiDomainEventEntryId,
                 saHpiEventSeverity,
                 saHpiDomainEventTimestamp
         }
@@ -2873,9 +2872,19 @@ saHpiDomainEventEntry OBJECT-TYPE
 
 SaHpiDomainEventEntry ::= SEQUENCE {
 
+	saHpiDomainEventEntryId			Counter32,
         saHpiDomainEventTimestamp               SaHpiTimeString,
         saHpiDomainEventType                    INTEGER
         }
+
+saHpiDomainEventEntryId OBJECT-TYPE
+    SYNTAX      Counter32
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+        "This columnar node is an index for Domain Events in the table."
+    ::= {saHpiDomainEventEntry 1}
+
 
 saHpiDomainEventTimestamp OBJECT-TYPE
     SYNTAX      SaHpiTimeString
@@ -2886,7 +2895,7 @@ saHpiDomainEventTimestamp OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= {saHpiDomainEventEntry 1}
+    ::= {saHpiDomainEventEntry 2}
 
 saHpiDomainEventType OBJECT-TYPE
     SYNTAX      INTEGER {
@@ -2901,7 +2910,7 @@ saHpiDomainEventType OBJECT-TYPE
         " Domain events are used to announce the addition of domain references 
         and the removal of domain references to the DRT."
 
-    ::= {saHpiDomainEventEntry 2}
+    ::= {saHpiDomainEventEntry 3}
 
 
 -- *********************************
@@ -4302,8 +4311,7 @@ saHpiEventLogClearRowStatus OBJECT-TYPE
         DESCRIPTION     "Write value of true will clear the Event log for the 
 	Domain and Resource specified by the index value.  The 
 	saHpiEventLogIndex value is ignore."
-	REFERNCE 
-	" See section 6.4.4 for futher details."
+	REFERENCE " See section 6.4.4 for futher details."
 	::=   {saHpiEventLogEntry 4 }
 
 
@@ -4358,7 +4366,7 @@ saHpiRdrEntry OBJECT-TYPE
 SaHpiRdrEntry ::= SEQUENCE {
 
         saHpiRdrEntryId         Counter32,
-	saHpiRdrNext		Counter32,
+	saHpiRdrNextEntryId	Counter32,
         saHpiRdrType            INTEGER,
         saHpiRdrEntityPath      OCTET STRING,
         
@@ -4374,7 +4382,7 @@ SaHpiRdrEntry ::= SEQUENCE {
 
 saHpiRdrEntryId OBJECT-TYPE
         SYNTAX          Counter32
-        MAX-ACCESS      not-accessible
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Id of the RDR entry. "
 	::=   {saHpiRdrEntry 1 }
@@ -4392,7 +4400,7 @@ saHpiRdrNextEntryId OBJECT-TYPE
 	index specified represents the last valid RDR  represented by 
 	the Resource in question."
 	REFERENCE "see section 7.1.1."
-	::=   {saHpiRdrEntry 1 }
+	::=   {saHpiRdrEntry 2 }
 
 saHpiRdrType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -4410,7 +4418,7 @@ saHpiRdrType OBJECT-TYPE
 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
-	::=   {saHpiRdrEntry 2 }
+	::=   {saHpiRdrEntry 3 }
 
 
 saHpiRdrEntityPath OBJECT-TYPE
@@ -4435,7 +4443,7 @@ saHpiRdrEntityPath OBJECT-TYPE
         
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
-	::=   {saHpiRdrEntry 3 }
+	::=   {saHpiRdrEntry 4 }
 
         
 saHpiRdrIsFru OBJECT-TYPE 
@@ -4445,7 +4453,7 @@ saHpiRdrIsFru OBJECT-TYPE
         DESCRIPTION     "Entity is a FRU.  This field is Only valid if the 
         Entity path given in the 'Entity' field is different from the Entity 
         path in the RPT entry for the resource."
-	::=   {saHpiRdrEntry 4 }
+	::=   {saHpiRdrEntry 5 }
 
 
 saHpiRdrRowPointer OBJECT-TYPE
@@ -4458,7 +4466,7 @@ saHpiRdrRowPointer OBJECT-TYPE
              saHpiSensorRec
              saHpiInventoryRec
              saHpiWatchdogRec"
-	::=   {saHpiRdrEntry 5 }
+	::=   {saHpiRdrEntry 6 }
 
 
 saHpiRdrRPT OBJECT-TYPE
@@ -4467,7 +4475,7 @@ saHpiRdrRPT OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Forward pointer to the Resource Presence Table (RPT) 
 	entry."
-	::=   {saHpiRdrEntry 6 }
+	::=   {saHpiRdrEntry 7 }
 
 
 saHpiRdrTextType OBJECT-TYPE
@@ -4476,7 +4484,7 @@ saHpiRdrTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "See definition"
-	::=   {saHpiRdrEntry 7 }
+	::=   {saHpiRdrEntry 8 }
 
 
 saHpiRdrTextLanguage OBJECT-TYPE
@@ -4485,7 +4493,7 @@ saHpiRdrTextLanguage OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
         "See definition"
-	::=   {saHpiRdrEntry 8 }
+	::=   {saHpiRdrEntry 9 }
 
 
 saHpiRdrIdString OBJECT-TYPE
@@ -4493,7 +4501,7 @@ saHpiRdrIdString OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "ID String of the RDR entry."
-	::=   {saHpiRdrEntry 9 }
+	::=   {saHpiRdrEntry 10 }
 
 
 --/*******************************************************************************
@@ -7012,19 +7020,33 @@ saHpiAnnunciatorMode  OBJECT-TYPE
                       }
 	MAX-ACCESS      read-write
 	STATUS          current
-        DESCRIPTION     "
-The Annunciator management instrument has a current mode that indicates whether announcements are added and removed automatically by the HPI implementation, by the HPI User, or both.  The mode may be set to one of three values, with the following meanings: 	 
+        DESCRIPTION     
+	"The Annunciator management instrument has a current mode that 
+	indicates whether announcements are added and removed automatically 
+	by the HPI implementation, by the HPI User, or both.  The mode may 
+	be set to one of three values, with the following meanings: 	 
   	 
- auto(1) - the HPI implementation automatically adds and deletes announcements; the HPI User is not permitted to add or delete announcements. 	 
- user(2) - the HPI User may add and delete announcements; the HPI implementation will not automatically add or delete announcements. 	 
- shared(3) -  the HPI implementation automatically adds and deletes announcements, and the HPI User may also add and delete announcements. 	 
+	auto(1) - the HPI implementation automatically adds and deletes 
+		announcements; the HPI User is not permitted to add or delete announcements. 	 
+	user(2) - the HPI User may add and delete announcements; the HPI 
+		implementation will not automatically add or delete announcements. 	 
+	shared(3) -  the HPI implementation automatically adds and deletes 
+		announcements, and the HPI User may also add and delete announcements. 	 
   	 
- The initial mode of each Annunciator is implementation-specific.  The HPI User may change the mode of Annunciators with the saHpiAnnunciatorMode object.  However, the mode may be configured to be Read-only, in which case the HPI User will not be able to change the mode. 	 
+	The initial mode of each Annunciator is implementation-specific.  The HPI 
+	User may change the mode of Annunciators with the saHpiAnnunciatorMode object.  
+	However, the mode may be configured to be Read-only, in which case the HPI 
+	User will not be able to change the mode. 	 
   	 
- When the mode is user(2) or shared(3), HPI Users may add or delete any types of announcements in the Annunciator's current set - not just HPI User announcements.  This is allowed so that the HPI User can exert complete control over what conditions are being announced, if that is required.  Note that this is less restrictive than the similar operations on the DAT.  To distinguish between announcements added to an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser field in the announcement indicates the source of the announcement in the set.
+	When the mode is user(2) or shared(3), HPI Users may add or delete any types 
+	of announcements in the Annunciator's current set - not just HPI User announcements.  
+	This is allowed so that the HPI User can exert complete control over what conditions 
+	are being announced, if that is required.  Note that this is less restrictive than 
+	the similar operations on the DAT.  To distinguish between announcements added to 
+	an Annunciator automatically and those added by an HPI User, an saHpiAddedByUser 
+	field in the announcement indicates the source of the announcement in the set.
 
-Note: Enumerated values are increased by one value compared to
-SAI-HPI-B spec."
+	Note: Enumerated values are increased by one value compared to SAI-HPI-B.01.01 spec."
        ::= {saHpiAnnunciatorEntry 5}
 
 saHpiAnnunciatorOem     OBJECT-TYPE
@@ -7500,13 +7522,12 @@ saHpiEventLogGroup OBJECT-GROUP
 	DESCRIPTION
 		"saHpiEventLog table."
 	::= { hpiMIBCompliances 19}
-
+      
 saHpiRdrGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiRdrEntityPath,
 		saHpiRdrIsFru,
 		saHpiRdrRowPointer,
-		saHpiRdrId,
 		saHpiRdrRPT,
 		saHpiRdrTextType,
 		saHpiRdrTextLanguage,
