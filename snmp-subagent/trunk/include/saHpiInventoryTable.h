@@ -39,7 +39,7 @@ extern "C"
    */
 #define INVENTORY_INDEX_NR 4
   /*
-   * Max values of saHpiInventoryAttributes. In the MIB its set to 5, but
+   * Max values of saHpiInventoryAttributes. In the MIB its set to 255, but
    * the SAF spec uses 'Variable length opaque data' - which can mean
    * pretty much anything. We set the limit to 1000.
    */
@@ -54,9 +54,10 @@ extern "C"
   /* 
    * Numerical values for saHpiInventoryValidity as defined per HPI-MIB
    */
+#define MIB_UNDEFINED 0
 #define MIB_VALID 1
-#define MIB_INVALID 0
-#define MIB_OVERFLOW 2
+#define MIB_INVALID 2
+#define MIB_OVERFLOW 3
 
   /*
    * Number of SaHpiTextBufferT pointers in the SaHpiInventDataRecordT
@@ -68,11 +69,12 @@ extern "C"
    * Max number of fields the SaHpiInventoryAttributes can have
    * per different type of data.
    */
-#define SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX 1
-#define SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX 5
-#define SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX 4
-#define SAHPI_INVENT_RECTYPE_PRODUCT_INFO_MAX 4
-#define SAHPI_INVENT_RECTYPE_OEM_MAX 4
+#define SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX 1000
+#define SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX 12
+#define SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX 8
+#define SAHPI_INVENT_RECTYPE_PRODUCT_INFO_MAX 8
+#define SAHPI_INVENT_RECTYPE_OEM_MAX 260
+#define SAHPI_INVENT_RECTYPE_OEM_MIN 4
 
   typedef struct saHpiInventoryTable_context_s
   {

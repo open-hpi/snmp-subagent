@@ -567,7 +567,7 @@ saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 	      //SaHpiCtrlStateTextT
 	      ctx->saHpiCtrlState[0] = state->StateUnion.Text.Line;
 	      ctx->saHpiCtrlState_len = sizeof (SaHpiTxtLineNumT);
-	      ctx->saHpiCtrlTextType = state->StateUnion.Text.Text.DataType+!;
+	      ctx->saHpiCtrlTextType = state->StateUnion.Text.Text.DataType+1;
 	      ctx->saHpiCtrlTextLanguage =
 		state->StateUnion.Text.Text.Language+1;
 	      ctx->saHpiCtrlText_len = state->StateUnion.Text.Text.DataLength;

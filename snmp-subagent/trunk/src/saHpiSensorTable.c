@@ -350,8 +350,8 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       memcpy (ctx->saHpiSensorRDR, rdr_entry, ctx->saHpiSensorRDR_len);
 
       ctx->saHpiSensorIndex = entry->Num;
-      ctx->saHpiSensorType = entry->Type;
-      ctx->saHpiSensorCategory = entry->Category;
+      ctx->saHpiSensorType = entry->Type+1;
+      ctx->saHpiSensorCategory = entry->Category+1;
 
       // DOAMIN
       ctx->domain_id = rpt_entry->DomainId;
@@ -377,10 +377,10 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->saHpiSensorIsNumeric =
 	(data.IsNumeric == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-      ctx->saHpiSensorSignFormat = data.SignFormat;
-      ctx->saHpiSensorBaseUnits = data.BaseUnits;
-      ctx->saHpiSensorModifierUnits = data.ModifierUnits;
-      ctx->saHpiSensorModifierUse = data.ModifierUse;
+      ctx->saHpiSensorSignFormat = data.SignFormat+1;
+      ctx->saHpiSensorBaseUnits = data.BaseUnits+1;
+      ctx->saHpiSensorModifierUnits = data.ModifierUnits+1;
+      ctx->saHpiSensorModifierUse = data.ModifierUse+1;
       ctx->saHpiSensorFactorsStatic =
 	(data.FactorsStatic == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
@@ -405,7 +405,7 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->saHpiSensorFactors[9] = data.Factors.ExpB;
       ctx->saHpiSensorFactors_len = SAHPISENSORFACTORS_MAX;
 
-      ctx->saHpiSensorFactorsLinearization = data.Factors.Linearization;
+      ctx->saHpiSensorFactorsLinearization = data.Factors.Linearization+1;
 
       ctx->saHpiSensorPercentage =
 	(data.Percentage == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
