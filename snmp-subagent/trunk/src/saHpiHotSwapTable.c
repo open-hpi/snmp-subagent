@@ -232,8 +232,8 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
 	}
       else
 	// IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
-	// Should we make it 64-bit?
-	ctx->saHpiHotSwapInsertTimeout = htonl (insert_t);
+	// Should we make it 64-bit? Endian
+	ctx->saHpiHotSwapInsertTimeout = insert ; 
 
       // Extract timeout
       DEBUGMSGTL ((AGENT, "Calling saHpiAutoExtractTimeoutGet with %d\n",
@@ -251,9 +251,9 @@ saHpiHotSwapTable_modify_context (SaHpiRptEntryT * rpt_entry,
       else
 	{
 	  // IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
-	  // Should we make it 64-bit?
+	  // Should we make it 64-bit? Endian
 	  //       
-	  ctx->saHpiHotSwapExtractTimeout = htonl (extract_t);
+	  ctx->saHpiHotSwapExtractTimeout = extract_t ;
 	}
       ctx->saHpiHotSwapActionRequest = 0;
 
