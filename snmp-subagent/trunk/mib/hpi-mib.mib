@@ -14,7 +14,7 @@ IMPORTS
         DateAndTime,
         RowPointer,
         RowStatus,
-	DisplayString,
+        DisplayString,
         TruthValue              FROM SNMPv2-TC
         MODULE-COMPLIANCE, 
         OBJECT-GROUP,
@@ -23,7 +23,7 @@ IMPORTS
 
 
 hpiB0101 MODULE-IDENTITY
-    LAST-UPDATED "200410180000Z"
+    LAST-UPDATED "200501140000Z"
     ORGANIZATION "www.saforum.org"
     CONTACT-INFO "
                 Sean Dague
@@ -69,11 +69,11 @@ hpiB0101 MODULE-IDENTITY
         "
     DESCRIPTION
     
-        "For security reasons it is recommend to use a SNMP v2 or v3c
-	SNMP daemon.
+        "When using this MIB it is strongly recommend to use a SNMP v2 or v3c
+	SNMP protocol due to security concerns.
 	
 	Additionally  if fine grain access configuration is desired, for 
-	example managed access to indiviual columnar nodes, the SNMP 
+	example to manage access to indiviual columnar nodes, the SNMP 
 	configuration should use VACM (View Based Access Control Model 
 	- RFC 2275).
 	
@@ -112,10 +112,10 @@ hpiB0101 MODULE-IDENTITY
                   associated with an entitry.
 
         The inventory control defines variables for reading inventory
-                resources.  
+                resources and changing the settings. 
     
 	"
-    REVISION    "200410180000Z"
+    REVISION    "200501140000Z"
     DESCRIPTION
         "HPI MIB for SAF-HPI B."
         ::= { enterprises 18568 1 1 1 6}
@@ -154,7 +154,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
         "Textual convention for an unsigned 16-bit data, 
     2-byte alignment data type."
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, section 8.1."
+        "Derived from SAI-HPI-B.01.01 specification, section 8.1."
     SYNTAX       INTEGER (0..65535)
 
 Unsigned8 ::= TEXTUAL-CONVENTION
@@ -162,7 +162,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
 	DESCRIPTION
         "Textual convention for an unsigned 8-bit data type."
 	REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, section 8.1."
+        "Derived from SAI-HPI-B.01.01 specification, section 8.1."
 	SYNTAX      INTEGER(0..255)
 
 Float64 ::= TEXTUAL-CONVENTION
@@ -171,9 +171,9 @@ Float64 ::= TEXTUAL-CONVENTION
         "Textual convention for an 64 bit float number, 
 	8 byte alignment data type."
 	REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, section 8.1.
-        The 64bit float number is assumed to be a IEEE-754 64 bit floating value of the type:
-        sign(1)exponent(11)mantissa(52)."
+        "Derived from SAI-HPI-B.01.01 specification, section 8.1.
+        The 64bit float number is assumed to be a IEEE-754 64 bit floating 
+	value of the type: sign(1)exponent(11)mantissa(52)."
 	SYNTAX      Opaque (SIZE(0..65))
     
 SaHpiEntityPath ::= TEXTUAL-CONVENTION
@@ -204,7 +204,9 @@ SaHpiEntityPath ::= TEXTUAL-CONVENTION
 SaHpiDomainId ::= TEXTUAL-CONVENTION
 	STATUS      current
         DESCRIPTION
-	"Each domain identifier is unique within the system."
+	"Domain identifier. The number is unique within the system."
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.1"
 	SYNTAX      Unsigned32
 
 SaHpiInstrumentId ::= TEXTUAL-CONVENTION
@@ -213,6 +215,8 @@ SaHpiInstrumentId ::= TEXTUAL-CONVENTION
         "Textual convention for all HPI MIB management instrument 
     identifiers - sensor numbers, control numbers, watchdog timer 
     numbers, etc."
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.1"
     SYNTAX      Unsigned32
 
 SaHpiEntryId ::= TEXTUAL-CONVENTION
@@ -226,6 +230,8 @@ SaHpiEntryId ::= TEXTUAL-CONVENTION
                 SAHPI_FIRST_ENTRY 0x00000000
                 SAHPI_LAST_ENTRY  0xFFFFFFFF
                 SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY" 
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.1"
         SYNTAX          Unsigned32
 
 SaHpiManufacturerId ::= TEXTUAL-CONVENTION
@@ -247,7 +253,7 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
         may be obtained by following the instructions located at
         http://www.iana.org/cgi-bin/enterprise.pl"
     REFERENCE
-        "Derived from SAI-HPI-B.01.01 spec, pg 8.1"
+	"See SAI-HPI-B.01.01 section 8.1"
     SYNTAX Unsigned32
 
 SaHpiCapabilities ::= TEXTUAL-CONVENTION
@@ -267,8 +273,10 @@ SaHpiCapabilities ::= TEXTUAL-CONVENTION
 SaHpiOptionalData ::= TEXTUAL-CONVENTION
         STATUS          current
         DESCRIPTION     " 
-	Sensor events may contain optional data items passed and stored with the 
-	event. If these optional data items are present, they will be included with 
+	Sensor events may contain optional data items passed and stored with 
+	the event. 
+
+	If these optional data items are present, they will be included with 
 	the event data.
 	 
         This texual definition defines the types of optional data
@@ -277,18 +285,14 @@ SaHpiOptionalData ::= TEXTUAL-CONVENTION
 	Each capability is seperated by a delimeter a comma 
 	',' or semicolon ';'. 
 
-	Sensor events may contain optional data items passed and stored with the 
-	event. If these optional data items are present, they will be included with 
-	the event data returned in response to a saHpiEventGet (SAI-HPI-b.01.01 
-	section 6.5.3) or saHpiEventLogEntryGet (SAI-HPI-B.01.01 section 6.4.2). 
-	Also, the optional data items may be included with the event data passed 
-	to the saHpiEventLogEntryAdd (SAI-HPI-B.01.01 section 6.4.3).
-    
-	Specific implementations of HPI (SNMP subagent) may have restrictions on 
-	how much data may be passed to saHpiEventLogEntryAdd. These restrictions 
-	should be documented by the provider of the HPI interface.
+	Specific implementations of HPI (SNMP subagent) may have restrictions 
+	on how much data may be passed to to this textual convention.
+
+	These restrictions should be documented by the provider of the 
+	HPI interface.
 
 	String token values are listed below.
+
 		SAHPI_SOD_TRIGGER_READING   
 		SAHPI_SOD_TRIGGER_THRESHOLD 
 		SAHPI_SOD_OEM               
