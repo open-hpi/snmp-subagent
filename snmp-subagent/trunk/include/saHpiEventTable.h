@@ -73,95 +73,96 @@ extern          "C" {
         long            saHpiEventSensorType;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventCategory;
+        long            saHpiEventSensorCategory;
 
         /** TruthValue = ASN_INTEGER */
-        long            saHpiEventAssertion;
+        long            saHpiEventSensorAssertion;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryUnspecified;
+        long            saHpiEventSensorStateCategoryUnspecified;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryThreshold;
+        long            saHpiEventSensorStateCategoryThreshold;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryUsage;
+        long            saHpiEventSensorStateCategoryUsage;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryState;
+        long            saHpiEventSensorStateCategoryState;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryPredFail;
+        long            saHpiEventSensorStateCategoryPredFail;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryLimit;
+        long            saHpiEventSensorStateCategoryLimit;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryPerformance;
+        long            saHpiEventSensorStateCategoryPerformance;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategorySeverity;
+        long            saHpiEventSensorStateCategorySeverity;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryPresence;
+        long            saHpiEventSensorStateCategoryPresence;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryEnable;
+        long            saHpiEventSensorStateCategoryEnable;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryAvailability;
+        long            saHpiEventSensorStateCategoryAvailability;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryRedundancy;
+        long            saHpiEventSensorStateCategoryRedundancy;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryUser;
+        long            saHpiEventSensorStateCategoryUser;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventStateCategoryGeneric;
+        long            saHpiEventSensorStateCategoryGeneric;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiSensorOptionalData;
+        unsigned long   saHpiEventSensorOptionalData;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventTriggerReadingType;
+        unsigned long   saHpiEventSensorTriggerReadingType;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventTriggerReadingRaw;
+        unsigned long   saHpiEventSensorTriggerReadingRaw;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventTriggerReadingInterpretedType;
+        long            saHpiEventSensorTriggerReadingInterpretedType;
+
 
         /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventTriggerReadingInterpreted[EVENT_TRIGGER_READING_INTERPRETED_MAX];
-        long            saHpiEventTriggerReadingInterpreted_len;
+        unsigned char   saHpiEventSensorTriggerReadingInterpreted[EVENT_TRIGGER_READING_INTERPRETED_MAX];
+        long            saHpiEventSensorTriggerReadingInterpreted_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventTriggerReadingEventState[EVENT_TRIGGER_READING_EVENT_STATE_MAX];
-        long            saHpiEventTriggerReadingEventState_len;
+        unsigned char   saHpiEventSensorTriggerReadingEventState[EVENT_TRIGGER_READING_EVENT_STATE_MAX];
+        long            saHpiEventSensorTriggerReadingEventState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventTriggerThresholdType;
+        unsigned long   saHpiEventSensorTriggerThresholdType;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventTriggerThresholdRaw;
+        unsigned long   saHpiEventSensorTriggerThresholdRaw;
 
         /** INTEGER = ASN_INTEGER */
-        long            saHpiEventTriggerThresholdInterpretedType;
+        long            saHpiEventSensorTriggerThresholdInterpretedType;
 
         /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventTriggerThresholdInterpreted[EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX];
-        long            saHpiEventTriggerThresholdInterpreted_len;
+        unsigned char   saHpiEventSensorTriggerThresholdInterpreted[EVENT_TRIGGER_THRESHOLD_INTERPRETED_MAX];
+        long            saHpiEventSensorTriggerThresholdInterpreted_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiEventTriggerThresholdEventState[EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
-        long            saHpiEventTriggerThresholdEventState_len;
+        unsigned char   saHpiEventSensorTriggerThresholdEventState[EVENT_TRIGGER_THRESHOLD_EVENT_STATE_MAX];
+        long            saHpiEventSensorTriggerThresholdEventState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventPreviousState;
+        unsigned long   saHpiEventSensorPreviousState;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        unsigned long   saHpiEventOem;
+        unsigned long   saHpiEventSensorOem;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         unsigned long   saHpiEventSensorSpecific;
@@ -222,8 +223,9 @@ populate_event(SaHpiSelEntryIdT,
 	       SaHpiEventT *,
 	       SaHpiRptEntryT *t,
 	       SaHpiRdrT *,
-	       oid *, 
-	       size_t *);
+	       oid *,  size_t *,
+	       oid *, const size_t,
+	       oid *, const size_t);
 
 
   int delete_event_entry(saHpiEventTable_context *ctx);
@@ -258,35 +260,35 @@ event_count_entries_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPIEVENTSEVERITY 4
 #define COLUMN_SAHPIEVENTSENSORNUM 5
 #define COLUMN_SAHPIEVENTSENSORTYPE 6
-#define COLUMN_SAHPIEVENTCATEGORY 7
-#define COLUMN_SAHPIEVENTASSERTION 8
-#define COLUMN_SAHPIEVENTSTATECATEGORYUNSPECIFIED 9
-#define COLUMN_SAHPIEVENTSTATECATEGORYTHRESHOLD 10
-#define COLUMN_SAHPIEVENTSTATECATEGORYUSAGE 11
-#define COLUMN_SAHPIEVENTSTATECATEGORYSTATE 12
-#define COLUMN_SAHPIEVENTSTATECATEGORYPREDFAIL 13
-#define COLUMN_SAHPIEVENTSTATECATEGORYLIMIT 14
-#define COLUMN_SAHPIEVENTSTATECATEGORYPERFORMANCE 15
-#define COLUMN_SAHPIEVENTSTATECATEGORYSEVERITY 16
-#define COLUMN_SAHPIEVENTSTATECATEGORYPRESENCE 17
-#define COLUMN_SAHPIEVENTSTATECATEGORYENABLE 18
-#define COLUMN_SAHPIEVENTSTATECATEGORYAVAILABILITY 19
-#define COLUMN_SAHPIEVENTSTATECATEGORYREDUNDANCY 20
-#define COLUMN_SAHPIEVENTSTATECATEGORYUSER 21
-#define COLUMN_SAHPIEVENTSTATECATEGORYGENERIC 22
-#define COLUMN_SAHPISENSOROPTIONALDATA 23
-#define COLUMN_SAHPIEVENTTRIGGERREADINGTYPE 24
-#define COLUMN_SAHPIEVENTTRIGGERREADINGRAW 25
-#define COLUMN_SAHPIEVENTTRIGGERREADINGINTERPRETEDTYPE 26
-#define COLUMN_SAHPIEVENTTRIGGERREADINGINTERPRETED 27
-#define COLUMN_SAHPIEVENTTRIGGERREADINGEVENTSTATE 28
-#define COLUMN_SAHPIEVENTTRIGGERTHRESHOLDTYPE 29
-#define COLUMN_SAHPIEVENTTRIGGERTHRESHOLDRAW 30
-#define COLUMN_SAHPIEVENTTRIGGERTHRESHOLDINTERPRETEDTYPE 31
-#define COLUMN_SAHPIEVENTTRIGGERTHRESHOLDINTERPRETED 32
-#define COLUMN_SAHPIEVENTTRIGGERTHRESHOLDEVENTSTATE 33
-#define COLUMN_SAHPIEVENTPREVIOUSSTATE 34
-#define COLUMN_SAHPIEVENTOEM 35
+#define COLUMN_SAHPIEVENTSENSORCATEGORY 7
+#define COLUMN_SAHPIEVENTSENSORASSERTION 8
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYUNSPECIFIED 9
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYTHRESHOLD 10
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSAGE 11
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYSTATE 12
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYPREDFAIL 13
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYLIMIT 14
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYPERFORMANCE 15
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYSEVERITY 16
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYPRESENCE 17
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYENABLE 18
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYAVAILABILITY 19
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYREDUNDANCY 20
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYUSER 21
+#define COLUMN_SAHPIEVENTSENSORSTATECATEGORYGENERIC 22
+#define COLUMN_SAHPIEVENTSENSOROPTIONALDATA 23
+#define COLUMN_SAHPIEVENTSENSORTRIGGERREADINGTYPE 24
+#define COLUMN_SAHPIEVENTSENSORTRIGGERREADINGRAW 25
+#define COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETEDTYPE 26
+#define COLUMN_SAHPIEVENTSENSORTRIGGERREADINGINTERPRETED 27
+#define COLUMN_SAHPIEVENTSENSORTRIGGERREADINGEVENTSTATE 28
+#define COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDTYPE 29
+#define COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDRAW 30
+#define COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETEDTYPE 31
+#define COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDINTERPRETED 32
+#define COLUMN_SAHPIEVENTSENSORTRIGGERTHRESHOLDEVENTSTATE 33
+#define COLUMN_SAHPIEVENTSENSORPREVIOUSSTATE 34
+#define COLUMN_SAHPIEVENTSENSOROEM 35
 #define COLUMN_SAHPIEVENTSENSORSPECIFIC 36
 #define COLUMN_SAHPIEVENTHOTSWAPSTATE 37
 #define COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE 38
@@ -300,6 +302,7 @@ event_count_entries_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPIEVENTDELETE 46
 #define saHpiEventTable_COL_MIN 1
 #define saHpiEventTable_COL_MAX 46
+
 
 
     int             saHpiEventTable_extract_index(saHpiEventTable_context *

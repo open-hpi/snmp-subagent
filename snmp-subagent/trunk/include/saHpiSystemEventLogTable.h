@@ -80,15 +80,11 @@ extern          "C" {
                                                        *, netsnmp_index *,
                                                        netsnmp_table_request_info
                                                        *);
-  int populate_sel(SaHpiRptEntryT *rpt_entry);
+  int populate_sel(SaHpiRptEntryT *rpt_entry,
+		   	  oid *DomainID_oid, const size_t DomainID_oid_len,
+			  oid *ResourceID_oid, const size_t ResourceID_oid_len);
 
-int
-saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
-					//SaHpiBoolT *state,
-					SaHpiRptEntryT *rpt,
-					oid *event_entry, 
-					size_t event_entry_oid_len,
-					saHpiSystemEventLogTable_context *ctx);
+
 		   
   int send_saHpiSystemEventLogTable_notification(saHpiSystemEventLogTable_context);
 

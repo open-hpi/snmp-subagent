@@ -61,8 +61,17 @@ static int event_log_overflow_action = 0;
 static int event_log_delete_entry_supported = 0;
 
 static SaHpiResourceIdT timestamp_resource_id;
+int
+saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
+					//SaHpiBoolT *state,
+					SaHpiRptEntryT *rpt,
+					oid *event_entry, 
+					size_t event_entry_oid_len,
+					saHpiSystemEventLogTable_context *ctx);
 
-int populate_sel(SaHpiRptEntryT *rpt_entry){
+int populate_sel(SaHpiRptEntryT *rpt_entry,
+		 oid *DomainID_oid, const size_t DomainID_oid_len,
+		 oid *ResourceID_oid, const size_t ResourceID_oid_len) {
   
   SaErrorT     err;
   SaHpiSessionIdT session_id;
@@ -82,6 +91,10 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
   //  long backup_count = event_log_entries;
 
   DEBUGMSGTL((AGENT,"\t--- populate_sel: Entry\n"));
+  DEBUGMSGTL((AGENT,"Got %d,  and %d\n", DomainID_oid_len, ResourceID_oid_len));
+  DEBUGMSGOID((AGENT,DomainID_oid, DomainID_oid_len));
+  DEBUGMSGTL((AGENT,"\n"));
+  DEBUGMSGOID((AGENT,ResourceID_oid, ResourceID_oid_len));
   if (rpt_entry) {
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
@@ -162,7 +175,10 @@ int populate_sel(SaHpiRptEntryT *rpt_entry){
 		       &sel.Event, 
 		       rpt_entry, 
 		       &rdr_entry, 
-		       child_oid, &child_oid_len);
+		       child_oid, &child_oid_len,
+		       DomainID_oid, DomainID_oid_len,
+		       ResourceID_oid, ResourceID_oid_len);
+
 	
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,

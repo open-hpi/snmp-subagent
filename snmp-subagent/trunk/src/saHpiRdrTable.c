@@ -77,7 +77,8 @@ static
 */
 int
 populate_rdr(SaHpiRptEntryT *rpt_entry, 
-	     oid *rpt_oid, size_t rpt_oid_len) 
+	     oid *rpt_oid, size_t rpt_oid_len,
+	     oid *resource_oid, size_t resource_oid_len)
 {
 
   SaErrorT       err;

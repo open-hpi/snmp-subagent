@@ -229,3 +229,13 @@ typedef struct trap_vars_ {
   size_t value_len;
 } trap_vars;
 #endif
+
+netsnmp_variable_list *build_notification(
+					  const netsnmp_index *index,
+					  const trap_vars *var, const size_t var_len,
+					  const oid *notification_oid, const size_t notification_oid_len,
+					  const oid *root_table_oid, const size_t root_table_oid_len,
+					  const SaHpiDomainIdT domain_id, 
+					  const oid *domain_id_oid, const size_t domain_id_oid_len,
+					  const SaHpiResourceIdT resource_id, 
+					  const oid *resource_id_oid, const size_t resource_id_oid_len);
