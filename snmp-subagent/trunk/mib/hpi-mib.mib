@@ -1876,12 +1876,13 @@ saHpiEventSensorSpecific OBJECT-TYPE
 
 saHpiEventHotSwapState OBJECT-TYPE
         SYNTAX          INTEGER {
-				inactive (0),
-				insertionPending (1),
-				activeHealthy (2),
-				activeUnhealthy (3),
-				extractionPending (4),
-				notPresent (5)
+				undefined(0),
+				inactive (1),
+				insertionPending (2),
+				activeHealthy (3),
+				activeUnhealthy (4),
+				extractionPending (5),
+				notPresent (6)
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -1890,12 +1891,13 @@ saHpiEventHotSwapState OBJECT-TYPE
 
 saHpiEventPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
-				inactive (0),
-				insertionPending (1),
-				activeHealthy (2),
-				activeUnhealthy (3),
-				extractionPending (4),
-				notPresent (5)
+				undefined(0),
+				inactive (1),
+				insertionPending (2),
+				activeHealthy (3),
+				activeUnhealthy (4),
+				extractionPending (5),
+				notPresent (6)
 			}
         MAX-ACCESS      read-only
         STATUS          current
