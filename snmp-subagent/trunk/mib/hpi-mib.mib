@@ -6195,7 +6195,8 @@ saHpiSensorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table defining Sensor records."
+        DESCRIPTION     "A table defining the static Sensor data found in the
+	Sensor RDR's."
         ::= {hpiResources 6}
 
 saHpiSensorEntry OBJECT-TYPE
@@ -6204,7 +6205,7 @@ saHpiSensorEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION
         " This is the sensor resource data record which
-        describes all of the static  data associated with a sensor. "
+        describes all of the static data associated with a sensor. "
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorTable 1}
 
@@ -6287,7 +6288,7 @@ saHpiSensorEventCtrl    OBJECT-TYPE
                                 readOnlyMasks(2), 
                                 readOnly(3)        
                         }
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "This columnar node represents the sensor category
@@ -6312,7 +6313,7 @@ saHpiSensorEventCtrl    OBJECT-TYPE
 
 saHpiSensorSupportedEventStates         OBJECT-TYPE
         SYNTAX          SaHpiEventState
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "Set of  event states supported. For format and possible types, please
@@ -7614,7 +7615,7 @@ saHpiInventoryTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiInventoryEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table defining entity inventory resource data records."
+        DESCRIPTION     "Table defining static data associated with Inventory RDR's."
         ::= {hpiInventory 2}
         
 saHpiInventoryEntry OBJECT-TYPE
@@ -8094,8 +8095,9 @@ saHpiWatchdogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table of watchdog  information including watchdog
-	RDR data."
+        DESCRIPTION     "Table of static and dynamic watchdog information 
+	including watchdog RDR data.  The dynamic data portion is necessary 
+	for control and operation of the watchdog timers."
         ::= {hpiResources 10}
 
 saHpiWatchdogEntry OBJECT-TYPE
@@ -8367,7 +8369,8 @@ saHpiAnnunciatorTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnunciatorEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "Table of Annunciator resource data records."
+        DESCRIPTION     "Table of static Annunciator resource data record 
+	information and dynamic control and operational data."
         ::= {hpiResources 12}
 
 saHpiAnnunciatorEntry OBJECT-TYPE
