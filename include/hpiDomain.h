@@ -13,6 +13,8 @@
  *
  *
  */
+#ifndef _HPI_DOMAIN_
+#define _HPI_DOMAIN_
 
 #include <SaHpi.h>
 #include <glib.h>
@@ -28,3 +30,8 @@ struct sa_resource_table {
         GStaticRecMutex lock;
 };
 
+int populate_drt(void);
+
+SaHpiSessionIdT get_session_id(SaHpiDomainIdT did);
+
+#endif /*_HPI_DOMAIN_ */
