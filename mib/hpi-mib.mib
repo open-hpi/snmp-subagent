@@ -5267,8 +5267,8 @@ saHpiSensorReadingCurrentEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        " This is the sensor resource data record which
-        describes the dynamic data associated with sensors."
+        " This is the sensor dynamic data associated with sensors
+	readings and event states."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorReadingCurrentTable 1}
 
