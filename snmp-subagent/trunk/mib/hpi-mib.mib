@@ -6038,7 +6038,7 @@ saHpiSensorThdLowCriticalIsReadable     OBJECT-TYPE
         DESCRIPTION
         "Defines if sensor threshold information can be read."
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2, 7.2.6, and 7.2.7."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
         ::= {saHpiSensorThdLowCriticalEntry 1}
 
 saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
@@ -6048,7 +6048,7 @@ saHpiSensorThdLowCriticalIsWritable     OBJECT-TYPE
         DESCRIPTION
         "Defines if sensor threshold information can be written to." 
         REFERENCE
-        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.6."
+        "Object derieved from SAF SAI-HPI-B.01.01 section 7.2.7."
         ::= {saHpiSensorThdLowCriticalEntry 2}
 
 saHpiSensorThdLowCriticalType           OBJECT-TYPE
