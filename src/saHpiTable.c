@@ -168,8 +168,8 @@ populate_rpt ()
 		  if (err != SA_OK)
 		    {
 		      DEBUGMSGTL ((AGENT,
-				   "Call to saHpiEventLogStateGet failed with rc: %d.\n",
-				   err));
+				   "Call to saHpiEventLogStateGet failed with rc: %s.\n",
+				   get_error_string (err)));
 		      state = SAHPI_TRUE;
 		    }
 		  // Construct the index from the entry. Look in the MIB for new index values
@@ -605,8 +605,11 @@ set_logstate (saHpiTable_context * ctx)
 
       if (rc != SA_OK)
 	{
-	  DEBUGMSGTL ((AGENT, "Error for 'saHpiEventLogStateSet' is %d\n",
-		       rc));
+	  snmp_log (LOG_ERR,
+		    "Calling saHpiEventLogStateSet failed with return code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "Error for 'saHpiEventLogStateSet' is %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -644,7 +647,11 @@ set_table_tag (saHpiTable_context * ctx)
 
       if (rc != SA_OK)
 	{
-	  DEBUGMSGTL ((AGENT, "Call to 'saHpiResourceTagSet'; rc: %d\n", rc));
+	  snmp_log (LOG_ERR,
+		    "Calling saHpiResourceTagSet failed with return code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "Call to 'saHpiResourceTagSet'; rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -686,11 +693,11 @@ set_event_log_time (saHpiTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiEventLogTimeSet failed with return code: %d.\n",
-		    rc);
+		    "Call to saHpiEventLogTimeSet failed with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to 'saHpiEventLogTimeSet' failed with rc: %d\n",
-		       rc));
+		       "Call to 'saHpiEventLogTimeSet' failed with rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -726,9 +733,10 @@ set_clear_events (saHpiTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiEventLogClear failed with return code: %d.\n",
-		    rc);
-	  DEBUGMSGTL ((AGENT, "Call to 'saHpiEventLogClear' rc: %d\n", rc));
+		    "Call to saHpiEventLogClear failed with return code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "Call to 'saHpiEventLogClear' rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -764,9 +772,10 @@ set_table_param_control (saHpiTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiParamControl failed, return code: %d.\n",
-		    rc);
-	  DEBUGMSGTL ((AGENT, "Call to saHpiParmControl rc: %d\n", rc));
+		    "Call to saHpiParamControl failed, return code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "Call to saHpiParmControl rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -876,11 +885,11 @@ set_table_severity (saHpiTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiResourceSeverity failed with return code: %d.\n",
-		    rc);
+		    "Call to saHpiResourceSeverity failed with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiResourceSeveritySet failed with rc: %d\n",
-		       rc));
+		       "Call to saHpiResourceSeveritySet failed with rc: %s.\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -1292,8 +1301,8 @@ saHpiTable_set_reserve1 (netsnmp_request_group * rg)
 	    rc = SNMP_ERR_INCONSISTENTNAME;
 	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT)	// createAndWait(5)
 	    rc = SNMP_ERR_WRONGVALUE;
+
 	  //if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
-	  // IBM-KR: TODO, this ought to be SNMP_ERR_NOERROR. ?
 	  // rc = SNMP_ERR_INCONSISTENTNAME;
 
 	  if (rc)
@@ -1357,7 +1366,6 @@ saHpiTable_set_reserve2 (netsnmp_request_group * rg)
 
 	case COLUMN_SAHPICLEAREVENTS:
 	  // This can only be destroy(6)
-	  // IBM-KR: Check the event state diagram for this.
 	  if (*var->val.integer != SNMP_ROW_DESTROY)
 	    rc = SNMP_ERR_BADVALUE;
 	  break;
@@ -1489,7 +1497,7 @@ saHpiTable_set_action (netsnmp_request_group * rg)
 	    }
 	  else
 	    {
-	      // IBM-KR: TODO: Send event?
+	      // IBM-KR:  Send event?
 	    }
 	  break;
 

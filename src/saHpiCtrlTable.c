@@ -35,7 +35,6 @@ static netsnmp_table_array_callbacks cb;
 static oid saHpiCtrlTable_oid[] = { saHpiCtrlTable_TABLE_OID };
 static size_t saHpiCtrlTable_oid_len = OID_LENGTH (saHpiCtrlTable_oid);
 
-  //1, 3, 6, 1, 3, 90, 3, 3, 0 };
 static oid saHpiCtrlCount_oid[] = { hpiResources_OID, 3, 0 };
 
 
@@ -116,11 +115,11 @@ populate_control (SaHpiCtrlRecT * ctrl,
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiControlStateGet failed with return code: %d.\n",
-		    rc);
+		    "Call to saHpiControlStateGet failed with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiControlStateGet failed with rc: %d\n",
-		       rc));
+		       "Call to saHpiControlStateGet failed with rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -212,11 +211,11 @@ read_textline (saHpiCtrlTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiControlStateGet failed with return code: %d\n",
-		    rc);
+		    "Call to saHpiControlStateGet failed with return code: %s\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to 'saHpiControlStateGet' failed. return code: %d\n",
-		       rc));
+		       "Call to 'saHpiControlStateGet' failed. return code: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
       // Copy the data in the columns.
@@ -264,11 +263,11 @@ set_ctrl_state (saHpiCtrlTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiControlStateGet failed with return code: %d\n",
-		    rc);
+		    "Call to saHpiControlStateGet failed with return code: %s\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiControlStateGet failed with return code: %d\n",
-		       rc));
+		       "Call to saHpiControlStateGet failed with return code: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
       // To be compliant with the HPI.
@@ -327,11 +326,11 @@ set_ctrl_state (saHpiCtrlTable_context * ctx)
       if (SA_OK != rc)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiControlStateSet failed with return code: %d\n",
-		    rc);
+		    "Call to saHpiControlStateSet failed with return code: %s\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiControlStateSet failed with return code %d\n",
-		       rc));
+		       "Call to saHpiControlStateSet failed with return code %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
       return AGENT_ERR_NOERROR;
@@ -728,9 +727,6 @@ saHpiCtrlTable_create_row (netsnmp_index * hdr)
   if (!ctx)
     return NULL;
 
-  /*
-   * TODO: check indexes, if necessary.
-   */
   if (saHpiCtrlTable_extract_index (ctx, hdr))
     {
       free (ctx->index.oids);

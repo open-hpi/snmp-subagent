@@ -35,11 +35,8 @@ static netsnmp_table_array_callbacks cb;
 static oid saHpiSensorTable_oid[] = { saHpiSensorTable_TABLE_OID };
 static size_t saHpiSensorTable_oid_len = OID_LENGTH (saHpiSensorTable_oid);
 
-//  { 1, 3, 6, 1, 3, 90, 3, 5, 0 };
 static oid saHpiSensorCount_oid[] = { hpiResources_OID, 5, 0 };
 
-//  { 1, 3, 6, 1, 3, 90, 4, 1, 0 }; 
-//static oid      saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
 
 static u_long sensor_count = 0;
 
@@ -172,11 +169,11 @@ populate_sensor (SaHpiSensorRecT * sensor,
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorThresholdsGet fails with return code: %d.\n",
-		    rc);
+		    "Call to saHpiSensorThresholdsGet fails with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to  SensorThresholdGet fails with return code: %d.\n",
-		       rc));
+		       "Call to  SensorThresholdGet fails with return code: %s.\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -187,11 +184,11 @@ populate_sensor (SaHpiSensorRecT * sensor,
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorEventEnablesGet fails with return code: %d.\n",
-		    rc);
+		    "Call to saHpiSensorEventEnablesGet fails with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to  saHpiSensorEventEnablesGet fails with return code: %d.\n",
-		       rc));
+		       "Call to  saHpiSensorEventEnablesGet fails with return code: %s.\n",
+		       get_error_string (rc)));
 	  // We continue on working. No need to bail on that one - will just use 'undefined(0)' values.
 	}
 
@@ -698,11 +695,11 @@ set_sensor (saHpiSensorTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorThresholdSet fails with return code: %d.\n",
-		    rc);
+		    "Call to saHpiSensorThresholdSet fails with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiSensorThresholdsSet fails with return code: %d\n",
-		       rc));
+		       "Call to saHpiSensorThresholdsSet fails with return code: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -717,11 +714,11 @@ set_sensor (saHpiSensorTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to  SensorThresholdGet fails with return code: %d\n",
-		    rc);
+		    "Call to  SensorThresholdGet fails with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to  SensorThresholdGet fails with return code: %d\n",
-		       rc));
+		       "Call to  SensorThresholdGet fails with return code: %s.\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
       // Update the latest data.
@@ -767,11 +764,11 @@ set_sensor_event (saHpiSensorTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiSensorEventEnablesSet failed wit return code %d\n",
-		    rc);
+		    "Call to saHpiSensorEventEnablesSet failed wit return code %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiSensorEventEnablesSet failed wit return code %d\n",
-		       rc));
+		       "Call to saHpiSensorEventEnablesSet failed wit return code %s.\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 

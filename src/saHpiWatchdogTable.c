@@ -127,11 +127,11 @@ populate_watchdog (SaHpiWatchdogRecT * watchdog,
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiWatchdogTimerGet failed with return code: %d.\n",
-		    rc);
+		    "Call to saHpiWatchdogTimerGet failed with return code: %s.\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiWatchdogTimerGet failed with rc: %d\n",
-		       rc));
+		       "Call to saHpiWatchdogTimerGet failed with rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -284,9 +284,12 @@ set_timer_reset (saHpiWatchdogTable_context * ctx)
 
 	  if (rc != SA_OK)
 	    {
+	      snmp_log (LOG_ERR,
+			"Call to saHpiWatchdogTimerReset failed with rc: %s\n",
+			get_error_string (rc));
 	      DEBUGMSGTL ((AGENT,
-			   "Call to saHpiWatchdogTimerReset failed with rc: %d\n",
-			   rc));
+			   "Call to saHpiWatchdogTimerReset failed with rc: %s\n",
+			   get_error_string (rc)));
 	      return AGENT_ERR_OPERATION;
 	    }
 	  // Get the new changes.
@@ -298,9 +301,12 @@ set_timer_reset (saHpiWatchdogTable_context * ctx)
 				      ctx->saHpiWatchdogNum, &wdog);
 	  if (rc != SA_OK)
 	    {
+	      snmp_log (LOG_ERR,
+			"Call to saHpiWatchdogTimerGet failed with rc: %s.\n",
+			get_error_string (rc));
 	      DEBUGMSGTL ((AGENT,
-			   "Call to saHpiWatchdogTimerGet failed with rc: %d\n",
-			   rc));
+			   "Call to saHpiWatchdogTimerGet failed with rc: %s.\n",
+			   get_error_string (rc)));
 	      return AGENT_ERR_OPERATION;
 	    }
 	  DEBUGMSGTL ((AGENT, "log: %d, Run: %d\n", wdog.Log, wdog.Running));
@@ -366,11 +372,11 @@ set_watchdog (saHpiWatchdogTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiWatchdogTimerSet failed with return code: %d\n",
-		    rc);
+		    "Call to saHpiWatchdogTimerSet failed with return code: %s\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call saHpiWatchdogTimerSet failed with return code: %d\n",
-		       rc));
+		       "Call saHpiWatchdogTimerSet failed with return code: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -384,10 +390,11 @@ set_watchdog (saHpiWatchdogTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_ERR,
-		    "Call to saHpiWatchdogTimerGet failed with rc: %d\n", rc);
+		    "Call to saHpiWatchdogTimerGet failed with rc: %s\n",
+		    get_error_string (rc));
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiWatchdogTimerGet failed with rc: %d\n",
-		       rc));
+		       "Call to saHpiWatchdogTimerGet failed with rc: %s\n",
+		       get_error_string (rc)));
 	  return AGENT_ERR_OPERATION;
 	}
 
@@ -426,7 +433,6 @@ update_watchdog_row (SaHpiDomainIdT domain_id,
 
   if (ctx)
     {
-
       ctx->saHpiWatchdogTimerUse = wdog->WatchdogUse + 1;
       ctx->saHpiWatchdogTimerAction = wdog->WatchdogAction + 1;
       ctx->saHpiWatchdogPretimerInterrupt = wdog->WatchdogPreTimerAction + 1;

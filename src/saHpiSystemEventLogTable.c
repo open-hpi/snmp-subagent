@@ -34,21 +34,18 @@ static oid saHpiSystemEventLogTable_oid[] =
 static size_t saHpiSystemEventLogTable_oid_len =
 OID_LENGTH (saHpiSystemEventLogTable_oid);
 
-static oid saHpiSystemEventLogEntries_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 1, 0 };
-static oid saHpiSystemEventLogSize_oid[] = { 1, 3, 6, 1, 3, 90, 2, 2, 2, 0 };
+static oid saHpiSystemEventLogEntries_oid[] = { systemEvents_OID, 1, 0 };
+static oid saHpiSystemEventLogSize_oid[] = { systemEvents_OID, 2, 0 };
 static oid saHpiSystemEventLogUpdateTimestamp_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 3, 0 };
-static oid saHpiSystemEventLogCurrentTime_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 4, 0 };
-static oid saHpiSystemEventLogEnabled_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 5, 0 };
-static oid saHpiSystemEventLogOverflowFlag_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 6, 0 };
+  { systemEvents_OID, 3, 0 };
+static oid saHpiSystemEventLogCurrentTime_oid[] = { systemEvents_OID, 4, 0 };
+static oid saHpiSystemEventLogEnabled_oid[] = { systemEvents_OID, 5, 0 };
+static oid saHpiSystemEventLogOverflowFlag_oid[] = { systemEvents_OID, 6, 0 };
 static oid saHpiSystemEventLogOverflowAction_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 7, 0 };
+  { systemEvents_OID, 7, 0 };
 static oid saHpiSystemEventLogDeleteEntrySupported_oid[] =
-  { 1, 3, 6, 1, 3, 90, 2, 2, 8, 0 };
+  { systemEvents_OID, 8, 0 };
+
 static u_long event_log_entries = 0;
 static u_long event_log_size = 0;
 static integer64 event_log_update_timestamp;
@@ -107,8 +104,8 @@ populate_sel (SaHpiRptEntryT * rpt_entry)
       if (err != SA_OK)
 	{
 	  DEBUGMSGTL ((AGENT,
-		       "Call to saHpiEventLogInfoGet failed with rc: %d.\n",
-		       err));
+		       "Call to saHpiEventLogInfoGet failed with rc: %s.\n",
+		       get_error_string (err)));
 	  return AGENT_ERR_OPERATION;
 	}
       //event_log_entries = info.Entries;
@@ -468,7 +465,6 @@ saHpiSystemEventLogTable_modify_context (SaHpiSelEntryT * sel,
 
 	      // Notify the HotSwap table about the event state
 	      /*
-	         IBM-KR: TODO should I? This is "historical" SEL entry 
 	         update_hotswap_event(rpt_entry->DomainId,
 	         rpt_entry->ResourceId,
 	         &hotswap);

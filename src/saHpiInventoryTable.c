@@ -33,12 +33,9 @@ static netsnmp_table_array_callbacks cb;
 static oid saHpiInventoryTable_oid[] = { saHpiInventoryTable_TABLE_OID };
 static size_t saHpiInventoryTable_oid_len =
 OID_LENGTH (saHpiInventoryTable_oid);
- // { 1, 3, 6, 1, 3, 90, 3, 7, 0 };
 static oid saHpiInventoryCount_oid[] = { hpiResources_OID, 7, 0 };
 
-
 static u_long inventory_count = 0;
-
 
 static int
 delete_inventory_row (SaHpiDomainIdT, SaHpiResourceIdT, SaHpiEirIdT, long);
@@ -136,9 +133,10 @@ populate_inventory (SaHpiInventoryRecT * inventory,
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_WARNING,
-		    "Call to saHpiEntityInventoryDataRead returns error code: %d.\n",
-		    rc);
-	  DEBUGMSGTL ((AGENT, "saHpiEntityInventoryDataRead rc is %d\n", rc));
+		    "Call to saHpiEntityInventoryDataRead returns error code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "saHpiEntityInventoryDataRead rc is %s\n",
+		       get_error_string (rc)));
 	  free (data);
 	  data = NULL;
 	  return AGENT_ERR_OPERATION;
@@ -735,9 +733,10 @@ set_inventory (saHpiInventoryTable_context * ctx)
       if (rc != SA_OK)
 	{
 	  snmp_log (LOG_WARNING,
-		    "Call to saHpiEntityInventoryDataRead returns error code: %d.\n",
-		    rc);
-	  DEBUGMSGTL ((AGENT, "SaHpiEntityInventoryDataRead rc is %d\n", rc));
+		    "Call to saHpiEntityInventoryDataRead returns error code: %s.\n",
+		    get_error_string (rc));
+	  DEBUGMSGTL ((AGENT, "SaHpiEntityInventoryDataRead rc is %s\n",
+		       get_error_string (rc)));
 	  free (data);
 	  data = NULL;
 	  return AGENT_ERR_OPERATION;
@@ -896,63 +895,6 @@ set_inventory (saHpiInventoryTable_context * ctx)
       return AGENT_ERR_NOERROR;
     }
   return AGENT_ERR_NULL_DATA;
-}
-
-/************************************************************
- * keep binary tree to find context by name
- */
-static int saHpiInventoryTable_cmp (const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-
-static int
-saHpiInventoryTable_cmp (const void *lhs, const void *rhs)
-{
-  saHpiInventoryTable_context *context_l =
-    (saHpiInventoryTable_context *) lhs;
-  saHpiInventoryTable_context *context_r =
-    (saHpiInventoryTable_context *) rhs;
-
-  int rc;
-  DEBUGMSGTL ((AGENT, "saHpiInventoryTable_cmp: Called\n"));
-  DEBUGMSGTL ((AGENT, "Checking: %d.%d ? %d.%d\n",
-	       context_l->domain_id, context_l->resource_id,
-	       context_r->domain_id, context_r->resource_id));
-
-  if (context_l->domain_id < context_r->domain_id)
-    return -1;
-  rc = (context_l->domain_id == context_r->domain_id) ? 0 : 1;
-
-  if (rc != 0)
-    return 1;
-
-  if (context_l->resource_id < context_r->resource_id)
-    return -1;
-
-  rc = (context_l->resource_id == context_r->resource_id) ? 0 : 1;
-
-  if (rc != 0)
-    return 1;
-
-  if (context_l->saHpiInventoryEirId < context_r->saHpiInventoryEirId)
-    return -1;
-
-  rc =
-    (context_l->saHpiInventoryEirId ==
-     context_r->saHpiInventoryEirId) ? 0 : 1;
-
-  if (rc != 0)
-    return 1;
-
-  if (context_l->saHpiInventoryIndex < context_r->saHpiInventoryIndex)
-    return -1;
-
-  return (context_l->saHpiInventoryIndex ==
-	  context_r->saHpiInventoryIndex) ? 0 : 1;
-
 }
 
 
@@ -1750,11 +1692,6 @@ initialize_table_saHpiInventoryTable (void)
 					 "table_container");
 
 
-  netsnmp_container_add_index (cb.container,
-			       netsnmp_container_find
-			       ("saHpiInventoryTable_secondary:"
-				"saHpiInventoryTable:" "table_container"));
-  cb.container->next->compare = saHpiInventoryTable_cmp;
 
 
   //cb.can_set = 1;

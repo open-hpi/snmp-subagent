@@ -38,19 +38,27 @@ static oid saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
 static size_t saHpiEventTable_oid_len = OID_LENGTH (saHpiEventTable_oid);
 
 
-
-// IBM-KR: TODO, make sure the OIDs are right.
+/*
+ * OIDs for our TRAPS
+ */
 static oid saHpiSensorNotification_oid[] = { hpiNotifications_OID, 1, 0 };
 
-static oid saHpiHotSwapNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 2, 0 };
+static oid saHpiHotSwapNotification_oid[] = { hpiNotifications_OID, 2, 0 };
 
-static oid saHpiWatchdogNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 3, 0 };
+static oid saHpiWatchdogNotification_oid[] = { hpiNotifications_OID, 3, 0 };
 
-static oid saHpiUserNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 5, 0 };
+static oid saHpiOEMNotification_oid[] = { hpiNotifications_OID, 4, 0 };
 
-static oid saHpiOEMNotification_oid[] = { 1, 3, 6, 1, 3, 90, 4, 4, 0 };
+static oid saHpiUserNotification_oid[] = { hpiNotifications_OID, 5, 0 };
 
+/*
+ * The length of all of the TRAPS are the same. 
+ */
 static size_t TRAPS_OID_LENGTH = OID_LENGTH (saHpiSensorNotification_oid);
+
+/* 
+ * Count and index values for our helper table.
+ */
 #define SENSOR_NOTIF_COUNT 8
 #define NOTIF_EVENTINDEX 0
 #define NOTIF_SEVERITY 1
@@ -61,6 +69,12 @@ static size_t TRAPS_OID_LENGTH = OID_LENGTH (saHpiSensorNotification_oid);
 #define SENSOR_NOTIF_SENSORTRIGGERREADINGRAW 6
 #define SENSOR_NOTIF_SENSOROEM 7
 
+/*
+ * Helper table.
+ * 
+ * This is were our values and length of the values
+ * will be updated when sending a trap.
+ */
 static trap_vars saHpiSensorNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
@@ -72,9 +86,16 @@ static trap_vars saHpiSensorNotification[] = {
   {COLUMN_SAHPIEVENTSENSOROEM, ASN_UNSIGNED, NULL, 0}
 };
 
+/*
+ * Count and index values for our helper table.
+ */
 #define HOTSWAP_NOTIF_COUNT 4
 #define HOTSWAP_STATE 2
 #define HOTSWAP_PREVIOUS_STATE 3
+
+/*
+ * Helper table.
+ */
 static trap_vars saHpiHotSwapNotification[] = {
   {COLUMN_SAHPIEVENTINDEX, ASN_UNSIGNED, NULL, 0},
   {COLUMN_SAHPIEVENTSEVERITY, ASN_INTEGER, NULL, 0},
@@ -82,7 +103,7 @@ static trap_vars saHpiHotSwapNotification[] = {
   {COLUMN_SAHPIEVENTPREVIOUSHOTSWAPSTATE, ASN_INTEGER, NULL, 0}
 };
 
-// IBM-KR: TODO add an OID to the HotSwap row?
+// IBM-KR:  add the OID of the HotSwap row?
 
 #define WATCHDOG_NOTIF_COUNT 6
 #define WATCHDOG_NOTIF_NUM 2
@@ -98,7 +119,7 @@ static trap_vars saHpiWatchdogNotification[] = {
   {COLUMN_SAHPIEVENTWATCHDOGUSE, ASN_INTEGER, NULL, 0}
 };
 
-// IBM-KR: TODO add an OID to the Watchdog row? 
+// IBM-KR:  add the OID of the Watchdog row? 
 
 #define OEM_NOTIF_COUNT 4
 #define OEM_NOTIF_MANUF_ID 2
@@ -121,7 +142,7 @@ static trap_vars saHpiUserNotification[] = {
 
 
 
-static oid saHpiEventCount_oid[] = { 1, 3, 6, 1, 3, 90, 2, 1, 1, 0 };
+static oid saHpiEventCount_oid[] = { events_OID, 1, 0 };
 
 static u_long event_count = 0;
 static SaHpiTimeoutT timeout = SAHPI_TIMEOUT_IMMEDIATE;
@@ -187,6 +208,14 @@ populate_event ()
 
   while (eventflag == AGENT_TRUE)
     {
+      // We clean it with spaces b/c in case its an SAHPI_ET_USER - which
+      // data-payload we just straight copy (32octets) and set the the
+      // the length to 32. And in case its an user-readable ASCIIZ string
+      // we just ignored the 0x00 delimiter (since we set the length to be 32).
+      // This will make the 32bit string padded with spaces and look readeable to
+      // the user. We figure that if its not SAHPI_ET_USER, it will use the 
+      // rest of the 32 octets with its own stuff.
+
       memset (&event, 0x20, sizeof (SaHpiEventT));
       err = saHpiEventGet (session_id, timeout, &event, &rdr, &rpt);
       if (err == SA_OK)
@@ -239,13 +268,13 @@ populate_event ()
 			      column, 2,
 			      &rpt_index,
 			      resource_oid, MAX_OID_LEN, &resource_oid_len);
-
-	      DEBUGMSGTL ((AGENT, "Our OIDS in Event are:\n"));
-	      DEBUGMSGOID ((AGENT, domain_oid, domain_oid_len));
-	      DEBUGMSGOID ((AGENT, resource_oid, resource_oid_len));
-	      DEBUGMSGTL ((AGENT, "Values are: %d.%d.%d\n",
-			   rpt.DomainId, rpt.ResourceId, rpt.EntryId));
-
+	      /*
+	         DEBUGMSGTL ((AGENT, "Our OIDS in Event are:\n"));
+	         DEBUGMSGOID ((AGENT, domain_oid, domain_oid_len));
+	         DEBUGMSGOID ((AGENT, resource_oid, resource_oid_len));
+	         DEBUGMSGTL ((AGENT, "Values are: %d.%d.%d\n",
+	         rpt.DomainId, rpt.ResourceId, rpt.EntryId));
+	       */
 	      if (user_oem_event_type == AGENT_TRUE)
 		{
 		  domain_oid_len = 0;
@@ -319,7 +348,8 @@ populate_event ()
 	{
 	  DEBUGMSGTL ((AGENT, "%s (rc: %d)\n", (err == SA_ERR_HPI_TIMEOUT) ?
 		       "No more EVENT  entries. " :
-		       "Call to saHpiEventGet failed.", err));
+		       "Call to saHpiEventGet failed.",
+		       get_error_string (err)));
 	  eventflag = AGENT_FALSE;
 	}
 
@@ -1324,10 +1354,8 @@ saHpiEventTable_set_reserve2 (netsnmp_request_group * rg)
 	  if (*var->val.integer == SNMP_ROW_CREATEANDWAIT)	// createAndWait(5)
 	    rc = SNMP_ERR_WRONGVALUE;
 
-	  // IBM-KR: TODO. This 'destroy' should work on _ANY_ row (even
-	  // non-existent ones. 
-
-
+	  // This 'destroy' should work on _ANY_ row (even
+	  // non-existent ones.  Refer to SNMPv2-TC RFC
 	  //if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
 	  //  rc = SNMP_ERR_INCONSISTENTNAME;
 
@@ -1368,11 +1396,13 @@ saHpiEventTable_set_action (netsnmp_request_group * rg)
 	{
 	  /*
 	     No need for that.
+
 	     if (row_ctx->hash != 0)
 	     delete_event_row(row_ctx->domain_id,
 	     row_ctx->resource_id,
 	     row_ctx->saHpiEventIndex);
 	   */
+
 	  rg->row_deleted = 1;
 	}
       else			// The rest of SNMP_ROW operations (4,5)
