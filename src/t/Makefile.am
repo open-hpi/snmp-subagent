@@ -6,6 +6,6 @@ TESTS = \
 	t0.sh
 
 clean:
-        rm -f *.log
-        rm -f *.result
+	rm -f *.log
+	rm -f *.result
 
