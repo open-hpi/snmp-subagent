@@ -2668,6 +2668,22 @@ saHpiHotSwapRowPointer OBJECT-TYPE
 -- *******************************************************************************/
 --
 
+saHpiEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	saHpiEventEntryCountTotal represents the total of types currently 
+	in the system.  saHpiDomainEventCount represents the subset of 
+	events that are Domain events.  The same relationship exists for 
+	ResourceEvent,  SensorEvent,  SensorEnableChangeEvent, 
+	HotSwapEvent,  WatchdogEvent,  HpiSwEvent,  OemEvent,  UserEvent."
+        ::= {events 1}
+
 
 saHpiEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -2680,30 +2696,31 @@ saHpiEventEntryCount OBJECT-TYPE
 	that are Domain events.  The same relationship exists for 
 	ResourceEvent,  SensorEvent,  SensorEnableChangeEvent, 
 	HotSwapEvent,  WatchdogEvent,  HpiSwEvent,  OemEvent,  UserEvent."
-        ::= {events 1}
+        ::= {events 2}
 
 saHpiEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event Master table. "
-        ::= {events 2}
+        ::= {events 3}
 
 saHpiEventEntry OBJECT-TYPE
         SYNTAX          SaHpiEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION "
-   This table presents the list of all events which are present in the
-HPI system. The implementation decides how to manipulate the events
-as they reach a large number. This table is used as a master event
-table which an index that points to the specific sub-table which has
-more details on the event.
+        DESCRIPTION 
+	"
+	This table presents the list of all events which are present in the
+	HPI system. The implementation decides how to manipulate the events
+	as they reach a large number. This table is used as a master event
+	table which an index that points to the specific sub-table which has
+	more details on the event.
 
-Each time a new event is surfaced in the HPI system this table 
-increases by a new row and its respective sub-event table too 
-(saHpiResourceEventTable, saHpiOEMEventTable, etc). Futhermore
-based on the type of event, an notification is generated as well.
+	Each time a new event is surfaced in the HPI system this table 
+	increases by a new row and its respective sub-event table too 
+	(saHpiResourceEventTable, saHpiOEMEventTable, etc). Futhermore
+	based on the type of event, an notification is generated as well.
 	"
         INDEX   { 
                 saHpiEventRowPointer
@@ -2798,6 +2815,19 @@ saHpiEventType          OBJECT-TYPE
 -- **
 -- *********************************
 
+saHpiResourceEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This columnar node represents the subset of events that
+	are Resource Events."
+        ::= {events 4}
+
 saHpiResourceEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
@@ -2805,14 +2835,14 @@ saHpiResourceEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that
 	are Resource Events."
-        ::= {events 3}
+        ::= {events 5}
 
 saHpiResourceEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiResourceEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 4}
+        ::= {events 6}
 
 saHpiResourceEventEntry OBJECT-TYPE
         SYNTAX          SaHpiResourceEventEntry
@@ -2873,6 +2903,19 @@ SAI-HPI-B spec."
 -- **
 -- *********************************
 
+saHpiDomainEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Domain events."
+        ::= {events 7}
+
 saHpiDomainEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
@@ -2880,14 +2923,14 @@ saHpiDomainEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This Columnar node represents the subset of events 
 	that are Domain events."
-        ::= {events 5}
+        ::= {events 8}
 
 saHpiDomainEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiDomainEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 6}
+        ::= {events 9}
 
 saHpiDomainEventEntry OBJECT-TYPE
         SYNTAX          SaHpiDomainEventEntry
@@ -2950,6 +2993,18 @@ saHpiDomainEventType OBJECT-TYPE
 -- **     Sensor  Events
 -- **
 -- *********************************
+saHpiSensorEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Sensor events."
+        ::= {events 10}
 
 saHpiSensorEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -2958,14 +3013,14 @@ saHpiSensorEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are Sensor Events."
-        ::= {events 7}
+        ::= {events 11}
 
 saHpiSensorEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 8}
+        ::= {events 12}
 
 saHpiSensorEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorEventEntry
@@ -3167,6 +3222,18 @@ saHpiSensorEventSpecific OBJECT-TYPE
 -- **     Sensor Enable Change Events
 -- **
 -- *********************************
+saHpiSensorEnableChangeEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Sensor Enable ChangeEvents."
+        ::= {events 13}
 
 saHpiSensorEnableChangeEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3175,14 +3242,14 @@ saHpiSensorEnableChangeEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are Sensor Enable ChangeEvents."
-        ::= {events 9}
+        ::= {events 14}
 
 saHpiSensorEnableChangeEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorEnableChangeEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 10}
+        ::= {events 15}
 
 saHpiSensorEnableChangeEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSensorEnableChangeEventEntry
@@ -3322,6 +3389,18 @@ saHpiSensorEnableChangeEventState OBJECT-TYPE
 -- **     HotSwap Events
 -- **
 -- *********************************
+saHpiHotSwapEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are HotSwap Events."
+        ::= {events 16}
 
 saHpiHotSwapEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3330,14 +3409,14 @@ saHpiHotSwapEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are HotSwap Events."
-        ::= {events 11}
+        ::= {events 17}
 
 saHpiHotSwapEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiHotSwapEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 12}
+        ::= {events 18}
 
 saHpiHotSwapEventEntry OBJECT-TYPE
         SYNTAX          SaHpiHotSwapEventEntry
@@ -3394,6 +3473,18 @@ saHpiHotSwapEventPreviousState OBJECT-TYPE
 -- **     Watchdog Events
 -- **
 -- *********************************
+saHpiWatchdogEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Watchdog Events."
+        ::= {events 19}
 
 saHpiWatchdogEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3402,14 +3493,14 @@ saHpiWatchdogEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are Watchdog Events."
-        ::= {events 13}
+        ::= {events 20}
 
 saHpiWatchdogEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiWatchdogEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 14}
+        ::= {events 21}
 
 saHpiWatchdogEventEntry OBJECT-TYPE
         SYNTAX          SaHpiWatchdogEventEntry
@@ -3494,6 +3585,19 @@ saHpiWatchdogEventUse OBJECT-TYPE
 -- **     Software Events
 -- **
 -- *********************************
+saHpiSoftwareEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are Software Events."
+        ::= {events 22}
+
 
 saHpiSoftwareEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3502,14 +3606,14 @@ saHpiSoftwareEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are Software Events."
-        ::= {events 15}
+        ::= {events 23}
 
 saHpiSoftwareEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSoftwareEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 16}
+        ::= {events 24}
 
 saHpiSoftwareEventEntry OBJECT-TYPE
         SYNTAX          SaHpiSoftwareEventEntry
@@ -3617,6 +3721,18 @@ saHpiSoftwareEventText OBJECT-TYPE
 -- **     OEM Events
 -- **
 -- *********************************
+saHpiOEMEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are OEM Events."
+        ::= {events 25}
 
 saHpiOEMEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3625,14 +3741,14 @@ saHpiOEMEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are OEM Events."
-        ::= {events 17}
+        ::= {events 26}
 
 saHpiOEMEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiOEMEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 18}
+        ::= {events 27}
 
 saHpiOEMEventEntry OBJECT-TYPE
         SYNTAX          SaHpiOEMEventEntry
@@ -3709,6 +3825,18 @@ saHpiOEMEventText       OBJECT-TYPE
 -- **     User Events
 -- **
 -- *********************************
+saHpiUserEventEntryCountTotal OBJECT-TYPE
+        SYNTAX          Counter32
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "The number of events registered in this table 
+	over the lifetime of the table. If the underlying management 
+	system is restarted this count is reset.  Use this node to 
+	determine table activity.
+
+	This Columnar node represents the subset of events 
+	that are User Events."
+        ::= {events 28}
 
 saHpiUserEventEntryCount OBJECT-TYPE
         SYNTAX          Counter32
@@ -3717,14 +3845,14 @@ saHpiUserEventEntryCount OBJECT-TYPE
         DESCRIPTION     
 	"This columnar node represents the subset of events that 
 	are User Events."
-        ::= {events 19}
+        ::= {events 29}
 
 saHpiUserEventTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiUserEventEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Event table. "
-        ::= {events 20}
+        ::= {events 30}
 
 saHpiUserEventEntry OBJECT-TYPE
         SYNTAX          SaHpiUserEventEntry
@@ -3834,14 +3962,14 @@ saHpiAnnouncementEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The number of announcements present on this system."
-        ::= { events 21 }
+        ::= { events 31 }
 
 saHpiAnnouncementTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiAnnouncementEntry
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION     "Table of Announcements."
-        ::= { events 22 }
+        ::= { events 32 }
 
 saHpiAnnouncementEntry OBJECT-TYPE
         SYNTAX          SaHpiAnnouncementEntry
