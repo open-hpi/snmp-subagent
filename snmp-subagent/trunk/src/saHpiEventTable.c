@@ -23,8 +23,9 @@
 
 #include <net-snmp/library/snmp_assert.h>
 #include <saHpiTable.h>
-#include "saHpiEventTable.h"
+#include <saHpiEventTable.h>
 #include <saHpiSystemEventLogTable.h>
+#include <saHpiHotSwapTable.h>
 static netsnmp_handler_registration *my_handler = NULL;
 static netsnmp_table_array_callbacks cb;
 
@@ -327,7 +328,15 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
       // CR: #022
       ctx->saHpiEventHotSwapState = hotswap.HotSwapState + 1;
       ctx->saHpiEventPreviousHotSwapState = hotswap.PreviousHotSwapState +1;
-   
+      // Notify the HotSwap table about the event state
+      // IBM-KR: TODO
+      // The table might not exist yet (hasn't been created). What to do?
+      // Perhaps we should do the passes 
+      //  - rpt, rdr
+      // individually, and then do the events? using a poll mechanism instead?
+      update_hotswap_event(rpt_entry->DomainId,
+			   rpt_entry->ResourceId,
+			   &hotswap);
     }
 
     if (event_entry->EventType == SAHPI_ET_WATCHDOG) {

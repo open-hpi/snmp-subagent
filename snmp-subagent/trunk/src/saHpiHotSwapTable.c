@@ -561,6 +561,34 @@ delete_hotswap_row(SaHpiDomainIdT domain_id,
   return AGENT_ERR_NOT_FOUND;
 }
 
+int
+update_hotswap_event(SaHpiDomainIdT domain_id,
+		     SaHpiResourceIdT resource_id,
+		     SaHpiHotSwapEventT *event) {
+
+  saHpiHotSwapTable_context *ctx;
+  oid hotswap_oid[HOTSWAP_INDEX_NR];
+  netsnmp_index	hotswap_index;
+
+  hotswap_oid[0]=domain_id;
+  hotswap_oid[1]=resource_id;	
+
+  // Possible more indexs?
+  hotswap_index.oids = (oid *)&hotswap_oid;
+  hotswap_index.len = HOTSWAP_INDEX_NR;
+
+  ctx = CONTAINER_FIND(cb.container, &hotswap_index);
+
+  if (ctx) {
+
+    ctx->saHpiHotSwapState = event->HotSwapState+1;
+    ctx->saHpiHotSwapPreviousState = event->PreviousHotSwapState+1;
+    return AGENT_ERR_NOERROR;
+  }
+
+  return AGENT_ERR_NOT_FOUND;
+}
+
 /************************************************************
  * the *_row_copy routine
  */
