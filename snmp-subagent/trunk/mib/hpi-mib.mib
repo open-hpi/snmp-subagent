@@ -1335,7 +1335,7 @@ saHpiDomainInfoEntry OBJECT-TYPE
 
 SaHpiDomainInfoEntry ::= SEQUENCE {
 
-	saHpiDomainId				SaHpiDomainId,
+		saHpiDomainId						SaHpiDomainId,
         saHpiDomainCapabilities         	BITS,
         saHpiDomainIsPeer                	TruthValue,
                                                                       
@@ -1344,22 +1344,22 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
         saHpiDomainTag                  	SaHpiText,
 
         saHpiDomainReferenceUpdateCount         Unsigned32,
-	saHpiDomainReferenceUpdateTimestamp     SaHpiTime,
+		saHpiDomainReferenceUpdateTimestamp     SaHpiTime,
                                       
         saHpiDomainResourcePresenceUpdateCount             Unsigned32,
-	saHpiDomainResourcePresenceUpdateTimestamp         SaHpiTime,
+		saHpiDomainResourcePresenceUpdateTimestamp         SaHpiTime,
                                                       
         saHpiDomainAlarmUpdateCount             Unsigned32,
-	saHpiDomainAlarmUpdateTimestamp         SaHpiTime,
+		saHpiDomainAlarmUpdateTimestamp         SaHpiTime,
 
         saHpiDomainActiveAlarms               	Unsigned32,
         saHpiDomainCriticalAlarms            	Unsigned32,
         saHpiDomainMajorAlarms                	Unsigned32,
         saHpiDomainMinorAlarms                	Unsigned32,
-        saHpiDomainAlarmUserLimit          	Unsigned32,
+        saHpiDomainAlarmUserLimit          		Unsigned32,
         saHpiDomainAlarmOverflow                TruthValue,
 
-        saHpiDomainGuid                 	SaHpiGuid
+        saHpiDomainGuid                 		SaHpiGuid
         }
 
 
