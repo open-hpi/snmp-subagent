@@ -44,10 +44,17 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
+/*************************************************************
+ * oid declarations scalars
+ */
+static u_long domain_info_entry_count = 0;
+
 oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
 size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
-
+/*
+ *  int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
+ */
 int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid) 
 {
 	SaErrorT rv;
@@ -56,6 +63,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	oid domain_info_oid[DOMAIN_INFO_INDEX_NR];
 	netsnmp_index domain_info_index;
 	saHpiDomainInfoTable_context *domain_info_context;
+	netsnmp_variable_list *trap_var;
 
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
@@ -69,9 +77,11 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	/* See if it exists. */
 	domain_info_context = NULL;
 	domain_info_context = CONTAINER_FIND (cb.container, &domain_info_index);
+		
 	if (!domain_info_context) { 
 		// New entry. Add it
-		domain_info_context = saHpiDomainInfoTable_create_row ( &domain_info_index);
+		domain_info_context = 
+			saHpiDomainInfoTable_create_row ( &domain_info_index);
 	}
 	if (!domain_info_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a RPT row!");
@@ -82,14 +92,16 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
     domain_info_context->saHpiDomainId;
 
     /** BITS = ASN_OCTET_STR */
-    memset(saHpiDomainCapabilities, 0, sizeof(saHpiDomainCapabilities));
+    memset(	domain_info_context->saHpiDomainCapabilities, 
+    		0, 
+    		sizeof(domain_info_context->saHpiDomainCapabilities));
     if(domain_info.DomainCapabilities == (SaHpiDomainCapabilitiesT)0X00000001) {
-    	memcpy(domain_info_context->saHpiDomainCapabilities,
-    		"SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY",
-    		sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");
+    	memcpy(	domain_info_context->saHpiDomainCapabilities,
+    			"SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY",
+    			sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY") );
      	domain_info_context->saHpiDomainCapabilities_len = 
     		sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");   		
-    else {
+    } else {
     	domain_info_context->saHpiDomainCapabilities_len = 0;
     }
 
@@ -103,14 +115,14 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 
    	/** SaHpiTextLanguage = ASN_INTEGER */
     domain_info_context->saHpiDomainTagTextLanguage =
-    	domain_infoDomainTag.Language;
+    	domain_info.DomainTag.Language;
 
     /** SaHpiText = ASN_OCTET_STR */
 	memcpy(domain_info_context->saHpiDomainTag, 
-		domain_info.DomainInfo.Data,
-		domain_info.DomainInfo.DataLength);
+		domain_info.DomainTag.Data,
+		domain_info.DomainTag.DataLength);
     domain_info_context->saHpiDomainTag_len =
-    	domain_info.DomainInfo.DataLength;
+    	domain_info.DomainTag.DataLength;
 
     /** UNSIGNED32 = ASN_UNSIGNED */
     domain_info_context->saHpiDomainReferenceUpdateCount =
@@ -130,7 +142,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 
     /** UNSIGNED32 = ASN_UNSIGNED */
     domain_info_context->saHpiDomainAlarmUpdateCount =
-    	domain_info.DatUpdateCount.
+    	domain_info.DatUpdateCount;
 
     /** SaHpiTime = ASN_COUNTER64 */
     domain_info_context->saHpiDomainAlarmUpdateTimestamp =
@@ -158,7 +170,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 
     /** TruthValue = ASN_INTEGER */
     domain_info_context->saHpiDomainAlarmOverflow =
-    	(domain_infoDatOverflow == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+    	(domain_info.DatOverflow == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
     /** SaHpiGuid = ASN_OCTET_STR */
     /* typedef SaHpiUint8T    SaHpiGuidT[16]; */
@@ -167,38 +179,68 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 		16);
     domain_info_context->saHpiDomainGuid_len = 16;
 	
-	CONTAINER_INSERT (cb.container, rpt_context);
+	CONTAINER_INSERT (cb.container, domain_info_context);
 	
-Add scalars here?	
-					  // Add two more entries: entryCount, and entryUpdate
-				  snmp_varlist_add_variable (&trap_var,
-							     saHpiEntryCount_oid,
-							     OID_LENGTH
-							     (saHpiEntryCount_oid),
-							     ASN_COUNTER,
-							     (u_char *) &
-							     entry_count,
-							     sizeof
-							     (entry_count));
-				  snmp_varlist_add_variable (&trap_var,
-							     saHpiEntryUpdateCount_oid,
-							     OID_LENGTH
-							     (saHpiEntryUpdateCount_oid),
-							     ASN_UNSIGNED,
-							     (u_char *) &
-							     update_entry_count,
-							     sizeof
-							     (update_entry_count));
-				  DEBUGMSGTL ((AGENT,
-					       "Sending the TRAP message\n"));
-				  send_v2trap (trap_var);
-				  snmp_free_varbind (trap_var);
-Add scalars here?	
-		
+	domain_info_entry_count = CONTAINER_SIZE (cb.container);
+	
 	DEBUGMSGTL ((AGENT, 
-		"WARNING: populate_saHpiDomainInfoTable: not implemented!"));
+		"WARNING: populate_saHpiDomainInfoTable SCALARS: not implemented!"));
+		
+		return rv;
 }
 
+
+/*
+ * int handle_saHpiDomainInfoEntryCount()
+ */
+int
+handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(
+            		requests->requestvb, 
+            		ASN_COUNTER,
+                    /* XXX: a pointer to the scalar's data */
+                    (u_char *) domain_info_entry_count,
+                    /* XXX: the length of the data in bytes */
+                    sizeof(domain_info_entry_count) );
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiDomainInfoEntryCount(void)
+ */
+int
+initialize_table_saHpiDomainInfoEntryCount(void)
+{
+	netsnmp_register_scalar( 
+        netsnmp_create_handler_registration(
+        	"saHpiDomainInfoEntryCount", 
+        	handle_saHpiDomainInfoEntryCount,
+            saHpiDomainInfoEntryCount_oid, 
+            OID_LENGTH(saHpiDomainInfoEntryCount_oid),
+            HANDLER_CAN_RONLY) ); 
+	return 0;
+}
 
 /************************************************************
  * keep binary tree to find context by name
@@ -217,37 +259,21 @@ saHpiDomainInfoTable_cmp( const void *lhs, const void *rhs )
     saHpiDomainInfoTable_context *context_r =
         (saHpiDomainInfoTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+	/* check for NULL pointers */
+    if(lhs == NULL || rhs == NULL ) {
+        DEBUGMSGTL((AGENT,"saHpiDomainInfoTable_compare NULL pointer ERROR\n" ));
+    	return 0;
+    }	
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiDomainInfoTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+		
+	if ( context_l->index.oids[0] == context_r->index.oids[0])
+		return 0;
+		
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;			     
+		
 }
 
 /************************************************************
@@ -292,14 +318,9 @@ void
 init_saHpiDomainInfoTable(void)
 {
     initialize_table_saHpiDomainInfoTable();
-
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiDomainInfoTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    
+    initialize_table_saHpiDomainInfoEntryCount();
+    
 }
 
 /************************************************************
@@ -1040,11 +1061,6 @@ initialize_table_saHpiDomainInfoTable(void)
      * Setting up the table's definition
      */
     /*
-     * TODO: add any external indexes here.
-     */
-        /** TODO: add code for external index(s)! */
-
-    /*
      * internal indexes
      */
    	/** index: saHpiDomainId */
@@ -1060,18 +1076,17 @@ initialize_table_saHpiDomainInfoTable(void)
     cb.container = netsnmp_container_find("saHpiDomainInfoTable_primary:"
                                           "saHpiDomainInfoTable:"
                                           "table_container");
-#ifdef saHpiDomainInfoTable_IDX2
+                                          
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiDomainInfoTable_secondary:"
                                                        "saHpiDomainInfoTable:"
                                                        "table_container"));
-    cb.container->next->compare = saHpiDomainInfoTable_cmp;
-#endif
-#ifdef saHpiDomainInfoTable_SET_HANDLING
-    cb.can_set = 1;
-#ifdef saHpiDomainInfoTable_ROW_CREATION
-    cb.create_row = (UserRowMethod*)saHpiDomainInfoTable_create_row;
-#endif
+    cb.container->next->compare = saHpiDomainInfoTable_cmp; 
+
+    cb.can_set = 1;  
+
+    cb.create_row = (UserRowMethod*)saHpiDomainInfoTable_create_row; 
+
     cb.duplicate_row = (UserRowMethod*)saHpiDomainInfoTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiDomainInfoTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiDomainInfoTable_row_copy;
@@ -1086,7 +1101,7 @@ initialize_table_saHpiDomainInfoTable(void)
     cb.set_commit = saHpiDomainInfoTable_set_commit;
     cb.set_free = saHpiDomainInfoTable_set_free;
     cb.set_undo = saHpiDomainInfoTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiDomainInfoTable",
                 "Registering table saHpiDomainInfoTable "
                 "as a table array\n"));
