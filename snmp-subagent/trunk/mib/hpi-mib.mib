@@ -1291,9 +1291,13 @@ saHpiEventSensorTriggerReadingInterpreted OBJECT-TYPE
 saHpiEventSensorTriggerReadingEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
-				enabled(129),
-				scanEnabled(65),
-				busy(33)
+				eventsEnabled(129),
+				scanEnabled(65),				
+				busy(33),
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -1437,9 +1441,13 @@ saHpiEventSensorTriggerThresholdInterpreted OBJECT-TYPE
 saHpiEventSensorTriggerThresholdEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
-				enabled(129),
-				scanEnabled(65),
-				busy(33)
+				eventsEnabled(129),
+				scanEnabled(65),				
+				busy(33),
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -2267,16 +2275,14 @@ saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
 
 saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -2313,9 +2319,13 @@ saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
 saHpiSystemEventLogSensorTriggerReadingEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
-				enabled(129),
-				scanEnabled(65),
-				busy(33)
+				eventsEnabled(129),
+				scanEnabled(65),				
+				busy(33),
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)				
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -2459,9 +2469,13 @@ saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
 saHpiSystemEventLogSensorTriggerThresholdEventStateFlag OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined (0),
-				enabled(129),
-				scanEnabled(65),
-				busy(33)
+				eventsEnabled(129),
+				scanEnabled(65),				
+				busy(33),
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -3639,7 +3653,7 @@ SaHpiSensorEntry ::= SEQUENCE {
 	saHpiSensorCategory			INTEGER,
 	saHpiSensorEventsCategoryControl	INTEGER,
 	saHpiSensorEventsSupported		OCTET STRING,
-	saHpiSensorStatus			Unsigned32,
+	saHpiSensorStatus			INTEGER,
 	saHpiSensorAssertEvents			OCTET STRING,
 	saHpiSensorDeassertEvents		OCTET STRING,
 	saHpiSensorIgnore			TruthValue,
@@ -3869,20 +3883,25 @@ saHpiSensorEventsSupported OBJECT-TYPE
         ::= {saHpiSensorEntry 5}
 
 saHpiSensorStatus OBJECT-TYPE
-	SYNTAX		Unsigned32 
+	SYNTAX		INTEGER {
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
+				busy(33),
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
+			} 
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
 	"The sensor status structure is used to determine if sensor 	
 	scanning is enabled and if events are enabled. If events are 
 	enabled, the structure will have valid data for the outstanding 
-	sensor event states.  
-
-	The bit flags are:
-	SAHPI_SENSTAT_EVENTS_ENABLED 0x80
-	SAHPI_SENSTAT_SCAN_ENABLED   0x40
-	SAHPI_SENSTAT_BUSY           0x20
+	sensor event states.    "
 	::= {saHpiSensorEntry 6}
+	
 
 saHpiSensorAssertEvents OBJECT-TYPE
 	SYNTAX		OCTET STRING
@@ -4391,16 +4410,14 @@ saHpiSensorReadingCurrentInterpreted OBJECT-TYPE
 
 saHpiSensorReadingCurrentStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -4587,16 +4604,14 @@ saHpiSensorReadingMaxInterpreted OBJECT-TYPE
 
 saHpiSensorReadingMaxStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -4782,16 +4797,14 @@ saHpiSensorReadingMinInterpreted OBJECT-TYPE
 
 saHpiSensorReadingMinStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)			       
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -4978,16 +4991,14 @@ saHpiSensorReadingNominalInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNominalStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)				
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -5174,16 +5185,14 @@ saHpiSensorReadingNormalMaxInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNormalMaxStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
@@ -5370,16 +5379,14 @@ saHpiSensorReadingNormalMinInterpreted OBJECT-TYPE
 
 saHpiSensorReadingNormalMinStatus OBJECT-TYPE
         SYNTAX          INTEGER {
-				undefined(0),
-				enabledEvents(129),
-				enabledScan(65),
+				undefined (0),
+				eventsEnabled(129),
+				scanEnabled(65),				
 				busy(33),
-			
-				busyEnabledScan(97),
-				busyEnabledEvent(257),
-				busyEnabledScanEvent(225),
-
-				enabledEventsScan(289)
+				eventsEnabledandscanEndabled(193),
+				eventsEnabledandbusy(161),
+				scanEnabledandBusy(97),
+				eventsEnabledandscanEnabledandBusy(225)	
 			}
         MAX-ACCESS      read-only
         STATUS          current
