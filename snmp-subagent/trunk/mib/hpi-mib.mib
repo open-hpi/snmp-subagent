@@ -5153,45 +5153,88 @@ saHpiInventoryEntry OBJECT-TYPE
 	All inventory data contained in an inventory data repository (IDR)
 	must be represented in the RDR repository"
 	
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiInstrumentId}
+	INDEX	{ 
+		saHpiDomainId, 
+		saHpiResourceId, 
+		saHpiInstrumentId
+	}
 	::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {
 	saHpiIdrPersistent              TruthValue,
 	saHpiInventoryOEM		Unsigned32,
+	saHpiIdrUpdateCount		Unsigned32,
+	saHpiIdrIsReadOnly		TruthValue,
+	saHpiIdrNumAreas		Unsigned32,
 	saHpiInventoryRDR		RowPointer
 	}
 	
 saHpiIdrPersistent OBJECT-TYPE 
 	SYNTAX		TruthValue
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
 	"True indicates that updates to IDR are automatically and immediately 
 	persisted. False indicates that updates are notimmediately persisted; 
 	but optionally may be persisted via saHpiParmControl function, as
         defined in implementation documentation."
+    	REFERENCE
+		""
 	::= {saHpiInventoryEntry 1}
 
 saHpiInventoryOEM OBJECT-TYPE
 	SYNTAX		Unsigned32
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"OEM value for the inventory record. This is manufacturere' 
 	specific value."
 	::= {saHpiInventoryEntry 2}
 
+saHpiIdrUpdateCount OBJECT-TYPE
+    SYNTAX	Unsigned32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"The count is incremented any time the IDR is changed."
+
+    ::= {saHpiInventoryEntry 3}
+
+saHpiIdrIsReadOnly OBJECT-TYPE
+    SYNTAX	TruthValue
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Describes if the IDR is read-only. If such, all area
+	headers and fields are flagged as well."
+    REFERENCE
+    	" "
+    ::= {saHpiInventoryEntry 4}
+
+
+saHpiIdrNumAreas OBJECT-TYPE
+    SYNTAX 	Unsigned32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Number of area containted in IDR"
+    REFERENCE
+    	" "
+    ::= {saHpiInventoryEntry 5}
+
+
 saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 3}
+        ::= {saHpiInventoryEntry 6}
 	
---
---
---
+-- **************************************
+-- **
+-- ** Idr Area
+-- **
+-- **************************************
 
 saHpiInventoryDataAreaCount OBJECT-TYPE
 	SYNTAX		Counter32
@@ -5214,26 +5257,33 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION
 	"These structures are used to read and write inventory data respository 
-	data area records."
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiInstrumentId, saHpiAreaId }
+	data area records.
+
+	The four-tuple index value consits of:
+	- saHpiDomainId, which is the domain of the resource
+	- saHpiResourceId, the id value for the resource
+	- saHpiInstrumentId, the id value of entity inventory 
+	- saHpiResourceEntryId, the id value of inventory data area.
+	"
+	INDEX	{ 
+		saHpiDomainId, 
+		saHpiResourceId, 
+		saHpiInstrumentId, 
+		saHpiResourceEntryIdx
+	}
 	::= {saHpiInventoryDataAreaTable 1}
 
+-- IBMKR: Have a comment about creating new AreaIds
+-- (saHpiIrdrAreaAdd())
 
 SaHpiInventoryDataAreaEntry ::= SEQUENCE {
-	saHpiAreaId  			Unsigned32,
+
 	saHpiIdrAreaType	       	INTEGER,
-	saHpiIdrDataAreaReadOnly	TruthValue,
-	saHpiIdrNumDataArea		Unsigned32
+	saHpiIdrDataAreaIsReadOnly	TruthValue,
+	saHpiIdrDataAreaDelete		RowStatus,
+	saHpiIdrNumDataFields		Unsigned32
 	}
 	
-saHpiAreaId OBJECT-TYPE
-	SYNTAX		Unsigned32
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Repository Identifier."
-	::= {saHpiInventoryDataAreaEntry 1}
-
 
 saHpiIdrAreaType	OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -5245,7 +5295,7 @@ saHpiIdrAreaType	OBJECT-TYPE
 				oem(193),
 				unspecified(256)
 			}
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     "
 	The type of Area.
@@ -5253,25 +5303,39 @@ saHpiIdrAreaType	OBJECT-TYPE
 	Note: The enumerated named have +1 added as opposed to the 
 	SA HPI  spec for the same constants.  Inventory Data Area 
 	type definitions."
-	::= {saHpiInventoryDataAreaEntry 2}
+	::= {saHpiInventoryDataAreaEntry 1}
 
-saHpiIdrDataAreaReadOnly OBJECT-TYPE 
+saHpiIdrDataAreaIsReadOnly OBJECT-TYPE 
 	SYNTAX		TruthValue
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
 	"Describes if an area is read-only.  All area headers in a 
 	read-only IDR are flagged as read-only as well."
+	::= {saHpiInventoryDataAreaEntry 2}
+
+saHpiIdrDataAreaDelete OBJECT-TYPE 
+	SYNTAX		RowStatus
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	
+	    "This function is used to delete an Inventory Data Area, including the Area header and all fields contained with the area, from a particular Inventory Data Repository.
+
+Deleting an Inventory Data Area also deletes all fields contained within the area.  
+In some implementations, certain Areas are intrinsically read-only.  The ReadOnly flag, in the area header, indicates if the Area is read-only.
+If the Inventory Data Area is not read-only, but contains a Field that is read-only, the Area cannot be deleted.  An attempt to delete an Area that contains a read-only Field will return an error."
+	REFERENCE
+		"Derieved from SA-HPI-B.01.01 page 114."
 	::= {saHpiInventoryDataAreaEntry 3}
 
-saHpiIdrNumDataArea OBJECT-TYPE
+saHpiIdrNumDataFields OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION
 	"Number of Fields contained in Area"
 	::= {saHpiInventoryDataAreaEntry 4}
---
+-- 
 --
 --
 
@@ -5296,29 +5360,29 @@ saHpiInventoryFieldEntry OBJECT-TYPE
 	DESCRIPTION
        	"These structures are used to read and write inventory data repository 
 	field records."
-	INDEX	{ saHpiDomainId, saHpiResourceId, saHpiAreaId, saHpiDataFieldId }
+	INDEX	{ 
+		saHpiDomainId, 
+		saHpiResourceId,
+		saHpiInstrumentId,
+-- Is AreHeaderT.AreadId the same as IdrFieldT.AreadId? Yes?Verify
+		saHpiResourceEntryIdx,
+		saHpiResourceEntryIdx
+	}
 	::= {saHpiInventoryFieldTable 1}
 
 SaHpiInventoryFieldEntry ::= SEQUENCE {
-	saHpiDataFieldId	Unsigned32,
-	saHpiIdrFieldType	INTEGER,
-	saHpiIdrFieldReadOnly	TruthValue,
-	saHpiIdrNumField	Unsigned32,
+--IBMKR: Perhaps we should put the AreaHeader in here?
+	saHpiFieldType		INTEGER,
+	saHpiFieldIsReadOnly	TruthValue,
+
 	saHpiFieldTextType    	SaHpiTextType, 
 	saHpiFieldTextLanguage  SaHpiTextLanguage, 
 	saHpiFieldText  	SaHpiText,
-	saHpiFieldDelete	TruthValue
+	saHpiFieldDelete	RowStatus
 	}
 	
-saHpiDataFieldId OBJECT-TYPE
-	SYNTAX		Unsigned32
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Repository Identifier."
-	::= {saHpiInventoryFieldEntry 1}
 	
-saHpiIdrFieldType OBJECT-TYPE
+saHpiFieldType OBJECT-TYPE
         SYNTAX          INTEGER {
 				undefined(0),
 				chassisType(1),
@@ -5333,7 +5397,7 @@ saHpiIdrFieldType OBJECT-TYPE
 				custom(10),
 				unspecified(256)
 			}
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
         STATUS          current
         DESCRIPTION     
 	"Inventory Data Field type definitions.
@@ -5343,34 +5407,26 @@ saHpiIdrFieldType OBJECT-TYPE
 	type definitions."
 	::= {saHpiInventoryFieldEntry 2}
 
-saHpiIdrFieldReadOnly OBJECT-TYPE 
+saHpiFieldIsReadOnly OBJECT-TYPE 
 	SYNTAX		TruthValue
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	
 	"Describes if an field is read-only.  All field headers in a 
 	read-only IDR are flagged as read-only as well."
 	::= {saHpiInventoryFieldEntry 3}
-
-saHpiIdrNumField OBJECT-TYPE
-	SYNTAX		Unsigned32
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION
-	"Number of Fields contained in Area."
-	::= {saHpiInventoryFieldEntry 4}
 	
 saHpiFieldTextType OBJECT-TYPE 
 	SYNTAX		SaHpiTextType
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Field Data. 
 	See Definition for SaHpiTextType for more details."
-	::= {saHpiInventoryFieldEntry 5}
+	::= {saHpiInventoryFieldEntry 4}
 	
 saHpiFieldTextLanguage	OBJECT-TYPE
 	SYNTAX		SaHpiTextLanguage
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-create
 	STATUS          current
 	DESCRIPTION     "Field Data.
 	See Definition for SaHpiTextLanguage for more details."
@@ -5378,7 +5434,7 @@ saHpiFieldTextLanguage	OBJECT-TYPE
 
 saHpiFieldText	OBJECT-TYPE
 	SYNTAX		SaHpiText
-	MAX-ACCESS	read-write
+	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	"Field Data.
 	The type of date is specified
@@ -5386,7 +5442,7 @@ saHpiFieldText	OBJECT-TYPE
 	::= {saHpiInventoryFieldEntry 7}
 	
 saHpiFieldDelete	OBJECT-TYPE
-	SYNTAX		TruthValue
+	SYNTAX		RowStatus
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
