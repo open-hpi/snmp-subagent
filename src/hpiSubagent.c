@@ -55,8 +55,10 @@ int send_traps = AGENT_FALSE;
 static int send_traps_on_startup = AGENT_FALSE;
 
 // Check for information every x seconds.
-int alarm_interval = 5;
+int alarm_interval = 10;
 
+#define REDISCOVER_COUNT_MAX 10;
+static int rediscover_count = 0;
 // Max EVENT rows.
 int MAX_EVENT_ENTRIES = 512;
 
@@ -527,15 +529,6 @@ getSaHpiSession (SaHpiSessionIdT * out)
 		    get_error_string (err));
 	  return AGENT_ERR_SESSION_OPEN;
 	}
-      // Discover 
-      err = saHpiResourcesDiscover (session_id);
-      if (SA_OK != err)
-	{
-	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
-		    get_error_string (err));
-	  return AGENT_ERR_DISCOVER;
-	}
-      //Subscribe to the Events
 
       err = saHpiSubscribe (session_id, SAHPI_FALSE);
       if (SA_OK != err)
@@ -545,6 +538,20 @@ getSaHpiSession (SaHpiSessionIdT * out)
 	  return AGENT_ERR_SUBSCRIBE;
 	}
       session_avail = AGENT_TRUE;
+      //Subscribe to the Events
+   }
+   rediscover_count--;
+   if (rediscover_count <= 0) {
+      // Re-set the  rediscover_count;
+      DEBUGMSGTL((AGENT,"Calling 'saHpiResourceDiscover()'.\n"));
+      rediscover_count = REDISCOVER_COUNT_MAX;
+      err = saHpiResourcesDiscover (session_id);
+      if (SA_OK != err)
+	{
+	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
+		    get_error_string (err));
+	  return AGENT_ERR_DISCOVER;
+	}
     }
 
   if (out)
