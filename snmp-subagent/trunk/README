@@ -45,6 +45,44 @@ It will generate the subagent code and put the configuration file
 - hpiSubagent.conf in the NetSNMP configuration directory.
 
 ---------------------------------------------------------
+RUNNING
+---------------------------------------------------------
+
+1. Start the NetSNMP daemon.
+2. Start the hpiSubagent. You should see something similar in the
+   syslog log file - /var/log/messages:
+   Feb  6 10:53:37 konrad hpiSubagent[9890]: Starting $Id$
+   Feb  6 10:53:37 konrad hpiSubagent[9890]: Not sending events during startup.
+   Feb  6 10:53:37 konrad hpiSubagent[9890]: Checking HPI infrastructure every 4 seconds.
+   Feb  6 10:53:37 konrad hpiSubagent[9890]: Max Event rows 1024.
+   ...
+
+3. Browse the MIB tree. When browsing the MIB tree, make sure you 
+   load the MIB with your favorite SNMP browser. If you are using 
+   NetSNMP commands, set the MIBS environment variable to ALL:
+
+   $export MIBS=ALL
+
+   Then you should have no trouble browsing the HPI MIB:
+
+   $snmpwalk -v2c -c public localhost hpi
+   HPI-MIB::saHpiEntryCount.0 = Counter32: 3
+   HPI-MIB::saHpiEntryUpdateCount.0 = Gauge32: 3
+   HPI-MIB::saHpiEntryUpdateTimestamp.0 = Counter64: 1076082821603968000
+   HPI-MIB::saHpiDomainID.0.1.1 = Gauge32: 0
+   HPI-MIB::saHpiDomainID.0.2.2 = Gauge32: 0
+   HPI-MIB::saHpiDomainID.0.3.3 = Gauge32: 0
+   HPI-MIB::saHpiEntryID.0.1.1 = Gauge32: 1
+   HPI-MIB::saHpiEntryID.0.2.2 = Gauge32: 2
+   HPI-MIB::saHpiEntryID.0.3.3 = Gauge32: 3
+   HPI-MIB::saHpiResourceID.0.1.1 = Gauge32: 1
+   HPI-MIB::saHpiResourceID.0.2.2 = Gauge32: 2
+   HPI-MIB::saHpiResourceID.0.3.3 = Gauge32: 3
+   HPI-MIB::saHpiResourceEntityPath.0.1.1 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{SYSTEM_BOARD,1}"
+   HPI-MIB::saHpiResourceEntityPath.0.2.2 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{POWER_SUPPLY,1}"
+   ....
+
+---------------------------------------------------------
 CLEANUP
 ---------------------------------------------------------
 To remove the temporary build files, type:
