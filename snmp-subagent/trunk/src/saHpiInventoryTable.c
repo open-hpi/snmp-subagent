@@ -165,6 +165,7 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 	  inventory_context = NULL;
 	  inventory_context = CONTAINER_FIND (cb.container, &inventory_index);
 	  // If we don't find it - create it.
+#ifdef BUG_873961
 	  if (!inventory_context)
 	  {
 		  // Bug # 873961. We use the 'rdr_id' to check to see if
@@ -200,9 +201,11 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 		// restoree it to its previous glory.
 		inventory_index.len =  INVENTORY_INDEX_NR;
 	  }
+#endif
 	  if (!inventory_context)
 	    {
 	      // New entry.
+	      DEBUGMSGTL((AGENT,"1 MEMORY"));
 	      inventory_context =
 		saHpiInventoryTable_create_row (&inventory_index);
 	    }
@@ -243,7 +246,7 @@ populate_inventory (SaHpiEntryIdT rdr_id,
 						  inventory_context) ==
 	      AGENT_NEW_ENTRY)
 	    {
-
+		DEBUGMSGTL((AGENT,"2 MEMORY"));
 	      CONTAINER_INSERT (cb.container, inventory_context);
 	      inventory_count = CONTAINER_SIZE (cb.container);
 	    }

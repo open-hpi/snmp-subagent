@@ -150,6 +150,7 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 	      if (backup_count == 0)
 		{
 		  rdr_context = saHpiRdrTable_create_row (&rdr_index);
+		  DEBUGMSGTL((AGENT,"1 MEMORY"));
 		}
 	      else
 		{
@@ -264,7 +265,7 @@ populate_rdr (SaHpiRptEntryT * rpt_entry,
 						&trap, &trap_len, &trap_oid)
 		  == AGENT_NEW_ENTRY)
 		{
-
+		DEBUGMSGTL((AGENT," 2 MEMORY"));
 		  CONTAINER_INSERT (cb.container, rdr_context);
 		  rdr_count = CONTAINER_SIZE (cb.container);
 

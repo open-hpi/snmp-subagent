@@ -89,7 +89,7 @@ populate_watchdog (SaHpiEntryIdT rdr_id,
       // We are re-populating. Check for existing entries
       watchdog_context = NULL;
       watchdog_context = CONTAINER_FIND (cb.container, &watchdog_index);
-
+#ifdef BUG_873961
       if (!watchdog_context) 
          {
 	 // Bug # 873961. We use the 'rdr_id' to check to see if
@@ -124,6 +124,7 @@ populate_watchdog (SaHpiEntryIdT rdr_id,
 		// restoree it to its previous glory.
 		watchdog_index.len =  WATCHDOG_INDEX_NR;
 	}
+#endif
       // If we don't find it - we create it.
       if (!watchdog_context)
 	{

@@ -86,6 +86,7 @@ populate_control (SaHpiEntryIdT rdr_id,
       ctrl_context = NULL;
       ctrl_context = CONTAINER_FIND (cb.container, &ctrl_index);
       // If we don't find it - we create it.
+#ifdef BUG_873961      
       if (!ctrl_context)
 	{
 		// Bug # 873961. We use the 'rdr_id' to check to see if 
@@ -118,10 +119,12 @@ populate_control (SaHpiEntryIdT rdr_id,
 		}
 		// restoree it to its previous glory.
 		ctrl_index.len =  CTRL_INDEX_NR;
-        }
+        } 
+#endif
       if (!ctrl_context)
 	{
 	  // New entry. Add it
+	  DEBUGMSGTL((AGENT, "1 MEMORY"));
 	  ctrl_context = saHpiCtrlTable_create_row (&ctrl_index);
 	}
 
@@ -170,7 +173,7 @@ populate_control (SaHpiEntryIdT rdr_id,
 					 rdr_entry_oid, rdr_entry_oid_len,
 					 ctrl_context) == AGENT_NEW_ENTRY)
 	{
-
+	DEBUGMSGTL((AGENT," 2 MEMORY"));
 	  CONTAINER_INSERT (cb.container, ctrl_context);
 	  control_count = CONTAINER_SIZE (cb.container);
 	}
