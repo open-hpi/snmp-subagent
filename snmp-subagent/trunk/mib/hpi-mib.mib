@@ -2413,7 +2413,7 @@ saHpiAutoInsertTimeoutTable OBJECT-TYPE
     DESCRIPTION
     "In support of HPI
 	saHpiAutoInsertTimeoutGet, and
-	saHpiAutoInsertTimeoutSet
+	saHpiAutoInsertTimeoutSet."
     
     REFERENCE "Derived from SAI-HPI-B.01.01 section 7.7."
     ::= { hpiHotSwap 1 }
@@ -4627,13 +4627,13 @@ saHpiRdrNextEntryId OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "Id of the next RDR entry. Use this to aid in 
+        DESCRIPTION     "ID of the next RDR entry. Use this to aid in 
 	walking just the RDRs for a given ResourceId.  For example If 
 	you know the DomainId and ResourceId use SAHPI_FIRST_ENTRY to 
 	retrieve this columnar node. Now you have the saHpiRdrEntryId 
-	for the next Rdr owned by the Resource in question.  When the 
+	for the next RDR owned by the Resource in question.  When the 
 	value of saHpiRdrNextEntryId is SAHPI_LAST_ENTRY it means the 
-	index specified represents the last valid RDR  represented by 
+	index specified represents the last valid RDR represented by 
 	the Resource in question."
 	REFERENCE "see section 7.1.1."
 	::=   {saHpiRdrEntry 2 }
