@@ -9,17 +9,24 @@ bin_PROGRAMS		= hpiSubagent
 SUBDIRS                 = 
 
 hpiSubagent_SOURCES	= alarm.c \
-			hpiB.c \
+			hpiB0101.c \
 			hpiSubagent.c \
 			hpiCheckIndice.c \
-			hpiPopulateRpt.c \
-			hpiPopulateRdr.c \
+			hpiSubagent.c \
+			saHpiAnnouncementEventLogTable.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnunciatorTable.c \
 			saHpiAreaTable.c \
-			saHpiAutoTimeOutTable.c \
-			saHpiCtrlTable.c \
+			saHpiAutoInsertTimeoutTable.c \
+			saHpiCtrlAnalogTable.c \
+			saHpiCtrlDigitalTable.c \
+			saHpiCtrlDiscreteTable.c \
+			saHpiCtrlOemTable.c \
+			saHpiCtrlStreamTable.c \
+			saHpiCtrlTextTable.c \
+			saHpiCurrentSensorStateTable.c \
 			saHpiDomainAlarmTable.c \
+			saHpiDomainEventLogTable.c \
 			saHpiDomainEventTable.c \
 			saHpiDomainInfoTable.c \
 			saHpiDomainReferenceTable.c \
@@ -27,16 +34,20 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiEventLogTable.c \
 			saHpiEventTable.c \
 			saHpiFieldTable.c \
+			saHpiHotSwapEventLogTable.c \
 			saHpiHotSwapEventTable.c \
 			saHpiHotSwapTable.c \
 			saHpiInventoryTable.c \
+			saHpiOEMEventLogTable.c \
 			saHpiOEMEventTable.c \
 			saHpiRdrTable.c \
+			saHpiResourceEventLogTable.c \
 			saHpiResourceEventTable.c \
 			saHpiResourceTable.c \
+			saHpiSensorEnableChangeEventLogTable.c \
 			saHpiSensorEnableChangeEventTable.c \
+			saHpiSensorEventLogTable.c \
 			saHpiSensorEventTable.c \
-			saHpiSensorReadingCurrentTable.c \
 			saHpiSensorReadingMaxTable.c \
 			saHpiSensorReadingMinTable.c \
 			saHpiSensorReadingNominalTable.c \
@@ -51,8 +62,11 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSensorThdUpCriticalTable.c \
 			saHpiSensorThdUpMajorTable.c \
 			saHpiSensorThdUpMinorTable.c \
+			saHpiSoftwareEventLogTable.c \
 			saHpiSoftwareEventTable.c \
+			saHpiUserEventLogTable.c \
 			saHpiUserEventTable.c \
+			saHpiWatchdogEventLogTable.c \
 			saHpiWatchdogEventTable.c \
 			saHpiWatchdogTable.c 
 
