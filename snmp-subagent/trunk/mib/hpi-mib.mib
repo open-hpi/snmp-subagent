@@ -4977,7 +4977,7 @@ saHpiSensorEnable       OBJECT-TYPE
 
 	When writing this object sets the sensor enable status for an addressed sensor.  If a sensor is disabled, the rows in saHpiSensorReadingCurrent for that sensor will not be present, and no events will be generated for the sensor."
 	REFERENCE
-	"Derieved from SAI-HPI-B.01.01 spec, page 85,86."
+	"Derieved from SAI-HPI-B.01.01 sections 7.2.9, and 7.2.10."
         ::= {saHpiSensorEntry 4}
 
 saHpiSensorEventEnable  OBJECT-TYPE
