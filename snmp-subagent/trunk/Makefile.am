@@ -67,8 +67,8 @@ EXTRA_DIST	= $(shell find include -name '*.h') \
 install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/snmp
 	$(INSTALL_DATA) hpiSubagent.conf $(DESTDIR)$(sysconfdir)/snmp
-	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/rc.d/init.d/
-	$(INSTALL_PROGRAM) -m 755 hpisnmpd.rc $(DESTDIR)$(sysconfdir)/rc.d/init.d/hpisnmpd
+	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)/init.d/
+	$(INSTALL_PROGRAM) -m 755 hpisnmpd.rc $(DESTDIR)$(sysconfdir)/init.d/hpisnmpd
 
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
