@@ -54,7 +54,7 @@ RUNNING
 2. Configure your NetSNMP configuration file (snmpd.conf) to include
    "master  agentx"
 
-3. Start the NetSNMP daemon.
+3. Start the NetSNMP daemon. (usually /etc/init.d/snmpd on various Linux distros).
 
 4. Start the hpiSubagent. (either use the runtime script: /etc/init.d/openhpi-subagent,
    or just run it from the terminal).  You should see something similar in the
@@ -67,12 +67,19 @@ RUNNING
    ...
 
 5. Browse the MIB tree. When browsing the MIB tree, make sure you 
-   load the MIB with your favorite SNMP browser. If you are using 
+   load the MIB in your favorite SNMP browser. If you are using 
    NetSNMP commands, set the MIBS environment variable to ALL:
 
    $export MIBS=ALL
+  
+   And set the MIBDIRS enviroment variable to point to the the directory where the 
+   OpenHPI MIB file is located (usr/share/doc/openhpi-subagent-0.2/mib) or
+   copy the MIB file in to the NetSNMP MIB default directory (usually 
+   /usr/share/snmp/mibs). To set the MIBDIRS, refer to 'man snmpcmd' or:
 
-   Then you should have no trouble browsing the HPI MIB:
+   $export MIBDIRS=+/usr/share/doc/openhpi-subagent-0.2/mibs
+
+   After these step you should have no trouble browsing the HPI MIB:
 
    $snmpwalk -v2c -c public localhost hpi
    HPI-MIB::saHpiEntryCount.0 = Counter32: 3
