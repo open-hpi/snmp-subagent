@@ -52,7 +52,7 @@ populate_inventory(SaHpiInventoryRecT *inventory,
   size_t initial_size;
 
   int rc = AGENT_ERR_NOERROR;
-  
+  int i;
   oid index_oid[1];
   oid column[2];
   
@@ -65,6 +65,7 @@ populate_inventory(SaHpiInventoryRecT *inventory,
     inventory_index.len = 1;
     // Look at the MIB to find out what the indexs are
     index_oid[0] = inventory->EirId;
+
     // Possible more indexs?
 
     inventory_index.oids = (oid *)&index_oid;
@@ -110,7 +111,6 @@ memory_fixed:
     }
     memset(data, 0x00, initial_size);
     DEBUGMSGTL((AGENT,"Calling saHpiEntityInventoryDataRead with buffer size %d\n", initial_size));
-    DEBUGMSGTL((AGENT,"Located at %X\n", data));
 
     rc = saHpiEntityInventoryDataRead (session_id, resource_id,
 					inventory->EirId,
@@ -137,7 +137,13 @@ memory_fixed:
       
     }
 
+    for (i = 0; data->DataRecords[i] != NULL; i++) {
+      DEBUGMSGTL((AGENT,"%d: %d, %d\n", i, 
+		  (data->DataRecords[i] == NULL)? -1 : data->DataRecords[i]->RecordType,
+		  (data->DataRecords[i] == NULL)? -1 : data->DataRecords[i]->DataLength));
+    }
     // Our dummy plugin is f**ked. Lets make our own test.
+      /*
     DEBUGMSGTL((AGENT,"Return size: %d\n",data_len));
     DEBUGMSGTL((AGENT,"Located at %X +len = %X\n", data, data + initial_size));
     
@@ -175,11 +181,11 @@ memory_fixed:
  DEBUGMSGTL((AGENT,"AssT: %X\n",  data->DataRecords[0]->RecordData.BoardInfo.AssetTag));
  DEBUGMSGTL((AGENT,"CusT: %X\n",  data->DataRecords[0]->RecordData.BoardInfo.CustomField[0]));
 
-     
+      */
     DEBUGMSGTL((AGENT,"Data validty is : %d\n", data->Validity));
-    //    if (data->Validity == SAHPI_INVENT_DATA_VALID)
-       //       (data->Validity == SAHPI_INVENT_DATA_INVALID)) 
-    //{
+    if ((data->Validity == SAHPI_INVENT_DATA_VALID) || 
+	(data->Validity == SAHPI_INVENT_DATA_INVALID)) {
+    
         if (saHpiInventoryTable_modify_context(inventory, 
 					       resource_id,
 					       data, data_len,
@@ -194,7 +200,7 @@ memory_fixed:
 	  // INVALID data 
 	  DEBUGMSGTL((AGENT,"Inventory.Validity == SAHPI_INVENT_DATA_INVALID"));
 	}
-	//}
+    }
     // Just finish the data.
     free(data);
     data = NULL;
@@ -281,7 +287,7 @@ saHpiInventoryTable_modify_context(
    
     ctx->saHpiInventoryEirId = entry->EirId;
     // How many do we have? Only one it seems?
-    //if (inv_data->DataRecords[0]) {
+    if (inv_data->DataRecords[0]) {
         data = *(inv_data->DataRecords[0]);
 	switch (inv_data->Validity) {
 	case SAHPI_INVENT_DATA_VALID:
@@ -364,7 +370,7 @@ saHpiInventoryTable_modify_context(
 	  break;
 	}
 	
-	//    }
+	}
     return AGENT_NEW_ENTRY;
   }
   
@@ -1056,13 +1062,12 @@ saHpiInventoryTable_set_reserve1(netsnmp_request_group * rg)
       // 0 the API couldn't find the right context.
 
        if ( ((saHpiInventoryTable_context *) rg->existing_row)->hash == 0) {
-	 DEBUGMSGTL((AGENT,"no such name\n"));
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					  SNMP_ERR_NOSUCHNAME);
        } else {
 
 	 if (((saHpiInventoryTable_context *) rg->existing_row)->saHpiInventoryValidity == MIB_INVALID) {
-	   DEBUGMSGTL((AGENT,"invaliod\n"));
+	   DEBUGMSGTL((AGENT,"Row hasINVALID flag, thus cannot be modified\n"));
 	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					   SNMP_ERR_NOTWRITABLE);
 	 }
