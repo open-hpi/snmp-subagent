@@ -83,6 +83,31 @@ static sensor_reading_to_mib sensor_reading[] = {
   {NULL, SAHPI_SRF_NORMAL_MAX, POS_MAX_NOM},
   {NULL, SAHPI_SRF_NOMINAL, POS_NOMINAL}};
 
+static int  
+saHpiSensorTable_modify_context(
+			     SaHpiSensorRecT *entry, 			     
+			     SaHpiSensorThresholdsT *sensor_threshold,
+			     SaHpiSensorEvtEnablesT *enables,
+			     SaHpiResourceIdT resource_id,
+			     oid *, size_t,
+			     saHpiSensorTable_context *ctx);
+
+
+ static
+  int send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx);
+static
+void 
+ fill_sensor_threshold_info(saHpiSensorTable_context *ctx, 
+			    SaHpiSensorThresholdsT *sensor_threshold);
+static
+void
+make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list, 
+	      netsnmp_index *index,
+	      int column, 
+	      u_char type,
+	      const u_char *value, 
+	      const size_t value_len);
+
 
 int
 populate_sensor(SaHpiSensorRecT *sensor, 
@@ -101,6 +126,8 @@ populate_sensor(SaHpiSensorRecT *sensor,
   saHpiSensorTable_context	*sensor_context; 
   SaHpiSensorThresholdsT sensor_threshold;
   SaHpiSessionIdT session_id;
+  SaHpiSensorEvtEnablesT enables;
+
   DEBUGMSGTL((AGENT,"\n\t--- populate_sensor: Entry.\n"));
 
   if (sensor) {
@@ -151,7 +178,14 @@ populate_sensor(SaHpiSensorRecT *sensor,
 	return AGENT_ERR_OPERATION;
     }
 
-    if (saHpiSensorTable_modify_context(sensor, &sensor_threshold,
+    rc = saHpiSensorEventEnablesGet(session_id,
+				    resource_id,
+				    sensor->Num,
+				    &enables);
+
+    if (saHpiSensorTable_modify_context(sensor, 
+					&sensor_threshold,
+					&enables,
 					resource_id,
 					rdr_entry_oid, rdr_entry_oid_len,
 					sensor_context)
@@ -205,6 +239,7 @@ int
 saHpiSensorTable_modify_context(
 				SaHpiSensorRecT *entry,
 				SaHpiSensorThresholdsT *sensor_threshold,
+				SaHpiSensorEvtEnablesT *enables,
 				SaHpiResourceIdT resource_id,	
 				oid *rdr_entry, size_t rdr_entry_oid_len,
 				saHpiSensorTable_context *ctx) {
@@ -258,7 +293,15 @@ saHpiSensorTable_modify_context(
     // IBM-KR: Revised in the future MIB - more columns possible
     ctx->saHpiSensorEventsState = entry->Events;       
     // TRUE=1 -> true(1), FALSE=0, false(2)
-    
+
+    ctx->saHpiSensorStatus = enables->SensorStatus;
+
+    ctx->saHpiSensorAssertEvents = enables->AssertEvents;
+
+    ctx->saHpiSensorDeassertEvents = enables->DeassertEvents;
+
+
+    //
     ctx->saHpiSensorIgnore = (entry->Ignore == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
     ctx->saHpiSensorReadingFormats = data.ReadingFormats;
@@ -622,6 +665,42 @@ int set_sensor(saHpiSensorTable_context *ctx) {
 }
 
 
+int
+set_sensor_event(saHpiSensorTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiSensorEvtEnablesT enables;
+
+  if (ctx) {
+
+    enables.SensorStatus = ctx-> saHpiSensorStatus;
+    enables.AssertEvents = ctx->saHpiSensorAssertEvents;
+    enables.DeassertEvents = ctx->saHpiSensorDeassertEvents;
+
+      // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+
+    DEBUGMSGTL((AGENT,"Calling 'saHpiSensorEventEnablesSet'\n"));
+    rc = saHpiSensorEventEnablesSet(session_id,
+				    ctx->resource_id,
+				    ctx->saHpiSensorIndex,
+				    &enables);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Error for 'saHpiSensorEventEnablesSet' is %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+
 
 int
 send_saHpiSensorTable_notification(saHpiSensorTable_context *ctx) {
@@ -729,13 +808,13 @@ make_SaHpiSensorTable_trap_msg(netsnmp_variable_list *list,
 /************************************************************
  * keep binary tree to find context by name
  */
-//static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
+static int      saHpiSensorTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
-/*
+
 static int
 saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 {
@@ -767,7 +846,7 @@ saHpiSensorTable_cmp(const void *lhs, const void *rhs)
 
 }
 
-*/
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -780,7 +859,6 @@ saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
     if (!dst || !src)
         return 1;
 
-    DEBUGMSGTL((AGENT,"_row_copy"));
     /*
      * copy index, if provided
      */
@@ -807,6 +885,12 @@ saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
         src->saHpiSensorEventsCategoryControl;
 
     dst->saHpiSensorEventsState = src->saHpiSensorEventsState;
+
+    dst->saHpiSensorStatus = src->saHpiSensorStatus;
+
+    dst->saHpiSensorAssertEvents = src->saHpiSensorAssertEvents;
+
+    dst->saHpiSensorDeassertEvents = src->saHpiSensorDeassertEvents;
 
     dst->saHpiSensorIgnore =src->saHpiSensorIgnore;
 
@@ -992,7 +1076,9 @@ saHpiSensorTable_create_row(netsnmp_index * hdr)
         free(ctx);
         return NULL;
     }
-
+    ctx->saHpiSensorStatus = 0;
+    ctx->saHpiSensorAssertEvents = 0;
+    ctx->saHpiSensorDeassertEvents = 0;
     ctx->saHpiSensorThresholdRaw_len=0;
     ctx->saHpiSensorThresholdInterpreted_len = 0;
     ctx->hash = 0;
@@ -1059,7 +1145,8 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
 
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
-    
+    saHpiSensorTable_context *row_ctx =
+      (saHpiSensorTable_context *) rg->existing_row;    
     int             rc = SNMP_ERR_NOERROR;
 
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_reserve1. Entry\n"));
@@ -1080,6 +1167,26 @@ saHpiSensorTable_set_reserve1(netsnmp_request_group * rg)
             /** OCTETSTR = ASN_OCTET_STR */
             rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
 						THRESHOLD_INTERPRETED_MAX);
+            break;
+	case COLUMN_SAHPISENSORSTATUS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
+                                                sizeof(row_ctx->
+                                                       saHpiSensorStatus));
+            break;
+
+        case COLUMN_SAHPISENSORASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
+                                                sizeof(row_ctx->
+                                                       saHpiSensorAssertEvents));
+            break;
+
+        case COLUMN_SAHPISENSORDEASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
+                                                sizeof(row_ctx->
+                                                       saHpiSensorDeassertEvents));
             break;
 	case COLUMN_SAHPISENSORINDEX:
 	case COLUMN_SAHPISENSORTYPE:
@@ -1177,8 +1284,18 @@ saHpiSensorTable_set_reserve2(netsnmp_request_group * rg)
 	if  (row_ctx->saHpiSensorThresholdDefnTholdCapabilities & SAHPI_STC_RAW) { 
 		rc = SNMP_ERR_NOACCESS;
 	}
-	      break;
+	break;
 
+	case COLUMN_SAHPISENSORSTATUS:
+	  if ((*var->val.integer != SAHPI_SENSTAT_EVENTS_ENABLED) &&
+	      (*var->val.integer != SAHPI_SENSTAT_SCAN_ENABLED) && 
+	      (*var->val.integer != SAHPI_SENSTAT_BUSY)) {
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+	  break;
+	case COLUMN_SAHPISENSORASSERTEVENTS:
+	case COLUMN_SAHPISENSORDEASSERTEVENTS:
+	  break;
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 	    break;
@@ -1216,13 +1333,33 @@ saHpiSensorTable_set_action(netsnmp_request_group * rg)
         (saHpiSensorTable_context *) rg->existing_row;
 
     netsnmp_request_group_item *current;
-    
+    int rc = SNMP_ERR_NOERROR;
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_action: Entry\n"));
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
 
         switch (current->tri->colnum) {
+	case COLUMN_SAHPISENSORSTATUS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            row_ctx->saHpiSensorStatus = *var->val.integer;
+	    if (set_sensor_event(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_GENERR;
+            break;
+
+        case COLUMN_SAHPISENSORASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            row_ctx->saHpiSensorAssertEvents = *var->val.integer;
+	    if (set_sensor_event(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_GENERR;
+            break;
+
+        case COLUMN_SAHPISENSORDEASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+            row_ctx->saHpiSensorDeassertEvents = *var->val.integer;
+	    if (set_sensor_event(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_GENERR;
+            break;
 
         case COLUMN_SAHPISENSORTHRESHOLDRAW:
             /** OCTETSTR = ASN_OCTET_STR */
@@ -1235,7 +1372,9 @@ saHpiSensorTable_set_action(netsnmp_request_group * rg)
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiSensorThresholdInterpreted,
                    var->val.string, var->val_len);
-            row_ctx->saHpiSensorThresholdInterpreted_len = var->val_len;	    
+            row_ctx->saHpiSensorThresholdInterpreted_len = var->val_len;
+	    if (set_sensor(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_GENERR;
             break;
 
         default:/** We shouldn't get here */
@@ -1243,12 +1382,10 @@ saHpiSensorTable_set_action(netsnmp_request_group * rg)
 	    break;
         }
 
-	// Tada! This is where the change will be done (or not)
-	if (set_sensor(row_ctx) != AGENT_ERR_NOERROR) {
-	  DEBUGMSGTL((AGENT,"saHpiSensorTable_set_action: Error: SNMP_ERR_GENERR"));
+	if (rc)
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					 SNMP_ERR_GENERR);
-	}
+					 rc);
+	
     }
     DEBUGMSGTL((AGENT,"saHpiSensorTable_set_action: Exit \n"));
   
@@ -1372,14 +1509,14 @@ initialize_table_saHpiSensorTable(void)
     cb.container = netsnmp_container_find("saHpiSensorTable_primary:"
                                           "saHpiSensorTable:"
                                           "table_container");
-    /*    
+       
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find
                                 ("saHpiSensorTable_secondary:"
                                  "saHpiSensorTable:" "table_container"));
     			 
     cb.container->next->compare = saHpiSensorTable_cmp;
-    */
+    
     //    cb.can_set = 1;
 
     cb.create_row = (UserRowMethod *) saHpiSensorTable_create_row;
@@ -1414,17 +1551,17 @@ initialize_table_saHpiSensorTable(void)
 						  NULL);
 }
 
+
 /************************************************************
  * saHpiSensorTable_get_value
  */
 int
 saHpiSensorTable_get_value(netsnmp_request_info *request,
-                            netsnmp_index * item,
-                            netsnmp_table_request_info *table_info)
+                           netsnmp_index * item,
+                           netsnmp_table_request_info *table_info)
 {
     netsnmp_variable_list *var = request->requestvb;
-    saHpiSensorTable_context *context =
-        (saHpiSensorTable_context *) item;
+    saHpiSensorTable_context *context = (saHpiSensorTable_context *) item;
 
     switch (table_info->colnum) {
 
@@ -1461,15 +1598,38 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
     case COLUMN_SAHPISENSOREVENTSSTATE:
             /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSensorEventsState,
+                                 (char *) &context->saHpiSensorEventsState,
                                  sizeof(context->saHpiSensorEventsState));
         break;
 
-    case COLUMN_SAHPISENSORIGNORE:
+    case COLUMN_SAHPISENSORSTATUS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->saHpiSensorStatus,
+                                 sizeof(context->saHpiSensorStatus));
+        break;
 
+    case COLUMN_SAHPISENSORASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSensorAssertEvents,
+                                 sizeof(context->saHpiSensorAssertEvents));
+        break;
+
+    case COLUMN_SAHPISENSORDEASSERTEVENTS:
+            /** UNSIGNED32 = ASN_UNSIGNED */
+        snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                 (char *) &context->
+                                 saHpiSensorDeassertEvents,
+                                 sizeof(context->
+                                        saHpiSensorDeassertEvents));
+        break;
+
+    case COLUMN_SAHPISENSORIGNORE:
+            /** TruthValue = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *)&context->saHpiSensorIgnore,
+                                 (char *) &context->saHpiSensorIgnore,
                                  sizeof(context->saHpiSensorIgnore));
         break;
 
@@ -1483,7 +1643,7 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
         break;
 
     case COLUMN_SAHPISENSORISNUMERIC:
-
+            /** TruthValue = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->saHpiSensorIsNumeric,
                                  sizeof(context->saHpiSensorIsNumeric));
@@ -1515,17 +1675,17 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
     case COLUMN_SAHPISENSORMODIFIERUSE:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
-                                 (char *) &context->
-                                 saHpiSensorModifierUse,
+                                 (char *) &context->saHpiSensorModifierUse,
                                  sizeof(context->saHpiSensorModifierUse));
         break;
 
     case COLUMN_SAHPISENSORFACTORSSTATIC:
-
+            /** TruthValue = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->
                                  saHpiSensorFactorsStatic,
-                                 sizeof(context->saHpiSensorFactorsStatic));
+                                 sizeof(context->
+                                        saHpiSensorFactorsStatic));
         break;
 
     case COLUMN_SAHPISENSORFACTORS:
@@ -1545,7 +1705,7 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
         break;
 
     case COLUMN_SAHPISENSORPERCENTAGE:
-
+            /** TruthValue = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->saHpiSensorPercentage,
                                  sizeof(context->saHpiSensorPercentage));
@@ -1594,21 +1754,21 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
         break;
 
     case COLUMN_SAHPISENSORTHRESHOLDDEFNISTHRESHOLD:
-
+            /** TruthValue = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
                                  (char *) &context->
                                  saHpiSensorThresholdDefnIsThreshold,
-
-                                 sizeof(context->saHpiSensorThresholdDefnIsThreshold));
+                                 sizeof(context->
+                                        saHpiSensorThresholdDefnIsThreshold));
         break;
 
     case COLUMN_SAHPISENSORTHRESHOLDDEFNTHOLDCAPABILITIES:
-
+            /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
                                  (char *) &context->
                                  saHpiSensorThresholdDefnTholdCapabilities,
                                  sizeof(context->
-                                 saHpiSensorThresholdDefnTholdCapabilities));
+                                        saHpiSensorThresholdDefnTholdCapabilities));
         break;
 
     case COLUMN_SAHPISENSORTHRESHOLDDEFNREADTHOLD:
@@ -1668,6 +1828,7 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
                                  (char *) &context->saHpiSensorRDR,
                                  context->saHpiSensorRDR_len);
         break;
+
     default:/** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in "
                  "saHpiSensorTable_get_value\n");
@@ -1675,5 +1836,3 @@ saHpiSensorTable_get_value(netsnmp_request_info *request,
     }
     return SNMP_ERR_NOERROR;
 }
-
-
