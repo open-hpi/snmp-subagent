@@ -39,7 +39,7 @@
 #include <saHpiSensorThdUpCriticalTable.h>
 #include <saHpiSensorThdUpMajorTable.h>
 #include <saHpiSensorThdUpMinorTable.h>
-                                                                                                       
+
 #include <saHpiSensorThdPosHysteresisTable.h>
 #include <saHpiSensorThdNegHysteresisTable.h>
 
@@ -58,18 +58,19 @@ static oid saHpiSensorCount_oid[] = { hpiResources_OID, 5, 0 };
 
 static u_long sensor_count = 0;
 static sensor_range_flags range_flags[] = {
-  {SAHPI_SRF_MIN,"MIN, "},
+  {SAHPI_SRF_MIN, "MIN, "},
   {SAHPI_SRF_MAX, "MAX, "},
   {SAHPI_SRF_NORMAL_MIN, "NORMAL_MIN, "},
   {SAHPI_SRF_NORMAL_MAX, "NORMAL_MAX, "},
-  {SAHPI_SRF_NOMINAL,"NOMINAL, "}};
+  {SAHPI_SRF_NOMINAL, "NOMINAL, "}
+};
+
 #define RANGE_FLAGS_LEN 5
 
 
 static int
 saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 				 SaHpiSensorRecT * entry,
-
 				 SaHpiSensorEvtEnablesT * enables,
 				 SaHpiRptEntryT * rpt_entry,
 				 oid *, size_t,
@@ -205,8 +206,8 @@ populate_sensor (SaHpiEntryIdT rdr_id,
 	}
 
 
-      
-      
+
+
       rc = saHpiSensorEventEnablesGet (session_id,
 				       rpt_entry->ResourceId,
 				       sensor->Num, &enables);
@@ -332,108 +333,111 @@ populate_sensor (SaHpiEntryIdT rdr_id,
       /*
        * Thresholds
        */
- 	if (sensor_context->is_threshold == SAHPI_TRUE) {
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_CRIT) */
+      if (sensor_context->saHpiSensorThresholdCapabilities == MIB_TRUE)
 	{
-	  rc = populate_ThdLowCritical (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.LowCritical);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdLowCritical failed with rc: %d\n",
-			 rc));
-	}
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_CRIT) */
+	  {
+	    rc = populate_ThdLowCritical (rpt_entry->DomainId,
+					  rpt_entry->ResourceId,
+					  sensor->Num,
+					  &sensor->ThresholdDefn,
+					  &sensor_threshold.LowCritical);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdLowCritical failed with rc: %d\n",
+			   rc));
+	  }
 
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MAJOR) */
-	{
-	  rc = populate_ThdLowMajor (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.LowMajor);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdLowMajor failed with rc: %d\n",
-			 rc));
-	}
-      
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MINOR) */
-	{
-	  rc = populate_ThdLowMinor (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.LowMinor);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdLowMinor failed with rc: %d\n",
-			 rc));
-	}
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_CRIT) */
-	{
-	  rc = populate_ThdUpCritical (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.UpCritical);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdUpCritical failed with rc: %d\n",
-			 rc));
-	}
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MAJOR) */
+	  {
+	    rc = populate_ThdLowMajor (rpt_entry->DomainId,
+				       rpt_entry->ResourceId,
+				       sensor->Num,
+				       &sensor->ThresholdDefn,
+				       &sensor_threshold.LowMajor);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdLowMajor failed with rc: %d\n",
+			   rc));
+	  }
 
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MAJOR) */
-	{
-	  rc = populate_ThdUpMajor (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.UpMajor);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdUpMajor failed with rc: %d\n",
-			 rc));
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_MINOR) */
+	  {
+	    rc = populate_ThdLowMinor (rpt_entry->DomainId,
+				       rpt_entry->ResourceId,
+				       sensor->Num,
+				       &sensor->ThresholdDefn,
+				       &sensor_threshold.LowMinor);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdLowMinor failed with rc: %d\n",
+			   rc));
+	  }
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_CRIT) */
+	  {
+	    rc = populate_ThdUpCritical (rpt_entry->DomainId,
+					 rpt_entry->ResourceId,
+					 sensor->Num,
+					 &sensor->ThresholdDefn,
+					 &sensor_threshold.UpCritical);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdUpCritical failed with rc: %d\n",
+			   rc));
+	  }
+
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MAJOR) */
+	  {
+	    rc = populate_ThdUpMajor (rpt_entry->DomainId,
+				      rpt_entry->ResourceId,
+				      sensor->Num,
+				      &sensor->ThresholdDefn,
+				      &sensor_threshold.UpMajor);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdUpMajor failed with rc: %d\n",
+			   rc));
+	  }
+
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MINOR) */
+	  {
+	    rc = populate_ThdUpMinor (rpt_entry->DomainId,
+				      rpt_entry->ResourceId,
+				      sensor->Num,
+				      &sensor->ThresholdDefn,
+				      &sensor_threshold.UpMinor);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdUpMinor failed with rc: %d\n",
+			   rc));
+	  }
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_HYSTERESIS) */
+	  {
+	    rc = populate_ThdPosHysteresis (rpt_entry->DomainId,
+					    rpt_entry->ResourceId,
+					    sensor->Num,
+					    &sensor->ThresholdDefn,
+					    &sensor_threshold.
+					    PosThdHysteresis);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdPosHysteresis failed with rc: %d\n",
+			   rc));
+	  }
+	  /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_HYSTERESIS) */
+	  {
+	    rc = populate_ThdNegHysteresis (rpt_entry->DomainId,
+					    rpt_entry->ResourceId,
+					    sensor->Num,
+					    &sensor->ThresholdDefn,
+					    &sensor_threshold.
+					    NegThdHysteresis);
+	    if (rc != AGENT_ERR_NOERROR)
+	      DEBUGMSGTL ((AGENT,
+			   "call to populate_ThdNegHysteresis failed with rc: %d\n",
+			   rc));
+	  }
 	}
-      
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_MINOR) */
-	{
-	  rc = populate_ThdUpMinor (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.UpMinor);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdUpMinor failed with rc: %d\n",
-			 rc));
-	}
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_UP_HYSTERESIS) */
-	{
-	  rc = populate_ThdPosHysteresis (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.PosThdHysteresis);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdPosHysteresis failed with rc: %d\n",
-			 rc));
-	}
-      /* if (sensor_context->thd_capabilities & SAHPI_STM_LOW_HYSTERESIS) */
-	{
-	  rc = populate_ThdNegHysteresis (rpt_entry->DomainId,
-					rpt_entry->ResourceId,
-					sensor->Num,
-					&sensor->ThresholdDefn,
-					&sensor_threshold.NegThdHysteresis);
-	  if (rc != AGENT_ERR_NOERROR)
-	    DEBUGMSGTL ((AGENT,
-			 "call to populate_ThdNegHysteresis failed with rc: %d\n",
-			 rc));
-	}
-      }
       rc = AGENT_ERR_NOERROR;
     }
   else
@@ -538,67 +542,68 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
       /*
        * Threshold rows
        */
-      if (ctx->is_threshold == SAHPI_TRUE) {
-	rc = delete_ThdLowCritical_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+      if (ctx->saHpiSensorThresholdCapabilities == MIB_TRUE)
+	{
+	  rc = delete_ThdLowCritical_row (ctx->domain_id,
+					  ctx->resource_id,
+					  ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowCritical failed with rc: %d\n",
 			 rc));
-      
-	rc = delete_ThdLowMajor_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+
+	  rc = delete_ThdLowMajor_row (ctx->domain_id,
+				       ctx->resource_id,
+				       ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowMajor failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdLowMinor_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdLowMinor_row (ctx->domain_id,
+				       ctx->resource_id,
+				       ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdLowMinor failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdUpCritical_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdUpCritical_row (ctx->domain_id,
+					 ctx->resource_id,
+					 ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpCritical failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdUpMajor_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdUpMajor_row (ctx->domain_id,
+				      ctx->resource_id,
+				      ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpMajor failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdUpMinor_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdUpMinor_row (ctx->domain_id,
+				      ctx->resource_id,
+				      ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdUpMinor failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdPosHysteresis_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdPosHysteresis_row (ctx->domain_id,
+					    ctx->resource_id,
+					    ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
 			 "call to delete_ThdPosHysteresis failed with rc: %d\n",
 			 rc));
-	rc = delete_ThdNegHysteresis_row (ctx->domain_id,
-					ctx->resource_id,
-					ctx->saHpiSensorIndex);
+	  rc = delete_ThdNegHysteresis_row (ctx->domain_id,
+					    ctx->resource_id,
+					    ctx->saHpiSensorIndex);
 
 	  if (rc != AGENT_ERR_NOERROR)
 	    DEBUGMSGTL ((AGENT,
@@ -617,7 +622,6 @@ delete_sensor_row (SaHpiDomainIdT domain_id,
 int
 saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 				 SaHpiSensorRecT * entry,
-
 				 SaHpiSensorEvtEnablesT * enables,
 				 SaHpiRptEntryT * rpt_entry,
 				 oid * rdr_entry, size_t rdr_entry_oid_len,
@@ -625,7 +629,7 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 {
   unsigned int update_entry = MIB_FALSE;
   long hash;
-  int i,len;
+  int i, len;
   SaHpiSensorDataFormatT data;
 
 
@@ -667,7 +671,6 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 
       data = entry->DataFormat;
       ctx->flags = data.Range.Flags;
-      ctx->is_threshold = entry->ThresholdDefn.IsThreshold;
 
       ctx->saHpiSensorRDR_len = rdr_entry_oid_len * sizeof (oid);
       memcpy (ctx->saHpiSensorRDR, rdr_entry, ctx->saHpiSensorRDR_len);
@@ -675,6 +678,12 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
       ctx->saHpiSensorIndex = entry->Num;
       ctx->saHpiSensorType = entry->Type + 1;
       ctx->saHpiSensorCategory = entry->Category + 1;
+      ctx->saHpiSensorHasThresholds =
+	(entry->ThresholdDefn.IsThreshold ==
+	 SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+      ctx->saHpiSensorThresholdCapabilities =
+	entry->ThresholdDefn.TholdCapabilities + 1;
 
       // DOAMIN
       ctx->domain_id = rpt_entry->DomainId;
@@ -753,21 +762,25 @@ saHpiSensorTable_modify_context (SaHpiEntryIdT rdr_id,
 
       ctx->saHpiSensorRangeFlags_len = 0;
 
-      for  (i =0; i<RANGE_FLAGS_LEN; i++) {
-	if ((data.Range.Flags & range_flags[i].flag) == range_flags[i].flag) {
-	  len = strlen(range_flags[i].str);
-	  if (len + ctx->saHpiSensorRangeFlags_len  > SENSOR_RANGE_FLAGS_MAX)
-	    break;
+      for (i = 0; i < RANGE_FLAGS_LEN; i++)
+	{
+	  if ((data.Range.Flags & range_flags[i].flag) == range_flags[i].flag)
+	    {
+	      len = strlen (range_flags[i].str);
+	      if (len + ctx->saHpiSensorRangeFlags_len >
+		  SENSOR_RANGE_FLAGS_MAX)
+		break;
 
-	  memcpy(ctx->saHpiSensorRangeFlags + ctx->saHpiSensorRangeFlags_len,
-		 range_flags[i].str,
-		 len);
+	      memcpy (ctx->saHpiSensorRangeFlags +
+		      ctx->saHpiSensorRangeFlags_len, range_flags[i].str,
+		      len);
 
-	  ctx->saHpiSensorRangeFlags_len =  ctx->saHpiSensorRangeFlags_len + len;
-	
+	      ctx->saHpiSensorRangeFlags_len =
+		ctx->saHpiSensorRangeFlags_len + len;
+
+	    }
+
 	}
-
-      }
       ctx->saHpiSensorRangeFlags_len -= 2;
       if (update_entry == MIB_TRUE)
 	return AGENT_ENTRY_EXIST;
@@ -889,69 +902,69 @@ saHpiSensorTable_row_copy (saHpiSensorTable_context * dst,
   /*
    * copy components into the context structure
    */
-    dst->saHpiSensorIndex = src->saHpiSensorIndex;
+  dst->saHpiSensorIndex = src->saHpiSensorIndex;
 
-    dst->saHpiSensorType = src->saHpiSensorType;
+  dst->saHpiSensorType = src->saHpiSensorType;
 
-    dst->saHpiSensorCategory = src->saHpiSensorCategory;
+  dst->saHpiSensorCategory = src->saHpiSensorCategory;
 
-    dst->saHpiSensorEventsCategoryControl =
-        src->saHpiSensorEventsCategoryControl;
+  dst->saHpiSensorEventsCategoryControl =
+    src->saHpiSensorEventsCategoryControl;
 
-    memcpy(dst->saHpiSensorEventsSupported,
-           src->saHpiSensorEventsSupported,
-           src->saHpiSensorEventsSupported_len);
-    dst->saHpiSensorEventsSupported_len =
-        src->saHpiSensorEventsSupported_len;
+  memcpy (dst->saHpiSensorEventsSupported,
+	  src->saHpiSensorEventsSupported,
+	  src->saHpiSensorEventsSupported_len);
+  dst->saHpiSensorEventsSupported_len = src->saHpiSensorEventsSupported_len;
 
-    dst->saHpiSensorStatus = src->saHpiSensorStatus;
+  dst->saHpiSensorStatus = src->saHpiSensorStatus;
 
-    memcpy(dst->saHpiSensorAssertEvents, src->saHpiSensorAssertEvents,
-           src->saHpiSensorAssertEvents_len);
-    dst->saHpiSensorAssertEvents_len = src->saHpiSensorAssertEvents_len;
+  memcpy (dst->saHpiSensorAssertEvents, src->saHpiSensorAssertEvents,
+	  src->saHpiSensorAssertEvents_len);
+  dst->saHpiSensorAssertEvents_len = src->saHpiSensorAssertEvents_len;
 
-    memcpy(dst->saHpiSensorDeassertEvents, src->saHpiSensorDeassertEvents,
-           src->saHpiSensorDeassertEvents_len);
-    dst->saHpiSensorDeassertEvents_len =
-        src->saHpiSensorDeassertEvents_len;
+  memcpy (dst->saHpiSensorDeassertEvents, src->saHpiSensorDeassertEvents,
+	  src->saHpiSensorDeassertEvents_len);
+  dst->saHpiSensorDeassertEvents_len = src->saHpiSensorDeassertEvents_len;
 
-    dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
+  dst->saHpiSensorIgnore = src->saHpiSensorIgnore;
 
-    dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
+  dst->saHpiSensorReadingFormats = src->saHpiSensorReadingFormats;
 
-    dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
+  dst->saHpiSensorIsNumeric = src->saHpiSensorIsNumeric;
 
-    dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
+  dst->saHpiSensorSignFormat = src->saHpiSensorSignFormat;
 
-    dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
+  dst->saHpiSensorBaseUnits = src->saHpiSensorBaseUnits;
 
-    dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
+  dst->saHpiSensorModifierUnits = src->saHpiSensorModifierUnits;
 
-    dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
+  dst->saHpiSensorModifierUse = src->saHpiSensorModifierUse;
 
-    dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
+  dst->saHpiSensorFactorsStatic = src->saHpiSensorFactorsStatic;
 
-    memcpy(dst->saHpiSensorFactors, src->saHpiSensorFactors,
-           src->saHpiSensorFactors_len);
-    dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
+  memcpy (dst->saHpiSensorFactors, src->saHpiSensorFactors,
+	  src->saHpiSensorFactors_len);
+  dst->saHpiSensorFactors_len = src->saHpiSensorFactors_len;
 
-    dst->saHpiSensorFactorsLinearization =
-        src->saHpiSensorFactorsLinearization;
+  dst->saHpiSensorFactorsLinearization = src->saHpiSensorFactorsLinearization;
 
-    dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
+  dst->saHpiSensorPercentage = src->saHpiSensorPercentage;
 
-    memcpy(dst->saHpiSensorRangeFlags, src->saHpiSensorRangeFlags,
-           src->saHpiSensorRangeFlags_len);
-    dst->saHpiSensorRangeFlags_len = src->saHpiSensorRangeFlags_len;
+  memcpy (dst->saHpiSensorRangeFlags, src->saHpiSensorRangeFlags,
+	  src->saHpiSensorRangeFlags_len);
+  dst->saHpiSensorRangeFlags_len = src->saHpiSensorRangeFlags_len;
 
-    dst->saHpiSensorOEM = src->saHpiSensorOEM;
+  dst->saHpiSensorHasThresholds = src->saHpiSensorHasThresholds;
 
-    memcpy(src->saHpiSensorRDR, dst->saHpiSensorRDR,
-           src->saHpiSensorRDR_len);
-    dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
+  dst->saHpiSensorThresholdCapabilities =
+    src->saHpiSensorThresholdCapabilities;
+
+  dst->saHpiSensorOEM = src->saHpiSensorOEM;
+
+  memcpy (src->saHpiSensorRDR, dst->saHpiSensorRDR, src->saHpiSensorRDR_len);
+  dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
   dst->flags = src->flags;
-  dst->is_threshold = src->is_threshold;
   dst->rdr_id = src->rdr_id;
   dst->resource_id = src->resource_id;
   dst->domain_id = src->domain_id;
@@ -1072,6 +1085,8 @@ saHpiSensorTable_create_row (netsnmp_index * hdr)
   ctx->saHpiSensorAssertEvents_len = 0;
   ctx->saHpiSensorDeassertEvents_len = 0;
   ctx->hash = 0;
+  ctx->saHpiSensorHasThresholds = MIB_FALSE;
+  ctx->saHpiSensorThresholdCapabilities = 0;
   return ctx;
 }
 
@@ -1206,6 +1221,8 @@ saHpiSensorTable_set_reserve1 (netsnmp_request_group * rg)
 	case COLUMN_SAHPISENSORFACTORSLINEARIZATION:
 	case COLUMN_SAHPISENSORPERCENTAGE:
 	case COLUMN_SAHPISENSORRANGEFLAGS:
+	case COLUMN_SAHPISENSORHASTHRESHOLDS:
+	case COLUMN_SAHPISENSORTHRESHOLDCAPABILITIES:
 	case COLUMN_SAHPISENSOROEM:
 	case COLUMN_SAHPISENSORRDR:
 	  rc = SNMP_ERR_NOTWRITABLE;
@@ -1339,7 +1356,7 @@ saHpiSensorTable_set_action (netsnmp_request_group * rg)
 	  if (rc2 == AGENT_ERR_WRONG_DELIM)
 	    rc = SNMP_ERR_BADVALUE;
 	  break;
-	
+
 	default:
 		/** We shouldn't get here */
 	  netsnmp_assert (0);  /** why wasn't this caught in reserve1? */
@@ -1667,12 +1684,29 @@ saHpiSensorTable_get_value (netsnmp_request_info * request,
 				(char *) &context->saHpiSensorPercentage,
 				sizeof (context->saHpiSensorPercentage));
       break;
-   case COLUMN_SAHPISENSORRANGEFLAGS:
-            /** OCTETSTR = ASN_OCTET_STR */
-        snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                 (char *) &context->saHpiSensorRangeFlags,
-                                 context->saHpiSensorRangeFlags_len);
-        break;
+    case COLUMN_SAHPISENSORRANGEFLAGS:
+	    /** OCTETSTR = ASN_OCTET_STR */
+      snmp_set_var_typed_value (var, ASN_OCTET_STR,
+				(char *) &context->saHpiSensorRangeFlags,
+				context->saHpiSensorRangeFlags_len);
+      break;
+    case COLUMN_SAHPISENSORHASTHRESHOLDS:
+	    /** TruthValue = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorHasThresholds,
+				sizeof (context->saHpiSensorHasThresholds));
+      break;
+
+    case COLUMN_SAHPISENSORTHRESHOLDCAPABILITIES:
+	    /** INTEGER = ASN_INTEGER */
+      snmp_set_var_typed_value (var, ASN_INTEGER,
+				(char *) &context->
+				saHpiSensorThresholdCapabilities,
+				sizeof (context->
+					saHpiSensorThresholdCapabilities));
+      break;
+
 
     case COLUMN_SAHPISENSOROEM:
 	    /** UNSIGNED32 = ASN_UNSIGNED */

@@ -111,11 +111,17 @@ extern "C"
 	 /** TruthValue = ASN_INTEGER */
     long saHpiSensorPercentage;
 
-  /** OCTETSTR = ASN_OCTET_STR */
-        unsigned char   saHpiSensorRangeFlags[SENSOR_RANGE_FLAGS_MAX];
-        long            saHpiSensorRangeFlags_len;
+         /** OCTETSTR = ASN_OCTET_STR */
+    unsigned char   saHpiSensorRangeFlags[SENSOR_RANGE_FLAGS_MAX];
+    long            saHpiSensorRangeFlags_len;
 
-	/** UNSIGNED32 = ASN_UNSIGNED */
+      /** TruthValue = ASN_INTEGER */
+    long            saHpiSensorHasThresholds;
+
+      /** INTEGER = ASN_INTEGER */
+    long            saHpiSensorThresholdCapabilities;
+    
+      /** UNSIGNED32 = ASN_UNSIGNED */
     unsigned long saHpiSensorOEM;
 
       /** RowPointer = ASN_OBJECT_ID */
@@ -127,28 +133,10 @@ extern "C"
     long domain_id;
     long hash;
     int flags;
-    SaHpiBoolT is_threshold;
 
   } saHpiSensorTable_context;
 
-  /*
-   * A mapping structure for reading values.
-   */
-  /*
-  typedef struct sensor_threshold_to_mib_s
-  {
-    SaHpiSensorReadingT *reading;
-    SaHpiUint8T bit;
-    int pos;
-  } sensor_threshold_to_mib;
-  
-  typedef struct sensor_reading_to_mib_s
-  {
-    SaHpiSensorReadingT *reading;
-    SaHpiSensorRangeFlagsT flag;
-    int pos;
-  } sensor_reading_to_mib;
-  */
+
   typedef struct sensor_range_flags_
   {
     SaHpiSensorRangeFlagsT flag;
@@ -183,8 +171,6 @@ extern "C"
 /*************************************************************
  * oid declarations
  */
-  //   extern oid      saHpiSensorTable_oid[];
-  //  extern size_t   saHpiSensorTable_oid_len;
 
 #define saHpiSensorTable_TABLE_OID hpiResources_OID,6
 
@@ -211,12 +197,12 @@ extern "C"
 #define COLUMN_SAHPISENSORFACTORSLINEARIZATION 18
 #define COLUMN_SAHPISENSORPERCENTAGE 19
 #define COLUMN_SAHPISENSORRANGEFLAGS 20
-#define COLUMN_SAHPISENSOROEM 21
-#define COLUMN_SAHPISENSORRDR 22
+#define COLUMN_SAHPISENSORHASTHRESHOLDS 21
+#define COLUMN_SAHPISENSORTHRESHOLDCAPABILITIES 22
+#define COLUMN_SAHPISENSOROEM 23
+#define COLUMN_SAHPISENSORRDR 24
 #define saHpiSensorTable_COL_MIN 1
-#define saHpiSensorTable_COL_MAX 22
-
-
+#define saHpiSensorTable_COL_MAX 24
 
   int
     saHpiSensorTable_extract_index (saHpiSensorTable_context * ctx,
