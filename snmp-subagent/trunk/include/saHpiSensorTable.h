@@ -49,7 +49,7 @@ extern "C"
 #define SAHPI_RANGE_EVENT_SENSOR_MAX  15
 #define THRESHOLD_RAW_MAX  32
 #define THRESHOLD_INTERPRETED_MAX 264
-
+#define SENSOR_EVENTS_SUPPORTED_MAX 255
   /*
    * Position of values within a OCTET
    */
@@ -85,8 +85,9 @@ extern "C"
 	/** INTEGER = ASN_INTEGER */
     long saHpiSensorEventsCategoryControl;
 
-	/** UNSIGNED32 = ASN_UNSIGNED */
-    unsigned long saHpiSensorEventsState;
+    /** OCTETSTR = ASN_OCTET_STR */
+    unsigned char   saHpiSensorEventsSupported[SENSOR_EVENTS_SUPPORTED_MAX];
+    size_t            saHpiSensorEventsSupported_len;
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
     unsigned long saHpiSensorStatus;
