@@ -850,11 +850,18 @@ static int populate_drt_call  = FALSE;
 
 int populate_drt(void) {
 
+	oid domain_ref_oids[DOMAIN_REF_INDEX_LEN];
+	netsnmp_index domain_refer_index;
+
+	saHpiDomainReferenceTable_context  *domain_ref_ctx;
 	int rval = 0;
 	SaHpiSessionIdT sid;
 
-	SaHpiDomainInfoT DomainInfo;
-	memset(&DomainInfo, 0, sizeof(SaHpiDomainInfoT));
+	SaHpiEntryIdT 	EntryId;
+	SaHpiEntryIdT 	NextEntryId;
+	SaHpiDrtEntryT 	DrtEntry;
+
+	memset(&DrtEntry, 0, sizeof(DrtEntry));
 
 	if ( SA_OK != saHpiSessionOpen(
 		SAHPI_UNSPECIFIED_DOMAIN_ID, 
@@ -866,7 +873,44 @@ int populate_drt(void) {
 		top_drt.sid = sid;
 		populate_drt_call  = TRUE;
 	}
-	
+
+	EntryId = SAHPI_FIRST_ENTRY;
+	do {
+		saHpiDrtEntryGet(sid, 
+				 EntryId,
+				 &NextEntryId,
+				 &DrtEntry);
+		EntryId = NextEntryId;
+
+		/* create domain tuple/ index */
+		domain_ref_oids[0] = SAHPI_UNSPECIFIED_DOMAIN_ID; 
+		domain_ref_oids[1] = DrtEntry.DomainId; 
+		domain_refer_index.len =  DOMAIN_REF_INDEX_LEN;
+		domain_refer_index.oids = (oid *) & domain_refer_index;  
+
+		/* See if it exists. */
+		domain_ref_ctx = NULL;
+		domain_ref_ctx = CONTAINER_FIND (
+			cb.container, 
+			&domain_refer_index);
+		// If we don't find it - we create it.
+
+		if (!domain_ref_ctx) 
+			/* New entry. Add it */
+			domain_ref_ctx = 
+				saHpiDomainReferenceTable_create_row (
+					&domain_refer_index);
+
+		/* fill in values in ctx*/
+	       	/* IsPeer */
+		domain_ref_ctx->saHpiDomainReferenceIsPeer =
+			( DrtEntry.IsPeer == 0) ? 1 : 2;
+
+		/* commit/add */
+		CONTAINER_INSERT(cb.container, domain_ref_ctx);
+
+	} while (EntryId != SAHPI_LAST_ENTRY);
+
 	return rval;
 
 }
@@ -877,6 +921,7 @@ SaHpiSessionIdT get_session_id(SaHpiDomainIdT did) {
 	else
 		return -1;
 }
+
 
 
 
