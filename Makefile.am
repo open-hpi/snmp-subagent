@@ -55,7 +55,7 @@ DIST_SUBDIRS = src
 
 DISTCHECK_CONFIGURE_FLAGS = --with-initdir=prefix
 
-ALL_SOURCES = $(shell \
+ALLSOURCES = $(shell \
 	find . \( -name SCCS -o -name BitKeeper -o -name .svn -o -name CVS \) -prune -o \
 	-name '*.[chS]' -print )
 
@@ -66,12 +66,12 @@ include_HEADERS	= $(shell find include -name '*.h')
 rpm: dist
 	$(RPM) $(RPMFLAGS) $(TARFILE) </dev/null;
 
-tags:   $(ALL_SOURCES)
+tags:   $(ALLSOURCES)
 	@echo making tags		
-	@echo $(ALL_SOURCES) | xargs ctags
-TAGS:   $(ALL_SOURCES)
+	@echo $(ALLSOURCES) | xargs ctags
+TAGS:   $(ALLSOURCES)
 	@echo making TAGS
-	@echo $(ALL_SOURCES) | xargs etags
-cscope: $(ALL_SOURCES)
+	@echo $(ALLSOURCES) | xargs etags
+cscope: $(ALLSOURCES)
 	@echo making cscope
 	@echo $(ALL_SOURCES) > cscope.files && cscope -b
