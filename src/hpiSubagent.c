@@ -54,6 +54,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+
+/*
+ * Internal prototypes
+ */
+static void usage(char *applName);
+
+
 /*
  * Internal data for the sub-agent.
  */
@@ -1087,6 +1094,21 @@ hpiSubagent_parse_config_max_event (const char *token, char *cptr)
     }
 }
 
+void
+usage(char *applName)
+{
+  printf("Usage: %s [OPTION]...\n", applName);
+  printf("\n");
+  printf("Options:\n");
+  printf("  -d            enables debug mode\n");
+  printf("  -f            enables forking\n");
+  printf("  -s            disables logging via syslog facility\n");
+  printf("  -C            do not read default SNMP configuration files\n");
+  printf("  -x ADDRESS    use ADDRESS as AgentX address\n");  
+  printf("  -h            print this help and exit\n");
+
+  return;
+}
 
 
 int
@@ -1100,28 +1122,44 @@ main (int argc, char **argv)
   /* change this if you want to be a SNMP master agent */
 
 
-  while ((c = getopt (argc, argv, "fds?")) != EOF)
-    switch (c)
-      {
+  while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
+
+    switch (c) {
+
       case 'f':
-	do_fork = AGENT_TRUE;
-	break;
+        do_fork = AGENT_TRUE;
+	   break;
+
       case 'd':
-	debug_register_tokens (AGENT);
-	snmp_enable_stderrlog ();
-	snmp_set_do_debugging (1);
-	break;
-	break;
+        debug_register_tokens (AGENT);
+        snmp_enable_stderrlog ();
+        snmp_set_do_debugging (1);
+      break;
+
       case 's':
-	do_syslog = AGENT_FALSE;
-	break;
+        do_syslog = AGENT_FALSE;
+      break;
+
+      case 'C':
+        netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID,
+                               NETSNMP_DS_LIB_DONT_READ_CONFIGS,
+                               1);
+      break;
+
+      case 'x':
+        netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
+                              NETSNMP_DS_AGENT_X_SOCKET,
+                              optarg);
+      break;
+
+      case 'h':
       default:
-	printf ("Usage %s [-dfs]\n", argv[0]);
-	printf ("where -d enables debug mode\n");
-	printf ("where -f enables forking\n");
-	printf ("where -s disables logging via syslog facility.\n");
-	exit (1);
-      }
+        usage(argv[0]);
+        exit(1);
+      break;
+    }
+  }
+
   init_snmp_logging ();
 
   if (do_syslog == AGENT_TRUE)
