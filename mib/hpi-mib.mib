@@ -16,7 +16,7 @@ IMPORTS
 	experimental		FROM RFC1155-SMI;
 
 hpi MODULE-IDENTITY
-    LAST-UPDATED "200311061800Z"
+    LAST-UPDATED "200311111800Z"
     ORGANIZATION "OpenHPI"
     CONTACT-INFO "
 		Sean Dague
@@ -2158,7 +2158,8 @@ saHpiSystemEventLogEntry OBJECT-TYPE
 SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogEntryId	Unsigned32,
 	saHpiSystemEventLogTimestamp	TimeStamp,
-	saHpiSystemEventLogged		RowPointer
+	saHpiSystemEventLogged		RowPointer,
+	saHpiSystemEventClearEventTable TruthValue
 	}
 
 saHpiSystemEventLogEntryId OBJECT-TYPE
@@ -2206,6 +2207,15 @@ saHpiSystemEventLogged OBJECT-TYPE
         DESCRIPTION     "Forward pointer to the event."
         ::= {saHpiSystemEventLogEntry 3}
 
+saHpiSystemEventClearEventTable OBJECT-TYPE
+	SYNTAX		TruthValue
+	MAX-ACCESS	read-write
+	STATUS		current
+	DESCRIPTION	"Erase the contents of system event rows (and event).
+
+	The deletion is done on the basis of the saHpiResourceId index value -
+	meaning it can erase more than one row."
+	::= {saHpiSystemEventLogEntry 4}
 
 --
 -- BILL
@@ -4690,7 +4700,8 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogDeleteEntrySupported,
 		saHpiSystemEventLogEntryId,
 		saHpiSystemEventLogTimestamp,
-		saHpiSystemEventLogged
+		saHpiSystemEventLogged,
+		saHpiSystemEventClearEventTable
 	}
 	STATUS current
 	DESCRIPTION 
