@@ -3633,13 +3633,9 @@ saHpiUserEventEntry OBJECT-TYPE
 SaHpiUserEventEntry ::= SEQUENCE {
 
         saHpiUserEventTimestamp         SaHpiTimeString,
-
--- IBM-DJ User event , writeable.
-        
         saHpiUserEventTextType          SaHpiTextType,
         saHpiUserEventTextLanguage      SaHpiTextLanguage,
         saHpiUserEventText              SaHpiText,
-
         saHpiUserEventDelete            RowStatus
         }
 
@@ -3815,7 +3811,6 @@ saHpiAnnouncementEntityPath     OBJECT-TYPE
         For example:
          {SYSTEM_CHASSIS,2}{PROCESSOR_BOARD,0} "
 	::=   {saHpiAnnouncementEntry 6 }
-
         
 saHpiAnnouncementSensorNum      OBJECT-TYPE
         SYNTAX          Unsigned32
