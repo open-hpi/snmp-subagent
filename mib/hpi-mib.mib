@@ -230,6 +230,41 @@ SaHpiCapabilities ::= TEXTUAL-CONVENTION
 	to the table. They explained in more details in the columnar
 	node. "
         SYNTAX          OCTET STRING(SIZE(0..255))
+	
+SaHpiOptionalData ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION     " 
+	Sensor events may contain optional data items passed and stored with the 
+	event. If these optional data items are present, they will be included with 
+	the event data.
+	 
+        This texual definition defines the types of optional data
+	passed back from a sensor during an event response.
+	
+	Each capability is seperated by a delimeter a comma 
+	',' or semicolon ';'. 
+
+	Sensor events may contain optional data items passed and stored with the 
+	event. If these optional data items are present, they will be included with 
+	the event data returned in response to a saHpiEventGet (SAI-HPI-b.01.01 
+	section 6.5.3) or saHpiEventLogEntryGet (SAI-HPI-B.01.01 section 6.4.2). 
+	Also, the optional data items may be included with the event data passed 
+	to the saHpiEventLogEntryAdd (SAI-HPI-B.01.01 section 6.4.3).
+    
+	Specific implementations of HPI (SNMP subagent) may have restrictions on 
+	how much data may be passed to saHpiEventLogEntryAdd. These restrictions 
+	should be documented by the provider of the HPI interface.
+
+	String token values are listed below.
+		SAHPI_SOD_TRIGGER_READING   
+		SAHPI_SOD_TRIGGER_THRESHOLD 
+		SAHPI_SOD_OEM               
+		SAHPI_SOD_PREVIOUS_STATE    
+		SAHPI_SOD_CURRENT_STATE     
+		SAHPI_SOD_SENSOR_SPECIFIC"
+    REFERENCE
+    "See SAI-HPI-B.01.01 section 8.14"
+        SYNTAX          OCTET STRING(SIZE(0..255))
 
 SaHpiTime ::= TEXTUAL-CONVENTION
 	STATUS       current
@@ -3056,7 +3091,7 @@ SaHpiSensorEventEntry ::= SEQUENCE {
 
         saHpiSensorEventState                   SaHpiEventState,
 
-        saHpiSensorEventOptionalData            Unsigned8,
+        saHpiSensorEventOptionalData            SaHpiOptionalData,
         
         saHpiSensorEventTriggerReadingType      SaHpiSensorReadingType,
         saHpiSensorEventTriggerReading          SaHpiSensorReadingValue,
@@ -3150,11 +3185,11 @@ saHpiSensorEventState OBJECT-TYPE
         ::= {saHpiSensorEventEntry 5}
 
 saHpiSensorEventOptionalData OBJECT-TYPE
-        SYNTAX      Unsigned8
+        SYNTAX      SaHpiOptionalData
         MAX-ACCESS  read-only
         STATUS      current
         DESCRIPTION
-        "DMJ - KR"
+        "See textual convention aHpiOptionalData."
         ::= {saHpiSensorEventEntry 6}
 
 
@@ -3286,7 +3321,7 @@ SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
         saHpiSensorEnableChangeEventEventsEnabled    	TruthValue,
         saHpiSensorEnableChangeEventAssertEvents     	SaHpiEventState,
         saHpiSensorEnableChangeEventDeassertEvents   	SaHpiEventState,
-        saHpiSensorEnableChangeEventOptionalData     	SaHpiCapabilities,
+        saHpiSensorEnableChangeEventOptionalData     	SaHpiOptionalData,
 
         saHpiSensorEnableChangeEventState       	SaHpiEventState
         }
@@ -3347,50 +3382,30 @@ saHpiSensorEnableChangeEventAssertEvents OBJECT-TYPE
 
 
 saHpiSensorEnableChangeEventDeassertEvents OBJECT-TYPE
-    SYNTAX      SaHpiEventState
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-    "Refer to the textual convention for more details."
-    ::= {saHpiSensorEnableChangeEventEntry 7}
+	SYNTAX      SaHpiEventState
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Refer to the textual convention for more details."
+	::= {saHpiSensorEnableChangeEventEntry 7}
 
 saHpiSensorEnableChangeEventOptionalData OBJECT-TYPE
-	SYNTAX      SaHpiCapabilities
+	SYNTAX      SaHpiOptionalData
 	MAX-ACCESS  read-only
 	STATUS      current
 	DESCRIPTION 
-	"This columnar node provides a list of string delimited indicators.  See
-	textual convention for details.
-    
-	Sensor events may contain optional data items passed and stored with the 
-	event. If these optional data items are present, they will be included with 
-	the event data returned in response to a saHpiEventGet (SAI-HPI-b.01.01 
-	section 6.5.3) or saHpiEventLogEntryGet (SAI-HPI-B.01.01 section 6.4.2). 
-	Also, the optional data items may be included with the event data passed 
-	to the saHpiEventLogEntryAdd (SAI-HPI-B.01.01 section 6.4.3).
-    
-	Specific implementations of HPI (SNMP subagent) may have restrictions on 
-	how much data may be passed to saHpiEventLogEntryAdd. These restrictions 
-	should be documented by the provider of the HPI interface.
-
-	String token values are listed below.
-		SAHPI_SOD_TRIGGER_READING   
-		SAHPI_SOD_TRIGGER_THRESHOLD 
-		SAHPI_SOD_OEM               
-		SAHPI_SOD_PREVIOUS_STATE    
-		SAHPI_SOD_CURRENT_STATE     
-		SAHPI_SOD_SENSOR_SPECIFIC"
-    REFERENCE
-    "See SAI-HPI-B.01.01 section 8.14"
-    ::= {saHpiSensorEnableChangeEventEntry 8}
+	"See textual convention SaHpiOptionalData."
+	REFERENCE
+	"See SAI-HPI-B.01.01 section 8.14"
+	::= {saHpiSensorEnableChangeEventEntry 8}
     
 saHpiSensorEnableChangeEventState OBJECT-TYPE
-    SYNTAX      SaHpiEventState
-    MAX-ACCESS  read-only
-    STATUS      current
-    DESCRIPTION
-    "Current set of asserted Event states."
-    ::= {saHpiSensorEnableChangeEventEntry 9}
+	SYNTAX      SaHpiEventState
+	MAX-ACCESS  read-only
+	STATUS      current
+	DESCRIPTION
+	"Current set of asserted Event states."
+	::= {saHpiSensorEnableChangeEventEntry 9}
 
 
 -- *********************************
