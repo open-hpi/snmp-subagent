@@ -6667,8 +6667,10 @@ saHpiSensorThdLowCriticalTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiSensorThdLowCriticalEntry
         MAX-ACCESS      not-accessible
         STATUS          current
-        DESCRIPTION     "A table definining lower critical threshold values for
-        sensor that supports raw or interpreted values."
+        DESCRIPTION     "A table definining the lower critical threshold value for 
+	a given sensor."
+	REFERENCE
+	"SAI-HPI-B.01.01 sections 7.2 and 8.5." 
         ::= {hpiSensor 7}
 
 saHpiSensorThdLowCriticalEntry OBJECT-TYPE
