@@ -2431,6 +2431,7 @@ SaHpiHotSwapEntry ::= SEQUENCE {
 
 saHpiHotSwapIndicator OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             off(1),
             on(2) }
     MAX-ACCESS read-create
@@ -2445,6 +2446,7 @@ saHpiHotSwapIndicator OBJECT-TYPE
 
 saHpiHotSwapPowerState OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             off(1),
             on(2),
             cycle(3) }
@@ -2459,6 +2461,7 @@ saHpiHotSwapPowerState OBJECT-TYPE
 
 saHpiHotSwapResetState OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             coldReset(1),
             warmReset(2),
             resetAssert(3),
@@ -2483,6 +2486,7 @@ saHpiHotSwapResetState OBJECT-TYPE
 
 saHpiHotSwapState OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             inactive(1),
             insertionPending(2),
             activeHealthy(3),
@@ -2529,13 +2533,14 @@ saHpiHotSwapState OBJECT-TYPE
 
 saHpiHotSwapPreviousState OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             inactive(1),
             insertionPending(2),
             activeHealthy(3),
             activeUnhealthy(4),
             extractionPending(5),
             notPresent(6) }
-    MAX-ACCESS read-create
+    MAX-ACCESS read-only
     STATUS current
     DESCRIPTION
         "The previous hot swap state of the resource.  See hotSwapState 
@@ -2546,6 +2551,7 @@ saHpiHotSwapPreviousState OBJECT-TYPE
 
 saHpiHotSwapEventSeverity OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             critical(1),
             major(2),
             minor(3),
@@ -2588,6 +2594,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
 
 saHpiHotSwapActionRequest OBJECT-TYPE
     SYNTAX INTEGER {
+    		undefined(0),
             insertion(1),
             extraction(2) }
     MAX-ACCESS read-create
