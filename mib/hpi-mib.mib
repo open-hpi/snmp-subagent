@@ -2024,6 +2024,8 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
         
         All of the fields in the following structure may or 
         may not be used by a given resource."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 
 	::=   {saHpiResourceEntry 8 }
 
@@ -2032,23 +2034,10 @@ saHpiResourceInfoSpecificVer OBJECT-TYPE
         SYNTAX          Unsigned32(0..255)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 9 }
 
 
@@ -2057,23 +2046,10 @@ saHpiResourceInfoDeviceSupport OBJECT-TYPE
         SYNTAX          Unsigned32(0..255)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 10 }
 
 
@@ -2082,23 +2058,10 @@ saHpiResourceInfoManufacturerId OBJECT-TYPE
         SYNTAX          SaHpiManufacturerId
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 11 }
 
 
@@ -2107,23 +2070,11 @@ saHpiResourceInfoProductId OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
+
 	::=   {saHpiResourceEntry 12 }
 
 
@@ -2132,23 +2083,10 @@ saHpiResourceInfoFirmwareMajorRev OBJECT-TYPE
         SYNTAX          Unsigned32(0..255)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 13 }
 
 
@@ -2156,23 +2094,10 @@ saHpiResourceInfoFirmwareMinorRev OBJECT-TYPE
         SYNTAX          Unsigned32(0..255)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     " 
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        that the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 14 }
 
 
@@ -2181,23 +2106,10 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
         SYNTAX          Unsigned32(0..255)
         MAX-ACCESS      read-only
         STATUS          current
-        DESCRIPTION     "
-        saHpiResourceInfo contains static configuration data 
-        concerning the management controller associated with 
-        the resource, or the resource itself. 
-        
-        Note this information is used to describe the resource; 
-        that is, the piece of infrastructure which manages an 
-        entity (or multiple entities) - NOT the entities for 
-        which the resource provides management. The purpose of the 
-        saHpiResourceInfoT structure is to provide information 
-        That the HPI user may need in order to interact 
-        correctly with the resource (e.g., recognize a 
-        specific management controller which may have defined 
-        OEM fields in sensors, OEM controls, etc.
-        
-        All of the fields in the following structure may or 
-        may not be used by a given resource."
+        DESCRIPTION     
+	" See saHpiResourceInfoResourceRev for over view."
+	REFERENCE 
+	"See sections 6.3 and 8.21"
 	::=   {saHpiResourceEntry 15 }
 
 
@@ -2213,6 +2125,9 @@ saHpiResourceInfoGuid   OBJECT-TYPE
         format, with a 3-bit variant field of 10x (where x indicates 'don't care')
 	
 	See textial-convention"
+	REFERENCE 
+	"See sections 6.3 and 8.21"
+	
 
 	::=   {saHpiResourceEntry 16 }
 
