@@ -58,7 +58,8 @@ extern "C"
     unsigned char
       saHpiSensorReadingCurrentEventStatus[SENSOR_READING_EVENT_MAX];
     size_t saHpiSensorReadingCurrentEventStatus_len;
-
+   
+    SaHpiEventCategoryT sensor_category;
     long sensor_id;
     long resource_id;
     long domain_id;

@@ -209,6 +209,9 @@ modify_saHpiSensorReadingMaxTable_row (SaHpiDomainIdT domain_id,
 				 * values of '0' uninitialized */
       ctx->hash = hash;
 
+      ctx->resource_id = resource_id;
+      ctx->domain_id = domain_id;
+      ctx->sensor_id = sensor_num;
 
       build_reading_strings (reading,
 			     sensor_category,
@@ -282,7 +285,10 @@ static int
 	  src->saHpiSensorReadingMaxEventStatus_len);
   dst->saHpiSensorReadingMaxEventStatus_len =
     src->saHpiSensorReadingMaxEventStatus_len;
-
+ dst->resource_id = src->resource_id;
+    dst->domain_id = src->domain_id;
+    dst->sensor_id = src->sensor_id;
+    dst->hash = src->hash;
   return 0;
 }
 

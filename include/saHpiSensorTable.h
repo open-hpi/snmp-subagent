@@ -118,11 +118,13 @@ extern "C"
       /** RowPointer = ASN_OBJECT_ID */
     oid saHpiSensorRDR[MAX_OID_LEN];
     long saHpiSensorRDR_len;
+
     long rdr_id;
     long resource_id;
     long domain_id;
     long hash;
     int flags;
+    SaHpiSensorThdCapT thd_capabilities;
 
   } saHpiSensorTable_context;
 
@@ -165,7 +167,6 @@ extern "C"
     delete_sensor_row (SaHpiDomainIdT domain_id,
 		       SaHpiResourceIdT resource_id, SaHpiSensorNumT num);
 
-  //  int set_sensor (saHpiSensorTable_context * ctx);
 
   int set_sensor_event (saHpiSensorTable_context * ctx);
 

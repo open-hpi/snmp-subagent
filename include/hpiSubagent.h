@@ -379,3 +379,8 @@ int build_reading_strings (SaHpiSensorReadingT *reading,
 #define SENSOR_READING_INTER_MAX 255
 #define SENSOR_READING_EVENT_MAX 255
 
+
+#define SENSOR_THD_INDEX_NR 3
+#define SENSOR_THD_INTER_MAX 255
+
+
