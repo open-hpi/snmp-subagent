@@ -106,6 +106,27 @@ populate_control(SaHpiCtrlRecT *ctrl,
   return rc;
 }
 
+set_table_state(saHpiCtrlTable_context *ctx) {
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+ 
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+   
+   
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
 
 int  
 saHpiCtrlTable_modify_context(

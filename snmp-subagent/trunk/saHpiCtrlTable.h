@@ -64,6 +64,7 @@ extern          "C" {
         oid             saHpiCtrlRDR[MAX_OID_LEN];
         long            saHpiCtrlRDR_len;
 
+      long resource_id;
       long hash;
 
     } saHpiCtrlTable_context;
@@ -88,11 +89,8 @@ int  populate_control(SaHpiCtrlRecT *ctrl,
 		      oid *ctrl_oid, size_t *ctrl_oid_len);
   
 
-int  
-saHpiCtrlTable_modify_context(
-			     SaHpiCtrlRecT *entry, 
-			     oid *rdr_entry, size_t rdr_entry_oid_len,
-			     saHpiCtrlTable_context *ctx);
+int 
+set_table_state(saHpiCtrlTable_context *ctx);
 
 
 /*************************************************************
