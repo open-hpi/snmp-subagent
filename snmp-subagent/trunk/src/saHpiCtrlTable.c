@@ -42,7 +42,8 @@ static u_long control_count = 0;
 
 
 static int
-saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
+saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id,
+			       SaHpiCtrlRecT * entry,
 			       SaHpiCtrlStateT * ctrl_state,
 			       SaHpiRptEntryT * rpt_entry,
 			       oid * rdr_entry, size_t rdr_entry_oid_len,
@@ -51,20 +52,23 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 
 
 int
-populate_control (SaHpiCtrlRecT * ctrl,
+populate_control (SaHpiEntryIdT rdr_id,
+		  SaHpiCtrlRecT * ctrl,
 		  SaHpiRptEntryT * rpt_entry,
 		  oid * rdr_entry_oid, size_t rdr_entry_oid_len,
 		  oid * ctrl_oid, size_t * ctrl_oid_len)
 {
 
   int rc = AGENT_ERR_NOERROR;
-
+  int i = 0;
   oid index_oid[CTRL_INDEX_NR];
   oid column[2];
   SaHpiSessionIdT session_id;
   netsnmp_index ctrl_index;
   saHpiCtrlTable_context *ctrl_context;
+  saHpiCtrlTable_context *ctx;
   SaHpiCtrlStateT ctrl_state;
+  netsnmp_void_array *array;
 
   DEBUGMSGTL ((AGENT, "\n\t--- populate_ctrl: Entry.\n"));
 
@@ -82,6 +86,39 @@ populate_control (SaHpiCtrlRecT * ctrl,
       ctrl_context = NULL;
       ctrl_context = CONTAINER_FIND (cb.container, &ctrl_index);
       // If we don't find it - we create it.
+      if (!ctrl_context)
+	{
+		// Bug # 873961. We use the 'rdr_id' to check to see if 
+		// it is the context. To do so, we have to search for it first.
+		ctrl_index.len = 1;
+		// re-using the index_oid. 
+		array = CONTAINER_GET_SUBSET (cb.container, &ctrl_index);
+		if (array != NULL) 
+		{
+			if (array->size > 0) 
+			{
+				for (i = 0; i < array->size; i++) 
+				{
+					ctx = array->array[i];
+					if (ctx->rdr_id == rdr_id) 
+					{
+						// Found the duplicate entry!
+						ctrl_context = ctx;
+						index_oid[1] = ctx->resource_id;
+						index_oid[2] = ctx->saHpiCtrlNum;
+						DEBUGMSGTL((AGENT,"duplicate control entry %d, %d, %d [rdr: %d] found.\n",
+									rpt_entry->DomainId,
+									rpt_entry->ResourceId,
+									ctrl->Num,
+									rdr_id));
+						break;
+					}
+				}
+			}
+		}
+		// restoree it to its previous glory.
+		ctrl_index.len =  CTRL_INDEX_NR;
+        }
       if (!ctrl_context)
 	{
 	  // New entry. Add it
@@ -127,7 +164,7 @@ populate_control (SaHpiCtrlRecT * ctrl,
       // '*_modify_context' does a checksum check to see if 
       // the record needs to be altered, and if so populates with
       // information from RDR and the OIDs passed.
-      if (saHpiCtrlTable_modify_context (ctrl,
+      if (saHpiCtrlTable_modify_context (rdr_id,ctrl,
 					 &ctrl_state,
 					 rpt_entry,
 					 rdr_entry_oid, rdr_entry_oid_len,
@@ -340,7 +377,7 @@ set_ctrl_state (saHpiCtrlTable_context * ctx)
 }
 
 int
-saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
+saHpiCtrlTable_modify_context (SaHpiEntryIdT rdr_id, SaHpiCtrlRecT * entry,
 			       SaHpiCtrlStateT * state,
 			       SaHpiRptEntryT * rpt_entry,
 			       oid * rdr_entry, size_t rdr_entry_oid_len,
@@ -379,14 +416,16 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 	      // The same data. No need to change.
 	      return AGENT_ENTRY_EXIST;
 	    }
-	  if ((ctx->resource_id == rpt_entry->ResourceId) &&
+	  if (((ctx->resource_id == rpt_entry->ResourceId) &&
 	      (ctx->domain_id == rpt_entry->DomainId) &&
-	      (ctx->saHpiCtrlNum == entry->Num)) {
+	      (ctx->saHpiCtrlNum == entry->Num)) || 
+	      (ctx->rdr_id == rdr_id)) {
 		  // Time to update record.
-		DEBUGMSGTL((AGENT,"Updating control entry [%d, %d, %d].\n",
+		DEBUGMSGTL((AGENT,"Updating control entry [%d, %d, %d (rdr: %d)].\n",
 					rpt_entry->DomainId,
 					rpt_entry->ResourceId,
-					entry->Num));
+					entry->Num,
+					rdr_id));
 		update_entry = MIB_TRUE;
 	  }
 	}
@@ -396,7 +435,7 @@ saHpiCtrlTable_modify_context (SaHpiCtrlRecT * entry,
 
       ctx->resource_id = rpt_entry->ResourceId;
       ctx->domain_id = rpt_entry->DomainId;
-
+      ctx->rdr_id = rdr_id;
       ctx->saHpiCtrlNum = entry->Num;
       ctx->saHpiCtrlBool =
 	(entry->Ignore == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
