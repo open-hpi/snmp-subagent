@@ -4199,7 +4199,7 @@ saHpiEventLogAddedTimestamp OBJECT-TYPE
 
 saHpiEventLog OBJECT-TYPE
         SYNTAX          RowPointer
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
             "Pointer to the event."
@@ -4843,7 +4843,7 @@ saHpiSensorEnable       OBJECT-TYPE
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
-	"When reading, this objetc returns the current sensor enable status for an addressed sensor.
+	"When reading, this object returns the current sensor enable status for an addressed sensor.
 
 	When writing this object sets the sensor enable status for an addressed sensor.  If a sensor is disabled, the rows in saHpiSensorReadingCurrent for that sensor will not be present, and no events will be generated for the sensor."
 	REFERENCE
@@ -6253,7 +6253,7 @@ saHpiIdrAreaType        OBJECT-TYPE
 
 saHpiIdrDataAreaIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
         "Describes if an area is read-only.  All area headers in a 
