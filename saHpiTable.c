@@ -290,42 +290,61 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
 }
 
 int set_table_tag(saHpiTable_context *ctx) { 
-	return -1;
+
+  SaHpiSessionIdT session_id;
+  SaHpiTextBufferT tag;
+  SaErrorT rc;
+
+  if (ctx) {
+
+    memset(&tag, 0x00, sizeof(SaHpiTextBufferT));
+    tag.DataType = ctx->saHpiResourceTagTextType - 1;
+    tag.Language = ctx->saHpiResourceTagTextLanguage;
+    tag.DataLength = ctx->saHpiResourceTag_len;
+
+    memcpy(tag.Data,
+	   ctx->saHpiResourceTag,
+	   ctx->saHpiResourceTag_len);
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+   
+    rc = saHpiResourceTagSet(session_id,
+			     ctx->resource_id,
+			     &tag);
+
+    if (rc != SA_OK) {
+	return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
 }
 int set_table_severity(saHpiTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
+  SaHpiSeverityT severity;
   SaErrorT rc;
 
   if (ctx) {
-  /* 
-    ctx->saHpiResourceSeverity = entry->ResourceSeverity+1;
+  
+    severity = ctx->saHpiResourceSeverity-1;
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
-      return rc;
-    
+      return rc;    
    
-    rc = saHpiWatchdogTimerSet (session_id, 
-				ctx->resource_id,
-				ctx->saHpiWatchdogNum,
-				&wdog);
+    rc = saHpiResourceSeveritySet(session_id,
+				  ctx->resource_id,
+				  severity);
 
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
     if (rc != SA_OK) {
 	return AGENT_ERR_OPERATION;
     }
-
     
-    rc = saHpiWatchdogTimerGet (session_id, ctx->resource_id,
-				ctx->saHpiWatchdogNum,
-				&wdog);
-
-
-    if (rc != SA_OK) {
-	return AGENT_ERR_OPERATION;
-    }
-   */ 
     return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
@@ -883,18 +902,21 @@ saHpiTable_set_action(netsnmp_request_group * rg)
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
-/*
+
 	if (current->tri->colnum == COLUMN_SAHPIRESOURCESEVERITY) {
-	  (set_table_severity(row_ctx) != AGENT_ERR_NOERROR) {
+
+	  if (set_table_severity(row_ctx) != AGENT_ERR_NOERROR) {
 	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					   SNMP_ERR_GENERR);
-	} else {	
+	  } 
+	}
+	else {
 	  
 	  if (set_table_tag(row_ctx) != AGENT_ERR_NOERROR) {
 	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					   SNMP_ERR_GENERR);
 	  }
-	} */
+	}
     }
 
 
