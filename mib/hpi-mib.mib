@@ -6921,9 +6921,7 @@ saHpiSensorThdUpCriticalEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "This is the sensor threshold data which defines  catastrophic status
-        status at the upper end of the range that impacts the functional status 
-        of the sensor."
+        "Sensor threshold data for upper critical thresholds."
         INDEX   { saHpiDomainId, saHpiResourceId, saHpiSensorNum }
         ::= {saHpiSensorThdUpCriticalTable 1}
 
