@@ -1440,6 +1440,7 @@ SaHpiResourceEntry ::= SEQUENCE {
 	saHpiEntryId				Unsigned32,
 	saHpiResourceId				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
+-- IBNKR: Resort the Rpt entries?
 	saHpiResourceCapabilities 		OCTET STRING,
 	
 	saHpiResourceHotSwapCapabilities 	Unsigned32,	
@@ -1822,7 +1823,7 @@ saHpiResourceInfoAuxFirmwareRev OBJECT-TYPE
 	entity (or multiple entities) - NOT the entities for 
 	which the resource provides management. The purpose of the 
 	saHpiResourceInfoT structure is to provide information 
-	that the HPI user may need in order to interact 
+	That the HPI user may need in order to interact 
 	correctly with the resource (e.g., recognize a 
 	specific management controller which may have defined 
 	OEM fields in sensors, OEM controls, etc.
