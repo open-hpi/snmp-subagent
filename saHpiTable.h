@@ -16,8 +16,6 @@
  *
  * $Id$
  *
- * Yes, there is lots of code here that you might not use. But it is much
- * easier to remove code than to add it!
  */
 #ifndef SAHPITABLE_H
 #define SAHPITABLE_H
@@ -32,9 +30,10 @@ extern          "C" {
 #include <SaHpi.h>
 #include <hpiSubagent.h>
 
-  /* 
-   * Max values defined in the the MIB
-   */
+#define PARAM_UNDEFINED 0
+#define PARAM_RESTORE_DEFAULT_PARM 1
+#define PARAM_SAVE_PARM 2
+#define PARAM_RESTORE_PARM 3
 
 #define SAHPI_RESOURCE_TAG_MAX 255
 
@@ -94,8 +93,17 @@ extern          "C" {
         unsigned char   saHpiResourceTag[SAHPI_RESOURCE_TAG_MAX];
         long            saHpiResourceTag_len;
 
-      long  hash;
-	long resource_id;
+         /** INTEGER = ASN_INTEGER */
+        long            saHpiParamControl;
+
+        /** RowStatus = ASN_INTEGER */
+        long            saHpiClearEvents;
+
+         /** HpiTimeStamp = ASN_COUNTER64 */
+
+        integer64        saHpiEventLogTime;
+        long  hash;
+
 
     } saHpiTable_context;
 
@@ -104,39 +112,49 @@ extern          "C" {
  */
 
     void            initialize_table_saHpiTable(void);
-  //    const saHpiTable_context *saHpiTable_get_by_idx(netsnmp_index *);
-  /*
-    const saHpiTable_context *saHpiTable_get_by_idx_rs(netsnmp_index *,
-                                                       int row_status);
-  */
+ 
     int             saHpiTable_get_value(netsnmp_request_info *,
                                          netsnmp_index *,
                                          netsnmp_table_request_info *);
 
   int populate_rpt();
-int
-set_table_severity(saHpiTable_context *ctx);
-int
-set_table_tag(saHpiTable_context *ctx);
 
+  /* 
+   * The various SET operations. 
+   */
+  int
+  set_table_severity(saHpiTable_context *ctx);
+  int
+  set_table_tag(saHpiTable_context *ctx);
+
+  int
+  set_table_param_control(saHpiTable_context *ctx);
+
+  int
+  set_clear_events(saHpiTable_context *ctx);
+
+  
+  int 
+  set_event_log_time(saHpiTable_context *ctx);
+  /*
+   * Remvoe the RTP row (from SNMP memory, not SaHPI).
+   */
 
 int
 delete_rpt_row(SaHpiDomainIdT domain_id,
 	       SaHpiResourceIdT resource_id,
 	       SaHpiEntryIdT num);
-int  
-saHpiTable_modify_context(SaHpiRptEntryT *entry, 
-				saHpiTable_context *ctx
-				);
 
-  int send_saHpiTable_notification(saHpiTable_context *ctx);
-void
-make_SaHpiTable_trap_msg(netsnmp_variable_list *list, 
-	      netsnmp_index *index,
-	      int column, 
-	      u_char type,
-	      const u_char *value, 
-	      const size_t value_len);
+
+int
+update_clear_event(SaHpiDomainIdT domain_id,
+			     SaHpiResourceIdT resource_id,
+			     SaHpiEntryIdT num,
+			     long event_status);
+
+  /*
+   * Handler for timestamp inforamtion
+   */
 int
 update_timestamp_handler(netsnmp_mib_handler *handler,
 			 netsnmp_handler_registration *reginfo,
@@ -159,6 +177,7 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 /*************************************************************
  * column number definitions for table saHpiTable
  */
+
 #define COLUMN_SAHPIDOMAINID 1
 #define COLUMN_SAHPIENTRYID 2
 #define COLUMN_SAHPIRESOURCEID 3
@@ -176,23 +195,12 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
 #define COLUMN_SAHPIRESOURCETAGTEXTTYPE 15
 #define COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE 16
 #define COLUMN_SAHPIRESOURCETAG 17
+#define COLUMN_SAHPIPARAMCONTROL 18
+#define COLUMN_SAHPICLEAREVENTS 19
+#define COLUMN_SAHPIEVENTLOGTIME 20
 #define saHpiTable_COL_MIN 1
-#define saHpiTable_COL_MAX 17
+#define saHpiTable_COL_MAX 20
 
-    /*
-     * comment out the following line if you don't handle SET-REQUEST for saHpiTable 
-     */
-#define saHpiTable_SET_HANDLING
-
-    /*
-     * comment out the following line if you can't create new rows 
-     */
-#define saHpiTable_ROW_CREATION
-
-    /*
-     * comment out the following line if you don't want the secondary index 
-     */
-#define saHpiTable_IDX2
 
 
     int             saHpiTable_extract_index(saHpiTable_context * ctx,

@@ -349,7 +349,7 @@ saHpiEventTable_modify_context(SaHpiSelEntryIdT entry_id,
 }
 
 int
-delete_entry(saHpiEventTable_context *ctx) {
+delete_event_entry(saHpiEventTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
   SaErrorT rc;
@@ -992,7 +992,7 @@ saHpiEventTable_set_action(netsnmp_request_group * rg)
 
       if ((*var->val.integer == SNMP_ROW_DESTROY)) {
 	// Only do the operation when its set to destroy(6)
-	if (delete_entry(row_ctx) != AGENT_ERR_NOERROR) {
+	if (delete_event_entry(row_ctx) != AGENT_ERR_NOERROR) {
 	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
 					 SNMP_ERR_INCONSISTENTVALUE);
 	} else {// It went fine

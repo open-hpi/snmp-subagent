@@ -28,6 +28,7 @@
 
 #include <saHpiTable.h>
 #include <saHpiRdrTable.h>
+#include <saHpiEventTable.h>
 #include <saHpiSystemEventLogTable.h>
 #include <saHpiHotSwapTable.h>
 
@@ -55,46 +56,24 @@ oid      saHpiEntryCount_oid[] =
 //    { 1, 3, 6, 1, 3, 90, 4, 6, 0 };
 oid saHpiResourceNotification[] = { hpiNotifications_OID, 6, 0 };
 
-/************************************************************
- * keep binary tree to find context by name
- */
-static int      saHpiTable_cmp(const void *lhs, const void *rhs);
-
-/************************************************************
- * compare two context pointers here. Return -1 if lhs < rhs,
- * 0 if lhs == rhs, and 1 if lhs > rhs.
- */
-static int
-saHpiTable_cmp(const void *lhs, const void *rhs)
-{
-    saHpiTable_context *context_l = (saHpiTable_context *) lhs;
-    saHpiTable_context *context_r = (saHpiTable_context *) rhs;
+static int  
+saHpiTable_modify_context(SaHpiRptEntryT *entry, 
+			  saHpiTable_context *ctx,
+			  SaHpiTimeT *time);
 
 
-    
-    int             rc;
+static void
+make_SaHpiTable_trap_msg(netsnmp_variable_list *list, 
+	      netsnmp_index *index,
+	      int column, 
+	      u_char type,
+	      const u_char *value, 
+	      const size_t value_len);
 
-    DEBUGMSGTL((AGENT,"--- saHpiTable_cmp: Entry. "));
-    if (context_l->saHpiDomainID < context_r->saHpiDomainID)
-	return -1;
-    rc = (context_l->saHpiDomainID == context_r->saHpiDomainID) ? 0: 1;
-    
-    if (rc != 0) 
-	return 1;
+static int 
+  send_saHpiTable_notification(saHpiTable_context *ctx);
 
-    if (context_l->saHpiResourceID < context_r->saHpiResourceID)
-	return -1;
 
-    rc =(context_l->saHpiResourceID == context_r->saHpiResourceID) ? 0: 1;
-
-    if (rc != 0)
-      return 1;
-
-    if (context_l->saHpiEntryID < context_r->saHpiEntryID)
-	return -1;
-    return (context_l->saHpiEntryID == context_r->saHpiEntryID) ? 0: 1;
-    
-}
 
 int
 populate_rpt() {
@@ -106,7 +85,7 @@ populate_rpt() {
    SaHpiRptInfoT        rpt_info;
    SaHpiEntryIdT	next;
    SaHpiEntryIdT	current;
-   
+   SaHpiTimeT           time;
  
    int new_entries;
 
@@ -135,11 +114,16 @@ populate_rpt() {
        next = SAHPI_FIRST_ENTRY;
        rpt_index.len = 3;	
        do {
-	 // If we were to make this multi-threaded - this is where the mutex would go in
-	 // Mutex-start:
+
 	 current = next;
+
 	 err = saHpiRptEntryGet(session, current, &next, &rpt_entry);
+
 	 if (SA_OK == err) {
+	   // Get more information
+	   err = saHpiEventLogTimeGet(session,
+				      rpt_entry.ResourceId,
+				      &time);
 	   // Construct the index from the entry. Look in the MIB for new index values
 	   // Comment #020 changed the index order.
 	   rpt_oid[0]=rpt_entry.DomainId;
@@ -168,7 +152,8 @@ populate_rpt() {
 	   // the record needs to be altered.
 
 	   if (saHpiTable_modify_context(&rpt_entry, 
-					 rpt_context) 
+					 rpt_context,
+					 &time) 
 		   == AGENT_NEW_ENTRY) {
 
 	     CONTAINER_INSERT(cb.container, rpt_context);
@@ -231,7 +216,9 @@ populate_rpt() {
    
 
 int  
-saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
+saHpiTable_modify_context(SaHpiRptEntryT *entry, 
+			  saHpiTable_context *ctx,
+			  SaHpiTimeT *time) {
 
   long hash;
   int len;
@@ -262,9 +249,11 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
     if (hash == 0)
       hash = 1;
     ctx->hash = hash;
-    ctx->resource_id = entry->ResourceId;
-    DEBUGMSGTL((AGENT,"Creating columns for resourceid: %d\n", entry->ResourceId));
-    
+
+    ctx->saHpiResourceID= entry->ResourceId;
+    ctx->saHpiDomainID = entry->DomainId;
+    ctx->saHpiEntryID = entry->EntryId;
+
     len = entitypath2string(
 			    &entry->ResourceEntity, 
 			    (gchar *)&ctx->saHpiResourceEntityPath, 
@@ -292,6 +281,15 @@ saHpiTable_modify_context(SaHpiRptEntryT *entry, saHpiTable_context *ctx) {
     strncpy(ctx->saHpiResourceTag, entry->ResourceTag.Data, len);
     ctx->saHpiResourceTag_len = len;
 
+    // IBM-KR: Shouldn't we change this depending on the events?
+    ctx->saHpiClearEvents = SNMP_ROW_NONEXISTENT; 
+    ctx->saHpiParamControl = PARAM_UNDEFINED;
+
+    memcpy(&ctx->saHpiEventLogTime, time, sizeof(SaHpiTimeT));
+
+    ctx->saHpiEventLogTime.high = htonl(ctx->saHpiEventLogTime.high);
+    ctx->saHpiEventLogTime.low = htonl(ctx->saHpiEventLogTime.low);
+   
     DEBUGMSGTL((AGENT,"ResourceTag: [%s]\n", ctx->saHpiResourceTag));
     return AGENT_NEW_ENTRY;
   }
@@ -315,18 +313,110 @@ int set_table_tag(saHpiTable_context *ctx) {
     memcpy(tag.Data,
 	   ctx->saHpiResourceTag,
 	   ctx->saHpiResourceTag_len);
+
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
-  	DEBUGMSGTL((AGENT,"Changing for %s, %d, %d\n", tag.Data,
-	tag.DataType, tag.Language));
+
+    
     rc = saHpiResourceTagSet(session_id,
-			     ctx->resource_id,
+			     ctx->saHpiResourceID,
 			     &tag);
-	DEBUGMSGTL((AGENT,"SET done: %d\n", rc));
+
     if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to 'saHpiResourceTagSet'; rc: %d\n", rc));
 	return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
+}
+
+
+
+int set_event_log_time(saHpiTable_context *ctx) { 
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiTimeT time;
+  integer64 t;
+  if (ctx) {
+    
+    t.low = ntohl(ctx->saHpiEventLogTime.low);
+    t.high = ntohl(ctx->saHpiEventLogTime.high);
+    memcpy(&time, &t, sizeof(SaHpiTimeT));
+  
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+
+    rc = saHpiEventLogTimeSet(session_id,
+			      ctx->saHpiResourceID,
+			      time);
+
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogTimeSet' rc: %d\n"));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
+}
+
+int set_clear_events(saHpiTable_context *ctx) { 
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+
+  if (ctx) {
+
+  
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+    rc = saHpiEventLogClear(session_id,
+			    ctx->saHpiResourceID);
+    rc = SA_OK;
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to 'saHpiEventLogClear' rc: %d\n"));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+  
+}
+
+int set_table_param_control(saHpiTable_context *ctx) { 
+
+  SaHpiSessionIdT session_id;
+  SaHpiParmActionT action;
+  SaErrorT rc;
+
+  if (ctx) {
+
+    action = ctx-> saHpiParamControl;
+
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+
+    rc = saHpiParmControl(session_id,
+			  ctx->saHpiResourceID,
+			  action);
+   
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"Call to saHpiParmControl rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
     }
     
     return AGENT_ERR_NOERROR;
@@ -364,6 +454,34 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
 }
 
 
+int
+update_clear_event(SaHpiDomainIdT domain_id,
+		   SaHpiResourceIdT resource_id,
+		   SaHpiEntryIdT num,
+		   long event_status) {
+
+  saHpiTable_context *ctx;
+  oid rpt_oid[3];
+  netsnmp_index	rpt_index;
+
+  rpt_oid[0]=domain_id;
+  rpt_oid[1]=resource_id;	
+  rpt_oid[2]=num;
+
+  // Possible more indexs?
+  rpt_index.oids = (oid *)&rpt_oid;
+  rpt_index.len = 3;
+
+  ctx = CONTAINER_FIND(cb.container, &rpt_index);
+
+  if (ctx) {
+    ctx->saHpiClearEvents = event_status;
+    return AGENT_ERR_NOERROR;
+  }
+    
+  return AGENT_ERR_NOT_FOUND;
+}
+
 int set_table_severity(saHpiTable_context *ctx) {
 
   SaHpiSessionIdT session_id;
@@ -379,7 +497,7 @@ int set_table_severity(saHpiTable_context *ctx) {
       return rc;    
    
     rc = saHpiResourceSeveritySet(session_id,
-				  ctx->resource_id,
+				  ctx->saHpiResourceID,
 				  severity);
 
     if (rc != SA_OK) {
@@ -556,6 +674,13 @@ saHpiTable_row_copy(saHpiTable_context * dst, saHpiTable_context * src)
            src->saHpiResourceTag_len);
     dst->saHpiResourceTag_len = src->saHpiResourceTag_len;
 
+    dst->saHpiParamControl = src->saHpiParamControl;
+
+    dst->saHpiClearEvents = src->saHpiClearEvents;
+
+    memcpy(&dst->saHpiEventLogTime,&src->saHpiEventLogTime,
+	   sizeof(integer64));
+
     dst->hash = src->hash;
     DEBUGMSGTL((AGENT,"--- saHpiTable_row_copy: Exit. "));
 
@@ -687,7 +812,13 @@ saHpiTable_create_row(netsnmp_index * hdr)
     ctx->saHpiResourceSeverity = 0;
     ctx->saHpiResourceTagTextType = 0;
     ctx->saHpiResourceTagTextLanguage = 0;
-    ctx->saHpiResourceTag_len = 0;    
+    ctx->saHpiResourceTag_len = 0; 
+    ctx->saHpiParamControl = 0;
+    ctx->saHpiClearEvents = SNMP_ROW_NONEXISTENT; 
+
+    ctx->saHpiEventLogTime.low = 0;
+    ctx->saHpiEventLogTime.high = 0;
+  
     return ctx;
 }
 
@@ -759,6 +890,7 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
     netsnmp_request_group_item *current;
     int             rc;
    
+
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -812,6 +944,28 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 	case COLUMN_SAHPIRESOURCEINFOAUXFIRMWAREREV:
 	  rc = SNMP_ERR_NOTWRITABLE;
 	  break;
+	case COLUMN_SAHPIPARAMCONTROL:
+	         /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiParamControl));
+            break;
+
+        case COLUMN_SAHPICLEAREVENTS:
+            /** RowStatus = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiClearEvents));
+            break;
+
+        case COLUMN_SAHPIEVENTLOGTIME:
+            /** HpiTimeStamp = ASN_COUNTER64 */
+          rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
+                                                sizeof(row_ctx->
+	                                             saHpiEventLogTime));
+	  
+            break;
+
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -825,17 +979,28 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
     }
 
     for (current = rg->list; current; current = current->next) {
-       
-      // The nice thing about this API is that _row_copy() is called
-      // for this row - if the API has matched the index with an
-      // already existing entry. We check the 'hash' value. If its
-      // 0 the API couldn't find the right context.
-
+    
       if ( row_ctx->hash == 0) {
-	rc = SNMP_ERR_NOSUCHNAME;
-	netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-				       rc);
-      } 
+	// The row doesn't exist.
+	rc =  SNMP_ERR_NOSUCHNAME;
+	var = current->ri->requestvb;
+
+	// SNMPv2-TC has a diagram of actions for non-existing rows.
+	if ((*var->val.integer == SNMP_ROW_CREATEANDGO) // createAndGo(4)
+	    || (*var->val.integer == SNMP_ROW_ACTIVE) // active (1)
+	    || (*var->val.integer == SNMP_ROW_NOTINSERVICE)) // notInService(2)
+	  rc = SNMP_ERR_INCONSISTENTVALUE;
+	if (*var->val.integer == SNMP_ROW_NOTREADY) // notReady(3)
+	  rc = SNMP_ERR_INCONSISTENTNAME;
+	if (*var->val.integer == SNMP_ROW_CREATEANDWAIT) // createAndWait(5)
+	  rc = SNMP_ERR_WRONGVALUE;
+	if (*var->val.integer == SNMP_ROW_DESTROY) // destory(6)
+	  rc = SNMP_ERR_INCONSISTENTNAME;
+	
+	if (rc)
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					 rc);
+      }
     }
    
 }
@@ -843,13 +1008,13 @@ saHpiTable_set_reserve1(netsnmp_request_group * rg)
 void
 saHpiTable_set_reserve2(netsnmp_request_group * rg)
 {
-
+  saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
 
     rg->rg_void = rg->list->ri;
-   
+
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -883,14 +1048,33 @@ saHpiTable_set_reserve2(netsnmp_request_group * rg)
         case COLUMN_SAHPIRESOURCETAG:
                 break;
 
+	case COLUMN_SAHPIPARAMCONTROL:
+	  if ( ((*var->val.integer < 1) || 
+		(*var->val.integer > 3))) {	    
+	    rc = SNMP_ERR_BADVALUE;
+	  }
+            break;
+
+        case COLUMN_SAHPICLEAREVENTS:
+	  // This can only be destroy(6)
+	  // IBM-KR: Check the event state diagram for this.
+	  if (*var->val.integer != SNMP_ROW_DESTROY)
+	    rc = SNMP_ERR_BADVALUE;
+            break;
+
+        case COLUMN_SAHPIEVENTLOGTIME:           
+            break;
+
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	    break;
         }
 
         if (rc)
             netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
                                            rc);
     }
+   
 }
 
 /************************************************************
@@ -912,11 +1096,9 @@ saHpiTable_set_action(netsnmp_request_group * rg)
     //    saHpiTable_context *undo_ctx = (saHpiTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
 
+    int rc = SNMP_ERR_NOERROR;
+    long count;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -926,6 +1108,8 @@ saHpiTable_set_action(netsnmp_request_group * rg)
         case COLUMN_SAHPIRESOURCESEVERITY:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiResourceSeverity = *var->val.integer;
+	    if (set_table_severity(row_ctx) != AGENT_ERR_NOERROR) 
+	      rc = SNMP_ERR_GENERR;
             break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
@@ -943,29 +1127,57 @@ saHpiTable_set_action(netsnmp_request_group * rg)
             memcpy(row_ctx->saHpiResourceTag, var->val.string,
                    var->val_len);
             row_ctx->saHpiResourceTag_len = var->val_len;
+	    if (set_table_tag(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_GENERR;
+            break;
+
+        case COLUMN_SAHPIPARAMCONTROL:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiParamControl = *var->val.integer;
+	    if (set_table_param_control(row_ctx) != AGENT_ERR_NOERROR)
+	      rc=SNMP_ERR_GENERR;
+            break;
+
+        case COLUMN_SAHPICLEAREVENTS:
+            /** RowStatus = ASN_INTEGER */
+            row_ctx->saHpiClearEvents = *var->val.integer;
+	    if (set_clear_events(row_ctx) != AGENT_ERR_NOERROR) {
+	      rc=SNMP_ERR_GENERR;
+	    } else 
+	      {
+		// Success. Now its time to remove the events and SEL entries.
+
+		for (count = 0; 
+		     ((delete_event_row(row_ctx->saHpiDomainID,
+					  row_ctx->saHpiResourceID,
+					  count) == AGENT_ERR_NOERROR) &&
+		      (delete_SEL_row(row_ctx->saHpiDomainID,
+				      row_ctx->saHpiResourceID,
+				      count) == AGENT_ERR_NOERROR)); count++) 
+		  DEBUGMSGTL((AGENT,"Deleted %d,%d,%d from SEL and Event table.\n",
+			      row_ctx->saHpiDomainID, row_ctx->saHpiResourceID, count));
+	      }
+	
+	    
+            break;
+
+        case COLUMN_SAHPIEVENTLOGTIME:
+            /** HpiTimeStamp = ASN_COUNTER64 */
+            row_ctx->saHpiEventLogTime = *var->val.counter64;
+
+	    if  (set_event_log_time(row_ctx) != AGENT_ERR_NOERROR)
+	      rc=SNMP_ERR_GENERR;
             break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
 
-	if (current->tri->colnum == COLUMN_SAHPIRESOURCESEVERITY) {
-
-	  if (set_table_severity(row_ctx) != AGENT_ERR_NOERROR) {
+	if (rc)	
 	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					   SNMP_ERR_GENERR);
-	  } 
-	}
-	else {
-	  
-	  if (set_table_tag(row_ctx) != AGENT_ERR_NOERROR) {
-	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
-					   SNMP_ERR_GENERR);
-	  }
-	}
+					   rc);
+     
     }
-
-
 }
 
 /************************************************************
@@ -1093,11 +1305,7 @@ initialize_table_saHpiTable(void)
     cb.get_value = saHpiTable_get_value;
     cb.container = netsnmp_container_find("saHpiTable_primary:"
                                           "saHpiTable:" "table_container");
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find
-                                ("saHpiTable_secondary:" "saHpiTable:"
-                                 "table_container"));
-    cb.container->next->compare = saHpiTable_cmp;
+   
     cb.create_row = (UserRowMethod *) saHpiTable_create_row;
 
     cb.can_set = 0;
@@ -1298,6 +1506,26 @@ saHpiTable_get_value(netsnmp_request_info *request,
                                  (char *) &context->saHpiResourceTag,
                                  context->saHpiResourceTag_len);
         break;
+    case COLUMN_SAHPIPARAMCONTROL:
+            /** INTEGER = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->saHpiParamControl,
+                                 sizeof(context->saHpiParamControl));
+        break;
+
+    case COLUMN_SAHPICLEAREVENTS:
+            /** RowStatus = ASN_INTEGER */
+        snmp_set_var_typed_value(var, ASN_INTEGER,
+                                 (char *) &context->saHpiClearEvents,
+                                 sizeof(context->saHpiClearEvents));
+        break;
+
+    case COLUMN_SAHPIEVENTLOGTIME:
+            /** HpiTimeStamp = ASN_COUNTER64 */
+        snmp_set_var_typed_value(var, ASN_COUNTER64,
+                                 (char *) &context->saHpiEventLogTime,
+                                 sizeof(context->saHpiEventLogTime));
+        break;
 
     default:/** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in " "saHpiTable_get_value\n");
@@ -1317,7 +1545,7 @@ update_timestamp_handler(netsnmp_mib_handler *handler,
  
 
   if  (reqinfo->mode == MODE_GET)
-    snmp_set_var_typed_value(requests->requestvb, ASN_TIMETICKS,
+    snmp_set_var_typed_value(requests->requestvb,  ASN_COUNTER64,
 			     (u_char *) &update_timestamp,
 			     sizeof(update_timestamp));
     
