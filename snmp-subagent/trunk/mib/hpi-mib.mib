@@ -152,6 +152,13 @@ Float64	::= TEXTUAL-CONVENTION
     SYNTAX	Opaque (SIZE(0..255))
 --IBMKR: Figure out the right length of the Float64
 
+SaHpiInstrumentId ::= TEXTUAL-CONVENTION
+    STATUS	current
+    DESCRIPTION
+	"The following data type is used for all management instrument 
+    identifiers - sensor numbers, control numbers, watchdog timer numbers, etc."
+    SYNTAX	Unsigned32
+
 SaHpiManufacturerId ::= TEXTUAL-CONVENTION
     STATUS	current
     DESCRIPTION
@@ -415,6 +422,51 @@ SaHpiEventState ::= TEXTUAL-CONVENTION
     REFERENCE
     	"Derived from SAI-HPI-B.00.90 spec, pg 178-180."
     SYNTAX		OCTET STRING(SIZE(0..255))
+
+SaHpiHotSwapState ::= TEXTUAL-CONVENTION
+    STATUS	current
+    DESCRIPTION
+	"Hot Swap states.
+
+inactive(1):
+
+	The INACTIVE state indicates that the FRU, which supports the full hot swap model, is no longer active in the system, and that it has completed the extraction process. When a FRU completes the hardware disconnection process, it is logically and electrically disconnected or isolated from the platform but still physically located in the platform, so the associated resource remains in the domain. Typically, a FRU will be powered off or held in reset when in this state. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource is transitioning to an INACTIVE state.
+
+insertionPending(2):
+
+	The INSERTION PENDING state is entered after a resource that supports the full hot swap model has been added to the domain, as a result of the associated FRU being physically inserted into the system. This state indicates the resource is transitioning from a NOT PRESENT state or INACTIVE state into the ACTIVE state. When transitioning into the INSERTION PENDING state, the resource should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event can be generated when the ejector latch is shut (cPCI) or the device is seated in a slot. 
+	Upon receiving the event, the HPI User has the opportunity to discover the capabilities of the resource before allowing the FRU associated with the resource to power on and become an active component in the system. During this state, the FRU can be commanded to power on or de-assert reset.
+
+
+active(3):
+
+	The ACTIVE state indicates that a resource is now an active member of the domain.
+
+	After a FRU completes the hardware connection process, the associated resource enters the ACTIVE state. This does not mean that the FRU is now active at the software level, but merely indicates that the FRU is now active in the system and that it should not be abruptly removed. The HPI implementation generates a hot swap event with HotSwapState = SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
+
+extractionPending(4):
+
+	The EXTRACTION PENDING state indicates that the resource, which supports the full hot swap model, has requested extraction of the associated FRU. Typically, a resource enters an EXTRACTION PENDING state when an ejector latch is opened (PICMG 2.1) or when a hot swap button is pressed. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that supports Managed Hot Swap requests extraction. 
+	Upon receiving the event, the HPI User has the opportunity to unload software drivers, relocate processes, or unmount file systems (software disconnect) before allowing a FRU to power down and disconnect from the system.
+
+notPresent(5):
+
+	 The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
+
+	 The event can indicate a normal transition from INACTIVE to the NOT PRESENT state or a surprise extraction from any other state.  Normal transition events are issued with a severity of SAHPI_INFORMATIONAL. A resource following the simplified hot swap model always indicates the transition to the NOT PRESENT state as a surprise extraction.
+	 When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
+
+    REFERENCE 
+        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144."
+
+    SYNTAX	INTEGER {
+		    undefined(0),
+		    inactive (1),
+		    insertionPending (2),
+		    active (3),
+		    extractionPending (4),
+		    notPresent (5)
+		}
 
 SaHpiTextType ::= TEXTUAL-CONVENTION 
 	STATUS		current
@@ -1278,7 +1330,7 @@ saHpiAlarmCondEventState OBJECT-TYPE
 	sensor(1)."
 	::= {saHpiDatEntry 8}
 	
---IBMRK: What is AIS? Look in description.
+--IBMKR: What is AIS? Look in description.
 saHpiAlarmCondNameValue OBJECT-TYPE 
 	SYNTAX		OCTET STRING(SIZE(0..255))
 	MAX-ACCESS	read-create
@@ -1352,7 +1404,6 @@ saHpiEntryUpdateTimestamp OBJECT-TYPE
 	DESCRIPTION	"Refer to SaSaHpiTime for full describption."
 	::= {hpiEntity 9}
 
---IBMKR: Perhaps the name saHpiResourceTable is a better name?
 saHpiResourceTable OBJECT-TYPE
 	SYNTAX		SEQUENCE OF SaHpiResourceEntry
 	MAX-ACCESS	not-accessible
@@ -1379,14 +1430,14 @@ saHpiResourceEntry OBJECT-TYPE
 		match a physical printed label attached to the primary  entity
 		which the resource manages. See section 5.2.6,
 		SaHpiResourceTagSet(), on page 33."
-	INDEX	{ saHpiDomainId, saHpiResourceId ,saHpiResourceEntryIdx }
+	INDEX	{ saHpiDomainId, saHpiResourceId ,saHpiEntryId }
 	::= {saHpiResourceTable 1}
 
 SaHpiResourceEntry ::= SEQUENCE {
 
 	saHpiDomainId				Unsigned32,
 
-	saHpiResourceEntryIdx				Unsigned32,
+	saHpiEntryId				Unsigned32,
 	saHpiResourceId				Unsigned32,
 	saHpiResourceEntityPath			OCTET STRING,
 	saHpiResourceCapabilities 		OCTET STRING,
@@ -1412,11 +1463,11 @@ SaHpiResourceEntry ::= SEQUENCE {
 	saHpiResourceTagTextLanguage		SaHpiTextLanguage,
 	saHpiResourceTag			SaHpiText,
 	
-	saHpiParamControl			INTEGER,
+	saHpiParamControl			INTEGER
 
-	saHpiClearEvents			RowStatus,
-	saHpiEventLogTime			SaHpiTime,
-	saHpiEventLogState			INTEGER
+	--saHpiClearEvents			RowStatus,
+	--saHpiEventLogTime			SaHpiTime,
+	--saHpiEventLogState			INTEGER
 	}
 
 saHpiDomainId OBJECT-TYPE 
@@ -1435,7 +1486,7 @@ saHpiDomainId OBJECT-TYPE
 --IBMKR: Is this a normal entry ID with the start being 
 -- 0x000000 and the last one being 0xFFFFFFFF?
 -- if so, perhaps a better name?
-saHpiResourceEntryIdx OBJECT-TYPE 
+saHpiEntryId OBJECT-TYPE 
 	SYNTAX		Unsigned32	
 	MAX-ACCESS	read-only
 	STATUS		current
@@ -1847,46 +1898,6 @@ saHpiParamControl OBJECT-TYPE
 
 
     	
-saHpiClearEvents OBJECT-TYPE
-	SYNTAX		RowStatus
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION
-	"Erase all of the system events for this particular
-	resource. The saHpiSystemEventsLogTable will be affected."
-	::= {saHpiResourceEntry 22}
-
-saHpiEventLogTime	OBJECT-TYPE
-	SYNTAX		SaHpiTime
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION     "Refer to SaHpiTime for full describption."
-	::= {saHpiResourceEntry 23}
-
-saHpiEventLogState OBJECT-TYPE
-	SYNTAX	INTEGER {
-			undefined(0),
-			enable(1),
-			disable(2)
-		}
-	MAX-ACCESS read-write
-	STATUS	current
-	DESCRIPTION 
-	"The object enables system management software to get (and
-	set) the event log state. If the event log is disable(2), 
-	no events generated within the HPI implemention will be 
-	added to the event log.
-  
-	When the event log is enable(1), events may be automatically 
-	added to the event log as they are generated in a resource  
-	or a domain.
-
-	Typically, the HPI implementation will provide an appropriate 
-	default value for this parameter, which may vary by resource. 
-	This object is provided so that management software can 
-	override the default value, if desired."
-	::= {saHpiResourceEntry 24}	
-
 --/*******************************************************************************
 -- * ********************************************************************************
 -- * ********** ********** ********** Hot Swap table ********** **********
@@ -1921,8 +1932,8 @@ SaHpiHotSwapEntry ::= SEQUENCE {
     saHpiHotSwapIndicator      INTEGER,
 
 
-    saHpiHotSwapState          INTEGER,
-    saHpiHotSwapPreviousState  INTEGER,
+--    saHpiHotSwapState          INTEGER,
+--    saHpiHotSwapPreviousState  INTEGER,
 
 
     saHpiHotSwapInsertTimeout	SaHpiTime,
@@ -1973,71 +1984,6 @@ saHpiHotSwapIndicator OBJECT-TYPE
     ::= {saHpiHotSwapEntry 1}
 
 
-saHpiHotSwapState OBJECT-TYPE
-    SYNTAX	INTEGER {
-    		    undefined(0),
-		    inactive(1),
-		    insertionPending(2),
-		    active(3),
-		    extractionPending(4),
-		    notPresent(5) 
-		 }
-    MAX-ACCESS	read-only
-    STATUS	current
-    DESCRIPTION
-        "The hot swap state of the resource.
-
-inactive(1):
-
-	The INACTIVE state indicates that the FRU, which supports the full hot swap model, is no longer active in the system, and that it has completed the extraction process. When a FRU completes the hardware disconnection process, it is logically and electrically disconnected or isolated from the platform but still physically located in the platform, so the associated resource remains in the domain. Typically, a FRU will be powered off or held in reset when in this state. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INACTIVE when the resource is transitioning to an INACTIVE state.
-
-insertionPending(2):
-
-	The INSERTION PENDING state is entered after a resource that supports the full hot swap model has been added to the domain, as a result of the associated FRU being physically inserted into the system. This state indicates the resource is transitioning from a NOT PRESENT state or INACTIVE state into the ACTIVE state. When transitioning into the INSERTION PENDING state, the resource should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_INSERTION_PENDING. The event can be generated when the ejector latch is shut (cPCI) or the device is seated in a slot. 
-	Upon receiving the event, the HPI User has the opportunity to discover the capabilities of the resource before allowing the FRU associated with the resource to power on and become an active component in the system. During this state, the FRU can be commanded to power on or de-assert reset.
-
-
-active(3):
-
-	The ACTIVE state indicates that a resource is now an active member of the domain.
-
-	After a FRU completes the hardware connection process, the associated resource enters the ACTIVE state. This does not mean that the FRU is now active at the software level, but merely indicates that the FRU is now active in the system and that it should not be abruptly removed. The HPI implementation generates a hot swap event with HotSwapState = SAHPI_HS_STATE_ACTIVE when the resource transitions to the ACTIVE state.
-
-extractionPending(4):
-
-	The EXTRACTION PENDING state indicates that the resource, which supports the full hot swap model, has requested extraction of the associated FRU. Typically, a resource enters an EXTRACTION PENDING state when an ejector latch is opened (PICMG 2.1) or when a hot swap button is pressed. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_EXTRACTION_PENDING when a resource that supports Managed Hot Swap requests extraction. 
-	Upon receiving the event, the HPI User has the opportunity to unload software drivers, relocate processes, or unmount file systems (software disconnect) before allowing a FRU to power down and disconnect from the system.
-
-notPresent(5):
-
-	 The NOT PRESENT state is actually a virtual state that represents a resource that is not currently present in the domain, because the FRU associated with that resource is not currently present in the system. A resource is in this state before the FRU is physically inserted into the system or if it has been removed from the system. A resource that supports the full Hot Swap model typically transitions to this state from the INACTIVE state, but a resource can transition to this state from any state due to a surprise extraction of the FRU. The HPI implementation should generate a hot swap event with HotSwapState = SAHPI_HS_STATE_NOT_PRESENT when the resource transitions from any state to the NOT PRESENT state.
-
-	 The event can indicate a normal transition from INACTIVE to the NOT PRESENT state or a surprise extraction from any other state.  Normal transition events are issued with a severity of SAHPI_INFORMATIONAL. A resource following the simplified hot swap model always indicates the transition to the NOT PRESENT state as a surprise extraction.
-	 When a resource associated with a FRU fails, many systems will detect this as a NOT PRESENT state for the FRU, and report it as a transition to the NOT PRESENT state (a normal transition if the resource was in the INACTIVE state, or a surprise extraction if it was in a different state).  If the resource is subsequently restored to functionality, these systems will then detect the presence of the FRU, and report another state transition from the NOT PRESENT state to the current hot swap state for the restored resource.  If the current hot swap state is not the normal ~initial~ state for the FRU when it is inserted (i.e., INSERTION PENDING for a resource that uses the full hot swap model or ACTIVE for a resource that uses the simplified hot swap model), then the severity of the ~unusual~ hot swap event showing a transition from NOT PRESENT to a different state should be the severity contained in the ResourceSeverity field in the resource~s RPT entry."
-
-    REFERENCE 
-        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144 and 156."
-    ::= {saHpiHotSwapEntry 2}
-
-saHpiHotSwapPreviousState OBJECT-TYPE
-    SYNTAX	INTEGER {
-    	            undefined(0),
-		    inactive(1),
-		    insertionPending(2),
-		    active(3),
-		    extractionPending(4),
-		    notPresent(5)
-		}
-    MAX-ACCESS 	read-only
-    STATUS 	current
-    DESCRIPTION
-        "The previous hot swap state of the resource.  See 
-    saHpiHotSwapState description for explanation of states."
-
-    REFERENCE 
-        "Derived from states described in the SAI-HPI-B.01.01 pages 143,144."
-    ::= {saHpiHotSwapEntry 3}
-
 saHpiHotSwapInsertTimeout OBJECT-TYPE
     SYNTAX	SaHpiTime
     MAX-ACCESS	read-create
@@ -2050,7 +1996,7 @@ Once the auto-insertion process begins, the HPI User will not be allowed to take
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 pages 149-150"
 
-    ::= {saHpiHotSwapEntry 4}
+    ::= {saHpiHotSwapEntry 2}
 
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
@@ -2084,7 +2030,7 @@ saHpiHotSwapExtractTimeout OBJECT-TYPE
     REFERENCE 
         "Derived from function prototypes in the SAI-HPI-B.01.01 pages 153,154"
     
-    ::= {saHpiHotSwapEntry 5}
+    ::= {saHpiHotSwapEntry 3}
 
 
 saHpiHotSwapActionRequest OBJECT-TYPE
@@ -2107,7 +2053,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 157."
-    ::= {saHpiHotSwapEntry 6}
+    ::= {saHpiHotSwapEntry 4}
 
 saHpiHotSwapPolicyCancel OBJECT-TYPE
     SYNTAX	INTEGER {
@@ -2128,7 +2074,7 @@ Because a resource that supports the simplified hot swap model will never transi
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 147."
-    ::= {saHpiHotSwapEntry 7}
+    ::= {saHpiHotSwapEntry 5}
 
 saHpiHotSwapResourceRequest OBJECT-TYPE
     SYNTAX	INTEGER {
@@ -2149,7 +2095,7 @@ Because a resource that supports the simplified hot swap model will never transi
 
     REFERENCE 
         "Derived from function prototype in the SAI-HPI-B.01.01 page 148-149."
-    ::= {saHpiHotSwapEntry 8}
+    ::= {saHpiHotSwapEntry 6}
 
 saHpiHotSwapResetAction OBJECT-TYPE
     SYNTAX	INTEGER {
@@ -2170,7 +2116,7 @@ coldReset(1) and warmReset(2) are pulsed resets, and are not valid values to be 
 
     REFERENCE
     	"Derieved from SA-HPI-B.01.01 page 164."
-    ::= {saHpiHotSwapEntry 9}
+    ::= {saHpiHotSwapEntry 7}
 
 saHpiHotSwapPowerAction OBJECT-TYPE
     SYNTAX	INTEGER {
@@ -2191,13 +2137,13 @@ Not all resources supporting hot swap will necessarily support this function. In
 This function may also be supported for non-FRU entities if power control is available for those entities."
 	REFERENCE
 	    	"Derieved from SA-HPI-B.01.01 page 168-169."
-	::= {saHpiHotSwapEntry 10}
+	::= {saHpiHotSwapEntry 8}
 saHpiHotSwapRTP	OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-only
 	STATUS		current
 	DESCRIPTION	"OID for RTP"
-	::= {saHpiHotSwapEntry 11}
+	::= {saHpiHotSwapEntry 9}
 
 
 	
@@ -2214,11 +2160,101 @@ hpiEvents	OBJECT IDENTIFIER ::= { hpi 2 }
 
 events		OBJECT IDENTIFIER ::= { hpiEvents 1 }
 
+saHpiEventCount OBJECT-TYPE
+	SYNTAX		Counter32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"The number of events present on this system."
+	::= {events 1}
+
+saHpiEventTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF SaHpiEventEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION	"Event Master table. "
+	::= {events 2}
+
+saHpiEventEntry OBJECT-TYPE
+	SYNTAX		SaHpiEventEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION ""
+	INDEX	{ 
+		saHpiDomainId
+	}
+	::= {saHpiEventTable 1}
+
+SaHpiEventEntry ::= SEQUENCE {
+
+	saHpiEvent		RowPointer,
+	saHpiInstrumentId	SaHpiInstrumentId,
+	saHpiEventSeverity	INTEGER,
+	saHpiEventHistorical	TruthValue,
+
+	saHpiEventQueueStatus	Unsigned32
+	}
+
+saHpiEvent OBJECT-TYPE
+    SYNTAX	RowPointer
+    MAX-ACCESS	not-accessible
+    STATUS	current
+    DESCRIPTION
+	"Pointer to the event."
+    ::= {saHpiEventEntry 1}
+
+saHpiInstrumentId OBJECT-TYPE
+    SYNTAX	SaHpiInstrumentId
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"Instrument Id"
+    ::= {saHpiEventEntry 2}
+
+saHpiEventSeverity OBJECT-TYPE
+        SYNTAX          INTEGER{
+				undefined (0),
+				critical(1),
+				major(2),
+				minor(3),
+				informational(4),
+				ok(5),
+				debug(241)
+			}
+        MAX-ACCESS      read-only
+        STATUS          current
+        DESCRIPTION     "Severity of event. 
+	Note: The enumerated named have +1 added as opposed to the 
+	SA HPI spec for the same constants.  "
+        ::= {saHpiEventEntry 3}
+
+
+saHpiEventHistorical OBJECT-TYPE
+    SYNTAX	TruthValue
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"True is event log."
+    ::= {saHpiEventEntry 4}
+
+
+saHpiEventQueueStatus OBJECT-TYPE
+    SYNTAX	Unsigned32
+    MAX-ACCESS	read-only
+    STATUS	current
+    DESCRIPTION
+	"  This status word is returned to HPI Users that request it
+	when saHpiEventGet() is called."
+    ::= {saHpiEventEntry 5}
+
+    
+
 --IBMKR: Add more in description.
 --IBMKR: Remove from index the saHpiDomainId and saHpiResourceId
 -- since the data is enumerated per saHpiEventIndex and a SensorNum/Watchdog
 -- has no relation to a resource and domain? Or does it?
+--IBMKR: Replicate the three Watchdog objects - they are used in the RDR fields.
 --IBMRK: Docuemnt in sahpiRresouceID 'UNSPECTIFIED' value.
+
 
 
 -- *********************************
@@ -2258,7 +2294,8 @@ saHpiResourceEventEntry OBJECT-TYPE
 SaHpiResourceEventEntry ::= SEQUENCE {
 
 	saHpiResourceEventTimestamp		SaHpiTime,
-	saHpiResourceType			INTEGER
+	saHpiResourceEventType			INTEGER,
+	saHpiResourceEventDelete		RowStatus
 
 	}
 
@@ -2273,7 +2310,7 @@ saHpiResourceEventTimestamp OBJECT-TYPE
 	if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiResourceEventEntry 1}
 
-saHpiResourceType OBJECT-TYPE
+saHpiResourceEventType OBJECT-TYPE
     SYNTAX	INTEGER {
     			undefined(0),
 			resourceFailure(1),
@@ -2286,6 +2323,15 @@ saHpiResourceType OBJECT-TYPE
 --IBM-KR: add more
 	" "
     ::= {saHpiResourceEventEntry 2}
+
+saHpiResourceEventDelete OBJECT-TYPE
+    SYNTAX		RowStatus
+    MAX-ACCESS	read-write
+    STATUS		current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiResourceEventEntry 3}
 
 
 -- *********************************
@@ -2326,8 +2372,8 @@ saHpiDomainEventEntry OBJECT-TYPE
 SaHpiDomainEventEntry ::= SEQUENCE {
 
 	saHpiDomainEventTimestamp		SaHpiTime,
-	saHpiDomainEventType			INTEGER
-
+	saHpiDomainEventType			INTEGER,
+	saHpiDomainEventDelete			RowStatus
 	}
 
 saHpiDomainEventTimestamp OBJECT-TYPE
@@ -2355,6 +2401,16 @@ saHpiDomainEventType OBJECT-TYPE
 	and the removal of domain references to the DRT."
 
     ::= {saHpiDomainEventEntry 2}
+
+saHpiDomainEventDelete OBJECT-TYPE
+    SYNTAX		RowStatus
+    MAX-ACCESS	read-write
+    STATUS		current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiDomainEventEntry 3}
+
 
 -- *********************************
 -- **
@@ -2410,11 +2466,11 @@ SaHpiSensorEventEntry ::= SEQUENCE {
 	saHpiEventSensorTriggerThreshold	SaHpiSensorReadingValue,
 
 	saHpiEventSensorPreviousState		SaHpiEventState,
--- IBMKR: Seems redundant?
 	saHpiEventSensorCurrentState		SaHpiEventState,
 
 	saHpiEventSensorOem			Unsigned32,
-	saHpiEventSensorSpecific		Unsigned32
+	saHpiEventSensorSpecific		Unsigned32,
+	saHpiEventSensorDelete			RowStatus
 	}
 
 saHpiSensorEventTimestamp OBJECT-TYPE
@@ -2563,7 +2619,6 @@ saHpiEventSensorPreviousState OBJECT-TYPE
 	""
     ::= {saHpiSensorEventEntry 11}
 
--- IBMKR: Seems redundant?
 saHpiEventSensorCurrentState OBJECT-TYPE
     SYNTAX	SaHpiEventState
     MAX-ACCESS	read-only
@@ -2588,6 +2643,15 @@ saHpiEventSensorSpecific OBJECT-TYPE
     DESCRIPTION
 	""
     ::= {saHpiSensorEventEntry 14}
+
+saHpiEventSensorDelete OBJECT-TYPE
+    SYNTAX	RowStatus
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiSensorEventEntry 15}
 
 
 -- *********************************
@@ -2637,7 +2701,8 @@ SaHpiSensorEnableChangeEventEntry ::= SEQUENCE {
 	saHpiSensorEnableChangeDeassertEvents	SaHpiEventState,
 	saHpiSensorEnableChangeOptionalData	Unsigned8,
 
-	saHpiSensorEnableChangeEventState	SaHpiEventState
+	saHpiSensorEnableChangeEventState	SaHpiEventState,
+	saHpiSensorEnableChangeDelete		RowStatus
 	}
 
 saHpiSensorEnableChangeEventTimestamp OBJECT-TYPE
@@ -2764,6 +2829,16 @@ saHpiSensorEnableChangeEventState OBJECT-TYPE
 	""
     ::= {saHpiSensorEnableChangeEventEntry 9}
 
+saHpiSensorEnableChangeDelete OBJECT-TYPE
+    SYNTAX	RowStatus
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiSensorEnableChangeEventEntry 10}
+
+
 
 
 -- *********************************
@@ -2804,8 +2879,9 @@ saHpiHotSwapEventEntry OBJECT-TYPE
 SaHpiHotSwapEventEntry ::= SEQUENCE {
 
 	saHpiHotSwapEventTimestamp		SaHpiTime,
-	saHpiHotSwapEventState			SaHpiEventState,
-	saHpiHotSwapEventPreviousState		SaHpiEventState
+	saHpiHotSwapEventState			SaHpiHotSwapState,
+	saHpiHotSwapEventPreviousState		SaHpiHotSwapState,
+	saHpiHotSwapEventDelete			RowStatus
 	}
 
 saHpiHotSwapEventTimestamp OBJECT-TYPE
@@ -2818,26 +2894,9 @@ saHpiHotSwapEventTimestamp OBJECT-TYPE
     	Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
 	if less than or equal to TIME_MAX_RELATIVE."
     ::= {saHpiHotSwapEventEntry 1}
--- IBMKR: How familiar is it with?
-
---saHpiEventHotSwapState OBJECT-TYPE
---        SYNTAX          INTEGER {
---				undefined(0),
---				inactive (1),
---				insertionPending (2),
---				activeHealthy (3),
---				activeUnhealthy (4),
---				extractionPending (5),
---				notPresent (6)
---			}
---        MAX-ACCESS      read-only
---        STATUS          current
---        DESCRIPTION     "Current state of the hot-swap device."
---        ::= {saHpiEventEntry 24}
-
 
 saHpiHotSwapEventState OBJECT-TYPE
-    SYNTAX	SaHpiEventState
+    SYNTAX	SaHpiHotSwapState
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION	
@@ -2845,12 +2904,22 @@ saHpiHotSwapEventState OBJECT-TYPE
     ::= {saHpiHotSwapEventEntry 2}
 
 saHpiHotSwapEventPreviousState OBJECT-TYPE
-    SYNTAX	SaHpiEventState
+    SYNTAX	SaHpiHotSwapState
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION	
 	""
     ::= {saHpiHotSwapEventEntry 3}
+
+saHpiHotSwapEventDelete OBJECT-TYPE
+    SYNTAX		RowStatus
+    MAX-ACCESS	read-write
+    STATUS		current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiHotSwapEventEntry 4}
+
 
 -- *********************************
 -- **
@@ -2894,7 +2963,8 @@ SaHpiWatchdogEventEntry ::= SEQUENCE {
 --IBMKR: Missing 
 	saHpiWatchdogEventAction		INTEGER,
 	saHpiWatchdogEventPreTimerAction	INTEGER,
-	saHpiWatchdogEventUse			INTEGER
+	saHpiWatchdogEventUse			INTEGER,
+	saHpiWatchdogEventDelete		RowStatus
 	}
 
 saHpiWatchdogEventTimestamp OBJECT-TYPE
@@ -2967,6 +3037,16 @@ saHpiWatchdogEventUse OBJECT-TYPE
         ::= {saHpiWatchdogEventEntry 4}
 
 
+saHpiWatchdogEventDelete OBJECT-TYPE
+    SYNTAX	RowStatus
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiWatchdogEventEntry 5}
+
+
 
 -- *********************************
 -- **
@@ -3011,7 +3091,8 @@ SaHpiSoftwareEventEntry ::= SEQUENCE {
 	saHpiSoftwareEventType			INTEGER,
 	saHpiSoftwareEventTextType		SaHpiTextType,
 	saHpiSoftwareEventTextLanguage		SaHpiTextLanguage,
-	saHpiSoftwareEventText			SaHpiText
+	saHpiSoftwareEventText			SaHpiText,
+	saHpiSoftwareEventDelete		RowStatus
 	}
 
 saHpiSoftwareEventTimestamp OBJECT-TYPE
@@ -3075,6 +3156,16 @@ saHpiSoftwareEventText OBJECT-TYPE
 	" "
     ::= {saHpiSoftwareEventEntry 7}
 
+saHpiSoftwareEventDelete OBJECT-TYPE
+    SYNTAX		RowStatus
+    MAX-ACCESS	read-write
+    STATUS		current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiSoftwareEventEntry 8}
+
+
 
 -- *********************************
 -- **
@@ -3116,7 +3207,8 @@ SaHpiOEMEventEntry ::= SEQUENCE {
 	saHpiOEMEventTimestamp		SaHpiTime,
 
 	saHpiOEMEventManufacturerIdT	Unsigned32,
-	saHpiOEMEventEventData		OCTET STRING
+	saHpiOEMEventData		OCTET STRING,
+	saHpiOEMEventDelete		RowStatus
 	}
 
 saHpiOEMEventTimestamp OBJECT-TYPE
@@ -3138,13 +3230,23 @@ saHpiOEMEventManufacturerIdT OBJECT-TYPE
 	" "
     ::= {saHpiOEMEventEntry 2}
 
-saHpiOEMEventEventData OBJECT-TYPE
+saHpiOEMEventData OBJECT-TYPE
     SYNTAX	OCTET STRING
     MAX-ACCESS	read-only
     STATUS	current
     DESCRIPTION
 	" "
     ::= {saHpiOEMEventEntry 3}
+
+saHpiOEMEventDelete OBJECT-TYPE
+    SYNTAX		RowStatus
+    MAX-ACCESS	read-write
+    STATUS		current
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
+
+    ::= {saHpiOEMEventEntry 4}
+
 
 
 -- *********************************
@@ -3190,10 +3292,9 @@ SaHpiUserEventEntry ::= SEQUENCE {
 	
 	saHpiUserEventTextType		SaHpiTextType,
 	saHpiUserEventTextLanguage 	SaHpiTextLanguage,
-	saHpiUserEventText		SaHpiText
+	saHpiUserEventText		SaHpiText,
 
--- IBMKR: Replicate amongs all of the rows?
---	saHpiEventDelete		RowStatus
+	saHpiUserEventDelete		RowStatus
 	}
 
 saHpiUserEventTimestamp OBJECT-TYPE
@@ -3233,52 +3334,14 @@ saHpiUserEventText OBJECT-TYPE
 	" "
     ::= {saHpiUserEventEntry 4}
 
-
--- IBMKR: Replicate amongs all of the rows?
---	saHpiEventDelete		RowStatus
-
-
--- IBMKR: These next four objects are here temporarily. They will
--- be moved out.
-saHpiEventSeverity OBJECT-TYPE
-        SYNTAX          INTEGER{
-				undefined (0),
-				critical(1),
-				major(2),
-				minor(3),
-				informational(4),
-				ok(5),
-				debug(241)
-			}
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Severity of event. 
-	Note: The enumerated named have +1 added as opposed to the 
-	SA HPI spec for the same constants.  "
-        ::= {events 1}
-
-saHpiInstrumentId OBJECT-TYPE
-    SYNTAX	Unsigned32
-    MAX-ACCESS	read-only
+saHpiUserEventDelete OBJECT-TYPE
+    SYNTAX	RowStatus
+    MAX-ACCESS	read-write
     STATUS	current
-    DESCRIPTION
-	"Instrument Id"
-    ::= {events 2}
+    DESCRIPTION	
+	"Set this to destory(6) or notInService(2) to delete this entry."
 
-saHpiEventHistorical OBJECT-TYPE
-    SYNTAX	TruthValue
-    MAX-ACCESS	read-only
-    STATUS	current
-    DESCRIPTION
-	"True is event log."
-    ::= {events 3}
--- saHpiEventDelete OBJECT-TYPE
---	SYNTAX		RowStatus
---	MAX-ACCESS	read-write
---	STATUS		current
---	DESCRIPTION	
---	"Set this to destory(6) or notInService(2) to delete this entry."
---	::= {saHpiEventEntry 33}
+    ::= {saHpiUserEventEntry 5}
 
 
 --/*******************************************************************************
@@ -3290,19 +3353,66 @@ saHpiEventHistorical OBJECT-TYPE
 
 eventLog	OBJECT IDENTIFIER ::= {hpiEvents 2}
 
+saHpiEventLogInfoTable OBJECT-TYPE
+        SYNTAX          SEQUENCE OF SaHpiEventLogInfoEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION     
+	    "A table definining Event Log Information records."
+        ::= {eventLog 1}
+
+
+saHpiEventLogInfoEntry OBJECT-TYPE
+        SYNTAX          SaHpiEventLogInfoEntry
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION 	
+	    "Each resource has a Event Log Information record, which contains
+	    per resource pertient logging information."
+        INDEX   { 
+		saHpiDomainId, 	
+		saHpiResourceId
+	}
+        ::= {saHpiEventLogInfoTable 1}
+                                                 
+SaHpiEventLogInfoEntry ::= SEQUENCE {
+
+	saHpiEventLogEntries 		Unsigned32,
+	saHpiEventLogSize		Unsigned32,
+	saHpiEventLogUserEventMaxSize	Unsigned32,
+	saHpiEventLogUpdateTimestamp	SaHpiTime,
+	saHpiEventLogCurrentTime	SaHpiTime,
+
+	saHpiEventLogIsEnabled		TruthValue,
+	
+	saHpiEventLogOverflowFlag	TruthValue,
+	saHpiEventLogOverflowResetable	TruthValue,
+	saHpiEventLogOverflowAction	INTEGER,
+
+	saHpiEventLogOverflowReset	INTEGER,
+
+-- Event Log operations:
+	saHpiEventLogDelete		RowStatus,
+
+	saHpiEventLogState		TruthValue
+
+	}
+
 saHpiEventLogEntries OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	" The Entries entry denotes the number of active entries contained in the log."
-	::= {eventLog 1}
+	DESCRIPTION	
+	    "The number of active entries contained in the log."
+	::= {saHpiEventLogInfoEntry 1}
 
 saHpiEventLogSize OBJECT-TYPE
 	SYNTAX		Unsigned32
 	MAX-ACCESS	read-only
 	STATUS		current
-	DESCRIPTION	" The Size entry denotes the total number of entries the log is able to hold."
-	::= {eventLog 2}
+	DESCRIPTION	
+	    "The total number of entries the log is able to hold."
+	::= {saHpiEventLogInfoEntry 2}
 
 saHpiEventLogUserEventMaxSize OBJECT-TYPE
     SYNTAX	Unsigned32(0..255)
@@ -3314,7 +3424,7 @@ saHpiEventLogUserEventMaxSize OBJECT-TYPE
 	by the Event Log implementation.  If the implementation does 
 	not enforce a more restrictive data length, it should be set
 	to SAHPI_MAX_TEXT_BUFFER_LENGTH (255)."
-    ::= {eventLog 3}
+    ::= {saHpiEventLogInfoEntry 3}
 
 saHpiEventLogUpdateTimestamp OBJECT-TYPE
 	SYNTAX		SaHpiTime
@@ -3323,20 +3433,32 @@ saHpiEventLogUpdateTimestamp OBJECT-TYPE
 	DESCRIPTION	
 	    "The UpdateTimestamp entry denotes the time of the last
 	update to the Event Log. 
-	Refer to SaSaHpiTime for full describption."
-	::= {eventLog 4}
-
-saHpiEventLogCurrentTime OBJECT-TYPE
-	SYNTAX		SaHpiTime
-	MAX-ACCESS	read-only
-	STATUS		current
-	DESCRIPTION	
-	    "The CurrentTime entry denotes the Event Log's idea of the 
-	current time; i.e the timestamp that would be placed on an
-	entry if it was added now. 
 
 	Refer to SaHpiTime for full describption."
-	::= {eventLog 5}
+	::= {saHpiEventLogInfoEntry 4}
+
+saHpiEventLogCurrentTime OBJECT-TYPE
+    SYNTAX     	SaHpiTime
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION	
+	"The CurrentTime entry denotes the Event Log's idea of the 
+    current time; i.e the timestamp that would be placed on an
+    entry if it was added now. 
+
+	Remarks:
+
+    Entries placed in the Event Log after this function is called will have Event Log timestamps (i.e., the Timestamp field in the SaHpiEventLogEntryT structure) based on the new time.  Setting the clock does not affect existing Event Log entries.  If the time is set to a relative time, subsequent entries placed in the Event Log will have an Event Log timestamp expressed as a relative time; if the time is set to an absolute time, subsequent entries will have an Event Log timestamp expressed as an absolute time.  
+
+    This function only sets the Event Log time clock and does not have any direct bearing on the timestamps placed on events (i.e., the Timestamp field in the SaHpiEventT structure), or the timestamps placed in the domain RPT info record.  Setting the clocks used to generate timestamps other than Event Log timestamps is implementation-dependent, and should be documented by the HPI implementation provider.
+
+    Some underlying implementations may not be able to handle the same relative and absolute time ranges, as those defined in HPI.  Such limitations will be documented in implementation-specific documentation.  When a time value is set in a region that is not supported by the implementation, an error code of SNMP_GENERROR  will be returned.
+
+    Refer to SaHpiTime for full describption."
+
+    REFERENCE
+    	"Derived from typedefs in SAI-HPI-B.01.01 page 59."
+	::= {saHpiEventLogInfoEntry 5}
 
 saHpiEventLogIsEnabled OBJECT-TYPE
 	SYNTAX		TruthValue
@@ -3353,7 +3475,7 @@ saHpiEventLogIsEnabled OBJECT-TYPE
 	added to the event log as they are generated in a resource 
 	or a domain, however, it is implementation-specific which
 	events are automatically added to any event log.  "
-	::= {eventLog 6}
+	::= {saHpiEventLogInfoEntry 6}
 
 saHpiEventLogOverflowFlag OBJECT-TYPE
 	SYNTAX		TruthValue 	
@@ -3362,7 +3484,16 @@ saHpiEventLogOverflowFlag OBJECT-TYPE
 	DESCRIPTION	
 	    "The OverflowFlag entry indicates the log has overflowed. 
 	Events have been dropped or overwritten due to a table overflow. "
-	::= {eventLog 7}
+	::= {saHpiEventLogInfoEntry 7}
+saHpiEventLogOverflowResetable OBJECT-TYPE
+    SYNTAX	TruthValue
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION
+	"Indicates if the the overflow falg can be cleared 
+	by calling saHpiEventLogOverflowReset."
+    ::= {saHpiEventLogInfoEntry 8}
+
 
 saHpiEventLogOverflowAction OBJECT-TYPE
 	SYNTAX		INTEGER{
@@ -3370,7 +3501,7 @@ saHpiEventLogOverflowAction OBJECT-TYPE
 				drop(1),
 				overwrite(2)
 			}
-	MAX-ACCESS	read-only
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
 	    "The OverflowAction entry indicates the behavior of the 
@@ -3383,16 +3514,56 @@ saHpiEventLogOverflowAction OBJECT-TYPE
 
 		Event Log overwrites existing entries when Event Log
 		is full"
-	::= {eventLog 8}
+	::= {saHpiEventLogInfoEntry 9}
 
-saHpiEventClearOverflowFlag OBJECT-TYPE
-	SYNTAX		RowStatus
-	MAX-ACCESS	read-only
+
+saHpiEventLogOverflowReset OBJECT-TYPE
+	SYNTAX		INTEGER {
+			      undefined(0),
+			      resetOverflowFlag(1)
+			}
+	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION	
-	    ""
+	    "This function resets the OverflowFlag in the Event Log info record of the specified Event Log."
 
-	::= {eventLog 9}
+	::= {saHpiEventLogInfoEntry 10}
+
+saHpiEventLogDelete OBJECT-TYPE
+    SYNTAX	RowStatus
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION
+	"This function erases the contents of the specified Event Log.
+
+	Set this to destory(6) or notInService(2) to delete the event log for
+	this resource.
+
+	NOTE: The OverflowFlag field in the Event Log info record will be 
+	reset when this function is called."
+
+    REFERENCE
+    	"Derieved from SA-HPI-B.01.01 page 57."
+
+    ::= {saHpiEventLogInfoEntry 11}
+
+saHpiEventLogState OBJECT-TYPE
+    SYNTAX	TruthValue
+    MAX-ACCESS	read-write
+    STATUS	current
+    DESCRIPTION
+	"When reading this value, true indicates that the Event Log is enabled; 
+    False indicates that it is disabled.
+
+    When writing this value, true indicates that the Event Log is to be enabled; 
+    False indicates that it is to be disabled.
+
+    This node enables an HPI User to set/get the Event Log state. If the Event Log is disabled no events generated within the HPI implementation will be added to the Event Log. Events may still be added to the Event Log. When the Event Log is enabled events may be automatically added to the Event Log as they are generated in a resource or a domain, however, it is implementation-specific which events are automatically added to any Event Log.
+    "
+    REFERENCE
+    	"Derieved from SA-HPI-B.01.01 page 61,62."
+    ::= {saHpiEventLogInfoEntry 12}
+
 
 saHpiEventLogTable OBJECT-TYPE
         SYNTAX          SEQUENCE OF SaHpiEventLogEntry
@@ -3400,7 +3571,7 @@ saHpiEventLogTable OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	    "A table definining Event Log records."
-        ::= {eventLog 10}
+        ::= {eventLog 2}
 
 
 saHpiEventLogEntry OBJECT-TYPE
@@ -3409,11 +3580,10 @@ saHpiEventLogEntry OBJECT-TYPE
         STATUS          current
         DESCRIPTION 	"This section defines the types associated with the SEL."
         INDEX   { 
-	saHpiDomainId, 
-	saHpiResourceId,
-	saHpiEventLogIndex,
-	saHpiEventLogType}
-
+		saHpiDomainId, 
+		saHpiResourceId,
+		saHpiEntryId
+	}
         ::= {saHpiEventLogTable 1}
                                                  
 SaHpiEventLogEntry ::= SEQUENCE {
@@ -3421,8 +3591,7 @@ SaHpiEventLogEntry ::= SEQUENCE {
 	saHpiEventLogType		INTEGER,
 	saHpiEventLogAddedTimestamp	SaHpiTime,
 
-	saHpiEvent			RowPointer,
-	saHpiEventLogDelete		RowStatus
+	saHpiEventLog			RowPointer
 	}
 
 saHpiEventLogIndex OBJECT-TYPE
@@ -3471,7 +3640,7 @@ saHpiEventLogAddedTimestamp OBJECT-TYPE
         ::= {saHpiEventLogEntry 3}
 
 
-saHpiEvent OBJECT-TYPE
+saHpiEventLog OBJECT-TYPE
 	SYNTAX		RowPointer
 	MAX-ACCESS	read-write
 	STATUS		current
@@ -3479,14 +3648,6 @@ saHpiEvent OBJECT-TYPE
 	    "Pointer to the event."
 	::= {saHpiEventLogEntry 4}
 
-
-saHpiEventLogDelete OBJECT-TYPE
-	SYNTAX		RowStatus
-	MAX-ACCESS	read-write
-	STATUS		current
-	DESCRIPTION	
-	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiEventLogEntry 5}
 
 	
 --/*******************************************************************************
@@ -3520,11 +3681,18 @@ saHpiRdrEntry OBJECT-TYPE
         DESCRIPTION 	" The following describes the different types of records that exist within a
          RDR repository and the RDR super-structure to all of the specific RDR types
          (sensor, inventory data, watchdog, etc.)."
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiRdrRecordId, saHpiRdrType }
+        INDEX   { 
+		saHpiDomainId, 
+		saHpiResourceId, 
+		saHpiRdrRecordId, 
+		saHpiRdrType 
+	}
 
         ::= {saHpiRdrTable 1} 
                                                  
 SaHpiRdrEntry ::= SEQUENCE {
+
+-- IBMLR: Can this be replaced with saHpiRdrEntryId?
 	saHpiRdrRecordId	Unsigned32,
 	saHpiRdrType		INTEGER,
 	saHpiRdrEntityPath	OCTET STRING,
@@ -5269,7 +5437,7 @@ saHpiInventoryDataAreaEntry OBJECT-TYPE
 		saHpiDomainId, 
 		saHpiResourceId, 
 		saHpiInstrumentId, 
-		saHpiResourceEntryIdx
+		saHpiEntryId
 	}
 	::= {saHpiInventoryDataAreaTable 1}
 
@@ -5365,8 +5533,8 @@ saHpiInventoryFieldEntry OBJECT-TYPE
 		saHpiResourceId,
 		saHpiInstrumentId,
 -- Is AreHeaderT.AreadId the same as IdrFieldT.AreadId? Yes?Verify
-		saHpiResourceEntryIdx,
-		saHpiResourceEntryIdx
+		saHpiEntryId,
+		saHpiEntryId
 	}
 	::= {saHpiInventoryFieldTable 1}
 
@@ -6145,7 +6313,7 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiEntryUpdateCount,
 		saHpiEntryUpdateTimestamp,
 		saHpiDomainId ,
-		saHpiResourceEntryIdx ,
+		saHpiEntryId ,
 		saHpiResourceId ,
 		saHpiResourceEntityPath ,
 		saHpiResourceCapabilities ,
@@ -6161,10 +6329,10 @@ saHpiEntityGroup OBJECT-GROUP
 		saHpiResourceTagTextType ,
 		saHpiResourceTagTextLanguage,
 		saHpiResourceTag,
-		saHpiParamControl,
-		saHpiClearEvents,
-		saHpiEventLogTime,
-		saHpiEventLogState
+		saHpiParamControl
+		--saHpiClearEvents,
+		--saHpiEventLogTime,
+		--saHpiEventLogState
 	}
 	STATUS current
 	DESCRIPTION
@@ -6184,8 +6352,8 @@ saHpiEventGroup OBJECT-GROUP
 saHpiHotSwapGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiHotSwapIndicator,
-		saHpiHotSwapState,
-		saHpiHotSwapPreviousState,
+--		saHpiHotSwapState,
+--		saHpiHotSwapPreviousState,
 		saHpiHotSwapInsertTimeout,
 		saHpiHotSwapExtractTimeout,
 		saHpiHotSwapActionRequest,
