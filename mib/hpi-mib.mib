@@ -3880,12 +3880,13 @@ saHpiInventoryEntry OBJECT-TYPE
 	DESCRIPTION
 		"These structures are used to read and write inventory data to entity inventory
 		repositories within a resource."
-	INDEX	{ saHpiInventoryEirId }
+	INDEX	{ saHpiInventoryEirId, saHpiInventoryIndex }
 	::= {saHpiInventoryTable 1}
 
 
 SaHpiInventoryEntry ::= SEQUENCE {
 	saHpiInventoryEirId		Unsigned32,
+	saHpiInventoryIndex		Unsigned32,
 	saHpiInventoryRecordType	INTEGER,
 	saHpiInventoryValidity		INTEGER,
 	saHpiInventoryAttributes	OCTET STRING,
@@ -3911,6 +3912,15 @@ saHpiInventoryEirId OBJECT-TYPE
 	SAHPI_DEFAULT_INVENTORY_ID  0x00 "
         ::= {saHpiInventoryEntry 1}
 
+saHpiInventoryIndex OBJECT-TYPE
+	SYNTAX		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Sub-index for the inventory data resource record.
+	This value enumerate n-inventory data resource records for
+	a record that has mulitple inventory entires (for the same 
+	saHpiInventoryEirId)."
+	::= {saHpiInventoryEntry 2}
 
 saHpiInventoryRecordType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3923,7 +3933,7 @@ saHpiInventoryRecordType OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     " Inventory Record definitions"
-        ::= {saHpiInventoryEntry 2}
+        ::= {saHpiInventoryEntry 3}
 
 saHpiInventoryValidity OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -3934,7 +3944,7 @@ saHpiInventoryValidity OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Indication as to whether data is complete and valid. "
-        ::= {saHpiInventoryEntry 3}
+        ::= {saHpiInventoryEntry 4}
 
 saHpiInventoryAttributes OBJECT-TYPE
 	SYNTAX		OCTET STRING (SIZE(1|4|12|9|261|275))
@@ -4032,7 +4042,7 @@ saHpiInventoryAttributes OBJECT-TYPE
 
 	oem	- OEM data represented as follows:
 		octet 1-4	-manufacturer ID in network byte order "
-        ::= {saHpiInventoryEntry 4}
+        ::= {saHpiInventoryEntry 5}
 
 saHpiInventoryTextType OBJECT-TYPE 
 	SYNTAX		INTEGER {
@@ -4058,7 +4068,7 @@ saHpiInventoryTextType OBJECT-TYPE
          language(4)
 		ASCII or UNICODE depending on language
 	"
-	::= {saHpiInventoryEntry 5}
+	::= {saHpiInventoryEntry 6}
 
 saHpiInventoryTextLanguage OBJECT-TYPE
 	SYNTAX		INTEGER {
@@ -4206,7 +4216,7 @@ saHpiInventoryTextLanguage OBJECT-TYPE
 	This enumeration lists all of the languages that can be 
 	associated with text.  Undef (0) indicates that 
 	the language is unspecified or unknown.  "
-	::= {saHpiInventoryEntry 6}
+	::= {saHpiInventoryEntry 7}
 
 saHpiInventoryManufacturer OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4224,7 +4234,7 @@ saHpiInventoryManufacturer OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 7}
+        ::= {saHpiInventoryEntry 8}
 
 saHpiInventoryProductName OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255)) 
@@ -4242,7 +4252,7 @@ saHpiInventoryProductName OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 8}
+        ::= {saHpiInventoryEntry 9}
 
 saHpiInventoryProductVersion OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4260,7 +4270,7 @@ saHpiInventoryProductVersion OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 9}
+        ::= {saHpiInventoryEntry 10}
 
 saHpiInventoryModelNumber OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4279,7 +4289,7 @@ saHpiInventoryModelNumber OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 10}
+        ::= {saHpiInventoryEntry 11}
 
 saHpiInventorySerialNumber OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4298,7 +4308,7 @@ saHpiInventorySerialNumber OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 11}
+        ::= {saHpiInventoryEntry 12}
 
 saHpiInventoryPartNumber OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4317,7 +4327,7 @@ saHpiInventoryPartNumber OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 12}
+        ::= {saHpiInventoryEntry 13}
 
 saHpiInventoryFileId OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4336,7 +4346,7 @@ saHpiInventoryFileId OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 13}
+        ::= {saHpiInventoryEntry 14}
 
 saHpiInventoryAssetTag OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4355,7 +4365,7 @@ saHpiInventoryAssetTag OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 14}
+        ::= {saHpiInventoryEntry 15}
 
 saHpiInventoryCustomField OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..255))
@@ -4374,14 +4384,14 @@ saHpiInventoryCustomField OBJECT-TYPE
 
 	Changing this field in those cases may not alter the inventory 
 	information."
-        ::= {saHpiInventoryEntry 15}
+        ::= {saHpiInventoryEntry 16}
 
 saHpiInventoryRDR OBJECT-TYPE
         SYNTAX          RowPointer
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Pointer to resource data record for this particulat inventory resource data record"
-        ::= {saHpiInventoryEntry 16}
+        ::= {saHpiInventoryEntry 17}
 --
 -- /*******************************************************************************
 -- ********************************************************************************
@@ -4958,6 +4968,7 @@ saHpiInventoryGroup OBJECT-GROUP
 	OBJECTS {
 		saHpiInventoryCount,
 		saHpiInventoryEirId,
+		saHpiInventoryIndex,
 		saHpiInventoryRecordType,
 		saHpiInventoryValidity,
 		saHpiInventoryAttributes,
