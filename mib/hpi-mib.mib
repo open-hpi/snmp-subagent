@@ -191,7 +191,7 @@ Unsigned16 ::= TEXTUAL-CONVENTION
 
 
 --
--- RPT Entry
+-- DomainInfo, DRT, DAT, and RPT Entry
 --
 
 saHpiDomainInfoEntryCount OBJECT-TYPE
@@ -792,10 +792,10 @@ SaHpiDatEntry ::= SEQUENCE {
 
 	saHpiAlarmId			Unsigned32,    
 	saHpiTimestamp			HpiTimeStamp,  
-	saHpiSeverity   		Unsigned32,  
+	saHpiSeverity   		INTEGER,  
 	saHpiAcknowledged       	TruthValue,
 	
-	saHpiAlarmCondStatusCondType	Unsigned32,
+	saHpiAlarmCondStatusCondType	INTEGER,
 	saHpiAlarmCondEntityPath      	OCTET STRING,
 	saHpiAlarmCondDomainId    	Unsigned32,			  
 	saHpiAlarmCondResourceId  	Unsigned32,			  
@@ -849,7 +849,15 @@ saHpiTimestamp OBJECT-TYPE
 	::= {saHpiDatEntry 2}
 
 saHpiSeverity OBJECT-TYPE 
-	SYNTAX		Unsigned32 
+	SYNTAX		INTEGER {
+				critical(0),
+				major(1),
+				minor(2),
+				informational(3),
+				ok(4),
+				debug(240),
+				allseverities(255)  			
+			} 
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
@@ -874,7 +882,12 @@ saHpiAcknowledged OBJECT-TYPE
         ::= {saHpiDatEntry 4}
 	
 saHpiAlarmCondStatusCondType OBJECT-TYPE 
-	SYNTAX		Unsigned32 
+	SYNTAX		INTEGER {
+				sensor(0),
+				resource(1),
+				oem(2),
+				user(3)
+			} 
 	MAX-ACCESS	read-create
 	STATUS		current
 	DESCRIPTION	
