@@ -175,7 +175,6 @@ delete_rpt_row(SaHpiDomainIdT domain_id,
 int
 update_event_status_flag(SaHpiDomainIdT domain_id,
 			     SaHpiResourceIdT resource_id,
-			     SaHpiEntryIdT num,
 			     long event_status);
 
   /*

@@ -812,10 +812,8 @@ saHpiClearEvents OBJECT-TYPE
 	MAX-ACCESS	read-write
 	STATUS		current
 	DESCRIPTION
-	"Erase all of the system events and events for this particulate
-	resource. The tables that will be affected are
-	saHpiEvents and saHpiSystemEventsLogTable
-	"
+	"Erase all of the system events for this particular
+	resource. The saHpiSystemEventsLogTable will be affected."
 	::= {saHpiEntry 19}
 
 saHpiEventLogTime	OBJECT-TYPE
@@ -2323,14 +2321,13 @@ saHpiSystemEventLogEntry OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION 	"This section defines the types associated with the SEL."
-        INDEX   { saHpiDomainID, saHpiResourceID  ,saHpiSystemEventLogEntryId }
+        INDEX   { saHpiDomainID, saHpiResourceID  ,saHpiSystemEventLogIndex }
 
         ::= {saHpiSystemEventLogTable 1}
                                                  
 SaHpiSystemEventLogEntry ::= SEQUENCE {
-	saHpiSystemEventLogEntryId	Unsigned32,
+	saHpiSystemEventLogIndex	Unsigned32,
 	saHpiSystemEventLogAddedTimestamp	HpiTimeStamp,
-	saHpiSystemEventLogIndex		Unsigned32,
 	saHpiSystemEventLogType		INTEGER,
 	saHpiSystemEventLogTimestamp	HpiTimeStamp,
 
@@ -2389,7 +2386,7 @@ SaHpiSystemEventLogEntry ::= SEQUENCE {
 	saHpiSystemEventLogDelete		RowStatus
 	}
 
-saHpiSystemEventLogEntryId OBJECT-TYPE
+saHpiSystemEventLogIndex OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
@@ -2427,14 +2424,6 @@ saHpiSystemEventLogAddedTimestamp OBJECT-TYPE
 			 SAHPI_TIME_MAX_RELATIVE    0x0C00000000000000 "
         ::= {saHpiSystemEventLogEntry 2}
 
-
-saHpiSystemEventLogIndex OBJECT-TYPE
-        SYNTAX          Unsigned32
-        MAX-ACCESS      read-only
-        STATUS          current
-        DESCRIPTION     "Index of the event. "
-	::= {saHpiSystemEventLogEntry 3}
-
 saHpiSystemEventLogType OBJECT-TYPE
         SYNTAX          INTEGER {
 				sensor(1),
@@ -2455,7 +2444,7 @@ saHpiSystemEventLogType OBJECT-TYPE
 	
 	Note: The enumerated named have +1 added as opposed to the SA HPI 
 	spec for the same constants.  "
-	::= {saHpiSystemEventLogEntry 4}
+	::= {saHpiSystemEventLogEntry 3}
 
 saHpiSystemEventLogTimestamp OBJECT-TYPE
         SYNTAX          HpiTimeStamp 
@@ -2480,7 +2469,7 @@ saHpiSystemEventLogTimestamp OBJECT-TYPE
 			 
 	Note: The same functionality - when the table is changed - 
 	is available via notifications."
-	::= {saHpiSystemEventLogEntry 5}
+	::= {saHpiSystemEventLogEntry 4}
 
 saHpiSystemEventLogSeverity OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2496,7 +2485,7 @@ saHpiSystemEventLogSeverity OBJECT-TYPE
         DESCRIPTION     "Severity of event. 
 	Note: The enumerated named have +1 added as opposed to the SA HPI 
 	spec for the same constants.  "
-	::= {saHpiSystemEventLogEntry 6}
+	::= {saHpiSystemEventLogEntry 5}
 
 
 saHpiSystemEventLogSensorNum OBJECT-TYPE
@@ -2506,7 +2495,7 @@ saHpiSystemEventLogSensorNum OBJECT-TYPE
         DESCRIPTION     "The sensor number-index. 
 
 	Note: This object is only valid if saHpiSystemEventLogType = sensor(1)"
-	::= {saHpiSystemEventLogEntry 7}
+	::= {saHpiSystemEventLogEntry 6}
 
 saHpiSystemEventLogSensorType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2560,7 +2549,7 @@ saHpiSystemEventLogSensorType OBJECT-TYPE
         DESCRIPTION     "General Sensor Type
 
 	Note: This object is only valid if saHpiSystemEventLogType = sensor(1)"
-	::= {saHpiSystemEventLogEntry 8}
+	::= {saHpiSystemEventLogEntry 7}
 
 saHpiSystemEventLogSensorCategory OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -2588,14 +2577,14 @@ saHpiSystemEventLogSensorCategory OBJECT-TYPE
 
  	The generic(127) category can be used for discrete sensors which have
  	state meanings other than those identified with other event categories."
-	::= {saHpiSystemEventLogEntry 9}
+	::= {saHpiSystemEventLogEntry 8}
 
 saHpiSystemEventLogSensorAssertion OBJECT-TYPE
         SYNTAX          TruthValue
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "TRUE = Event State asserted.  FALSE = deasserted "
-	::= {saHpiSystemEventLogEntry 10}
+	::= {saHpiSystemEventLogEntry 9}
 
 saHpiSystemEventLogSensorStateCategoryUnspecified OBJECT-TYPE
         SYNTAX          INTEGER (0..1)
@@ -2616,7 +2605,7 @@ saHpiSystemEventLogSensorStateCategoryUnspecified OBJECT-TYPE
 			 
 			SAHPI_ES_UNSPECIFIED 0x0001
 	"		 
-	::= {saHpiSystemEventLogEntry 11}
+	::= {saHpiSystemEventLogEntry 10}
 
 saHpiSystemEventLogSensorStateCategoryThreshold OBJECT-TYPE
         SYNTAX          INTEGER (0..32)
@@ -2644,7 +2633,7 @@ saHpiSystemEventLogSensorStateCategoryThreshold OBJECT-TYPE
 			 SAHPI_ES_UPPER_MAJOR 0x0010
 			 SAHPI_ES_UPPER_CRIT  0x0020
 	"		
-	::= {saHpiSystemEventLogEntry 12}
+	::= {saHpiSystemEventLogEntry 11}
 
 saHpiSystemEventLogSensorStateCategoryUsage OBJECT-TYPE
         SYNTAX          INTEGER (0..4)
@@ -2667,7 +2656,7 @@ saHpiSystemEventLogSensorStateCategoryUsage OBJECT-TYPE
 			 SAHPI_ES_ACTIVE 0x0002
 			 SAHPI_ES_BUSY   0x0004
 	"		
-	::= {saHpiSystemEventLogEntry 13}
+	::= {saHpiSystemEventLogEntry 12}
 saHpiSystemEventLogSensorStateCategoryState OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
@@ -2688,7 +2677,7 @@ saHpiSystemEventLogSensorStateCategoryState OBJECT-TYPE
 			 SAHPI_ES_STATE_DEASSERTED 0x0001
 			 SAHPI_ES_STATE_ASSERTED   0x0002
 	"
-	::= {saHpiSystemEventLogEntry 14}
+	::= {saHpiSystemEventLogEntry 13}
 saHpiSystemEventLogSensorStateCategoryPredFail OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
@@ -2709,7 +2698,7 @@ saHpiSystemEventLogSensorStateCategoryPredFail OBJECT-TYPE
 			 SAHPI_ES_PRED_FAILURE_DEASSERT 0x0001
 			 SAHPI_ES_PRED_FAILURE_ASSERT   0x0002
 	"
-	::= {saHpiSystemEventLogEntry 15}
+	::= {saHpiSystemEventLogEntry 14}
 
 saHpiSystemEventLogSensorStateCategoryLimit OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
@@ -2731,7 +2720,7 @@ saHpiSystemEventLogSensorStateCategoryLimit OBJECT-TYPE
 			 SAHPI_ES_LIMIT_NOT_EXCEEDED 0x0001
 			 SAHPI_ES_LIMIT_EXCEEDED     0x0002
 	"
-	::= {saHpiSystemEventLogEntry 16}
+	::= {saHpiSystemEventLogEntry 15}
 
 saHpiSystemEventLogSensorStateCategoryPerformance OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
@@ -2753,7 +2742,7 @@ saHpiSystemEventLogSensorStateCategoryPerformance OBJECT-TYPE
 			 SAHPI_ES_PERFORMANCE_LAGS  0x0002
 			
 	"		
-	::= {saHpiSystemEventLogEntry 17}
+	::= {saHpiSystemEventLogEntry 16}
 
 saHpiSystemEventLogSensorStateCategorySeverity OBJECT-TYPE
         SYNTAX          INTEGER (0..256)
@@ -2783,7 +2772,7 @@ saHpiSystemEventLogSensorStateCategorySeverity OBJECT-TYPE
 			 SAHPI_ES_MONITOR             0x0080
 			 SAHPI_ES_INFORMATIONAL       0x0100
 	"		
-	::= {saHpiSystemEventLogEntry 18}
+	::= {saHpiSystemEventLogEntry 17}
 saHpiSystemEventLogSensorStateCategoryPresence OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
@@ -2804,7 +2793,7 @@ saHpiSystemEventLogSensorStateCategoryPresence OBJECT-TYPE
 			 SAHPI_ES_ABSENT  0x0001
 			 SAHPI_ES_PRESENT 0x0002
 	"			
-	::= {saHpiSystemEventLogEntry 19}
+	::= {saHpiSystemEventLogEntry 18}
 saHpiSystemEventLogSensorStateCategoryEnable OBJECT-TYPE
         SYNTAX          INTEGER (0..2)
         MAX-ACCESS      read-only
@@ -2825,7 +2814,7 @@ saHpiSystemEventLogSensorStateCategoryEnable OBJECT-TYPE
 			 SAHPI_ES_DISABLED 0x0001
 			 SAHPI_ES_ENABLED  0x0002
 	"		
-	::= {saHpiSystemEventLogEntry 20}
+	::= {saHpiSystemEventLogEntry 19}
 saHpiSystemEventLogSensorStateCategoryAvailability OBJECT-TYPE
         SYNTAX          INTEGER (0..256)
         MAX-ACCESS      read-only
@@ -2853,7 +2842,7 @@ saHpiSystemEventLogSensorStateCategoryAvailability OBJECT-TYPE
 			 SAHPI_ES_POWER_SAVE    0x0080
 			 SAHPI_ES_INSTALL_ERROR 0x0100
 	"
-	::= {saHpiSystemEventLogEntry 21}
+	::= {saHpiSystemEventLogEntry 20}
 saHpiSystemEventLogSensorStateCategoryRedundancy OBJECT-TYPE
         SYNTAX          INTEGER (0..128)
         MAX-ACCESS      read-only
@@ -2880,7 +2869,7 @@ saHpiSystemEventLogSensorStateCategoryRedundancy OBJECT-TYPE
 			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_FULL    0x0040
 			 SAHPI_ES_REDUNDANCY_DEGRADED_FROM_NON     0x0080
 	"
-	::= {saHpiSystemEventLogEntry 22}
+	::= {saHpiSystemEventLogEntry 21}
 saHpiSystemEventLogSensorStateCategoryUser OBJECT-TYPE
         SYNTAX          INTEGER (0..16384)
         MAX-ACCESS      read-only
@@ -2916,7 +2905,7 @@ saHpiSystemEventLogSensorStateCategoryUser OBJECT-TYPE
 			 SAHPI_ES_STATE_12  0x1000
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 23}
+	::= {saHpiSystemEventLogEntry 22}
 saHpiSystemEventLogSensorStateCategoryGeneric OBJECT-TYPE
         SYNTAX          INTEGER (0..16384)
         MAX-ACCESS      read-only
@@ -2952,7 +2941,7 @@ saHpiSystemEventLogSensorStateCategoryGeneric OBJECT-TYPE
 			 SAHPI_ES_STATE_12  0x1000
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 24}
+	::= {saHpiSystemEventLogEntry 23}
 
 saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
         SYNTAX          Unsigned32(1..16)
@@ -2971,7 +2960,7 @@ saHpiSystemEventLogSensorOptionalData OBJECT-TYPE
  	OEM               0x04
  	PREVIOUS_STATE    0x08
  	SENSOR_SPECIFIC   0x10 " 
-	::= {saHpiSystemEventLogEntry 25}
+	::= {saHpiSystemEventLogEntry 24}
 
 
 saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
@@ -2994,7 +2983,7 @@ saHpiSystemEventLogSensorTriggerReadingType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-	::= {saHpiSystemEventLogEntry 26}
+	::= {saHpiSystemEventLogEntry 25}
 
 saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3003,7 +2992,7 @@ saHpiSystemEventLogSensorTriggerReadingRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerReadingType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiSystemEventLogEntry 27}
+	::= {saHpiSystemEventLogEntry 26}
 
 saHpiSystemEventLogSensorTriggerReadingInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3021,7 +3010,7 @@ saHpiSystemEventLogSensorTriggerReadingInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerReadingType = interpreted(2) then this object
 	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	::= {saHpiSystemEventLogEntry 28}
+	::= {saHpiSystemEventLogEntry 27}
 
 saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -3033,7 +3022,7 @@ saHpiSystemEventLogSensorTriggerReadingInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::= {saHpiSystemEventLogEntry 29}
+	::= {saHpiSystemEventLogEntry 28}
 
 
 saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
@@ -3173,7 +3162,7 @@ saHpiSystemEventLogSensorTriggerReadingEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-	::= {saHpiSystemEventLogEntry 30}
+	::= {saHpiSystemEventLogEntry 29}
 
 
 saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
@@ -3196,7 +3185,7 @@ saHpiSystemEventLogSensorTriggerThresholdType OBJECT-TYPE
  	INTERPRETED 0x02
  	EVENT_STATE 0x04
 	"
-	::= {saHpiSystemEventLogEntry 31}
+	::= {saHpiSystemEventLogEntry 30}
 
 saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3205,7 +3194,7 @@ saHpiSystemEventLogSensorTriggerThresholdRaw OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = raw(1) then this object
 	contains the raw value of the sensor as unsigned 32-bit integer"
-	::= {saHpiSystemEventLogEntry 32}
+	::= {saHpiSystemEventLogEntry 31}
 
 saHpiSystemEventLogSensorTriggerThresholdInterpretedType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3223,7 +3212,7 @@ saHpiSystemEventLogSensorTriggerThresholdInterpretedType OBJECT-TYPE
         DESCRIPTION     "
 	If saHpiSystemEventLogTriggerThresholdType = interpreted(2) then this object
 	contains the type that saHpiSystemEventLogTriggerReadingInterpreted is in."
-	::= {saHpiSystemEventLogEntry 33}
+	::= {saHpiSystemEventLogEntry 32}
 
 saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(1..32)) 
@@ -3235,7 +3224,7 @@ saHpiSystemEventLogSensorTriggerThresholdInterpreted OBJECT-TYPE
 	
 	Note that interpreted value must be used within context 
 	of type of interpreted value."
-	::= {saHpiSystemEventLogEntry 34}
+	::= {saHpiSystemEventLogEntry 33}
 
 
 saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
@@ -3375,7 +3364,7 @@ saHpiSystemEventLogSensorTriggerThresholdEventState OBJECT-TYPE
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000
 	"
-	::= {saHpiSystemEventLogEntry 35}
+	::= {saHpiSystemEventLogEntry 34}
 
 saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
         SYNTAX          Unsigned32 (0..16384)
@@ -3493,21 +3482,21 @@ saHpiSystemEventLogSensorPreviousState OBJECT-TYPE
 			 SAHPI_ES_STATE_12  0x1000
 			 SAHPI_ES_STATE_13  0x2000
 			 SAHPI_ES_STATE_14  0x4000"
-	::= {saHpiSystemEventLogEntry 36}
+	::= {saHpiSystemEventLogEntry 35}
 
 saHpiSystemEventLogSensorOem OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor OEM event information "
-	::= {saHpiSystemEventLogEntry 37}
+	::= {saHpiSystemEventLogEntry 36}
 
 saHpiSystemEventLogSensorSpecific OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Sensor specific information "
-	::= {saHpiSystemEventLogEntry 38}
+	::= {saHpiSystemEventLogEntry 37}
 
 
 saHpiSystemEventLogHotSwapState OBJECT-TYPE
@@ -3523,7 +3512,7 @@ saHpiSystemEventLogHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Current state of the hot-swap device."
-	::= {saHpiSystemEventLogEntry 39}
+	::= {saHpiSystemEventLogEntry 38}
 
 saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         SYNTAX           INTEGER{
@@ -3538,14 +3527,14 @@ saHpiSystemEventLogPreviousHotSwapState OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Previous state of the hot-swap device. "
-	::= {saHpiSystemEventLogEntry 40}
+	::= {saHpiSystemEventLogEntry 39}
 
 saHpiSystemEventLogWatchdogNum OBJECT-TYPE
         SYNTAX          Unsigned32
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "The Watchdog number. "
-	::= {saHpiSystemEventLogEntry 41}
+	::= {saHpiSystemEventLogEntry 40}
 
 saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         SYNTAX          INTEGER{ 
@@ -3561,7 +3550,7 @@ saHpiSystemEventLogWatchdogAction OBJECT-TYPE
         DESCRIPTION     "
 	These enumerations represent the possible actions to be taken upon watchdog
  	timer timeout and the events that are generated for watchdog actions. "
-	::= {saHpiSystemEventLogEntry 42}
+	::= {saHpiSystemEventLogEntry 41}
 
 saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -3577,7 +3566,7 @@ saHpiSystemEventLogWatchdogPreTimerAction OBJECT-TYPE
         DESCRIPTION     " These enumerations represent the possible types of interrupts that may be
  			triggered by a watchdog pre-timer event. The actual meaning of these
  			operations may differ depending on the hardware architecture. "
-	::= {saHpiSystemEventLogEntry 43}
+	::= {saHpiSystemEventLogEntry 42}
 
 saHpiSystemEventLogWatchdogUse OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -3601,7 +3590,7 @@ saHpiSystemEventLogWatchdogUse OBJECT-TYPE
 			 indicate SAHPI_WTU_SMS_OS  if the use is to provide an OS-healthy heartbeat, 
 			 or SAHPI_WTU_OEM if it is used for some other purpose."
 			
-	::= {saHpiSystemEventLogEntry 44}
+	::= {saHpiSystemEventLogEntry 43}
 
 saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -3624,14 +3613,14 @@ saHpiSystemEventLogOemManufacturerIdT OBJECT-TYPE
 			Its SAHPI_MANUFACTURER_ID_UNSPECIFIED(0) if not known.
 			"
 				
-	::= {saHpiSystemEventLogEntry 45}
+	::= {saHpiSystemEventLogEntry 44}
 
 saHpiSystemEventLogOemEventData OBJECT-TYPE
         SYNTAX          OCTET STRING(SIZE(0..32))
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Events provided by OEM."
-	::= {saHpiSystemEventLogEntry 46}
+	::= {saHpiSystemEventLogEntry 45}
 
 
 saHpiSystemEventLogUserEventData OBJECT-TYPE
@@ -3641,7 +3630,7 @@ saHpiSystemEventLogUserEventData OBJECT-TYPE
         DESCRIPTION     "User events may be used for storing custom events 
 			created by the application  middleware;
 			eg. when injecting events into the event log using SaHpiEventLogEntryAdd().  "
-	::= {saHpiSystemEventLogEntry 47}
+	::= {saHpiSystemEventLogEntry 46}
 
 saHpiSystemEventLogDelete OBJECT-TYPE
 	SYNTAX		RowStatus
@@ -3649,7 +3638,7 @@ saHpiSystemEventLogDelete OBJECT-TYPE
 	STATUS		current
 	DESCRIPTION	
 	"Set this to destory(6) or notInService(2) to delete this entry."
-	::= {saHpiSystemEventLogEntry 48}
+	::= {saHpiSystemEventLogEntry 47}
 
 --/*******************************************************************************
 -- * ********************************************************************************
@@ -6582,9 +6571,8 @@ saHpiSystemEventGroup OBJECT-GROUP
 		saHpiSystemEventLogOverflowFlag,
 		saHpiSystemEventLogOverflowAction,
 		saHpiSystemEventLogDeleteEntrySupported,
-		saHpiSystemEventLogEntryId,
-		saHpiSystemEventLogAddedTimestamp,
 		saHpiSystemEventLogIndex,
+		saHpiSystemEventLogAddedTimestamp,
 		saHpiSystemEventLogType,
 		saHpiSystemEventLogTimestamp,
 		saHpiSystemEventLogSeverity,

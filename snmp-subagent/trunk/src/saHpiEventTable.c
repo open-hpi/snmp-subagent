@@ -262,7 +262,7 @@ int populate_event() {
 	// New entry. Add it
 	event_context = saHpiEventTable_create_row(&event_index);
       }
-      
+     
       // By this stage, event_context surely has something in it.
 
       // And since this is a queue, only NEW entries are seen.
@@ -744,6 +744,7 @@ saHpiEventTable_modify_context(unsigned long  entry_id,
       *var_trap_oid = saHpiUserNotification_oid;
 
     }
+  
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;

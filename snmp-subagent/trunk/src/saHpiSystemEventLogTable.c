@@ -67,7 +67,6 @@ int
 saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 					//SaHpiBoolT *state,
 					SaHpiRptEntryT *rpt,
-
 					saHpiSystemEventLogTable_context *ctx);
 
 
@@ -87,6 +86,8 @@ int populate_sel(SaHpiRptEntryT *rpt_entry) {
   int rc;
   netsnmp_index sel_index;
   saHpiSystemEventLogTable_context *sel_context;
+
+
   //  SaHpiBoolT state;
   //  long backup_count = event_log_entries;
 
@@ -159,18 +160,14 @@ int populate_sel(SaHpiRptEntryT *rpt_entry) {
 	  // New entry. Add it
 	  sel_context = saHpiSystemEventLogTable_create_row(&sel_index);
 	}
-
 	// Notify RPT table that this row is active.
 	update_event_status_flag(rpt_entry->DomainId,
-			   rpt_entry->ResourceId,
-			   sel.EntryId,
-			   SNMP_ROW_ACTIVE);
-
-
+				 rpt_entry->ResourceId,
+				 SNMP_ROW_ACTIVE);
+      
 	if (saHpiSystemEventLogTable_modify_context(&sel, 
 						    //&state,
 						    rpt_entry,
-
 						    sel_context)
 	    == AGENT_NEW_ENTRY) {
 	  
@@ -231,7 +228,6 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->resource_id = rpt->ResourceId;
     ctx->domain_id = rpt->DomainId;
 
-    ctx->saHpiSystemEventLogEntryId = sel->EntryId;
 
     memcpy(&ctx->saHpiSystemEventLogAddedTimestamp,
 	   &sel->Timestamp,
@@ -239,7 +235,7 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
     ctx->saHpiSystemEventLogAddedTimestamp.low = htonl(ctx->saHpiSystemEventLogAddedTimestamp.low);
     ctx->saHpiSystemEventLogAddedTimestamp.high = htonl(ctx->saHpiSystemEventLogAddedTimestamp.high);
 
-    /* IBM-KR: TODO remove this ? */
+
     ctx->saHpiSystemEventLogIndex = sel->EntryId;
 
 
@@ -459,18 +455,18 @@ saHpiSystemEventLogTable_modify_context(SaHpiSelEntryT *sel,
 
     }
     }
-    // Notify RPT table that we are active.
+
+  // Notify RPT table that we are active.
     update_event_status_flag(rpt->DomainId,
 		       rpt->ResourceId,
-		       sel->EntryId,
 		       SNMP_ROW_ACTIVE);
-
 
 
     return AGENT_NEW_ENTRY;
   }
   return AGENT_ERR_NULL_DATA;
 }
+
 
 int 
 set_SEL_delete(saHpiSystemEventLogTable_context *ctx) {
@@ -483,10 +479,11 @@ set_SEL_delete(saHpiSystemEventLogTable_context *ctx) {
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) 
       return rc;    
+
     
     rc = saHpiEventLogEntryDelete(session_id,
 				  ctx->resource_id,
-				  ctx->saHpiSystemEventLogEntryId);
+				  ctx->saHpiSystemEventLogIndex);
 
     if (rc != SA_OK)       
 	return AGENT_ERR_OPERATION;
@@ -504,7 +501,7 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
 
   saHpiSystemEventLogTable_context *ctx;
   int rc = AGENT_ERR_NOT_FOUND;
-  unsigned long i;
+  unsigned long i = 0;
   oid partial_index_oid[SEL_INDEX_NR-1];
   netsnmp_index index;
   netsnmp_void_array *array;
@@ -519,15 +516,50 @@ delete_SEL_row(SaHpiDomainIdT domain_id,
   index.len = SEL_INDEX_NR-1;
 
   array = CONTAINER_GET_SUBSET(cb.container, &index);
-  if (array->size > 0) {
-    for (i = 0; i < array->size; i++) {
-      ctx = array->array[i];
-      CONTAINER_REMOVE(cb.container, ctx);
+  if (array != NULL) {
+    if (array->size > 0) {
+      for (i = 0; i < array->size; i++) {
+	ctx = array->array[i];
+	CONTAINER_REMOVE(cb.container, ctx);
+      }
+      rc = AGENT_ERR_NOERROR;
     }
-    rc = AGENT_ERR_NOERROR;
+
   }
-  DEBUGMSGTL((AGENT,"delete_SEL_row. Exit (rc: %d, purged: %d records)\n", rc, array->size));
+  DEBUGMSGTL((AGENT,"delete_SEL_row. Exit (rc: %d, purged: %d records)\n",
+	      rc, i));
   return rc;
+  
+}
+
+
+
+static unsigned long
+number_of_rows(SaHpiDomainIdT domain_id,
+	       SaHpiResourceIdT resource_id) {
+
+
+  unsigned long i = 0;
+  oid partial_index_oid[SEL_INDEX_NR-1];
+  netsnmp_index index;
+  netsnmp_void_array *array;
+
+  DEBUGMSGTL((AGENT,"number_of_rows (%d, %d). Entry\n",
+  	domain_id, resource_id));
+
+  partial_index_oid[0] = domain_id;
+  partial_index_oid[1] = resource_id;
+
+  index.oids = (oid *)&partial_index_oid;
+  index.len = SEL_INDEX_NR-1;
+
+  array = CONTAINER_GET_SUBSET(cb.container, &index);
+  if (array != NULL) {
+    i = array->size;
+  }
+  DEBUGMSGTL((AGENT,"number_of_rows (count: %d). Exit\n",
+	      i));
+  return i;
   
 }
 
@@ -555,7 +587,6 @@ saHpiSystemEventLogTable_row_copy(saHpiSystemEventLogTable_context * dst,
     }
     dst->index.len = src->index.len;
 
-    dst->saHpiSystemEventLogEntryId = src->saHpiSystemEventLogEntryId;
 
     dst->saHpiSystemEventLogAddedTimestamp =
         src->saHpiSystemEventLogAddedTimestamp;
@@ -728,7 +759,7 @@ saHpiSystemEventLogTable_extract_index(saHpiSystemEventLogTable_context *
      */
     netsnmp_variable_list var_saHpiDomainID;
     netsnmp_variable_list var_saHpiResourceID;
-    netsnmp_variable_list var_saHpiSystemEventLogEntryId;
+    netsnmp_variable_list var_saHpiSystemEventLogIndex;
     int             err;
 
     /*
@@ -750,12 +781,12 @@ saHpiSystemEventLogTable_extract_index(saHpiSystemEventLogTable_context *
 
     memset(&var_saHpiResourceID, 0x00, sizeof(var_saHpiResourceID));
     var_saHpiResourceID.type = ASN_UNSIGNED;
-    var_saHpiResourceID.next_variable = &var_saHpiSystemEventLogEntryId;
+    var_saHpiResourceID.next_variable = &var_saHpiSystemEventLogIndex;
 
-    memset(&var_saHpiSystemEventLogEntryId, 0x00,
-           sizeof(var_saHpiSystemEventLogEntryId));
-    var_saHpiSystemEventLogEntryId.type = ASN_UNSIGNED;
-    var_saHpiSystemEventLogEntryId.next_variable = NULL;
+    memset(&var_saHpiSystemEventLogIndex, 0x00,
+           sizeof(var_saHpiSystemEventLogIndex));
+    var_saHpiSystemEventLogIndex.type = ASN_UNSIGNED;
+    var_saHpiSystemEventLogIndex.next_variable = NULL;
 
 
     /*
@@ -769,8 +800,8 @@ saHpiSystemEventLogTable_extract_index(saHpiSystemEventLogTable_context *
 
               /** skipping external index saHpiResourceID */
 
-        ctx->saHpiSystemEventLogEntryId =
-            *var_saHpiSystemEventLogEntryId.val.integer;
+        ctx->saHpiSystemEventLogIndex =
+            *var_saHpiSystemEventLogIndex.val.integer;
 
     }
 
@@ -913,9 +944,8 @@ saHpiSystemEventLogTable_set_reserve1(netsnmp_request_group * rg)
 
         switch (current->tri->colnum) {
 
-	case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
-	case COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP:
 	case COLUMN_SAHPISYSTEMEVENTLOGINDEX:
+	case COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP:
 	case COLUMN_SAHPISYSTEMEVENTLOGTYPE:
 	case COLUMN_SAHPISYSTEMEVENTLOGTIMESTAMP:
 	case COLUMN_SAHPISYSTEMEVENTLOGSEVERITY:
@@ -1102,11 +1132,16 @@ saHpiSystemEventLogTable_set_action(netsnmp_request_group * rg)
 					       SNMP_ERR_INCONSISTENTVALUE);
 		
 	      } else {
-		// Notify the RPT table.
-		update_event_status_flag(row_ctx->domain_id,
-					 row_ctx->resource_id,
-					 row_ctx->saHpiSystemEventLogEntryId,
-					 SNMP_ROW_NOTINSERVICE);
+		// Notify the RPT table - but only if _ALL_ of the 
+		// rows with domain_id and resource_id are gone.
+		
+		if (number_of_rows(row_ctx->domain_id, 
+				   row_ctx->resource_id) == 1) {
+		  // Only if this is the last one.
+		  update_event_status_flag(row_ctx->domain_id,
+					   row_ctx->resource_id,
+					   SNMP_ROW_NOTINSERVICE);
+		}
 		
 	      }
 	    }
@@ -1347,13 +1382,13 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
 
     switch (table_info->colnum) {
 
-    case COLUMN_SAHPISYSTEMEVENTLOGENTRYID:
+    case COLUMN_SAHPISYSTEMEVENTLOGINDEX:
             /** UNSIGNED32 = ASN_UNSIGNED */
         snmp_set_var_typed_value(var, ASN_UNSIGNED,
                                  (char *) &context->
-                                 saHpiSystemEventLogEntryId,
+                                 saHpiSystemEventLogIndex,
                                  sizeof(context->
-                                        saHpiSystemEventLogEntryId));
+                                        saHpiSystemEventLogIndex));
         break;
 
     case COLUMN_SAHPISYSTEMEVENTLOGADDEDTIMESTAMP:
@@ -1365,15 +1400,7 @@ saHpiSystemEventLogTable_get_value(netsnmp_request_info *request,
                                         saHpiSystemEventLogAddedTimestamp));
         break;
 
-    case COLUMN_SAHPISYSTEMEVENTLOGINDEX:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-        snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                 (char *) &context->
-                                 saHpiSystemEventLogIndex,
-                                 sizeof(context->
-                                        saHpiSystemEventLogIndex));
-        break;
-
+   
     case COLUMN_SAHPISYSTEMEVENTLOGTYPE:
             /** INTEGER = ASN_INTEGER */
         snmp_set_var_typed_value(var, ASN_INTEGER,
