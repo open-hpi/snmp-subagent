@@ -223,13 +223,7 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
        /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainReferenceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = NULL;
 
 
     /*
@@ -241,15 +235,9 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
         * copy index components into the context structure
         */
               /** skipping external index saHpiDomainId */
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+
+   		if(!err)
+			err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
     }
 
     /*
@@ -552,6 +540,7 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
+#if 0 /* TODO DMJ */
 #ifndef saHpiDomainReferenceTable_CAN_MODIFY_ACTIVE_ROW
     if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmDelete) &&
         row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmDelete) ) {
@@ -565,6 +554,7 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmDelete : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmDelete : NULL);
+#endif /* DMJ */
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
