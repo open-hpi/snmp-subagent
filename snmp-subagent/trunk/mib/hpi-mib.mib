@@ -2015,7 +2015,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
         Note this information is used to describe the resource; 
         that is, the piece of infrastructure which manages an 
         entity (or multiple entities) - NOT the entities for 
-        which the resource probvides management. The purpose of the 
+        which the resource provides management. The purpose of the 
         saHpiResourceInfoT structure is to provide information 
         that the HPI user may need in order to interact 
         correctly with the resource (e.g., recognize a 
