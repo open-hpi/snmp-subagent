@@ -60,9 +60,9 @@ extern "C"
     size_t saHpiSensorReadingCurrentEventStatus_len;
    
     SaHpiEventCategoryT sensor_category;
-    long sensor_id;
-    long resource_id;
-    long domain_id;
+    SaHpiSensorNumT sensor_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
     long hash;
 
 

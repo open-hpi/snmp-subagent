@@ -81,10 +81,12 @@ extern "C"
       /** RowPointer = ASN_OBJECT_ID */
     oid saHpiWatchdogRDR[MAX_OID_LEN];
     long saHpiWatchdogRDR_len;
-    long rdr_id;
-    long resource_id;
-    long domain_id;
+
     long hash;
+    SaHpiResourceIdT resource_id;
+    SaHpiEntryIdT rdr_id;
+    SaHpiDomainIdT domain_id;
+
   } saHpiWatchdogTable_context;
 
 /*************************************************************

@@ -71,10 +71,8 @@ extern "C"
     oid saHpiRdrRTP[MAX_OID_LEN];
     long saHpiRdrRTP_len;
 
-    long domain_id;
-
+    SaHpiDomainIdT domain_id;
     long hash;
-
     unsigned int dirty_bit;
   } saHpiRdrTable_context;
 

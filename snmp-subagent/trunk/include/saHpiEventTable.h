@@ -178,8 +178,8 @@ extern "C"
     long saHpiEventDelete;
 
     long hash;
-    long resource_id;
-    long domain_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
   } saHpiEventTable_context;
 
 /*************************************************************

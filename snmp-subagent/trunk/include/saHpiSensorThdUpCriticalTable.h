@@ -62,10 +62,10 @@ extern "C"
     size_t saHpiSensorThdUpCriticalInterpreted_len;
 
 
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
+    SaHpiSensorNumT sensor_id;
 
-    long sensor_id;
-    long resource_id;
-    long domain_id;
     long hash;
 
 

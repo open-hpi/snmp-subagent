@@ -107,10 +107,10 @@ extern "C"
     long saHpiCtrlRDR_len;
 
 
-    long resource_id;
-    long rdr_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiEntryIdT rdr_id;
     long hash;
-    long domain_id;
+    SaHpiDomainIdT domain_id;
   } saHpiCtrlTable_context;
 
 /*************************************************************

@@ -63,9 +63,9 @@ extern "C"
 
 
 
-    long sensor_id;
-    long resource_id;
-    long domain_id;
+    SaHpiResourceIdT resource_id;
+    SaHpiDomainIdT domain_id;
+    SaHpiSensorNumT sensor_id;
     long hash;
 
 
