@@ -78,7 +78,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#if 0
 /*
  * Internal prototypes
  */
@@ -90,8 +89,8 @@ static void usage(char *applName);
  */
 static int keep_running;
 static int session_avail = AGENT_FALSE;
-static SaHpiSessionIdT session_id;
-static SaHpiRptInfoT rpt_info;
+//static SaHpiSessionIdT session_id;
+//static SaHpiRptInfoT rpt_info;
 static SaErrorT err;
 
 static const char *version =
@@ -115,6 +114,7 @@ int MAX_EVENT_ENTRIES = 512;
 static int do_syslog = AGENT_TRUE;
 static int do_fork = AGENT_FALSE;
 
+
 /*
  * Count of newly added RPT, RDR, Events and SEL entries since last  populate_ call
  * to be global. Reset every time the respective populate_ call is made.
@@ -129,6 +129,9 @@ stop_server (int a)
 {
   keep_running = 0;
 }
+
+#if 0
+
 
 int
 build_full_oid (oid * prefix, size_t prefix_len,
@@ -1050,6 +1053,7 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
 
 }
 
+#endif
 
 void
 hpiSubagent_parse_config_traps (const char *token, char *cptr)
@@ -1133,7 +1137,6 @@ usage(char *applName)
 
   return;
 }
-#endif
 
 int
 main (int argc, char **argv)
@@ -1228,34 +1231,53 @@ main (int argc, char **argv)
 
   init_snmp (AGENT);
   /* Initialize tables */
-  initialize_table_saHpiTable ();
-  initialize_table_saHpiRdrTable ();
-  initialize_table_saHpiSensorTable ();
-  initialize_table_saHpiCtrlTable ();
-  initialize_table_saHpiInventoryTable ();
-  initialize_table_saHpiWatchdogTable ();
-  initialize_table_saHpiHotSwapTable ();
-
-  initialize_table_saHpiSystemEventLogTable ();
-  initialize_table_saHpiEventTable ();
-
-  initialize_table_saHpiSensorReadingCurrentTable ();
-  initialize_table_saHpiSensorReadingMaxTable ();
-  initialize_table_saHpiSensorReadingMinTable ();
-  initialize_table_saHpiSensorReadingNominalTable ();
-  initialize_table_saHpiSensorReadingNormalMaxTable ();
-  initialize_table_saHpiSensorReadingNormalMinTable ();
-
-  initialize_table_saHpiSensorThdLowCriticalTable ();
-  initialize_table_saHpiSensorThdLowMajorTable ();
-  initialize_table_saHpiSensorThdLowMinorTable ();
-
-  initialize_table_saHpiSensorThdUpCriticalTable ();
-  initialize_table_saHpiSensorThdUpMajorTable ();
-  initialize_table_saHpiSensorThdUpMinorTable ();
-
-  initialize_table_saHpiSensorThdNegHysteresisTable ();
-  initialize_table_saHpiSensorThdPosHysteresisTable ();
+	init_saHpiDomainInfoTable();
+	init_saHpiDomainReferenceTable();
+	init_saHpiDomainAlarmTable();
+	init_saHpiResourceTable();
+	init_saHpiAutoTimeOutTable();
+	init_saHpiHotSwapTable();
+	init_saHpiEventTable();
+	init_saHpiResourceEventTable();
+	init_saHpiDomainEventTable();
+	init_saHpiSensorEventTable();
+	init_saHpiSensorEnableChangeEventTable();
+	init_saHpiHotSwapEventTable();
+	init_saHpiWatchdogEventTable();
+	init_saHpiSoftwareEventTable();
+	init_saHpiOEMEventTable();
+	init_saHpiUserEventTable();
+	init_saHpiAnnouncementTable();			    
+	
+	init_saHpiEventLogInfoTable();
+	init_saHpiEventLogTable();
+	
+	init_saHpiRdrTable();
+	init_saHpiCtrlTable();
+	init_saHpiSensorTable();
+	
+	init_saHpiSensorReadingCurrentTable();
+	init_saHpiSensorReadingMaxTable();
+	init_saHpiSensorReadingMinTable();
+	
+	init_saHpiSensorReadingNominalTable();
+	init_saHpiSensorReadingNormalMaxTable();
+	init_saHpiSensorReadingNormalMinTable();
+	
+	init_saHpiSensorThdLowCriticalTable();
+	init_saHpiSensorThdLowMajorTable();
+	init_saHpiSensorThdLowMinorTable();
+	init_saHpiSensorThdNegHysteresisTable();
+	init_saHpiSensorThdPosHysteresisTable();
+	init_saHpiSensorThdUpCriticalTable();
+	init_saHpiSensorThdUpMajorTable();
+	init_saHpiSensorThdUpMinorTable();
+	
+	init_saHpiInventoryTable();
+	init_saHpiAreaTable();
+	init_saHpiFieldTable();
+	init_saHpiWatchdogTable();
+	init_saHpiAnnunciatorTable();
 
   if (send_traps_on_startup == AGENT_TRUE)
     send_traps = AGENT_TRUE;
