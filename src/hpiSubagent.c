@@ -25,6 +25,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <hpiSubagent.h>
+
 #include <SaHpi.h> 
 #include <oh_utils.h>
 
@@ -36,7 +38,6 @@
 #include <hpiB0101.h>
 
 #include <hpiCheckIndice.h>
-#include <hpiSubagent.h>
 
 #include <saHpiDomainInfoTable.h>
 #include <saHpiDomainAlarmTable.h>
@@ -107,6 +108,7 @@
  * OIDs for subagent
  */
 //  .iso.org.dod.internet.private.enterprises.saforum.experimental.hpiE.openhpiE
+/*
 #define hpi0101_OID 			1,3,6,1,4,1,18568,2,1,1
 
 #define hpiAdministration_OID 	hpi0101_OID,1
@@ -124,10 +126,11 @@
 #define hpiSensor_OID 			hpiResources_OID,9
 
 #define hpiNotifications_OID 	hpi0101_OID,5
-
+*/
 // SnmpTrapOID.0
+/* 
 #define snmptrap_oid 1,3,6,1,6,3,1,1,4,1,0
-
+*/
 
 /*
  * Internal data for the sub-agent.
@@ -264,6 +267,7 @@ main (int argc, char **argv)
 		SaHpiSessionIdT sessionid;
 		
 	  	pid_t child;
+	  		  	
 	  	/* change this if you want to be a SNMP master agent */
 	  	
 	  	debug_register_tokens (AGENT);
@@ -305,8 +309,6 @@ main (int argc, char **argv)
 	      	break;
 	    }
 	  }
-
-	  init_snmp_logging ();
 	
 	  if (do_syslog == AGENT_TRUE) {
 	      snmp_enable_calllog ();
@@ -344,39 +346,36 @@ main (int argc, char **argv)
 					 hpiSubagent_parse_config_max_event,
 					 NULL,
 					 "hpiSubagent MAX number of rows for Events.");
-
+					 
+	init_snmp (AGENT); 	
+	
 	/* 
 	 * Initialize HPI library
 	 */
-	DEBUGMSGTL ((AGENT, "saHpiVersionGet\n"));
 	hpiVer = saHpiVersionGet();
-	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));
+	DEBUGMSGTL ((AGENT, "Hpi Version %d Implemented.\n", hpiVer));   	 
 
-	DEBUGMSGTL ((AGENT, "saHpiSessionOpen calling\n"));
 	rv = saHpiSessionOpen( SAHPI_UNSPECIFIED_DOMAIN_ID, &sessionid, NULL );
-	DEBUGMSGTL ((AGENT, "saHpiSessionOpen return\n"));
 	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns %s\n",
+		DEBUGMSGTL ((AGENT, "saHpiSessionOpen Error: returns %s\n",
 			oh_lookup_error(rv)));
 		exit(-1);
 	}
    	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
-   		sessionid));
-
+   		sessionid));  		
+		
 	/*
 	 * Resource discovery
-	 */
-	DEBUGMSGTL ((AGENT, "saHpiDiscover\n"));	
+	 */	
 	rv = saHpiDiscover(sessionid);
 	
 	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "saHpiDiscover returns %s\n",oh_lookup_error(rv)));
+		DEBUGMSGTL ((AGENT, "saHpiDiscover Error: returns %s\n",oh_lookup_error(rv)));
 		exit(-1);
 	}
+	DEBUGMSGTL ((AGENT, "saHpiDiscover Success!\n"));	
 
-	init_snmp (AGENT);
-
-		/* Initialize subagent tables */
+		/* Initialize subagent tables */		
 		init_saHpiDomainInfoTable(); 
 	/*	init_saHpiDomainAlarmTable();
 		init_saHpiDomainReferenceTable();
