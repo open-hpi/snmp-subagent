@@ -26,7 +26,7 @@
  * Our Net-SNMP "call-sign"
  */
 #define AGENT "hpiSubagent"
-
+//#define AGENT "read_config"
 /*
  * Max amount of memory to allocate when using saHpiInventoryEntityDataRead
  */
