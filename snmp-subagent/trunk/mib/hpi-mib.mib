@@ -6484,7 +6484,7 @@ saHpiAreaEntryCount OBJECT-TYPE
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
-        "The number of inventory resource area data records present on this system."
+        "The number of inventory data records present on this system."
         ::= {hpiInventory 3}
 
 saHpiAreaTable OBJECT-TYPE
