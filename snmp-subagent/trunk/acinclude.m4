@@ -56,9 +56,21 @@ AC_DEFUN(OH_CHECK_NETSNMP,
         have_netsnmp=yes
         SNMPFLAGS=`net-snmp-config --cflags`
         SNMPALIBS=`net-snmp-config --agent-libs`
+	SNMPVERSIONOK=`net-snmp-config --version | awk -F\. '{ \
+			if ( $[1] >= 5 ) { \
+  				if ( $[2] > 0 ) print "OK"; \
+ 			if ( $[2] == 0) { \
+   				if ( $[3] == 7) print "OK"; \
+ 			} \
+		} \
+	}'`
         # the following seems to work... thankfully.
         SNMPCONFDIR=`net-snmp-config --configure-options | perl -p -e 's/.*sysconfdir=(\S+).*/\1/'`
-        AC_MSG_RESULT(yes)
+	if test "$SNMPVERSIONOK" == "OK"; then
+	        AC_MSG_RESULT(yes)
+	else
+		AC_MSG_ERROR(no. Need NetSNMP version 5.0.7 or higher.)
+	fi
     ],
-    [AC_MSG_RESULT(no.  No SNMP based plugins can be built!)])
+    [AC_MSG_ERROR(no. NetSNMP is not found.!)])
 ])
