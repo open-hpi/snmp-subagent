@@ -81,7 +81,7 @@ extern "C"
       /** RowPointer = ASN_OBJECT_ID */
     oid saHpiWatchdogRDR[MAX_OID_LEN];
     long saHpiWatchdogRDR_len;
-
+    long rdr_id;
     long resource_id;
     long domain_id;
     long hash;
@@ -98,7 +98,8 @@ extern "C"
 				    netsnmp_table_request_info *);
 
 
-  int populate_watchdog (SaHpiWatchdogRecT * watchdog,
+  int populate_watchdog (SaHpiEntryIdT rdr_id,
+		         SaHpiWatchdogRecT * watchdog,
 			 SaHpiRptEntryT * rpt_entry,
 			 oid * rdr_oid, size_t rdr_oid_len,
 			 oid * watchdog_oid, size_t * watchdog_oid_len);

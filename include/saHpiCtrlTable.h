@@ -108,6 +108,7 @@ extern "C"
 
 
     long resource_id;
+    long rdr_id;
     long hash;
     long domain_id;
   } saHpiCtrlTable_context;
@@ -122,7 +123,8 @@ extern "C"
 				netsnmp_index *,
 				netsnmp_table_request_info *);
 
-  int populate_control (SaHpiCtrlRecT * ctrl,
+  int populate_control (SaHpiEntryIdT rdr_id,
+		  	SaHpiCtrlRecT * ctrl,
 			SaHpiRptEntryT * rpt_entry,
 			oid * rdr_entry_oid, size_t rdr_entry_oid_len,
 			oid * ctrl_oid, size_t * ctrl_oid_len);
