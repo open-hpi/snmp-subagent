@@ -123,8 +123,6 @@ populate_rpt() {
 
    if (getSaHpiSession(&session)==AGENT_ERR_NOERROR) {
 
-     DEBUGMSGTL((AGENT,"Session ID is: %d ", session));
-
      // Check to see if there are any new entries.
 
      err = didSaHpiChanged(&new_entries,&rpt_info);

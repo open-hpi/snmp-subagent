@@ -108,7 +108,8 @@ memory_fixed:
 	return AGENT_ERR_MEMORY_FAULT;
 	
     }
-    DEBUGMSGTL((AGENT,"Calling InventoryRead with buffer size %d\n", initial_size));
+    memset(&data, 0x00, initial_size);
+    DEBUGMSGTL((AGENT,"Calling saHpiEntityInventoryDataRead with buffer size %d\n", initial_size));
     rc = saHpiEntityInventoryDataRead (session_id, resource_id,
 					inventory->EirId,
 					initial_size,
@@ -125,18 +126,18 @@ memory_fixed:
  	}
 	goto memory_fixed;
     }
-    DEBUGMSGTL((AGENT,"rc is %d, SA_OK is %d\n", rc, SA_OK));
-    DEBUGMSGTL((AGENT,"Data validty is : %d\n", data->Validity));
 
     if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"rc is %d\n", rc, SA_OK));
 	free(data);
 	data = NULL;
 	return AGENT_ERR_OPERATION;
 
     }
-    if((data->Validity == SAHPI_INVENT_DATA_VALID) || 
-       (data->Validity == SAHPI_INVENT_DATA_INVALID)) 
-    {
+    DEBUGMSGTL((AGENT,"Data validty is : %d\n", data->Validity));
+    //    if (data->Validity == SAHPI_INVENT_DATA_VALID)
+       //       (data->Validity == SAHPI_INVENT_DATA_INVALID)) 
+    //{
         if (saHpiInventoryTable_modify_context(inventory, 
 					       resource_id,
 					       data, data_len,
@@ -147,23 +148,20 @@ memory_fixed:
 	  CONTAINER_INSERT(cb.container, inventory_context);	  
 	  inventory_count = CONTAINER_SIZE(cb.container);
 
-
 	} else {
 	  // INVALID data 
 	  DEBUGMSGTL((AGENT,"Inventory.Validity == SAHPI_INVENT_DATA_INVALID"));
 	}
-    }
+	//}
     // Just finish the data.
     free(data);
     data = NULL;
-    DEBUGMSGTL((AGENT,"Do we ever get here?\n"));
     rc = AGENT_ERR_NOERROR;
-  }
+  } // if (inventory)
    else
     rc = AGENT_ERR_OPERATION;
   
-
-  if (free) 
+  if (free != NULL) 
 	DEBUGMSGTL((AGENT,"free != NULL, possible memory leak.\n"));
   DEBUGMSGTL((AGENT,"\n\t--- populate_inventory. Exit\n"));
   return rc;
@@ -241,10 +239,27 @@ saHpiInventoryTable_modify_context(
    
     ctx->saHpiInventoryEirId = entry->EirId;
     // How many do we have? Only one it seems?
-    if (inv_data->DataRecords[0]) {
+    //if (inv_data->DataRecords[0]) {
         data = *(inv_data->DataRecords[0]);
-	ctx->saHpiInventoryValidity = inv_data->Validity;	
+	switch (inv_data->Validity) {
+	case SAHPI_INVENT_DATA_VALID:
+	  ctx->saHpiInventoryValidity = MIB_VALID;
+	  break;
+	case SAHPI_INVENT_DATA_INVALID:
+	  ctx->saHpiInventoryValidity = MIB_INVALID;
+	  break;
+	case SAHPI_INVENT_DATA_OVERFLOW:
+	  ctx->saHpiInventoryValidity = MIB_OVERFLOW;
+	  break;
+	default:	  
+	  ctx->saHpiInventoryValidity = MIB_INVALID;
+	}	
+
+	// If we receive data-record that is invalid, these entries are
+	// still safe - but the data might be corrupted - *unless* you
+	// memset to 0x00 before you put data in it.
 	ctx->saHpiInventoryRecordType = data.RecordType;
+
 	ctx->saHpiInventoryAttributes_len = 0;
 	memset(ctx->saHpiInventoryAttributes, 0x00, SAHPI_INVENTORY_ATTRIBUTES_MAX);
 	ctx->saHpiInventoryManufacturer_len = 0;
@@ -301,11 +316,13 @@ saHpiInventoryTable_modify_context(
 		memcpy(ctx->saHpiInventoryAttributes + ctx->saHpiInventoryAttributes_len,
 			&data.RecordData.OemData.Data,
 			data.DataLength - sizeof(SaHpiManufacturerIdT));
+		ctx->saHpiInventoryAttributes_len = data.DataLength;
 		break;
-
+	default:
+	  break;
 	}
 	
-    }
+	//    }
     return AGENT_NEW_ENTRY;
   }
   
@@ -364,19 +381,168 @@ struct {
 	memcpy(ctx->saHpiInventoryCustomField, data->CustomField[0]->Data,
 			ctx->saHpiInventoryCustomField_len);
 	
-}			
+}		
 
+static SaHpiTextBufferT *copy_data( saHpiInventoryTable_context *ctx,
+				   unsigned char *data, int length, 
+				   
+				   size_t *new_size) {
+
+  SaHpiTextBufferT *buf = NULL;
+  
+  buf = SNMP_MALLOC_TYPEDEF(SaHpiTextBufferT);
+
+  buf->DataType = ctx->saHpiInventoryTextType-1;
+  buf->Language = ctx->saHpiInventoryTextLanguage;
+  buf->DataLength = length;
+  memcpy(buf->Data, data, length);
+  *new_size += length;
+  
+  return buf;
+}
+int
+ update_inventory_data_on_context(SaHpiInventGeneralDataT *data,
+				  saHpiInventoryTable_context *ctx,
+				  size_t *length) {
+
+  //  SaHpiTextBufferT *buf =NULL;
+  
+  data->Manufacturer = copy_data(ctx, ctx->saHpiInventoryManufacturer,
+				 ctx-> saHpiInventoryManufacturer_len,
+				 length);
+
+  data->ProductName = copy_data(ctx, ctx->saHpiInventoryProductName,
+				ctx->saHpiInventoryProductName_len,
+				length);
+
+  return AGENT_ERR_NOERROR;
+
+}
+
+int set_inventory(saHpiInventoryTable_context *ctx) {
+
+  SaHpiInventoryDataT inv;
+  SaHpiSessionIdT session_id;
+  SaHpiInventDataRecordT data;
+  SaHpiUint32T length = 0;
+  SaHpiInventGeneralDataT *general_data = NULL;
+  SaErrorT rc = SA_OK;
+  
+
+  if (ctx) {
+    memset(&data, 0x00, sizeof(SaHpiInventDataRecordT));
+    data.RecordType = ctx->saHpiInventoryRecordType;    
+    switch (data.RecordType) {
+    case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
+      memcpy(ctx->saHpiInventoryAttributes, 
+	     &data.RecordData.InternalUse.Data,
+	     sizeof(SaHpiUint8T));
+      length = sizeof(SaHpiUint8T);
+      break;
+    case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+      data.RecordData.ChassisInfo.Type =ctx->saHpiInventoryAttributes[0];
+      length = 1;
+      memcpy(&data.RecordData.ChassisInfo.GeneralData.MfgDateTime,
+	     ctx->saHpiInventoryAttributes+1,		
+	     sizeof(SaHpiTimeT));	
+      length += sizeof(SaHpiTimeT);
+      rc =update_inventory_data_on_context(&data.RecordData.ChassisInfo.GeneralData, ctx, &length);
+      break;
+    case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+      memcpy( &data.RecordData.BoardInfo.MfgDateTime,
+	      ctx->saHpiInventoryAttributes,                       
+	      sizeof(SaHpiTimeT));
+      length = sizeof(SaHpiTimeT);
+      rc =update_inventory_data_on_context(&data.RecordData.BoardInfo,
+					 ctx, &length);
+      break;
+    case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+       memcpy( &data.RecordData.ProductInfo.MfgDateTime,
+	      ctx->saHpiInventoryAttributes,                       
+	      sizeof(SaHpiTimeT));
+      length = sizeof(SaHpiTimeT);
+      rc = update_inventory_data_on_context(&data.RecordData.ProductInfo,
+					 ctx, &length);
+      break;
+    case SAHPI_INVENT_RECTYPE_OEM:
+      memcpy(&data.RecordData.OemData.MId,
+	     ctx->saHpiInventoryAttributes,	     
+	     sizeof(SaHpiManufacturerIdT));
+      data.RecordData.OemData.MId = ntohl( data.RecordData.OemData.MId);
+      length =  sizeof(SaHpiManufacturerIdT);
+      memcpy(&data.RecordData.OemData.Data,
+	     ctx->saHpiInventoryAttributes + length,
+	     ctx->saHpiInventoryAttributes_len - length);
+
+      length = ctx->saHpiInventoryAttributes_len;
+      break;
+    default:
+      return AGENT_ERR_NULL_DATA;
+      break;
+    }
+    if (rc != AGENT_ERR_NOERROR)
+      return AGENT_ERR_MEMORY_FAULT;
+
+    data.DataLength = length;
+    inv.Validity = ctx->saHpiInventoryValidity;
+    inv.DataRecords[0] = &data;
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) 
+      return rc;    
+   
+    DEBUGMSGTL((AGENT,"Calling 'saHpiEntityInventoryDataWrite' with %d\n",
+		ctx->resource_id));
+
+    rc = saHpiEntityInventoryDataWrite(session_id,
+				       ctx->resource_id,
+				       ctx->saHpiInventoryEirId,
+				       &inv);
+    if (rc != SA_OK) {
+      DEBUGMSGTL((AGENT,"rc is %d\n"));
+      return AGENT_ERR_OPERATION;
+    }
+    
+    // Free all data
+     switch (data.RecordType) {
+     case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+       general_data = &data.RecordData.ChassisInfo.GeneralData;
+       break;
+     case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+       general_data = &data.RecordData.ProductInfo;
+       break;
+     case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+       general_data = &data.RecordData.ProductInfo;
+     default:
+       break;
+     }
+     if (general_data != NULL) {
+       DEBUGMSGTL((AGENT,"De-allocating memory\n"));
+       free(general_data->Manufacturer);
+       free(general_data->ProductName);
+       free(general_data->ProductVersion);
+       free(general_data->ModelNumber);
+       free(general_data->SerialNumber);
+       free(general_data->PartNumber);
+       free(general_data->FileId);
+       free(general_data->AssetTag);
+       free(general_data->CustomField[0]);
+     }
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
 
 /************************************************************
  * keep binary tree to find context by name
  */
-//static int      saHpiInventoryTable_cmp(const void *lhs, const void *rhs);
+static int      saHpiInventoryTable_cmp(const void *lhs, const void *rhs);
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
-/*
+
 static int
 saHpiInventoryTable_cmp(const void *lhs, const void *rhs)
 {
@@ -385,13 +551,34 @@ saHpiInventoryTable_cmp(const void *lhs, const void *rhs)
     saHpiInventoryTable_context *context_r =
         (saHpiInventoryTable_context *) rhs;
 
-    if (context_l->saHpiInventoryEirId < context_r->saHpiInventoryEirId)
+    int rc;
+    DEBUGMSGTL((AGENT,"saHpiInventoryTable_cmp: Called\n"));
+    DEBUGMSGTL((AGENT,"Checking: %d.%d ? %d.%d\n",
+		context_l->domain_id, context_l->resource_id,
+		context_r->domain_id, context_r->resource_id));
+
+    if (context_l->domain_id < context_r->domain_id)
+      return -1;
+    rc = (context_l->domain_id == context_r->domain_id) ? 0: 1;
+    
+    if (rc != 0) 
+	return 1;
+
+    if (context_l->resource_id < context_r->resource_id)
 	return -1;
 
+    rc =(context_l->resource_id == context_r->resource_id) ? 0: 1;    
+
+    if (rc != 0)
+      return 1;
+
+    if (context_l->saHpiInventoryEirId < context_r->saHpiInventoryEirId)
+	return -1;
+    
     return (context_l->saHpiInventoryEirId == context_r->saHpiInventoryEirId) ? 0 : 1;
 
 }
-*/
+
 
 /************************************************************
  * the *_row_copy routine
@@ -482,6 +669,8 @@ saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
            src->saHpiInventoryRDR_len);
     dst->saHpiInventoryRDR_len = src->saHpiInventoryRDR_len;
 
+    dst->resource_id = src->resource_id;
+    dst->domain_id = src->domain_id;
     dst->hash = src->hash;
     return 0;
 }
@@ -532,14 +721,6 @@ saHpiInventoryTable_extract_index(saHpiInventoryTable_context * ctx,
          */
         ctx->saHpiInventoryEirId = *var_saHpiInventoryEirId.val.integer;
 
-
-        /*
-         * TODO: check index for valid values. For EXAMPLE:
-         *
-         * if ( *var_saHpiInventoryEirId.val.integer != XXX ) {
-         *    err = -1;
-         * }
-         */
     }
 
     /*
@@ -563,10 +744,7 @@ saHpiInventoryTable_can_delete(saHpiInventoryTable_context * undo_ctx,
                                netsnmp_request_group * rg)
 {
 
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 0;
+    return 1;
 }
 
 
@@ -592,28 +770,25 @@ saHpiInventoryTable_create_row(netsnmp_index * hdr)
     if (!ctx)
         return NULL;
 
-    /*
-     * TODO: check indexes, if necessary.
-     */
+  
     if (saHpiInventoryTable_extract_index(ctx, hdr)) {
         free(ctx->index.oids);
         free(ctx);
         return NULL;
     }
 
-    /*
-     * netsnmp_mutex_init(ctx->lock);
-     * netsnmp_mutex_lock(ctx->lock); 
-     */
-
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-    */
+    ctx->saHpiInventoryAttributes_len = 0;
+    ctx->saHpiInventoryTextType = 0;
+    ctx->saHpiInventoryTextLanguage = 0;
+    ctx->saHpiInventoryManufacturer_len = 0;
+    ctx->saHpiInventoryProductName_len = 0;
+    ctx->saHpiInventoryProductVersion_len = 0;
+    ctx->saHpiInventoryModelNumber_len = 0;
+    ctx->saHpiInventorySerialNumber_len = 0;
+    ctx->saHpiInventoryPartNumber_len = 0;
+    ctx->saHpiInventoryFileId_len = 0;
+    ctx->saHpiInventoryAssetTag_len = 0;
+    ctx->saHpiInventoryCustomField_len = 0;
     ctx->hash = 0;
     return ctx;
 }
@@ -655,10 +830,7 @@ saHpiInventoryTable_delete_row(saHpiInventoryTable_context * ctx)
     if (ctx->index.oids)
         free(ctx->index.oids);
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
-
+  
     /*
      * release header
      */
@@ -686,28 +858,71 @@ saHpiInventoryTable_delete_row(saHpiInventoryTable_context * ctx)
 void
 saHpiInventoryTable_set_reserve1(netsnmp_request_group * rg)
 {
- /*
-    saHpiInventoryTable_context *row_ctx =
+  saHpiInventoryTable_context *row_ctx =
         (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info;*/
+
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int             rc;
 
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
         rc = SNMP_ERR_NOERROR;
 
         switch (current->tri->colnum) {
+
+	case COLUMN_SAHPIINVENTORYEIRID:
+	case COLUMN_SAHPIINVENTORYRECORDTYPE:
+	case COLUMN_SAHPIINVENTORYVALIDITY:
+	case COLUMN_SAHPIINVENTORYRDR:
+	   rc = SNMP_ERR_NOTWRITABLE;
+	   break;
+        case COLUMN_SAHPIINVENTORYATTRIBUTES:
+
+	  /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR) {
+	    rc = SNMP_ERR_WRONGTYPE;
+	  } else if (var->val_len > SAHPI_INVENTORY_ATTRIBUTES_MAX) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  } else if (var->val_len < 0) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  }
+	  break;
+
+        case COLUMN_SAHPIINVENTORYTEXTTYPE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiInventoryTextType));
+            break;
+
+        case COLUMN_SAHPIINVENTORYTEXTLANGUAGE:
+            /** INTEGER = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->
+                                                       saHpiInventoryTextLanguage));
+            break;
+
+        case COLUMN_SAHPIINVENTORYMANUFACTURER:
+        case COLUMN_SAHPIINVENTORYPRODUCTNAME:
+        case COLUMN_SAHPIINVENTORYPRODUCTVERSION:
+        case COLUMN_SAHPIINVENTORYMODELNUMBER:
+        case COLUMN_SAHPIINVENTORYSERIALNUMBER:
+        case COLUMN_SAHPIINVENTORYPARTNUMBER:
+        case COLUMN_SAHPIINVENTORYFILEID:
+        case COLUMN_SAHPIINVENTORYASSETTAG:
+        case COLUMN_SAHPIINVENTORYCUSTOMFIELD:
+	    /** OCTETSTR = ASN_OCTET_STR */
+	  if (var->type != ASN_OCTET_STR) {
+	    rc = SNMP_ERR_WRONGTYPE;
+	  } else if (var->val_len > SAHPI_STRING_MAX) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  } else if (var->val_len < 0) {
+	    rc = SNMP_ERR_WRONGLENGTH;
+	  }
+	  break;
 
         default:/** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
@@ -720,32 +935,38 @@ saHpiInventoryTable_set_reserve1(netsnmp_request_group * rg)
                                            rc);
         rg->status = SNMP_MAX(rg->status, current->ri->status);
     }
+    for (current = rg->list; current; current = current->next) {
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+      // The nice thing about this API is that _row_copy() is called
+      // for this row - if the API has matched the index with an
+      // already existing entry. We check the 'hash' value. If its
+      // 0 the API couldn't find the right context.
+
+       if ( ((saHpiInventoryTable_context *) rg->existing_row)->hash == 0) {
+
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					  SNMP_ERR_NOSUCHNAME);
+       } else {
+	 if (((saHpiInventoryTable_context *) rg->existing_row)->saHpiInventoryValidity == SAHPI_INVENT_DATA_INVALID) 
+	    netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+					   SNMP_ERR_NOTWRITABLE);
+
+       }
+    }
 }
 
 void
 saHpiInventoryTable_set_reserve2(netsnmp_request_group * rg)
 {
-/*
-    saHpiInventoryTable_context *row_ctx =
+  saHpiInventoryTable_context *ctx =
         (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info;
- */
+
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int             rc;
 
     rg->rg_void = rg->list->ri;
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
@@ -753,19 +974,102 @@ saHpiInventoryTable_set_reserve2(netsnmp_request_group * rg)
 
         switch (current->tri->colnum) {
 
+        case COLUMN_SAHPIINVENTORYATTRIBUTES:
+	  switch (ctx->saHpiInventoryRecordType) {
+	  case SAHPI_INVENT_RECTYPE_INTERNAL_USE:
+	    if (var->val_len != SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX)
+	      rc= SNMP_ERR_WRONGLENGTH;
+	    break;
+	  case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+	    if (var->val_len != SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX)
+	      rc= SNMP_ERR_WRONGLENGTH;
+	    break;
+	  case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+	    if (var->val_len != SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX)
+	      rc= SNMP_ERR_WRONGLENGTH;
+	    break;
+	  case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+	    if (var->val_len != SAHPI_INVENT_RECTYPE_PRODUCT_INFO_MAX)
+	      rc= SNMP_ERR_WRONGLENGTH;
+	    break;
+	  case SAHPI_INVENT_RECTYPE_OEM:
+	    if (var->val_len != SAHPI_INVENT_RECTYPE_OEM_MAX)
+	      rc= SNMP_ERR_WRONGLENGTH;
+	    break;
+	  default:	    
+	    // Means that VALIDITY is INVALID.	    
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	    break;
+	  }
+	  break;           
+
+        case COLUMN_SAHPIINVENTORYTEXTTYPE:
+	  switch (ctx->saHpiInventoryRecordType) {
+	  case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+	  case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+	  case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+	    // Not include undefined(0) since its non-compliant.
+	    if ( ((*var->val.integer < 1) || 
+		  (*var->val.integer > 4))) {	    
+	      rc = SNMP_ERR_BADVALUE;
+	    }
+	    break;
+	  default:	    
+	    // Wrong type.
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	    break;
+	  }
+	  break;          
+        case COLUMN_SAHPIINVENTORYTEXTLANGUAGE:
+	  switch (ctx->saHpiInventoryRecordType) {
+	  case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+	  case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+	  case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+	    if ( ((*var->val.integer < 0) || 
+		  (*var->val.integer > 136))) {	    
+	      rc = SNMP_ERR_BADVALUE;
+	    }            
+	    break;
+	  default:	    
+	    // Wrong type.
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	    break;
+
+	  }
+	  break;
+
+        case COLUMN_SAHPIINVENTORYMANUFACTURER:
+        case COLUMN_SAHPIINVENTORYPRODUCTNAME:
+        case COLUMN_SAHPIINVENTORYPRODUCTVERSION:
+        case COLUMN_SAHPIINVENTORYMODELNUMBER:
+        case COLUMN_SAHPIINVENTORYSERIALNUMBER:
+        case COLUMN_SAHPIINVENTORYPARTNUMBER:
+        case COLUMN_SAHPIINVENTORYFILEID:
+        case COLUMN_SAHPIINVENTORYASSETTAG:
+        case COLUMN_SAHPIINVENTORYCUSTOMFIELD:
+	  switch (ctx->saHpiInventoryRecordType) {
+	  case SAHPI_INVENT_RECTYPE_CHASSIS_INFO:
+	    break;
+	  case SAHPI_INVENT_RECTYPE_BOARD_INFO:
+	    break;
+	  case SAHPI_INVENT_RECTYPE_PRODUCT_INFO:
+	    break;
+	  default:	    
+	    // Wrong type.
+	    rc = SNMP_ERR_INCONSISTENTVALUE;
+	    break;
+	  }
+	  break;
         default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	  netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+	  break;
         }
 
         if (rc)
             netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
                                            rc);
     }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+   
 }
 
 /************************************************************
@@ -782,37 +1086,115 @@ saHpiInventoryTable_set_reserve2(netsnmp_request_group * rg)
 void
 saHpiInventoryTable_set_action(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var; /*
+  netsnmp_variable_list *var;
     saHpiInventoryTable_context *row_ctx =
         (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info; */
+    //    saHpiInventoryTable_context *undo_ctx =
+    //  (saHpiInventoryTable_context *) rg->undo_info;
     netsnmp_request_group_item *current;
 
+    int rc = SNMP_ERR_NOERROR;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
     for (current = rg->list; current; current = current->next) {
 
         var = current->ri->requestvb;
 
         switch (current->tri->colnum) {
 
+        case COLUMN_SAHPIINVENTORYATTRIBUTES:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryAttributes, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryAttributes_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYTEXTTYPE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiInventoryTextType = *var->val.integer;
+            break;
+
+        case COLUMN_SAHPIINVENTORYTEXTLANGUAGE:
+            /** INTEGER = ASN_INTEGER */
+            row_ctx->saHpiInventoryTextLanguage = *var->val.integer;
+            break;
+
+        case COLUMN_SAHPIINVENTORYMANUFACTURER:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryManufacturer, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryManufacturer_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYPRODUCTNAME:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryProductName, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryProductName_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYPRODUCTVERSION:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryProductVersion, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryProductVersion_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYMODELNUMBER:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryModelNumber, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryModelNumber_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYSERIALNUMBER:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventorySerialNumber, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventorySerialNumber_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYPARTNUMBER:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryPartNumber, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryPartNumber_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYFILEID:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryFileId, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryFileId_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYASSETTAG:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryAssetTag, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryAssetTag_len = var->val_len;
+            break;
+
+        case COLUMN_SAHPIINVENTORYCUSTOMFIELD:
+            /** OCTETSTR = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiInventoryCustomField, var->val.string,
+                   var->val_len);
+            row_ctx->saHpiInventoryCustomField_len = var->val_len;
+            break;
+
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
+	
+	// The write operation.
+	if (set_inventory(row_ctx) != AGENT_ERR_NOERROR)
+	       rc= SNMP_ERR_GENERR;	  
+
+	if (rc)
+            netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri,
+                                           rc);
+    }
+   
 }
 
 /************************************************************
@@ -835,32 +1217,7 @@ saHpiInventoryTable_set_action(netsnmp_request_group * rg)
 void
 saHpiInventoryTable_set_commit(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-/*
-    saHpiInventoryTable_context *row_ctx =
-        (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info; */
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+ 
 }
 
 /************************************************************
@@ -874,33 +1231,7 @@ saHpiInventoryTable_set_commit(netsnmp_request_group * rg)
 void
 saHpiInventoryTable_set_free(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var;
-/*
-    saHpiInventoryTable_context *row_ctx =
-        (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info;*/
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        default:/** We shouldn't get here */
-            /** should have been logged in reserve1 */
-	break;
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+ 
 }
 
 /************************************************************
@@ -924,31 +1255,7 @@ saHpiInventoryTable_set_free(netsnmp_request_group * rg)
 void
 saHpiInventoryTable_set_undo(netsnmp_request_group * rg)
 {
-    netsnmp_variable_list *var; /*
-    saHpiInventoryTable_context *row_ctx =
-        (saHpiInventoryTable_context *) rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-        (saHpiInventoryTable_context *) rg->undo_info;*/
-    netsnmp_request_group_item *current;
-
-    /*
-     * loop through columns
-     */
-    for (current = rg->list; current; current = current->next) {
-
-        var = current->ri->requestvb;
-
-        switch (current->tri->colnum) {
-
-        default:/** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+ 
 }
 
 
@@ -982,7 +1289,7 @@ initialize_table_saHpiInventoryTable(void)
                                                      netsnmp_table_array_helper_handler,
                                                      saHpiInventoryTable_oid,
                                                      saHpiInventoryTable_oid_len,
-                                                     HANDLER_CAN_RONLY);
+                                                     HANDLER_CAN_RWRITE);
 
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
@@ -993,9 +1300,7 @@ initialize_table_saHpiInventoryTable(void)
     /***************************************************
      * Setting up the table's definition
      */
-    /*
-     * TODO: add any external indexes here.
-     */
+   
 
     /*
      * internal indexes
@@ -1014,20 +1319,20 @@ initialize_table_saHpiInventoryTable(void)
                                           "saHpiInventoryTable:"
                                           "table_container");
 
-    /*
+    
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find
                                 ("saHpiInventoryTable_secondary:"
                                  "saHpiInventoryTable:"
                                  "table_container"));
     cb.container->next->compare = saHpiInventoryTable_cmp;
-    */
+    
 
     //cb.can_set = 1;
 
     cb.create_row = (UserRowMethod *) saHpiInventoryTable_create_row;
 
-    /*
+    
     cb.duplicate_row = (UserRowMethod *) saHpiInventoryTable_duplicate_row;
     cb.delete_row = (UserRowMethod *) saHpiInventoryTable_delete_row;
     cb.row_copy =
@@ -1042,7 +1347,7 @@ initialize_table_saHpiInventoryTable(void)
     cb.set_commit = saHpiInventoryTable_set_commit;
     cb.set_free = saHpiInventoryTable_set_free;
     cb.set_undo = saHpiInventoryTable_set_undo;
-    */
+    
     DEBUGMSGTL(("initialize_table_saHpiInventoryTable",
                 "Registering table saHpiInventoryTable "
                 "as a table array\n"));
@@ -1203,15 +1508,3 @@ saHpiInventoryTable_get_value(netsnmp_request_info *request,
     }
     return SNMP_ERR_NOERROR;
 }
-
-/************************************************************
- * saHpiInventoryTable_get_by_idx
- */
-/*
-const saHpiInventoryTable_context *
-saHpiInventoryTable_get_by_idx(netsnmp_index * hdr)
-{
-    return (const saHpiInventoryTable_context *)
-        CONTAINER_FIND(cb.container, hdr);
-}
-*/

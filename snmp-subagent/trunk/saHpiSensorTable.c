@@ -993,7 +993,8 @@ saHpiSensorTable_create_row(netsnmp_index * hdr)
         return NULL;
     }
 
-  
+    ctx->saHpiSensorThresholdRaw_len=0;
+    ctx->saHpiSensorThresholdInterpreted_len = 0;
     ctx->hash = 0;
     return ctx;
 }

@@ -33,9 +33,17 @@ extern          "C" {
    * Max values are defined in the MIB
    */
 
-#define SAHPI_INVENTORY_ATTRIBUTES_MAX 275
+#define SAHPI_INVENTORY_ATTRIBUTES_MAX 5
 #define SAHPI_STRING_MAX 255
+#define MIB_VALID 1
+#define MIB_INVALID 0
+#define MIB_OVERFLOW 2
 
+#define SAHPI_INVENT_RECTYPE_INTERNAL_USE_MAX 1
+#define SAHPI_INVENT_RECTYPE_CHASSIS_INFO_MAX 5
+#define SAHPI_INVENT_RECTYPE_BOARD_INFO_MAX 4
+#define SAHPI_INVENT_RECTYPE_PRODUCT_INFO_MAX 4
+#define SAHPI_INVENT_RECTYPE_OEM_MAX 4
 
     typedef struct saHpiInventoryTable_context_s {
         netsnmp_index   index;
@@ -134,11 +142,19 @@ void
 update_context_on_inventory_data(SaHpiInventGeneralDataT *data,
                                 saHpiInventoryTable_context *ctx);
 
+int
+ update_inventory_data_on_context(SaHpiInventGeneralDataT *data,
+				  saHpiInventoryTable_context *ctx,
+				  size_t *length);
+
 
 int
 delete_inventory_row(SaHpiDomainIdT domain_id,
 		     SaHpiResourceIdT resource_id,
 		     SaHpiEirIdT num);
+int set_inventory(saHpiInventoryTable_context *ctx);
+
+
 /*************************************************************
  * oid declarations
  */
