@@ -1,3 +1,6 @@
 Test -endian on differnt machines. Pay attention to Time.
 Add another argument for 'getSaHpiSession' - domain_id. 
 Write RFE  for the UNSUPPORTED function. - Tags in RPT
+Update the MIB to reflect the fact that SaHpiHsStateT is also in the event - perhpas remove PreviousHotSwapState ?
+saHpiHotSwapResetState - not sure if the fourht state - resetDeassert- is allowed under SAF HPI?
+Replace in set_action 'SNMP_ERR_GENERR' with SNMP_ERR_INCONSISTENTVALUE

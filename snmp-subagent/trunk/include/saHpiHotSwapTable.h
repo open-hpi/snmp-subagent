@@ -95,6 +95,26 @@ extern          "C" {
 int
 populate_hotswap(SaHpiRptEntryT *rpt_entry,
 		 oid *rpt_oid, size_t rpt_oid_len);
+
+  /* Write methods
+   */
+int 
+set_hotswap_indicator(saHpiHotSwapTable_context *ctx);
+int
+  set_hotswap_powerstate(saHpiHotSwapTable_context *ctx);
+int
+ set_hotswap_reset_state(saHpiHotSwapTable_context *ctx);
+int
+  set_hotswap_insert_t(saHpiHotSwapTable_context *ctx);
+int
+  set_hotswap_extract_t(saHpiHotSwapTable_context *ctx);
+int
+  set_hotswap_action_request(saHpiHotSwapTable_context *ctx);
+
+int
+delete_hotswap_row(SaHpiDomainIdT ,
+		   SaHpiResourceIdT);
+		   
 /*************************************************************
  * oid declarations
  */

@@ -220,7 +220,7 @@ saHpiHotSwapTable_modify_context(SaHpiRptEntryT *rpt_entry,
     else 
       // IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
       // Should we make it 64-bit?
-      ctx->saHpiHotSwapInsertTimeout = insert_t;
+      ctx->saHpiHotSwapInsertTimeout = htonl(insert_t);
 
     // Extract timeout
     DEBUGMSGTL((AGENT,"Calling saHpiAutoExtractTimeoutGet with %d\n",
@@ -234,11 +234,12 @@ saHpiHotSwapTable_modify_context(SaHpiRptEntryT *rpt_entry,
       DEBUGMSGTL((AGENT,"Call to saHpiAutoExtractTimeoutGet failed with %d\n",
 		  rc));
     }
-    else 
+    else {
       // IBM-KR: TODO, saHpiTimeT is 64bit, long is 32bit-
       // Should we make it 64-bit?
-      ctx->saHpiHotSwapExtractTimeout = extract_t;
-
+      //       
+      ctx->saHpiHotSwapExtractTimeout = htonl(extract_t);
+    }
     ctx->saHpiHotSwapActionRequest = 0;
 
     // Copy the RPT OID.
@@ -250,16 +251,16 @@ saHpiHotSwapTable_modify_context(SaHpiRptEntryT *rpt_entry,
   return AGENT_ERR_NULL_DATA;
 }
 
-
-/*
 int
 set_hotswap_indicator(saHpiHotSwapTable_context *ctx) {
 
 
   SaHpiSessionIdT session_id;
   SaErrorT rc;
+  SaHpiHsIndicatorStateT indication_state;
 
   if (ctx) {
+    indication_state = ctx->saHpiHotSwapIndicator -1;
     // Get the seesion_id
     rc = getSaHpiSession(&session_id);
     if (rc != AGENT_ERR_NOERROR) {
@@ -268,36 +269,298 @@ set_hotswap_indicator(saHpiHotSwapTable_context *ctx) {
     }
 
     // Set the new value
-    DEBUGMSGTL((AGENT,"Calling  with %d\n", ctx->resource_id ));
-    rc =   (session_id, 
-	    ctx->resource_id,
-	    &wdog);
+    DEBUGMSGTL((AGENT,"Calling with saHpiHotSwapIndicatorStateSet%d\n", ctx->resource_id ));
+
+    rc =   saHpiHotSwapIndicatorStateSet(session_id, 
+					 ctx->resource_id,
+					 indication_state);
 
 
     if (rc != SA_OK) {
-      snmp_log(LOG_ERR,"Call to  failed with return code: %d\n", rc);
-      DEBUGMSGTL((AGENT,"Call  failed with return code: %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiHotSwapIndicatorStateSet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call saHpiHotSwapIndicatorStateSet failed with return code: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
 
     // Get the new value
-    DEBUGMSGTL((AGENT,"Calling with %d\n", ctx->resource_id ));
+    DEBUGMSGTL((AGENT,"Calling saHpiHotSwapIndicatorStateGet with %d\n", ctx->resource_id ));
  
-    rc =  (session_id, ctx->resource_id,
-	   &wdog);
+    rc = saHpiHotSwapIndicatorStateGet (session_id, 
+					ctx->resource_id,
+					&indication_state);
 
  
     if (rc != SA_OK) {
-      snmp_log(LOG_ERR,"Call to failed with rc: %d\n", rc);
-      DEBUGMSGTL((AGENT,"Call to  failed with rc: %d\n", rc));
+      snmp_log(LOG_ERR,"Call to saHpiHotSwapIndicatorStateGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  saHpiHotSwapIndicatorStateGet failed with rc: %d\n", rc));
       return AGENT_ERR_OPERATION;
     }
     // Update the new value to ctx.
+    ctx->saHpiHotSwapIndicator = indication_state+1;
     return AGENT_ERR_NOERROR;
   }
   return AGENT_ERR_NULL_DATA;
 }
-*/
+
+int
+set_hotswap_powerstate(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiHsPowerStateT power_state;
+ 
+  if (ctx) {
+    power_state = ctx->saHpiHotSwapPowerState -1;
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling  saHpiResourcePowerStateSet with %d\n", ctx->resource_id ));
+    rc =   saHpiResourcePowerStateSet(session_id, 
+				      ctx->resource_id,
+				      power_state);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiResourcePowerStateSet failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiResourcePowerStateSet  failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+
+    // Get the new value
+    DEBUGMSGTL((AGENT,"Calling with saHpiHotSwapIndicatorStateGet %d\n", ctx->resource_id ));
+ 
+    rc =  saHpiHotSwapIndicatorStateGet(session_id, ctx->resource_id,
+					&power_state);
+
+ 
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiHotSwapIndicatorStateGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiHotSwapIndicatorStateGet failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // Update the new value to ctx.
+    ctx->saHpiHotSwapPowerState = power_state-1;
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+int
+set_hotswap_reset_state(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiResetActionT reset_action;
+  if (ctx) {
+    reset_action = ctx->saHpiHotSwapResetState-1;
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiResourceResetStateSet with %d\n", ctx->resource_id ));
+    rc =saHpiResourceResetStateSet   (session_id, 
+				      ctx->resource_id,
+				      reset_action);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to  saHpiResourceResetStateSetfailed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call saHpiResourceResetStateSet failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+
+    // Get the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiResourceResetStateGet with %d\n", ctx->resource_id ));
+ 
+    rc = saHpiResourceResetStateGet (session_id, ctx->resource_id,
+	   &reset_action);
+
+ 
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiResourceResetStateGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to  saHpiResourceResetStateGet failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // Update the new value to ctx.
+    ctx->saHpiHotSwapResetState = reset_action+1;
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+int
+set_hotswap_insert_t(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiTimeoutT time;
+
+  if (ctx) {
+    time = ctx->saHpiHotSwapInsertTimeout;
+      
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoInsertTimeoutSet  with %d\n", ctx->resource_id ));
+    rc =   saHpiAutoInsertTimeoutSet(session_id, 
+				     time);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiAutoInsertTimeoutSet  failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call saHpiAutoInsertTimeoutSet failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+
+    // Get the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoInsertTimeoutGet  with %d\n", ctx->resource_id ));
+ 
+    rc = saHpiAutoInsertTimeoutGet (session_id,
+				    &time);
+
+ 
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiAutoInsertTimeoutGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiAutoInsertTimeoutGet  failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // Update the new value to ctx.
+    ctx->saHpiHotSwapInsertTimeout = time;
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+
+int
+set_hotswap_extract_t(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiTimeoutT time;
+
+  if (ctx) {
+    time = ctx->saHpiHotSwapExtractTimeout;
+      
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoExtractTimeoutSet  with %d\n", ctx->resource_id ));
+    rc =   saHpiAutoExtractTimeoutSet(session_id, 
+				      ctx->resource_id,
+				     time);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiAutoExtractTimeoutSet  failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call saHpiAutoExtractTimeoutSet failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+
+    // Get the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiAutoExtractTimeoutGet  with %d\n", ctx->resource_id ));
+ 
+    rc = saHpiAutoExtractTimeoutGet (session_id,
+				     ctx->resource_id,
+				    &time);
+
+ 
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to saHpiAutoExtractTimeoutGet failed with rc: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiAutoExtractTimeoutGet  failed with rc: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    }
+    // Update the new value to ctx.
+    ctx->saHpiHotSwapExtractTimeout = time;
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+int
+set_hotswap_action_request(saHpiHotSwapTable_context *ctx) {
+
+
+  SaHpiSessionIdT session_id;
+  SaErrorT rc;
+  SaHpiHsActionT action;
+
+  if (ctx) {
+    action = ctx->saHpiHotSwapActionRequest-1;
+    // Get the seesion_id
+    rc = getSaHpiSession(&session_id);
+    if (rc != AGENT_ERR_NOERROR) {
+      DEBUGMSGTL((AGENT,"Call to getSaHpiSession failed with rc: %d\n", rc));
+      return rc;
+    }
+
+    // Set the new value
+    DEBUGMSGTL((AGENT,"Calling saHpiHotSwapActionRequest with %d\n", ctx->resource_id ));
+    rc =saHpiHotSwapActionRequest(session_id, 
+				  ctx->resource_id,
+				  action);
+
+
+    if (rc != SA_OK) {
+      snmp_log(LOG_ERR,"Call to  saHpiHotSwapActionRequest failed with return code: %d\n", rc);
+      DEBUGMSGTL((AGENT,"Call to saHpiHotSwapActionRequest failed with return code: %d\n", rc));
+      return AGENT_ERR_OPERATION;
+    } 
+
+    ctx->saHpiHotSwapActionRequest = action+1;
+    return AGENT_ERR_NOERROR;
+  }
+  return AGENT_ERR_NULL_DATA;
+}
+
+
+int
+delete_hotswap_row(SaHpiDomainIdT domain_id,
+		   SaHpiResourceIdT resource_id)  {
+  saHpiHotSwapTable_context *ctx;
+  oid hotswap_oid[HOTSWAP_INDEX_NR];
+  netsnmp_index	hotswap_index;
+
+  hotswap_oid[0]=domain_id;
+  hotswap_oid[1]=resource_id;	
+
+
+  // Possible more indexs?
+  hotswap_index.oids = (oid *)&hotswap_oid;
+  hotswap_index.len = HOTSWAP_INDEX_NR;
+
+  ctx = CONTAINER_FIND(cb.container, &hotswap_index);
+
+  if (ctx) {
+    CONTAINER_REMOVE(cb.container, ctx);
+    return AGENT_ERR_NOERROR;
+  }    
+  return AGENT_ERR_NOT_FOUND;
+}
+
 /************************************************************
  * the *_row_copy routine
  */
@@ -324,7 +587,7 @@ saHpiHotSwapTable_row_copy(saHpiHotSwapTable_context * dst,
     /*
      * copy components into the context structure
      */
-    /** TODO: add code for external index(s)! */
+
     dst->saHpiHotSwapIndicator = src->saHpiHotSwapIndicator;
 
     dst->saHpiHotSwapPowerState = src->saHpiHotSwapPowerState;
@@ -397,26 +660,7 @@ saHpiHotSwapTable_extract_index(saHpiHotSwapTable_context * ctx,
      * parse the oid into the individual components
      */
     err = parse_oid_indexes(hdr->oids, hdr->len, &var_saHpiDomainID);
-    DEBUGMSGTL((AGENT,"err is %d\n", err));
-    if (err == SNMP_ERR_NOERROR) {
-        /*
-         * copy components into the context structure
-         */
-              /** skipping external index saHpiDomainID */
 
-              /** skipping external index saHpiResourceID */
-
-
-        /*
-         * TODO: check index for valid values. For EXAMPLE:
-         *
-         * if ( *var_saHpiDomainID.val.integer != XXX ) {
-         *    err = -1;
-         * }
-         */
-      
-         
-    }
 
     /*
      * parsing may have allocated memory. free it.
@@ -583,13 +827,8 @@ saHpiHotSwapTable_set_reserve1(netsnmp_request_group * rg)
 
         case COLUMN_SAHPIHOTSWAPSTATE:
             /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->
-                                                       saHpiHotSwapState));
-            break;
- 	    
         case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
-            /** INTEGER = ASN_INTEGER */
+            /** INTEGER = ASN_INTEGER */	  
        case COLUMN_SAHPIHOTSWAPEVENTSEVERITY:
 	 rc = SNMP_ERR_NOTWRITABLE;
 	  break;
@@ -754,58 +993,59 @@ saHpiHotSwapTable_set_action(netsnmp_request_group * rg)
         var = current->ri->requestvb;
 
         switch (current->tri->colnum) {
-
+	  // IBM-KR: Fix those 'rc' - should be something else? Unsupported rc?
         case COLUMN_SAHPIHOTSWAPINDICATOR:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapIndicator = *var->val.integer;
-	    
+	    if (set_hotswap_indicator(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
+	    	    
             break;
 
         case COLUMN_SAHPIHOTSWAPPOWERSTATE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapPowerState = *var->val.integer;
+	    if (set_hotswap_powerstate(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
             break;
 
         case COLUMN_SAHPIHOTSWAPRESETSTATE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapResetState = *var->val.integer;
-            break;
-
-        case COLUMN_SAHPIHOTSWAPSTATE:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiHotSwapState = *var->val.integer;
-            break;
-
-        case COLUMN_SAHPIHOTSWAPPREVIOUSSTATE:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiHotSwapPreviousState = *var->val.integer;
+	    if (set_hotswap_reset_state(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
             break;
 
         case COLUMN_SAHPIHOTSWAPINSERTTIMEOUT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiHotSwapInsertTimeout = *var->val.integer;
+	    if (set_hotswap_insert_t(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
             break;
 
-        case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
+        case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:	  
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiHotSwapExtractTimeout = *var->val.integer;
+	    if (set_hotswap_extract_t(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
             break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapActionRequest = *var->val.integer;
+	    if (set_hotswap_action_request(row_ctx) != AGENT_ERR_NOERROR)
+	      rc = SNMP_ERR_INCONSISTENTVALUE;
             break;
 
         default:/** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
+
+	if (rc)
+	  netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+					 current->ri,
+					 rc);
     }
-
-    if (rc)
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-				       current->ri,
-				       rc);
-
     DEBUGMSGTL((AGENT,"saHpiHotSwapTable_set_action: Exit.\n"));
 }
 
