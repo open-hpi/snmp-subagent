@@ -36,10 +36,18 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiDomainReferenceTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
+
+/*************************************************************
+ * oid declarations scalars
+ */
+static u_long domain_reference_entry_count = 0;
 
 oid saHpiDomainReferenceTable_oid[] = { saHpiDomainReferenceTable_TABLE_OID };
 size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_oid);
@@ -47,7 +55,56 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 
 void poplulate_saHpiDomainReferenceTable() 
 {
-	dbg("WARNING: poplulate_saHpiDomainReferenceTable: not implemented!");
+	DEBUGMSGTL ((AGENT,
+		"WARNING: poplulate_saHpiDomainReferenceTable: not implemented!"));
+}
+
+int
+handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+	DEBUGMSGTL ((AGENT, 
+				"handle_saHpiDomainReferenceEntryCount: Entry Count is %d\n", 
+				domain_reference_entry_count));
+						
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(	
+            	requests->requestvb, 
+            	ASN_COUNTER,
+                (u_char *) &domain_reference_entry_count,
+                sizeof(domain_reference_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiDomainInfoEntryCount(void)
+ */
+int
+initialize_table_saHpiDomainReferenceEntryCount(void)
+{
+	DEBUGMSGTL ((AGENT, 
+		"initialize_table_saHpiDomainReferenceEntryCount, called\n"));
+			
+    netsnmp_register_scalar(
+        netsnmp_create_handler_registration(
+        	"saHpiDomainReferenceEntryCount", 
+        	handle_saHpiDomainReferenceEntryCount,
+            saHpiDomainReferenceEntryCount_oid, 
+            OID_LENGTH(saHpiDomainReferenceEntryCount_oid),
+           HANDLER_CAN_RONLY )); 
+	return 0;
 }
 
 #ifdef saHpiDomainReferenceTable_IDX2
@@ -144,6 +201,8 @@ void
 init_saHpiDomainReferenceTable(void)
 {
     initialize_table_saHpiDomainReferenceTable();
+    
+    initialize_table_saHpiDomainReferenceEntryCount();
 
     /*
      * TODO: perform any startup stuff here, such as
@@ -198,7 +257,8 @@ static int saHpiDomainReferenceTable_row_copy(saHpiDomainReferenceTable_context 
  * context. Then we make sure the indexes for the new row are valid.
  */
 int
-saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx, netsnmp_index * hdr )
+saHpiDomainReferenceTable_extract_index( 
+	saHpiDomainReferenceTable_context * ctx, netsnmp_index * hdr )
 {
     /*
      * temporary local storage for extracting oid index
@@ -206,7 +266,6 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
      * extract index uses varbinds (netsnmp_variable_list) to parse
      * the index OID into the individual components for each index part.
      */
-    /** TODO: add storage for external index(s)! */
     netsnmp_variable_list var_saHpiDomainId;
     netsnmp_variable_list var_saHpiDomainRef;
     int err;
@@ -228,28 +287,14 @@ saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx
      * If there are multiple indexes for the table, the variable_lists
      * need to be linked together, in order.
      */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainReferenceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
-
-       memset( &var_saHpiDomainRef, 0x00, sizeof(var_saHpiDomainRef) );
-       var_saHpiDomainRef.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainReferenceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainRef.next_variable = &var_XX;
-#endif
-
-
+       	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+       	var_saHpiDomainId.type = ASN_UNSIGNED;    
+       	var_saHpiDomainId.next_variable = &var_saHpiDomainRef; 
+       
+       	memset( &var_saHpiDomainRef, 0x00, sizeof(var_saHpiDomainRef) );
+       	var_saHpiDomainRef.type = ASN_UNSIGNED; 
+		var_saHpiDomainRef.next_variable = NULL; 
+		
     /*
      * parse the oid into the individual index components
      */
@@ -576,30 +621,6 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
     }
 
     /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiDomainReferenceTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-
-    /*
      * TODO: if you have dependencies on other tables, this would be
      * a good place to check those, too.
      */
@@ -674,7 +695,7 @@ void saHpiDomainReferenceTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        	break;    /** should have been logged in reserve1 */
         }
     }
 
