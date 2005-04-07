@@ -29,8 +29,6 @@ typedef struct saHpiDomainInfoTable_context_s {
 
     /*************************************************************
      * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
      */
         /** SaHpiDomainId = ASN_UNSIGNED */
             unsigned long saHpiDomainId;
