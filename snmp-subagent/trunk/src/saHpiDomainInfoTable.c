@@ -277,40 +277,6 @@ saHpiDomainInfoTable_cmp( const void *lhs, const void *rhs )
 		
 }
 
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiDomainInfoTable_context *
-saHpiDomainInfoTable_get( const char *name, int len )
-{
-    saHpiDomainInfoTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainInfoTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 
 /************************************************************
  * Initializes the saHpiDomainInfoTable module
@@ -433,7 +399,6 @@ saHpiDomainInfoTable_extract_index( saHpiDomainInfoTable_context * ctx, netsnmp_
      * If there are multiple indexes for the table, the variable_lists
      * need to be linked together, in order.
      */
-       /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; 
        var_saHpiDomainId.next_variable = NULL;
@@ -573,7 +538,8 @@ saHpiDomainInfoTable_create_row( netsnmp_index* hdr)
      */
      
      
-     DEBUGMSGTL ((AGENT, "saHpiDomainInfoTable_create_row: should set to init values"));
+     DEBUGMSGTL ((AGENT, 
+     	"saHpiDomainInfoTable_create_row: should set to init values"));
     /**
      ctx->saHpiDomainTagTextType = 0;
      ctx->saHpiDomainTagTextLanguage = 0;
@@ -656,7 +622,7 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
 
 
     /*
-     * TODO: loop through columns, check syntax and lengths. For
+     * Loop through columns, check syntax and lengths. For
      * columns which have no dependencies, you could also move
      * the value/range checking here to attempt to catch error
      * cases as early as possible.
@@ -670,20 +636,26 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiDomainTagTextType));
+            rc = netsnmp_check_vb_type_and_size(
+            			var, 
+            			ASN_INTEGER,
+                        sizeof(row_ctx->saHpiDomainTagTextType));
         break;
 
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiDomainTagTextLanguage));
+            rc = netsnmp_check_vb_type_and_size(
+            			var, 
+            			ASN_INTEGER,
+                        sizeof(row_ctx->saHpiDomainTagTextLanguage));
         break;
 
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiDomainTag));
+            rc = netsnmp_check_vb_type_and_size(
+            			var, 
+            			ASN_OCTET_STR,
+                       	sizeof(row_ctx->saHpiDomainTag));
         break;
 
         default: /** We shouldn't get here */
@@ -714,7 +686,7 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
     rg->rg_void = rg->list->ri;
 
     /*
-     * TODO: loop through columns, check for valid
+     * Loop through columns, check for valid
      * values and any range constraints.
      */
     for( current = rg->list; current; current = current->next ) {
@@ -726,47 +698,34 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+            if (oh_lookup_texttype(*var->val.integer) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIDOMAINTAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}
         break;
 
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+			if ( oh_lookup_language(*var->val.integer) == NULL ) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));				
+          		rc = SNMP_ERR_BADVALUE;
+         	}
         break;
 
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+       		if ( strlen(var->val.string) > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIDOMAINTAG: SNMP_ERR_BADVALUE\n"));       			
+               	rc = SNMP_ERR_BADVALUE;
+          	}    
         break;
 
         default: /** We shouldn't get here */
+     		DEBUGMSGTL ((AGENT, 
+	     		"saHpiDomainInfoTable_set_reserve2: netsnmp_assert\n"));        
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
 
