@@ -21,16 +21,14 @@ extern "C" {
 
         /** Index saHpiDomainId is external */
         /** Index saHpiDomainRef is internal */
+#define DOMAIN_REFERENCE_INDEX_NR	2        
 
 typedef struct saHpiDomainReferenceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
     /*************************************************************
      * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
      */
-    /** TODO: add storage for external index(s)! */
         /** SaHpiDomainId = ASN_UNSIGNED */
             unsigned long saHpiDomainRef;
 
@@ -66,9 +64,13 @@ const saHpiDomainReferenceTable_context * saHpiDomainReferenceTable_get_by_idx_r
                                         int row_status);
 int saHpiDomainReferenceTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * oid declarations scalars
+ */
+static oid saHpiDomainReferenceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,3 };
 
 /*************************************************************
- * oid declarations
+ * oid declarations Table
  */
 extern oid saHpiDomainReferenceTable_oid[];
 extern size_t saHpiDomainReferenceTable_oid_len;
