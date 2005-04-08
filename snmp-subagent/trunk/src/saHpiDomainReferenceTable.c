@@ -107,7 +107,6 @@ initialize_table_saHpiDomainReferenceEntryCount(void)
 	return 0;
 }
 
-#ifdef saHpiDomainReferenceTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -157,42 +156,6 @@ saHpiDomainReferenceTable_cmp( const void *lhs, const void *rhs )
      * return (context_l->yy == context_r->yy) ? 0 : 1;
      */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiDomainReferenceTable_context *
-saHpiDomainReferenceTable_get( const char *name, int len )
-{
-    saHpiDomainReferenceTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainReferenceTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiDomainReferenceTable module
@@ -245,8 +208,6 @@ static int saHpiDomainReferenceTable_row_copy(saHpiDomainReferenceTable_context 
 
     return 0;
 }
-
-#ifdef saHpiDomainReferenceTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -400,7 +361,6 @@ int saHpiDomainReferenceTable_can_delete(saHpiDomainReferenceTable_context *undo
     return 1;
 }
 
-#ifdef saHpiDomainReferenceTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -446,7 +406,6 @@ saHpiDomainReferenceTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -750,8 +709,6 @@ void saHpiDomainReferenceTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiDomainReferenceTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -812,18 +769,18 @@ initialize_table_saHpiDomainReferenceTable(void)
     cb.container = netsnmp_container_find("saHpiDomainReferenceTable_primary:"
                                           "saHpiDomainReferenceTable:"
                                           "table_container");
-#ifdef saHpiDomainReferenceTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiDomainReferenceTable_secondary:"
                                                        "saHpiDomainReferenceTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiDomainReferenceTable_cmp;
-#endif
-#ifdef saHpiDomainReferenceTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiDomainReferenceTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiDomainReferenceTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiDomainReferenceTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiDomainReferenceTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiDomainReferenceTable_row_copy;
@@ -838,7 +795,7 @@ initialize_table_saHpiDomainReferenceTable(void)
     cb.set_commit = saHpiDomainReferenceTable_set_commit;
     cb.set_free = saHpiDomainReferenceTable_set_free;
     cb.set_undo = saHpiDomainReferenceTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiDomainReferenceTable",
                 "Registering table saHpiDomainReferenceTable "
                 "as a table array\n"));
