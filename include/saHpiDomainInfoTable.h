@@ -199,8 +199,6 @@ int saHpiDomainInfoTable_can_delete(saHpiDomainInfoTable_context *undo_ctx,
 saHpiDomainInfoTable_context * saHpiDomainInfoTable_create_row( netsnmp_index* );
 
 
-
-
 #ifdef __cplusplus
 };
 #endif
