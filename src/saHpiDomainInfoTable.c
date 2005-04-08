@@ -41,6 +41,8 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 
+#include <saHpiDomainReferenceTable.h>
+
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
@@ -63,7 +65,6 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	oid domain_info_oid[DOMAIN_INFO_INDEX_NR];
 	netsnmp_index domain_info_index;
 	saHpiDomainInfoTable_context *domain_info_context;
-	netsnmp_variable_list *trap_var;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiDomainInfoTable\n"));
 
@@ -185,6 +186,8 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	CONTAINER_INSERT (cb.container, domain_info_context);
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
+	
+	poplulate_saHpiDomainReferenceTable(&domain_info, sessionid);
 		
 		return rv;
 }
