@@ -620,6 +620,8 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+     DEBUGMSGTL ((AGENT, 
+     	"saHpiDomainInfoTable_set_reserve1: Called\n"));
 
     /*
      * Loop through columns, check syntax and lengths. For
@@ -651,11 +653,19 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIDOMAINTAG:
-            /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(
-            			var, 
-            			ASN_OCTET_STR,
-                       	sizeof(row_ctx->saHpiDomainTag));
+            /** SaHpiText = ASN_OCTET_STR */  
+			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);            	
+			if(rc == SNMP_ERR_NOERROR ) {
+				if (var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH) {
+        			rc = SNMP_ERR_WRONGLENGTH;
+    			}	
+			}
+			if (rc == SNMP_ERR_NOERROR)		              
+	     		DEBUGMSGTL ((AGENT, 
+     				"COLUMN_SAHPIDOMAINTAG NO ERROR: %d\n", rc));                       
+			else
+	     		DEBUGMSGTL ((AGENT, 
+     				"COLUMN_SAHPIDOMAINTAG ERROR: %d\n", rc));				     					
         break;
 
         default: /** We shouldn't get here */
@@ -682,6 +692,9 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+     DEBUGMSGTL ((AGENT, 
+     	"saHpiDomainInfoTable_set_reserve2: Called"));
 
     rg->rg_void = rg->list->ri;
 
@@ -716,7 +729,7 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
-       		if ( strlen(var->val.string) > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
+       		if ( var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
      			DEBUGMSGTL ((AGENT, 
 	     			"COLUMN_SAHPIDOMAINTAG: SNMP_ERR_BADVALUE\n"));       			
                	rc = SNMP_ERR_BADVALUE;
