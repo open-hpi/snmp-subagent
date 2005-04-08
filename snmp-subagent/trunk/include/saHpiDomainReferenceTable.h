@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <SaHpi.h>
+
         /** Index saHpiDomainId is external */
         /** Index saHpiDomainRef is internal */
 #define DOMAIN_REFERENCE_INDEX_NR	2        
@@ -52,7 +54,8 @@ typedef struct saHpiDomainReferenceTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-void poplulate_saHpiDomainReferenceTable(void);
+int poplulate_saHpiDomainReferenceTable(SaHpiDomainInfoT *domain_info, 
+											SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * function declarations
