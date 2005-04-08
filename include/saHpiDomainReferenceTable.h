@@ -98,7 +98,6 @@ extern size_t saHpiDomainReferenceTable_oid_len;
  * active row */
 /** define saHpiDomainReferenceTable_CAN_MODIFY_ACTIVE_ROW */
 
-#ifdef saHpiDomainReferenceTable_SET_HANDLING
 
 int saHpiDomainReferenceTable_extract_index( saHpiDomainReferenceTable_context * ctx, netsnmp_index * hdr );
 
@@ -121,16 +120,8 @@ int saHpiDomainReferenceTable_can_deactivate(saHpiDomainReferenceTable_context *
 int saHpiDomainReferenceTable_can_delete(saHpiDomainReferenceTable_context *undo_ctx,
                     saHpiDomainReferenceTable_context *row_ctx,
                     netsnmp_request_group * rg);
-    
-    
-#ifdef saHpiDomainReferenceTable_ROW_CREATION
+   
 saHpiDomainReferenceTable_context * saHpiDomainReferenceTable_create_row( netsnmp_index* );
-#endif
-#endif
-
-#ifdef saHpiDomainReferenceTable_IDX2
-saHpiDomainReferenceTable_context * saHpiDomainReferenceTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
