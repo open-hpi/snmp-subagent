@@ -377,11 +377,11 @@ main (int argc, char **argv)
 
 		/* Initialize subagent tables */		
 		init_saHpiDomainInfoTable(); 
-	/*	init_saHpiDomainAlarmTable();
+/*		init_saHpiDomainAlarmTable(); */
 		init_saHpiDomainReferenceTable();
 		
-		init_saHpiResourceTable();
-		init_saHpiRdrTable();
+//		init_saHpiResourceTable();
+/*		init_saHpiRdrTable();
 		
 		init_saHpiAnnunciatorTable();
 		
@@ -446,10 +446,10 @@ main (int argc, char **argv)
 
 		/* after initialization populate tables */
 		populate_saHpiDomainInfoTable(sessionid);
-/*		populate_saHpiDomainAlarmTable();
-		poplulate_saHpiDomainReferenceTable();	
-		populate_saHpiResourceTable();
-		populate_saHpiRdrTable();		
+/*		populate_saHpiDomainAlarmTable(); */
+		poplulate_saHpiDomainReferenceTable(sessionid);	
+//		populate_saHpiResourceTable();
+/*		populate_saHpiRdrTable();		
 */
 
 
