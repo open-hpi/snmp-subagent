@@ -54,8 +54,7 @@ typedef struct saHpiDomainReferenceTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-int poplulate_saHpiDomainReferenceTable(SaHpiDomainInfoT *domain_info, 
-											SaHpiSessionIdT sessionid);
+int poplulate_saHpiDomainReferenceTable(SaHpiSessionIdT sessionid); 
 
 /*************************************************************
  * function declarations
