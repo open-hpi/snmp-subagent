@@ -186,8 +186,6 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	CONTAINER_INSERT (cb.container, domain_info_context);
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
-	
-	poplulate_saHpiDomainReferenceTable(&domain_info, sessionid);
 		
 		return rv;
 }
