@@ -40,7 +40,6 @@
 #include "saHpiDomainReferenceTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
-#include <oh_session.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -57,50 +56,78 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
  * void poplulate_saHpiDomainReferenceTable()  
  */
  int
- poplulate_saHpiDomainReferenceTable(SaHpiDomainInfoT *domain_info, 
- 											SaHpiSessionIdT sessionid) 
+ poplulate_saHpiDomainReferenceTable(SaHpiSessionIdT sessionid) 
 {
 	
 	SaErrorT rv;
+	SaHpiDomainInfoT domain_info;
+	
+    SaHpiEntryIdT 	EntryId;
+    SaHpiEntryIdT 	NextEntryId;
+    SaHpiDrtEntryT	DrtEntry;		
 	
 	oid domain_reference_oid[DOMAIN_REFERENCE_INDEX_NR];
 	netsnmp_index domain_reference_index;
 	saHpiDomainReferenceTable_context *domain_reference_context;
 
-	DEBUGMSGTL ((AGENT,
-		"poplulate_saHpiDomainReferenceTable: called",
-		"Not Fully Implemented\n"));
+	DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: called",
+						"Should check err for SA_ERR_HPI_INVALID_SESSION",
+						"and SA_ERR_HPI_INVALID_PARAMS\n"));
 	
-	domain_reference_index.len = DOMAIN_REFERENCE_INDEX_NR;
-	domain_reference_oid[0] = oh_get_session_domain(sessionid);
-	domain_reference_oid[1] = domain_info->DomainId;
-	domain_reference_index.oids = (oid *) & domain_reference_oid;
-	
-	/* See if it exists. */
-	domain_reference_context = NULL;
-	domain_reference_context = CONTAINER_FIND (cb.container, 
-										&domain_reference_index);
-		
-	if (!domain_reference_context) { 
-		// New entry. Add it
-		domain_reference_context = 
-			saHpiDomainReferenceTable_create_row ( &domain_reference_index);
-	}
-	if (!domain_reference_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a DomainReference row!");
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);
+	if (rv != SA_OK) {	
+		DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: ",
+							"saHpiDomainInfoGet Failed: rv = %d\n",rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}		
 	
-	/** SaHpiDomainId = ASN_UNSIGNED */
-    domain_reference_context->saHpiDomainRef =
-    	domain_info->DomainId;
-	
-    /** TruthValue = ASN_INTEGER */
-    domain_reference_context->saHpiDomainReferenceIsPeer =
-    	(domain_info->IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;	
-	
-	
-	CONTAINER_INSERT (cb.container, domain_reference_context);
+	/* Get the first Drt Entry for this Session */
+	rv = saHpiDrtEntryGet ( sessionid, 
+							SAHPI_FIRST_ENTRY, 
+							&NextEntryId, 
+							&DrtEntry);	
+	do  {
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: ",
+								"saHpiDRTEntryGet Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+		
+		domain_reference_index.len = DOMAIN_REFERENCE_INDEX_NR;
+		domain_reference_oid[0] = domain_info.DomainId;
+		domain_reference_oid[1] = DrtEntry.DomainId;
+		domain_reference_index.oids = (oid *) & domain_reference_oid;
+		
+		/* See if it exists. */
+		domain_reference_context = NULL;
+		domain_reference_context = CONTAINER_FIND (cb.container, 
+											&domain_reference_index);
+			
+		if (!domain_reference_context) { 
+			// New entry. Add it
+			domain_reference_context = 
+				saHpiDomainReferenceTable_create_row ( &domain_reference_index);
+		}
+		if (!domain_reference_context) {
+			snmp_log (LOG_ERR, "Not enough memory for a DomainReference row!");
+			return AGENT_ERR_INTERNAL_ERROR;
+		}		
+		
+		/** SaHpiDomainId = ASN_UNSIGNED */
+	    domain_reference_context->saHpiDomainRef = DrtEntry.DomainId;
+		
+	    /** TruthValue = ASN_INTEGER */
+	    domain_reference_context->saHpiDomainReferenceIsPeer =
+	    	(DrtEntry.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;	
+		
+		CONTAINER_INSERT (cb.container, domain_reference_context);
+			
+		rv = saHpiDrtEntryGet ( sessionid, 
+								NextEntryId, 
+								&NextEntryId, 
+								&DrtEntry);			
+																
+	} while ( NextEntryId != SAHPI_LAST_ENTRY);
 	
 	domain_reference_entry_count = CONTAINER_SIZE (cb.container);
 	
