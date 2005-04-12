@@ -44,12 +44,15 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiResourceTable_oid[] = { saHpiResourceTable_TABLE_OID };
 size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 
-void populate_saHpiResourceTable(void)
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+void populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 {
-	dbg("WARNING: populate_saHpiResourceTable: not implemented!");
+	
 }
 
-#ifdef saHpiResourceTable_IDX2
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -72,6 +75,21 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
      * there are more than 2 indexes
      */
     int rc;
+    
+	/* check for NULL pointers */
+    if(lhs == NULL || rhs == NULL ) {
+        DEBUGMSGTL((AGENT,"saHpiResourceTable_cmp() NULL pointer ERROR\n" ));
+    	return 0;
+    }	
+
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+		
+	if ( context_l->index.oids[0] == context_r->index.oids[0])
+		????return 0;
+		
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;			         
 
     /*
      * TODO: implement compare. Remove this ifdef code and
@@ -99,42 +117,6 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
      * return (context_l->yy == context_r->yy) ? 0 : 1;
      */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiResourceTable_context *
-saHpiResourceTable_get( const char *name, int len )
-{
-    saHpiResourceTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiResourceTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiResourceTable module
@@ -233,8 +215,6 @@ static int saHpiResourceTable_row_copy(saHpiResourceTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiResourceTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -252,7 +232,6 @@ saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_inde
      * extract index uses varbinds (netsnmp_variable_list) to parse
      * the index OID into the individual components for each index part.
      */
-    /** TODO: add storage for external index(s)! */
     netsnmp_variable_list var_saHpiDomainId;
     netsnmp_variable_list var_saHpiResourceEntryId;
     netsnmp_variable_list var_saHpiResourceIsHistorical;
@@ -275,74 +254,46 @@ saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_inde
      * If there are multiple indexes for the table, the variable_lists
      * need to be linked together, in order.
      */
-       /** TODO: add code for external index(s)! */
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiResourceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.type = ASN_UNSIGNED; 
+       var_saHpiDomainId.next_variable = &var_saHpiResourceEntryId;
+
 
        memset( &var_saHpiResourceEntryId, 0x00, sizeof(var_saHpiResourceEntryId) );
-       var_saHpiResourceEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiResourceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceEntryId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceEntryId.type = ASN_UNSIGNED; 
+       var_saHpiResourceEntryId.next_variable = &var_saHpiResourceIsHistorical;
+
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiResourceTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
-
+       var_saHpiResourceIsHistorical.type = ASN_INTEGER; 
+       var_saHpiResourceIsHistorical.next_variable = NULL;
 
     /*
      * parse the oid into the individual index components
      */
     err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
     if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
+   		
+       	/*
+       	 * copy index components into the context structure
+       	 */
+       	/** skipping external index saHpiDomainId */
    
-                ctx->saHpiResourceEntryId = *var_saHpiResourceEntryId.val.integer;
+       	ctx->saHpiResourceEntryId = 
+       			*var_saHpiResourceEntryId.val.integer;
    
-                ctx->saHpiResourceIsHistorical = *var_saHpiResourceIsHistorical.val.integer;
+       	ctx->saHpiResourceIsHistorical = 
+       			*var_saHpiResourceIsHistorical.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+   		/*
+   		 *Check Index 
+         */
+    	err = saHpiDomainId_check_index(
+    						*var_saHpiDomainId.val.integer);
+    	err = saHpiResourceEntryId_check_index(
+    						*var_saHpiResourceEntryId.val.integer);  
+    	err = saHpiResourceIsHistorical_check_index(
+    						*var_saHpiResourceIsHistorical.val.integer);
     }
 
     /*
@@ -421,7 +372,6 @@ int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiResourceTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -474,7 +424,6 @@ saHpiResourceTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -825,30 +774,6 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
     }
 
     /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiResourceTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-
-    /*
      * TODO: if you have dependencies on other tables, this would be
      * a good place to check those, too.
      */
@@ -978,8 +903,9 @@ void saHpiResourceTable_set_free( netsnmp_request_group *rg )
             /** INTEGER = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+        break;	/** We shouldn't get here */
+            	/** should have been logged in reserve1 */
         }
     }
 
@@ -1062,8 +988,6 @@ void saHpiResourceTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiResourceTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -1126,18 +1050,18 @@ initialize_table_saHpiResourceTable(void)
     cb.container = netsnmp_container_find("saHpiResourceTable_primary:"
                                           "saHpiResourceTable:"
                                           "table_container");
-#ifdef saHpiResourceTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiResourceTable_secondary:"
                                                        "saHpiResourceTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiResourceTable_cmp;
-#endif
-#ifdef saHpiResourceTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiResourceTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiResourceTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiResourceTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiResourceTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiResourceTable_row_copy;
@@ -1152,7 +1076,7 @@ initialize_table_saHpiResourceTable(void)
     cb.set_commit = saHpiResourceTable_set_commit;
     cb.set_free = saHpiResourceTable_set_free;
     cb.set_undo = saHpiResourceTable_set_undo;
-#endif
+    
     DEBUGMSGTL(("initialize_table_saHpiResourceTable",
                 "Registering table saHpiResourceTable "
                 "as a table array\n"));
