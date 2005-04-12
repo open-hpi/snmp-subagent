@@ -132,6 +132,11 @@ int saHpiResourceTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 
 
 /*************************************************************
+ * oid declarations scalars
+ */
+static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
+
+/*************************************************************
  * oid declarations
  */
 extern oid saHpiResourceTable_oid[];
