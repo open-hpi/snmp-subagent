@@ -19,19 +19,14 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceEntryId is internal */
-        /** Index saHpiResourceIsHistorical is internal */
+#include <SaHpi.h>
 
 typedef struct saHpiResourceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
     /*************************************************************
      * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
      */
-    /** TODO: add storage for external index(s)! */
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiResourceId;
 
@@ -123,7 +118,7 @@ typedef struct saHpiResourceTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-void populate_saHpiResourceTable(void);
+void populate_saHpiResourceTable(SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * function declarations
