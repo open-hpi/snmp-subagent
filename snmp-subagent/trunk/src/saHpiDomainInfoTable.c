@@ -41,8 +41,6 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 
-#include <saHpiDomainReferenceTable.h>
-
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
@@ -194,8 +192,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 /*
  * int handle_saHpiDomainInfoEntryCount()
  */
-int
-handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
+int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -220,9 +217,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
         default:
             /* we should never get here, so this is a really bad error */
             return SNMP_ERR_GENERR;
-    }
-    
-	DEBUGMSGTL ((AGENT, "handle_saHpiDomainInfoEntryCount: Returning" ));    
+    }   
 
     return SNMP_ERR_NOERROR;
 }
@@ -230,8 +225,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
 /*
  * int initialize_table_saHpiDomainInfoEntryCount(void)
  */
-int
-initialize_table_saHpiDomainInfoEntryCount(void)
+int initialize_table_saHpiDomainInfoEntryCount(void)
 {
 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainInfoEntryCount, called\n"));	
 	netsnmp_register_scalar( 
