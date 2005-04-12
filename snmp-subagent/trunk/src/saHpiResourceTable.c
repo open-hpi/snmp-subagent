@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiResourceTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -82,40 +87,35 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
     	return 0;
     }	
 
+	/* CHECK FIRST INDEX,  saHpiDomainId */
 	if ( context_l->index.oids[0] < context_r->index.oids[0])
 		return -1;
-		
-	if ( context_l->index.oids[0] == context_r->index.oids[0])
-		????return 0;
-		
+				
 	if ( context_l->index.oids[0] > context_r->index.oids[0])
 		return 1;			         
-
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiResourceTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+		
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK FIRST INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+				
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;			
+		
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by second index */
+			/* CHECK FIRST INDEX,  saHpiResourceIsHistorical */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+				return -1;
+					
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 1;
+						
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 0;		
+		}
+	}		
 }
 
 /************************************************************
