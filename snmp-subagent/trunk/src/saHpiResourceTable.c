@@ -50,11 +50,65 @@ oid saHpiResourceTable_oid[] = { saHpiResourceTable_TABLE_OID };
 size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 
 /*************************************************************
+ * oid declarations scalars
+ */
+static u_long resource_entry_count = 0;
+
+/*************************************************************
  * function declarations: OpenHpi
  */
 void populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 {
 	
+}
+
+/*
+ *  int handle_saHpiResourceEntryCount()
+ */
+int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+	
+	DEBUGMSGTL ((AGENT, "handle_saHpiResourceEntryCount: Entry Count is %d\n", 
+					resource_entry_count));  
+						
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &resource_entry_count,
+                                     sizeof(resource_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+/*
+ * inn initialize_table_saHpiResourceEntryCount()
+ */
+int initialize_table_saHpiResourceEntryCount(void)
+{
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEntryCount, called\n"));	
+    netsnmp_register_scalar(
+        netsnmp_create_handler_registration("saHpiResourceEntryCount", 
+        	handle_saHpiResourceEntryCount,
+            saHpiResourceEntryCount_oid, 
+            OID_LENGTH(saHpiResourceEntryCount_oid),
+            HANDLER_CAN_RONLY) );
+	return 0;
 }
 
 
@@ -124,15 +178,12 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiResourceTable(void)
 {
+	
+	DEBUGMSGTL ((AGENT, "init_saHpiResourceTable\n"));
+	
     initialize_table_saHpiResourceTable();
-
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiResourceTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    
+	initialize_table_saHpiResourceEntryCount();
 }
 
 /************************************************************
