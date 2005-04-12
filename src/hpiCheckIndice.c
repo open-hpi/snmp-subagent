@@ -26,12 +26,25 @@
 #include "hpiCheckIndice.h"
 
 /**************************/
-/* saHpiAnnouncementTable */    
+/* saHpiDomainInfoTable */    
 /**************************/
 int saHpiDomainId_check_index(long val) 
 {
 	return 0;
 }
+
+/**************************/
+/* saHpiResourceTable */    
+/**************************/
+int saHpiResourceEntryId_check_index(long val) 
+{
+	return 0;
+}
+int saHpiResourceIsHistorical_check_index(long val) 
+{
+	return 0;
+}
+
 
 /**************************/
 /* saHpiAnnunciatorTable */    
