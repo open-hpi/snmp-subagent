@@ -380,7 +380,7 @@ main (int argc, char **argv)
 /*		init_saHpiDomainAlarmTable(); */
 		init_saHpiDomainReferenceTable();
 		
-//		init_saHpiResourceTable();
+		init_saHpiResourceTable();
 /*		init_saHpiRdrTable();
 		
 		init_saHpiAnnunciatorTable();
@@ -448,7 +448,7 @@ main (int argc, char **argv)
 		populate_saHpiDomainInfoTable(sessionid);
 /*		populate_saHpiDomainAlarmTable(); */
 		poplulate_saHpiDomainReferenceTable(sessionid);	
-//		populate_saHpiResourceTable();
+		populate_saHpiResourceTable(sessionid);
 /*		populate_saHpiRdrTable();		
 */
 
