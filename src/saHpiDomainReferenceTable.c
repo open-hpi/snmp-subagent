@@ -81,12 +81,14 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 		return AGENT_ERR_INTERNAL_ERROR;
 	}		
 	
-	/* Get the first Drt Entry for this Session */
-	rv = saHpiDrtEntryGet ( sessionid, 
-							SAHPI_FIRST_ENTRY, 
-							&NextEntryId, 
-							&DrtEntry);	
+	/* Get the first Drt Entry for this Session */	
+	NextEntryId = SAHPI_FIRST_ENTRY;
 	do  {
+		rv = saHpiDrtEntryGet ( sessionid, 
+								NextEntryId, 
+								&NextEntryId, 
+								&DrtEntry);			
+								
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: ",
 								"saHpiDRTEntryGet Failed: rv = %d\n",rv));
@@ -121,12 +123,7 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 	    	(DrtEntry.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;	
 		
 		CONTAINER_INSERT (cb.container, domain_reference_context);
-			
-		rv = saHpiDrtEntryGet ( sessionid, 
-								NextEntryId, 
-								&NextEntryId, 
-								&DrtEntry);			
-																
+	 																	
 	} while ( NextEntryId != SAHPI_LAST_ENTRY);
 	
 	domain_reference_entry_count = CONTAINER_SIZE (cb.container);
