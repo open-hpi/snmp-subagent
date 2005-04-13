@@ -70,14 +70,13 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 	netsnmp_index domain_reference_index;
 	saHpiDomainReferenceTable_context *domain_reference_context;
 
-	DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: called",
-						"Should check err for SA_ERR_HPI_INVALID_SESSION",
-						"and SA_ERR_HPI_INVALID_PARAMS\n"));
+	DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: called\n"));
 	
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {	
-		DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: ",
-							"saHpiDomainInfoGet Failed: rv = %d\n",rv));
+		DEBUGMSGTL ((AGENT, 
+		"poplulate_saHpiDomainReferenceTable: saHpiDomainInfoGet Failed: rv = %d\n",
+		rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}		
 	
@@ -90,8 +89,9 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 								&DrtEntry);			
 								
 		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: ",
-								"saHpiDRTEntryGet Failed: rv = %d\n",rv));
+			DEBUGMSGTL ((AGENT, 
+			"poplulate_saHpiDomainReferenceTable: saHpiDEntryGet Failed: rv = %d\n",
+			rv));
 			return AGENT_ERR_INTERNAL_ERROR;
 		}
 		
@@ -790,6 +790,8 @@ void
 initialize_table_saHpiDomainReferenceTable(void)
 {
     netsnmp_table_registration_info *table_info;
+    
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainReferenceTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiDomainReferenceTable_handler called again\n");

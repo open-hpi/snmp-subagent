@@ -185,7 +185,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
 		
-		return rv;
+	return rv;
 }
 
 
@@ -510,6 +510,9 @@ saHpiDomainInfoTable_create_row( netsnmp_index* hdr)
 {
     saHpiDomainInfoTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiDomainInfoTable_context);
+        
+ 	DEBUGMSGTL ((AGENT, "saHpiDomainInfoTable_create_row: Called\n"));        
+        
     if(!ctx)
         return NULL;
         
@@ -533,8 +536,6 @@ saHpiDomainInfoTable_create_row( netsnmp_index* hdr)
      */
      
      
-     DEBUGMSGTL ((AGENT, 
-     	"saHpiDomainInfoTable_create_row: should set to init values"));
     /**
      ctx->saHpiDomainTagTextType = 0;
      ctx->saHpiDomainTagTextLanguage = 0;
