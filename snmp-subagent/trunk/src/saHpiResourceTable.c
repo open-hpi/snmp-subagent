@@ -41,7 +41,8 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 
-
+#include <oh_utils.h>
+//#include <sahpi_struct_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -57,9 +58,214 @@ static u_long resource_entry_count = 0;
 /*************************************************************
  * function declarations: OpenHpi
  */
-void populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
-{
+int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
+{	
+	SaErrorT 			rv;
+	SaHpiDomainInfoT 	domain_info;	
+    SaHpiEntryIdT		EntryId;
+//    SaHpiEntryIdT   	NextEntryId;
+    SaHpiRptEntryT  	RptEntry;
+    oh_big_textbuffer	bigbuf;
+    SaHpiTextBufferT	capbuf;
+	SaHpiResetActionT   ResetAction;
+	SaHpiPowerStateT    State;
 	
+	oid resource_oid[RESOURCE_INDEX_NR];
+	netsnmp_index resource_index;
+	saHpiResourceTable_context	*resource_context;
+
+	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable\n"));
+	
+	/* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable: ",
+			"saHpiDomainInfoGet Failed: rv = %d\n",rv));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}	
+	
+	EntryId = SAHPI_FIRST_ENTRY;
+	do {					
+		rv = saHpiRptEntryGet ( sessionid, 
+								EntryId,
+    							&EntryId,
+    							&RptEntry );			
+		
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+
+		resource_index.len = RESOURCE_INDEX_NR;
+		resource_oid[0] = domain_info.DomainId;
+		resource_oid[1] = RptEntry.EntryId;
+		resource_oid[2] = MIB_FALSE;
+		resource_index.oids = (oid *) & resource_oid;
+		
+		/* See if it exists. */
+		resource_context = NULL;
+		resource_context = CONTAINER_FIND (cb.container, &resource_index);
+			
+		if (!resource_context) { 
+			// New entry. Add it
+			resource_context = 
+				saHpiResourceTable_create_row ( &resource_index);
+		}
+		if (!resource_context) {
+			snmp_log (LOG_ERR, "Not enough memory for a Resource row!");
+			return AGENT_ERR_INTERNAL_ERROR;
+		}			
+		
+       	/** UNSIGNED32 = ASN_UNSIGNED */
+       	resource_context->saHpiResourceId = RptEntry.EntryId;
+
+      	/** SaHpiEntryId = ASN_UNSIGNED */
+        resource_context->saHpiResourceEntryId = RptEntry.ResourceId;
+
+        /** SaHpiEntityPath = ASN_OCTET_STR */
+        memset(resource_context->saHpiResourceEntityPath, 0, 65535);
+        memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
+        rv = oh_decode_entitypath(	&RptEntry.ResourceEntity, &bigbuf );
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_entitypath",
+								" Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}        
+        memcpy(	resource_context->saHpiResourceEntityPath, 
+        		bigbuf.Data, 
+        		bigbuf.DataLength );  
+        resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength;
+
+        /** BITS = ASN_OCTET_STR */
+		memset(resource_context->saHpiResourceCapabilities, 0, 65535);
+		memset(&capbuf, 0, sizeof(SaHpiTextBufferT) );       
+        rv = oh_decode_capabilities( RptEntry.ResourceCapabilities, &capbuf);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_capabilities",
+								" Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}          
+        memcpy( resource_context->saHpiResourceCapabilities, 
+        		capbuf.Data, 
+        		capbuf.DataLength ); 
+        resource_context->saHpiResourceCapabilities_len = capbuf.DataLength;
+
+        /** BITS = ASN_OCTET_STR */
+		memset(resource_context->saHpiResourceHotSwapCapabilities, 0, 65535);
+		memset(&capbuf, 0, sizeof(SaHpiTextBufferT) );  
+        rv = oh_decode_hscapabilities( RptEntry.HotSwapCapabilities, &capbuf);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_hscapabilities",
+								" Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}         
+        memcpy( resource_context->saHpiResourceHotSwapCapabilities, 
+        		capbuf.Data, 
+        		capbuf.DataLength ); 
+        resource_context->saHpiResourceHotSwapCapabilities_len = 
+        	capbuf.DataLength;    
+
+        /** SaHpiSeverity = ASN_INTEGER */
+        resource_context->saHpiResourceSeverity = 
+        	RptEntry.ResourceSeverity + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        resource_context->saHpiResourceFailed = 
+        	(RptEntry.ResourceFailed == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoResourceRev = 
+        	RptEntry.ResourceInfo.ResourceRev;
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoSpecificVer =
+        	RptEntry.ResourceInfo.SpecificVer;
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoDeviceSupport =
+        	RptEntry.ResourceInfo.DeviceSupport;
+
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+        resource_context->saHpiResourceInfoManufacturerId =
+        	RptEntry.ResourceInfo.ManufacturerId;
+
+        /** Unsigned16 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoProductId =
+        	RptEntry.ResourceInfo.ProductId;            
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoFirmwareMajorRev =
+	        RptEntry.ResourceInfo.FirmwareMajorRev;
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoFirmwareMinorRev =
+        	RptEntry.ResourceInfo.FirmwareMinorRev;
+
+        /** Unsigned8 = ASN_INTEGER */
+        resource_context->saHpiResourceInfoAuxFirmwareRev =
+        	RptEntry.ResourceInfo.AuxFirmwareRev;
+
+        /** SaHpiGuid = ASN_OCTET_STR */
+        memset(resource_context->saHpiResourceInfoGuid, 0, 65535);
+        memcpy( resource_context->saHpiResourceInfoGuid, 
+        		RptEntry.ResourceInfo.Guid, 
+        		sizeof(SaHpiGuidT) );
+        resource_context->saHpiResourceInfoGuid_len = sizeof(SaHpiGuidT);
+
+        /** SaHpiTextType = ASN_INTEGER */
+        resource_context->saHpiResourceTagTextType = 
+        	RptEntry.ResourceTag.DataType + 1;
+        	
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+        resource_context->saHpiResourceTagTextLanguage = 
+        	RptEntry.ResourceTag.Language + 1;
+
+        /** SaHpiText = ASN_OCTET_STR */
+        memset(resource_context->saHpiResourceTag, 0, 65535);
+        memcpy( resource_context->saHpiResourceTag, 
+        		RptEntry.ResourceTag.Data, 
+        		RptEntry.ResourceTag.DataLength );  
+        resource_context->saHpiResourceTag_len = 
+        	RptEntry.ResourceTag.DataLength;
+
+        /** INTEGER = ASN_INTEGER */
+        resource_context->saHpiResourceParmControl = 0; /* undefined */
+        	
+        /** INTEGER = ASN_INTEGER */
+		rv = saHpiResourceResetStateGet(
+				sessionid, 
+				RptEntry.ResourceId,
+    			&ResetAction );
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: saHpiResourceResetStateGet",
+								" Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}    			        
+        resource_context->saHpiResourceResetAction = ResetAction + 1;
+
+        /** INTEGER = ASN_INTEGER */
+		rv = saHpiResourcePowerStateGet( 
+				sessionid, 
+				RptEntry.ResourceId, 
+				&State);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: saHpiResourcePowerStateGet",
+								" Failed: rv = %d\n",rv));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}  				        
+        resource_context->saHpiResourcePowerAction = State + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        resource_context->saHpiResourceIsHistorical = MIB_FALSE;		
+		
+		CONTAINER_INSERT (cb.container, resource_context);
+		
+	} while (EntryId != SAHPI_LAST_ENTRY);
+	
+	resource_entry_count = CONTAINER_SIZE (cb.container);
+		
+	return rv;		
 }
 
 /*
