@@ -21,6 +21,9 @@ extern "C" {
 
 #include <SaHpi.h>
 
+/* Number of table Indexes */
+#define RESOURCE_INDEX_NR 3 
+
 typedef struct saHpiResourceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
@@ -118,7 +121,7 @@ typedef struct saHpiResourceTable_context_s {
 /*************************************************************
  * function declarations: OpenHpi
  */
-void populate_saHpiResourceTable(SaHpiSessionIdT sessionid);
+int populate_saHpiResourceTable(SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * function declarations
@@ -186,8 +189,6 @@ extern size_t saHpiResourceTable_oid_len;
  * active row */
 /** define saHpiResourceTable_CAN_MODIFY_ACTIVE_ROW */
 
-#ifdef saHpiResourceTable_SET_HANDLING
-
 int saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_index * hdr );
 
 void saHpiResourceTable_set_reserve1( netsnmp_request_group * );
@@ -210,15 +211,9 @@ int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
                     saHpiResourceTable_context *row_ctx,
                     netsnmp_request_group * rg);
     
-    
-#ifdef saHpiResourceTable_ROW_CREATION
 saHpiResourceTable_context * saHpiResourceTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiResourceTable_IDX2
 saHpiResourceTable_context * saHpiResourceTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
