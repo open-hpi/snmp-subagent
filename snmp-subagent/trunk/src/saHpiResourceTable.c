@@ -63,24 +63,27 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	SaErrorT 			rv;
 	SaHpiDomainInfoT 	domain_info;	
     SaHpiEntryIdT		EntryId;
-//    SaHpiEntryIdT   	NextEntryId;
     SaHpiRptEntryT  	RptEntry;
     oh_big_textbuffer	bigbuf;
-    SaHpiTextBufferT	capbuf;
+//   SaHpiTextBufferT	capbuf;
 	SaHpiResetActionT   ResetAction;
 	SaHpiPowerStateT    State;
+	
+	SaHpiUint16T 	rs_cap;
+	SaHpiUint8T		hs_cap;
 	
 	oid resource_oid[RESOURCE_INDEX_NR];
 	netsnmp_index resource_index;
 	saHpiResourceTable_context	*resource_context;
 
-	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable\n"));
+	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable() Called\n"));
 	
 	/* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable: ",
-			"saHpiDomainInfoGet Failed: rv = %d\n",rv));
+		DEBUGMSGTL ((AGENT, 
+		"populate_saHpiResourceTable: saHpiDomainInfoGet() Failed: rv = %d\n",
+		rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}	
 	
@@ -93,7 +96,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			break;
 		}
 
 		resource_index.len = RESOURCE_INDEX_NR;
@@ -113,7 +117,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		}
 		if (!resource_context) {
 			snmp_log (LOG_ERR, "Not enough memory for a Resource row!");
-			return AGENT_ERR_INTERNAL_ERROR;
+			rv = AGENT_ERR_INTERNAL_ERROR;
+			break;
 		}			
 		
        	/** UNSIGNED32 = ASN_UNSIGNED */
@@ -127,9 +132,11 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
         rv = oh_decode_entitypath(	&RptEntry.ResourceEntity, &bigbuf );
 		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_entitypath",
-								" Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: oh_decode_entitypath() rv = %d\n",rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			saHpiResourceTable_delete_row( resource_context );
+			break;
 		}        
         memcpy(	resource_context->saHpiResourceEntityPath, 
         		bigbuf.Data, 
@@ -137,33 +144,58 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength;
 
         /** BITS = ASN_OCTET_STR */
-		memset(resource_context->saHpiResourceCapabilities, 0, 65535);
-		memset(&capbuf, 0, sizeof(SaHpiTextBufferT) );       
-        rv = oh_decode_capabilities( RptEntry.ResourceCapabilities, &capbuf);
-		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_capabilities",
-								" Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
-		}          
+        rs_cap = 0x0000;		
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_SENSOR)		
+			rs_cap = 0x4000;				
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RDR)		
+			rs_cap |= 0x2000;				
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVENT_LOG)		
+			rs_cap |= 0x1000;
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_INVENTORY_DATA)		
+			rs_cap |= 0x0800;	
+									
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESET)		
+			rs_cap |= 0x0400;	
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_POWER)		
+			rs_cap |= 0x0200;							
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_ANNUNCIATOR)		
+			rs_cap |= 0x0100;					
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_FRU)		
+			rs_cap |= 0x0080;	
+			
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONTROL)		
+			rs_cap |= 0x0040;	
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_WATCHDOG)		
+			rs_cap |= 0x0020;							
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP)		
+			rs_cap |= 0x0010;					
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONFIGURATION)		
+			rs_cap |= 0x0008;
+			
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)		
+			rs_cap |= 0x0004;							
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS)		
+			rs_cap |= 0x0002;					
+		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESOURCE)		
+			rs_cap |= 0x0001;							
+		
         memcpy( resource_context->saHpiResourceCapabilities, 
-        		capbuf.Data, 
-        		capbuf.DataLength ); 
-        resource_context->saHpiResourceCapabilities_len = capbuf.DataLength;
+        		&rs_cap, 
+        		sizeof(rs_cap) ); 
+        resource_context->saHpiResourceCapabilities_len = sizeof(rs_cap);
 
-        /** BITS = ASN_OCTET_STR */
-		memset(resource_context->saHpiResourceHotSwapCapabilities, 0, 65535);
-		memset(&capbuf, 0, sizeof(SaHpiTextBufferT) );  
-        rv = oh_decode_hscapabilities( RptEntry.HotSwapCapabilities, &capbuf);
-		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: oh_decode_hscapabilities",
-								" Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
-		}         
-        memcpy( resource_context->saHpiResourceHotSwapCapabilities, 
-        		capbuf.Data, 
-        		capbuf.DataLength ); 
-        resource_context->saHpiResourceHotSwapCapabilities_len = 
-        	capbuf.DataLength;    
+        /** BITS = ASN_OCTET_STR */	
+        hs_cap = 0x00;		
+		if(RptEntry.HotSwapCapabilities & 
+			SAHPI_HS_CAPABILITY_AUTOEXTRACT_READ_ONLY)		
+			hs_cap = 0x40;
+			
+		if(RptEntry.HotSwapCapabilities & 
+			SAHPI_HS_CAPABILITY_INDICATOR_SUPPORTED)		
+			hs_cap = hs_cap | 0x20;	
+			
+		*resource_context->saHpiResourceHotSwapCapabilities = hs_cap;					
+        resource_context->saHpiResourceHotSwapCapabilities_len = sizeof(hs_cap);    
 
         /** SaHpiSeverity = ASN_INTEGER */
         resource_context->saHpiResourceSeverity = 
@@ -215,7 +247,6 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         /** SaHpiTextType = ASN_INTEGER */
         resource_context->saHpiResourceTagTextType = 
         	RptEntry.ResourceTag.DataType + 1;
-        	
 
         /** SaHpiTextLanguage = ASN_INTEGER */
         resource_context->saHpiResourceTagTextLanguage = 
@@ -237,24 +268,38 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 				sessionid, 
 				RptEntry.ResourceId,
     			&ResetAction );
-		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: saHpiResourceResetStateGet",
-								" Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
-		}    			        
-        resource_context->saHpiResourceResetAction = ResetAction + 1;
-
+		if (rv == SA_ERR_HPI_INVALID_CMD) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: saHpiResourceResetStateGet() rv = %d\n",
+			rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			saHpiResourceTable_delete_row( resource_context );
+			break;
+		}    			       
+		if (rv == SA_ERR_HPI_CAPABILITY ) {
+			resource_context->saHpiResourceResetAction = 0;
+		} else { 
+	        resource_context->saHpiResourceResetAction = ResetAction + 1;
+		}
+		
         /** INTEGER = ASN_INTEGER */
 		rv = saHpiResourcePowerStateGet( 
 				sessionid, 
 				RptEntry.ResourceId, 
-				&State);
-		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet: saHpiResourcePowerStateGet",
-								" Failed: rv = %d\n",rv));
-			return AGENT_ERR_INTERNAL_ERROR;
-		}  				        
-        resource_context->saHpiResourcePowerAction = State + 1;
+				&State);		
+		if( rv == SA_ERR_HPI_INVALID_CMD )  {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: saHpiResourcePowerStateGet() rv = %d\n",
+			rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			saHpiResourceTable_delete_row( resource_context );
+			break;
+		}
+		if (rv == SA_ERR_HPI_CAPABILITY) {
+			resource_context->saHpiResourcePowerAction = 0;		
+		} else {
+	        resource_context->saHpiResourcePowerAction = State + 1;
+		}
 
         /** TruthValue = ASN_INTEGER */
         resource_context->saHpiResourceIsHistorical = MIB_FALSE;		
@@ -264,6 +309,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	} while (EntryId != SAHPI_LAST_ENTRY);
 	
 	resource_entry_count = CONTAINER_SIZE (cb.container);
+	
+	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", resource_entry_count));
 		
 	return rv;		
 }
@@ -303,7 +350,7 @@ int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 /*
- * inn initialize_table_saHpiResourceEntryCount()
+ * int initialize_table_saHpiResourceEntryCount()
  */
 int initialize_table_saHpiResourceEntryCount(void)
 {
@@ -334,6 +381,8 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
         (saHpiResourceTable_context *)lhs;
     saHpiResourceTable_context *context_r =
         (saHpiResourceTable_context *)rhs;
+        
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_cmp, called\n"));        
 
     /*
      * check primary key, then secondary. Add your own code if
@@ -384,8 +433,7 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiResourceTable(void)
 {
-	
-	DEBUGMSGTL ((AGENT, "init_saHpiResourceTable\n"));
+	DEBUGMSGTL ((AGENT, "init_saHpiResourceTable, called\n"));
 	
     initialize_table_saHpiResourceTable();
     
@@ -398,6 +446,9 @@ init_saHpiResourceTable(void)
 static int saHpiResourceTable_row_copy(saHpiResourceTable_context * dst,
                          saHpiResourceTable_context * src)
 {
+	
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_row_copy, called\n"));
+	
     if(!dst||!src)
         return 1;
         
@@ -493,6 +544,8 @@ saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_inde
     netsnmp_variable_list var_saHpiResourceEntryId;
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     int err;
+    
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_extract_index, called\n"));    
 
     /*
      * copy index, if provided
@@ -574,6 +627,9 @@ int saHpiResourceTable_can_activate(saHpiResourceTable_context *undo_ctx,
                       saHpiResourceTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+	
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_activate, called\n"));
+		
     /*
      * TODO: check for activation requirements here
      */
@@ -599,6 +655,7 @@ int saHpiResourceTable_can_deactivate(saHpiResourceTable_context *undo_ctx,
                         saHpiResourceTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -616,6 +673,9 @@ int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
                     saHpiResourceTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+	
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_delete, called\n"));
+	
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -646,6 +706,9 @@ int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
 saHpiResourceTable_context *
 saHpiResourceTable_create_row( netsnmp_index* hdr)
 {
+	
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_create_row, called\n"));
+	
     saHpiResourceTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiResourceTable_context);
     if(!ctx)
@@ -689,6 +752,8 @@ saHpiResourceTable_context *
 saHpiResourceTable_duplicate_row( saHpiResourceTable_context * row_ctx)
 {
     saHpiResourceTable_context * dup;
+    
+    DEBUGMSGTL ((AGENT, "saHpiResourceTable_duplicate_row, called\n"));
 
     if(!row_ctx)
         return NULL;
@@ -710,6 +775,9 @@ saHpiResourceTable_duplicate_row( saHpiResourceTable_context * row_ctx)
  */
 netsnmp_index * saHpiResourceTable_delete_row( saHpiResourceTable_context * ctx )
 {
+	
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_delete_row, called\n"));
+	
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -753,7 +821,8 @@ void saHpiResourceTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
-
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_reserve1, called\n"));
+	
     /*
      * TODO: loop through columns, check syntax and lengths. For
      * columns which have no dependencies, you could also move
@@ -833,6 +902,8 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -978,6 +1049,8 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+    
+    DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_action, called\n"));
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -1060,6 +1133,8 @@ void saHpiResourceTable_set_commit( netsnmp_request_group *rg )
     saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -1122,6 +1197,8 @@ void saHpiResourceTable_set_free( netsnmp_request_group *rg )
     saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
     saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+    
+    DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -1197,6 +1274,8 @@ void saHpiResourceTable_set_undo( netsnmp_request_group *rg )
     saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -1254,6 +1333,8 @@ void
 initialize_table_saHpiResourceTable(void)
 {
     netsnmp_table_registration_info *table_info;
+    
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiResourceTable_handler called again\n");
@@ -1356,6 +1437,8 @@ int saHpiResourceTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiResourceTable_context *context = (saHpiResourceTable_context *)item;
+    
+    DEBUGMSGTL ((AGENT, "saHpiResourceTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -1534,6 +1617,8 @@ int saHpiResourceTable_get_value(
 const saHpiResourceTable_context *
 saHpiResourceTable_get_by_idx(netsnmp_index * hdr)
 {
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_get_by_idx, called\n"));
+	
     return (const saHpiResourceTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
