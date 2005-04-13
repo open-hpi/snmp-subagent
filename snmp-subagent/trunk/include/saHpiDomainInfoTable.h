@@ -21,7 +21,7 @@ extern "C" {
 
 #include <SaHpi.h>
 
-        /** Index saHpiDomainId is internal */
+/* Number of table Indexes */
 #define DOMAIN_INFO_INDEX_NR 1        
 
 typedef struct saHpiDomainInfoTable_context_s {
