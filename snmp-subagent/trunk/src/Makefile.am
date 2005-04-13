@@ -1,7 +1,8 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES 		= -I$(top_srcdir)/include -I../../openhpi/include 
-
+#INCLUDES 		= -I$(top_srcdir)/include
+ 
 AM_CFLAGS 		= @CFLAGS@
 
 bin_PROGRAMS		= hpiSubagent
