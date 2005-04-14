@@ -38,6 +38,7 @@
 #include <hpiB0101.h>
 
 #include <hpiCheckIndice.h>
+#include <session_info.h>
 
 #include <saHpiDomainInfoTable.h>
 #include <saHpiDomainAlarmTable.h>
@@ -362,7 +363,10 @@ main (int argc, char **argv)
 		exit(-1);
 	}
    	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
-   		sessionid));  		
+   		sessionid));  
+   		
+   	store_session_info(sessionid, SAHPI_UNSPECIFIED_DOMAIN_ID);	
+   				
 		
 	/*
 	 * Resource discovery
