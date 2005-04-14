@@ -42,7 +42,6 @@
 #include <hpiCheckIndice.h>
 
 #include <oh_utils.h>
-//#include <sahpi_struct_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -65,7 +64,6 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
     SaHpiEntryIdT		EntryId;
     SaHpiRptEntryT  	RptEntry;
     oh_big_textbuffer	bigbuf;
-//   SaHpiTextBufferT	capbuf;
 	SaHpiResetActionT   ResetAction;
 	SaHpiPowerStateT    State;
 	
@@ -128,7 +126,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         resource_context->saHpiResourceEntryId = RptEntry.ResourceId;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-        memset(resource_context->saHpiResourceEntityPath, 0, 65535);
+        memset(	resource_context->saHpiResourceEntityPath, 
+        		0, sizeof(oh_big_textbuffer));
         memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
         rv = oh_decode_entitypath(	&RptEntry.ResourceEntity, &bigbuf );
 		if (rv != SA_OK) {
@@ -137,11 +136,26 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
 			break;
-		}        
+		}       
+		 
         memcpy(	resource_context->saHpiResourceEntityPath, 
         		bigbuf.Data, 
-        		bigbuf.DataLength );  
-        resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength;
+        		bigbuf.DataLength ); 
+        		
+DEBUGMSGTL ((AGENT, "ERROR: oh_decode_entitypath() TextType rv = %d\n",bigbuf.DataType));        		
+DEBUGMSGTL ((	AGENT, 
+				"bigbuf.DataLength rv = %d\n",
+				bigbuf.DataLength	));
+DEBUGMSGTL ((	AGENT, 
+				"strlen(bigbuf.Data) rv = %d\n",
+				strlen(bigbuf.Data)	));        		
+        		
+        		 
+		if ((bigbuf.Data[bigbuf.DataLength-1] == 0x00) && 
+			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
+        	resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength-1;
+        else
+        	resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength;
 
         /** BITS = ASN_OCTET_STR */
         rs_cap = 0x0000;		
@@ -238,7 +252,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         	RptEntry.ResourceInfo.AuxFirmwareRev;
 
         /** SaHpiGuid = ASN_OCTET_STR */
-        memset(resource_context->saHpiResourceInfoGuid, 0, 65535);
+        memset(resource_context->saHpiResourceInfoGuid, 0, sizeof(SaHpiGuidT));
         memcpy( resource_context->saHpiResourceInfoGuid, 
         		RptEntry.ResourceInfo.Guid, 
         		sizeof(SaHpiGuidT) );
@@ -253,12 +267,27 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         	RptEntry.ResourceTag.Language + 1;
 
         /** SaHpiText = ASN_OCTET_STR */
-        memset(resource_context->saHpiResourceTag, 0, 65535);
+        memset(	resource_context->saHpiResourceTag, 
+        		0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
         memcpy( resource_context->saHpiResourceTag, 
         		RptEntry.ResourceTag.Data, 
-        		RptEntry.ResourceTag.DataLength );  
-        resource_context->saHpiResourceTag_len = 
-        	RptEntry.ResourceTag.DataLength;
+        		RptEntry.ResourceTag.DataLength ); 
+
+        		
+DEBUGMSGTL ((	AGENT, 
+				"RptEntry.ResourceTag.DataLength rv = %d\n",
+				RptEntry.ResourceTag.DataLength	));
+DEBUGMSGTL ((	AGENT, 
+				"strlen(RptEntry.ResourceTag.Data) rv = %d\n",
+				strlen(RptEntry.ResourceTag.Data)	));        		
+        		
+		if ((RptEntry.ResourceTag.Data[RptEntry.ResourceTag.DataLength-1] == 0x00) 
+			&& (RptEntry.ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))         		
+        	resource_context->saHpiResourceTag_len = 
+        		RptEntry.ResourceTag.DataLength - 1;
+        else
+        	resource_context->saHpiResourceTag_len = 
+        		RptEntry.ResourceTag.DataLength;        		
 
         /** INTEGER = ASN_INTEGER */
         resource_context->saHpiResourceParmControl = 0; /* undefined */
