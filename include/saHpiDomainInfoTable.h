@@ -47,7 +47,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             long saHpiDomainTagTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiDomainTag[65535];
+            unsigned char saHpiDomainTag[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainTag_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -87,7 +87,7 @@ typedef struct saHpiDomainInfoTable_context_s {
             long saHpiDomainAlarmOverflow;
 
         /** SaHpiGuid = ASN_OCTET_STR */
-            unsigned char saHpiDomainGuid[65535];
+            unsigned char saHpiDomainGuid[ sizeof(SaHpiGuidT) ];
             long saHpiDomainGuid_len;
 
 

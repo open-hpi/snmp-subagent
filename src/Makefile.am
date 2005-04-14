@@ -12,6 +12,7 @@ SUBDIRS                 =
 hpiSubagent_SOURCES	= alarm.c \
 			hpiB0101.c \
 			hpiCheckIndice.c \
+			session_info.c \
 			hpiSubagent.c \
 			saHpiDomainInfoTable.c \
 			saHpiDomainReferenceTable.c \
