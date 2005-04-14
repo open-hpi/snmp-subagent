@@ -20,9 +20,13 @@ extern "C" {
 #include <net-snmp/agent/table_array.h>
 
 #include <SaHpi.h>
+#include <oh_utils.h>
 
 /* Number of table Indexes */
 #define RESOURCE_INDEX_NR 3 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
 
 typedef struct saHpiResourceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -37,15 +41,15 @@ typedef struct saHpiResourceTable_context_s {
             unsigned long saHpiResourceEntryId;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-            unsigned char saHpiResourceEntityPath[65535];
+            unsigned char saHpiResourceEntityPath[sizeof(oh_big_textbuffer)];
             long saHpiResourceEntityPath_len;
 
         /** BITS = ASN_OCTET_STR */
-            unsigned char saHpiResourceCapabilities[65535];
+            unsigned char saHpiResourceCapabilities[sizeof(SaHpiUint16T)];
             long saHpiResourceCapabilities_len;
 
         /** BITS = ASN_OCTET_STR */
-            unsigned char saHpiResourceHotSwapCapabilities[65535];
+            unsigned char saHpiResourceHotSwapCapabilities[sizeof(SaHpiUint8T)];
             long saHpiResourceHotSwapCapabilities_len;
 
         /** SaHpiSeverity = ASN_INTEGER */
@@ -79,7 +83,7 @@ typedef struct saHpiResourceTable_context_s {
             long saHpiResourceInfoAuxFirmwareRev;
 
         /** SaHpiGuid = ASN_OCTET_STR */
-            unsigned char saHpiResourceInfoGuid[65535];
+            unsigned char saHpiResourceInfoGuid[sizeof(SaHpiGuidT)];
             long saHpiResourceInfoGuid_len;
 
         /** SaHpiTextType = ASN_INTEGER */
@@ -89,7 +93,7 @@ typedef struct saHpiResourceTable_context_s {
             long saHpiResourceTagTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiResourceTag[65535];
+            unsigned char saHpiResourceTag[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiResourceTag_len;
 
         /** INTEGER = ASN_INTEGER */
