@@ -707,7 +707,7 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-            if (oh_lookup_texttype(*var->val.integer) == NULL) {
+            if (oh_lookup_texttype(*var->val.integer - 1) == NULL) {
      			DEBUGMSGTL ((AGENT, 
 	     			"COLUMN_SAHPIDOMAINTAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));            	
                 rc = SNMP_ERR_BADVALUE;
@@ -716,7 +716,7 @@ void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-			if ( oh_lookup_language(*var->val.integer) == NULL ) {
+			if ( oh_lookup_language(*var->val.integer - 1) == NULL ) {
      			DEBUGMSGTL ((AGENT, 
 	     			"COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));				
           		rc = SNMP_ERR_BADVALUE;
