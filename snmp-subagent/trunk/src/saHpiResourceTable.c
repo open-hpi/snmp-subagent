@@ -1008,7 +1008,7 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
            /** SaHpiTextType = ASN_INTEGER */
-            if (oh_lookup_texttype(*var->val.integer) == NULL) {
+            if (oh_lookup_texttype(*var->val.integer - 1) == NULL) {
      			DEBUGMSGTL ((AGENT, 
 	     			"COLUMN_SAHPIRESOURCETAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));            	
                 rc = SNMP_ERR_BADVALUE;
@@ -1017,7 +1017,7 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-			if ( oh_lookup_language(*var->val.integer) == NULL ) {
+			if ( oh_lookup_language(*var->val.integer - 1) == NULL ) {
      			DEBUGMSGTL ((AGENT, 
 	     		   "COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));				
           		rc = SNMP_ERR_BADVALUE;
