@@ -40,6 +40,7 @@
 #include "saHpiResourceTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
+#include <session_info.h>
 
 #include <oh_utils.h>
 
@@ -342,6 +343,39 @@ DEBUGMSGTL ((	AGENT,
 	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", resource_entry_count));
 		
 	return rv;		
+}
+
+/*
+ * int set_table_severity (saHpiTable_context * ctx)
+ */
+int set_table_severity (saHpiResourceTable_context *row_ctx)
+{
+	SaErrorT 			rc = SA_OK;
+    SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiSeverityT      severity;
+	
+	if(!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+    resource_id = row_ctx->saHpiResourceEntryId;
+    severity = row_ctx->saHpiResourceSeverity - 1;
+    
+    rc = saHpiResourceSeveritySet(session_id, resource_id, severity);            
+    
+    if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			"Call to saHpiResourceSeverity failed with return code: %s.\n",
+		    oh_lookup_error(rc));
+	  	DEBUGMSGTL ((AGENT,
+			"Call to saHpiResourceSeveritySet failed with rc: %s.\n",
+		   	oh_lookup_error(rc)));
+	  	return AGENT_ERR_OPERATION;
+    }
+  
+    return AGENT_ERR_NOERROR; 
+    
 }
 
 /*
@@ -868,43 +902,53 @@ void saHpiResourceTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIRESOURCESEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourceSeverity));
+                 						sizeof(row_ctx->saHpiResourceSeverity));
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourceTagTextType));
+                                	 sizeof(row_ctx->saHpiResourceTagTextType));
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourceTagTextLanguage));
+                                 sizeof(row_ctx->saHpiResourceTagTextLanguage));
         break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiResourceTag));
+        case COLUMN_SAHPIRESOURCETAG:          
+			/** SaHpiText = ASN_OCTET_STR */  
+			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);            	
+			if(rc == SNMP_ERR_NOERROR ) {
+				if (var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH) {
+        			rc = SNMP_ERR_WRONGLENGTH;
+    			}	
+			}
+			if (rc == SNMP_ERR_NOERROR)		              
+	     		DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCETAG NO ERROR: %d\n", rc));                       
+			else
+	     		DEBUGMSGTL ((AGENT, 
+     				"COLUMN_SAHPIRESOURCETAG ERROR: %d\n", rc));                          
         break;
 
         case COLUMN_SAHPIRESOURCEPARMCONTROL:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourceParmControl));
+                                 	sizeof(row_ctx->saHpiResourceParmControl));
         break;
 
         case COLUMN_SAHPIRESOURCERESETACTION:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourceResetAction));
+                                    sizeof(row_ctx->saHpiResourceResetAction));
         break;
 
         case COLUMN_SAHPIRESOURCEPOWERACTION:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiResourcePowerAction));
+                                    sizeof(row_ctx->saHpiResourcePowerAction));
         break;
 
         default: /** We shouldn't get here */
@@ -931,7 +975,7 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
-
+    
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
@@ -959,48 +1003,34 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
                 *    rc = SNMP_ERR_BADVALUE;
                 * }
                 */
+
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+           /** SaHpiTextType = ASN_INTEGER */
+            if (oh_lookup_texttype(*var->val.integer) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCETAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+			if ( oh_lookup_language(*var->val.integer) == NULL ) {
+     			DEBUGMSGTL ((AGENT, 
+	     		   "COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));				
+          		rc = SNMP_ERR_BADVALUE;
+         	}
         break;
 
         case COLUMN_SAHPIRESOURCETAG:
             /** SaHpiText = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+       		if ( var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCETAG: SNMP_ERR_BADVALUE\n"));       			
+               	rc = SNMP_ERR_BADVALUE;
+          	}  
         break;
 
         case COLUMN_SAHPIRESOURCEPARMCONTROL:
@@ -1077,8 +1107,8 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
     saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-    int            row_err = 0;
-    
+    int row_err = 0;
+        
     DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_action, called\n"));
 
     /*
@@ -1092,8 +1122,10 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-            row_ctx->saHpiResourceSeverity = *var->val.integer;
+            /** SaHpiSeverity = ASN_INTEGER */ 
+               row_ctx->saHpiResourceSeverity = *var->val.integer;
+          if (set_table_severity (row_ctx) != AGENT_ERR_NOERROR)
+            row_err = SNMP_ERR_GENERR;
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
@@ -1133,9 +1165,21 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
     }
 
     /*
+     * check activation/deactivation
+     */
+	if(row_err) {
+        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+                                       (netsnmp_request_info*)rg->rg_void,
+                                       row_err);
+        return;
+    }
+
+
+    /*
      * TODO: if you have dependencies on other tables, this would be
      * a good place to check those, too.
      */
+     
 }
 
 /************************************************************
@@ -1651,5 +1695,7 @@ saHpiResourceTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiResourceTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
+
+
 
 
