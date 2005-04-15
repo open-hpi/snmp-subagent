@@ -379,6 +379,113 @@ int set_table_severity (saHpiResourceTable_context *row_ctx)
 }
 
 /*
+ * int set_table_resource_parm_control (saHpiTable_context * ctx)
+ */
+int set_table_resource_parm_control (saHpiResourceTable_context *row_ctx)
+{
+	SaErrorT 			rc = SA_OK;
+    SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiParmActionT    action;
+	
+	if(!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+    resource_id = row_ctx->saHpiResourceEntryId;
+    action = row_ctx->saHpiResourceParmControl - 1;
+
+	rc = saHpiParmControl (session_id, resource_id, action);
+    
+    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+		snmp_log (LOG_ERR,
+			"Call to saHpiParmControl failed with return code: %s.\n",
+		    oh_lookup_error(rc));
+	  	DEBUGMSGTL ((AGENT,
+			"Call to saHpiParmControl failed with rc: %s.\n",
+		   	oh_lookup_error(rc)));
+	  	return AGENT_ERR_OPERATION;
+    } else if (rc == SA_ERR_HPI_CAPABILITY) {
+    	row_ctx->saHpiResourceParmControl = 4;
+    }	
+  
+    return AGENT_ERR_NOERROR; 
+    
+}
+
+/*
+ * int set_table_resource_reset_action (saHpiTable_context * ctx)
+ */
+int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx)
+{
+	SaErrorT 			rc = SA_OK;
+    SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiResetActionT   reset_action;
+	
+	if(!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+    resource_id = row_ctx->saHpiResourceEntryId;
+    reset_action = row_ctx->saHpiResourceResetAction - 1;
+
+	rc = saHpiResourceResetStateSet (session_id, resource_id, reset_action);
+    
+    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+		snmp_log (LOG_ERR,
+			"Call to saHpiResourceResetStateSet failed with return code: %s.\n",
+		    oh_lookup_error(rc));
+	  	DEBUGMSGTL ((AGENT,
+			"Call to saHpiResourceResetStateSet failed with rc: %s.\n",
+		   	oh_lookup_error(rc)));	   	
+	  	return AGENT_ERR_OPERATION;
+    } else if (rc == SA_ERR_HPI_CAPABILITY) {
+    	row_ctx->saHpiResourceResetAction = 5;
+    }	
+  
+    return AGENT_ERR_NOERROR; 
+    
+}
+
+
+/*
+ * int set_table_resource_power_action (saHpiTable_context * ctx)
+ */
+int set_table_resource_power_action (saHpiResourceTable_context *row_ctx)
+{
+	SaErrorT 			rc = SA_OK;
+    SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiPowerStateT   	power_action;
+	
+	if(!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+    resource_id = row_ctx->saHpiResourceEntryId;
+    power_action = row_ctx->saHpiResourcePowerAction - 1;   
+
+	rc = saHpiResourcePowerStateSet (session_id, resource_id, power_action); 
+    
+    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+		snmp_log (LOG_ERR,
+			"Call to saHpiResourcePowerStateSet failed with return code: %s.\n",
+		    oh_lookup_error(rc));
+	  	DEBUGMSGTL ((AGENT,
+			"Call to saHpiResourcePowerStateSet failed with rc: %s.\n",
+		   	oh_lookup_error(rc)));
+	  	return AGENT_ERR_OPERATION;
+    } else if (rc == SA_ERR_HPI_CAPABILITY) {
+    	row_ctx->saHpiResourcePowerAction = 4;
+    }	
+  
+    return AGENT_ERR_NOERROR; 
+    
+}
+
+
+/*
  *  int handle_saHpiResourceEntryCount()
  */
 int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
@@ -992,18 +1099,11 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-
+            if (oh_lookup_severity(*var->val.integer - 1) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCESEVERITY: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
@@ -1034,45 +1134,27 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+            if (oh_lookup_parmaction(*var->val.integer - 1) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCEPARMCONTROL: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}        
         break;
 
         case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+            if (oh_lookup_resetaction(*var->val.integer - 1) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCERESETACTION: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}    
         break;
 
         case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+            if (oh_lookup_powerstate(*var->val.integer - 1) == NULL) {
+     			DEBUGMSGTL ((AGENT, 
+	     			"COLUMN_SAHPIRESOURCEPOWERACTION: SNMP_ERR_BADVALUE\n"));            	
+                rc = SNMP_ERR_BADVALUE;
+        	}         
         break;
 
         default: /** We shouldn't get here */
@@ -1123,9 +1205,9 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIRESOURCESEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */ 
-               row_ctx->saHpiResourceSeverity = *var->val.integer;
-          if (set_table_severity (row_ctx) != AGENT_ERR_NOERROR)
-            row_err = SNMP_ERR_GENERR;
+        	row_ctx->saHpiResourceSeverity = *var->val.integer;
+          	if (set_table_severity (row_ctx) != AGENT_ERR_NOERROR)
+            	row_err = SNMP_ERR_GENERR;
         break;
 
         case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
@@ -1146,17 +1228,23 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIRESOURCEPARMCONTROL:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiResourceParmControl = *var->val.integer;
+        	row_ctx->saHpiResourceParmControl = *var->val.integer;
+          	if (set_table_resource_parm_control (row_ctx) != AGENT_ERR_NOERROR)
+            	row_err = SNMP_ERR_GENERR;
         break;
 
         case COLUMN_SAHPIRESOURCERESETACTION:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiResourceResetAction = *var->val.integer;
+          	if (set_table_resource_reset_action (row_ctx) != AGENT_ERR_NOERROR)
+            	row_err = SNMP_ERR_GENERR;            
         break;
 
         case COLUMN_SAHPIRESOURCEPOWERACTION:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiResourcePowerAction = *var->val.integer;
+          	if (set_table_resource_power_action (row_ctx) != AGENT_ERR_NOERROR)
+            	row_err = SNMP_ERR_GENERR;               
         break;
 
         default: /** We shouldn't get here */
