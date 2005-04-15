@@ -2403,7 +2403,9 @@ saHpiResourceResetAction OBJECT-TYPE
                     coldReset(1),
                     warmReset(2),
                     resetAssert(3),
-                    resetDeAssert(4)
+                    resetDeAssert(4),
+		    unsupported(5)
+		    
                 }
     MAX-ACCESS  read-write
     STATUS      current
@@ -2432,7 +2434,8 @@ saHpiResourcePowerAction OBJECT-TYPE
                     undefined(0),
                     off(1),
                     on(2),
-                    cycle(3)
+                    cycle(3),
+		    unsupported(4)
                 }
 	MAX-ACCESS  read-write
 	STATUS      current
