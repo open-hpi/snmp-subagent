@@ -60,16 +60,16 @@ static u_long resource_entry_count = 0;
  */
 int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 {	
-	SaErrorT 			rv;
+	SaErrorT 		rv;
 	SaHpiDomainInfoT 	domain_info;	
-    SaHpiEntryIdT		EntryId;
-    SaHpiRptEntryT  	RptEntry;
-    oh_big_textbuffer	bigbuf;
+	SaHpiEntryIdT		EntryId;
+	SaHpiRptEntryT  	RptEntry;
+	oh_big_textbuffer	bigbuf;
 	SaHpiResetActionT   ResetAction;
 	SaHpiPowerStateT    State;
 	
 	SaHpiUint16T 	rs_cap;
-	SaHpiUint8T		hs_cap;
+	SaHpiUint8T	hs_cap;
 	
 	oid resource_oid[RESOURCE_INDEX_NR];
 	netsnmp_index resource_index;
@@ -88,10 +88,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	
 	EntryId = SAHPI_FIRST_ENTRY;
 	do {					
-		rv = saHpiRptEntryGet ( sessionid, 
-								EntryId,
-    							&EntryId,
-    							&RptEntry );			
+		rv = saHpiRptEntryGet(sessionid, EntryId, &EntryId, &RptEntry);
 		
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
@@ -144,13 +141,9 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
         		bigbuf.DataLength ); 
         		
 DEBUGMSGTL ((AGENT, "ERROR: oh_decode_entitypath() TextType rv = %d\n",bigbuf.DataType));        		
-DEBUGMSGTL ((	AGENT, 
-				"bigbuf.DataLength rv = %d\n",
-				bigbuf.DataLength	));
-DEBUGMSGTL ((	AGENT, 
-				"strlen(bigbuf.Data) rv = %d\n",
-				strlen(bigbuf.Data)	));        		
-        		
+DEBUGMSGTL ((AGENT, "bigbuf.DataLength rv = %d\n", bigbuf.DataLength));
+DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data)));        		
+   	
         		 
 		if ((bigbuf.Data[bigbuf.DataLength-1] == 0x00) && 
 			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
@@ -619,78 +612,78 @@ static int saHpiResourceTable_row_copy(saHpiResourceTable_context * dst,
 	
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_row_copy, called\n"));
 	
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
-
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiResourceId = src->saHpiResourceId;
-
-    dst->saHpiResourceEntryId = src->saHpiResourceEntryId;
-
-    memcpy( dst->saHpiResourceEntityPath, src->saHpiResourceEntityPath, src->saHpiResourceEntityPath_len );
-    dst->saHpiResourceEntityPath_len = src->saHpiResourceEntityPath_len;
-
-    memcpy( dst->saHpiResourceCapabilities, src->saHpiResourceCapabilities, src->saHpiResourceCapabilities_len );
-    dst->saHpiResourceCapabilities_len = src->saHpiResourceCapabilities_len;
-
-    memcpy( dst->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities_len );
-    dst->saHpiResourceHotSwapCapabilities_len = src->saHpiResourceHotSwapCapabilities_len;
-
-    dst->saHpiResourceSeverity = src->saHpiResourceSeverity;
-
-    dst->saHpiResourceFailed = src->saHpiResourceFailed;
-
-    dst->saHpiResourceInfoResourceRev = src->saHpiResourceInfoResourceRev;
-
-    dst->saHpiResourceInfoSpecificVer = src->saHpiResourceInfoSpecificVer;
-
-    dst->saHpiResourceInfoDeviceSupport = src->saHpiResourceInfoDeviceSupport;
-
-    dst->saHpiResourceInfoManufacturerId = src->saHpiResourceInfoManufacturerId;
-
-    dst->saHpiResourceInfoProductId = src->saHpiResourceInfoProductId;
-
-    dst->saHpiResourceInfoFirmwareMajorRev = src->saHpiResourceInfoFirmwareMajorRev;
-
-    dst->saHpiResourceInfoFirmwareMinorRev = src->saHpiResourceInfoFirmwareMinorRev;
-
-    dst->saHpiResourceInfoAuxFirmwareRev = src->saHpiResourceInfoAuxFirmwareRev;
-
-    memcpy( dst->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid_len );
-    dst->saHpiResourceInfoGuid_len = src->saHpiResourceInfoGuid_len;
-
-    dst->saHpiResourceTagTextType = src->saHpiResourceTagTextType;
-
-    dst->saHpiResourceTagTextLanguage = src->saHpiResourceTagTextLanguage;
-
-    memcpy( dst->saHpiResourceTag, src->saHpiResourceTag, src->saHpiResourceTag_len );
-    dst->saHpiResourceTag_len = src->saHpiResourceTag_len;
-
-    dst->saHpiResourceParmControl = src->saHpiResourceParmControl;
-
-    dst->saHpiResourceResetAction = src->saHpiResourceResetAction;
-
-    dst->saHpiResourcePowerAction = src->saHpiResourcePowerAction;
-
-    dst->saHpiResourceIsHistorical = src->saHpiResourceIsHistorical;
-
-    return 0;
+	if(!dst||!src)
+	    return 1;
+	    
+	/*
+	 * copy index, if provided
+	 */
+	if(dst->index.oids)
+	    free(dst->index.oids);
+	if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			       src->index.len * sizeof(oid) )) {
+	    dst->index.oids = NULL;
+	    return 1;
+	}
+	dst->index.len = src->index.len;
+	
+	
+	/*
+	 * copy components into the context structure
+	 */
+	/** TODO: add code for external index(s)! */
+	dst->saHpiResourceId = src->saHpiResourceId;
+	
+	dst->saHpiResourceEntryId = src->saHpiResourceEntryId;
+	
+	memcpy( dst->saHpiResourceEntityPath, src->saHpiResourceEntityPath, src->saHpiResourceEntityPath_len );
+	dst->saHpiResourceEntityPath_len = src->saHpiResourceEntityPath_len;
+	
+	memcpy( dst->saHpiResourceCapabilities, src->saHpiResourceCapabilities, src->saHpiResourceCapabilities_len );
+	dst->saHpiResourceCapabilities_len = src->saHpiResourceCapabilities_len;
+	
+	memcpy( dst->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities_len );
+	dst->saHpiResourceHotSwapCapabilities_len = src->saHpiResourceHotSwapCapabilities_len;
+	
+	dst->saHpiResourceSeverity = src->saHpiResourceSeverity;
+	
+	dst->saHpiResourceFailed = src->saHpiResourceFailed;
+	
+	dst->saHpiResourceInfoResourceRev = src->saHpiResourceInfoResourceRev;
+	
+	dst->saHpiResourceInfoSpecificVer = src->saHpiResourceInfoSpecificVer;
+	
+	dst->saHpiResourceInfoDeviceSupport = src->saHpiResourceInfoDeviceSupport;
+	
+	dst->saHpiResourceInfoManufacturerId = src->saHpiResourceInfoManufacturerId;
+	
+	dst->saHpiResourceInfoProductId = src->saHpiResourceInfoProductId;
+	
+	dst->saHpiResourceInfoFirmwareMajorRev = src->saHpiResourceInfoFirmwareMajorRev;
+	
+	dst->saHpiResourceInfoFirmwareMinorRev = src->saHpiResourceInfoFirmwareMinorRev;
+	
+	dst->saHpiResourceInfoAuxFirmwareRev = src->saHpiResourceInfoAuxFirmwareRev;
+	
+	memcpy( dst->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid_len );
+	dst->saHpiResourceInfoGuid_len = src->saHpiResourceInfoGuid_len;
+	
+	dst->saHpiResourceTagTextType = src->saHpiResourceTagTextType;
+	
+	dst->saHpiResourceTagTextLanguage = src->saHpiResourceTagTextLanguage;
+	
+	memcpy( dst->saHpiResourceTag, src->saHpiResourceTag, src->saHpiResourceTag_len );
+	dst->saHpiResourceTag_len = src->saHpiResourceTag_len;
+	
+	dst->saHpiResourceParmControl = src->saHpiResourceParmControl;
+	
+	dst->saHpiResourceResetAction = src->saHpiResourceResetAction;
+	
+	dst->saHpiResourcePowerAction = src->saHpiResourcePowerAction;
+	
+	dst->saHpiResourceIsHistorical = src->saHpiResourceIsHistorical;
+	
+	return 0;
 }
 
 /**
