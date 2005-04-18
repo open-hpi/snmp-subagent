@@ -36,7 +36,14 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiRdrTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -49,7 +56,6 @@ void populate_saHpiRdrTable(void)
 	dbg("WARNING: populate_saHpiRdrTable: not implemented!");
 }
 
-#ifdef saHpiRdrTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -99,42 +105,6 @@ saHpiRdrTable_cmp( const void *lhs, const void *rhs )
      * return (context_l->yy == context_r->yy) ? 0 : 1;
      */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiRdrTable_context *
-saHpiRdrTable_get( const char *name, int len )
-{
-    saHpiRdrTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiRdrTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiRdrTable module
@@ -205,9 +175,6 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 
     return 0;
 }
-
-#ifdef saHpiRdrTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -253,42 +220,23 @@ saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiRdrTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiRdrTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiRdrTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiRdrEntryId;
 
        memset( &var_saHpiRdrEntryId, 0x00, sizeof(var_saHpiRdrEntryId) );
        var_saHpiRdrEntryId.type = ASN_COUNTER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiRdrTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiRdrEntryId.next_variable = &var_XX;
-#endif
+       var_saHpiRdrEntryId.next_variable = NULL;
+
 
 
     /*
@@ -296,46 +244,22 @@ saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
      */
     err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
     if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
+	/*
+         * copy index components into the context structure
+         */
+	    /** skipping external index saHpiDomainId */
    
-              /** skipping external index saHpiResourceId */
+            /** skipping external index saHpiResourceId */
    
-              /** skipping external index saHpiResourceIsHistorical */
+            /** skipping external index saHpiResourceIsHistorical */
    
-                ctx->saHpiRdrEntryId = *var_saHpiRdrEntryId.val.integer;
+	    ctx->saHpiRdrEntryId = *var_saHpiRdrEntryId.val.integer;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiRdrEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+	    err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+	    err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
+	    err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
+	    err = saHpiRdrEntryId_check_index(*var_saHpiRdrEntryId.val.integer);
+
     }
 
     /*
@@ -414,7 +338,6 @@ int saHpiRdrTable_can_delete(saHpiRdrTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiRdrTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -460,7 +383,6 @@ saHpiRdrTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -634,23 +556,6 @@ void saHpiRdrTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiRdrTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -732,8 +637,10 @@ void saHpiRdrTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default:
+		break;
+		/** We shouldn't get here */
+		/** should have been logged in reserve1 */
         }
     }
 
@@ -787,9 +694,6 @@ void saHpiRdrTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiRdrTable_SET_HANDLING */
-
 
 /************************************************************
  *
