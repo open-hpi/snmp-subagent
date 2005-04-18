@@ -558,7 +558,6 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
 	
 	    /* check for NULL pointers */
 	if(lhs == NULL || rhs == NULL ) {
@@ -590,10 +589,12 @@ saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 			if ( context_l->index.oids[2] > context_r->index.oids[2])
 			     return 1;
 					
-			if ( context_l->index.oids[2] > context_r->index.oids[2])
+			if ( context_l->index.oids[2] == context_r->index.oids[2])
 			     return 0;		
 		 }
-	}		
+	}     
+
+	return 0;
 }
 
 /************************************************************
