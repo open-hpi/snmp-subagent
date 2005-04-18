@@ -59,9 +59,15 @@ static u_long rdr_entry_count = 0;
 /*
  * void populate_saHpiRdrTable(void)
  */
-void populate_saHpiRdrTable(void)
+int populate_saHpiRdrTable(void)
 {
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
+
+
+
+
+
+
 }
 
 /*
@@ -193,11 +199,11 @@ void
 init_saHpiRdrTable(void)
 {
 
-    DEBUGMSGTL ((AGENT, "init_saHpiRdrTable, called\n"));
-
-    initialize_table_saHpiRdrTable();
-
-    initialize_table_saHpiRdrEntryCount();
+	DEBUGMSGTL ((AGENT, "init_saHpiRdrTable, called\n"));
+	
+	initialize_table_saHpiRdrTable();
+	
+	initialize_table_saHpiRdrEntryCount();
 
 }
 
@@ -208,53 +214,53 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
                          saHpiRdrTable_context * src)
 {
 
-    DEBUGMSGTL ((AGENT, "saHpiRdrTable_row_copy, called\n"));
-
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
-
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiRdrEntryId = src->saHpiRdrEntryId;
-
-    dst->saHpiRdrNextEntryId = src->saHpiRdrNextEntryId;
-
-    dst->saHpiRdrType = src->saHpiRdrType;
-
-    memcpy( dst->saHpiRdrEntityPath, src->saHpiRdrEntityPath, src->saHpiRdrEntityPath_len );
-    dst->saHpiRdrEntityPath_len = src->saHpiRdrEntityPath_len;
-
-    dst->saHpiRdrIsFru = src->saHpiRdrIsFru;
-
-    memcpy( src->saHpiRdrRowPointer, dst->saHpiRdrRowPointer, src->saHpiRdrRowPointer_len );
-    dst->saHpiRdrRowPointer_len = src->saHpiRdrRowPointer_len;
-
-    memcpy( src->saHpiRdrRPT, dst->saHpiRdrRPT, src->saHpiRdrRPT_len );
-    dst->saHpiRdrRPT_len = src->saHpiRdrRPT_len;
-
-    dst->saHpiRdrTextType = src->saHpiRdrTextType;
-
-    dst->saHpiRdrTextLanguage = src->saHpiRdrTextLanguage;
-
-    memcpy( dst->saHpiRdrIdString, src->saHpiRdrIdString, src->saHpiRdrIdString_len );
-    dst->saHpiRdrIdString_len = src->saHpiRdrIdString_len;
-
-    return 0;
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_row_copy, called\n"));
+	
+	if(!dst||!src)
+	    return 1;
+	    
+	/*
+	 * copy index, if provided
+	 */
+	if(dst->index.oids)
+	    free(dst->index.oids);
+	if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			       src->index.len * sizeof(oid) )) {
+	    dst->index.oids = NULL;
+	    return 1;
+	}
+	dst->index.len = src->index.len;
+	
+	
+	/*
+	 * copy components into the context structure
+	 */
+	/** TODO: add code for external index(s)! */
+	dst->saHpiRdrEntryId = src->saHpiRdrEntryId;
+	
+	dst->saHpiRdrNextEntryId = src->saHpiRdrNextEntryId;
+	
+	dst->saHpiRdrType = src->saHpiRdrType;
+	
+	memcpy( dst->saHpiRdrEntityPath, src->saHpiRdrEntityPath, src->saHpiRdrEntityPath_len );
+	dst->saHpiRdrEntityPath_len = src->saHpiRdrEntityPath_len;
+	
+	dst->saHpiRdrIsFru = src->saHpiRdrIsFru;
+	
+	memcpy( src->saHpiRdrRowPointer, dst->saHpiRdrRowPointer, src->saHpiRdrRowPointer_len );
+	dst->saHpiRdrRowPointer_len = src->saHpiRdrRowPointer_len;
+	
+	memcpy( src->saHpiRdrRPT, dst->saHpiRdrRPT, src->saHpiRdrRPT_len );
+	dst->saHpiRdrRPT_len = src->saHpiRdrRPT_len;
+	
+	dst->saHpiRdrTextType = src->saHpiRdrTextType;
+	
+	dst->saHpiRdrTextLanguage = src->saHpiRdrTextLanguage;
+	
+	memcpy( dst->saHpiRdrIdString, src->saHpiRdrIdString, src->saHpiRdrIdString_len );
+	dst->saHpiRdrIdString_len = src->saHpiRdrIdString_len;
+	
+	return 0;
 }
 /**
  * the *_extract_index routine
