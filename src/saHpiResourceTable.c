@@ -768,12 +768,9 @@ saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_inde
    		/*
    		 *Check Index 
          */
-    	err = saHpiDomainId_check_index(
-    						*var_saHpiDomainId.val.integer);
-    	err = saHpiResourceEntryId_check_index(
-    						*var_saHpiResourceEntryId.val.integer);  
-    	err = saHpiResourceIsHistorical_check_index(
-    						*var_saHpiResourceIsHistorical.val.integer);
+    	err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+    	err = saHpiResourceEntryId_check_index(*var_saHpiResourceEntryId.val.integer);  
+    	err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
     }
 
     /*
