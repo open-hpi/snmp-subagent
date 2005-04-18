@@ -53,7 +53,7 @@ size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 
 void populate_saHpiRdrTable(void)
 {
-	dbg("WARNING: populate_saHpiRdrTable: not implemented!");
+	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 }
 
 /************************************************************
@@ -78,6 +78,8 @@ saHpiRdrTable_cmp( const void *lhs, const void *rhs )
      * there are more than 2 indexes
      */
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiRdrTable_cmp, called\n"));
 
     /*
      * TODO: implement compare. Remove this ifdef code and
@@ -112,6 +114,9 @@ saHpiRdrTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiRdrTable(void)
 {
+
+    DEBUGMSGTL ((AGENT, "init_saHpiRdrTable, called\n"));
+
     initialize_table_saHpiRdrTable();
 
     /*
@@ -129,6 +134,9 @@ init_saHpiRdrTable(void)
 static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
                          saHpiRdrTable_context * src)
 {
+
+    DEBUGMSGTL ((AGENT, "saHpiRdrTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -186,6 +194,8 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 int
 saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
 {
+    DEBUGMSGTL ((AGENT, "saHpiRdrTable_extract_index, called\n"));
+
     /*
      * temporary local storage for extracting oid index
      *
@@ -283,6 +293,9 @@ int saHpiRdrTable_can_activate(saHpiRdrTable_context *undo_ctx,
                       saHpiRdrTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -308,6 +321,8 @@ int saHpiRdrTable_can_deactivate(saHpiRdrTable_context *undo_ctx,
                         saHpiRdrTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_can_deactivate, called\n"));
+
     /*
      * TODO: check for deactivation requirements here
      */
@@ -325,6 +340,8 @@ int saHpiRdrTable_can_delete(saHpiRdrTable_context *undo_ctx,
                     saHpiRdrTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_can_delete, called\n"));
+
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -355,6 +372,9 @@ int saHpiRdrTable_can_delete(saHpiRdrTable_context *undo_ctx,
 saHpiRdrTable_context *
 saHpiRdrTable_create_row( netsnmp_index* hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_create_row, called\n"));
+
     saHpiRdrTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiRdrTable_context);
     if(!ctx)
@@ -390,6 +410,9 @@ saHpiRdrTable_create_row( netsnmp_index* hdr)
 saHpiRdrTable_context *
 saHpiRdrTable_duplicate_row( saHpiRdrTable_context * row_ctx)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_duplicate_row, called\n"));
+
     saHpiRdrTable_context * dup;
 
     if(!row_ctx)
@@ -412,6 +435,9 @@ saHpiRdrTable_duplicate_row( saHpiRdrTable_context * row_ctx)
  */
 netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_delete_row, called\n"));
+
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -447,6 +473,7 @@ netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
  */
 void saHpiRdrTable_set_reserve1( netsnmp_request_group *rg )
 {
+
     saHpiRdrTable_context *row_ctx =
             (saHpiRdrTable_context *)rg->existing_row;
     saHpiRdrTable_context *undo_ctx =
@@ -455,6 +482,7 @@ void saHpiRdrTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -493,6 +521,8 @@ void saHpiRdrTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -540,6 +570,8 @@ void saHpiRdrTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_action, called\n"));
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -593,6 +625,8 @@ void saHpiRdrTable_set_commit( netsnmp_request_group *rg )
     saHpiRdrTable_context *undo_ctx = (saHpiRdrTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -627,6 +661,8 @@ void saHpiRdrTable_set_free( netsnmp_request_group *rg )
     saHpiRdrTable_context *row_ctx = (saHpiRdrTable_context *)rg->existing_row;
     saHpiRdrTable_context *undo_ctx = (saHpiRdrTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -675,6 +711,8 @@ void saHpiRdrTable_set_undo( netsnmp_request_group *rg )
     saHpiRdrTable_context *undo_ctx = (saHpiRdrTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -703,6 +741,8 @@ void
 initialize_table_saHpiRdrTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiRdrTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiRdrTable_handler called again\n");
@@ -758,18 +798,14 @@ initialize_table_saHpiRdrTable(void)
     cb.container = netsnmp_container_find("saHpiRdrTable_primary:"
                                           "saHpiRdrTable:"
                                           "table_container");
-#ifdef saHpiRdrTable_IDX2
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiRdrTable_secondary:"
                                                        "saHpiRdrTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiRdrTable_cmp;
-#endif
-#ifdef saHpiRdrTable_SET_HANDLING
+
     cb.can_set = 1;
-#ifdef saHpiRdrTable_ROW_CREATION
     cb.create_row = (UserRowMethod*)saHpiRdrTable_create_row;
-#endif
     cb.duplicate_row = (UserRowMethod*)saHpiRdrTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiRdrTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiRdrTable_row_copy;
@@ -784,7 +820,6 @@ initialize_table_saHpiRdrTable(void)
     cb.set_commit = saHpiRdrTable_set_commit;
     cb.set_free = saHpiRdrTable_set_free;
     cb.set_undo = saHpiRdrTable_set_undo;
-#endif
     DEBUGMSGTL(("initialize_table_saHpiRdrTable",
                 "Registering table saHpiRdrTable "
                 "as a table array\n"));
@@ -805,87 +840,89 @@ int saHpiRdrTable_get_value(
             netsnmp_index *item,
             netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiRdrTable_context *context = (saHpiRdrTable_context *)item;
+	netsnmp_variable_list *var = request->requestvb;
+	saHpiRdrTable_context *context = (saHpiRdrTable_context *)item;
 
-    switch(table_info->colnum) {
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_get_value, called\n"));
 
-        case COLUMN_SAHPIRDRENTRYID:
-            /** COUNTER = ASN_COUNTER */
-            snmp_set_var_typed_value(var, ASN_COUNTER,
-                         (char*)&context->saHpiRdrEntryId,
-                         sizeof(context->saHpiRdrEntryId) );
-        break;
-    
-        case COLUMN_SAHPIRDRNEXTENTRYID:
-            /** COUNTER = ASN_COUNTER */
-            snmp_set_var_typed_value(var, ASN_COUNTER,
-                         (char*)&context->saHpiRdrNextEntryId,
-                         sizeof(context->saHpiRdrNextEntryId) );
-        break;
-    
-        case COLUMN_SAHPIRDRTYPE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiRdrType,
-                         sizeof(context->saHpiRdrType) );
-        break;
-    
-        case COLUMN_SAHPIRDRENTITYPATH:
-            /** SaHpiEntityPath = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiRdrEntityPath,
-                         context->saHpiRdrEntityPath_len );
-        break;
-    
-        case COLUMN_SAHPIRDRISFRU:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiRdrIsFru,
-                         sizeof(context->saHpiRdrIsFru) );
-        break;
-    
-        case COLUMN_SAHPIRDRROWPOINTER:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiRdrRowPointer,
-                         context->saHpiRdrRowPointer_len );
-        break;
-    
-        case COLUMN_SAHPIRDRRPT:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiRdrRPT,
-                         context->saHpiRdrRPT_len );
-        break;
-    
-        case COLUMN_SAHPIRDRTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiRdrTextType,
-                         sizeof(context->saHpiRdrTextType) );
-        break;
-    
-        case COLUMN_SAHPIRDRTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiRdrTextLanguage,
-                         sizeof(context->saHpiRdrTextLanguage) );
-        break;
-    
-        case COLUMN_SAHPIRDRIDSTRING:
-            /** OCTETSTR = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiRdrIdString,
-                         context->saHpiRdrIdString_len );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiRdrTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+	switch(table_info->colnum) {
+	
+	    case COLUMN_SAHPIRDRENTRYID:
+		/** COUNTER = ASN_COUNTER */
+		snmp_set_var_typed_value(var, ASN_COUNTER,
+			 (char*)&context->saHpiRdrEntryId,
+			 sizeof(context->saHpiRdrEntryId) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRNEXTENTRYID:
+		/** COUNTER = ASN_COUNTER */
+		snmp_set_var_typed_value(var, ASN_COUNTER,
+			 (char*)&context->saHpiRdrNextEntryId,
+			 sizeof(context->saHpiRdrNextEntryId) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRTYPE:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+			 (char*)&context->saHpiRdrType,
+			 sizeof(context->saHpiRdrType) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRENTITYPATH:
+		/** SaHpiEntityPath = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+			 (char*)&context->saHpiRdrEntityPath,
+			 context->saHpiRdrEntityPath_len );
+	    break;
+	
+	    case COLUMN_SAHPIRDRISFRU:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+			 (char*)&context->saHpiRdrIsFru,
+			 sizeof(context->saHpiRdrIsFru) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRROWPOINTER:
+		/** RowPointer = ASN_OBJECT_ID */
+		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+			 (char*)&context->saHpiRdrRowPointer,
+			 context->saHpiRdrRowPointer_len );
+	    break;
+	
+	    case COLUMN_SAHPIRDRRPT:
+		/** RowPointer = ASN_OBJECT_ID */
+		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+			 (char*)&context->saHpiRdrRPT,
+			 context->saHpiRdrRPT_len );
+	    break;
+	
+	    case COLUMN_SAHPIRDRTEXTTYPE:
+		/** SaHpiTextType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+			 (char*)&context->saHpiRdrTextType,
+			 sizeof(context->saHpiRdrTextType) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRTEXTLANGUAGE:
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+			 (char*)&context->saHpiRdrTextLanguage,
+			 sizeof(context->saHpiRdrTextLanguage) );
+	    break;
+	
+	    case COLUMN_SAHPIRDRIDSTRING:
+		/** OCTETSTR = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+			 (char*)&context->saHpiRdrIdString,
+			 context->saHpiRdrIdString_len );
+	    break;
+	
+	default: /** We shouldn't get here */
+	    snmp_log(LOG_ERR, "unknown column in "
+		 "saHpiRdrTable_get_value\n");
+	    return SNMP_ERR_GENERR;
+	}
+	return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -894,6 +931,8 @@ int saHpiRdrTable_get_value(
 const saHpiRdrTable_context *
 saHpiRdrTable_get_by_idx(netsnmp_index * hdr)
 {
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_get_by_idx, called\n"));
+
     return (const saHpiRdrTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
