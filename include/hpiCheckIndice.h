@@ -19,7 +19,13 @@
 /**************************/
 int saHpiDomainId_check_index(long val);
 int saHpiDomainAlarmId_check_index(long val);
-  
+
+/**************************/
+/* saHpiResourceTable */    
+/**************************/
+int saHpiResourceEntryId_check_index(long val);
+int saHpiResourceIsHistorical_check_index(long val);
+
 /**************************/
 /* saHpiAnnunciatorTable */    
 /**************************/
