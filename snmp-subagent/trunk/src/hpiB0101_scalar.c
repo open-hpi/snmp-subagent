@@ -41,7 +41,7 @@ init_hpiB0101(void)
     static oid saHpiSensorEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
     static oid saHpiSoftwareEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,22 };
     static oid saHpiHotSwapEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 };
-    static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
+//    static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
 //    static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
     static oid saHpiDomainEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
     static oid saHpiWatchdogEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,20 };
@@ -222,11 +222,11 @@ init_hpiB0101(void)
                                saHpiHotSwapEventLogEntryCount_oid, OID_LENGTH(saHpiHotSwapEventLogEntryCount_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiRdrEntryCount", handle_saHpiRdrEntryCount,
-                               saHpiRdrEntryCount_oid, OID_LENGTH(saHpiRdrEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiRdrEntryCount", handle_saHpiRdrEntryCount,
+//                               saHpiRdrEntryCount_oid, OID_LENGTH(saHpiRdrEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiDomainInfoEntryCount", handle_saHpiDomainInfoEntryCount,
                                saHpiDomainInfoEntryCount_oid, OID_LENGTH(saHpiDomainInfoEntryCount_oid),
@@ -1205,6 +1205,7 @@ handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1233,6 +1234,7 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
