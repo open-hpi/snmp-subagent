@@ -139,9 +139,24 @@ int saHpiResourceTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 
 
 /*************************************************************
- * oid declarations scalars
+ * set funtions
+ */
+int set_table_severity (saHpiResourceTable_context *row_ctx);
+int set_table_resource_parm_control (saHpiResourceTable_context *row_ctx);
+int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx);
+int set_table_resource_power_action (saHpiResourceTable_context *row_ctx);
+
+
+/*************************************************************
+ * oid and fucntion declarations scalars
  */
 static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
+int handle_saHpiResourceEntryCount( netsnmp_mib_handler 	*handler,
+				    netsnmp_handler_registration *reginfo,
+				    netsnmp_agent_request_info   *reqinfo,
+				    netsnmp_request_info         *requests);
+int initialize_table_saHpiResourceEntryCount(void);
+
 
 /*************************************************************
  * oid declarations
