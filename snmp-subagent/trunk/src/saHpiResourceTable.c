@@ -455,35 +455,34 @@ int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx)
 int set_table_resource_power_action (saHpiResourceTable_context *row_ctx)
 {
 	SaErrorT 			rc = SA_OK;
-    SaHpiSessionIdT     session_id;
+	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
 	SaHpiPowerStateT   	power_action;
 	
 	if(!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-    resource_id = row_ctx->saHpiResourceEntryId;
-    power_action = row_ctx->saHpiResourcePowerAction - 1;   
-
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->saHpiResourceEntryId;
+	power_action = row_ctx->saHpiResourcePowerAction - 1;   
+	
 	rc = saHpiResourcePowerStateSet (session_id, resource_id, power_action); 
-    
-    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+	
+	if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
 		snmp_log (LOG_ERR,
 			"Call to saHpiResourcePowerStateSet failed with return code: %s.\n",
 		    oh_lookup_error(rc));
-	  	DEBUGMSGTL ((AGENT,
+			DEBUGMSGTL ((AGENT,
 			"Call to saHpiResourcePowerStateSet failed with rc: %s.\n",
-		   	oh_lookup_error(rc)));
-	  	return AGENT_ERR_OPERATION;
-    } else if (rc == SA_ERR_HPI_CAPABILITY) {
-    	row_ctx->saHpiResourcePowerAction = 4;
-    }	
-  
-    return AGENT_ERR_NOERROR; 
+			oh_lookup_error(rc)));
+		return AGENT_ERR_OPERATION;
+	} else if (rc == SA_ERR_HPI_CAPABILITY) {
+		row_ctx->saHpiResourcePowerAction = 4;
+	}	
+	
+	return AGENT_ERR_NOERROR; 
     
 }
-
 
 /*
  *  int handle_saHpiResourceEntryCount()
@@ -494,38 +493,39 @@ int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_request_info         *requests)
 {
 	
-	DEBUGMSGTL ((AGENT, "handle_saHpiResourceEntryCount: Entry Count is %d\n", 
-					resource_entry_count));  
+	DEBUGMSGTL ((AGENT, 	
+		     "handle_saHpiResourceEntryCount: Entry Count is %d\n", 
+		     resource_entry_count));  
 						
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
+	/* We are never called for a GETNEXT if it's registered as a
+	   "instance", as it's "magically" handled for us.  */
+	
+	/* a instance handler also only hands us one request at a time, so
+	   we don't need to loop over a list of requests; we'll only get one. */
+	
+	switch(reqinfo->mode) {
+	
+	    case MODE_GET:
+		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+					 (u_char *) &resource_entry_count,
+					 sizeof(resource_entry_count));
+		break;
 
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) &resource_entry_count,
-                                     sizeof(resource_entry_count));
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
+	    default:
+		/* we should never get here, so this is a really bad error */
+		return SNMP_ERR_GENERR;
+	}
+	
+	return SNMP_ERR_NOERROR;
 }
+
 /*
  * int initialize_table_saHpiResourceEntryCount()
  */
 int initialize_table_saHpiResourceEntryCount(void)
 {
 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEntryCount, called\n"));	
-    netsnmp_register_scalar(
+	netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiResourceEntryCount", 
         	handle_saHpiResourceEntryCount,
             saHpiResourceEntryCount_oid, 
