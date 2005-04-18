@@ -77,7 +77,7 @@ int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventT
 /**************************/
 /* saHpiRdrTable  */    
 /**************************/
-int saHpiRdrType_check_index(long val);
+int saHpiRdrEntryId_check_index(long val);
 
 /**************************/
 /* saHpiResourceEventTable  */    

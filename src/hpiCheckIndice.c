@@ -47,6 +47,15 @@ int saHpiResourceIsHistorical_check_index(long val)
 
 
 /**************************/
+/* saHpiRrdTable */    
+/**************************/
+int saHpiRdrEntryId_check_index(long val)
+{
+	return 0;
+}
+
+
+/**************************/
 /* saHpiAnnunciatorTable */    
 /**************************/
 int saHpiAnnunciatorNum_check_index(long val)
