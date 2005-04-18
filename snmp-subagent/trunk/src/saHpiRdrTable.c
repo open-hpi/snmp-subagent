@@ -44,17 +44,76 @@
 
 #include <oh_utils.h>
 
-
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
 oid saHpiRdrTable_oid[] = { saHpiRdrTable_TABLE_OID };
 size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 
+
+/*************************************************************
+ * oid declarations scalars
+ */
+static u_long rdr_entry_count = 0;
+
+/*
+ * void populate_saHpiRdrTable(void)
+ */
 void populate_saHpiRdrTable(void)
 {
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 }
+
+/*
+ * int handle_saHpiRdrEntryCount()
+ */
+int
+handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &rdr_entry_count,
+				     sizeof(rdr_entry_count));
+            break;
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiResourceEntryCount()
+ */
+int initialize_table_saHpiRdrEntryCount(void)
+{
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiRdrEntryCount, called\n"));	
+
+	netsnmp_register_scalar(
+		netsnmp_create_handler_registration(
+			"saHpiRdrEntryCount", 
+			handle_saHpiRdrEntryCount,
+                        saHpiRdrEntryCount_oid, 
+			OID_LENGTH(saHpiRdrEntryCount_oid),
+                        HANDLER_CAN_RONLY ));
+	return 0;
+}
+
+
+
 
 /************************************************************
  * keep binary tree to find context by name
@@ -138,13 +197,8 @@ init_saHpiRdrTable(void)
 
     initialize_table_saHpiRdrTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiRdrTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiRdrEntryCount();
+
 }
 
 /************************************************************
