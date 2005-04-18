@@ -547,53 +547,52 @@ static int saHpiResourceTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiResourceTable_context *context_l =
-        (saHpiResourceTable_context *)lhs;
-    saHpiResourceTable_context *context_r =
-        (saHpiResourceTable_context *)rhs;
-        
+	saHpiResourceTable_context *context_l =
+	    (saHpiResourceTable_context *)lhs;
+	saHpiResourceTable_context *context_r =
+	    (saHpiResourceTable_context *)rhs;
+	    
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_cmp, called\n"));        
-
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
-    
-	/* check for NULL pointers */
-    if(lhs == NULL || rhs == NULL ) {
-        DEBUGMSGTL((AGENT,"saHpiResourceTable_cmp() NULL pointer ERROR\n" ));
-    	return 0;
-    }	
-
+	
+	/*
+	 * check primary key, then secondary. Add your own code if
+	 * there are more than 2 indexes
+	 */
+	int rc;
+	
+	    /* check for NULL pointers */
+	if(lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,"saHpiResourceTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}	
 	/* CHECK FIRST INDEX,  saHpiDomainId */
 	if ( context_l->index.oids[0] < context_r->index.oids[0])
-		return -1;
-				
+	    return -1;
+		
 	if ( context_l->index.oids[0] > context_r->index.oids[0])
-		return 1;			         
-		
+	    return 1;			         
+	       
 	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
-		/* If saHpiDomainId index is equal sort by second index */
-		/* CHECK FIRST INDEX,  saHpiResourceEntryId */
-		if ( context_l->index.oids[1] < context_r->index.oids[1])
-			return -1;
-				
-		if ( context_l->index.oids[1] > context_r->index.oids[1])
-			return 1;			
+	       /* If saHpiDomainId index is equal sort by second index */
+	       /* CHECK FIRST INDEX,  saHpiResourceEntryId */
+	       if ( context_l->index.oids[1] < context_r->index.oids[1])
+		  return -1;
 		
-		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-			/* If saHpiResourceEntryId index is equal sort by second index */
-			/* CHECK FIRST INDEX,  saHpiResourceIsHistorical */
+	       if ( context_l->index.oids[1] > context_r->index.oids[1])
+		  return 1;			
+		      
+	       if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		/* If saHpiResourceEntryId index is equal sort by second index */
+		/* CHECK FIRST INDEX,  saHpiResourceIsHistorical */
 			if ( context_l->index.oids[2] < context_r->index.oids[2])
-				return -1;
+			     return -1;
+				
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+			     return 1;
 					
 			if ( context_l->index.oids[2] > context_r->index.oids[2])
-				return 1;
-						
-			if ( context_l->index.oids[2] > context_r->index.oids[2])
-				return 0;		
-		}
+			     return 0;		
+		 }
 	}		
 }
 
@@ -605,7 +604,7 @@ init_saHpiResourceTable(void)
 {
 	DEBUGMSGTL ((AGENT, "init_saHpiResourceTable, called\n"));
 	
-    initialize_table_saHpiResourceTable();
+	initialize_table_saHpiResourceTable();
     
 	initialize_table_saHpiResourceEntryCount();
 }
