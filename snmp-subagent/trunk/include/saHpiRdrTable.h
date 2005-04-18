@@ -84,7 +84,7 @@ typedef struct saHpiRdrTable_context_s {
 /*************************************************************
  * function declarations
  */
-void populate_saHpiRdrTable(void);
+int populate_saHpiRdrTable(void);
 
 /*************************************************************
  * function declarations
