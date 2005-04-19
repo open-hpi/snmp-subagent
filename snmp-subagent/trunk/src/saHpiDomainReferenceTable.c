@@ -62,9 +62,9 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 	SaErrorT rv;
 	SaHpiDomainInfoT domain_info;
 	
-    SaHpiEntryIdT 	EntryId;
-    SaHpiEntryIdT 	NextEntryId;
-    SaHpiDrtEntryT	DrtEntry;		
+        SaHpiEntryIdT 	EntryId;
+	SaHpiEntryIdT 	NextEntryId;
+	SaHpiDrtEntryT	DrtEntry;		
 	
 	oid domain_reference_oid[DOMAIN_REFERENCE_INDEX_NR];
 	netsnmp_index domain_reference_index;
@@ -84,9 +84,9 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 	NextEntryId = SAHPI_FIRST_ENTRY;
 	do  {
 		rv = saHpiDrtEntryGet ( sessionid, 
-								NextEntryId, 
-								&NextEntryId, 
-								&DrtEntry);			
+					NextEntryId, 
+					&NextEntryId, 
+					&DrtEntry);			
 								
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, 
@@ -102,8 +102,7 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 		
 		/* See if it exists. */
 		domain_reference_context = NULL;
-		domain_reference_context = CONTAINER_FIND (cb.container, 
-											&domain_reference_index);
+		domain_reference_context = CONTAINER_FIND (cb.container,&domain_reference_index);
 			
 		if (!domain_reference_context) { 
 			// New entry. Add it
@@ -116,12 +115,12 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 		}		
 		
 		/** SaHpiDomainId = ASN_UNSIGNED */
-	    domain_reference_context->saHpiDomainRef = DrtEntry.DomainId;
+		domain_reference_context->saHpiDomainRef = DrtEntry.DomainId;
 		
-	    /** TruthValue = ASN_INTEGER */
-	    domain_reference_context->saHpiDomainReferenceIsPeer =
+		/** TruthValue = ASN_INTEGER */
+		domain_reference_context->saHpiDomainReferenceIsPeer =
 	    	(DrtEntry.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;	
-		
+                	    
 		CONTAINER_INSERT (cb.container, domain_reference_context);
 	 																	
 	} while ( NextEntryId != SAHPI_LAST_ENTRY);
