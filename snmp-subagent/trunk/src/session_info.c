@@ -30,6 +30,8 @@
 #include <alarm.h>
 #include <oh_error.h>
 
+#include <session_info.h>
+
 static SaHpiSessionIdT stored_session_id;
 static SaHpiDomainIdT stored_domain_id;
 
@@ -47,6 +49,47 @@ SaHpiSessionIdT get_session_id(SaHpiDomainIdT domain_id)
 SaHpiDomainIdT get_domain_id(SaHpiSessionIdT session_id)
 {
 	return( stored_domain_id );
+}
+
+
+
+/*
+ *  int build_full_oid()
+ */
+int build_full_oid (oid * prefix, size_t prefix_len,
+		    oid * column, size_t column_len,
+		    netsnmp_index * index,
+		    oid * out_oid, size_t in_len, size_t * out_len)
+{
+
+  int register len = prefix_len + column_len;
+  int register i = 0;
+
+  DEBUGMSGTL((AGENT, "build_full_oid() called\n"));
+
+  if (index)
+    len += index->len;
+
+  if (len > in_len)
+    return AGENT_ERR_MEMORY_FAULT;
+
+  *out_len = len;
+  memcpy (out_oid, prefix, prefix_len * sizeof (oid));
+
+  for (; i < column_len; i++)
+    {
+      out_oid[prefix_len + i] = column[i];
+    }
+  len = prefix_len + i;
+
+  if (index)
+    {
+      for (i = 0; i < index->len; i++)
+        {
+          out_oid[len + i] = index->oids[i];
+        }
+    }
+  return AGENT_ERR_NOERROR;
 }
 
 
