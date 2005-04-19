@@ -17,7 +17,10 @@ extern "C" {
     
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
-#include <net-snmp/agent/table_array.h>
+#include <net-snmp/agent/table_array.h>   
+
+#include <SaHpi.h>
+#include <oh_utils.h>
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -46,7 +49,7 @@ typedef struct saHpiRdrTable_context_s {
             long saHpiRdrType;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-            unsigned char saHpiRdrEntityPath[65535];
+            unsigned char saHpiRdrEntityPath[sizeof(oh_big_textbuffer)];
             long saHpiRdrEntityPath_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -67,7 +70,7 @@ typedef struct saHpiRdrTable_context_s {
             long saHpiRdrTextLanguage;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiRdrIdString[65535];
+            unsigned char saHpiRdrIdString[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiRdrIdString_len;
 
 
