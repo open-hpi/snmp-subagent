@@ -22,7 +22,10 @@ extern "C" {
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiRdrEntryId is internal */
+        /** Index saHpiRdrEntryId is internal */ 
+
+/* Number of table Indexes */
+#define RDR_INDEX_NR 4 
 
 typedef struct saHpiRdrTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -84,7 +87,10 @@ typedef struct saHpiRdrTable_context_s {
 /*************************************************************
  * function declarations
  */
-int populate_saHpiRdrTable(void);
+int populate_saHpiRdrTable(SaHpiSessionIdT sessionid, 
+			   SaHpiRptEntryT * rpt_entry,
+			   oid * resource_oid, 
+			   size_t resource_oid_len);
 
 /*************************************************************
  * function declarations
