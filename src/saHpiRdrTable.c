@@ -59,14 +59,133 @@ static u_long rdr_entry_count = 0;
 /*
  * void populate_saHpiRdrTable(void)
  */
-int populate_saHpiRdrTable(void)
+int populate_saHpiRdrTable(SaHpiSessionIdT sessionid, 
+			   SaHpiRptEntryT * rpt_entry,
+			   oid * resource_oid, 
+			   size_t resource_oid_len)
 {
+	/* 
+	 * From   oid * resource_oid, size_t resource_oid_len
+	 *       INDEX   { saHpiDomainId, 
+	 *		saHpiResourceEntryId,
+	 *       	saHpiResourceIsHistorical 
+	 *		} 
+	 *
+	 */
+
+ 	SaErrorT 		rv;   
+
+	SaHpiDomainIdT		domain_id;
+
+	SaHpiEntryIdT		rpt_entry_id;
+	SaHpiRptEntryT  	rpt_entry;
+
+	SaHpiEntryIdT    	rdr_entry_id;
+	SaHpiRdrT		rdr_entry;
+		
+	oid 			rdr_oid[RDR_INDEX_NR];
+	netsnmp_index 		rdr_index;
+	saHpiRdrTable_context	*rdr_context;
+
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
+	
+	rpt_entry_id = SAHPI_FIRST_ENTRY;
+	do {					
+		rv = saHpiRptEntryGet(sessionid, 
+				      rpt_entry_id, 
+				      &rpt_entry_id, 
+				      &rpt_entry);
+		
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			break;
+		}
 
+		rdr_entry_id = SAHPI_FIRST_ENTRY;
+		do {
+			rv =  saHpiRdrGet(sessionid, 
+					  rpt_entry.ResourceId, 
+					  rdr_entry_id, 
+					  &rdr_entry_id, 
+					  &rdr_entry);
 
+			if (rv != SA_OK) {
+				DEBUGMSGTL ((AGENT, "saHpiRdrGet Failed: rv = %d\n",rv));
+				rv =  AGENT_ERR_INTERNAL_ERROR;
+				break;
+			}
 
+			domain_id =  get_domain_id(sessionid);
 
+			rdr_index.len = RDR_INDEX_NR;
+			rdr_oid[0] = domain_id;
+			rdr_oid[1] = rpt_entry.ResourceId;
+			rdr_oid[2] = MIB_FALSE;
+			rdr_oid[3] = rdr_entry.RecordId;
+			rdr_index.oids = (oid *) &resource_oid;
+			
+			/* See if it exists. */
+			rdr_context = NULL;
+			rdr_context = CONTAINER_FIND(cb.container, &rdr_index);
+				
+			if (!rdr_context) { 
+				// New entry. Add it
+				rdr_context = 
+					saHpiRdrTable_create_row(&rdr_index);
+			}
+			if (!rdr_context) {
+				snmp_log (LOG_ERR, "Not enough memory for a Rdr row!");
+				rv = AGENT_ERR_INTERNAL_ERROR;
+				break;
+			}			
+			
+			/** COUNTER = ASN_COUNTER */
+			    rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
+		
+			/** COUNTER = ASN_COUNTER */
+			    rdr_context->saHpiRdrNextEntryId;
+		
+			/** INTEGER = ASN_INTEGER */
+			    rdr_context->saHpiRdrType;
+		
+			/** SaHpiEntityPath = ASN_OCTET_STR */
+			    rdr_context->saHpiRdrEntityPath[65535];
+			    rdr_context->saHpiRdrEntityPath_len;
+		
+			/** TruthValue = ASN_INTEGER */
+			    rdr_context->saHpiRdrIsFru;
+		
+			/** RowPointer = ASN_OBJECT_ID */
+			    oid saHpiRdrRowPointer[MAX_OID_LEN];
+			    long saHpiRdrRowPointer_len;
+		
+			/** RowPointer = ASN_OBJECT_ID */
+			    oid saHpiRdrRPT[MAX_OID_LEN];
+			    long saHpiRdrRPT_len;
+		
+			/** SaHpiTextType = ASN_INTEGER */
+			    rdr_context->saHpiRdrTextType;
+		
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			    rdr_context->saHpiRdrTextLanguage;
+		
+			/** OCTETSTR = ASN_OCTET_STR */
+			    rdr_context->saHpiRdrIdString[65535];
+			    rdr_context->saHpiRdrIdString_len;
+    
+			CONTAINER_INSERT (cb.container, resource_context);
 
+		} while (rdr_entry_id !=  SAHPI_LAST_ENTRY );
+  
+		
+	} while (rpt_entry_id != SAHPI_LAST_ENTRY);
+	
+	rdr_entry_count = CONTAINER_SIZE (cb.container);
+	
+	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", rdr_entry_count));
+		
+	return rv;
 
 }
 
