@@ -75,13 +75,9 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
  	SaErrorT 		rv;   
 
-	SaHpiDomainIdT		domain_id;
-
-	SaHpiEntryIdT		rpt_entry_id;
-	SaHpiRptEntryT  	rpt_entry;
-
 	SaHpiEntryIdT    	rdr_entry_id;
 	SaHpiRdrT		rdr_entry;
+	oh_big_textbuffer	bigbuf;
 		
 	oid 			rdr_oid[RDR_INDEX_NR];
 	netsnmp_index 		rdr_index;
@@ -89,97 +85,134 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 	
-	rpt_entry_id = SAHPI_FIRST_ENTRY;
-	do {					
-		rv = saHpiRptEntryGet(sessionid, 
-				      rpt_entry_id, 
-				      &rpt_entry_id, 
-				      &rpt_entry);
-		
+	rdr_entry_id = SAHPI_FIRST_ENTRY;
+	do {
+		rv =  saHpiRdrGet(sessionid, 
+				  rpt_entry->ResourceId, 
+				  rdr_entry_id, 
+				  &rdr_entry_id, 
+				  &rdr_entry);
+	
 		if (rv != SA_OK) {
-			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
+			DEBUGMSGTL ((AGENT, "saHpiRdrGet Failed: rv = %d\n",rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			break;
 		}
 
-		rdr_entry_id = SAHPI_FIRST_ENTRY;
-		do {
-			rv =  saHpiRdrGet(sessionid, 
-					  rpt_entry.ResourceId, 
-					  rdr_entry_id, 
-					  &rdr_entry_id, 
-					  &rdr_entry);
-
-			if (rv != SA_OK) {
-				DEBUGMSGTL ((AGENT, "saHpiRdrGet Failed: rv = %d\n",rv));
-				rv =  AGENT_ERR_INTERNAL_ERROR;
-				break;
-			}
-
-			domain_id =  get_domain_id(sessionid);
-
-			rdr_index.len = RDR_INDEX_NR;
-			rdr_oid[0] = domain_id;
-			rdr_oid[1] = rpt_entry.ResourceId;
-			rdr_oid[2] = MIB_FALSE;
-			rdr_oid[3] = rdr_entry.RecordId;
-			rdr_index.oids = (oid *) &resource_oid;
+		/* From MIB table index 
+		 * INDEX { 
+		 *	saHpiDomainId, 
+		 *	saHpiResourceId, 
+		 *      saHpiResourceIsHistorical,
+		 *	saHpiRdrEntryId
+		 * }
+		 */
+		rdr_index.len = RDR_INDEX_NR;
+		rdr_oid[0] = resource_oid[0];
+		rdr_oid[1] = rpt_entry->ResourceId;
+		rdr_oid[2] = MIB_FALSE;
+		rdr_oid[3] = rdr_entry.RecordId;
+		rdr_index.oids = (oid *) &rdr_oid;
+		
+		/* See if it exists. */
+		rdr_context = NULL;
+		rdr_context = CONTAINER_FIND(cb.container, &rdr_index);
 			
-			/* See if it exists. */
-			rdr_context = NULL;
-			rdr_context = CONTAINER_FIND(cb.container, &rdr_index);
-				
-			if (!rdr_context) { 
-				// New entry. Add it
-				rdr_context = 
-					saHpiRdrTable_create_row(&rdr_index);
-			}
-			if (!rdr_context) {
-				snmp_log (LOG_ERR, "Not enough memory for a Rdr row!");
-				rv = AGENT_ERR_INTERNAL_ERROR;
-				break;
-			}			
-			
-			/** COUNTER = ASN_COUNTER */
-			    rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
+		if (!rdr_context) { 
+			// New entry. Add it
+			rdr_context = 
+				saHpiRdrTable_create_row(&rdr_index);
+		}
+		if (!rdr_context) {
+			snmp_log (LOG_ERR, "Not enough memory for a Rdr row!");
+			rv = AGENT_ERR_INTERNAL_ERROR;
+			break;
+		}			
 		
-			/** COUNTER = ASN_COUNTER */
-			    rdr_context->saHpiRdrNextEntryId;
+		/** COUNTER = ASN_COUNTER */
+		rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
+	
+		/** COUNTER = ASN_COUNTER */
+                rdr_context->saHpiRdrNextEntryId = rdr_entry_id;
+	
+		/** INTEGER = ASN_INTEGER */
+		rdr_context->saHpiRdrType = rdr_entry.RdrType + 1;
+	
+		/** SaHpiEntityPath = ASN_OCTET_STR */
+		/** SaHpiEntityPath = ASN_OCTET_STR */
+		memset(rdr_context->saHpiRdrEntityPath,
+		       0, sizeof(oh_big_textbuffer));
 		
-			/** INTEGER = ASN_INTEGER */
-			    rdr_context->saHpiRdrType;
+		memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
 		
-			/** SaHpiEntityPath = ASN_OCTET_STR */
-			    rdr_context->saHpiRdrEntityPath[65535];
-			    rdr_context->saHpiRdrEntityPath_len;
+		rv = oh_decode_entitypath(&rdr_entry.Entity, &bigbuf);
 		
-			/** TruthValue = ASN_INTEGER */
-			    rdr_context->saHpiRdrIsFru;
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: RDR, oh_decode_entitypath() rv = %d\n",rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			saHpiRdrTable_delete_row(rdr_context);
+			break;
+		}       
+			 
+		memcpy(rdr_context->saHpiRdrEntityPath,
+		       bigbuf.Data, bigbuf.DataLength );
 		
-			/** RowPointer = ASN_OBJECT_ID */
-			    oid saHpiRdrRowPointer[MAX_OID_LEN];
-			    long saHpiRdrRowPointer_len;
 		
-			/** RowPointer = ASN_OBJECT_ID */
-			    oid saHpiRdrRPT[MAX_OID_LEN];
-			    long saHpiRdrRPT_len;
-		
-			/** SaHpiTextType = ASN_INTEGER */
-			    rdr_context->saHpiRdrTextType;
-		
-			/** SaHpiTextLanguage = ASN_INTEGER */
-			    rdr_context->saHpiRdrTextLanguage;
-		
-			/** OCTETSTR = ASN_OCTET_STR */
-			    rdr_context->saHpiRdrIdString[65535];
-			    rdr_context->saHpiRdrIdString_len;
-    
-			CONTAINER_INSERT (cb.container, resource_context);
+		if ((bigbuf.Data[bigbuf.DataLength - 1] == 0x00) && 
+			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
+			rdr_context->saHpiRdrEntityPath_len = 
+				bigbuf.DataLength - 1;
+		else
+			rdr_context->saHpiRdrEntityPath_len = 
+				bigbuf.DataLength;
+	
+		/** TruthValue = ASN_INTEGER */
+		rdr_context->saHpiRdrIsFru = 
+			(rdr_entry.IsFru == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	
+		/** RowPointer = ASN_OBJECT_ID */ 
+/* NOT CORRECT NEED to jump to one of 4 populatess and return OID then stick it in here.*/
+DEBUGMSGTL ((AGENT, "TODO!!!!! RowPointer = ASN_OBJECT_ID Failed: rv = %d\n",rv));		
+		rdr_context->saHpiRdrRowPointer[0] = rdr_oid[0];
+		rdr_context->saHpiRdrRowPointer[1] = rdr_oid[1];
+		rdr_context->saHpiRdrRowPointer[2] = rdr_oid[2];
+		rdr_context->saHpiRdrRowPointer[3] = rdr_oid[3];
+		rdr_context->saHpiRdrRowPointer_len = RDR_INDEX_NR;
+	
+		/** RowPointer = ASN_OBJECT_ID */
+DEBUGMSGTL ((AGENT, "TODO!!!!! RowPointer = Build full oid Failed: rv = %d\n",rv));
+		rdr_context->saHpiRdrRPT[0] = resource_oid[0]; 
+		rdr_context->saHpiRdrRPT[1] = resource_oid[1];
+		rdr_context->saHpiRdrRPT[2] = resource_oid[2];
+		rdr_context->saHpiRdrRPT_len = resource_oid_len;
 
-		} while (rdr_entry_id !=  SAHPI_LAST_ENTRY );
-  
-		
-	} while (rpt_entry_id != SAHPI_LAST_ENTRY);
+		/** SaHpiTextType = ASN_INTEGER */
+		rdr_context->saHpiRdrTextType = 
+			rdr_entry.IdString.DataType + 1;
+	
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		rdr_context->saHpiRdrTextLanguage = 
+			rdr_entry.IdString.Language + 1;
+	
+		/** OCTETSTR = ASN_OCTET_STR */
+		memset(rdr_context->saHpiRdrIdString, 
+		       0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
+		memcpy(rdr_context->saHpiRdrIdString, 
+		       rdr_entry.IdString.Data, 
+		       rdr_entry.IdString.DataLength);        		
+        		
+		if ((rdr_entry.IdString.Data[rdr_entry.IdString.DataLength - 1] == 0x00) 
+			&& (rdr_entry.IdString.DataType == SAHPI_TL_TYPE_TEXT))         		
+			rdr_context->saHpiRdrIdString_len = 
+				rdr_entry.IdString.DataLength - 1;
+		else
+			rdr_context->saHpiRdrIdString_len = 
+				rdr_entry.IdString.DataLength;  
+
+		CONTAINER_INSERT (cb.container, rdr_context);
+	
+	} while (rdr_entry_id !=  SAHPI_LAST_ENTRY );
 	
 	rdr_entry_count = CONTAINER_SIZE (cb.container);
 	
