@@ -40,9 +40,11 @@
 #include "saHpiRdrTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
+#include <hpiB0101_columns.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -82,6 +84,11 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	oid 			rdr_oid[RDR_INDEX_NR];
 	netsnmp_index 		rdr_index;
 	saHpiRdrTable_context	*rdr_context;
+
+	oid column[2];
+	int column_len = 2;
+	oid full_oid[MAX_OID_LEN];
+	int full_oid_len;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 	
@@ -127,8 +134,45 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			snmp_log (LOG_ERR, "Not enough memory for a Rdr row!");
 			rv = AGENT_ERR_INTERNAL_ERROR;
 			break;
-		}			
-		
+		} 
+
+		/* Build the full oid for THIS rdr, then pass it to
+		 * the appropriate populate() for its RowPointer. Then accept 
+		 * its full oidto use in this rdr's RowPointer.
+		 */
+		column[0] = 1;
+		column[1] = COLUMN_SAHPIRDRENTRYID;
+		build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
+				column, column_len,
+				&rdr_index,
+				full_oid, MAX_OID_LEN, &full_oid_len);
+		 
+
+		switch (rdr_entry.RdrType) {
+		case SAHPI_NO_RECORD:
+			DEBUGMSGTL((AGENT, "SAHPI_NO_RECORD: ERROR STATE\n"));
+			break;
+		case SAHPI_CTRL_RDR:
+			DEBUGMSGTL((AGENT, "SAHPI_CTRL_RDR: Not Implemented\n"));
+			break;
+		case SAHPI_SENSOR_RDR:
+			DEBUGMSGTL((AGENT, "SAHPI_SENSOR_RDR: Not Implemented\n"));
+			break;
+		case SAHPI_INVENTORY_RDR:
+			DEBUGMSGTL((AGENT, "RdrType,SAHPI_INVENTORY_RDR: Not Implemented\n"));
+			break;
+		case SAHPI_WATCHDOG_RDR:
+			DEBUGMSGTL((AGENT, "RdrType,SAHPI_WATCHDOG_RDR: Not Implemented\n"));
+			break;
+		case SAHPI_ANNUNCIATOR_RDR:
+			DEBUGMSGTL((AGENT, "RdrType,SAHPI_ANNUNCIATOR_RDR: Not Implemented\n"));
+			break;
+		default:
+			DEBUGMSGTL((AGENT, "RdrType,default: Not Implemented\n"));
+			break;
+		}
+
+
 		/** COUNTER = ASN_COUNTER */
 		rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
 	
