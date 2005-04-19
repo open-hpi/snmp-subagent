@@ -385,9 +385,9 @@ main (int argc, char **argv)
 		init_saHpiDomainReferenceTable();
 		
 		init_saHpiResourceTable();
-/*		init_saHpiRdrTable();
+		init_saHpiRdrTable();
 		
-		init_saHpiAnnunciatorTable();
+/*		init_saHpiAnnunciatorTable();
 		
 		init_saHpiInventoryTable();
 		init_saHpiFieldTable();
@@ -450,15 +450,17 @@ main (int argc, char **argv)
 
 		/* after initialization populate tables */
 		populate_saHpiDomainInfoTable(sessionid);
+
 /*		populate_saHpiDomainAlarmTable(); */
+
 		poplulate_saHpiDomainReferenceTable(sessionid);	
+
 		populate_saHpiResourceTable(sessionid);
-/*		populate_saHpiRdrTable();		
-*/
+			/* populate_saHpiResourceTable() calls:
+			 * populate_saHpiRdrTable();		
+			*/
 
-
-		dbg("WARNING: populate_rpt: hpiSubagent.c: nolong implemented!");
-  		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
+    		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
 
 
   if (init_alarm () != AGENT_ERR_NOERROR)
