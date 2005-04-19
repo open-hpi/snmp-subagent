@@ -65,8 +65,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	SaHpiEntryIdT		EntryId;
 	SaHpiRptEntryT  	RptEntry;
 	oh_big_textbuffer	bigbuf;
-	SaHpiResetActionT   ResetAction;
-	SaHpiPowerStateT    State;
+	SaHpiResetActionT   	ResetAction;
+	SaHpiPowerStateT    	State;
 	
 	SaHpiUint16T 	rs_cap;
 	SaHpiUint8T	hs_cap;
@@ -130,7 +130,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		rv = oh_decode_entitypath(	&RptEntry.ResourceEntity, &bigbuf );
 			if (rv != SA_OK) {
 				DEBUGMSGTL ((AGENT, 
-				"ERROR: oh_decode_entitypath() rv = %d\n",rv));
+				"ERROR: RPT, oh_decode_entitypath() rv = %d\n",rv));
 				rv =  AGENT_ERR_INTERNAL_ERROR;
 				saHpiResourceTable_delete_row( resource_context );
 				break;
@@ -138,18 +138,19 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 			 
 		memcpy(	resource_context->saHpiResourceEntityPath, 
 				bigbuf.Data, 
-				bigbuf.DataLength ); 
-        		
+				bigbuf.DataLength );    	
+        		 
+		if ((bigbuf.Data[bigbuf.DataLength - 1] == 0x00) && 
+			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
+			resource_context->saHpiResourceEntityPath_len = 
+				bigbuf.DataLength - 1;
+		else
+			resource_context->saHpiResourceEntityPath_len = 
+				bigbuf.DataLength;
+
 DEBUGMSGTL ((AGENT, "ERROR: oh_decode_entitypath() TextType rv = %d\n",bigbuf.DataType));        		
 DEBUGMSGTL ((AGENT, "bigbuf.DataLength rv = %d\n", bigbuf.DataLength));
-DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data)));        		
-   	
-        		 
-		if ((bigbuf.Data[bigbuf.DataLength-1] == 0x00) && 
-			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
-			resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength-1;
-		else
-			resource_context->saHpiResourceEntityPath_len = bigbuf.DataLength;
+DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data))); 
 
 		/** BITS = ASN_OCTET_STR */
 		rs_cap = 0x0000;		
@@ -265,11 +266,7 @@ DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data)));
 				0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
 		memcpy( resource_context->saHpiResourceTag, 
 				RptEntry.ResourceTag.Data, 
-				RptEntry.ResourceTag.DataLength ); 
-
-        		
-DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", RptEntry.ResourceTag.DataLength));
-DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEntry.ResourceTag.Data)));        		
+				RptEntry.ResourceTag.DataLength );        		
         		
 		if ((RptEntry.ResourceTag.Data[RptEntry.ResourceTag.DataLength-1] == 0x00) 
 			&& (RptEntry.ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))         		
@@ -277,7 +274,11 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
 				RptEntry.ResourceTag.DataLength - 1;
 		else
 			resource_context->saHpiResourceTag_len = 
-				RptEntry.ResourceTag.DataLength;        		
+				RptEntry.ResourceTag.DataLength;   
+
+DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", RptEntry.ResourceTag.DataLength));
+DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEntry.ResourceTag.Data))); 
+
 
 		/** INTEGER = ASN_INTEGER */
 		resource_context->saHpiResourceParmControl = 0; /* undefined */
@@ -324,12 +325,6 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
 		resource_context->saHpiResourceIsHistorical = MIB_FALSE;		
 		
 		CONTAINER_INSERT (cb.container, resource_context);
-
-		resource_index.len = RESOURCE_INDEX_NR;
-		resource_oid[0] = domain_info.DomainId;
-		resource_oid[1] = RptEntry.ResourceId;
-		resource_oid[2] = MIB_FALSE;
-		resource_index.oids = (oid *) & resource_oid;
 
 /*	       DMJ TODO:  Maybe from A spec agent maybe same here
 		if (rpt_entry.
