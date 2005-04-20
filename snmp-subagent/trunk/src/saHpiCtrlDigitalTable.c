@@ -49,7 +49,7 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiCtrlDigitalTable_oid[] = { saHpiCtrlDigitalTable_TABLE_OID };
+oid saHpiCtrlDigitalTable_oid[] = { saHpiCtrlDigitalTable_TABLE_OID};
 size_t saHpiCtrlDigitalTable_oid_len = OID_LENGTH(saHpiCtrlDigitalTable_oid);
 
 /*************************************************************
@@ -86,58 +86,58 @@ static int
 saHpiCtrlDigitalTable_cmp( const void *lhs, const void *rhs )
 {
 	saHpiCtrlDigitalTable_context *context_l =
-	    (saHpiCtrlDigitalTable_context *)lhs;
+	(saHpiCtrlDigitalTable_context *)lhs;
 	saHpiCtrlDigitalTable_context *context_r =
-	    (saHpiCtrlDigitalTable_context *)rhs;
-	
+	(saHpiCtrlDigitalTable_context *)rhs;
+
 	/*
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_cmp, called\n"));
 
 	/* check for NULL pointers */
-	if(lhs == NULL || rhs == NULL ) {
-	    DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
-	}   
+	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */
 	if ( context_l->index.oids[0] < context_r->index.oids[0])
-	    return -1;
-		
+		return -1;
+
 	if ( context_l->index.oids[0] > context_r->index.oids[0])
-	    return 1;			         
-	       
+		return 1;
+
 	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
-	       /* If saHpiDomainId index is equal sort by second index */
-	       /* CHECK SECOND INDEX,  saHpiResourceEntryId */
-	       if ( context_l->index.oids[1] < context_r->index.oids[1])
-		  return -1;
-		
-	       if ( context_l->index.oids[1] > context_r->index.oids[1])
-		  return 1;			
-		      
-	        if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-		/* If saHpiResourceEntryId index is equal sort by third index */
-		/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;
+
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by third index */
+			/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
 			if ( context_l->index.oids[2] < context_r->index.oids[2])
-			     return -1;
-				
+				return -1;
+
 			if ( context_l->index.oids[2] > context_r->index.oids[2])
-			     return 1;
-					
+				return 1;
+
 			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
 				/* If saHpiResourceIsHistorical index is equal sort by forth index */
 				/* CHECK FORTH INDEX,  saHpiCtrlDigitalEntryId */
 				if ( context_l->index.oids[3] < context_r->index.oids[3])
-				     return -1;
-					
+					return -1;
+
 				if ( context_l->index.oids[3] > context_r->index.oids[3])
-				     return 1;
-						
+					return 1;
+
 				if ( context_l->index.oids[3] == context_r->index.oids[3])
-				     return 0;
+					return 0;
 			}
 		}
 	}
@@ -154,67 +154,67 @@ init_saHpiCtrlDigitalTable(void)
 
 	initialize_table_saHpiCtrlDigitalTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiCtrlDigitalTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+	/*
+	 * TODO: perform any startup stuff here, such as
+	 * populating the table with initial data.
+	 *
+	 * saHpiCtrlDigitalTable_context * new_row = create_row(index);
+	 * CONTAINER_INSERT(cb.container,new_row);
+	 */
 }
 
 /************************************************************
  * the *_row_copy routine
  */
 static int saHpiCtrlDigitalTable_row_copy(saHpiCtrlDigitalTable_context * dst,
-                         saHpiCtrlDigitalTable_context * src)
+					  saHpiCtrlDigitalTable_context * src)
 {
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_row_copy, called\n"));
 
-	if(!dst||!src)
-	    return 1;
-	    
+	if (!dst||!src)
+		return 1;
+
 	/*
 	 * copy index, if provided
 	 */
-	if(dst->index.oids)
-	    free(dst->index.oids);
-	if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-			       src->index.len * sizeof(oid) )) {
-	    dst->index.oids = NULL;
-	    return 1;
+	if (dst->index.oids)
+		free(dst->index.oids);
+	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			    src->index.len * sizeof(oid) )) {
+		dst->index.oids = NULL;
+		return 1;
 	}
 	dst->index.len = src->index.len;
-	
-	
+
+
 	/*
 	 * copy components into the context structure
 	 */
 	/** TODO: add code for external index(s)! */
 	dst->saHpiCtrlDigitalEntryId = src->saHpiCtrlDigitalEntryId;
-	
+
 	dst->saHpiCtrlDigitalNum = src->saHpiCtrlDigitalNum;
-	
+
 	dst->saHpiCtrlDigitalOutputType = src->saHpiCtrlDigitalOutputType;
-	
+
 	dst->saHpiCtrlDigitalDefaultMode = src->saHpiCtrlDigitalDefaultMode;
-	
+
 	dst->saHpiCtrlDigitalMode = src->saHpiCtrlDigitalMode;
-	
+
 	dst->saHpiCtrlDigitalIsReadOnly = src->saHpiCtrlDigitalIsReadOnly;
-	
+
 	dst->saHpiCtrlDigitalIsWriteOnly = src->saHpiCtrlDigitalIsWriteOnly;
-	
+
 	dst->saHpiCtrlDigitalDefaultState = src->saHpiCtrlDigitalDefaultState;
-	
+
 	dst->saHpiCtrlDigitalState = src->saHpiCtrlDigitalState;
-	
+
 	dst->saHpiCtrlDigitalOem = src->saHpiCtrlDigitalOem;
-	
+
 	memcpy( src->saHpiCtrlDigitalRDR, dst->saHpiCtrlDigitalRDR, src->saHpiCtrlDigitalRDR_len );
 	dst->saHpiCtrlDigitalRDR_len = src->saHpiCtrlDigitalRDR_len;
-	
+
 	return 0;
 }
 
@@ -247,41 +247,41 @@ saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnm
 	/*
 	 * copy index, if provided
 	 */
-	if(hdr) {
+	if (hdr) {
 		netsnmp_assert(ctx->index.oids == NULL);
-		if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-			       hdr->len * sizeof(oid) )) {
-		    return -1;
+		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+				    hdr->len * sizeof(oid) )) {
+			return -1;
 		}
 		ctx->index.len = hdr->len;
 	}
-	
-       /*
-	* initialize variable that will hold each component of the index.
-	* If there are multiple indexes for the table, the variable_lists
-	* need to be linked together, in order.
-	*/
+
+	/*
+	 * initialize variable that will hold each component of the index.
+	 * If there are multiple indexes for the table, the variable_lists
+	 * need to be linked together, in order.
+	 */
 	/** TODO: add code for external index(s)! */
 	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
 	var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
 	var_saHpiDomainId.next_variable = &var_saHpiResourceId;
-	
+
 	memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
 	var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
 	var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
-	
+
 	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
 	var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
 	var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlDigitalEntryId;
-	
+
 	memset( &var_saHpiCtrlDigitalEntryId, 0x00, sizeof(var_saHpiCtrlDigitalEntryId) );
 	var_saHpiCtrlDigitalEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
 	var_saHpiCtrlDigitalEntryId.next_variable = NULL;
-	
+
 	/*
 	 * parse the oid into the individual index components
 	 */
@@ -290,29 +290,29 @@ saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnm
 		/*
 		 * copy index components into the context structure
 		 */
-		 /** skipping external index saHpiDomainId */
-		
+		/** skipping external index saHpiDomainId */
+
 		/** skipping external index saHpiResourceId */
-		
+
 		/** skipping external index saHpiResourceIsHistorical */
-		
+
 		ctx->saHpiCtrlDigitalEntryId = *var_saHpiCtrlDigitalEntryId.val.integer;
-		
+
 		err = saHpiDomainId_check_index(
-			*var_saHpiDomainId.val.integer);
+					       *var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-			*var_saHpiResourceId.val.integer);  
+						      *var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-			*var_saHpiResourceIsHistorical.val.integer);
+							   *var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiCtrlDigitalEntryId_check_index(
-			*var_saHpiCtrlDigitalEntryId.val.integer);
+							 *var_saHpiCtrlDigitalEntryId.val.integer);
 	}
-	
+
 	/*
 	 * parsing may have allocated memory. free it.
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
-	
+
 	return err;
 }
 
@@ -326,19 +326,19 @@ saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnm
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiCtrlDigitalTable_can_activate(saHpiCtrlDigitalTable_context *undo_ctx,
-                      saHpiCtrlDigitalTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+				       saHpiCtrlDigitalTable_context *row_ctx,
+				       netsnmp_request_group * rg)
 {
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_can_activate, called\n"));
 	/*
 	 * TODO: check for activation requirements here
 	 */
-	
-	
+
+
 	/*
 	 * be optimistic.
 	 */
-    return 1;
+	return 1;
 }
 
 /************************************************************
@@ -352,14 +352,14 @@ int saHpiCtrlDigitalTable_can_activate(saHpiCtrlDigitalTable_context *undo_ctx,
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiCtrlDigitalTable_can_deactivate(saHpiCtrlDigitalTable_context *undo_ctx,
-                        saHpiCtrlDigitalTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+					 saHpiCtrlDigitalTable_context *row_ctx,
+					 netsnmp_request_group * rg)
 {
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_can_deactivate, called\n"));
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+	/*
+	 * TODO: check for deactivation requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -370,22 +370,22 @@ int saHpiCtrlDigitalTable_can_deactivate(saHpiCtrlDigitalTable_context *undo_ctx
  * return 0 if the row cannot be deleted
  */
 int saHpiCtrlDigitalTable_can_delete(saHpiCtrlDigitalTable_context *undo_ctx,
-                    saHpiCtrlDigitalTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+				     saHpiCtrlDigitalTable_context *row_ctx,
+				     netsnmp_request_group * rg)
 {
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_can_delete, called\n"));
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiCtrlDigitalTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+	/*
+	 * probably shouldn't delete a row that we can't
+	 * deactivate.
+	 */
+	if (saHpiCtrlDigitalTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+		return 0;
+
+	/*
+	 * TODO: check for other deletion requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -408,22 +408,22 @@ saHpiCtrlDigitalTable_create_row( netsnmp_index* hdr)
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_create_row, called\n"));
 
 	saHpiCtrlDigitalTable_context * ctx =
-	    SNMP_MALLOC_TYPEDEF(saHpiCtrlDigitalTable_context);
-	if(!ctx)
-	    return NULL;
-	    
+	SNMP_MALLOC_TYPEDEF(saHpiCtrlDigitalTable_context);
+	if (!ctx)
+		return NULL;
+
 	/*
 	 * TODO: check indexes, if necessary.
 	 */
-	if(saHpiCtrlDigitalTable_extract_index( ctx, hdr )) {
-	    free(ctx->index.oids);
-	    free(ctx);
-	    return NULL;
+	if (saHpiCtrlDigitalTable_extract_index( ctx, hdr )) {
+		free(ctx->index.oids);
+		free(ctx);
+		return NULL;
 	}
-	
+
 	/* netsnmp_mutex_init(ctx->lock);
 	   netsnmp_mutex_lock(ctx->lock); */
-	
+
 	/*
 	 * TODO: initialize any default values here. This is also
 	 * first place you really should allocate any memory for
@@ -434,7 +434,7 @@ saHpiCtrlDigitalTable_create_row( netsnmp_index* hdr)
 	 ctx->saHpiCtrlDigitalMode = 0;
 	 ctx->saHpiCtrlDigitalState = 0;
 	*/
-	
+
 	return ctx;
 }
 
@@ -445,21 +445,21 @@ saHpiCtrlDigitalTable_context *
 saHpiCtrlDigitalTable_duplicate_row( saHpiCtrlDigitalTable_context * row_ctx)
 {
 	saHpiCtrlDigitalTable_context * dup;
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_duplicate_row, called\n"));
-	
-	if(!row_ctx)
-	    return NULL;
-	
+
+	if (!row_ctx)
+		return NULL;
+
 	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlDigitalTable_context);
-	if(!dup)
-	    return NULL;
-	    
-	if(saHpiCtrlDigitalTable_row_copy(dup,row_ctx)) {
-	    free(dup);
-	    dup = NULL;
+	if (!dup)
+		return NULL;
+
+	if (saHpiCtrlDigitalTable_row_copy(dup,row_ctx)) {
+		free(dup);
+		dup = NULL;
 	}
-	
+
 	return dup;
 }
 
@@ -471,9 +471,9 @@ netsnmp_index * saHpiCtrlDigitalTable_delete_row( saHpiCtrlDigitalTable_context 
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_delete_row, called\n"));
 
-       /* netsnmp_mutex_destroy(ctx->lock); */
+	/* netsnmp_mutex_destroy(ctx->lock); */
 
-	if(ctx->index.oids)
+	if (ctx->index.oids)
 		free(ctx->index.oids);
 
 	/*
@@ -481,7 +481,7 @@ netsnmp_index * saHpiCtrlDigitalTable_delete_row( saHpiCtrlDigitalTable_context 
 	 */
 
 	/*
-         * release header
+	 * release header
 	 */
 	free( ctx );
 
@@ -507,51 +507,51 @@ netsnmp_index * saHpiCtrlDigitalTable_delete_row( saHpiCtrlDigitalTable_context 
 void saHpiCtrlDigitalTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlDigitalTable_context *row_ctx =
-		(saHpiCtrlDigitalTable_context *)rg->existing_row;
+	(saHpiCtrlDigitalTable_context *)rg->existing_row;
 	saHpiCtrlDigitalTable_context *undo_ctx =
-		(saHpiCtrlDigitalTable_context *)rg->undo_info;
+	(saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_reserve1, called\n"));
-	
+
 	/*
 	 * TODO: loop through columns, check syntax and lengths. For
 	 * columns which have no dependencies, you could also move
 	 * the value/range checking here to attempt to catch error
 	 * cases as early as possible.
 	 */
-	for( current = rg->list; current; current = current->next ) {
-	
-	    var = current->ri->requestvb;
-	    rc = SNMP_ERR_NOERROR;
-	
-	    switch(current->tri->colnum) {
-	
-	    case COLUMN_SAHPICTRLDIGITALMODE:
-		/** SaHpiCtrlMode = ASN_INTEGER */
-		rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-						    sizeof(row_ctx->saHpiCtrlDigitalMode));
-	    break;
-	
-	    case COLUMN_SAHPICTRLDIGITALSTATE:
-		/** SaHpiCtrlStateDigital = ASN_INTEGER */
-		rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-						    sizeof(row_ctx->saHpiCtrlDigitalState));
-	    break;
-	
-	    default: /** We shouldn't get here */
-		rc = SNMP_ERR_GENERR;
-		snmp_log(LOG_ERR, "unknown column in "
-			 "saHpiCtrlDigitalTable_set_reserve1\n");
-	    }
-	
-	    if (rc)
-	       netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-	    rg->status = SNMP_MAX( rg->status, current->ri->status );
+	for ( current = rg->list; current; current = current->next ) {
+
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
+
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlDigitalMode));
+			break;
+
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlDigitalState));
+			break;
+
+		default: /** We shouldn't get here */
+			rc = SNMP_ERR_GENERR;
+			snmp_log(LOG_ERR, "unknown column in "
+				 "saHpiCtrlDigitalTable_set_reserve1\n");
+		}
+
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+		rg->status = SNMP_MAX( rg->status, current->ri->status );
 	}
-	
+
 	/*
 	 * done with all the columns. Could check row related
 	 * requirements here.
@@ -565,24 +565,24 @@ void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_reserve2, called\n"));
-	
+
 	rg->rg_void = rg->list->ri;
-	
+
 	/*
 	 * TODO: loop through columns, check for valid
 	 * values and any range constraints.
 	 */
-	for( current = rg->list; current; current = current->next ) {
-	
-	    var = current->ri->requestvb;
-	    rc = SNMP_ERR_NOERROR;
-	
-	    switch(current->tri->colnum) {
-	
-	    case COLUMN_SAHPICTRLDIGITALMODE:
-		/** SaHpiCtrlMode = ASN_INTEGER */
+	for ( current = rg->list; current; current = current->next ) {
+
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
+
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
 			/*
 			 * TODO: routine to check valid values
 			 *
@@ -593,10 +593,10 @@ void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 		    *    rc = SNMP_ERR_BADVALUE;
 		    * }
 		    */
-	    break;
-	
-	    case COLUMN_SAHPICTRLDIGITALSTATE:
-		/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			break;
+
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
 			/*
 			 * TODO: routine to check valid values
 			 *
@@ -607,14 +607,14 @@ void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 		    *    rc = SNMP_ERR_BADVALUE;
 		    * }
 		    */
-	    break;
-	
-	    default: /** We shouldn't get here */
-		netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    }
-	
-	    if (rc)
-	       netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
+			break;
+
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
 	}
 
 	/*
@@ -640,44 +640,44 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
 	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
 	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
-	
+
 	int            row_err = 0;
-	
-	
+
+
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_action, called\n"));
-	
+
 	/*
 	 * TODO: loop through columns, copy varbind values
 	 * to context structure for the row.
 	 */
-	for( current = rg->list; current; current = current->next ) {
-	
-	    var = current->ri->requestvb;
-	
-	    switch(current->tri->colnum) {
-	
-	    case COLUMN_SAHPICTRLDIGITALMODE:
-		/** SaHpiCtrlMode = ASN_INTEGER */
-		row_ctx->saHpiCtrlDigitalMode = *var->val.integer;
-	    break;
-	
-	    case COLUMN_SAHPICTRLDIGITALSTATE:
-		/** SaHpiCtrlStateDigital = ASN_INTEGER */
-		row_ctx->saHpiCtrlDigitalState = *var->val.integer;
-	    break;
-	
-	    default: /** We shouldn't get here */
-		netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-	    }
+	for ( current = rg->list; current; current = current->next ) {
+
+		var = current->ri->requestvb;
+
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			row_ctx->saHpiCtrlDigitalMode = *var->val.integer;
+			break;
+
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			row_ctx->saHpiCtrlDigitalState = *var->val.integer;
+			break;
+
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
 	}
-	
-	if(row_err) {
-	    netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-					   (netsnmp_request_info*)rg->rg_void,
-					   row_err);
-	    return;
+
+	if (row_err) {
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+					       (netsnmp_request_info*)rg->rg_void,
+					       row_err);
+		return;
 	}
-	
+
 	/*
 	 * TODO: if you have dependencies on other tables, this would be
 	 * a good place to check those, too.
@@ -703,39 +703,39 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiCtrlDigitalTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-    saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_commit, called\n"));
+	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_commit, called\n"));
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLDIGITALMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLDIGITALSTATE:
-            /** SaHpiCtrlStateDigital = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -755,35 +755,35 @@ void saHpiCtrlDigitalTable_set_free( netsnmp_request_group *rg )
 
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_free, called\n"));
-	
+
 	/*
 	 * loop through columns
 	 */
-	for( current = rg->list; current; current = current->next ) {
-	
+	for ( current = rg->list; current; current = current->next ) {
+
 		var = current->ri->requestvb;
-		
-		switch(current->tri->colnum) {
+
+		switch (current->tri->colnum) {
 		
 		case COLUMN_SAHPICTRLDIGITALMODE:
-		    /** SaHpiCtrlMode = ASN_INTEGER */
-		break;
-		
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
+
 		case COLUMN_SAHPICTRLDIGITALSTATE:
-		    /** SaHpiCtrlStateDigital = ASN_INTEGER */
-		break;
-		
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			break;
+
 		default: 
-		    break;
-		    /** We shouldn't get here */
-		    /** should have been logged in reserve1 */
+			break;
+			/** We shouldn't get here */
+			/** should have been logged in reserve1 */
 		}
 	}
 
-/*
- * done with all the columns. Could check row related
- * requirements here.
- */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -806,39 +806,39 @@ void saHpiCtrlDigitalTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiCtrlDigitalTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-    saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_undo, called\n"));
+	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_undo, called\n"));
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLDIGITALMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+			/** SaHpiCtrlStateDigital = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLDIGITALSTATE:
-            /** SaHpiCtrlStateDigital = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -848,97 +848,97 @@ void saHpiCtrlDigitalTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiCtrlDigitalTable(void)
 {
-    netsnmp_table_registration_info *table_info;
+	netsnmp_table_registration_info *table_info;
 
 
-    DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDigitalTable, called\n"));
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDigitalTable, called\n"));
 
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiCtrlDigitalTable_handler called again\n");
-        return;
-    }
+	if (my_handler) {
+		snmp_log(LOG_ERR, "initialize_table_saHpiCtrlDigitalTable_handler called again\n");
+		return;
+	}
 
-    memset(&cb, 0x00, sizeof(cb));
+	memset(&cb, 0x00, sizeof(cb));
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+	/** create the table structure itself */
+	table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiCtrlDigitalTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiCtrlDigitalTable_oid,
-                                             saHpiCtrlDigitalTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiCtrlDigitalTable_handler\n");
-        return; /** mallocs failed */
-    }
+	/* if your table is read only, it's easiest to change the
+	   HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+	my_handler = netsnmp_create_handler_registration("saHpiCtrlDigitalTable",
+							 netsnmp_table_array_helper_handler,
+							 saHpiCtrlDigitalTable_oid,
+							 saHpiCtrlDigitalTable_oid_len,
+							 HANDLER_CAN_RWRITE);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
-        /** TODO: add code for external index(s)! */
+	if (!my_handler || !table_info) {
+		snmp_log(LOG_ERR, "malloc failed in "
+			 "initialize_table_saHpiCtrlDigitalTable_handler\n");
+		return;	/** mallocs failed */
+	}
 
-    /*
-     * internal indexes
-     */
-        /** index: saHpiDomainId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceIsHistorical */
-        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
-        /** index: saHpiCtrlDigitalEntryId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/***************************************************
+	 * Setting up the table's definition
+	 */
+	/*
+	 * TODO: add any external indexes here.
+	 */
+	/** TODO: add code for external index(s)! */
 
-    table_info->min_column = saHpiCtrlDigitalTable_COL_MIN;
-    table_info->max_column = saHpiCtrlDigitalTable_COL_MAX;
+	/*
+	 * internal indexes
+	 */
+	/** index: saHpiDomainId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceIsHistorical */
+	netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
+	/** index: saHpiCtrlDigitalEntryId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiCtrlDigitalTable_get_value;
-    cb.container = netsnmp_container_find("saHpiCtrlDigitalTable_primary:"
-                                          "saHpiCtrlDigitalTable:"
-                                          "table_container");
+	table_info->min_column = saHpiCtrlDigitalTable_COL_MIN;
+	table_info->max_column = saHpiCtrlDigitalTable_COL_MAX;
 
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiCtrlDigitalTable_secondary:"
-                                                       "saHpiCtrlDigitalTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiCtrlDigitalTable_cmp;
+	/***************************************************
+	 * registering the table with the master agent
+	 */
+	cb.get_value = saHpiCtrlDigitalTable_get_value;
+	cb.container = netsnmp_container_find("saHpiCtrlDigitalTable_primary:"
+					      "saHpiCtrlDigitalTable:"
+					      "table_container");
+
+	netsnmp_container_add_index(cb.container,
+				    netsnmp_container_find("saHpiCtrlDigitalTable_secondary:"
+							   "saHpiCtrlDigitalTable:"
+							   "table_container"));
+	cb.container->next->compare = saHpiCtrlDigitalTable_cmp;
 
 
-    cb.can_set = 1;
+	cb.can_set = 1;
 
-    cb.create_row = (UserRowMethod*)saHpiCtrlDigitalTable_create_row;
+	cb.create_row = (UserRowMethod*)saHpiCtrlDigitalTable_create_row;
 
-    cb.duplicate_row = (UserRowMethod*)saHpiCtrlDigitalTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiCtrlDigitalTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlDigitalTable_row_copy;
+	cb.duplicate_row = (UserRowMethod*)saHpiCtrlDigitalTable_duplicate_row;
+	cb.delete_row = (UserRowMethod*)saHpiCtrlDigitalTable_delete_row;
+	cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlDigitalTable_row_copy;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_delete;
+	cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_activate;
+	cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_deactivate;
+	cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlDigitalTable_can_delete;
 
-    cb.set_reserve1 = saHpiCtrlDigitalTable_set_reserve1;
-    cb.set_reserve2 = saHpiCtrlDigitalTable_set_reserve2;
-    cb.set_action = saHpiCtrlDigitalTable_set_action;
-    cb.set_commit = saHpiCtrlDigitalTable_set_commit;
-    cb.set_free = saHpiCtrlDigitalTable_set_free;
-    cb.set_undo = saHpiCtrlDigitalTable_set_undo;
+	cb.set_reserve1 = saHpiCtrlDigitalTable_set_reserve1;
+	cb.set_reserve2 = saHpiCtrlDigitalTable_set_reserve2;
+	cb.set_action = saHpiCtrlDigitalTable_set_action;
+	cb.set_commit = saHpiCtrlDigitalTable_set_commit;
+	cb.set_free = saHpiCtrlDigitalTable_set_free;
+	cb.set_undo = saHpiCtrlDigitalTable_set_undo;
 
-    DEBUGMSGTL(("initialize_table_saHpiCtrlDigitalTable",
-                "Registering table saHpiCtrlDigitalTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+	DEBUGMSGTL(("initialize_table_saHpiCtrlDigitalTable",
+		    "Registering table saHpiCtrlDigitalTable "
+		    "as a table array\n"));
+	netsnmp_table_container_register(my_handler, table_info, &cb,
+					 cb.container, 1);
 }
 
 /************************************************************
@@ -950,101 +950,101 @@ initialize_table_saHpiCtrlDigitalTable(void)
  * change in code in this fuction.
  */
 int saHpiCtrlDigitalTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+				   netsnmp_request_info *request,
+				   netsnmp_index *item,
+				   netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiCtrlDigitalTable_context *context = (saHpiCtrlDigitalTable_context *)item;
+	netsnmp_variable_list *var = request->requestvb;
+	saHpiCtrlDigitalTable_context *context = (saHpiCtrlDigitalTable_context *)item;
 
 
-    DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_get_value, called\n"));
+	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_get_value, called\n"));
 
-    switch(table_info->colnum) {
+	switch (table_info->colnum) {
+	
+	case COLUMN_SAHPICTRLDIGITALENTRYID:
+		/** SaHpiEntryId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlDigitalEntryId,
+					 sizeof(context->saHpiCtrlDigitalEntryId) );
+		break;
 
-        case COLUMN_SAHPICTRLDIGITALENTRYID:
-            /** SaHpiEntryId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlDigitalEntryId,
-                         sizeof(context->saHpiCtrlDigitalEntryId) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALNUM:
-            /** SaHpiInstrumentId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlDigitalNum,
-                         sizeof(context->saHpiCtrlDigitalNum) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALOUTPUTTYPE:
-            /** SaHpiCtrlOutputType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalOutputType,
-                         sizeof(context->saHpiCtrlDigitalOutputType) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALDEFAULTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalDefaultMode,
-                         sizeof(context->saHpiCtrlDigitalDefaultMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalMode,
-                         sizeof(context->saHpiCtrlDigitalMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALISREADONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalIsReadOnly,
-                         sizeof(context->saHpiCtrlDigitalIsReadOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALISWRITEONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalIsWriteOnly,
-                         sizeof(context->saHpiCtrlDigitalIsWriteOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALDEFAULTSTATE:
-            /** SaHpiCtrlStateDigital = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalDefaultState,
-                         sizeof(context->saHpiCtrlDigitalDefaultState) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALSTATE:
-            /** SaHpiCtrlStateDigital = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlDigitalState,
-                         sizeof(context->saHpiCtrlDigitalState) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALOEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlDigitalOem,
-                         sizeof(context->saHpiCtrlDigitalOem) );
-        break;
-    
-        case COLUMN_SAHPICTRLDIGITALRDR:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiCtrlDigitalRDR,
-                         context->saHpiCtrlDigitalRDR_len );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiCtrlDigitalTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+	case COLUMN_SAHPICTRLDIGITALNUM:
+		/** SaHpiInstrumentId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlDigitalNum,
+					 sizeof(context->saHpiCtrlDigitalNum) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALOUTPUTTYPE:
+		/** SaHpiCtrlOutputType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalOutputType,
+					 sizeof(context->saHpiCtrlDigitalOutputType) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALDEFAULTMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalDefaultMode,
+					 sizeof(context->saHpiCtrlDigitalDefaultMode) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalMode,
+					 sizeof(context->saHpiCtrlDigitalMode) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALISREADONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalIsReadOnly,
+					 sizeof(context->saHpiCtrlDigitalIsReadOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALISWRITEONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalIsWriteOnly,
+					 sizeof(context->saHpiCtrlDigitalIsWriteOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALDEFAULTSTATE:
+		/** SaHpiCtrlStateDigital = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalDefaultState,
+					 sizeof(context->saHpiCtrlDigitalDefaultState) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALSTATE:
+		/** SaHpiCtrlStateDigital = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlDigitalState,
+					 sizeof(context->saHpiCtrlDigitalState) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALOEM:
+		/** UNSIGNED32 = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlDigitalOem,
+					 sizeof(context->saHpiCtrlDigitalOem) );
+		break;
+
+	case COLUMN_SAHPICTRLDIGITALRDR:
+		/** RowPointer = ASN_OBJECT_ID */
+		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+					 (char*)&context->saHpiCtrlDigitalRDR,
+					 context->saHpiCtrlDigitalRDR_len );
+		break;
+
+	default: /** We shouldn't get here */
+		snmp_log(LOG_ERR, "unknown column in "
+			 "saHpiCtrlDigitalTable_get_value\n");
+		return SNMP_ERR_GENERR;
+	}
+	return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -1056,8 +1056,8 @@ saHpiCtrlDigitalTable_get_by_idx(netsnmp_index * hdr)
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_get_by_idx, called\n"));
 
-	return (const saHpiCtrlDigitalTable_context *)
-		CONTAINER_FIND(cb.container, hdr );
+	return(const saHpiCtrlDigitalTable_context *)
+	CONTAINER_FIND(cb.container, hdr );
 }
 
 
