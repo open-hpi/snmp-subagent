@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiCtrlDigitalTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +52,26 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiCtrlDigitalTable_oid[] = { saHpiCtrlDigitalTable_TABLE_OID };
 size_t saHpiCtrlDigitalTable_oid_len = OID_LENGTH(saHpiCtrlDigitalTable_oid);
 
+/*************************************************************
+ *  scalars 
+ */
+static u_long ctrl_digital_entry_count = 0;
 
-#ifdef saHpiCtrlDigitalTable_IDX2
+
+/*
+ * populate_ctrl_digital()
+ */
+SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid, 
+			       SaHpiRdrT *rdr_entry,
+			       SaHpiRptEntryT *rpt_entry,
+			       oid *full_oid, size_t full_oid_len,
+			       oid *child_oid, size_t *child_oid_len)
+{
+	SaErrorT rv;
+	return rv;
+}
+
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -95,42 +121,6 @@ saHpiCtrlDigitalTable_cmp( const void *lhs, const void *rhs )
      * return (context_l->yy == context_r->yy) ? 0 : 1;
      */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiCtrlDigitalTable_context *
-saHpiCtrlDigitalTable_get( const char *name, int len )
-{
-    saHpiCtrlDigitalTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlDigitalTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiCtrlDigitalTable module
@@ -201,8 +191,6 @@ static int saHpiCtrlDigitalTable_row_copy(saHpiCtrlDigitalTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiCtrlDigitalTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -214,131 +202,89 @@ static int saHpiCtrlDigitalTable_row_copy(saHpiCtrlDigitalTable_context * dst,
 int
 saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiCtrlDigitalEntryId;
-    int err;
-
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
-
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlDigitalTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
-
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlDigitalTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
-
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlDigitalTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
-
-       memset( &var_saHpiCtrlDigitalEntryId, 0x00, sizeof(var_saHpiCtrlDigitalEntryId) );
-       var_saHpiCtrlDigitalEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlDigitalTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiCtrlDigitalEntryId.next_variable = &var_XX;
-#endif
-
-
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
+	/*
+	 * temporary local storage for extracting oid index
+	 *
+	 * extract index uses varbinds (netsnmp_variable_list) to parse
+	 * the index OID into the individual components for each index part.
+	 */
+	/** TODO: add storage for external index(s)! */
+	netsnmp_variable_list var_saHpiDomainId;
+	netsnmp_variable_list var_saHpiResourceId;
+	netsnmp_variable_list var_saHpiResourceIsHistorical;
+	netsnmp_variable_list var_saHpiCtrlDigitalEntryId;
+	int err;
+	
+	/*
+	 * copy index, if provided
+	 */
+	if(hdr) {
+		netsnmp_assert(ctx->index.oids == NULL);
+		if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+			       hdr->len * sizeof(oid) )) {
+		    return -1;
+		}
+		ctx->index.len = hdr->len;
+	}
+	
        /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiResourceIsHistorical */
-   
-                ctx->saHpiCtrlDigitalEntryId = *var_saHpiCtrlDigitalEntryId.val.integer;
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiCtrlDigitalEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
-
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
-
-    return err;
+	* initialize variable that will hold each component of the index.
+	* If there are multiple indexes for the table, the variable_lists
+	* need to be linked together, in order.
+	*/
+	/** TODO: add code for external index(s)! */
+	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+	var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiDomainId.next_variable = &var_saHpiResourceId;
+	
+	memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+	var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
+	
+	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+	var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlDigitalEntryId;
+	
+	memset( &var_saHpiCtrlDigitalEntryId, 0x00, sizeof(var_saHpiCtrlDigitalEntryId) );
+	var_saHpiCtrlDigitalEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiCtrlDigitalEntryId.next_variable = NULL;
+	
+	/*
+	 * parse the oid into the individual index components
+	 */
+	err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+	if (err == SNMP_ERR_NOERROR) {
+		/*
+		 * copy index components into the context structure
+		 */
+		 /** skipping external index saHpiDomainId */
+		
+		/** skipping external index saHpiResourceId */
+		
+		/** skipping external index saHpiResourceIsHistorical */
+		
+		ctx->saHpiCtrlDigitalEntryId = *var_saHpiCtrlDigitalEntryId.val.integer;
+		
+		err = saHpiDomainId_check_index(
+			*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+			*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+			*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiCtrlDigitalEntryId_check_index(
+			*var_saHpiCtrlDigitalEntryId.val.integer);
+	}
+	
+	/*
+	 * parsing may have allocated memory. free it.
+	 */
+	snmp_reset_var_buffers( &var_saHpiDomainId );
+	
+	return err;
 }
 
 /************************************************************
@@ -409,7 +355,6 @@ int saHpiCtrlDigitalTable_can_delete(saHpiCtrlDigitalTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiCtrlDigitalTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -457,7 +402,6 @@ saHpiCtrlDigitalTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -681,23 +625,6 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiCtrlDigitalTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -773,37 +700,39 @@ void saHpiCtrlDigitalTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiCtrlDigitalTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-    saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
+	
+	/*
+	 * loop through columns
+	 */
+	for( current = rg->list; current; current = current->next ) {
+	
+		var = current->ri->requestvb;
+		
+		switch(current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLDIGITALMODE:
+		    /** SaHpiCtrlMode = ASN_INTEGER */
+		break;
+		
+		case COLUMN_SAHPICTRLDIGITALSTATE:
+		    /** SaHpiCtrlStateDigital = ASN_INTEGER */
+		break;
+		
+		default: 
+		    break;
+		    /** We shouldn't get here */
+		    /** should have been logged in reserve1 */
+		}
+	}
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
-
-        var = current->ri->requestvb;
-
-        switch(current->tri->colnum) {
-
-        case COLUMN_SAHPICTRLDIGITALMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
-
-        case COLUMN_SAHPICTRLDIGITALSTATE:
-            /** SaHpiCtrlStateDigital = ASN_INTEGER */
-        break;
-
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+/*
+ * done with all the columns. Could check row related
+ * requirements here.
+ */
 }
 
 /************************************************************
@@ -858,9 +787,6 @@ void saHpiCtrlDigitalTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiCtrlDigitalTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -925,18 +851,18 @@ initialize_table_saHpiCtrlDigitalTable(void)
     cb.container = netsnmp_container_find("saHpiCtrlDigitalTable_primary:"
                                           "saHpiCtrlDigitalTable:"
                                           "table_container");
-#ifdef saHpiCtrlDigitalTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiCtrlDigitalTable_secondary:"
                                                        "saHpiCtrlDigitalTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiCtrlDigitalTable_cmp;
-#endif
-#ifdef saHpiCtrlDigitalTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiCtrlDigitalTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiCtrlDigitalTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiCtrlDigitalTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiCtrlDigitalTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlDigitalTable_row_copy;
@@ -951,7 +877,7 @@ initialize_table_saHpiCtrlDigitalTable(void)
     cb.set_commit = saHpiCtrlDigitalTable_set_commit;
     cb.set_free = saHpiCtrlDigitalTable_set_free;
     cb.set_undo = saHpiCtrlDigitalTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiCtrlDigitalTable",
                 "Registering table saHpiCtrlDigitalTable "
                 "as a table array\n"));
