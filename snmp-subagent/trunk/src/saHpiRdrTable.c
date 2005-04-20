@@ -40,7 +40,7 @@
 #include "saHpiRdrTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
-#include <hpiB0101_columns.h>
+#include <saHpiResourceTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -82,13 +82,14 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	oh_big_textbuffer	bigbuf;
 		
 	oid 			rdr_oid[RDR_INDEX_NR];
-	netsnmp_index 		rdr_index;
+	netsnmp_index 		rdr_index;;
 	saHpiRdrTable_context	*rdr_context;
 
 	oid column[2];
 	int column_len = 2;
 	oid full_oid[MAX_OID_LEN];
 	int full_oid_len;
+	netsnmp_index resource_index;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 	
@@ -142,36 +143,110 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		 */
 		column[0] = 1;
 		column[1] = COLUMN_SAHPIRDRENTRYID;
+		memset(full_oid, 0, sizeof(full_oid_len))
+		;
 		build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
 				column, column_len,
 				&rdr_index,
 				full_oid, MAX_OID_LEN, &full_oid_len);
 		 
-
+/*
 		switch (rdr_entry.RdrType) {
 		case SAHPI_NO_RECORD:
 			DEBUGMSGTL((AGENT, "SAHPI_NO_RECORD: ERROR STATE\n"));
 			break;
+
 		case SAHPI_CTRL_RDR:
-			DEBUGMSGTL((AGENT, "SAHPI_CTRL_RDR: Not Implemented\n"));
+			child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
+			DEBUGMSGTL ((AGENT,
+				      "Calling populate_control; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      rpt_entry->ResourceId,
+				      rdr_entry.RecordId,
+				      child_id));
+			rc = populate_control (rdr_entry.RecordId,
+					       &rdr_entry.RdrTypeUnion.CtrlRec,
+					       rpt_entry,
+					       full_oid, full_oid_len,
+					       child_oid, &child_oid_len);
+			DEBUGMSGTL ((AGENT,
+				     "Called populate_control(); rc: %d\n",   
+				     rc));
 			break;
+
 		case SAHPI_SENSOR_RDR:
-			DEBUGMSGTL((AGENT, "SAHPI_SENSOR_RDR: Not Implemented\n"));
+			child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
+			DEBUGMSGTL ((AGENT,
+				      "Calling populate_sensor; RPT: %d, RDR: %d, SensorRec.Num: %d\n",
+				      rpt_entry->ResourceId,
+				      rdr_entry.RecordId,
+				      child_id));
+			rc = populate_sensor (rdr_entry.RecordId, 
+					      &rdr_entry.RdrTypeUnion.SensorRec,
+					      rpt_entry,
+					      full_oid, full_oid_len,
+					      child_oid, &child_oid_len);
+			DEBUGMSGTL ((AGENT,
+				     "Called populate_sensor(); rc: %d\n",
+				     rc));
 			break;
+
 		case SAHPI_INVENTORY_RDR:
-			DEBUGMSGTL((AGENT, "RdrType,SAHPI_INVENTORY_RDR: Not Implemented\n"));
+			child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
+			DEBUGMSGTL ((AGENT,
+				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.EirId: %d\n",
+				      rpt_entry->ResourceId,
+				      rdr_entry.RecordId,
+				      child_id));
+			rc =
+			  populate_inventory (rdr_entry.RecordId,
+					      &rdr_entry.RdrTypeUnion.InventoryRec,
+					      rpt_entry, full_oid, full_oid_len,
+					      child_oid, &child_oid_len);
+			DEBUGMSGTL ((AGENT,
+				     "Called populate_inventory(); rc: %d\n",
+				     rc));
 			break;
+
 		case SAHPI_WATCHDOG_RDR:
-			DEBUGMSGTL((AGENT, "RdrType,SAHPI_WATCHDOG_RDR: Not Implemented\n"));
+			child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
+			DEBUGMSGTL ((AGENT,
+				      "Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      rpt_entry->ResourceId,
+				      rdr_entry.RecordId,
+				      child_id));
+			rc = populate_watchdog (rdr_entry.RecordId,
+						&rdr_entry.RdrTypeUnion.WatchdogRec,
+						rpt_entry,
+						full_oid, full_oid_len,
+						child_oid, &child_oid_len);
+			DEBUGMSGTL ((AGENT,
+				     "Called populate_watchdog(); rc: %d\n",
+				     rc));
 			break;
+
 		case SAHPI_ANNUNCIATOR_RDR:
-			DEBUGMSGTL((AGENT, "RdrType,SAHPI_ANNUNCIATOR_RDR: Not Implemented\n"));
+			child_id = rdr_entry.RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
+			DEBUGMSGTL ((AGENT,
+				      "Calling populate_annunciator; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      rpt_entry->ResourceId,
+				      rdr_entry.RecordId,
+				      child_id));
+			rc = populate_annunciator (rdr_entry.RecordId,
+						&rdr_entry.RdrTypeUnion.AnnunciatorRec,
+						rpt_entry,
+						full_oid, full_oid_len,
+						child_oid, &child_oid_len);
+			DEBUGMSGTL ((AGENT,
+				     "Called populate_annunciator(); rc: %d\n",
+				     rc));
+
 			break;
+
 		default:
 			DEBUGMSGTL((AGENT, "RdrType,default: Not Implemented\n"));
 			break;
 		}
-
+*/
 
 		/** COUNTER = ASN_COUNTER */
 		rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
@@ -225,11 +300,21 @@ DEBUGMSGTL ((AGENT, "TODO!!!!! RowPointer = ASN_OBJECT_ID Failed: rv = %d\n",rv)
 		rdr_context->saHpiRdrRowPointer_len = RDR_INDEX_NR;
 	
 		/** RowPointer = ASN_OBJECT_ID */
-DEBUGMSGTL ((AGENT, "TODO!!!!! RowPointer = Build full oid Failed: rv = %d\n",rv));
-		rdr_context->saHpiRdrRPT[0] = resource_oid[0]; 
-		rdr_context->saHpiRdrRPT[1] = resource_oid[1];
-		rdr_context->saHpiRdrRPT[2] = resource_oid[2];
-		rdr_context->saHpiRdrRPT_len = resource_oid_len;
+		column[0] = 1;
+		column[1] = COLUMN_SAHPIRESOURCEID;
+		resource_index.len = resource_oid_len;
+		resource_index.oids = resource_oid;
+		memset(full_oid, 0, sizeof(full_oid_len));
+
+		build_full_oid (saHpiResourceTable_oid, saHpiResourceTable_oid_len,
+				column, column_len,
+				&resource_index,
+				full_oid, MAX_OID_LEN, &full_oid_len);
+
+		rdr_context->saHpiRdrRPT_len = full_oid_len * sizeof (oid);
+		memcpy (rdr_context->saHpiRdrRPT, 
+			full_oid, 
+			rdr_context->saHpiRdrRPT_len);
 
 		/** SaHpiTextType = ASN_INTEGER */
 		rdr_context->saHpiRdrTextType = 
