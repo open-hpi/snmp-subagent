@@ -41,6 +41,7 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
+#include <saHpiCtrlDigitalTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -54,7 +55,7 @@ size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 
 
 /*************************************************************
- * oid declarations scalars
+ *  scalars 
  */
 static u_long rdr_entry_count = 0;
 
@@ -88,7 +89,9 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	oid column[2];
 	int column_len = 2;
 	oid full_oid[MAX_OID_LEN];
-	int full_oid_len;
+	size_t full_oid_len;
+	oid child_oid[MAX_OID_LEN];
+	size_t child_oid_len;
 	netsnmp_index resource_index;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
@@ -143,110 +146,129 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		 */
 		column[0] = 1;
 		column[1] = COLUMN_SAHPIRDRENTRYID;
-		memset(full_oid, 0, sizeof(full_oid_len))
-		;
+		memset(full_oid, 0, sizeof(full_oid_len));
+
 		build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
 				column, column_len,
 				&rdr_index,
 				full_oid, MAX_OID_LEN, &full_oid_len);
 		 
-/*
+
 		switch (rdr_entry.RdrType) {
 		case SAHPI_NO_RECORD:
 			DEBUGMSGTL((AGENT, "SAHPI_NO_RECORD: ERROR STATE\n"));
 			break;
 
 		case SAHPI_CTRL_RDR:
-			child_id = rdr_entry.RdrTypeUnion.CtrlRec.Num;
+			memset(&child_oid, 0, sizeof(child_oid));
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_control; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      child_id));
-			rc = populate_control (rdr_entry.RecordId,
-					       &rdr_entry.RdrTypeUnion.CtrlRec,
-					       rpt_entry,
-					       full_oid, full_oid_len,
-					       child_oid, &child_oid_len);
+				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
+			switch (rdr_entry.RdrTypeUnion.CtrlRec.Type) {
+			case SAHPI_CTRL_TYPE_DIGITAL:
+				rv = populate_ctrl_digital(
+					sessionid,
+					&rdr_entry,
+					rpt_entry,
+					&full_oid, full_oid_len,
+					&child_oid, &child_oid_len);
+ 				break;
+			case SAHPI_CTRL_TYPE_DISCRETE:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DISCRETE: Not implemented\n"));
+				break;
+			case SAHPI_CTRL_TYPE_ANALOG:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_ANALOG: Not implemented\n"));
+				break;
+			case SAHPI_CTRL_TYPE_STREAM:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_STREAM: Not implemented\n"));
+				break;
+			case SAHPI_CTRL_TYPE_TEXT:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT: Not implemented\n"));
+				break;
+			case SAHPI_CTRL_TYPE_OEM:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_OEM: Not implemented\n"));
+				break;
+			default:
+				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_RDR UNKNOWN TYPE: Not implemented\n"));
+				break;
+			}
 			DEBUGMSGTL ((AGENT,
-				     "Called populate_control(); rc: %d\n",   
-				     rc));
+				     "Called populate_control(); rv: %d\n",   
+				     rv));
 			break;
-
+/*
 		case SAHPI_SENSOR_RDR:
-			child_id = rdr_entry.RdrTypeUnion.SensorRec.Num;
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_sensor; RPT: %d, RDR: %d, SensorRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      child_id));
-			rc = populate_sensor (rdr_entry.RecordId, 
+				      rdr_entry.RdrTypeUnion.SensorRec.Num));
+			rv = populate_sensor (rdr_entry.RecordId, 
 					      &rdr_entry.RdrTypeUnion.SensorRec,
 					      rpt_entry,
 					      full_oid, full_oid_len,
 					      child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_sensor(); rc: %d\n",
-				     rc));
+				     rv));
 			break;
 
 		case SAHPI_INVENTORY_RDR:
-			child_id = rdr_entry.RdrTypeUnion.InventoryRec.EirId;
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.EirId: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      child_id));
-			rc =
+				      rdr_entry.RdrTypeUnion.InventoryRec.EirId));
+			rv =
 			  populate_inventory (rdr_entry.RecordId,
 					      &rdr_entry.RdrTypeUnion.InventoryRec,
 					      rpt_entry, full_oid, full_oid_len,
 					      child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_inventory(); rc: %d\n",
-				     rc));
+				     rv));
 			break;
 
 		case SAHPI_WATCHDOG_RDR:
-			child_id = rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum;
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      child_id));
-			rc = populate_watchdog (rdr_entry.RecordId,
+				      rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum));
+			rv = populate_watchdog (rdr_entry.RecordId,
 						&rdr_entry.RdrTypeUnion.WatchdogRec,
 						rpt_entry,
 						full_oid, full_oid_len,
 						child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_watchdog(); rc: %d\n",
-				     rc));
+				     rv));
 			break;
 
 		case SAHPI_ANNUNCIATOR_RDR:
-			child_id = rdr_entry.RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_annunciator; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      child_id));
-			rc = populate_annunciator (rdr_entry.RecordId,
+				      rdr_entry.RdrTypeUnion.AnnunciatorRec.AnnunciatorNum));
+			rv = populate_annunciator (rdr_entry.RecordId,
 						&rdr_entry.RdrTypeUnion.AnnunciatorRec,
 						rpt_entry,
 						full_oid, full_oid_len,
 						child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_annunciator(); rc: %d\n",
-				     rc));
+				     rv));
 
 			break;
-
+*/
 		default:
 			DEBUGMSGTL((AGENT, "RdrType,default: Not Implemented\n"));
 			break;
 		}
-*/
+
 
 		/** COUNTER = ASN_COUNTER */
 		rdr_context->saHpiRdrEntryId = rdr_entry.RecordId;
@@ -554,90 +576,88 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 int
 saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
 {
-    DEBUGMSGTL ((AGENT, "saHpiRdrTable_extract_index, called\n"));
-
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiRdrEntryId;
-    int err;
-
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
-
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
-
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
-
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_saHpiRdrEntryId;
-
-       memset( &var_saHpiRdrEntryId, 0x00, sizeof(var_saHpiRdrEntryId) );
-       var_saHpiRdrEntryId.type = ASN_COUNTER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiRdrEntryId.next_variable = NULL;
-
-
-
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
+	DEBUGMSGTL ((AGENT, "saHpiRdrTable_extract_index, called\n"));
+	
 	/*
-         * copy index components into the context structure
-         */
-	    /** skipping external index saHpiDomainId */
-   
-            /** skipping external index saHpiResourceId */
-   
-            /** skipping external index saHpiResourceIsHistorical */
-   
-	    ctx->saHpiRdrEntryId = *var_saHpiRdrEntryId.val.integer;
-   
-	    err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
-	    err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
-	    err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
-	    err = saHpiRdrEntryId_check_index(*var_saHpiRdrEntryId.val.integer);
+	 * temporary local storage for extracting oid index
+	 *
+	 * extract index uses varbinds (netsnmp_variable_list) to parse
+	 * the index OID into the individual components for each index part.
+	 */
+	/** TODO: add storage for external index(s)! */
+	netsnmp_variable_list var_saHpiDomainId;
+	netsnmp_variable_list var_saHpiResourceId;
+	netsnmp_variable_list var_saHpiResourceIsHistorical;
+	netsnmp_variable_list var_saHpiRdrEntryId;
+	int err;
+	
+	/*
+	 * copy index, if provided
+	 */
+	if(hdr) {
+	    netsnmp_assert(ctx->index.oids == NULL);
+	    if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+			       hdr->len * sizeof(oid) )) {
+		return -1;
+	    }
+	    ctx->index.len = hdr->len;
+	}
+	
+	/*
+	 * initialize variable that will hold each component of the index.
+	 * If there are multiple indexes for the table, the variable_lists
+	 * need to be linked together, in order.
+	 */
+	   /** TODO: add code for external index(s)! */
+	   memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+	   var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	   /** TODO: link this index to the next, or NULL for the last one */
+	   var_saHpiDomainId.next_variable = &var_saHpiResourceId;
+	
+	   memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+	   var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	   /** TODO: link this index to the next, or NULL for the last one */
+	   var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
+	
+	   memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+	   var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+	   /** TODO: link this index to the next, or NULL for the last one */
+	   var_saHpiResourceIsHistorical.next_variable = &var_saHpiRdrEntryId;
+	
+	   memset( &var_saHpiRdrEntryId, 0x00, sizeof(var_saHpiRdrEntryId) );
+	   var_saHpiRdrEntryId.type = ASN_COUNTER; /* type hint for parse_oid_indexes */
+	   /** TODO: link this index to the next, or NULL for the last one */
+	   var_saHpiRdrEntryId.next_variable = NULL;
+	
+	/*
+	 * parse the oid into the individual index components
+	 */
+	err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+	if (err == SNMP_ERR_NOERROR) {
+	    /*
+	     * copy index components into the context structure
+	     */
+		/** skipping external index saHpiDomainId */
+	
+		/** skipping external index saHpiResourceId */
+	
+		/** skipping external index saHpiResourceIsHistorical */
+	
+		ctx->saHpiRdrEntryId = *var_saHpiRdrEntryId.val.integer;
+	
+		err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiRdrEntryId_check_index(*var_saHpiRdrEntryId.val.integer);
+	
+	}
+	
+	/*
+	 * parsing may have allocated memory. free it.
+	 */
+	snmp_reset_var_buffers( &var_saHpiDomainId );
 
-    }
-
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
-
-    return err;
+	return err;
 }
 
 /************************************************************
