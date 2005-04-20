@@ -54,6 +54,18 @@ int saHpiRdrEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiCtrlDigitalTable  */    
+/**************************/
+int saHpiCtrlDigitalEntryId_check_index(long val)
+{
+	return 0;
+}
+
+/*******************************************/
+/*******************************************/
+/*******************************************/
+/*******************************************/
 
 /**************************/
 /* saHpiAnnunciatorTable */    
@@ -67,14 +79,6 @@ int saHpiAnnunciatorNum_check_index(long val)
 /* saHpiAreaTable */    
 /**************************/
 int saHpiAreaId_check_index(long val)
-{
-	return 0;
-}
-
-/**************************/
-/* saHpiCtrlTable	 */    
-/**************************/
-int saHpiCtrlNum_check_index(long val)
 {
 	return 0;
 }
