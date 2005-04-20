@@ -27,6 +27,16 @@ int saHpiResourceEntryId_check_index(long val);
 int saHpiResourceIsHistorical_check_index(long val);
 
 /**************************/
+/* saHpiCtrlDigitalTable  */    
+/**************************/
+int saHpiCtrlDigitalEntryId_check_index(long val);
+
+/**************************************/
+/**************************************/
+/**************************************/
+/**************************************/
+
+/**************************/
 /* saHpiAnnunciatorTable */    
 /**************************/
 int saHpiAnnunciatorNum_check_index(long val);
@@ -35,11 +45,6 @@ int saHpiAnnunciatorNum_check_index(long val);
 /* saHpiAreaTable */    
 /**************************/
 int saHpiAreaId_check_index(long val);
-
-/**************************/
-/* saHpiCtrlTable	 */    
-/**************************/
-int saHpiCtrlNum_check_index(long val);
 
 /**************************/
 /* saHpiDomainAlarmTable  */    
