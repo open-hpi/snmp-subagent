@@ -13,7 +13,7 @@ void
 init_hpiB0101(void)
 {
     static oid saHpiSensorEventEntryLogCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
-    static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
+//    static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
     static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
     static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
     static oid saHpiHpiVersion_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,1 };
@@ -82,11 +82,11 @@ init_hpiB0101(void)
                                saHpiSensorEventEntryLogCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryLogCountTotal_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiCtrlDigitalEntryCount", handle_saHpiCtrlDigitalEntryCount,
-                               saHpiCtrlDigitalEntryCount_oid, OID_LENGTH(saHpiCtrlDigitalEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiCtrlDigitalEntryCount", handle_saHpiCtrlDigitalEntryCount,
+//                               saHpiCtrlDigitalEntryCount_oid, OID_LENGTH(saHpiCtrlDigitalEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiCtrlOemEntryCount", handle_saHpiCtrlOemEntryCount,
                                saHpiCtrlOemEntryCount_oid, OID_LENGTH(saHpiCtrlOemEntryCount_oid),
@@ -417,6 +417,7 @@ handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -445,6 +446,8 @@ handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+
 int
 handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
