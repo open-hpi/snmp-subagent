@@ -386,6 +386,7 @@ main (int argc, char **argv)
 		
 		init_saHpiResourceTable();
 		init_saHpiRdrTable();
+		init_saHpiCtrlDigitalTable();
 		
 /*		init_saHpiAnnunciatorTable();
 		
@@ -410,7 +411,6 @@ main (int argc, char **argv)
 		init_saHpiSensorThdUpMinorTable();
 		
 		init_saHpiCtrlAnalogTable();
-		init_saHpiCtrlDigitalTable();
 		init_saHpiCtrlDiscreteTable();
 		init_saHpiCtrlOemTable();
 		init_saHpiCtrlStreamTable();
@@ -457,8 +457,9 @@ main (int argc, char **argv)
 
 		populate_saHpiResourceTable(sessionid);
 			/* populate_saHpiResourceTable() calls:
-			 * populate_saHpiRdrTable();		
-			*/
+			 * populate_saHpiRdrTable();
+			 *	populate_saHpiCtrlDigitalTable();		
+			 */
 
     		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
 
