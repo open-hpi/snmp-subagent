@@ -93,8 +93,6 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 			       oid *full_oid, size_t full_oid_len,
 			       oid *child_oid, size_t *child_oid_len);
 
-
-
 /*************************************************************
  * function declarations
  */
@@ -113,6 +111,13 @@ extern oid saHpiCtrlDigitalTable_oid[];
 extern size_t saHpiCtrlDigitalTable_oid_len;
 
 #define saHpiCtrlDigitalTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,2
+
+/* Number of table Indexes */
+#define CTRL_DIGITAL_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlDigitalEntryId_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiCtrlDigitalTable
