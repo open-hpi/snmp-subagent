@@ -73,7 +73,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	
 	oid resource_oid[RESOURCE_INDEX_NR];
 	netsnmp_index resource_index;
-	saHpiResourceTable_context	*resource_context;
+	saHpiResourceTable_context *resource_context;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable() Called\n"));
 	
