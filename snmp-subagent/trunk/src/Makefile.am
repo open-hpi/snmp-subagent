@@ -27,7 +27,8 @@ hpiSubagent_LDFLAGS	=
 clean:
 	rm -f *~
 	rm -f *.o
-
+	
+#			uid_utils.c \
 #			saHpiAnnouncementEventLogTable.c \
 #			saHpiAnnouncementTable.c \
 #			saHpiAnnunciatorTable.c \
