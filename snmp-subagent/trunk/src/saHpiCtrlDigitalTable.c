@@ -45,7 +45,6 @@
 
 #include <oh_utils.h>
 
-
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
@@ -57,6 +56,12 @@ size_t saHpiCtrlDigitalTable_oid_len = OID_LENGTH(saHpiCtrlDigitalTable_oid);
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *oh_ep_table;
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -79,7 +84,65 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 			       oid *child_oid, size_t *child_oid_len)
 {
 	SaErrorT rv;
-	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_cmp, NOT IMPLEMENTED!!!!\n"));
+
+	oid ctrl_digital_oid[CTRL_DIGITAL_INDEX_NR];
+	netsnmp_index ctrl_digital_index;
+	saHpiCtrlDigitalTable_context *ctrl_digital_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DIGITAL populate_ctrl_digital() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_digital() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_digital() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	ctrl_digital_index.len = CTRL_DIGITAL_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	ctrl_digital_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	ctrl_digital_oid[1] = rpt_entry->ResourceId;
+		/** Index saHpiResourceIsHistorical is external */
+	ctrl_digital_oid[2] = MIB_FALSE;
+		/** Index saHpiCtrlDigitalEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &oh_ep_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_digital() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_digital_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	ctrl_digital_index.oids = (oid *) & ctrl_digital_oid;
+
+	/* See if Row exists. */
+	ctrl_digital_context = NULL;
+	ctrl_digital_context = CONTAINER_FIND(cb.container, &ctrl_digital_index);
+
+	if (!ctrl_digital_context) { 
+		// New entry. Add it
+		ctrl_digital_context = 
+			saHpiCtrlDigitalTable_create_row(&ctrl_digital_index);
+	}
+	if (!ctrl_digital_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Digital row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	} 
+
+
 	return rv;
 }
 
@@ -221,6 +284,8 @@ void init_saHpiCtrlDigitalTable(void)
 	initialize_table_saHpiCtrlDigitalTable();  
 
 	initialize_table_saHpiCtrlDigitalEntryCount();
+
+	domain_resource_pair_initialize(&initialized, &oh_ep_table);
 }
 
 /************************************************************
