@@ -22,12 +22,6 @@ extern "C" {
 #include <SaHpi.h>
 #include <oh_utils.h>
 
-/* Number of table Indexes */
-#define RESOURCE_INDEX_NR 3 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-
 typedef struct saHpiResourceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
@@ -165,6 +159,12 @@ extern oid saHpiResourceTable_oid[];
 extern size_t saHpiResourceTable_oid_len;
 
 #define saHpiResourceTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,2,8
+
+/* Number of table Indexes */
+#define RESOURCE_INDEX_NR 3 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
     
 /*************************************************************
  * column number definitions for table saHpiResourceTable
