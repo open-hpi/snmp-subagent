@@ -174,6 +174,9 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					rpt_entry,
 					&full_oid, full_oid_len,
 					&child_oid, &child_oid_len);
+				DEBUGMSGTL((AGENT,
+					    "populate_ctrl_digital rv: %s\n",
+					    oh_lookup_error(rv)));
  				break;
 			case SAHPI_CTRL_TYPE_DISCRETE:
 				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DISCRETE: Not implemented\n"));
