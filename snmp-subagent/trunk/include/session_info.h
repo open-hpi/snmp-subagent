@@ -34,16 +34,47 @@
 #include <alarm.h>
 #include <oh_error.h>
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Session Domian mappings                    ***/
+/**************************************************/
+/**************************************************/
 void store_session_info(SaHpiSessionIdT session_id, SaHpiDomainIdT domain_id);
 
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT domain_id);
 
 SaHpiDomainIdT get_domain_id(SaHpiSessionIdT session_id);
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Creates full oid, used for such things as  ***/
+/*** RowPointers and Notifications              ***/
+/**************************************************/
+/**************************************************/
 int build_full_oid (oid * prefix, size_t prefix_len,
 		    oid * column, size_t column_len,
 		    netsnmp_index * index,
 		    oid * out_oid, size_t in_len, size_t * out_len);
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/**************************************************/
+/**************************************************/
+typedef struct {
+	SaHpiEntryIdT domainId_resourceId_arry[2];
+} SaHpiDomainIdResourceIdArrayT;
+
+
+typedef struct {
+        SaHpiEntryIdT entry_id;
+        SaHpiDomainIdResourceIdArrayT dr_pair;
+} DR_XREF;
+
+/* hpi internal apis */
+SaErrorT domain_resource_pair_initialize(int *initialized, GHashTable **oh_ep_table); 
+DR_XREF *domain_resource_pair_get(SaHpiDomainIdResourceIdArrayT *ep, GHashTable **oh_ep_table); 
+DR_XREF *domain_resoruce_pair_lookup(SaHpiDomainIdResourceIdArrayT *ep, GHashTable **oh_ep_table);
 
 #endif //_SESSION_INFO_H_
