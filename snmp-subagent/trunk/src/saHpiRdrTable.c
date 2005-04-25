@@ -140,27 +140,36 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			break;
 		} 
 
-		/* Build the full oid for THIS rdr, then pass it to
+		/*
+		 * Build the full oid for THIS rdr, then pass it to
 		 * the appropriate populate() for its RowPointer. Then accept 
 		 * its full oidto use in this rdr's RowPointer.
 		 */
 		column[0] = 1;
 		column[1] = COLUMN_SAHPIRDRENTRYID;
 		memset(full_oid, 0, sizeof(full_oid_len));
-
 		build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
 				column, column_len,
 				&rdr_index,
 				full_oid, MAX_OID_LEN, &full_oid_len);
-		 
+		/*
+		 * make sure we don't pickup previous rdr type's oid  
+		 * this shall be the oid of the corresponding rdr type's 
+		 * table
+		 */
+		memset(&child_oid, 0, sizeof(child_oid));
+		child_oid_len = 0;
 
+		/*
+		 * call the _populate() fpr the corresponding 'type'
+		 * specific table.
+		 */
 		switch (rdr_entry.RdrType) {
 		case SAHPI_NO_RECORD:
 			DEBUGMSGTL((AGENT, "SAHPI_NO_RECORD: ERROR STATE\n"));
 			break;
 
 		case SAHPI_CTRL_RDR:
-			memset(&child_oid, 0, sizeof(child_oid));
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_control; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
@@ -316,13 +325,16 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			(rdr_entry.IsFru == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 	
 		/** RowPointer = ASN_OBJECT_ID */ 
-/* NOT CORRECT NEED to jump to one of 4 populatess and return OID then stick it in here.*/
-DEBUGMSGTL ((AGENT, "TODO!!!!! RowPointer = ASN_OBJECT_ID Failed: rv = %d\n",rv));		
-		rdr_context->saHpiRdrRowPointer[0] = rdr_oid[0];
-		rdr_context->saHpiRdrRowPointer[1] = rdr_oid[1];
-		rdr_context->saHpiRdrRowPointer[2] = rdr_oid[2];
-		rdr_context->saHpiRdrRowPointer[3] = rdr_oid[3];
-		rdr_context->saHpiRdrRowPointer_len = RDR_INDEX_NR;
+		memset(rdr_context->saHpiRdrRowPointer, 
+		       0, sizeof(rdr_context->saHpiRdrRowPointer));
+
+		rdr_context->saHpiRdrRowPointer_len = 
+			child_oid_len * sizeof(oid);
+
+		memcpy(rdr_context->saHpiRdrRowPointer, 
+		       child_oid, 
+		       rdr_context->saHpiRdrRowPointer_len);
+
 	
 		/** RowPointer = ASN_OBJECT_ID */
 		column[0] = 1;
