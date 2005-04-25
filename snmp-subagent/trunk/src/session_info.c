@@ -100,6 +100,87 @@ int build_full_oid (oid * prefix, size_t prefix_len,
 
 /**************************************************/
 /*** BEGIN: ***************************************/
+/*** Translates from HPI to SNMP Error Codes s  ***/
+/**************************************************/
+/**************************************************/
+/*
+ * int get_snmp_error(SaErrorT val) 
+ */
+int get_snmp_error(SaErrorT val) 
+{
+	switch (val) {
+	case SA_ERR_HPI_ERROR:
+		return SNMP_ERR_GENERR;
+		break;
+	case SA_ERR_HPI_UNSUPPORTED_API:
+		return SNMP_ERR_GENERR;
+		break;
+	case SA_ERR_HPI_BUSY:
+		return SNMP_ERR_GENERR;
+		break;
+	case SA_ERR_HPI_INTERNAL_ERROR:
+		return SNMP_ERR_GENERR;
+		break;
+	case SA_ERR_HPI_INVALID_CMD:
+		return SNMP_ERR_GENERR;
+		break;
+	case SA_ERR_HPI_TIMEOUT:
+		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		break;
+	case SA_ERR_HPI_OUT_OF_SPACE:
+		return SNMP_ERR_TOOBIG;
+		break;
+	case SA_ERR_HPI_OUT_OF_MEMORY:
+		return SNMP_ERR_TOOBIG;
+		break;
+	case SA_ERR_HPI_INVALID_PARAMS:
+		return SNMP_ERR_INCONSISTENTVALUE;
+		break;
+	case SA_ERR_HPI_INVALID_DATA:
+		return SNMP_ERR_WRONGVALUE;
+		break;
+	case SA_ERR_HPI_NOT_PRESENT:
+		return SNMP_ERR_NOSUCHNAME;
+		break;
+	case SA_ERR_HPI_NO_RESPONSE:
+		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		break;
+	case SA_ERR_HPI_DUPLICATE:
+		return SNMP_ERR_INCONSISTENTNAME;
+		break;
+	case SA_ERR_HPI_INVALID_SESSION:
+		return SNMP_ERR_INCONSISTENTNAME;
+		break;
+	case SA_ERR_HPI_INVALID_DOMAIN:
+		return SNMP_ERR_INCONSISTENTNAME;
+		break;
+	case SA_ERR_HPI_INVALID_RESOURCE:
+		return SNMP_ERR_INCONSISTENTNAME;
+		break;
+	case SA_ERR_HPI_INVALID_REQUEST:
+		return SNMP_ERR_BADVALUE;
+		break;
+	case SA_ERR_HPI_ENTITY_NOT_PRESENT:
+		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		break;
+	case SA_ERR_HPI_READ_ONLY:
+		return SNMP_ERR_READONLY;
+		break;
+	case SA_ERR_HPI_CAPABILITY:
+		return SNMP_ERR_NOACCESS;
+		break;
+	case SA_ERR_HPI_UNKNOWN:
+		return SNMP_ERR_GENERR;
+		break;
+	default:
+		return SNMP_ERR_GENERR;
+		break;
+	}
+}
+
+
+/**************************************************/
+/*** BEGIN: ***************************************/
 /*** Hash Table Used for generating and         ***/
 /*** tracking unique indices when required      ***/
 /**************************************************/
@@ -145,9 +226,6 @@ guint domain_resource_pair_hash(gconstpointer key)
  */
 gboolean domain_resource_pair_equal(gconstpointer a, gconstpointer b)
 {
-	const SaHpiDomainIdResourceIdArrayT  *dra = a;
-	const SaHpiDomainIdResourceIdArrayT  *drb = b; 
-
 	if (!memcmp(a, b, sizeof(SaHpiDomainIdResourceIdArrayT))) {
                 return 1;
         }
