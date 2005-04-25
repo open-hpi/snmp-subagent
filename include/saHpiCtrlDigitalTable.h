@@ -84,6 +84,14 @@ typedef struct saHpiCtrlDigitalTable_context_s {
 
 } saHpiCtrlDigitalTable_context;
 
+
+/*************************************************************
+ * set funtions
+ */
+int set_table_ctrl_digital_mode (saHpiCtrlDigitalTable_context *row_ctx);
+int set_table_ctrl_digital_state (saHpiCtrlDigitalTable_context *row_ctx);
+
+
 /*************************************************************
  * function declarations
  */

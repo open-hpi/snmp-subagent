@@ -170,7 +170,8 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
 
         /** SaHpiCtrlMode = ASN_INTEGER */
-        ctrl_digital_context->saHpiCtrlDigitalMode = 0;
+        ctrl_digital_context->saHpiCtrlDigitalMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
 
         /** TruthValue = ASN_INTEGER */
         ctrl_digital_context->saHpiCtrlDigitalIsReadOnly =
@@ -187,7 +188,8 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Digital.Default + 1;
 
         /** SaHpiCtrlStateDigital = ASN_INTEGER */
-        ctrl_digital_context->saHpiCtrlDigitalState = 0;
+        ctrl_digital_context->saHpiCtrlDigitalState = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Digital.Default + 1;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         ctrl_digital_context->saHpiCtrlDigitalOem = 
@@ -209,6 +211,79 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 	ctrl_digital_entry_count = CONTAINER_SIZE (cb.container);
 
 	return rv;
+}
+
+
+/*
+ * int set_table_ctrl_digital_mode (saHpiCtrlDigitalTable_context * ctx)
+ */
+int set_table_ctrl_digital_mode (saHpiCtrlDigitalTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlDigitalNum, 
+			     row_ctx->saHpiCtrlDigitalMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/*
+ * int set_table_ctrl_digital_state (saHpiCtrlDigitalTable_context * ctx)
+ */
+int set_table_ctrl_digital_state (saHpiCtrlDigitalTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDigitalState - 1;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_DIGITAL;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlDigitalNum, 
+			     row_ctx->saHpiCtrlDigitalMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to saHpiControlSet failed to set State rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiControlSet failed to set State rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 /*
@@ -772,31 +847,30 @@ void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 		switch (current->tri->colnum) {
 		
 		case COLUMN_SAHPICTRLDIGITALMODE:
-			/** SaHpiCtrlMode = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlDigitalIsReadOnly == MIB_TRUE) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDIGITALMODE mode is ReadOnly, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDIGITALMODE mode is ReadOnly, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+			}  
+			if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDIGITALMODE Invalid Mode, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDIGITALMODE Invalid Mode, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		case COLUMN_SAHPICTRLDIGITALSTATE:
-			/** SaHpiCtrlStateDigital = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlDigitalMode == 
+			    (SAHPI_CTRL_MODE_AUTO + 1) ) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDIGITALSTATE mode is AUTO, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDIGITALSTATE mode is AUTO, Failed\n"));
+				rc = SNMP_ERR_GENERR;
+			} 
+			if (oh_lookup_ctrlstatedigital(*var->val.integer) == NULL ) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDIGITALMODE Invalid State, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDIGITALMODE Invalid State, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		default: /** We shouldn't get here */
@@ -849,11 +923,13 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
 		case COLUMN_SAHPICTRLDIGITALMODE:
 			/** SaHpiCtrlMode = ASN_INTEGER */
 			row_ctx->saHpiCtrlDigitalMode = *var->val.integer;
+			row_err = set_table_ctrl_digital_mode(row_ctx);
 			break;
 
 		case COLUMN_SAHPICTRLDIGITALSTATE:
 			/** SaHpiCtrlStateDigital = ASN_INTEGER */
 			row_ctx->saHpiCtrlDigitalState = *var->val.integer;
+			row_err = set_table_ctrl_digital_state(row_ctx); 
 			break;
 
 		default: /** We shouldn't get here */
