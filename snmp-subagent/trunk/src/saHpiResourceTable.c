@@ -47,7 +47,7 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiResourceTable_oid[] = { saHpiResourceTable_TABLE_OID };
+oid saHpiResourceTable_oid[] = { saHpiResourceTable_TABLE_OID};
 size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 
 /*************************************************************
@@ -59,37 +59,37 @@ static u_long resource_entry_count = 0;
  * function declarations: OpenHpi
  */
 int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
-{	
-	SaErrorT 		rv;
-	SaHpiDomainInfoT 	domain_info;	
-	SaHpiEntryIdT		EntryId;
-	SaHpiRptEntryT  	RptEntry;
-	oh_big_textbuffer	bigbuf;
-	SaHpiResetActionT   	ResetAction;
-	SaHpiPowerStateT    	State;
-	
-	SaHpiUint16T 	rs_cap;
-	SaHpiUint8T	hs_cap;
-	
+{       
+	SaErrorT                rv;
+	SaHpiDomainInfoT        domain_info;    
+	SaHpiEntryIdT           EntryId;
+	SaHpiRptEntryT          RptEntry;
+	oh_big_textbuffer       bigbuf;
+	SaHpiResetActionT       ResetAction;
+	SaHpiPowerStateT        State;
+
+	SaHpiUint16T    rs_cap;
+	SaHpiUint8T     hs_cap;
+
 	oid resource_oid[RESOURCE_INDEX_NR];
 	netsnmp_index resource_index;
 	saHpiResourceTable_context *resource_context;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable() Called\n"));
-	
+
 	/* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
-		"populate_saHpiResourceTable: saHpiDomainInfoGet() Failed: rv = %d\n",
-		rv));
+			     "populate_saHpiResourceTable: saHpiDomainInfoGet() Failed: rv = %d\n",
+			     rv));
 		return AGENT_ERR_INTERNAL_ERROR;
-	}	
-	
+	}
+
 	EntryId = SAHPI_FIRST_ENTRY;
-	do {					
+	do {
 		rv = saHpiRptEntryGet(sessionid, EntryId, &EntryId, &RptEntry);
-		
+
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, "saHpiRptEntryGet Failed: rv = %d\n",rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
@@ -101,229 +101,229 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		resource_oid[1] = RptEntry.ResourceId;
 		resource_oid[2] = MIB_FALSE;
 		resource_index.oids = (oid *) & resource_oid;
-		
+
 		/* See if it exists. */
 		resource_context = NULL;
 		resource_context = CONTAINER_FIND (cb.container, &resource_index);
-			
-		if (!resource_context) { 
+
+		if (!resource_context) {
 			// New entry. Add it
 			resource_context = 
-				saHpiResourceTable_create_row ( &resource_index);
+			saHpiResourceTable_create_row ( &resource_index);
 		}
 		if (!resource_context) {
 			snmp_log (LOG_ERR, "Not enough memory for a Resource row!");
 			rv = AGENT_ERR_INTERNAL_ERROR;
 			break;
-		}			
-		
+		}
+
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		resource_context->saHpiResourceId = RptEntry.EntryId;
-	
+
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		resource_context->saHpiResourceEntryId = RptEntry.ResourceId;
-	
+
 		/** SaHpiEntityPath = ASN_OCTET_STR */
-		memset(	resource_context->saHpiResourceEntityPath, 
-				0, sizeof(oh_big_textbuffer));
+		memset( resource_context->saHpiResourceEntityPath, 
+			0, sizeof(oh_big_textbuffer));
 		memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
-		rv = oh_decode_entitypath(	&RptEntry.ResourceEntity, &bigbuf );
-			if (rv != SA_OK) {
-				DEBUGMSGTL ((AGENT, 
-				"ERROR: RPT, oh_decode_entitypath() rv = %d\n",rv));
-				rv =  AGENT_ERR_INTERNAL_ERROR;
-				saHpiResourceTable_delete_row( resource_context );
-				break;
-			}       
-			 
-		memcpy(	resource_context->saHpiResourceEntityPath, 
-				bigbuf.Data, 
-				bigbuf.DataLength );    	
-        		 
-		if ((bigbuf.Data[bigbuf.DataLength - 1] == 0x00) && 
-			(bigbuf.DataType == SAHPI_TL_TYPE_TEXT))         		
-			resource_context->saHpiResourceEntityPath_len = 
-				bigbuf.DataLength - 1;
-		else
-			resource_context->saHpiResourceEntityPath_len = 
-				bigbuf.DataLength;
-
-DEBUGMSGTL ((AGENT, "ERROR: oh_decode_entitypath() TextType rv = %d\n",bigbuf.DataType));        		
-DEBUGMSGTL ((AGENT, "bigbuf.DataLength rv = %d\n", bigbuf.DataLength));
-DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data))); 
-
-		/** BITS = ASN_OCTET_STR */
-		rs_cap = 0x0000;		
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_SENSOR)		
-			rs_cap = 0x4000;				
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RDR)		
-			rs_cap |= 0x2000;				
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVENT_LOG)		
-			rs_cap |= 0x1000;
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_INVENTORY_DATA)		
-			rs_cap |= 0x0800;	
-									
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESET)		
-			rs_cap |= 0x0400;	
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_POWER)		
-			rs_cap |= 0x0200;							
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_ANNUNCIATOR)		
-			rs_cap |= 0x0100;					
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_FRU)		
-			rs_cap |= 0x0080;	
-			
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONTROL)		
-			rs_cap |= 0x0040;	
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_WATCHDOG)		
-			rs_cap |= 0x0020;							
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP)		
-			rs_cap |= 0x0010;					
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONFIGURATION)		
-			rs_cap |= 0x0008;
-			
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)		
-			rs_cap |= 0x0004;							
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS)		
-			rs_cap |= 0x0002;					
-		if(RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESOURCE)		
-			rs_cap |= 0x0001;							
-		
-		memcpy( resource_context->saHpiResourceCapabilities, 
-				&rs_cap, 
-				sizeof(rs_cap) ); 
-		resource_context->saHpiResourceCapabilities_len = sizeof(rs_cap);
-	
-		/** BITS = ASN_OCTET_STR */	
-		hs_cap = 0x00;		
-			if(RptEntry.HotSwapCapabilities & 
-				SAHPI_HS_CAPABILITY_AUTOEXTRACT_READ_ONLY)		
-				hs_cap = 0x40;
-				
-			if(RptEntry.HotSwapCapabilities & 
-				SAHPI_HS_CAPABILITY_INDICATOR_SUPPORTED)		
-				hs_cap = hs_cap | 0x20;	
-				
-			*resource_context->saHpiResourceHotSwapCapabilities = hs_cap;					
-		resource_context->saHpiResourceHotSwapCapabilities_len = sizeof(hs_cap);    
-	
-		/** SaHpiSeverity = ASN_INTEGER */
-		resource_context->saHpiResourceSeverity = 
-			RptEntry.ResourceSeverity + 1;
-	
-		/** TruthValue = ASN_INTEGER */
-		resource_context->saHpiResourceFailed = 
-			(RptEntry.ResourceFailed == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoResourceRev = 
-			RptEntry.ResourceInfo.ResourceRev;
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoSpecificVer =
-			RptEntry.ResourceInfo.SpecificVer;
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoDeviceSupport =
-			RptEntry.ResourceInfo.DeviceSupport;
-	
-		/** SaHpiManufacturerId = ASN_UNSIGNED */
-		resource_context->saHpiResourceInfoManufacturerId =
-			RptEntry.ResourceInfo.ManufacturerId;
-	
-		/** Unsigned16 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoProductId =
-			RptEntry.ResourceInfo.ProductId;            
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoFirmwareMajorRev =
-			RptEntry.ResourceInfo.FirmwareMajorRev;
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoFirmwareMinorRev =
-			RptEntry.ResourceInfo.FirmwareMinorRev;
-	
-		/** Unsigned8 = ASN_INTEGER */
-		resource_context->saHpiResourceInfoAuxFirmwareRev =
-			RptEntry.ResourceInfo.AuxFirmwareRev;
-	
-		/** SaHpiGuid = ASN_OCTET_STR */
-		memset(resource_context->saHpiResourceInfoGuid, 0, sizeof(SaHpiGuidT));
-		memcpy( resource_context->saHpiResourceInfoGuid, 
-				RptEntry.ResourceInfo.Guid, 
-				sizeof(SaHpiGuidT) );
-		resource_context->saHpiResourceInfoGuid_len = sizeof(SaHpiGuidT);
-	
-		/** SaHpiTextType = ASN_INTEGER */
-		resource_context->saHpiResourceTagTextType = 
-			RptEntry.ResourceTag.DataType + 1;
-	
-		/** SaHpiTextLanguage = ASN_INTEGER */
-		resource_context->saHpiResourceTagTextLanguage = 
-			RptEntry.ResourceTag.Language + 1;
-	
-		/** SaHpiText = ASN_OCTET_STR */
-		memset(	resource_context->saHpiResourceTag, 
-				0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
-		memcpy( resource_context->saHpiResourceTag, 
-				RptEntry.ResourceTag.Data, 
-				RptEntry.ResourceTag.DataLength );        		
-        		
-		if ((RptEntry.ResourceTag.Data[RptEntry.ResourceTag.DataLength-1] == 0x00) 
-			&& (RptEntry.ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))         		
-			resource_context->saHpiResourceTag_len = 
-				RptEntry.ResourceTag.DataLength - 1;
-		else
-			resource_context->saHpiResourceTag_len = 
-				RptEntry.ResourceTag.DataLength;   
-
-DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", RptEntry.ResourceTag.DataLength));
-DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEntry.ResourceTag.Data))); 
-
-
-		/** INTEGER = ASN_INTEGER */
-		resource_context->saHpiResourceParmControl = 0; /* undefined */
-			
-		/** INTEGER = ASN_INTEGER */
-		rv = saHpiResourceResetStateGet(
-				sessionid, 
-				RptEntry.ResourceId,
-    			&ResetAction );
-		if (rv == SA_ERR_HPI_INVALID_CMD) {
+		rv = oh_decode_entitypath(      &RptEntry.ResourceEntity, &bigbuf );
+		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, 
-			"ERROR: saHpiResourceResetStateGet() rv = %d\n",
-			rv));
+				     "ERROR: RPT, oh_decode_entitypath() rv = %d\n",rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
 			break;
-		}    			       
+		}
+
+		memcpy( resource_context->saHpiResourceEntityPath, 
+			bigbuf.Data, 
+			bigbuf.DataLength );            
+
+		if ((bigbuf.Data[bigbuf.DataLength - 1] == 0x00) && 
+		    (bigbuf.DataType == SAHPI_TL_TYPE_TEXT))
+			resource_context->saHpiResourceEntityPath_len = 
+			bigbuf.DataLength - 1;
+		else
+			resource_context->saHpiResourceEntityPath_len = 
+			bigbuf.DataLength;
+
+		DEBUGMSGTL ((AGENT, "ERROR: oh_decode_entitypath() TextType rv = %d\n",bigbuf.DataType));                       
+		DEBUGMSGTL ((AGENT, "bigbuf.DataLength rv = %d\n", bigbuf.DataLength));
+		DEBUGMSGTL ((AGENT, "strlen(bigbuf.Data) rv = %d\n", strlen(bigbuf.Data))); 
+
+		/** BITS = ASN_OCTET_STR */
+		rs_cap = 0x0000;                
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_SENSOR)
+			rs_cap = 0x4000;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RDR)
+			rs_cap |= 0x2000;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVENT_LOG)
+			rs_cap |= 0x1000;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_INVENTORY_DATA)
+			rs_cap |= 0x0800;
+
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESET)
+			rs_cap |= 0x0400;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_POWER)
+			rs_cap |= 0x0200;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_ANNUNCIATOR)
+			rs_cap |= 0x0100;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_FRU)
+			rs_cap |= 0x0080;
+
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONTROL)
+			rs_cap |= 0x0040;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_WATCHDOG)
+			rs_cap |= 0x0020;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP)
+			rs_cap |= 0x0010;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_CONFIGURATION)
+			rs_cap |= 0x0008;
+
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)
+			rs_cap |= 0x0004;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS)
+			rs_cap |= 0x0002;
+		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RESOURCE)
+			rs_cap |= 0x0001;
+
+		memcpy( resource_context->saHpiResourceCapabilities, 
+			&rs_cap, 
+			sizeof(rs_cap) ); 
+		resource_context->saHpiResourceCapabilities_len = sizeof(rs_cap);
+
+		/** BITS = ASN_OCTET_STR */     
+		hs_cap = 0x00;          
+		if (RptEntry.HotSwapCapabilities & 
+		    SAHPI_HS_CAPABILITY_AUTOEXTRACT_READ_ONLY)
+			hs_cap = 0x40;
+
+		if (RptEntry.HotSwapCapabilities & 
+		    SAHPI_HS_CAPABILITY_INDICATOR_SUPPORTED)
+			hs_cap = hs_cap | 0x20;
+
+		*resource_context->saHpiResourceHotSwapCapabilities = hs_cap;                                   
+		resource_context->saHpiResourceHotSwapCapabilities_len = sizeof(hs_cap);    
+
+		/** SaHpiSeverity = ASN_INTEGER */
+		resource_context->saHpiResourceSeverity = 
+		RptEntry.ResourceSeverity + 1;
+
+		/** TruthValue = ASN_INTEGER */
+		resource_context->saHpiResourceFailed = 
+		(RptEntry.ResourceFailed == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoResourceRev = 
+		RptEntry.ResourceInfo.ResourceRev;
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoSpecificVer =
+		RptEntry.ResourceInfo.SpecificVer;
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoDeviceSupport =
+		RptEntry.ResourceInfo.DeviceSupport;
+
+		/** SaHpiManufacturerId = ASN_UNSIGNED */
+		resource_context->saHpiResourceInfoManufacturerId =
+		RptEntry.ResourceInfo.ManufacturerId;
+
+		/** Unsigned16 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoProductId =
+		RptEntry.ResourceInfo.ProductId;            
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoFirmwareMajorRev =
+		RptEntry.ResourceInfo.FirmwareMajorRev;
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoFirmwareMinorRev =
+		RptEntry.ResourceInfo.FirmwareMinorRev;
+
+		/** Unsigned8 = ASN_INTEGER */
+		resource_context->saHpiResourceInfoAuxFirmwareRev =
+		RptEntry.ResourceInfo.AuxFirmwareRev;
+
+		/** SaHpiGuid = ASN_OCTET_STR */
+		memset(resource_context->saHpiResourceInfoGuid, 0, sizeof(SaHpiGuidT));
+		memcpy( resource_context->saHpiResourceInfoGuid, 
+			RptEntry.ResourceInfo.Guid, 
+			sizeof(SaHpiGuidT) );
+		resource_context->saHpiResourceInfoGuid_len = sizeof(SaHpiGuidT);
+
+		/** SaHpiTextType = ASN_INTEGER */
+		resource_context->saHpiResourceTagTextType = 
+		RptEntry.ResourceTag.DataType + 1;
+
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		resource_context->saHpiResourceTagTextLanguage = 
+		RptEntry.ResourceTag.Language + 1;
+
+		/** SaHpiText = ASN_OCTET_STR */
+		memset( resource_context->saHpiResourceTag, 
+			0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
+		memcpy( resource_context->saHpiResourceTag, 
+			RptEntry.ResourceTag.Data, 
+			RptEntry.ResourceTag.DataLength );                      
+
+		if ((RptEntry.ResourceTag.Data[RptEntry.ResourceTag.DataLength-1] == 0x00) 
+		    && (RptEntry.ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))
+			resource_context->saHpiResourceTag_len = 
+			RptEntry.ResourceTag.DataLength - 1;
+		else
+			resource_context->saHpiResourceTag_len = 
+			RptEntry.ResourceTag.DataLength;   
+
+		DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", RptEntry.ResourceTag.DataLength));
+		DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEntry.ResourceTag.Data))); 
+
+
+		/** INTEGER = ASN_INTEGER */
+		resource_context->saHpiResourceParmControl = 0;	/* undefined */
+
+		/** INTEGER = ASN_INTEGER */
+		rv = saHpiResourceResetStateGet(
+					       sessionid, 
+					       RptEntry.ResourceId,
+					       &ResetAction );
+		if (rv == SA_ERR_HPI_INVALID_CMD) {
+			DEBUGMSGTL ((AGENT, 
+				     "ERROR: saHpiResourceResetStateGet() rv = %d\n",
+				     rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			saHpiResourceTable_delete_row( resource_context );
+			break;
+		}
 		if (rv == SA_ERR_HPI_CAPABILITY ) {
 			resource_context->saHpiResourceResetAction = 0;
-		} else { 
-	        resource_context->saHpiResourceResetAction = ResetAction + 1;
+		} else {
+			resource_context->saHpiResourceResetAction = ResetAction + 1;
 		}
-		
+
 		/** INTEGER = ASN_INTEGER */
-		rv = saHpiResourcePowerStateGet( 
-				sessionid, 
-				RptEntry.ResourceId, 
-				&State);		
-		if( rv == SA_ERR_HPI_INVALID_CMD )  {
+		rv = saHpiResourcePowerStateGet(
+					       sessionid, 
+					       RptEntry.ResourceId, 
+					       &State);                
+		if ( rv == SA_ERR_HPI_INVALID_CMD ) {
 			DEBUGMSGTL ((AGENT, 
-			"ERROR: saHpiResourcePowerStateGet() rv = %d\n",
-			rv));
+				     "ERROR: saHpiResourcePowerStateGet() rv = %d\n",
+				     rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
 			break;
 		}
 		if (rv == SA_ERR_HPI_CAPABILITY) {
-			resource_context->saHpiResourcePowerAction = 0;		
+			resource_context->saHpiResourcePowerAction = 0;         
 		} else {
 			resource_context->saHpiResourcePowerAction = State + 1;
 		}
 
 		/** TruthValue = ASN_INTEGER */
-		resource_context->saHpiResourceIsHistorical = MIB_FALSE;		
-		
+		resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
+
 		CONTAINER_INSERT (cb.container, resource_context);
 
 /*	       DMJ TODO:  Maybe from A spec agent maybe same here
@@ -333,7 +333,7 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
 
 			 rc = populate_hotswap (&rpt_entry,
 						DomainID_oid, DomainID_oid_len);
-			                        ResourceID_oid, ResourceID_oid_len);
+						ResourceID_oid, ResourceID_oid_len);
 
 
 
@@ -343,7 +343,7 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
 						    &RptEntry,
 						    resource_index.oids, 
 						    resource_index.len);
-		}    
+		}
 
 /*	       	DMJ TODO:  Maybe from A spec agent maybe same here,
 		This would be the 'hpiEvents' branch, 'events' and 'eventLog' sub-branches
@@ -374,12 +374,12 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
 
 */
 	} while (EntryId != SAHPI_LAST_ENTRY);
-	
+
 	resource_entry_count = CONTAINER_SIZE (cb.container);
-	
+
 	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", resource_entry_count));
-		
-	return rv;		
+
+	return rv;              
 }
 
 /*
@@ -387,32 +387,32 @@ DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEnt
  */
 int set_table_severity (saHpiResourceTable_context *row_ctx)
 {
-	SaErrorT 			rc = SA_OK;
-    SaHpiSessionIdT     session_id;
+	SaErrorT                        rc = SA_OK;
+	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
 	SaHpiSeverityT      severity;
-	
-	if(!row_ctx)
+
+	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-    resource_id = row_ctx->saHpiResourceEntryId;
-    severity = row_ctx->saHpiResourceSeverity - 1;
-    
-    rc = saHpiResourceSeveritySet(session_id, resource_id, severity);            
-    
-    if (rc != SA_OK) {
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->saHpiResourceEntryId;
+	severity = row_ctx->saHpiResourceSeverity - 1;
+
+	rc = saHpiResourceSeveritySet(session_id, resource_id, severity);            
+
+	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
-			"Call to saHpiResourceSeverity failed with return code: %s.\n",
-		    oh_lookup_error(rc));
-	  	DEBUGMSGTL ((AGENT,
-			"Call to saHpiResourceSeveritySet failed with rc: %s.\n",
-		   	oh_lookup_error(rc)));
-	  	return AGENT_ERR_OPERATION;
-    }
-  
-    return AGENT_ERR_NOERROR; 
-    
+			  "Call to saHpiResourceSeverity failed with return code: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiResourceSeveritySet failed with rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return AGENT_ERR_OPERATION;
+	}
+
+	return AGENT_ERR_NOERROR; 
+
 }
 
 /*
@@ -420,34 +420,34 @@ int set_table_severity (saHpiResourceTable_context *row_ctx)
  */
 int set_table_resource_parm_control (saHpiResourceTable_context *row_ctx)
 {
-	SaErrorT 			rc = SA_OK;
-    SaHpiSessionIdT     session_id;
+	SaErrorT                        rc = SA_OK;
+	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
 	SaHpiParmActionT    action;
-	
-	if(!row_ctx)
+
+	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-    resource_id = row_ctx->saHpiResourceEntryId;
-    action = row_ctx->saHpiResourceParmControl - 1;
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->saHpiResourceEntryId;
+	action = row_ctx->saHpiResourceParmControl - 1;
 
 	rc = saHpiParmControl (session_id, resource_id, action);
-    
-    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+
+	if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
 		snmp_log (LOG_ERR,
-			"Call to saHpiParmControl failed with return code: %s.\n",
-		    oh_lookup_error(rc));
-	  	DEBUGMSGTL ((AGENT,
-			"Call to saHpiParmControl failed with rc: %s.\n",
-		   	oh_lookup_error(rc)));
-	  	return AGENT_ERR_OPERATION;
-    } else if (rc == SA_ERR_HPI_CAPABILITY) {
-    	row_ctx->saHpiResourceParmControl = 4;
-    }	
-  
-    return AGENT_ERR_NOERROR; 
-    
+			  "Call to saHpiParmControl failed with return code: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiParmControl failed with rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return AGENT_ERR_OPERATION;
+	} else if (rc == SA_ERR_HPI_CAPABILITY) {
+		row_ctx->saHpiResourceParmControl = 4;
+	}
+
+	return AGENT_ERR_NOERROR; 
+
 }
 
 /*
@@ -455,34 +455,34 @@ int set_table_resource_parm_control (saHpiResourceTable_context *row_ctx)
  */
 int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx)
 {
-	SaErrorT 			rc = SA_OK;
-    SaHpiSessionIdT     session_id;
+	SaErrorT                        rc = SA_OK;
+	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
 	SaHpiResetActionT   reset_action;
-	
-	if(!row_ctx)
+
+	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-    session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-    resource_id = row_ctx->saHpiResourceEntryId;
-    reset_action = row_ctx->saHpiResourceResetAction - 1;
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->saHpiResourceEntryId;
+	reset_action = row_ctx->saHpiResourceResetAction - 1;
 
 	rc = saHpiResourceResetStateSet (session_id, resource_id, reset_action);
-    
-    if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
+
+	if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
 		snmp_log (LOG_ERR,
-			"Call to saHpiResourceResetStateSet failed with return code: %s.\n",
-		    oh_lookup_error(rc));
-	  	DEBUGMSGTL ((AGENT,
-			"Call to saHpiResourceResetStateSet failed with rc: %s.\n",
-		   	oh_lookup_error(rc)));	   	
-	  	return AGENT_ERR_OPERATION;
-    } else if (rc == SA_ERR_HPI_CAPABILITY) {
-    	row_ctx->saHpiResourceResetAction = 5;
-    }	
-  
-    return AGENT_ERR_NOERROR; 
-    
+			  "Call to saHpiResourceResetStateSet failed with return code: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiResourceResetStateSet failed with rc: %s.\n",
+			     oh_lookup_error(rc)));          
+		return AGENT_ERR_OPERATION;
+	} else if (rc == SA_ERR_HPI_CAPABILITY) {
+		row_ctx->saHpiResourceResetAction = 5;
+	}
+
+	return AGENT_ERR_NOERROR; 
+
 }
 
 
@@ -491,68 +491,68 @@ int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx)
  */
 int set_table_resource_power_action (saHpiResourceTable_context *row_ctx)
 {
-	SaErrorT 			rc = SA_OK;
+	SaErrorT            rc = SA_OK;
 	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
-	SaHpiPowerStateT   	power_action;
-	
-	if(!row_ctx)
+	SaHpiPowerStateT    power_action;
+
+	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->saHpiResourceEntryId;
 	power_action = row_ctx->saHpiResourcePowerAction - 1;   
-	
+
 	rc = saHpiResourcePowerStateSet (session_id, resource_id, power_action); 
-	
+
 	if ((rc != SA_OK) && (rc != SA_ERR_HPI_CAPABILITY)) {
 		snmp_log (LOG_ERR,
-			"Call to saHpiResourcePowerStateSet failed with return code: %s.\n",
-		    oh_lookup_error(rc));
-			DEBUGMSGTL ((AGENT,
-			"Call to saHpiResourcePowerStateSet failed with rc: %s.\n",
-			oh_lookup_error(rc)));
+			  "Call to saHpiResourcePowerStateSet failed with return code: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiResourcePowerStateSet failed with rc: %s.\n",
+			     oh_lookup_error(rc)));
 		return AGENT_ERR_OPERATION;
 	} else if (rc == SA_ERR_HPI_CAPABILITY) {
 		row_ctx->saHpiResourcePowerAction = 4;
-	}	
-	
+	}
+
 	return AGENT_ERR_NOERROR; 
-    
+
 }
 
 /*
  *  int handle_saHpiResourceEntryCount()
  */
 int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
+				   netsnmp_handler_registration *reginfo,
+				   netsnmp_agent_request_info   *reqinfo,
+				   netsnmp_request_info         *requests)
 {
-	
-	DEBUGMSGTL ((AGENT, 	
+
+	DEBUGMSGTL ((AGENT,     
 		     "handle_saHpiResourceEntryCount: Entry Count is %d\n", 
 		     resource_entry_count));  
-						
+
 	/* We are never called for a GETNEXT if it's registered as a
 	   "instance", as it's "magically" handled for us.  */
-	
+
 	/* a instance handler also only hands us one request at a time, so
 	   we don't need to loop over a list of requests; we'll only get one. */
+
+	switch (reqinfo->mode) {
 	
-	switch(reqinfo->mode) {
-	
-	    case MODE_GET:
+	case MODE_GET:
 		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
 					 (u_char *) &resource_entry_count,
 					 sizeof(resource_entry_count));
 		break;
 
-	    default:
+	default:
 		/* we should never get here, so this is a really bad error */
 		return SNMP_ERR_GENERR;
 	}
-	
+
 	return SNMP_ERR_NOERROR;
 }
 
@@ -561,15 +561,21 @@ int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
  */
 int initialize_table_saHpiResourceEntryCount(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEntryCount, called\n"));     
 	netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiResourceEntryCount", 
-        	handle_saHpiResourceEntryCount,
-            saHpiResourceEntryCount_oid, 
-            OID_LENGTH(saHpiResourceEntryCount_oid),
-            HANDLER_CAN_RONLY) );
+			       netsnmp_create_handler_registration("saHpiResourceEntryCount", 
+								   handle_saHpiResourceEntryCount,
+								   saHpiResourceEntryCount_oid, 
+								   OID_LENGTH(saHpiResourceEntryCount_oid),
+								   HANDLER_CAN_RONLY) );
 	return 0;
 }
+
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 
 /************************************************************
@@ -585,51 +591,51 @@ static int
 saHpiResourceTable_cmp( const void *lhs, const void *rhs )
 {
 	saHpiResourceTable_context *context_l =
-	    (saHpiResourceTable_context *)lhs;
+	(saHpiResourceTable_context *)lhs;
 	saHpiResourceTable_context *context_r =
-	    (saHpiResourceTable_context *)rhs;
-	    
+	(saHpiResourceTable_context *)rhs;
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_cmp, called\n"));        
-	
+
 	/*
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	
-	    /* check for NULL pointers */
-	if(lhs == NULL || rhs == NULL ) {
-	    DEBUGMSGTL((AGENT,"saHpiResourceTable_cmp() NULL pointer ERROR\n" ));
+
+	/* check for NULL pointers */
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiResourceTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
-	}	
+	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */
 	if ( context_l->index.oids[0] < context_r->index.oids[0])
-	    return -1;
-		
+		return -1;
+
 	if ( context_l->index.oids[0] > context_r->index.oids[0])
-	    return 1;			         
-	       
+		return 1;
+
 	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
-	       /* If saHpiDomainId index is equal sort by second index */
-	       /* CHECK FIRST INDEX,  saHpiResourceEntryId */
-	       if ( context_l->index.oids[1] < context_r->index.oids[1])
-		  return -1;
-		
-	       if ( context_l->index.oids[1] > context_r->index.oids[1])
-		  return 1;			
-		      
-	       if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-		/* If saHpiResourceEntryId index is equal sort by second index */
-		/* CHECK FIRST INDEX,  saHpiResourceIsHistorical */
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK FIRST INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;
+
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by second index */
+			/* CHECK FIRST INDEX,  saHpiResourceIsHistorical */
 			if ( context_l->index.oids[2] < context_r->index.oids[2])
-			     return -1;
-				
+				return -1;
+
 			if ( context_l->index.oids[2] > context_r->index.oids[2])
-			     return 1;
-					
+				return 1;
+
 			if ( context_l->index.oids[2] == context_r->index.oids[2])
-			     return 0;		
-		 }
-	}     
+				return 0;
+		}
+	}
 
 	return 0;
 }
@@ -641,9 +647,9 @@ void
 init_saHpiResourceTable(void)
 {
 	DEBUGMSGTL ((AGENT, "init_saHpiResourceTable, called\n"));
-	
+
 	initialize_table_saHpiResourceTable();
-    
+
 	initialize_table_saHpiResourceEntryCount();
 }
 
@@ -651,82 +657,82 @@ init_saHpiResourceTable(void)
  * the *_row_copy routine
  */
 static int saHpiResourceTable_row_copy(saHpiResourceTable_context * dst,
-                         saHpiResourceTable_context * src)
+				       saHpiResourceTable_context * src)
 {
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_row_copy, called\n"));
-	
-	if(!dst||!src)
-	    return 1;
-	    
+
+	if (!dst||!src)
+		return 1;
+
 	/*
 	 * copy index, if provided
 	 */
-	if(dst->index.oids)
-	    free(dst->index.oids);
-	if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-			       src->index.len * sizeof(oid) )) {
-	    dst->index.oids = NULL;
-	    return 1;
+	if (dst->index.oids)
+		free(dst->index.oids);
+	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			    src->index.len * sizeof(oid) )) {
+		dst->index.oids = NULL;
+		return 1;
 	}
 	dst->index.len = src->index.len;
-	
-	
+
+
 	/*
 	 * copy components into the context structure
 	 */
 	/** TODO: add code for external index(s)! */
 	dst->saHpiResourceId = src->saHpiResourceId;
-	
+
 	dst->saHpiResourceEntryId = src->saHpiResourceEntryId;
-	
+
 	memcpy( dst->saHpiResourceEntityPath, src->saHpiResourceEntityPath, src->saHpiResourceEntityPath_len );
 	dst->saHpiResourceEntityPath_len = src->saHpiResourceEntityPath_len;
-	
+
 	memcpy( dst->saHpiResourceCapabilities, src->saHpiResourceCapabilities, src->saHpiResourceCapabilities_len );
 	dst->saHpiResourceCapabilities_len = src->saHpiResourceCapabilities_len;
-	
+
 	memcpy( dst->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities, src->saHpiResourceHotSwapCapabilities_len );
 	dst->saHpiResourceHotSwapCapabilities_len = src->saHpiResourceHotSwapCapabilities_len;
-	
+
 	dst->saHpiResourceSeverity = src->saHpiResourceSeverity;
-	
+
 	dst->saHpiResourceFailed = src->saHpiResourceFailed;
-	
+
 	dst->saHpiResourceInfoResourceRev = src->saHpiResourceInfoResourceRev;
-	
+
 	dst->saHpiResourceInfoSpecificVer = src->saHpiResourceInfoSpecificVer;
-	
+
 	dst->saHpiResourceInfoDeviceSupport = src->saHpiResourceInfoDeviceSupport;
-	
+
 	dst->saHpiResourceInfoManufacturerId = src->saHpiResourceInfoManufacturerId;
-	
+
 	dst->saHpiResourceInfoProductId = src->saHpiResourceInfoProductId;
-	
+
 	dst->saHpiResourceInfoFirmwareMajorRev = src->saHpiResourceInfoFirmwareMajorRev;
-	
+
 	dst->saHpiResourceInfoFirmwareMinorRev = src->saHpiResourceInfoFirmwareMinorRev;
-	
+
 	dst->saHpiResourceInfoAuxFirmwareRev = src->saHpiResourceInfoAuxFirmwareRev;
-	
+
 	memcpy( dst->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid, src->saHpiResourceInfoGuid_len );
 	dst->saHpiResourceInfoGuid_len = src->saHpiResourceInfoGuid_len;
-	
+
 	dst->saHpiResourceTagTextType = src->saHpiResourceTagTextType;
-	
+
 	dst->saHpiResourceTagTextLanguage = src->saHpiResourceTagTextLanguage;
-	
+
 	memcpy( dst->saHpiResourceTag, src->saHpiResourceTag, src->saHpiResourceTag_len );
 	dst->saHpiResourceTag_len = src->saHpiResourceTag_len;
-	
+
 	dst->saHpiResourceParmControl = src->saHpiResourceParmControl;
-	
+
 	dst->saHpiResourceResetAction = src->saHpiResourceResetAction;
-	
+
 	dst->saHpiResourcePowerAction = src->saHpiResourcePowerAction;
-	
+
 	dst->saHpiResourceIsHistorical = src->saHpiResourceIsHistorical;
-	
+
 	return 0;
 }
 
@@ -741,81 +747,81 @@ static int saHpiResourceTable_row_copy(saHpiResourceTable_context * dst,
 int
 saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceEntryId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    int err;
-    
+	/*
+	 * temporary local storage for extracting oid index
+	 *
+	 * extract index uses varbinds (netsnmp_variable_list) to parse
+	 * the index OID into the individual components for each index part.
+	 */
+	netsnmp_variable_list var_saHpiDomainId;
+	netsnmp_variable_list var_saHpiResourceEntryId;
+	netsnmp_variable_list var_saHpiResourceIsHistorical;
+	int err;
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_extract_index, called\n"));    
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
+	/*
+	 * copy index, if provided
+	 */
+	if (hdr) {
+		netsnmp_assert(ctx->index.oids == NULL);
+		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+				    hdr->len * sizeof(oid) )) {
+			return -1;
+		}
+		ctx->index.len = hdr->len;
+	}
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; 
-       var_saHpiDomainId.next_variable = &var_saHpiResourceEntryId;
-
-
-       memset( &var_saHpiResourceEntryId, 0x00, sizeof(var_saHpiResourceEntryId) );
-       var_saHpiResourceEntryId.type = ASN_UNSIGNED; 
-       var_saHpiResourceEntryId.next_variable = &var_saHpiResourceIsHistorical;
+	/*
+	 * initialize variable that will hold each component of the index.
+	 * If there are multiple indexes for the table, the variable_lists
+	 * need to be linked together, in order.
+	 */
+	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+	var_saHpiDomainId.type = ASN_UNSIGNED; 
+	var_saHpiDomainId.next_variable = &var_saHpiResourceEntryId;
 
 
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; 
-       var_saHpiResourceIsHistorical.next_variable = NULL;
+	memset( &var_saHpiResourceEntryId, 0x00, sizeof(var_saHpiResourceEntryId) );
+	var_saHpiResourceEntryId.type = ASN_UNSIGNED; 
+	var_saHpiResourceEntryId.next_variable = &var_saHpiResourceIsHistorical;
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-   		
-       	/*
-       	 * copy index components into the context structure
-       	 */
-       	/** skipping external index saHpiDomainId */
-   
-       	ctx->saHpiResourceEntryId = 
-       			*var_saHpiResourceEntryId.val.integer;
-   
-       	ctx->saHpiResourceIsHistorical = 
-       			*var_saHpiResourceIsHistorical.val.integer;
-   
-   		/*
-   		 *Check Index 
-         */
-    	err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
-    	err = saHpiResourceEntryId_check_index(*var_saHpiResourceEntryId.val.integer);  
-    	err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
-    }
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+	var_saHpiResourceIsHistorical.type = ASN_INTEGER; 
+	var_saHpiResourceIsHistorical.next_variable = NULL;
 
-    return err;
+	/*
+	 * parse the oid into the individual index components
+	 */
+	err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+	if (err == SNMP_ERR_NOERROR) {
+
+		/*
+		 * copy index components into the context structure
+		 */
+		/** skipping external index saHpiDomainId */
+
+		ctx->saHpiResourceEntryId = 
+		*var_saHpiResourceEntryId.val.integer;
+
+		ctx->saHpiResourceIsHistorical = 
+		*var_saHpiResourceIsHistorical.val.integer;
+
+		/*
+		 *Check Index 
+	 */
+		err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(*var_saHpiResourceEntryId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
+	}
+
+	/*
+	 * parsing may have allocated memory. free it.
+	 */
+	snmp_reset_var_buffers( &var_saHpiDomainId );
+
+	return err;
 }
 
 /************************************************************
@@ -828,21 +834,21 @@ saHpiResourceTable_extract_index( saHpiResourceTable_context * ctx, netsnmp_inde
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiResourceTable_can_activate(saHpiResourceTable_context *undo_ctx,
-                      saHpiResourceTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+				    saHpiResourceTable_context *row_ctx,
+				    netsnmp_request_group * rg)
 {
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_activate, called\n"));
-		
-    /*
-     * TODO: check for activation requirements here
-     */
+
+	/*
+	 * TODO: check for activation requirements here
+	 */
 
 
-    /*
-     * be optimistic.
-     */
-    return 1;
+	/*
+	 * be optimistic.
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -856,14 +862,14 @@ int saHpiResourceTable_can_activate(saHpiResourceTable_context *undo_ctx,
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiResourceTable_can_deactivate(saHpiResourceTable_context *undo_ctx,
-                        saHpiResourceTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+				      saHpiResourceTable_context *row_ctx,
+				      netsnmp_request_group * rg)
 {
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_deactivate, called\n"));
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+	/*
+	 * TODO: check for deactivation requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -874,23 +880,23 @@ int saHpiResourceTable_can_deactivate(saHpiResourceTable_context *undo_ctx,
  * return 0 if the row cannot be deleted
  */
 int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
-                    saHpiResourceTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+				  saHpiResourceTable_context *row_ctx,
+				  netsnmp_request_group * rg)
 {
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_can_delete, called\n"));
-	
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiResourceTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+
+	/*
+	 * probably shouldn't delete a row that we can't
+	 * deactivate.
+	 */
+	if (saHpiResourceTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+		return 0;
+
+	/*
+	 * TODO: check for other deletion requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -910,43 +916,43 @@ int saHpiResourceTable_can_delete(saHpiResourceTable_context *undo_ctx,
 saHpiResourceTable_context *
 saHpiResourceTable_create_row( netsnmp_index* hdr)
 {
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_create_row, called\n"));
-	
-    saHpiResourceTable_context * ctx =
-        SNMP_MALLOC_TYPEDEF(saHpiResourceTable_context);
-    if(!ctx)
-        return NULL;
-        
-    /*
-     * TODO: check indexes, if necessary.
-     */
-    if(saHpiResourceTable_extract_index( ctx, hdr )) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
-    }
 
-    /* netsnmp_mutex_init(ctx->lock);
-       netsnmp_mutex_lock(ctx->lock); */
+	saHpiResourceTable_context * ctx =
+	SNMP_MALLOC_TYPEDEF(saHpiResourceTable_context);
+	if (!ctx)
+		return NULL;
 
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-     ctx->saHpiResourceSeverity = 0;
-     ctx->saHpiResourceTagTextType = 0;
-     ctx->saHpiResourceTagTextLanguage = 0;
-     ctx->saHpiResourceTag = 0;
-     ctx->saHpiResourceParmControl = 0;
-     ctx->saHpiResourceResetAction = 0;
-     ctx->saHpiResourcePowerAction = 0;
-    */
+	/*
+	 * TODO: check indexes, if necessary.
+	 */
+	if (saHpiResourceTable_extract_index( ctx, hdr )) {
+		free(ctx->index.oids);
+		free(ctx);
+		return NULL;
+	}
 
-    return ctx;
+	/* netsnmp_mutex_init(ctx->lock);
+	   netsnmp_mutex_lock(ctx->lock); */
+
+	/*
+	 * TODO: initialize any default values here. This is also
+	 * first place you really should allocate any memory for
+	 * yourself to use.  If you allocated memory earlier,
+	 * make sure you free it for earlier error cases!
+	 */
+	/**
+	 ctx->saHpiResourceSeverity = 0;
+	 ctx->saHpiResourceTagTextType = 0;
+	 ctx->saHpiResourceTagTextLanguage = 0;
+	 ctx->saHpiResourceTag = 0;
+	 ctx->saHpiResourceParmControl = 0;
+	 ctx->saHpiResourceResetAction = 0;
+	 ctx->saHpiResourcePowerAction = 0;
+	*/
+
+	return ctx;
 }
 
 /************************************************************
@@ -955,23 +961,23 @@ saHpiResourceTable_create_row( netsnmp_index* hdr)
 saHpiResourceTable_context *
 saHpiResourceTable_duplicate_row( saHpiResourceTable_context * row_ctx)
 {
-    saHpiResourceTable_context * dup;
-    
-    DEBUGMSGTL ((AGENT, "saHpiResourceTable_duplicate_row, called\n"));
+	saHpiResourceTable_context * dup;
 
-    if(!row_ctx)
-        return NULL;
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_duplicate_row, called\n"));
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiResourceTable_context);
-    if(!dup)
-        return NULL;
-        
-    if(saHpiResourceTable_row_copy(dup,row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
+	if (!row_ctx)
+		return NULL;
 
-    return dup;
+	dup = SNMP_MALLOC_TYPEDEF(saHpiResourceTable_context);
+	if (!dup)
+		return NULL;
+
+	if (saHpiResourceTable_row_copy(dup,row_ctx)) {
+		free(dup);
+		dup = NULL;
+	}
+
+	return dup;
 }
 
 /************************************************************
@@ -979,24 +985,24 @@ saHpiResourceTable_duplicate_row( saHpiResourceTable_context * row_ctx)
  */
 netsnmp_index * saHpiResourceTable_delete_row( saHpiResourceTable_context * ctx )
 {
-	
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_delete_row, called\n"));
-	
-  /* netsnmp_mutex_destroy(ctx->lock); */
 
-    if(ctx->index.oids)
-        free(ctx->index.oids);
+	/* netsnmp_mutex_destroy(ctx->lock); */
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
+	if (ctx->index.oids)
+		free(ctx->index.oids);
 
-    /*
-     * release header
-     */
-    free( ctx );
+	/*
+	 * TODO: release any memory you allocated here...
+	 */
 
-    return NULL;
+	/*
+	 * release header
+	 */
+	free( ctx );
+
+	return NULL;
 }
 
 
@@ -1017,192 +1023,192 @@ netsnmp_index * saHpiResourceTable_delete_row( saHpiResourceTable_context * ctx 
  */
 void saHpiResourceTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiResourceTable_context *row_ctx =
-            (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx =
-            (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int rc;
+	saHpiResourceTable_context *row_ctx =
+	(saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx =
+	(saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_variable_list *var;
+	netsnmp_request_group_item *current;
+	int rc;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_reserve1, called\n"));
-	
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
-    for( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+	/*
+	 * TODO: loop through columns, check syntax and lengths. For
+	 * columns which have no dependencies, you could also move
+	 * the value/range checking here to attempt to catch error
+	 * cases as early as possible.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                 						sizeof(row_ctx->saHpiResourceSeverity));
-        break;
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			/** SaHpiSeverity = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourceSeverity));
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                	 sizeof(row_ctx->saHpiResourceTagTextType));
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourceTagTextType));
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                 sizeof(row_ctx->saHpiResourceTagTextLanguage));
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourceTagTextLanguage));
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:          
+		case COLUMN_SAHPIRESOURCETAG:          
 			/** SaHpiText = ASN_OCTET_STR */  
-			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);            	
-			if(rc == SNMP_ERR_NOERROR ) {
+			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+			if (rc == SNMP_ERR_NOERROR ) {
 				if (var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH) {
-        			rc = SNMP_ERR_WRONGLENGTH;
-    			}	
+					rc = SNMP_ERR_WRONGLENGTH;
+				}
 			}
-			if (rc == SNMP_ERR_NOERROR)		              
-	     		DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCETAG NO ERROR: %d\n", rc));                       
+			if (rc == SNMP_ERR_NOERROR)
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCETAG NO ERROR: %d\n", rc));
 			else
-	     		DEBUGMSGTL ((AGENT, 
-     				"COLUMN_SAHPIRESOURCETAG ERROR: %d\n", rc));                          
-        break;
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCETAG ERROR: %d\n", rc));                          
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                 	sizeof(row_ctx->saHpiResourceParmControl));
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			/** INTEGER = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourceParmControl));
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                    sizeof(row_ctx->saHpiResourceResetAction));
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			/** INTEGER = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourceResetAction));
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                    sizeof(row_ctx->saHpiResourcePowerAction));
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			/** INTEGER = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiResourcePowerAction));
+			break;
 
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiResourceTable_set_reserve1\n");
-        }
+		default: /** We shouldn't get here */
+			rc = SNMP_ERR_GENERR;
+			snmp_log(LOG_ERR, "unknown column in "
+				 "saHpiResourceTable_set_reserve1\n");
+		}
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-        rg->status = SNMP_MAX( rg->status, current->ri->status );
-    }
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+		rg->status = SNMP_MAX( rg->status, current->ri->status );
+	}
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int rc;
-    
+	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	int rc;
+
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_reserve2, called\n"));
 
-    rg->rg_void = rg->list->ri;
+	rg->rg_void = rg->list->ri;
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, check for valid
+	 * values and any range constraints.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			if (oh_lookup_severity(*var->val.integer - 1) == NULL) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCESEVERITY: SNMP_ERR_BADVALUE\n"));                  
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            if (oh_lookup_severity(*var->val.integer - 1) == NULL) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCESEVERITY: SNMP_ERR_BADVALUE\n"));            	
-                rc = SNMP_ERR_BADVALUE;
-        	}
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			if (oh_lookup_texttype(*var->val.integer - 1) == NULL) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCETAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));               
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-           /** SaHpiTextType = ASN_INTEGER */
-            if (oh_lookup_texttype(*var->val.integer - 1) == NULL) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCETAGTEXTTYPE: SNMP_ERR_BADVALUE\n"));            	
-                rc = SNMP_ERR_BADVALUE;
-        	}
-        break;
-
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
 			if ( oh_lookup_language(*var->val.integer - 1) == NULL ) {
-     			DEBUGMSGTL ((AGENT, 
-	     		   "COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));				
-          		rc = SNMP_ERR_BADVALUE;
-         	}
-        break;
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE: SNMP_ERR_BADVALUE\n"));                                
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-       		if ( var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCETAG: SNMP_ERR_BADVALUE\n"));       			
-               	rc = SNMP_ERR_BADVALUE;
-          	}  
-        break;
+		case COLUMN_SAHPIRESOURCETAG:
+			/** SaHpiText = ASN_OCTET_STR */
+			if ( var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH  ) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCETAG: SNMP_ERR_BADVALUE\n"));                               
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            if (oh_lookup_parmaction(*var->val.integer - 1) == NULL) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCEPARMCONTROL: SNMP_ERR_BADVALUE\n"));            	
-                rc = SNMP_ERR_BADVALUE;
-        	}        
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			if (oh_lookup_parmaction(*var->val.integer - 1) == NULL) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCEPARMCONTROL: SNMP_ERR_BADVALUE\n"));               
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            if (oh_lookup_resetaction(*var->val.integer - 1) == NULL) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCERESETACTION: SNMP_ERR_BADVALUE\n"));            	
-                rc = SNMP_ERR_BADVALUE;
-        	}    
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			if (oh_lookup_resetaction(*var->val.integer - 1) == NULL) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCERESETACTION: SNMP_ERR_BADVALUE\n"));               
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            if (oh_lookup_powerstate(*var->val.integer - 1) == NULL) {
-     			DEBUGMSGTL ((AGENT, 
-	     			"COLUMN_SAHPIRESOURCEPOWERACTION: SNMP_ERR_BADVALUE\n"));            	
-                rc = SNMP_ERR_BADVALUE;
-        	}         
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			if (oh_lookup_powerstate(*var->val.integer - 1) == NULL) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPIRESOURCEPOWERACTION: SNMP_ERR_BADVALUE\n"));               
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
-    }
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
+	}
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1218,90 +1224,90 @@ void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
  */
 void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    int row_err = 0;
-        
-    DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_action, called\n"));
+	int row_err = 0;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_action, called\n"));
 
-        var = current->ri->requestvb;
+	/*
+	 * TODO: loop through columns, copy varbind values
+	 * to context structure for the row.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+		var = current->ri->requestvb;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */ 
-        	row_ctx->saHpiResourceSeverity = *var->val.integer;
-          	if (set_table_severity (row_ctx) != AGENT_ERR_NOERROR)
-            	row_err = SNMP_ERR_GENERR;
-        break;
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			/** SaHpiSeverity = ASN_INTEGER */ 
+			row_ctx->saHpiResourceSeverity = *var->val.integer;
+			if (set_table_severity (row_ctx) != AGENT_ERR_NOERROR)
+				row_err = SNMP_ERR_GENERR;
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-            row_ctx->saHpiResourceTagTextType = *var->val.integer;
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			row_ctx->saHpiResourceTagTextType = *var->val.integer;
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-            row_ctx->saHpiResourceTagTextLanguage = *var->val.integer;
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			row_ctx->saHpiResourceTagTextLanguage = *var->val.integer;
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiResourceTag,var->val.string,var->val_len);
-            row_ctx->saHpiResourceTag_len = var->val_len;
-        break;
+		case COLUMN_SAHPIRESOURCETAG:
+			/** SaHpiText = ASN_OCTET_STR */
+			memcpy(row_ctx->saHpiResourceTag,var->val.string,var->val_len);
+			row_ctx->saHpiResourceTag_len = var->val_len;
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-        	row_ctx->saHpiResourceParmControl = *var->val.integer;
-          	if (set_table_resource_parm_control (row_ctx) != AGENT_ERR_NOERROR)
-            	row_err = SNMP_ERR_GENERR;
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			/** INTEGER = ASN_INTEGER */
+			row_ctx->saHpiResourceParmControl = *var->val.integer;
+			if (set_table_resource_parm_control (row_ctx) != AGENT_ERR_NOERROR)
+				row_err = SNMP_ERR_GENERR;
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiResourceResetAction = *var->val.integer;
-          	if (set_table_resource_reset_action (row_ctx) != AGENT_ERR_NOERROR)
-            	row_err = SNMP_ERR_GENERR;            
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			/** INTEGER = ASN_INTEGER */
+			row_ctx->saHpiResourceResetAction = *var->val.integer;
+			if (set_table_resource_reset_action (row_ctx) != AGENT_ERR_NOERROR)
+				row_err = SNMP_ERR_GENERR;
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiResourcePowerAction = *var->val.integer;
-          	if (set_table_resource_power_action (row_ctx) != AGENT_ERR_NOERROR)
-            	row_err = SNMP_ERR_GENERR;               
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			/** INTEGER = ASN_INTEGER */
+			row_ctx->saHpiResourcePowerAction = *var->val.integer;
+			if (set_table_resource_power_action (row_ctx) != AGENT_ERR_NOERROR)
+				row_err = SNMP_ERR_GENERR;
+			break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-    /*
-     * check activation/deactivation
-     */
-	if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
+	/*
+	 * check activation/deactivation
+	 */
+	if (row_err) {
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+					       (netsnmp_request_info*)rg->rg_void,
+					       row_err);
+		return;
+	}
 
 
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
-     
+	/*
+	 * TODO: if you have dependencies on other tables, this would be
+	 * a good place to check those, too.
+	 */
+
 }
 
 /************************************************************
@@ -1323,59 +1329,59 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiResourceTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_commit, called\n"));
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			/** SaHpiSeverity = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAG:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1388,60 +1394,60 @@ void saHpiResourceTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiResourceTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    
-    DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_free, called\n"));
+	netsnmp_variable_list *var;
+	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_free, called\n"));
 
-        var = current->ri->requestvb;
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+		var = current->ri->requestvb;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			/** SaHpiSeverity = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		case COLUMN_SAHPIRESOURCETAG:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        default: 
-        break;	/** We shouldn't get here */
-            	/** should have been logged in reserve1 */
-        }
-    }
+		default: 
+			break;	/** We shouldn't get here */
+				/** should have been logged in reserve1 */
+		}
+	}
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1464,59 +1470,59 @@ void saHpiResourceTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiResourceTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-    saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_undo, called\n"));
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPIRESOURCESEVERITY:
+			/** SaHpiSeverity = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+			/** SaHpiTextType = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+			/** SaHpiTextLanguage = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCETAG:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		case COLUMN_SAHPIRESOURCEPARMCONTROL:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCERESETACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPIRESOURCEPOWERACTION:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 
@@ -1527,94 +1533,94 @@ void saHpiResourceTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiResourceTable(void)
 {
-    netsnmp_table_registration_info *table_info;
-    
-    DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceTable, called\n"));
+	netsnmp_table_registration_info *table_info;
 
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiResourceTable_handler called again\n");
-        return;
-    }
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceTable, called\n"));
 
-    memset(&cb, 0x00, sizeof(cb));
+	if (my_handler) {
+		snmp_log(LOG_ERR, "initialize_table_saHpiResourceTable_handler called again\n");
+		return;
+	}
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+	memset(&cb, 0x00, sizeof(cb));
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiResourceTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiResourceTable_oid,
-                                             saHpiResourceTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiResourceTable_handler\n");
-        return; /** mallocs failed */
-    }
+	/** create the table structure itself */
+	table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
-        /** TODO: add code for external index(s)! */
+	/* if your table is read only, it's easiest to change the
+	   HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+	my_handler = netsnmp_create_handler_registration("saHpiResourceTable",
+							 netsnmp_table_array_helper_handler,
+							 saHpiResourceTable_oid,
+							 saHpiResourceTable_oid_len,
+							 HANDLER_CAN_RWRITE);
 
-    /*
-     * internal indexes
-     */
-        /** index: saHpiDomainId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceEntryId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceIsHistorical */
-        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
+	if (!my_handler || !table_info) {
+		snmp_log(LOG_ERR, "malloc failed in "
+			 "initialize_table_saHpiResourceTable_handler\n");
+		return;	/** mallocs failed */
+	}
 
-    table_info->min_column = saHpiResourceTable_COL_MIN;
-    table_info->max_column = saHpiResourceTable_COL_MAX;
+	/***************************************************
+	 * Setting up the table's definition
+	 */
+	/*
+	 * TODO: add any external indexes here.
+	 */
+	/** TODO: add code for external index(s)! */
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiResourceTable_get_value;
-    cb.container = netsnmp_container_find("saHpiResourceTable_primary:"
-                                          "saHpiResourceTable:"
-                                          "table_container");
+	/*
+	 * internal indexes
+	 */
+	/** index: saHpiDomainId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceEntryId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceIsHistorical */
+	netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
 
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiResourceTable_secondary:"
-                                                       "saHpiResourceTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiResourceTable_cmp;
+	table_info->min_column = saHpiResourceTable_COL_MIN;
+	table_info->max_column = saHpiResourceTable_COL_MAX;
+
+	/***************************************************
+	 * registering the table with the master agent
+	 */
+	cb.get_value = saHpiResourceTable_get_value;
+	cb.container = netsnmp_container_find("saHpiResourceTable_primary:"
+					      "saHpiResourceTable:"
+					      "table_container");
+
+	netsnmp_container_add_index(cb.container,
+				    netsnmp_container_find("saHpiResourceTable_secondary:"
+							   "saHpiResourceTable:"
+							   "table_container"));
+	cb.container->next->compare = saHpiResourceTable_cmp;
 
 
-    cb.can_set = 1;
+	cb.can_set = 1;
 
-    cb.create_row = (UserRowMethod*)saHpiResourceTable_create_row;
+	cb.create_row = (UserRowMethod*)saHpiResourceTable_create_row;
 
-    cb.duplicate_row = (UserRowMethod*)saHpiResourceTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiResourceTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiResourceTable_row_copy;
+	cb.duplicate_row = (UserRowMethod*)saHpiResourceTable_duplicate_row;
+	cb.delete_row = (UserRowMethod*)saHpiResourceTable_delete_row;
+	cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiResourceTable_row_copy;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_delete;
+	cb.can_activate = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_activate;
+	cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_deactivate;
+	cb.can_delete = (Netsnmp_User_Row_Action *)saHpiResourceTable_can_delete;
 
-    cb.set_reserve1 = saHpiResourceTable_set_reserve1;
-    cb.set_reserve2 = saHpiResourceTable_set_reserve2;
-    cb.set_action = saHpiResourceTable_set_action;
-    cb.set_commit = saHpiResourceTable_set_commit;
-    cb.set_free = saHpiResourceTable_set_free;
-    cb.set_undo = saHpiResourceTable_set_undo;
-    
-    DEBUGMSGTL(("initialize_table_saHpiResourceTable",
-                "Registering table saHpiResourceTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+	cb.set_reserve1 = saHpiResourceTable_set_reserve1;
+	cb.set_reserve2 = saHpiResourceTable_set_reserve2;
+	cb.set_action = saHpiResourceTable_set_action;
+	cb.set_commit = saHpiResourceTable_set_commit;
+	cb.set_free = saHpiResourceTable_set_free;
+	cb.set_undo = saHpiResourceTable_set_undo;
+
+	DEBUGMSGTL(("initialize_table_saHpiResourceTable",
+		    "Registering table saHpiResourceTable "
+		    "as a table array\n"));
+	netsnmp_table_container_register(my_handler, table_info, &cb,
+					 cb.container, 1);
 }
 
 /************************************************************
@@ -1626,184 +1632,184 @@ initialize_table_saHpiResourceTable(void)
  * change in code in this fuction.
  */
 int saHpiResourceTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+				netsnmp_request_info *request,
+				netsnmp_index *item,
+				netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiResourceTable_context *context = (saHpiResourceTable_context *)item;
-    
-    DEBUGMSGTL ((AGENT, "saHpiResourceTable_get_value, called\n"));
+	netsnmp_variable_list *var = request->requestvb;
+	saHpiResourceTable_context *context = (saHpiResourceTable_context *)item;
 
-    switch(table_info->colnum) {
+	DEBUGMSGTL ((AGENT, "saHpiResourceTable_get_value, called\n"));
 
-        case COLUMN_SAHPIRESOURCEID:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiResourceId,
-                         sizeof(context->saHpiResourceId) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEENTRYID:
-            /** SaHpiEntryId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiResourceEntryId,
-                         sizeof(context->saHpiResourceEntryId) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEENTITYPATH:
-            /** SaHpiEntityPath = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiResourceEntityPath,
-                         context->saHpiResourceEntityPath_len );
-        break;
-    
-        case COLUMN_SAHPIRESOURCECAPABILITIES:
-            /** BITS = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiResourceCapabilities,
-                         context->saHpiResourceCapabilities_len );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEHOTSWAPCAPABILITIES:
-            /** BITS = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiResourceHotSwapCapabilities,
-                         context->saHpiResourceHotSwapCapabilities_len );
-        break;
-    
-        case COLUMN_SAHPIRESOURCESEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceSeverity,
-                         sizeof(context->saHpiResourceSeverity) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEFAILED:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceFailed,
-                         sizeof(context->saHpiResourceFailed) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFORESOURCEREV:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoResourceRev,
-                         sizeof(context->saHpiResourceInfoResourceRev) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOSPECIFICVER:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoSpecificVer,
-                         sizeof(context->saHpiResourceInfoSpecificVer) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFODEVICESUPPORT:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoDeviceSupport,
-                         sizeof(context->saHpiResourceInfoDeviceSupport) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOMANUFACTURERID:
-            /** SaHpiManufacturerId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiResourceInfoManufacturerId,
-                         sizeof(context->saHpiResourceInfoManufacturerId) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOPRODUCTID:
-            /** Unsigned16 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoProductId,
-                         sizeof(context->saHpiResourceInfoProductId) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOFIRMWAREMAJORREV:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoFirmwareMajorRev,
-                         sizeof(context->saHpiResourceInfoFirmwareMajorRev) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOFIRMWAREMINORREV:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoFirmwareMinorRev,
-                         sizeof(context->saHpiResourceInfoFirmwareMinorRev) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOAUXFIRMWAREREV:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceInfoAuxFirmwareRev,
-                         sizeof(context->saHpiResourceInfoAuxFirmwareRev) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEINFOGUID:
-            /** SaHpiGuid = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiResourceInfoGuid,
-                         context->saHpiResourceInfoGuid_len );
-        break;
-    
-        case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceTagTextType,
-                         sizeof(context->saHpiResourceTagTextType) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceTagTextLanguage,
-                         sizeof(context->saHpiResourceTagTextLanguage) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCETAG:
-            /** SaHpiText = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiResourceTag,
-                         context->saHpiResourceTag_len );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEPARMCONTROL:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceParmControl,
-                         sizeof(context->saHpiResourceParmControl) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCERESETACTION:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceResetAction,
-                         sizeof(context->saHpiResourceResetAction) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEPOWERACTION:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourcePowerAction,
-                         sizeof(context->saHpiResourcePowerAction) );
-        break;
-    
-        case COLUMN_SAHPIRESOURCEISHISTORICAL:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceIsHistorical,
-                         sizeof(context->saHpiResourceIsHistorical) );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiResourceTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+	switch (table_info->colnum) {
+	
+	case COLUMN_SAHPIRESOURCEID:
+		/** UNSIGNED32 = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiResourceId,
+					 sizeof(context->saHpiResourceId) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEENTRYID:
+		/** SaHpiEntryId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiResourceEntryId,
+					 sizeof(context->saHpiResourceEntryId) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEENTITYPATH:
+		/** SaHpiEntityPath = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiResourceEntityPath,
+					 context->saHpiResourceEntityPath_len );
+		break;
+
+	case COLUMN_SAHPIRESOURCECAPABILITIES:
+		/** BITS = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiResourceCapabilities,
+					 context->saHpiResourceCapabilities_len );
+		break;
+
+	case COLUMN_SAHPIRESOURCEHOTSWAPCAPABILITIES:
+		/** BITS = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiResourceHotSwapCapabilities,
+					 context->saHpiResourceHotSwapCapabilities_len );
+		break;
+
+	case COLUMN_SAHPIRESOURCESEVERITY:
+		/** SaHpiSeverity = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceSeverity,
+					 sizeof(context->saHpiResourceSeverity) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEFAILED:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceFailed,
+					 sizeof(context->saHpiResourceFailed) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFORESOURCEREV:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoResourceRev,
+					 sizeof(context->saHpiResourceInfoResourceRev) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOSPECIFICVER:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoSpecificVer,
+					 sizeof(context->saHpiResourceInfoSpecificVer) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFODEVICESUPPORT:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoDeviceSupport,
+					 sizeof(context->saHpiResourceInfoDeviceSupport) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOMANUFACTURERID:
+		/** SaHpiManufacturerId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiResourceInfoManufacturerId,
+					 sizeof(context->saHpiResourceInfoManufacturerId) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOPRODUCTID:
+		/** Unsigned16 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoProductId,
+					 sizeof(context->saHpiResourceInfoProductId) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMAJORREV:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoFirmwareMajorRev,
+					 sizeof(context->saHpiResourceInfoFirmwareMajorRev) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMINORREV:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoFirmwareMinorRev,
+					 sizeof(context->saHpiResourceInfoFirmwareMinorRev) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOAUXFIRMWAREREV:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceInfoAuxFirmwareRev,
+					 sizeof(context->saHpiResourceInfoAuxFirmwareRev) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEINFOGUID:
+		/** SaHpiGuid = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiResourceInfoGuid,
+					 context->saHpiResourceInfoGuid_len );
+		break;
+
+	case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
+		/** SaHpiTextType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceTagTextType,
+					 sizeof(context->saHpiResourceTagTextType) );
+		break;
+
+	case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceTagTextLanguage,
+					 sizeof(context->saHpiResourceTagTextLanguage) );
+		break;
+
+	case COLUMN_SAHPIRESOURCETAG:
+		/** SaHpiText = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiResourceTag,
+					 context->saHpiResourceTag_len );
+		break;
+
+	case COLUMN_SAHPIRESOURCEPARMCONTROL:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceParmControl,
+					 sizeof(context->saHpiResourceParmControl) );
+		break;
+
+	case COLUMN_SAHPIRESOURCERESETACTION:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceResetAction,
+					 sizeof(context->saHpiResourceResetAction) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEPOWERACTION:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourcePowerAction,
+					 sizeof(context->saHpiResourcePowerAction) );
+		break;
+
+	case COLUMN_SAHPIRESOURCEISHISTORICAL:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiResourceIsHistorical,
+					 sizeof(context->saHpiResourceIsHistorical) );
+		break;
+
+	default: /** We shouldn't get here */
+		snmp_log(LOG_ERR, "unknown column in "
+			 "saHpiResourceTable_get_value\n");
+		return SNMP_ERR_GENERR;
+	}
+	return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -1813,9 +1819,9 @@ const saHpiResourceTable_context *
 saHpiResourceTable_get_by_idx(netsnmp_index * hdr)
 {
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_get_by_idx, called\n"));
-	
-    return (const saHpiResourceTable_context *)
-        CONTAINER_FIND(cb.container, hdr );
+
+	return(const saHpiResourceTable_context *)
+	CONTAINER_FIND(cb.container, hdr );
 }
 
 
