@@ -92,6 +92,9 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 	DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
 
+	oid column[2];
+	int column_len = 2;
+
 	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DIGITAL populate_ctrl_digital() called\n"));
 
 	/* check for NULL pointers */
@@ -128,6 +131,15 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 		/* assign the indices to the index */
 	ctrl_digital_index.oids = (oid *) & ctrl_digital_oid;
 
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLDIGITALNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlDigitalTable_oid, saHpiCtrlDigitalTable_oid_len,
+			column, column_len,
+			&ctrl_digital_index,
+			child_oid, MAX_OID_LEN, child_oid_len);
+
 	/* See if Row exists. */
 	ctrl_digital_context = NULL;
 	ctrl_digital_context = CONTAINER_FIND(cb.container, &ctrl_digital_index);
@@ -142,12 +154,65 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	} 
 
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        ctrl_digital_context->saHpiCtrlDigitalEntryId = ctrl_digital_oid[3];
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        ctrl_digital_context->saHpiCtrlDigitalNum =
+		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+        /** SaHpiCtrlOutputType = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalOutputType = 
+		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalMode = 0;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalIsReadOnly =
+            (rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalIsWriteOnly =
+	    (rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+		? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalDefaultState =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Digital.Default + 1;
+
+        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        ctrl_digital_context->saHpiCtrlDigitalState = 0;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        ctrl_digital_context->saHpiCtrlDigitalOem = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_digital_context->saHpiCtrlDigitalRDR, 
+	       0, 
+	       sizeof(ctrl_digital_context->saHpiCtrlDigitalRDR));
+
+	ctrl_digital_context->saHpiCtrlDigitalRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_digital_context->saHpiCtrlDigitalRDR, 
+	       full_oid, 
+	       ctrl_digital_context->saHpiCtrlDigitalRDR_len);
+
+
+	CONTAINER_INSERT (cb.container, ctrl_digital_context);
+		
+	ctrl_digital_entry_count = CONTAINER_SIZE (cb.container);
 
 	return rv;
 }
 
 /*
- *
+ * int handle_saHpiCtrlDigitalEntryCount()
  */
 int handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
 				      netsnmp_handler_registration *reginfo,
@@ -1084,6 +1149,9 @@ int saHpiCtrlDigitalTable_get_value(
 
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_get_value, called\n"));
+
+
+	DEBUGMSGTL ((AGENT, "**** saHpiCtrlDigitalTable_get_value, called [%d] ****\n", table_info->colnum));
 
 	switch (table_info->colnum) {
 	
