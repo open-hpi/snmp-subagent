@@ -6318,7 +6318,7 @@ saHpiCtrlDigitalDefaultMode OBJECT-TYPE
 		REFERENCE 
 	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 5}
+        ::= {saHpiCtrlDigitalEntry 4}
 
 saHpiCtrlDigitalMode OBJECT-TYPE 
         SYNTAX          SaHpiCtrlMode
@@ -6344,7 +6344,7 @@ saHpiCtrlDigitalMode OBJECT-TYPE
 		REFERENCE 
 	"See section 7.3.2 and 7.3.3 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 6}
+        ::= {saHpiCtrlDigitalEntry 5}
         
 saHpiCtrlDigitalIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -6355,7 +6355,7 @@ saHpiCtrlDigitalIsReadOnly OBJECT-TYPE
 		REFERENCE
     "See section 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 7}
+        ::= {saHpiCtrlDigitalEntry 6}
         
 saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -6367,7 +6367,7 @@ saHpiCtrlDigitalIsWriteOnly  OBJECT-TYPE
 		REFERENCE
     "See section 7.3.2, 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 	
-        ::= {saHpiCtrlDigitalEntry 8}
+        ::= {saHpiCtrlDigitalEntry 7}
 
 saHpiCtrlDigitalDefaultState          OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital 
@@ -6382,7 +6382,7 @@ saHpiCtrlDigitalDefaultState          OBJECT-TYPE
     	REFERENCE 
 	"See section 7.1.1, 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
 
-        ::= {saHpiCtrlDigitalEntry 9}
+        ::= {saHpiCtrlDigitalEntry 8}
 
 saHpiCtrlDigitalState OBJECT-TYPE
         SYNTAX          SaHpiCtrlStateDigital
@@ -6430,7 +6430,7 @@ saHpiCtrlDigitalState OBJECT-TYPE
     	REFERENCE 
 	"See section 7.3.2, 7.3.3. 8.7 and 8.8 from SAI-HPI-B.01.01 specification."
          
-        ::= {saHpiCtrlDigitalEntry 10}
+        ::= {saHpiCtrlDigitalEntry 9}
 
 saHpiCtrlDigitalOem OBJECT-TYPE
         SYNTAX          Unsigned32
@@ -6440,7 +6440,7 @@ saHpiCtrlDigitalOem OBJECT-TYPE
 	"Reserved for OEM use"
 		REFERENCE		
 	"See section 8.8 from SAI-HPI-B.01.01 specification."
-        ::= {saHpiCtrlDigitalEntry 11}
+        ::= {saHpiCtrlDigitalEntry 10}
 
 
 saHpiCtrlDigitalRDR OBJECT-TYPE
@@ -6449,7 +6449,7 @@ saHpiCtrlDigitalRDR OBJECT-TYPE
         STATUS          current
         DESCRIPTION     
 	"Pointer to Resource Table for this digital control."
-        ::= {saHpiCtrlDigitalEntry 12}
+        ::= {saHpiCtrlDigitalEntry 11}
 
 ---
 --- Discrete
