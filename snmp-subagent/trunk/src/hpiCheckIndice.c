@@ -62,6 +62,15 @@ int saHpiCtrlDigitalEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiCtrlDiscreteTable  */    
+/**************************/
+int saHpiCtrlDiscreteEntryId_check_index(long val)
+{
+	return 0;
+}
+
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
