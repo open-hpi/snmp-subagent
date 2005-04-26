@@ -83,7 +83,7 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 			       oid *full_oid, size_t full_oid_len,
 			       oid *child_oid, size_t *child_oid_len)
 {
-	SaErrorT rv;
+	SaErrorT rv = SA_OK;
 
 	oid ctrl_digital_oid[CTRL_DIGITAL_INDEX_NR];
 	netsnmp_index ctrl_digital_index;
