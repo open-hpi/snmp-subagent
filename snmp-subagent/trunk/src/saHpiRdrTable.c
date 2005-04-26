@@ -182,8 +182,8 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					sessionid,
 					&rdr_entry,
 					rpt_entry,
-					&full_oid, full_oid_len,
-					&child_oid, &child_oid_len);
+					full_oid, full_oid_len,
+					child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_digital rv: %s\n",
 					    oh_lookup_error(rv)));
@@ -193,8 +193,8 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					sessionid,
 					&rdr_entry,
 					rpt_entry,
-					&full_oid, full_oid_len,
-					&child_oid, &child_oid_len);
+					full_oid, full_oid_len,
+					child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_discrete rv: %s\n",
 					    oh_lookup_error(rv)));            
