@@ -77,9 +77,6 @@ int initialize_table_saHpiCtrlDiscreteEntryCount(void);
 
 
 
-
-
-
 /*
  * SaErrorT populate_ctrl_discrete()
  */
@@ -89,7 +86,137 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 			        oid *full_oid, size_t full_oid_len,
 			        oid *child_oid, size_t *child_oid_len)
 {
-	return SA_OK;
+
+	SaErrorT rv;
+
+	oid ctrl_discrete_oid[CTRL_DISCRETE_INDEX_NR];
+	netsnmp_index ctrl_discrete_index;
+	saHpiCtrlDiscreteTable_context *ctrl_discrete_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DISCRETE populate_ctrl_digital() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_discrete() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_discrete() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	ctrl_discrete_index.len = CTRL_DISCRETE_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	ctrl_discrete_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	ctrl_discrete_oid[1] = rpt_entry->ResourceId;
+		/** Index saHpiResourceIsHistorical is external */
+	ctrl_discrete_oid[2] = MIB_FALSE;
+		/** Index saHpiCtrlDigitalEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_discrete() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_discrete_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	ctrl_discrete_index.oids = (oid *) & ctrl_discrete_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLDISCRETENUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlDiscreteTable_oid, saHpiCtrlDiscreteTable_oid_len,
+			column, column_len,
+			&ctrl_discrete_index,
+			child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	ctrl_discrete_context = NULL;
+	ctrl_discrete_context = CONTAINER_FIND(cb.container, &ctrl_discrete_index);
+
+	if (!ctrl_discrete_context) { 
+		// New entry. Add it
+		ctrl_discrete_context = 
+			saHpiCtrlDigitalTable_create_row(&ctrl_discrete_index);
+	}
+	if (!ctrl_discrete_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Digital row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	} 
+
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        ctrl_discrete_context->saHpiCtrlDiscreteEntryId =
+		ctrl_discrete_oid[3];
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        ctrl_discrete_context->saHpiCtrlDiscreteNum =
+		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+        /** SaHpiCtrlOutputType = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteOutputType = 
+		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteIsReadOnly =
+            (rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteIsWriteOnly =
+	    (rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+		? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteDefaultState =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default + 1;
+
+        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        ctrl_discrete_context->saHpiCtrlDiscreteState = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default + 1;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        ctrl_discrete_context->saHpiCtrlDiscreteOem = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_discrete_context->saHpiCtrlDiscreteRDR, 
+	       0, 
+	       sizeof(ctrl_discrete_context->saHpiCtrlDiscreteRDR));
+
+	ctrl_discrete_context->saHpiCtrlDiscreteRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_discrete_context->saHpiCtrlDiscreteRDR, 
+	       full_oid, 
+	       ctrl_discrete_context->saHpiCtrlDiscreteRDR_len);
+
+
+	CONTAINER_INSERT (cb.container, ctrl_discrete_context);
+		
+	ctrl_discrete_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
+
 }
 
 
