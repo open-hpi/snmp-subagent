@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+
+#include <SaHpi.h>
 #include "saHpiCtrlDiscreteTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -54,7 +62,22 @@ size_t saHpiCtrlDiscreteTable_oid_len = OID_LENGTH(saHpiCtrlDiscreteTable_oid);
  */
 static int initialized = FALSE;               
 static GHashTable *dr_table;
+/*
+ * SaErrorT populate_ctrl_discrete()
+ */
+SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid, 
+			        SaHpiRdrT *rdr_entry,
+			        SaHpiRptEntryT *rpt_entry,
+			        oid *full_oid, size_t full_oid_len,
+			        oid *child_oid, size_t *child_oid_len)
+{
+	return SA_OK;
+}
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /************************************************************
  * keep binary tree to find context by name
@@ -106,39 +129,6 @@ saHpiCtrlDiscreteTable_cmp( const void *lhs, const void *rhs )
 	 */
 }
 
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiCtrlDiscreteTable_context *
-saHpiCtrlDiscreteTable_get( const char *name, int len )
-{
-	saHpiCtrlDiscreteTable_context tmp;
-
-	/** we should have a secondary index */
-	netsnmp_assert(cb.container->next != NULL);
-
-	/*
-	 * TODO: implement compare. Remove this ifdef code and
-	 * add your own code here.
-	 */
-#ifdef TABLE_CONTAINER_TODO
-	snmp_log(LOG_ERR, "saHpiCtrlDiscreteTable_get not implemented!\n" );
-	return NULL;
-#endif
-
-	/*
-	 * EXAMPLE:
-	 *
-	 * if(len > sizeof(tmp.xxName))
-	 *   return NULL;
-	 *
-	 * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-	 * tmp.xxName_len = len;
-	 *
-	 * return CONTAINER_FIND(cb.container->next, &tmp);
-	 */
-}
 
 
 /************************************************************
@@ -256,42 +246,27 @@ saHpiCtrlDiscreteTable_extract_index( saHpiCtrlDiscreteTable_context * ctx, nets
 	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
 	var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
+
 	snmp_log(LOG_ERR, "saHpiCtrlDiscreteTable_extract_index index list not implemented!\n" );
-	return 0;
-#else
-	var_saHpiDomainId.next_variable = &var_XX;
-#endif
+	var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
 	memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
 	var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
 	snmp_log(LOG_ERR, "saHpiCtrlDiscreteTable_extract_index index list not implemented!\n" );
-	return 0;
-#else
-	var_saHpiResourceId.next_variable = &var_XX;
-#endif
+	var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
 	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
 	var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
 	snmp_log(LOG_ERR, "saHpiCtrlDiscreteTable_extract_index index list not implemented!\n" );
-	return 0;
-#else
-	var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+	var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlDiscreteEntryId;
 
 	memset( &var_saHpiCtrlDiscreteEntryId, 0x00, sizeof(var_saHpiCtrlDiscreteEntryId) );
 	var_saHpiCtrlDiscreteEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
 	/** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
 	snmp_log(LOG_ERR, "saHpiCtrlDiscreteTable_extract_index index list not implemented!\n" );
-	return 0;
-#else
-	var_saHpiCtrlDiscreteEntryId.next_variable = &var_XX;
-#endif
+	var_saHpiCtrlDiscreteEntryId.next_variable = NULL;
 
 
 	/*
@@ -311,34 +286,14 @@ saHpiCtrlDiscreteTable_extract_index( saHpiCtrlDiscreteTable_context * ctx, nets
 		ctx->saHpiCtrlDiscreteEntryId = *var_saHpiCtrlDiscreteEntryId.val.integer;
 
 
-		/*
-		 * TODO: check index for valid values. For EXAMPLE:
-		 *
-		   * if ( *var_saHpiDomainId.val.integer != XXX ) {
-	       *    err = -1;
-	       * }
-	       */
-		/*
-		 * TODO: check index for valid values. For EXAMPLE:
-		 *
-		   * if ( *var_saHpiResourceId.val.integer != XXX ) {
-	       *    err = -1;
-	       * }
-	       */
-		/*
-		 * TODO: check index for valid values. For EXAMPLE:
-		 *
-		   * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-	       *    err = -1;
-	       * }
-	       */
-		/*
-		 * TODO: check index for valid values. For EXAMPLE:
-		 *
-		   * if ( *var_saHpiCtrlDiscreteEntryId.val.integer != XXX ) {
-	       *    err = -1;
-	       * }
-	       */
+		err = saHpiDomainId_check_index(
+				*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+				*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+				*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiCtrlDiscreteEntryId_check_index(
+				*var_saHpiCtrlDiscreteEntryId.val.integer);
 	}
 
 	/*
@@ -688,23 +643,7 @@ void saHpiCtrlDiscreteTable_set_action( netsnmp_request_group *rg )
 		}
 	}
 
-	/*
-	 * done with all the columns. Could check row related
-	 * requirements here.
-	 */
-#ifndef saHpiCtrlDiscreteTable_CAN_MODIFY_ACTIVE_ROW
-	if ( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-	     row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-		row_err = 1;
-	}
-#endif
 
-	/*
-	 * check activation/deactivation
-	 */
-	row_err = netsnmp_table_array_check_row_status(&cb, rg,
-						       row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-						       undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
 	if (row_err) {
 		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
 					       (netsnmp_request_info*)rg->rg_void,
@@ -802,7 +741,9 @@ void saHpiCtrlDiscreteTable_set_free( netsnmp_request_group *rg )
 			/** UNSIGNED32 = ASN_UNSIGNED */
 			break;
 
-		default: /** We shouldn't get here */
+		default: 
+			break;
+			/** We shouldn't get here */
 			/** should have been logged in reserve1 */
 		}
 	}
