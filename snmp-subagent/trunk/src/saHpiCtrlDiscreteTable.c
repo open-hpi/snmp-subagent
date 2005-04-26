@@ -62,6 +62,28 @@ size_t saHpiCtrlDiscreteTable_oid_len = OID_LENGTH(saHpiCtrlDiscreteTable_oid);
  */
 static int initialized = FALSE;               
 static GHashTable *dr_table;
+
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long ctrl_discrete_entry_count = 0;
+static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
+
+
+
+int handle_saHpiCtrlDigitalEntryCount( netsnmp_mib_handler *handler, 
+			       netsnmp_handler_registration *reginfo,
+			       netsnmp_agent_request_info   *reqinfo, 
+			       netsnmp_request_info *requests);
+
+int initialize_table_saHpiCtrlDiscreteEntryCount(void);
+
+
+
+
+
+
 /*
  * SaErrorT populate_ctrl_discrete()
  */
@@ -73,6 +95,59 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 {
 	return SA_OK;
 }
+
+
+
+/*
+ * int handle_saHpiCtrlDiscreteEntryCount()
+ */
+int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
+				       netsnmp_handler_registration *reginfo,
+				       netsnmp_agent_request_info   *reqinfo,
+				       netsnmp_request_info         *requests)
+{
+
+	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDiscreteEntryCount, called\n"));	
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &ctrl_discrete_entry_count,
+				     sizeof(ctrl_discrete_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiCtrlDigitalEntryCount()
+ */
+int initialize_table_saHpiCtrlDiscreteEntryCount(void)
+{
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDiscreteEntryCount, called\n"));	
+
+	netsnmp_register_scalar(
+	    netsnmp_create_handler_registration(
+		    "saHpiCtrlDiscreteEntryCount", 
+		    handle_saHpiCtrlDiscreteEntryCount,
+		    saHpiCtrlDiscreteEntryCount_oid, 
+		    OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
+		    HANDLER_CAN_RONLY));
+	return 0;
+}
+
 
 /************************************************************/
 /************************************************************/
@@ -159,15 +234,13 @@ saHpiCtrlDiscreteTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiCtrlDiscreteTable(void)
 {
+
+	DEBUGMSGTL ((AGENT, "init_saHpiCtrlDiscreteTable, called\n"));
+
 	initialize_table_saHpiCtrlDiscreteTable();
 
-	/*
-	 * TODO: perform any startup stuff here, such as
-	 * populating the table with initial data.
-	 *
-	 * saHpiCtrlDiscreteTable_context * new_row = create_row(index);
-	 * CONTAINER_INSERT(cb.container,new_row);
-	 */
+	initialize_table_saHpiCtrlDiscreteEntryCount();
+
 }
 
 /************************************************************
