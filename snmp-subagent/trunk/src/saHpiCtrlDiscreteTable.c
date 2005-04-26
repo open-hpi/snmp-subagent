@@ -69,14 +69,10 @@ static GHashTable *dr_table;
  */
 static u_long ctrl_discrete_entry_count = 0;
 static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
-
-
-
-int handle_saHpiCtrlDigitalEntryCount( netsnmp_mib_handler *handler, 
-			       netsnmp_handler_registration *reginfo,
-			       netsnmp_agent_request_info   *reqinfo, 
-			       netsnmp_request_info *requests);
-
+int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
+				       netsnmp_handler_registration *reginfo,
+				       netsnmp_agent_request_info   *reqinfo,
+				       netsnmp_request_info         *requests);
 int initialize_table_saHpiCtrlDiscreteEntryCount(void);
 
 
@@ -240,6 +236,8 @@ init_saHpiCtrlDiscreteTable(void)
 	initialize_table_saHpiCtrlDiscreteTable();
 
 	initialize_table_saHpiCtrlDiscreteEntryCount();
+
+	domain_resource_pair_initialize(&initialized, &dr_table);
 
 }
 
