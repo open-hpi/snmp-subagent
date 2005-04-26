@@ -57,7 +57,7 @@ init_hpiB0101(void)
 //    static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
     static oid saHpiEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
     static oid saHpiSensorEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 };
-    static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
+//    static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
     static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
     static oid saHpiWatchdogEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,19 };
     static oid saHpiSensorEnableChangeEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
@@ -302,11 +302,11 @@ init_hpiB0101(void)
                                saHpiSensorEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryCountTotal_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiCtrlDiscreteEntryCount", handle_saHpiCtrlDiscreteEntryCount,
-                               saHpiCtrlDiscreteEntryCount_oid, OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiCtrlDiscreteEntryCount", handle_saHpiCtrlDiscreteEntryCount,
+//                               saHpiCtrlDiscreteEntryCount_oid, OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiDomainAlarmEntryCount", handle_saHpiDomainAlarmEntryCount,
                                saHpiDomainAlarmEntryCount_oid, OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
@@ -1707,6 +1707,7 @@ handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1735,6 +1736,7 @@ handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
