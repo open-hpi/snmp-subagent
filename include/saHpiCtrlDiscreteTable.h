@@ -121,6 +121,14 @@ extern oid saHpiCtrlDiscreteTable_oid[];
 extern size_t saHpiCtrlDiscreteTable_oid_len;
 
 #define saHpiCtrlDiscreteTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,4
+
+
+/* Number of table Indexes */
+#define CTRL_DISCRETE_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlDiscreteEntryId_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiCtrlDiscreteTable
