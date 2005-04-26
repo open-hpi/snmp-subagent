@@ -487,7 +487,7 @@ static int saHpiCtrlDiscreteTable_row_copy(saHpiCtrlDiscreteTable_context * dst,
 
 	dst->saHpiCtrlDiscreteOem = src->saHpiCtrlDiscreteOem;
 
-	memcpy( src->saHpiCtrlDiscreteRDR, dst->saHpiCtrlDiscreteRDR, src->saHpiCtrlDiscreteRDR_len );
+	memcpy( dst->saHpiCtrlDiscreteRDR, src->saHpiCtrlDiscreteRDR, src->saHpiCtrlDiscreteRDR_len );
 	dst->saHpiCtrlDiscreteRDR_len = src->saHpiCtrlDiscreteRDR_len;
 
 	return 0;

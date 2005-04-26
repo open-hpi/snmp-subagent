@@ -477,7 +477,7 @@ static int saHpiCtrlDigitalTable_row_copy(saHpiCtrlDigitalTable_context * dst,
 
 	dst->saHpiCtrlDigitalOem = src->saHpiCtrlDigitalOem;
 
-	memcpy( src->saHpiCtrlDigitalRDR, dst->saHpiCtrlDigitalRDR, src->saHpiCtrlDigitalRDR_len );
+	memcpy( dst->saHpiCtrlDigitalRDR, src->saHpiCtrlDigitalRDR, src->saHpiCtrlDigitalRDR_len );
 	dst->saHpiCtrlDigitalRDR_len = src->saHpiCtrlDigitalRDR_len;
 
 	return 0;
@@ -1225,9 +1225,6 @@ int saHpiCtrlDigitalTable_get_value(
 
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_get_value, called\n"));
-
-
-	DEBUGMSGTL ((AGENT, "**** saHpiCtrlDigitalTable_get_value, called [%d] ****\n", table_info->colnum));
 
 	switch (table_info->colnum) {
 	
