@@ -31,6 +31,11 @@ int saHpiResourceIsHistorical_check_index(long val);
 /**************************/
 int saHpiCtrlDigitalEntryId_check_index(long val);
 
+/**************************/
+/* saHpiCtrlDiscreteTable  */    
+/**************************/
+int saHpiCtrlDiscreteEntryId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
