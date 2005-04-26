@@ -87,7 +87,7 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 			        oid *child_oid, size_t *child_oid_len)
 {
 
-	SaErrorT rv;
+	SaErrorT rv = SA_OK;
 
 	oid ctrl_discrete_oid[CTRL_DISCRETE_INDEX_NR];
 	netsnmp_index ctrl_discrete_index;
@@ -151,7 +151,7 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 	if (!ctrl_discrete_context) { 
 		// New entry. Add it
 		ctrl_discrete_context = 
-			saHpiCtrlDigitalTable_create_row(&ctrl_discrete_index);
+			saHpiCtrlDiscreteTable_create_row(&ctrl_discrete_index);
 	}
 	if (!ctrl_discrete_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Digital row!");
@@ -188,13 +188,13 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 	    (rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
 		? MIB_TRUE : MIB_FALSE;
 
-        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        /** saHpiCtrlDiscreteState = UNSIGNED32 */
         ctrl_discrete_context->saHpiCtrlDiscreteDefaultState =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default + 1;
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default;
 
-        /** SaHpiCtrlStateDigital = ASN_INTEGER */
+        /** saHpiCtrlDiscreteState = UNSIGNED32 */
         ctrl_discrete_context->saHpiCtrlDiscreteState = 
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default + 1;
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Discrete.Default;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         ctrl_discrete_context->saHpiCtrlDiscreteOem = 
@@ -219,6 +219,79 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 
 }
 
+/*
+ * int set_table_ctrl_discrete_mode (saHpiCtrlDiscreteTable_context * ctx)
+ */
+int set_table_ctrl_discrete_mode (saHpiCtrlDiscreteTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	DEBUGMSGTL((AGENT, "SAHPI_CTRL_TYPE_DISCRETE: sessionod [%d] resourceid [%d] saHpiCtrlDiscreteNum [%d] saHpiCtrlDiscreteMode [%d]\n",
+		    session_id, resource_id, row_ctx->saHpiCtrlDiscreteNum, row_ctx->saHpiCtrlDiscreteMode - 1)); 
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlDiscreteNum, 
+			     row_ctx->saHpiCtrlDiscreteMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_DISCRETE: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_DISCRETE: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/*
+ * int set_table_ctrl_digital_state (saHpiCtrlDiscreteTable_context * ctx)
+ */
+int set_table_ctrl_discrete_state (saHpiCtrlDiscreteTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDiscreteState - 1;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_DISCRETE;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlDiscreteNum, 
+			     row_ctx->saHpiCtrlDiscreteMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+	"SAHPI_CTRL_TYPE_DISCRETE: Call to saHpiControlSet failed to set State rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+	"SAHPI_CTRL_TYPE_DISCRETE: Call to saHpiControlSet failed to set State rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
 
 
 /*
@@ -777,31 +850,30 @@ void saHpiCtrlDiscreteTable_set_reserve2( netsnmp_request_group *rg )
 		switch (current->tri->colnum) {
 		
 		case COLUMN_SAHPICTRLDISCRETEMODE:
-			/** SaHpiCtrlMode = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlDiscreteIsReadOnly == MIB_TRUE) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDISCRETEMODE mode is ReadOnly, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDISCRETEMODE mode is ReadOnly, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+			}  
+			if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDISCRETEMODE Invalid Mode, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDISCRETEMODE Invalid Mode, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		case COLUMN_SAHPICTRLDISCRETESTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlDiscreteMode == 
+			    (SAHPI_CTRL_MODE_AUTO + 1) ) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDISCRETESTATE mode is AUTO, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDISCRETESTATE mode is AUTO, Failed\n"));
+				rc = SNMP_ERR_GENERR;
+			} 
+			if (*var->val.integer < 0 ) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLDISCRETESTATE Invalid State Value, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLDISCRETESTATE Invalid State Value, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		default: /** We shouldn't get here */
@@ -851,11 +923,13 @@ void saHpiCtrlDiscreteTable_set_action( netsnmp_request_group *rg )
 		case COLUMN_SAHPICTRLDISCRETEMODE:
 			/** SaHpiCtrlMode = ASN_INTEGER */
 			row_ctx->saHpiCtrlDiscreteMode = *var->val.integer;
+			row_err = set_table_ctrl_discrete_mode(row_ctx);
 			break;
 
 		case COLUMN_SAHPICTRLDISCRETESTATE:
 			/** UNSIGNED32 = ASN_UNSIGNED */
 			row_ctx->saHpiCtrlDiscreteState = *var->val.integer;
+			row_err = set_table_ctrl_discrete_state(row_ctx); 
 			break;
 
 		default: /** We shouldn't get here */
