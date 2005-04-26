@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
 #include <saHpiCtrlDigitalTable.h>
+#include <saHpiCtrlDiscreteTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -171,7 +172,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 		case SAHPI_CTRL_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_control; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				     "SAHPI_CTRL_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
@@ -188,7 +189,15 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					    oh_lookup_error(rv)));
  				break;
 			case SAHPI_CTRL_TYPE_DISCRETE:
-				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DISCRETE: Not implemented\n"));
+				rv = populate_ctrl_discrete(
+					sessionid,
+					&rdr_entry,
+					rpt_entry,
+					&full_oid, full_oid_len,
+					&child_oid, &child_oid_len);
+				DEBUGMSGTL((AGENT,
+					    "populate_ctrl_discrete rv: %s\n",
+					    oh_lookup_error(rv)));            
 				break;
 			case SAHPI_CTRL_TYPE_ANALOG:
 				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_ANALOG: Not implemented\n"));
@@ -206,9 +215,6 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_RDR UNKNOWN TYPE: Not implemented\n"));
 				break;
 			}
-			DEBUGMSGTL ((AGENT,
-				     "Called populate_control(); rv: %d\n",   
-				     rv));
 			break;
 /*
 		case SAHPI_SENSOR_RDR:
