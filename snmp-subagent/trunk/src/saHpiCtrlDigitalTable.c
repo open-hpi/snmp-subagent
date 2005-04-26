@@ -61,7 +61,7 @@ size_t saHpiCtrlDigitalTable_oid_len = OID_LENGTH(saHpiCtrlDigitalTable_oid);
  * objects for hash table
  */
 static int initialized = FALSE;		      
-static GHashTable *oh_ep_table;
+static GHashTable *dr_table;
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -121,7 +121,7 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 		/** Index saHpiCtrlDigitalEntryId is internal */
 	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
 	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
-	dr_entry = domain_resource_pair_get(&dr_pair, &oh_ep_table); 
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
 	if (dr_entry == NULL) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_ctrl_digital() domain_resource_pair_get returned NULL\n"));
@@ -425,7 +425,7 @@ void init_saHpiCtrlDigitalTable(void)
 
 	initialize_table_saHpiCtrlDigitalEntryCount();
 
-	domain_resource_pair_initialize(&initialized, &oh_ep_table);
+	domain_resource_pair_initialize(&initialized, &dr_table);
 }
 
 /************************************************************
@@ -564,13 +564,13 @@ saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnm
 		ctx->saHpiCtrlDigitalEntryId = *var_saHpiCtrlDigitalEntryId.val.integer;
 
 		err = saHpiDomainId_check_index(
-					       *var_saHpiDomainId.val.integer);
+				*var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-						      *var_saHpiResourceId.val.integer);  
+				*var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-							   *var_saHpiResourceIsHistorical.val.integer);
+				*var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiCtrlDigitalEntryId_check_index(
-							 *var_saHpiCtrlDigitalEntryId.val.integer);
+				*var_saHpiCtrlDigitalEntryId.val.integer);
 	}
 
 	/*
