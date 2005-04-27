@@ -19,6 +19,9 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <SaHpi.h>
+#include <oh_utils.h>
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiResourceIsHistorical is external */
@@ -86,6 +89,24 @@ typedef struct saHpiCtrlAnalogTable_context_s {
      */
 
 } saHpiCtrlAnalogTable_context;
+
+
+/*************************************************************
+ * set funtions
+ */
+int set_table_ctrl_analog_mode (saHpiCtrlAnalogTable_context *row_ctx);
+int set_table_ctrl_analog_state (saHpiCtrlAnalogTable_context *row_ctx);
+
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid, 
+			       SaHpiRdrT *rdr_entry,
+			       SaHpiRptEntryT *rpt_entry,
+			       oid *full_oid, size_t full_oid_len,
+			       oid *child_oid, size_t *child_oid_len);
+
 
 /*************************************************************
  * function declarations
