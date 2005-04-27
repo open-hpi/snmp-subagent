@@ -65,7 +65,7 @@ init_hpiB0101(void)
     static oid saHpiSensorEnableChangeEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
     static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
     static oid saHpiUserEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,29 };
-    static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
+//    static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
     static oid saHpiUserEvenLogtEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
     static oid saHpiUserEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
     static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
@@ -342,11 +342,11 @@ init_hpiB0101(void)
                                saHpiUserEventEntryCount_oid, OID_LENGTH(saHpiUserEventEntryCount_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiCtrlAnalogEntryCount", handle_saHpiCtrlAnalogEntryCount,
-                               saHpiCtrlAnalogEntryCount_oid, OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiCtrlAnalogEntryCount", handle_saHpiCtrlAnalogEntryCount,
+//                               saHpiCtrlAnalogEntryCount_oid, OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiUserEvenLogtEntryCountTotal", handle_saHpiUserEvenLogtEntryCountTotal,
                                saHpiUserEvenLogtEntryCountTotal_oid, OID_LENGTH(saHpiUserEvenLogtEntryCountTotal_oid),
@@ -1933,6 +1933,7 @@ handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1961,6 +1962,7 @@ handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
