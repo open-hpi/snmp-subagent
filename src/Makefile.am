@@ -19,7 +19,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiResourceTable.c \
 			saHpiRdrTable.c \
 			saHpiCtrlDigitalTable.c \
-			saHpiCtrlDiscreteTable.c
+			saHpiCtrlDiscreteTable.c \
+			saHpiCtrlAnalogTable.c 
 
 
 hpiSubagent_LDADD	= 
@@ -34,8 +35,6 @@ clean:
 #			saHpiAnnouncementTable.c \
 #			saHpiAnnunciatorTable.c \
 #			saHpiAutoInsertTimeoutTable.c \
-#			saHpiCtrlAnalogTable.c \
-#			saHpiCtrlDiscreteTable.c \
 #			saHpiCtrlOemTable.c \
 #			saHpiCtrlStreamTable.c \
 #			saHpiCtrlTextTable.c \
