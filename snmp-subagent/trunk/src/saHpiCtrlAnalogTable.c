@@ -48,7 +48,7 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiCtrlAnalogTable_oid[] = { saHpiCtrlAnalogTable_TABLE_OID };
+oid saHpiCtrlAnalogTable_oid[] = { saHpiCtrlAnalogTable_TABLE_OID};
 size_t saHpiCtrlAnalogTable_oid_len = OID_LENGTH(saHpiCtrlAnalogTable_oid);
 
 
@@ -61,10 +61,10 @@ size_t saHpiCtrlAnalogTable_oid_len = OID_LENGTH(saHpiCtrlAnalogTable_oid);
  * SaErrorT populate_ctrl_analog()
  */
 SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid, 
-			       SaHpiRdrT *rdr_entry,
-			       SaHpiRptEntryT *rpt_entry,
-			       oid *full_oid, size_t full_oid_len,
-			       oid *child_oid, size_t *child_oid_len)
+			      SaHpiRdrT *rdr_entry,
+			      SaHpiRptEntryT *rpt_entry,
+			      oid *full_oid, size_t full_oid_len,
+			      oid *child_oid, size_t *child_oid_len)
 {
 	return 0;
 }
@@ -104,42 +104,42 @@ static int saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiCtrlAnalogTable_context *context_l =
-        (saHpiCtrlAnalogTable_context *)lhs;
-    saHpiCtrlAnalogTable_context *context_r =
-        (saHpiCtrlAnalogTable_context *)rhs;
+	saHpiCtrlAnalogTable_context *context_l =
+	(saHpiCtrlAnalogTable_context *)lhs;
+	saHpiCtrlAnalogTable_context *context_r =
+	(saHpiCtrlAnalogTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+	/*
+	 * check primary key, then secondary. Add your own code if
+	 * there are more than 2 indexes
+	 */
+	int rc;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
+	/*
+	 * TODO: implement compare. Remove this ifdef code and
+	 * add your own code here.
+	 */
 #ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiCtrlAnalogTable_compare not implemented! Container order undefined\n" );
-    return 0;
+	snmp_log(LOG_ERR,
+		 "saHpiCtrlAnalogTable_compare not implemented! Container order undefined\n" );
+	return 0;
 #endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+
+	/*
+	 * EXAMPLE (assuming you want to sort on a name):
+	 *   
+	 * rc = strcmp( context_l->xxName, context_r->xxName );
+	 *
+	 * if(rc)
+	 *   return rc;
+	 *
+	 * TODO: fix secondary keys (or delete if there are none)
+	 *
+	 * if(context_l->yy < context_r->yy) 
+	 *   return -1;
+	 *
+	 * return (context_l->yy == context_r->yy) ? 0 : 1;
+	 */
 }
 
 /************************************************************
@@ -149,31 +149,31 @@ saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs )
 saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_get( const char *name, int len )
 {
-    saHpiCtrlAnalogTable_context tmp;
+	saHpiCtrlAnalogTable_context tmp;
 
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
+	/** we should have a secondary index */
+	netsnmp_assert(cb.container->next != NULL);
+
+	/*
+	 * TODO: implement compare. Remove this ifdef code and
+	 * add your own code here.
+	 */
 #ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlAnalogTable_get not implemented!\n" );
-    return NULL;
+	snmp_log(LOG_ERR, "saHpiCtrlAnalogTable_get not implemented!\n" );
+	return NULL;
 #endif
 
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
+	/*
+	 * EXAMPLE:
+	 *
+	 * if(len > sizeof(tmp.xxName))
+	 *   return NULL;
+	 *
+	 * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
+	 * tmp.xxName_len = len;
+	 *
+	 * return CONTAINER_FIND(cb.container->next, &tmp);
+	 */
 }
 
 
@@ -183,71 +183,71 @@ saHpiCtrlAnalogTable_get( const char *name, int len )
 void
 init_saHpiCtrlAnalogTable(void)
 {
-    initialize_table_saHpiCtrlAnalogTable();
+	initialize_table_saHpiCtrlAnalogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiCtrlAnalogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+	/*
+	 * TODO: perform any startup stuff here, such as
+	 * populating the table with initial data.
+	 *
+	 * saHpiCtrlAnalogTable_context * new_row = create_row(index);
+	 * CONTAINER_INSERT(cb.container,new_row);
+	 */
 }
 
 /************************************************************
  * the *_row_copy routine
  */
 static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
-                         saHpiCtrlAnalogTable_context * src)
+					 saHpiCtrlAnalogTable_context * src)
 {
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
+	if (!dst||!src)
+		return 1;
 
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiCtrlAnalogEntryId = src->saHpiCtrlAnalogEntryId;
+	/*
+	 * copy index, if provided
+	 */
+	if (dst->index.oids)
+		free(dst->index.oids);
+	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			    src->index.len * sizeof(oid) )) {
+		dst->index.oids = NULL;
+		return 1;
+	}
+	dst->index.len = src->index.len;
 
-    dst->saHpiCtrlAnalogNum = src->saHpiCtrlAnalogNum;
 
-    dst->saHpiCtrlAnalogOutputType = src->saHpiCtrlAnalogOutputType;
+	/*
+	 * copy components into the context structure
+	 */
+	/** TODO: add code for external index(s)! */
+	dst->saHpiCtrlAnalogEntryId = src->saHpiCtrlAnalogEntryId;
 
-    dst->saHpiCtrlAnalogDefaultMode = src->saHpiCtrlAnalogDefaultMode;
+	dst->saHpiCtrlAnalogNum = src->saHpiCtrlAnalogNum;
 
-    dst->saHpiCtrlAnalogMode = src->saHpiCtrlAnalogMode;
+	dst->saHpiCtrlAnalogOutputType = src->saHpiCtrlAnalogOutputType;
 
-    dst->saHpiCtrlAnalogIsReadOnly = src->saHpiCtrlAnalogIsReadOnly;
+	dst->saHpiCtrlAnalogDefaultMode = src->saHpiCtrlAnalogDefaultMode;
 
-    dst->saHpiCtrlAnalogIsWriteOnly = src->saHpiCtrlAnalogIsWriteOnly;
+	dst->saHpiCtrlAnalogMode = src->saHpiCtrlAnalogMode;
 
-    dst->saHpiCtrlAnalogDefaultMinState = src->saHpiCtrlAnalogDefaultMinState;
+	dst->saHpiCtrlAnalogIsReadOnly = src->saHpiCtrlAnalogIsReadOnly;
 
-    dst->saHpiCtrlAnalogDefaultMaxState = src->saHpiCtrlAnalogDefaultMaxState;
+	dst->saHpiCtrlAnalogIsWriteOnly = src->saHpiCtrlAnalogIsWriteOnly;
 
-    dst->saHpiCtrlAnalogDefaultState = src->saHpiCtrlAnalogDefaultState;
+	dst->saHpiCtrlAnalogDefaultMinState = src->saHpiCtrlAnalogDefaultMinState;
 
-    dst->saHpiCtrlAnalogState = src->saHpiCtrlAnalogState;
+	dst->saHpiCtrlAnalogDefaultMaxState = src->saHpiCtrlAnalogDefaultMaxState;
 
-    dst->saHpiCtrlAnalogOem = src->saHpiCtrlAnalogOem;
+	dst->saHpiCtrlAnalogDefaultState = src->saHpiCtrlAnalogDefaultState;
 
-    memcpy( dst->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR_len );
-    dst->saHpiCtrlAnalogRDR_len = src->saHpiCtrlAnalogRDR_len;
+	dst->saHpiCtrlAnalogState = src->saHpiCtrlAnalogState;
 
-    return 0;
+	dst->saHpiCtrlAnalogOem = src->saHpiCtrlAnalogOem;
+
+	memcpy( dst->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR_len );
+	dst->saHpiCtrlAnalogRDR_len = src->saHpiCtrlAnalogRDR_len;
+
+	return 0;
 }
 
 
@@ -262,90 +262,90 @@ static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 int
 saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiCtrlAnalogEntryId;
-    int err;
+	/*
+	 * temporary local storage for extracting oid index
+	 *
+	 * extract index uses varbinds (netsnmp_variable_list) to parse
+	 * the index OID into the individual components for each index part.
+	 */
+	/** TODO: add storage for external index(s)! */
+	netsnmp_variable_list var_saHpiDomainId;
+	netsnmp_variable_list var_saHpiResourceId;
+	netsnmp_variable_list var_saHpiResourceIsHistorical;
+	netsnmp_variable_list var_saHpiCtrlAnalogEntryId;
+	int err;
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
+	/*
+	 * copy index, if provided
+	 */
+	if (hdr) {
+		netsnmp_assert(ctx->index.oids == NULL);
+		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+				    hdr->len * sizeof(oid) )) {
+			return -1;
+		}
+		ctx->index.len = hdr->len;
+	}
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
+	/*
+	 * initialize variable that will hold each component of the index.
+	 * If there are multiple indexes for the table, the variable_lists
+	 * need to be linked together, in order.
+	 */
+	/** TODO: add code for external index(s)! */
+	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+	var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
+	memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+	var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlAnalogEntryId;
+	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+	var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlAnalogEntryId;
 
-       memset( &var_saHpiCtrlAnalogEntryId, 0x00, sizeof(var_saHpiCtrlAnalogEntryId) );
-       var_saHpiCtrlAnalogEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiCtrlAnalogEntryId.next_variable = NULL;
+	memset( &var_saHpiCtrlAnalogEntryId, 0x00, sizeof(var_saHpiCtrlAnalogEntryId) );
+	var_saHpiCtrlAnalogEntryId.type = ASN_UNSIGNED;	/* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiCtrlAnalogEntryId.next_variable = NULL;
 
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiResourceIsHistorical */
-   
-                ctx->saHpiCtrlAnalogEntryId = *var_saHpiCtrlAnalogEntryId.val.integer;
-   
+	/*
+	 * parse the oid into the individual index components
+	 */
+	err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+	if (err == SNMP_ERR_NOERROR) {
+		/*
+		 * copy index components into the context structure
+		 */
+		/** skipping external index saHpiDomainId */
+
+		/** skipping external index saHpiResourceId */
+
+		/** skipping external index saHpiResourceIsHistorical */
+
+		ctx->saHpiCtrlAnalogEntryId = *var_saHpiCtrlAnalogEntryId.val.integer;
+
 		err = saHpiDomainId_check_index(
-				*var_saHpiDomainId.val.integer);
+					       *var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-				*var_saHpiResourceId.val.integer);  
+						      *var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-				*var_saHpiResourceIsHistorical.val.integer);
+							   *var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiCtrlAnalogEntryId_check_index(
-				*var_saHpiCtrlAnalogEntryId.val.integer);
-    }
+							*var_saHpiCtrlAnalogEntryId.val.integer);
+	}
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+	/*
+	 * parsing may have allocated memory. free it.
+	 */
+	snmp_reset_var_buffers( &var_saHpiDomainId );
 
-    return err;
+	return err;
 }
 
 /************************************************************
@@ -358,18 +358,18 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiCtrlAnalogTable_can_activate(saHpiCtrlAnalogTable_context *undo_ctx,
-                      saHpiCtrlAnalogTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+				      saHpiCtrlAnalogTable_context *row_ctx,
+				      netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for activation requirements here
-     */
+	/*
+	 * TODO: check for activation requirements here
+	 */
 
 
-    /*
-     * be optimistic.
-     */
-    return 1;
+	/*
+	 * be optimistic.
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -383,13 +383,13 @@ int saHpiCtrlAnalogTable_can_activate(saHpiCtrlAnalogTable_context *undo_ctx,
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiCtrlAnalogTable_can_deactivate(saHpiCtrlAnalogTable_context *undo_ctx,
-                        saHpiCtrlAnalogTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+					saHpiCtrlAnalogTable_context *row_ctx,
+					netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+	/*
+	 * TODO: check for deactivation requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -400,20 +400,20 @@ int saHpiCtrlAnalogTable_can_deactivate(saHpiCtrlAnalogTable_context *undo_ctx,
  * return 0 if the row cannot be deleted
  */
 int saHpiCtrlAnalogTable_can_delete(saHpiCtrlAnalogTable_context *undo_ctx,
-                    saHpiCtrlAnalogTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+				    saHpiCtrlAnalogTable_context *row_ctx,
+				    netsnmp_request_group * rg)
 {
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiCtrlAnalogTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+	/*
+	 * probably shouldn't delete a row that we can't
+	 * deactivate.
+	 */
+	if (saHpiCtrlAnalogTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+		return 0;
+
+	/*
+	 * TODO: check for other deletion requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -433,35 +433,35 @@ int saHpiCtrlAnalogTable_can_delete(saHpiCtrlAnalogTable_context *undo_ctx,
 saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_create_row( netsnmp_index* hdr)
 {
-    saHpiCtrlAnalogTable_context * ctx =
-        SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
-    if(!ctx)
-        return NULL;
-        
-    /*
-     * TODO: check indexes, if necessary.
-     */
-    if(saHpiCtrlAnalogTable_extract_index( ctx, hdr )) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
-    }
+	saHpiCtrlAnalogTable_context * ctx =
+	SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
+	if (!ctx)
+		return NULL;
 
-    /* netsnmp_mutex_init(ctx->lock);
-       netsnmp_mutex_lock(ctx->lock); */
+	/*
+	 * TODO: check indexes, if necessary.
+	 */
+	if (saHpiCtrlAnalogTable_extract_index( ctx, hdr )) {
+		free(ctx->index.oids);
+		free(ctx);
+		return NULL;
+	}
 
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-     ctx->saHpiCtrlAnalogMode = 0;
-     ctx->saHpiCtrlAnalogState = 0;
-    */
+	/* netsnmp_mutex_init(ctx->lock);
+	   netsnmp_mutex_lock(ctx->lock); */
 
-    return ctx;
+	/*
+	 * TODO: initialize any default values here. This is also
+	 * first place you really should allocate any memory for
+	 * yourself to use.  If you allocated memory earlier,
+	 * make sure you free it for earlier error cases!
+	 */
+	/**
+	 ctx->saHpiCtrlAnalogMode = 0;
+	 ctx->saHpiCtrlAnalogState = 0;
+	*/
+
+	return ctx;
 }
 
 /************************************************************
@@ -470,21 +470,21 @@ saHpiCtrlAnalogTable_create_row( netsnmp_index* hdr)
 saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
 {
-    saHpiCtrlAnalogTable_context * dup;
+	saHpiCtrlAnalogTable_context * dup;
 
-    if(!row_ctx)
-        return NULL;
+	if (!row_ctx)
+		return NULL;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
-    if(!dup)
-        return NULL;
-        
-    if(saHpiCtrlAnalogTable_row_copy(dup,row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
+	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
+	if (!dup)
+		return NULL;
 
-    return dup;
+	if (saHpiCtrlAnalogTable_row_copy(dup,row_ctx)) {
+		free(dup);
+		dup = NULL;
+	}
+
+	return dup;
 }
 
 /************************************************************
@@ -492,21 +492,21 @@ saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
  */
 netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * ctx )
 {
-  /* netsnmp_mutex_destroy(ctx->lock); */
+	/* netsnmp_mutex_destroy(ctx->lock); */
 
-    if(ctx->index.oids)
-        free(ctx->index.oids);
+	if (ctx->index.oids)
+		free(ctx->index.oids);
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
+	/*
+	 * TODO: release any memory you allocated here...
+	 */
 
-    /*
-     * release header
-     */
-    free( ctx );
+	/*
+	 * release header
+	 */
+	free( ctx );
 
-    return NULL;
+	return NULL;
 }
 
 
@@ -527,118 +527,118 @@ netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * 
  */
 void saHpiCtrlAnalogTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiCtrlAnalogTable_context *row_ctx =
-            (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx =
-            (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int rc;
+	saHpiCtrlAnalogTable_context *row_ctx =
+	(saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx =
+	(saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_variable_list *var;
+	netsnmp_request_group_item *current;
+	int rc;
 
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, check syntax and lengths. For
+	 * columns which have no dependencies, you could also move
+	 * the value/range checking here to attempt to catch error
+	 * cases as early as possible.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlAnalogMode));
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiCtrlAnalogMode));
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlAnalogState));
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiCtrlAnalogState));
-        break;
+		default: /** We shouldn't get here */
+			rc = SNMP_ERR_GENERR;
+			snmp_log(LOG_ERR, "unknown column in "
+				 "saHpiCtrlAnalogTable_set_reserve1\n");
+		}
 
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiCtrlAnalogTable_set_reserve1\n");
-        }
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+		rg->status = SNMP_MAX( rg->status, current->ri->status );
+	}
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-        rg->status = SNMP_MAX( rg->status, current->ri->status );
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int rc;
+	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	int rc;
 
-    rg->rg_void = rg->list->ri;
+	rg->rg_void = rg->list->ri;
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, check for valid
+	 * values and any range constraints.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			/*
+			 * TODO: routine to check valid values
+			 *
+			 * EXAMPLE:
+			 *
+			* if ( *var->val.integer != XXX ) {
+		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
+		    *    rc = SNMP_ERR_BADVALUE;
+		    * }
+		    */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			/*
+			 * TODO: routine to check valid values
+			 *
+			 * EXAMPLE:
+			 *
+			* if ( *var->val.integer != XXX ) {
+		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
+		    *    rc = SNMP_ERR_BADVALUE;
+		    * }
+		    */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
+	}
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -654,49 +654,49 @@ void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
  */
 void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+	int            row_err = 0;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, copy varbind values
+	 * to context structure for the row.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			row_ctx->saHpiCtrlAnalogMode = *var->val.integer;
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            row_ctx->saHpiCtrlAnalogMode = *var->val.integer;
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			row_ctx->saHpiCtrlAnalogState = *var->val.integer;
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiCtrlAnalogState = *var->val.integer;
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
+	if (row_err) {
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+					       (netsnmp_request_info*)rg->rg_void,
+					       row_err);
+		return;
+	}
 
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
+	/*
+	 * TODO: if you have dependencies on other tables, this would be
+	 * a good place to check those, too.
+	 */
 }
 
 /************************************************************
@@ -718,37 +718,37 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiCtrlAnalogTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -761,37 +761,37 @@ void saHpiCtrlAnalogTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiCtrlAnalogTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		default: 
+			break;
+		}
+	}
 
-        default: 
-		break;
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -814,37 +814,37 @@ void saHpiCtrlAnalogTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiCtrlAnalogTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-    saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLANALOGMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLANALOGSTATE:
+			/** INTEGER = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 
@@ -855,94 +855,94 @@ void saHpiCtrlAnalogTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiCtrlAnalogTable(void)
 {
-    netsnmp_table_registration_info *table_info;
+	netsnmp_table_registration_info *table_info;
 
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiCtrlAnalogTable_handler called again\n");
-        return;
-    }
+	if (my_handler) {
+		snmp_log(LOG_ERR, "initialize_table_saHpiCtrlAnalogTable_handler called again\n");
+		return;
+	}
 
-    memset(&cb, 0x00, sizeof(cb));
+	memset(&cb, 0x00, sizeof(cb));
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+	/** create the table structure itself */
+	table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiCtrlAnalogTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiCtrlAnalogTable_oid,
-                                             saHpiCtrlAnalogTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiCtrlAnalogTable_handler\n");
-        return; /** mallocs failed */
-    }
+	/* if your table is read only, it's easiest to change the
+	   HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+	my_handler = netsnmp_create_handler_registration("saHpiCtrlAnalogTable",
+							 netsnmp_table_array_helper_handler,
+							 saHpiCtrlAnalogTable_oid,
+							 saHpiCtrlAnalogTable_oid_len,
+							 HANDLER_CAN_RWRITE);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
-        /** TODO: add code for external index(s)! */
+	if (!my_handler || !table_info) {
+		snmp_log(LOG_ERR, "malloc failed in "
+			 "initialize_table_saHpiCtrlAnalogTable_handler\n");
+		return;	/** mallocs failed */
+	}
 
-    /*
-     * internal indexes
-     */
-        /** index: saHpiDomainId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceIsHistorical */
-        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
-        /** index: saHpiCtrlAnalogEntryId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/***************************************************
+	 * Setting up the table's definition
+	 */
+	/*
+	 * TODO: add any external indexes here.
+	 */
+	/** TODO: add code for external index(s)! */
 
-    table_info->min_column = saHpiCtrlAnalogTable_COL_MIN;
-    table_info->max_column = saHpiCtrlAnalogTable_COL_MAX;
+	/*
+	 * internal indexes
+	 */
+	/** index: saHpiDomainId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceIsHistorical */
+	netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
+	/** index: saHpiCtrlAnalogEntryId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiCtrlAnalogTable_get_value;
-    cb.container = netsnmp_container_find("saHpiCtrlAnalogTable_primary:"
-                                          "saHpiCtrlAnalogTable:"
-                                          "table_container");
+	table_info->min_column = saHpiCtrlAnalogTable_COL_MIN;
+	table_info->max_column = saHpiCtrlAnalogTable_COL_MAX;
+
+	/***************************************************
+	 * registering the table with the master agent
+	 */
+	cb.get_value = saHpiCtrlAnalogTable_get_value;
+	cb.container = netsnmp_container_find("saHpiCtrlAnalogTable_primary:"
+					      "saHpiCtrlAnalogTable:"
+					      "table_container");
 #ifdef saHpiCtrlAnalogTable_IDX2
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiCtrlAnalogTable_secondary:"
-                                                       "saHpiCtrlAnalogTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiCtrlAnalogTable_cmp;
+	netsnmp_container_add_index(cb.container,
+				    netsnmp_container_find("saHpiCtrlAnalogTable_secondary:"
+							   "saHpiCtrlAnalogTable:"
+							   "table_container"));
+	cb.container->next->compare = saHpiCtrlAnalogTable_cmp;
 #endif
 #ifdef saHpiCtrlAnalogTable_SET_HANDLING
-    cb.can_set = 1;
+	cb.can_set = 1;
 #ifdef saHpiCtrlAnalogTable_ROW_CREATION
-    cb.create_row = (UserRowMethod*)saHpiCtrlAnalogTable_create_row;
+	cb.create_row = (UserRowMethod*)saHpiCtrlAnalogTable_create_row;
 #endif
-    cb.duplicate_row = (UserRowMethod*)saHpiCtrlAnalogTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiCtrlAnalogTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlAnalogTable_row_copy;
+	cb.duplicate_row = (UserRowMethod*)saHpiCtrlAnalogTable_duplicate_row;
+	cb.delete_row = (UserRowMethod*)saHpiCtrlAnalogTable_delete_row;
+	cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlAnalogTable_row_copy;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_delete;
+	cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_activate;
+	cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_deactivate;
+	cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlAnalogTable_can_delete;
 
-    cb.set_reserve1 = saHpiCtrlAnalogTable_set_reserve1;
-    cb.set_reserve2 = saHpiCtrlAnalogTable_set_reserve2;
-    cb.set_action = saHpiCtrlAnalogTable_set_action;
-    cb.set_commit = saHpiCtrlAnalogTable_set_commit;
-    cb.set_free = saHpiCtrlAnalogTable_set_free;
-    cb.set_undo = saHpiCtrlAnalogTable_set_undo;
+	cb.set_reserve1 = saHpiCtrlAnalogTable_set_reserve1;
+	cb.set_reserve2 = saHpiCtrlAnalogTable_set_reserve2;
+	cb.set_action = saHpiCtrlAnalogTable_set_action;
+	cb.set_commit = saHpiCtrlAnalogTable_set_commit;
+	cb.set_free = saHpiCtrlAnalogTable_set_free;
+	cb.set_undo = saHpiCtrlAnalogTable_set_undo;
 #endif
-    DEBUGMSGTL(("initialize_table_saHpiCtrlAnalogTable",
-                "Registering table saHpiCtrlAnalogTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+	DEBUGMSGTL(("initialize_table_saHpiCtrlAnalogTable",
+		    "Registering table saHpiCtrlAnalogTable "
+		    "as a table array\n"));
+	netsnmp_table_container_register(my_handler, table_info, &cb,
+					 cb.container, 1);
 }
 
 /************************************************************
@@ -954,112 +954,112 @@ initialize_table_saHpiCtrlAnalogTable(void)
  * change in code in this fuction.
  */
 int saHpiCtrlAnalogTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+				  netsnmp_request_info *request,
+				  netsnmp_index *item,
+				  netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiCtrlAnalogTable_context *context = (saHpiCtrlAnalogTable_context *)item;
+	netsnmp_variable_list *var = request->requestvb;
+	saHpiCtrlAnalogTable_context *context = (saHpiCtrlAnalogTable_context *)item;
 
-    switch(table_info->colnum) {
+	switch (table_info->colnum) {
+	
+	case COLUMN_SAHPICTRLANALOGENTRYID:
+		/** SaHpiEntryId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlAnalogEntryId,
+					 sizeof(context->saHpiCtrlAnalogEntryId) );
+		break;
 
-        case COLUMN_SAHPICTRLANALOGENTRYID:
-            /** SaHpiEntryId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlAnalogEntryId,
-                         sizeof(context->saHpiCtrlAnalogEntryId) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGNUM:
-            /** SaHpiInstrumentId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlAnalogNum,
-                         sizeof(context->saHpiCtrlAnalogNum) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGOUTPUTTYPE:
-            /** SaHpiCtrlOutputType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogOutputType,
-                         sizeof(context->saHpiCtrlAnalogOutputType) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGDEFAULTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogDefaultMode,
-                         sizeof(context->saHpiCtrlAnalogDefaultMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogMode,
-                         sizeof(context->saHpiCtrlAnalogMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGISREADONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogIsReadOnly,
-                         sizeof(context->saHpiCtrlAnalogIsReadOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGISWRITEONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogIsWriteOnly,
-                         sizeof(context->saHpiCtrlAnalogIsWriteOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGDEFAULTMINSTATE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogDefaultMinState,
-                         sizeof(context->saHpiCtrlAnalogDefaultMinState) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGDEFAULTMAXSTATE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogDefaultMaxState,
-                         sizeof(context->saHpiCtrlAnalogDefaultMaxState) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGDEFAULTSTATE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogDefaultState,
-                         sizeof(context->saHpiCtrlAnalogDefaultState) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGSTATE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlAnalogState,
-                         sizeof(context->saHpiCtrlAnalogState) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGOEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlAnalogOem,
-                         sizeof(context->saHpiCtrlAnalogOem) );
-        break;
-    
-        case COLUMN_SAHPICTRLANALOGRDR:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiCtrlAnalogRDR,
-                         context->saHpiCtrlAnalogRDR_len );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiCtrlAnalogTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+	case COLUMN_SAHPICTRLANALOGNUM:
+		/** SaHpiInstrumentId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlAnalogNum,
+					 sizeof(context->saHpiCtrlAnalogNum) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGOUTPUTTYPE:
+		/** SaHpiCtrlOutputType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogOutputType,
+					 sizeof(context->saHpiCtrlAnalogOutputType) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGDEFAULTMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogDefaultMode,
+					 sizeof(context->saHpiCtrlAnalogDefaultMode) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogMode,
+					 sizeof(context->saHpiCtrlAnalogMode) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGISREADONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogIsReadOnly,
+					 sizeof(context->saHpiCtrlAnalogIsReadOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGISWRITEONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogIsWriteOnly,
+					 sizeof(context->saHpiCtrlAnalogIsWriteOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGDEFAULTMINSTATE:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogDefaultMinState,
+					 sizeof(context->saHpiCtrlAnalogDefaultMinState) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGDEFAULTMAXSTATE:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogDefaultMaxState,
+					 sizeof(context->saHpiCtrlAnalogDefaultMaxState) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGDEFAULTSTATE:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogDefaultState,
+					 sizeof(context->saHpiCtrlAnalogDefaultState) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGSTATE:
+		/** INTEGER = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlAnalogState,
+					 sizeof(context->saHpiCtrlAnalogState) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGOEM:
+		/** UNSIGNED32 = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlAnalogOem,
+					 sizeof(context->saHpiCtrlAnalogOem) );
+		break;
+
+	case COLUMN_SAHPICTRLANALOGRDR:
+		/** RowPointer = ASN_OBJECT_ID */
+		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+					 (char*)&context->saHpiCtrlAnalogRDR,
+					 context->saHpiCtrlAnalogRDR_len );
+		break;
+
+	default: /** We shouldn't get here */
+		snmp_log(LOG_ERR, "unknown column in "
+			 "saHpiCtrlAnalogTable_get_value\n");
+		return SNMP_ERR_GENERR;
+	}
+	return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -1068,8 +1068,8 @@ int saHpiCtrlAnalogTable_get_value(
 const saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_get_by_idx(netsnmp_index * hdr)
 {
-    return (const saHpiCtrlAnalogTable_context *)
-        CONTAINER_FIND(cb.container, hdr );
+	return(const saHpiCtrlAnalogTable_context *)
+	CONTAINER_FIND(cb.container, hdr );
 }
 
 
