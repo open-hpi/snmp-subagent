@@ -199,7 +199,7 @@ static int saHpiCtrlStreamTable_row_copy(saHpiCtrlStreamTable_context * dst,
 
     dst->saHpiCtrlStreamOem = src->saHpiCtrlStreamOem;
 
-    memcpy( src->saHpiCtrlStreamRDR, dst->saHpiCtrlStreamRDR, src->saHpiCtrlStreamRDR_len );
+    memcpy( dst->saHpiCtrlStreamRDR, src->saHpiCtrlStreamRDR,, src->saHpiCtrlStreamRDR_len );
     dst->saHpiCtrlStreamRDR_len = src->saHpiCtrlStreamRDR_len;
 
     return 0;

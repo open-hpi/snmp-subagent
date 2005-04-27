@@ -204,7 +204,7 @@ static int saHpiCtrlOemTable_row_copy(saHpiCtrlOemTable_context * dst,
 
     dst->saHpiCtrlOemValue = src->saHpiCtrlOemValue;
 
-    memcpy( src->saHpiCtrlOemRDR, dst->saHpiCtrlOemRDR, src->saHpiCtrlOemRDR_len );
+    memcpy( dst->saHpiCtrlOemRDR, src->saHpiCtrlOemRDR, src->saHpiCtrlOemRDR_len );
     dst->saHpiCtrlOemRDR_len = src->saHpiCtrlOemRDR_len;
 
     return 0;

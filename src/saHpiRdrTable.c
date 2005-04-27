@@ -575,10 +575,10 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 	
 	dst->saHpiRdrIsFru = src->saHpiRdrIsFru;
 	
-	memcpy( src->saHpiRdrRowPointer, dst->saHpiRdrRowPointer, src->saHpiRdrRowPointer_len );
+	memcpy( dst->saHpiRdrRowPointer, src->saHpiRdrRowPointer, src->saHpiRdrRowPointer_len );
 	dst->saHpiRdrRowPointer_len = src->saHpiRdrRowPointer_len;
 	
-	memcpy( src->saHpiRdrRPT, dst->saHpiRdrRPT, src->saHpiRdrRPT_len );
+	memcpy( dst->saHpiRdrRPT, src->saHpiRdrRPT, src->saHpiRdrRPT_len );
 	dst->saHpiRdrRPT_len = src->saHpiRdrRPT_len;
 	
 	dst->saHpiRdrTextType = src->saHpiRdrTextType;
