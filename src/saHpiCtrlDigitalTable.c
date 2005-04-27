@@ -230,6 +230,8 @@ int set_table_ctrl_digital_mode (saHpiCtrlDigitalTable_context *row_ctx)
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
 
+	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDigitalState - 1;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_DIGITAL;
 
 	rc = saHpiControlSet(session_id, resource_id, 
 			     row_ctx->saHpiCtrlDigitalNum, 
@@ -829,7 +831,7 @@ void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
-	int rc;
+	int rc = SNMP_ERR_NOERROR;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_reserve2, called\n"));
 

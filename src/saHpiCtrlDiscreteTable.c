@@ -229,14 +229,16 @@ int set_table_ctrl_discrete_mode (saHpiCtrlDiscreteTable_context *row_ctx)
 	SaHpiResourceIdT    resource_id;
 	SaHpiCtrlStateT	    ctrl_state;	
 
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_discrete_mode, called\n"));	
+
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
 
-	DEBUGMSGTL((AGENT, "SAHPI_CTRL_TYPE_DISCRETE: sessionod [%d] resourceid [%d] saHpiCtrlDiscreteNum [%d] saHpiCtrlDiscreteMode [%d]\n",
-		    session_id, resource_id, row_ctx->saHpiCtrlDiscreteNum, row_ctx->saHpiCtrlDiscreteMode - 1)); 
+	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDiscreteState;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_DISCRETE;
 
 	rc = saHpiControlSet(session_id, resource_id, 
 			     row_ctx->saHpiCtrlDiscreteNum, 
@@ -266,13 +268,15 @@ int set_table_ctrl_discrete_state (saHpiCtrlDiscreteTable_context *row_ctx)
 	SaHpiResourceIdT    resource_id;
 	SaHpiCtrlStateT	    ctrl_state;	
 
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_discrete_state, called\n"));	
+
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
 
-	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDiscreteState - 1;
+	ctrl_state.StateUnion.Digital = row_ctx->saHpiCtrlDiscreteState;
 	ctrl_state.Type = SAHPI_CTRL_TYPE_DISCRETE;
 
 	rc = saHpiControlSet(session_id, resource_id, 
@@ -304,11 +308,11 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 {
 
 	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDiscreteEntryCount, called\n"));	
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
+	/* We are never called for a GETNEXT if it's registered as a
+	"instance", as it's "magically" handled for us.  */
 
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
+	/* a instance handler also only hands us one request at a time, so
+	we don't need to loop over a list of requests; we'll only get one. */
     
     switch(reqinfo->mode) {
 
@@ -834,7 +838,7 @@ void saHpiCtrlDiscreteTable_set_reserve2( netsnmp_request_group *rg )
 	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
-	int rc;
+	int rc = SNMP_ERR_NOERROR;
 
 	rg->rg_void = rg->list->ri;
 
