@@ -457,7 +457,7 @@ main (int argc, char **argv)
 
 		populate_saHpiResourceTable(sessionid);
 			/* populate_saHpiResourceTable() calls:
-			 * populate_saHpiRdrTable();
+			 * populate_saHpiRdrTable(); calls:
 			 *	populate_saHpiCtrlDigitalTable();		
 			 *	populate_saHpiCtrlDiscreteTable();		
 			 *	populate_saHpiCtrlAnalogTable();		
