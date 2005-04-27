@@ -36,7 +36,6 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
-
 #include <SaHpi.h>
 #include "saHpiCtrlDiscreteTable.h"
 #include <hpiSubagent.h>
