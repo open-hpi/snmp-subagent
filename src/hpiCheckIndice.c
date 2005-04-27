@@ -45,7 +45,6 @@ int saHpiResourceIsHistorical_check_index(long val)
 	return 0;
 }
 
-
 /**************************/
 /* saHpiRrdTable */    
 /**************************/
@@ -66,6 +65,14 @@ int saHpiCtrlDigitalEntryId_check_index(long val)
 /* saHpiCtrlDiscreteTable  */    
 /**************************/
 int saHpiCtrlDiscreteEntryId_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpiCtrlAnalogTable  */    
+/**************************/
+int saHpiCtrlAnalogEntryId_check_index(long val)
 {
 	return 0;
 }
