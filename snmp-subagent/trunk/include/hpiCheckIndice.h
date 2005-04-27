@@ -36,6 +36,11 @@ int saHpiCtrlDigitalEntryId_check_index(long val);
 /**************************/
 int saHpiCtrlDiscreteEntryId_check_index(long val);
 
+/**************************/
+/* saHpiCtrlAnalogTable  */    
+/**************************/
+int saHpiCtrlAnalogEntryId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
