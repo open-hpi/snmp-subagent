@@ -41,6 +41,11 @@ int saHpiCtrlDiscreteEntryId_check_index(long val);
 /**************************/
 int saHpiCtrlAnalogEntryId_check_index(long val);
 
+/**************************/
+/* saHpiCtrlStreamTable  */    
+/**************************/
+int saHpiCtrlStreamEntryId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/

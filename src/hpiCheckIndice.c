@@ -77,6 +77,13 @@ int saHpiCtrlAnalogEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiCtrlStreamTable  */    
+/**************************/
+int saHpiCtrlStreamEntryId_check_index(long val)
+{
+	return 0;
+}
 
 /*******************************************/
 /*******************************************/
