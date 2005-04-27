@@ -88,6 +88,22 @@ typedef struct saHpiCtrlStreamTable_context_s {
 } saHpiCtrlStreamTable_context;
 
 /*************************************************************
+ * set funtions
+ */
+int set_table_ctrl_stream_mode (saHpiCtrlStreamTable_context *row_ctx);
+int set_table_ctrl_stream_state (saHpiCtrlStreamTable_context *row_ctx);
+
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid, 
+			      SaHpiRdrT *rdr_entry,
+			      SaHpiRptEntryT *rpt_entry,
+			      oid *full_oid, size_t full_oid_len,
+			      oid *child_oid, size_t *child_oid_len);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiCtrlStreamTable(void);
