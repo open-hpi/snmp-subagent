@@ -212,7 +212,15 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					    oh_lookup_error(rv))); 
 				break;
 			case SAHPI_CTRL_TYPE_STREAM:
-				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_STREAM: Not implemented\n"));
+				rv = populate_ctrl_stream(
+					sessionid,
+					&rdr_entry,
+					rpt_entry,
+					full_oid, full_oid_len,
+					child_oid, &child_oid_len);
+				DEBUGMSGTL((AGENT,
+					    "populate_ctrl_analog rv: %s\n",
+					    oh_lookup_error(rv))); 
 				break;
 			case SAHPI_CTRL_TYPE_TEXT:
 				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT: Not implemented\n"));
