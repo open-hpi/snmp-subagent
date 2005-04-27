@@ -127,6 +127,13 @@ extern "C" {
 
 #define saHpiCtrlAnalogTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,7
 
+/* Number of table Indexes */
+#define CTRL_DIGITAL_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlAnalogEntryId_INDEX 3
+
 /*************************************************************
  * column number definitions for table saHpiCtrlAnalogTable
  */
