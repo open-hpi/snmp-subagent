@@ -85,7 +85,143 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 {
 
  	DEBUGMSGTL ((AGENT, "populate_ctrl_analog, called\n"));
-	return 0;
+	SaErrorT rv = SA_OK;
+
+	oid ctrl_analog_oid[CTRL_ANALOG_INDEX_NR];
+	netsnmp_index ctrl_analog_index;
+	saHpiCtrlAnalogTable_context *ctrl_analog_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_DISCRETE populate_ctrl_digital() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	ctrl_analog_index.len = CTRL_ANALOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	ctrl_analog_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	ctrl_analog_oid[1] = rpt_entry->ResourceId;
+		/** Index saHpiResourceIsHistorical is external */
+	ctrl_analog_oid[2] = MIB_FALSE;
+		/** Index saHpiCtrlDigitalEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_discrete() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_analog_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	ctrl_analog_index.oids = (oid *) & ctrl_analog_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLANALOGNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlAnalogTable_oid, saHpiCtrlAnalogTable_oid_len,
+			column, column_len,
+			&ctrl_analog_index,
+			child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	ctrl_analog_context = NULL;
+	ctrl_analog_context = CONTAINER_FIND(cb.container, &ctrl_analog_index);
+
+	if (!ctrl_analog_context) { 
+		// New entry. Add it
+		ctrl_analog_context = 
+			saHpiCtrlDiscreteTable_create_row(&ctrl_analog_index);
+	}
+	if (!ctrl_analog_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	} 
+
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        ctrl_analog_context->saHpiCtrlAnalogEntryId =
+		ctrl_analog_oid[3];
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        ctrl_analog_context->saHpiCtrlAnalogNum =
+		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+        /** SaHpiCtrlOutputType = ASN_INTEGER */
+        ctrl_analog_context->saHpiCtrlAnalogOutputType = 
+		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_analog_context->saHpiCtrlAnalogDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_analog_context->saHpiCtrlAnalogDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_analog_context->saHpiCtrlAnalogIsReadOnly =
+            (rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_analog_context->saHpiCtrlAnalogIsWriteOnly =
+	    (rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+		? MIB_TRUE : MIB_FALSE;
+
+	/** INTEGER = ASN_INTEGER */
+	ctrl_analog_context->saHpiCtrlAnalogDefaultMinState =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Analog.Min;
+
+	/** INTEGER = ASN_INTEGER */
+	ctrl_analog_context->saHpiCtrlAnalogDefaultMaxState =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Analog.Max;
+
+	/** INTEGER = ASN_INTEGER */
+	ctrl_analog_context->saHpiCtrlAnalogDefaultState =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Analog.Default;
+
+        /** saHpiCtrlDiscreteState = UNSIGNED32 */
+        ctrl_analog_context->saHpiCtrlAnalogState = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Analog.Default;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        ctrl_analog_context->saHpiCtrlAnalogOem = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_analog_context->saHpiCtrlAnalogRDR, 
+	       0, 
+	       sizeof(ctrl_analog_context->saHpiCtrlAnalogRDR));
+
+	ctrl_analog_context->saHpiCtrlAnalogRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_analog_context->saHpiCtrlAnalogRDR, 
+	       full_oid, 
+	       ctrl_analog_context->saHpiCtrlAnalogRDR_len);
+
+
+	CONTAINER_INSERT (cb.container, ctrl_analog_context);
+		
+	ctrl_analog_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
 }
 
 /*
