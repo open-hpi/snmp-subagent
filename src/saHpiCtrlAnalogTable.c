@@ -66,6 +66,8 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 			      oid *full_oid, size_t full_oid_len,
 			      oid *child_oid, size_t *child_oid_len)
 {
+
+ 	DEBUGMSGTL ((AGENT, "populate_ctrl_analog, called\n"));
 	return 0;
 }
 
@@ -74,6 +76,8 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
  */
 int set_table_ctrl_analog_mode (saHpiCtrlAnalogTable_context *row_ctx)
 {
+
+ 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
 	return 0;
 }
 
@@ -83,6 +87,8 @@ int set_table_ctrl_analog_mode (saHpiCtrlAnalogTable_context *row_ctx)
 
 int set_table_ctrl_analog_state (saHpiCtrlAnalogTable_context *row_ctx)
 {
+
+ 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
 	return 0;
 }
 
@@ -115,67 +121,10 @@ saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs )
 	 */
 	int rc;
 
-	/*
-	 * TODO: implement compare. Remove this ifdef code and
-	 * add your own code here.
-	 */
-#ifdef TABLE_CONTAINER_TODO
-	snmp_log(LOG_ERR,
-		 "saHpiCtrlAnalogTable_compare not implemented! Container order undefined\n" );
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_cmp, called\n"));
+
 	return 0;
-#endif
-
-	/*
-	 * EXAMPLE (assuming you want to sort on a name):
-	 *   
-	 * rc = strcmp( context_l->xxName, context_r->xxName );
-	 *
-	 * if(rc)
-	 *   return rc;
-	 *
-	 * TODO: fix secondary keys (or delete if there are none)
-	 *
-	 * if(context_l->yy < context_r->yy) 
-	 *   return -1;
-	 *
-	 * return (context_l->yy == context_r->yy) ? 0 : 1;
-	 */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiCtrlAnalogTable_context *
-saHpiCtrlAnalogTable_get( const char *name, int len )
-{
-	saHpiCtrlAnalogTable_context tmp;
-
-	/** we should have a secondary index */
-	netsnmp_assert(cb.container->next != NULL);
-
-	/*
-	 * TODO: implement compare. Remove this ifdef code and
-	 * add your own code here.
-	 */
-#ifdef TABLE_CONTAINER_TODO
-	snmp_log(LOG_ERR, "saHpiCtrlAnalogTable_get not implemented!\n" );
-	return NULL;
-#endif
-
-	/*
-	 * EXAMPLE:
-	 *
-	 * if(len > sizeof(tmp.xxName))
-	 *   return NULL;
-	 *
-	 * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-	 * tmp.xxName_len = len;
-	 *
-	 * return CONTAINER_FIND(cb.container->next, &tmp);
-	 */
-}
-
 
 /************************************************************
  * Initializes the saHpiCtrlAnalogTable module
@@ -183,6 +132,8 @@ saHpiCtrlAnalogTable_get( const char *name, int len )
 void
 init_saHpiCtrlAnalogTable(void)
 {
+
+ 	DEBUGMSGTL ((AGENT, "init_saHpiCtrlAnalogTable, called\n"));
 	initialize_table_saHpiCtrlAnalogTable();
 
 	/*
@@ -200,6 +151,9 @@ init_saHpiCtrlAnalogTable(void)
 static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 					 saHpiCtrlAnalogTable_context * src)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_row_copy, called\n"));
+
 	if (!dst||!src)
 		return 1;
 
@@ -274,6 +228,8 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
 	netsnmp_variable_list var_saHpiResourceIsHistorical;
 	netsnmp_variable_list var_saHpiCtrlAnalogEntryId;
 	int err;
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_extract_index, called\n"));
 
 	/*
 	 * copy index, if provided
@@ -361,6 +317,8 @@ int saHpiCtrlAnalogTable_can_activate(saHpiCtrlAnalogTable_context *undo_ctx,
 				      saHpiCtrlAnalogTable_context *row_ctx,
 				      netsnmp_request_group * rg)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_can_activate, called\n"));
 	/*
 	 * TODO: check for activation requirements here
 	 */
@@ -386,6 +344,8 @@ int saHpiCtrlAnalogTable_can_deactivate(saHpiCtrlAnalogTable_context *undo_ctx,
 					saHpiCtrlAnalogTable_context *row_ctx,
 					netsnmp_request_group * rg)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_can_deactivate, called\n"));
 	/*
 	 * TODO: check for deactivation requirements here
 	 */
@@ -403,6 +363,8 @@ int saHpiCtrlAnalogTable_can_delete(saHpiCtrlAnalogTable_context *undo_ctx,
 				    saHpiCtrlAnalogTable_context *row_ctx,
 				    netsnmp_request_group * rg)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_can_delete, called\n"));
 	/*
 	 * probably shouldn't delete a row that we can't
 	 * deactivate.
@@ -433,6 +395,9 @@ int saHpiCtrlAnalogTable_can_delete(saHpiCtrlAnalogTable_context *undo_ctx,
 saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_create_row( netsnmp_index* hdr)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_create_row, called\n"));
+
 	saHpiCtrlAnalogTable_context * ctx =
 	SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
 	if (!ctx)
@@ -472,6 +437,8 @@ saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
 {
 	saHpiCtrlAnalogTable_context * dup;
 
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_duplicate_row, called\n"));
+
 	if (!row_ctx)
 		return NULL;
 
@@ -492,6 +459,10 @@ saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
  */
 netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * ctx )
 {
+
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_delete_row, called\n"));
+
 	/* netsnmp_mutex_destroy(ctx->lock); */
 
 	if (ctx->index.oids)
@@ -535,6 +506,7 @@ void saHpiCtrlAnalogTable_set_reserve1( netsnmp_request_group *rg )
 	netsnmp_request_group_item *current;
 	int rc;
 
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_reserve1, called\n"));
 
 	/*
 	 * TODO: loop through columns, check syntax and lengths. For
@@ -585,6 +557,8 @@ void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_reserve2, called\n"));
 
 	rg->rg_void = rg->list->ri;
 
@@ -661,6 +635,8 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 
 	int            row_err = 0;
 
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_action, called\n"));
+
 	/*
 	 * TODO: loop through columns, copy varbind values
 	 * to context structure for the row.
@@ -723,6 +699,8 @@ void saHpiCtrlAnalogTable_set_commit( netsnmp_request_group *rg )
 	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_commit, called\n"));
+
 	/*
 	 * loop through columns
 	 */
@@ -765,6 +743,8 @@ void saHpiCtrlAnalogTable_set_free( netsnmp_request_group *rg )
 	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
 	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_free, called\n"));
 
 	/*
 	 * loop through columns
@@ -819,6 +799,8 @@ void saHpiCtrlAnalogTable_set_undo( netsnmp_request_group *rg )
 	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_undo, called\n"));
+
 	/*
 	 * loop through columns
 	 */
@@ -856,6 +838,8 @@ void
 initialize_table_saHpiCtrlAnalogTable(void)
 {
 	netsnmp_table_registration_info *table_info;
+
+ 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlAnalogTable, called\n"));
 
 	if (my_handler) {
 		snmp_log(LOG_ERR, "initialize_table_saHpiCtrlAnalogTable_handler called again\n");
@@ -911,18 +895,18 @@ initialize_table_saHpiCtrlAnalogTable(void)
 	cb.container = netsnmp_container_find("saHpiCtrlAnalogTable_primary:"
 					      "saHpiCtrlAnalogTable:"
 					      "table_container");
-#ifdef saHpiCtrlAnalogTable_IDX2
+
 	netsnmp_container_add_index(cb.container,
 				    netsnmp_container_find("saHpiCtrlAnalogTable_secondary:"
 							   "saHpiCtrlAnalogTable:"
 							   "table_container"));
 	cb.container->next->compare = saHpiCtrlAnalogTable_cmp;
-#endif
-#ifdef saHpiCtrlAnalogTable_SET_HANDLING
+
+
 	cb.can_set = 1;
-#ifdef saHpiCtrlAnalogTable_ROW_CREATION
+
 	cb.create_row = (UserRowMethod*)saHpiCtrlAnalogTable_create_row;
-#endif
+
 	cb.duplicate_row = (UserRowMethod*)saHpiCtrlAnalogTable_duplicate_row;
 	cb.delete_row = (UserRowMethod*)saHpiCtrlAnalogTable_delete_row;
 	cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlAnalogTable_row_copy;
@@ -937,7 +921,7 @@ initialize_table_saHpiCtrlAnalogTable(void)
 	cb.set_commit = saHpiCtrlAnalogTable_set_commit;
 	cb.set_free = saHpiCtrlAnalogTable_set_free;
 	cb.set_undo = saHpiCtrlAnalogTable_set_undo;
-#endif
+
 	DEBUGMSGTL(("initialize_table_saHpiCtrlAnalogTable",
 		    "Registering table saHpiCtrlAnalogTable "
 		    "as a table array\n"));
@@ -960,6 +944,8 @@ int saHpiCtrlAnalogTable_get_value(
 {
 	netsnmp_variable_list *var = request->requestvb;
 	saHpiCtrlAnalogTable_context *context = (saHpiCtrlAnalogTable_context *)item;
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_get_value, called\n"));
 
 	switch (table_info->colnum) {
 	
@@ -1068,6 +1054,9 @@ int saHpiCtrlAnalogTable_get_value(
 const saHpiCtrlAnalogTable_context *
 saHpiCtrlAnalogTable_get_by_idx(netsnmp_index * hdr)
 {
+
+ 	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_get_by_idx, called\n"));
+
 	return(const saHpiCtrlAnalogTable_context *)
 	CONTAINER_FIND(cb.container, hdr );
 }
