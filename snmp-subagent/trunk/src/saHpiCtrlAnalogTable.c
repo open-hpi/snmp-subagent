@@ -57,6 +57,23 @@ size_t saHpiCtrlAnalogTable_oid_len = OID_LENGTH(saHpiCtrlAnalogTable_oid);
 /************************************************************/
 /************************************************************/
 
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long ctrl_analog_entry_count = 0;
+static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
+int handle_saHpiCtrlAnalogEntryCount( netsnmp_mib_handler *handler, 
+			       netsnmp_handler_registration *reginfo,
+			       netsnmp_agent_request_info   *reqinfo, 
+			       netsnmp_request_info *requests);
+int initialize_table_saHpiCtrlAnalogEntryCount(void);
+
 /*
  * SaErrorT populate_ctrl_analog()
  */
@@ -91,6 +108,59 @@ int set_table_ctrl_analog_state (saHpiCtrlAnalogTable_context *row_ctx)
  	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
 	return 0;
 }
+
+/*
+ * int handle_saHpiCtrlAnalogEntryCount()
+ */
+int handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
+				     netsnmp_handler_registration *reginfo,
+				     netsnmp_agent_request_info   *reqinfo,
+				     netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+
+ 	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlAnalogEntryCount, called\n"));
+
+	switch(reqinfo->mode) {
+	
+	    case MODE_GET:
+		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+					 (u_char *) &ctrl_analog_entry_count,
+					 sizeof(ctrl_analog_entry_count));
+		break;
+	
+	
+	    default:
+		/* we should never get here, so this is a really bad error */
+		return SNMP_ERR_GENERR;
+	}
+	
+	return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiCtrlAnalogEntryCount(void)
+ */
+int initialize_table_saHpiCtrlAnalogEntryCount(void)
+{
+
+ 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlAnalogEntryCount, called\n"));
+
+	netsnmp_register_scalar(
+		netsnmp_create_handler_registration(
+			"saHpiCtrlAnalogEntryCount", 
+			handle_saHpiCtrlAnalogEntryCount,
+                        saHpiCtrlAnalogEntryCount_oid, 
+			OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
+                        HANDLER_CAN_RONLY));
+	return 0;
+}
+
 
 /************************************************************/
 /************************************************************/
@@ -167,6 +237,7 @@ saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs )
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -178,15 +249,12 @@ init_saHpiCtrlAnalogTable(void)
 {
 
  	DEBUGMSGTL ((AGENT, "init_saHpiCtrlAnalogTable, called\n"));
+
 	initialize_table_saHpiCtrlAnalogTable();
 
-	/*
-	 * TODO: perform any startup stuff here, such as
-	 * populating the table with initial data.
-	 *
-	 * saHpiCtrlAnalogTable_context * new_row = create_row(index);
-	 * CONTAINER_INSERT(cb.container,new_row);
-	 */
+	initialize_table_saHpiCtrlAnalogEntryCount();
+
+	domain_resource_pair_initialize(&initialized, &dr_table);
 }
 
 /************************************************************
