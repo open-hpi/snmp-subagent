@@ -128,7 +128,7 @@ extern "C" {
 #define saHpiCtrlAnalogTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,7
 
 /* Number of table Indexes */
-#define CTRL_DIGITAL_INDEX_NR 4 
+#define CTRL_ANALOG_INDEX_NR 4 
 #define saHpiDomainId_INDEX 0
 #define saHpiResourceEntryId_INDEX 1
 #define saHpiResourceIsHistorical_INDEX 2
@@ -166,8 +166,6 @@ extern "C" {
  * active row */
 /** define saHpiCtrlAnalogTable_CAN_MODIFY_ACTIVE_ROW */
 
-#ifdef saHpiCtrlAnalogTable_SET_HANDLING
-
 	int saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_index * hdr );
 
 	void saHpiCtrlAnalogTable_set_reserve1( netsnmp_request_group * );
@@ -190,15 +188,8 @@ extern "C" {
 					    saHpiCtrlAnalogTable_context *row_ctx,
 					    netsnmp_request_group * rg);
 
-
-#ifdef saHpiCtrlAnalogTable_ROW_CREATION
 	saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_create_row( netsnmp_index* );
-#endif
-#endif
-
-#ifdef saHpiCtrlAnalogTable_IDX2
 	saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
