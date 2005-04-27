@@ -199,7 +199,7 @@ static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 
     dst->saHpiCtrlAnalogOem = src->saHpiCtrlAnalogOem;
 
-    memcpy( src->saHpiCtrlAnalogRDR, dst->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR_len );
+    memcpy( dst->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR_len );
     dst->saHpiCtrlAnalogRDR_len = src->saHpiCtrlAnalogRDR_len;
 
     return 0;

@@ -209,7 +209,7 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
 
     dst->saHpiCtrlTextOem = src->saHpiCtrlTextOem;
 
-    memcpy( src->saHpiCtrlTextRDR, dst->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR_len );
+    memcpy( dst->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR_len );
     dst->saHpiCtrlTextRDR_len = src->saHpiCtrlTextRDR_len;
 
     return 0;
