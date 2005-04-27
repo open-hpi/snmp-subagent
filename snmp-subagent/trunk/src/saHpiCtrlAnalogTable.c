@@ -231,7 +231,37 @@ int set_table_ctrl_analog_mode (saHpiCtrlAnalogTable_context *row_ctx)
 {
 
  	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
-	return 0;
+
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	ctrl_state.StateUnion.Analog = row_ctx->saHpiCtrlAnalogState;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_ANALOG;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlAnalogNum, 
+			     row_ctx->saHpiCtrlAnalogMode - 1, 
+			     &ctrl_state);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 /*
@@ -241,8 +271,38 @@ int set_table_ctrl_analog_mode (saHpiCtrlAnalogTable_context *row_ctx)
 int set_table_ctrl_analog_state (saHpiCtrlAnalogTable_context *row_ctx)
 {
 
- 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
-	return 0;
+ 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_state, called\n"));
+
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	ctrl_state.StateUnion.Analog = row_ctx->saHpiCtrlAnalogState;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_ANALOG; 
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlAnalogNum, 
+			     row_ctx->saHpiCtrlAnalogMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set State rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set State rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 /*
@@ -804,7 +864,7 @@ void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
 	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
-	int rc;
+	int rc = SNMP_ERR_NOERROR;
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_reserve2, called\n"));
 
@@ -822,31 +882,25 @@ void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
 		switch (current->tri->colnum) {
 		
 		case COLUMN_SAHPICTRLANALOGMODE:
-			/** SaHpiCtrlMode = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlAnalogIsReadOnly == MIB_TRUE) {
+				       snmp_log(LOG_ERR, "COLUMN_SAHPICTRLANALOGMODE mode is ReadOnly, Failed\n");
+				       DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLANALOGMODE mode is ReadOnly, Failed\n"));
+				       rc = SNMP_ERR_READONLY;
+			       }  
+			       if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+				       snmp_log(LOG_ERR, "COLUMN_SAHPICTRLANALOGMODE Invalid Mode, Failed\n");
+				       DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLANALOGMODE Invalid Mode, Failed\n"));
+				       rc = SNMP_ERR_BADVALUE;
+			       }
 			break;
 
 		case COLUMN_SAHPICTRLANALOGSTATE:
-			/** INTEGER = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			if (row_ctx->saHpiCtrlAnalogMode == 
+			    (SAHPI_CTRL_MODE_AUTO + 1) ) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLANALOGSTATE mode is AUTO, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLANALOGSTATE mode is AUTO, Failed\n"));
+				rc = SNMP_ERR_GENERR;
+			} 
 			break;
 
 		default: /** We shouldn't get here */
@@ -881,7 +935,7 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
-	int            row_err = 0;
+	int	row_err = 0;
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_action, called\n"));
 
@@ -898,11 +952,13 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 		case COLUMN_SAHPICTRLANALOGMODE:
 			/** SaHpiCtrlMode = ASN_INTEGER */
 			row_ctx->saHpiCtrlAnalogMode = *var->val.integer;
+			row_err = set_table_ctrl_analog_mode (row_ctx);
 			break;
 
 		case COLUMN_SAHPICTRLANALOGSTATE:
 			/** INTEGER = ASN_INTEGER */
 			row_ctx->saHpiCtrlAnalogState = *var->val.integer;
+			row_err = set_table_ctrl_analog_state (row_ctx);
 			break;
 
 		default: /** We shouldn't get here */
