@@ -111,12 +111,12 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 /*************************************************************
  * function declarations
  */
-	void init_saHpiCtrlAnalogTable(void);
-	void initialize_table_saHpiCtrlAnalogTable(void);
-	const saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_get_by_idx(netsnmp_index *);
-	const saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_get_by_idx_rs(netsnmp_index *,
+void init_saHpiCtrlAnalogTable(void);
+void initialize_table_saHpiCtrlAnalogTable(void);
+const saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_get_by_idx(netsnmp_index *);
+const saHpiCtrlAnalogTable_context * saHpiCtrlAnalogTable_get_by_idx_rs(netsnmp_index *,
 										int row_status);
-	int saHpiCtrlAnalogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
+int saHpiCtrlAnalogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
 /*************************************************************
