@@ -57,15 +57,17 @@ typedef struct saHpiCtrlStreamTable_context_s {
 	/** TruthValue = ASN_INTEGER */
 	long saHpiCtrlStreamDefaultRepeat;
 	
-	/** UNSIGNED32 = ASN_UNSIGNED */
-	unsigned long saHpiCtrlStreamDefaultState;
-	
+        /** SaHpiText = ASN_OCTET_STR */
+        unsigned char saHpiCtrlStreamDefaultState[SAHPI_CTRL_MAX_STREAM_LENGTH];
+        long saHpiCtrlStreamDefaultState_len;
+
 	/** TruthValue = ASN_INTEGER */
 	long saHpiCtrlStreamRepeat;
 	
-	/** UNSIGNED32 = ASN_UNSIGNED */
-	unsigned long saHpiCtrlStreamState;
-	
+	/** SaHpiText = ASN_OCTET_STR */
+        unsigned char saHpiCtrlStreamState[SAHPI_CTRL_MAX_STREAM_LENGTH];
+        long saHpiCtrlStreamState_len;
+
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	unsigned long saHpiCtrlStreamOem;
 	
