@@ -75,6 +75,166 @@ int handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
 int initialize_table_saHpiCtrlStreamEntryCount(void);
 
 /*
+ * SaErrorT populate_ctrl_stream()
+ */
+SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid, 
+			      SaHpiRdrT *rdr_entry,
+			      SaHpiRptEntryT *rpt_entry,
+			      oid *full_oid, size_t full_oid_len,
+			      oid *child_oid, size_t *child_oid_len)
+{
+ 	DEBUGMSGTL ((AGENT, "populate_ctrl_analog, called\n"));
+	SaErrorT rv = SA_OK;
+
+	oid ctrl_stream_oid[CTRL_STREAM_INDEX_NR];
+	netsnmp_index ctrl_stream_index;
+	saHpiCtrlStreamTable_context *ctrl_stream_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_STREAM populate_ctrl_stream() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	ctrl_stream_index.len = CTRL_STREAM_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	ctrl_stream_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	ctrl_stream_oid[1] = rpt_entry->ResourceId;
+		/** Index saHpiResourceIsHistorical is external */
+	ctrl_stream_oid[2] = MIB_FALSE;
+		/** Index saHpiCtrlDigitalEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_discrete() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_stream_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	ctrl_stream_index.oids = (oid *) & ctrl_stream_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLSTREAMNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlStreamTable_oid, saHpiCtrlStreamTable_oid_len,
+			column, column_len,
+			&ctrl_stream_index,
+			child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	ctrl_stream_context = NULL;
+	ctrl_stream_context = CONTAINER_FIND(cb.container, &ctrl_stream_index);
+
+	if (!ctrl_stream_context) { 
+		// New entry. Add it
+		ctrl_stream_context = 
+			saHpiCtrlDiscreteTable_create_row(&ctrl_stream_index);
+	}
+	if (!ctrl_stream_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	} 
+
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        ctrl_stream_context->saHpiCtrlStreamEntryId =
+		ctrl_stream_oid[3];
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        ctrl_stream_context->saHpiCtrlStreamNum =
+		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+        /** SaHpiCtrlOutputType = ASN_INTEGER */
+        ctrl_stream_context->saHpiCtrlStreamOutputType = 
+		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_stream_context->saHpiCtrlStreamDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_stream_context->saHpiCtrlStreamMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_stream_context->saHpiCtrlStreamIsReadOnly =
+		(rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+			? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_stream_context->saHpiCtrlStreamIsWriteOnly =
+		(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+			? MIB_TRUE : MIB_FALSE;
+
+	/** TruthValue = ASN_INTEGER */
+	ctrl_stream_context->saHpiCtrlStreamDefaultRepeat =
+		(rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.Repeat 
+		 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiText = ASN_OCTET_STR */
+	memset(ctrl_stream_context->saHpiCtrlStreamDefaultState, 
+	       0, SAHPI_CTRL_MAX_STREAM_LENGTH);
+        memcpy(	ctrl_stream_context->saHpiCtrlStreamDefaultState,
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.Stream,
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.StreamLength);
+        ctrl_stream_context->saHpiCtrlStreamDefaultState_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.StreamLength;
+
+	/** TruthValue = ASN_INTEGER */
+	ctrl_stream_context->saHpiCtrlStreamRepeat =
+		(rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.Repeat 
+			 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+	/** SaHpiText = ASN_OCTET_STR */
+	memset(ctrl_stream_context->saHpiCtrlStreamState, 
+	       0, SAHPI_CTRL_MAX_STREAM_LENGTH);
+        memcpy(	ctrl_stream_context->saHpiCtrlStreamState,
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.Stream,
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.StreamLength);
+        ctrl_stream_context->saHpiCtrlStreamState_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Stream.Default.StreamLength;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        ctrl_stream_context->saHpiCtrlStreamOem = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_stream_context->saHpiCtrlStreamRDR, 
+	       0, 
+	       sizeof(ctrl_stream_context->saHpiCtrlStreamRDR));
+
+	ctrl_stream_context->saHpiCtrlStreamRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_stream_context->saHpiCtrlStreamRDR, 
+	       full_oid, 
+	       ctrl_stream_context->saHpiCtrlStreamRDR_len);
+
+	CONTAINER_INSERT (cb.container, ctrl_stream_context);
+		
+	ctrl_stream_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
+}
+
+/*
  * int set_table_ctrl_analog_mode();
  */
 int set_table_ctrl_stream_mode (saHpiCtrlStreamTable_context *row_ctx)
@@ -89,20 +249,6 @@ int set_table_ctrl_stream_state (saHpiCtrlStreamTable_context *row_ctx)
 {
 	return 0;
 }
-
-
-/*
- * SaErrorT populate_ctrl_stream()
- */
-SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid, 
-			      SaHpiRdrT *rdr_entry,
-			      SaHpiRptEntryT *rpt_entry,
-			      oid *full_oid, size_t full_oid_len,
-			      oid *child_oid, size_t *child_oid_len)
-{
-	return 0;
-}
-
 
 /*
  * int handle_saHpiCtrlStreamEntryCount()
@@ -291,11 +437,15 @@ static int saHpiCtrlStreamTable_row_copy(saHpiCtrlStreamTable_context * dst,
 
 	dst->saHpiCtrlStreamDefaultRepeat = src->saHpiCtrlStreamDefaultRepeat;
 
-	dst->saHpiCtrlStreamDefaultState = src->saHpiCtrlStreamDefaultState;
+	memcpy( dst->saHpiCtrlStreamDefaultState, src->saHpiCtrlStreamDefaultState, 
+		src->saHpiCtrlStreamDefaultState_len );
+	dst->saHpiCtrlStreamDefaultState_len = src->saHpiCtrlStreamDefaultState_len;
 
 	dst->saHpiCtrlStreamRepeat = src->saHpiCtrlStreamRepeat;
 
-	dst->saHpiCtrlStreamState = src->saHpiCtrlStreamState;
+	memcpy( dst->saHpiCtrlStreamState, src->saHpiCtrlStreamState, 
+		src->saHpiCtrlStreamState_len );
+	dst->saHpiCtrlStreamState_len = src->saHpiCtrlStreamState_len;
 
 	dst->saHpiCtrlStreamOem = src->saHpiCtrlStreamOem;
 
@@ -621,8 +771,8 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
-			rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
+			/** SaHpiText = ASN_OCTET_STR */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
 							    sizeof(row_ctx->saHpiCtrlStreamState));
 			break;
 
@@ -671,11 +821,11 @@ void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 			 *
 			 * EXAMPLE:
 			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+			 * if ( *var->val.integer != XXX ) {
+			 *    rc = SNMP_ERR_INCONSISTENTVALUE;
+			 *    rc = SNMP_ERR_BADVALUE;
+		         * }
+		         */
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMREPEAT:
@@ -684,17 +834,17 @@ void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
+			/** SaHpiText = ASN_OCTET_STR */
 			/*
 			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			* if ( *var->val.integer != XXX ) {
-		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-		    *    rc = SNMP_ERR_BADVALUE;
-		    * }
-		    */
+                         *
+                         * EXAMPLE:
+                         *
+                         * if ( XXX_check_value( var->val.string, XXX ) ) {
+                         *    rc = SNMP_ERR_INCONSISTENTVALUE;
+                         *    rc = SNMP_ERR_BADVALUE;
+                         * }
+                         */
 			break;
 
 		default: /** We shouldn't get here */
@@ -752,8 +902,9 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
-			row_ctx->saHpiCtrlStreamState = *var->val.integer;
+			/** SaHpiText = ASN_OCTET_STR */
+			memcpy(row_ctx->saHpiCtrlStreamState,var->val.string,var->val_len);
+			row_ctx->saHpiCtrlStreamState_len = var->val_len;
 			break;
 
 		default: /** We shouldn't get here */
@@ -816,7 +967,7 @@ void saHpiCtrlStreamTable_set_commit( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
+			/** SaHpiText = ASN_OCTET_STR */
 			break;
 
 		default: /** We shouldn't get here */
@@ -863,7 +1014,7 @@ void saHpiCtrlStreamTable_set_free( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
+			/** SaHpiText = ASN_OCTET_STR */
 			break;
 
 		default: 
@@ -920,7 +1071,7 @@ void saHpiCtrlStreamTable_set_undo( netsnmp_request_group *rg )
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
-			/** UNSIGNED32 = ASN_UNSIGNED */
+			/** SaHpiText = ASN_OCTET_STR */
 			break;
 
 		default: /** We shouldn't get here */
@@ -1105,10 +1256,10 @@ int saHpiCtrlStreamTable_get_value(
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMDEFAULTSTATE:
-		/** UNSIGNED32 = ASN_UNSIGNED */
-		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlStreamDefaultState,
-					 sizeof(context->saHpiCtrlStreamDefaultState) );
+            /** SaHpiText = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&context->saHpiCtrlStreamDefaultState,
+                         context->saHpiCtrlStreamDefaultState_len );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMREPEAT:
@@ -1119,10 +1270,10 @@ int saHpiCtrlStreamTable_get_value(
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMSTATE:
-		/** UNSIGNED32 = ASN_UNSIGNED */
-		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlStreamState,
-					 sizeof(context->saHpiCtrlStreamState) );
+		/** SaHpiText = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&context->saHpiCtrlStreamState,
+                         context->saHpiCtrlStreamState_len );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMOEM:
