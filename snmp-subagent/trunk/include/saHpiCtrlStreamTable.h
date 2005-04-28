@@ -14,77 +14,77 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiCtrlStreamEntryId is internal */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiCtrlStreamEntryId is internal */
 
 typedef struct saHpiCtrlStreamTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+	netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
-        /** SaHpiEntryId = ASN_UNSIGNED */
-            unsigned long saHpiCtrlStreamEntryId;
-
-        /** SaHpiInstrumentId = ASN_UNSIGNED */
-            unsigned long saHpiCtrlStreamNum;
-
-        /** SaHpiCtrlOutputType = ASN_INTEGER */
-            long saHpiCtrlStreamOutputType;
-
-        /** SaHpiCtrlMode = ASN_INTEGER */
-            long saHpiCtrlStreamDefaultMode;
-
-        /** SaHpiCtrlMode = ASN_INTEGER */
-            long saHpiCtrlStreamMode;
-
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlStreamIsReadOnly;
-
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlStreamIsWriteOnly;
-
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlStreamDefaultRepeat;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiCtrlStreamDefaultState;
-
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlStreamRepeat;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiCtrlStreamState;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiCtrlStreamOem;
-
-        /** RowPointer = ASN_OBJECT_ID */
-            oid saHpiCtrlStreamRDR[MAX_OID_LEN];
-            long saHpiCtrlStreamRDR_len;
-
-
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
-
-    /*
-     *add anything else you want here
-     */
-
+	/*************************************************************
+	 * You can store data internally in this structure.
+	 *
+	 * TODO: You will probably have to fix a few types here...
+	 */
+	/** TODO: add storage for external index(s)! */
+	/** SaHpiEntryId = ASN_UNSIGNED */
+	unsigned long saHpiCtrlStreamEntryId;
+	
+	/** SaHpiInstrumentId = ASN_UNSIGNED */
+	unsigned long saHpiCtrlStreamNum;
+	
+	/** SaHpiCtrlOutputType = ASN_INTEGER */
+	long saHpiCtrlStreamOutputType;
+	
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	long saHpiCtrlStreamDefaultMode;
+	
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	long saHpiCtrlStreamMode;
+	
+	/** TruthValue = ASN_INTEGER */
+	long saHpiCtrlStreamIsReadOnly;
+	
+	/** TruthValue = ASN_INTEGER */
+	long saHpiCtrlStreamIsWriteOnly;
+	
+	/** TruthValue = ASN_INTEGER */
+	long saHpiCtrlStreamDefaultRepeat;
+	
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	unsigned long saHpiCtrlStreamDefaultState;
+	
+	/** TruthValue = ASN_INTEGER */
+	long saHpiCtrlStreamRepeat;
+	
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	unsigned long saHpiCtrlStreamState;
+	
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	unsigned long saHpiCtrlStreamOem;
+	
+	/** RowPointer = ASN_OBJECT_ID */
+	oid saHpiCtrlStreamRDR[MAX_OID_LEN];
+	long saHpiCtrlStreamRDR_len;
+	
+	
+	/*
+	 * OR
+	 *
+	 * Keep a pointer to your data
+	 */
+	void * data;
+	
+	/*
+	 *add anything else you want here
+	 */
+	
 } saHpiCtrlStreamTable_context;
 
 /*************************************************************
@@ -110,8 +110,9 @@ void init_saHpiCtrlStreamTable(void);
 void initialize_table_saHpiCtrlStreamTable(void);
 const saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_get_by_idx(netsnmp_index *);
 const saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
-int saHpiCtrlStreamTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
+									int row_status);
+int saHpiCtrlStreamTable_get_value(netsnmp_request_info *, netsnmp_index *, 
+				   netsnmp_table_request_info *);
 
 
 /*************************************************************
@@ -121,7 +122,14 @@ extern oid saHpiCtrlStreamTable_oid[];
 extern size_t saHpiCtrlStreamTable_oid_len;
 
 #define saHpiCtrlStreamTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,9
-    
+
+/* Number of table Indexes */
+#define CTRL_STREAM_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlStreamEntryId_INDEX 3
+
 /*************************************************************
  * column number definitions for table saHpiCtrlStreamTable
  */
@@ -169,23 +177,23 @@ saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_duplicate_row( saHpiCtrlStre
 netsnmp_index * saHpiCtrlStreamTable_delete_row( saHpiCtrlStreamTable_context* );
 
 int saHpiCtrlStreamTable_can_activate(saHpiCtrlStreamTable_context *undo_ctx,
-                      saHpiCtrlStreamTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+					      saHpiCtrlStreamTable_context *row_ctx,
+					      netsnmp_request_group * rg);
 int saHpiCtrlStreamTable_can_deactivate(saHpiCtrlStreamTable_context *undo_ctx,
-                        saHpiCtrlStreamTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+						saHpiCtrlStreamTable_context *row_ctx,
+						netsnmp_request_group * rg);
 int saHpiCtrlStreamTable_can_delete(saHpiCtrlStreamTable_context *undo_ctx,
-                    saHpiCtrlStreamTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+					    saHpiCtrlStreamTable_context *row_ctx,
+					    netsnmp_request_group * rg);
+
+
 #ifdef saHpiCtrlStreamTable_ROW_CREATION
-saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_create_row( netsnmp_index* );
+	saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_create_row( netsnmp_index* );
 #endif
 #endif
 
 #ifdef saHpiCtrlStreamTable_IDX2
-saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_get( const char *name, int len );
+	saHpiCtrlStreamTable_context * saHpiCtrlStreamTable_get( const char *name, int len );
 #endif
 
 #ifdef __cplusplus
