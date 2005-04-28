@@ -237,17 +237,53 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 /*
  * int set_table_ctrl_analog_mode();
  */
-int set_table_ctrl_stream_mode (saHpiCtrlStreamTable_context *row_ctx)
+int set_table_ctrl_stream (saHpiCtrlStreamTable_context *row_ctx)
 {
-	return 0;
-}
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
 
-/*
- * int set_table_ctrl_analog_mode();
- */
-int set_table_ctrl_stream_state (saHpiCtrlStreamTable_context *row_ctx)
-{
-	return 0;
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_stream_mode, called\n"));	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	/* repeat */
+	ctrl_state.StateUnion.Stream.Repeat = row_ctx->saHpiCtrlStreamRepeat;
+
+	/* stream */
+	memset(ctrl_state.StateUnion.Stream.Stream, 0, 
+	       sizeof(ctrl_state.StateUnion.Stream.Stream));
+	memcpy(ctrl_state.StateUnion.Stream.Stream,
+	       row_ctx->saHpiCtrlStreamState, 
+	       row_ctx->saHpiCtrlStreamState_len);
+
+	/* stream length */
+	ctrl_state.StateUnion.Stream.StreamLength = row_ctx->saHpiCtrlStreamState_len;
+
+	/* type */
+	ctrl_state.Type = SAHPI_CTRL_TYPE_STREAM;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlStreamNum, 
+			     row_ctx->saHpiCtrlStreamMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_STREAM: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_STREAM: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 /*
@@ -610,7 +646,10 @@ int saHpiCtrlStreamTable_can_deactivate(saHpiCtrlStreamTable_context *undo_ctx,
 int saHpiCtrlStreamTable_can_delete(saHpiCtrlStreamTable_context *undo_ctx,
 				    saHpiCtrlStreamTable_context *row_ctx,
 				    netsnmp_request_group * rg)
-{
+{      
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_can_delete, called\n"));
+
 	/*
 	 * probably shouldn't delete a row that we can't
 	 * deactivate.
@@ -643,6 +682,9 @@ saHpiCtrlStreamTable_create_row( netsnmp_index* hdr)
 {
 	saHpiCtrlStreamTable_context * ctx =
 	SNMP_MALLOC_TYPEDEF(saHpiCtrlStreamTable_context);
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_create_row, called\n"));
+
 	if (!ctx)
 		return NULL;
 
@@ -681,6 +723,8 @@ saHpiCtrlStreamTable_duplicate_row( saHpiCtrlStreamTable_context * row_ctx)
 {
 	saHpiCtrlStreamTable_context * dup;
 
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_duplicate_row, called\n"));
+
 	if (!row_ctx)
 		return NULL;
 
@@ -702,6 +746,8 @@ saHpiCtrlStreamTable_duplicate_row( saHpiCtrlStreamTable_context * row_ctx)
 netsnmp_index * saHpiCtrlStreamTable_delete_row( saHpiCtrlStreamTable_context * ctx )
 {
 	/* netsnmp_mutex_destroy(ctx->lock); */
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_delete_row, called\n"));
 
 	if (ctx->index.oids)
 		free(ctx->index.oids);
@@ -744,6 +790,7 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 	netsnmp_request_group_item *current;
 	int rc;
 
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_reserve1, called\n"));
 
 	/*
 	 * TODO: loop through columns, check syntax and lengths. For
@@ -772,8 +819,18 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
 			/** SaHpiText = ASN_OCTET_STR */
-			rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-							    sizeof(row_ctx->saHpiCtrlStreamState));
+			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+			if (rc == SNMP_ERR_NOERROR ) {
+				if (var->val_len > sizeof(row_ctx->saHpiCtrlStreamState)) {
+					rc = SNMP_ERR_WRONGLENGTH;
+				}
+			}
+			if (rc == SNMP_ERR_NOERROR)
+				DEBUGMSGTL ((AGENT, 
+			            "COLUMN_SAHPICTRLSTREAMSTATE NO ERROR: %d\n", rc));
+			else
+				DEBUGMSGTL ((AGENT, 
+				    "COLUMN_SAHPICTRLSTREAMSTATE ERROR: %d\n", rc));
 			break;
 
 		default: /** We shouldn't get here */
@@ -801,6 +858,8 @@ void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 	netsnmp_variable_list *var;
 	int rc;
 
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_reserve2, called\n"));
+
 	rg->rg_void = rg->list->ri;
 
 	/*
@@ -815,36 +874,42 @@ void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 		switch (current->tri->colnum) {
 		
 		case COLUMN_SAHPICTRLSTREAMMODE:
-			/** SaHpiCtrlMode = ASN_INTEGER */
-			/*
-			 * TODO: routine to check valid values
-			 *
-			 * EXAMPLE:
-			 *
-			 * if ( *var->val.integer != XXX ) {
-			 *    rc = SNMP_ERR_INCONSISTENTVALUE;
-			 *    rc = SNMP_ERR_BADVALUE;
-		         * }
-		         */
+			if (row_ctx->saHpiCtrlStreamIsReadOnly == MIB_TRUE) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLSTREAMMODE mode is ReadOnly, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLSTREAMMODE mode is ReadOnly, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+			}  
+			if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLSTREAMMODE Invalid Mode, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLSTREAMMODE Invalid Mode, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMREPEAT:
+			if ( (row_ctx->saHpiCtrlStreamMode - 1) == SAHPI_CTRL_MODE_AUTO) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLSTREAMREPEAT mode is Auto, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLSTREAMREPEAT mode is Auto, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+				break;
+			}  
 			/** TruthValue = ASN_INTEGER */
 			rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
+			if ( (row_ctx->saHpiCtrlStreamMode - 1) == SAHPI_CTRL_MODE_AUTO) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLSTREAMSTATE mode is Auto, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLSTREAMSTATE mode is Auto, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+				break;
+			}  
 			/** SaHpiText = ASN_OCTET_STR */
-			/*
-			 * TODO: routine to check valid values
-                         *
-                         * EXAMPLE:
-                         *
-                         * if ( XXX_check_value( var->val.string, XXX ) ) {
-                         *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                         *    rc = SNMP_ERR_BADVALUE;
-                         * }
-                         */
+			if ( var->val_len > sizeof(row_ctx->saHpiCtrlStreamState)  ) {
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPICTRLSTREAMSTATE: SNMP_ERR_BADVALUE\n"));                               
+				rc = SNMP_ERR_BADVALUE;
+			}
 			break;
 
 		default: /** We shouldn't get here */
@@ -881,6 +946,8 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 
 	int            row_err = 0;
 
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_action, called\n"));
+
 	/*
 	 * TODO: loop through columns, copy varbind values
 	 * to context structure for the row.
@@ -894,17 +961,20 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 		case COLUMN_SAHPICTRLSTREAMMODE:
 			/** SaHpiCtrlMode = ASN_INTEGER */
 			row_ctx->saHpiCtrlStreamMode = *var->val.integer;
+			row_err = set_table_ctrl_stream (row_ctx);
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMREPEAT:
 			/** TruthValue = ASN_INTEGER */
 			row_ctx->saHpiCtrlStreamRepeat = *var->val.integer;
+			row_err = set_table_ctrl_stream (row_ctx);
 			break;
 
 		case COLUMN_SAHPICTRLSTREAMSTATE:
 			/** SaHpiText = ASN_OCTET_STR */
 			memcpy(row_ctx->saHpiCtrlStreamState,var->val.string,var->val_len);
 			row_ctx->saHpiCtrlStreamState_len = var->val_len;
+			row_err = set_table_ctrl_stream (row_ctx);
 			break;
 
 		default: /** We shouldn't get here */
@@ -948,6 +1018,8 @@ void saHpiCtrlStreamTable_set_commit( netsnmp_request_group *rg )
 	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
 	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_commit, called\n"));
 
 	/*
 	 * loop through columns
@@ -995,6 +1067,8 @@ void saHpiCtrlStreamTable_set_free( netsnmp_request_group *rg )
 	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
 	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_free, called\n"));
 
 	/*
 	 * loop through columns
@@ -1053,6 +1127,8 @@ void saHpiCtrlStreamTable_set_undo( netsnmp_request_group *rg )
 	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_undo, called\n"));
+
 	/*
 	 * loop through columns
 	 */
@@ -1093,6 +1169,8 @@ void
 initialize_table_saHpiCtrlStreamTable(void)
 {
 	netsnmp_table_registration_info *table_info;
+
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlStreamTable, called\n"));
 
 	if (my_handler) {
 		snmp_log(LOG_ERR, "initialize_table_saHpiCtrlStreamTable_handler called again\n");
@@ -1196,6 +1274,8 @@ int saHpiCtrlStreamTable_get_value(
 {
 	netsnmp_variable_list *var = request->requestvb;
 	saHpiCtrlStreamTable_context *context = (saHpiCtrlStreamTable_context *)item;
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_get_value, called\n"));
 
 	switch (table_info->colnum) {
 	
@@ -1304,6 +1384,9 @@ int saHpiCtrlStreamTable_get_value(
 const saHpiCtrlStreamTable_context *
 saHpiCtrlStreamTable_get_by_idx(netsnmp_index * hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_get_by_idx, called\n"));
+
 	return(const saHpiCtrlStreamTable_context *)
 	CONTAINER_FIND(cb.container, hdr );
 }
