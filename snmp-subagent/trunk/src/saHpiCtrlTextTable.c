@@ -100,9 +100,29 @@ int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx)
 int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 				   netsnmp_handler_registration *reginfo,
 				   netsnmp_agent_request_info   *reqinfo,
-				   netsnmp_request_info         *requests) 
+				   netsnmp_request_info         *requests)
 {
-	return 0;
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &ctrl_text_entry_count,
+				     sizeof(ctrl_text_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
 }
 
 /*
@@ -110,6 +130,15 @@ int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
  */
 int initialize_table_saHpiCtrlTextEntryCount(void)
 {
+
+	netsnmp_register_scalar(
+		netsnmp_create_handler_registration(
+			"saHpiCtrlTextEntryCount", 
+			handle_saHpiCtrlTextEntryCount,
+			saHpiCtrlTextEntryCount_oid, 
+			OID_LENGTH(saHpiCtrlTextEntryCount_oid),
+			HANDLER_CAN_RONLY));
+
 	return 0;
 }
 

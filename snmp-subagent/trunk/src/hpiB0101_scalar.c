@@ -15,7 +15,7 @@ init_hpiB0101(void)
     static oid saHpiSensorEventEntryLogCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
 //    static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
     static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
-    static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
+//    static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
     static oid saHpiHpiVersion_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,1 };
     static oid saHpiUserEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,28 };
     static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5 };
@@ -92,11 +92,11 @@ init_hpiB0101(void)
                                saHpiCtrlOemEntryCount_oid, OID_LENGTH(saHpiCtrlOemEntryCount_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiCtrlTextEntryCount", handle_saHpiCtrlTextEntryCount,
-                               saHpiCtrlTextEntryCount_oid, OID_LENGTH(saHpiCtrlTextEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiCtrlTextEntryCount", handle_saHpiCtrlTextEntryCount,
+//                               saHpiCtrlTextEntryCount_oid, OID_LENGTH(saHpiCtrlTextEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiHpiVersion", handle_saHpiHpiVersion,
                                saHpiHpiVersion_oid, OID_LENGTH(saHpiHpiVersion_oid),
@@ -476,6 +476,7 @@ handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -504,6 +505,7 @@ handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiHpiVersion(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,

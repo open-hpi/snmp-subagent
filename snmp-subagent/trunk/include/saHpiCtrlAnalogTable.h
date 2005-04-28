@@ -122,8 +122,8 @@ int saHpiCtrlAnalogTable_get_value(netsnmp_request_info *, netsnmp_index *, nets
 /*************************************************************
  * oid declarations
  */
-	extern oid saHpiCtrlAnalogTable_oid[];
-	extern size_t saHpiCtrlAnalogTable_oid_len;
+extern oid saHpiCtrlAnalogTable_oid[];
+extern size_t saHpiCtrlAnalogTable_oid_len;
 
 #define saHpiCtrlAnalogTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,7
 
