@@ -595,13 +595,13 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
 		ctx->saHpiCtrlAnalogEntryId = *var_saHpiCtrlAnalogEntryId.val.integer;
 
 		err = saHpiDomainId_check_index(
-					       *var_saHpiDomainId.val.integer);
+				*var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-						      *var_saHpiResourceId.val.integer);  
+				*var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-							   *var_saHpiResourceIsHistorical.val.integer);
+				*var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiCtrlAnalogEntryId_check_index(
-							*var_saHpiCtrlAnalogEntryId.val.integer);
+				*var_saHpiCtrlAnalogEntryId.val.integer);
 	}
 
 	/*
@@ -767,7 +767,6 @@ saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
  */
 netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * ctx )
 {
-
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_delete_row, called\n"));
 
