@@ -115,31 +115,55 @@ saHpiCtrlStreamTable_cmp( const void *lhs, const void *rhs )
      */
     int rc;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiCtrlStreamTable_compare not implemented! Container order undefined\n" );
+    DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_cmp, called\n"));
+
+   /* check for NULL pointers */
+    if (lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
+	    return 0;
+    }
+    /* CHECK FIRST INDEX,  saHpiDomainId */
+    if ( context_l->index.oids[0] < context_r->index.oids[0])
+	    return -1;
+
+    if ( context_l->index.oids[0] > context_r->index.oids[0])
+	    return 1;
+
+    if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+	    /* If saHpiDomainId index is equal sort by second index */
+	    /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+	    if ( context_l->index.oids[1] < context_r->index.oids[1])
+		    return -1;
+
+	    if ( context_l->index.oids[1] > context_r->index.oids[1])
+		    return 1;
+
+	    if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		    /* If saHpiResourceEntryId index is equal sort by third index */
+		    /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+		    if ( context_l->index.oids[2] < context_r->index.oids[2])
+			    return -1;
+
+		    if ( context_l->index.oids[2] > context_r->index.oids[2])
+			    return 1;
+
+		    if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+			    /* If saHpiResourceIsHistorical index is equal sort by forth index */
+			    /* CHECK FORTH INDEX,  saHpiCtrlStreamEntryId */
+			    if ( context_l->index.oids[3] < context_r->index.oids[3])
+				    return -1;
+
+			    if ( context_l->index.oids[3] > context_r->index.oids[3])
+				    return 1;
+
+			    if ( context_l->index.oids[3] == context_r->index.oids[3])
+				    return 0;
+		    }
+	    }
+    }
+
     return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+
 }
 
 /************************************************************
