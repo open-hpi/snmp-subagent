@@ -75,7 +75,6 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 int initialize_table_saHpiCtrlDiscreteEntryCount(void);
 
 
-
 /*
  * SaErrorT populate_ctrl_discrete()
  */
