@@ -71,7 +71,7 @@ init_hpiB0101(void)
     static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
     static oid saHpiSoftwareEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,22 };
     static oid saHpiSensorEnableChangeEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
-    static oid saHpiCtrlStreamEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,8 };
+//    static oid saHpiCtrlStreamEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,8 };
     static oid saHpiEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
     static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
 
@@ -372,11 +372,11 @@ init_hpiB0101(void)
                                saHpiSensorEnableChangeEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCount_oid),
                                HANDLER_CAN_RONLY
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiCtrlStreamEntryCount", handle_saHpiCtrlStreamEntryCount,
-                               saHpiCtrlStreamEntryCount_oid, OID_LENGTH(saHpiCtrlStreamEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiCtrlStreamEntryCount", handle_saHpiCtrlStreamEntryCount,
+//                               saHpiCtrlStreamEntryCount_oid, OID_LENGTH(saHpiCtrlStreamEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiEventEntryCountTotal", handle_saHpiEventEntryCountTotal,
                                saHpiEventEntryCountTotal_oid, OID_LENGTH(saHpiEventEntryCountTotal_oid),
@@ -2103,6 +2103,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2131,6 +2132,7 @@ handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
