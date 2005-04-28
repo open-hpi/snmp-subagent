@@ -96,7 +96,7 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	oid column[2];
 	int column_len = 2;
 
-	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT populate_ctrl_stream() called\n"));
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT populate_ctrl_text() called\n"));
 
 	/* check for NULL pointers */
 	if (!rdr_entry) {
@@ -148,10 +148,10 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	if (!ctrl_text_context) { 
 		// New entry. Add it
 		ctrl_text_context = 
-			saHpiCtrlDiscreteTable_create_row(&ctrl_text_index);
+			saHpiCtrlTextTable_create_row(&ctrl_text_index);
 	}
 	if (!ctrl_text_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	} 
 
@@ -227,7 +227,6 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	ctrl_text_context->saHpiCtrlTextState_len = 
 		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
 
-
         /** UNSIGNED32 = ASN_UNSIGNED */
         ctrl_text_context->saHpiCtrlTextOem = 
 		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
@@ -254,7 +253,58 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
  */
 int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx) 
 {
-	return 0;
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_text, called\n"));	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	/* line */
+	ctrl_state.StateUnion.Text.Line = row_ctx->saHpiCtrlTextLine;
+
+      	/* data, len */
+	memset(ctrl_state.StateUnion.Text.Text.Data, 0, 
+	       sizeof(ctrl_state.StateUnion.Text.Text.Data));
+	memcpy(ctrl_state.StateUnion.Text.Text.Data,
+	       row_ctx->saHpiCtrlTextState, 
+	       row_ctx->saHpiCtrlTextState_len);
+	ctrl_state.StateUnion.Text.Text.DataLength = 
+		row_ctx->saHpiCtrlTextState_len;
+
+	/* Datatype */
+	ctrl_state.StateUnion.Text.Text.DataType = 
+		row_ctx->saHpiCtrlTextType - 1;
+
+	/* language */
+	ctrl_state.StateUnion.Text.Text.Language = 
+		row_ctx->saHpiCtrlTextLanguage - 1;
+
+	/* type */
+	ctrl_state.Type = SAHPI_CTRL_TYPE_TEXT;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlTextNum, 
+			     row_ctx->saHpiCtrlTextMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_TEXT: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_TEXT: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR;
 }
 
 /*
