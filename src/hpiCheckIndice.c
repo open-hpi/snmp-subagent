@@ -85,6 +85,14 @@ int saHpiCtrlStreamEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiCtrlTextTable  */    
+/**************************/
+int saHpiCtrlTextEntryId_check_index(long val)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
