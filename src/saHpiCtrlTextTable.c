@@ -83,7 +83,170 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 			    oid *full_oid, size_t full_oid_len,
 			    oid *child_oid, size_t *child_oid_len)
 {
-	return 0;
+ 	DEBUGMSGTL ((AGENT, "populate_ctrl_text, called\n"));
+	SaErrorT rv = SA_OK;
+
+	oid ctrl_text_oid[CTRL_TEXT_INDEX_NR];
+	netsnmp_index ctrl_text_index;
+	saHpiCtrlTextTable_context *ctrl_text_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT populate_ctrl_stream() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	ctrl_text_index.len = CTRL_TEXT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	ctrl_text_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	ctrl_text_oid[1] = rpt_entry->ResourceId;
+		/** Index saHpiResourceIsHistorical is external */
+	ctrl_text_oid[2] = MIB_FALSE;
+		/** Index saHpiCtrlTextEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_ctrl_text() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_text_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	ctrl_text_index.oids = (oid *) & ctrl_text_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLTEXTNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlTextTable_oid, saHpiCtrlTextTable_oid_len,
+			column, column_len,
+			&ctrl_text_index,
+			child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	ctrl_text_context = NULL;
+	ctrl_text_context = CONTAINER_FIND(cb.container, &ctrl_text_index);
+
+	if (!ctrl_text_context) { 
+		// New entry. Add it
+		ctrl_text_context = 
+			saHpiCtrlDiscreteTable_create_row(&ctrl_text_index);
+	}
+	if (!ctrl_text_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	} 
+
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        ctrl_text_context->saHpiCtrlTextEntryId =
+		ctrl_text_oid[3];
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        ctrl_text_context->saHpiCtrlTextNum =
+		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+        /** SaHpiCtrlOutputType = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextOutputType = 
+		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextDefaultMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** SaHpiCtrlMode = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextMode = 
+		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextIsReadOnly =
+		(rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+			? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextIsWriteOnly =
+		(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+			? MIB_TRUE : MIB_FALSE;
+
+        /** Unsigned8 = ASN_INTEGER */
+        ctrl_text_context->saHpiCtrlTextMaxChars =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxChars;
+
+        /** Unsigned8 = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextMaxLines = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxLines;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextLanguage =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Language + 1;
+
+        /** SaHpiTextType = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextType =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.DataType + 1;
+
+        /** Unsigned8 = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextLine =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
+
+        /** SaHpiText = ASN_OCTET_STR */
+	memset(ctrl_text_context->saHpiCtrlTextDefault, 0, 
+	       sizeof(ctrl_text_context->saHpiCtrlTextDefault));
+	memcpy(ctrl_text_context->saHpiCtrlTextDefault, 
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
+	ctrl_text_context->saHpiCtrlTextDefault_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+
+        /** Unsigned8 = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextLine =
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
+
+        /** SaHpiText = ASN_OCTET_STR */
+	memset(ctrl_text_context->saHpiCtrlTextState, 0, 
+	       sizeof(ctrl_text_context->saHpiCtrlTextState));
+	memcpy(ctrl_text_context->saHpiCtrlTextState, 
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
+	ctrl_text_context->saHpiCtrlTextState_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        ctrl_text_context->saHpiCtrlTextOem = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_text_context->saHpiCtrlTextRDR, 
+	       0, 
+	       sizeof(ctrl_text_context->saHpiCtrlTextRDR));
+
+	ctrl_text_context->saHpiCtrlTextRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_text_context->saHpiCtrlTextRDR, 
+	       full_oid, 
+	       ctrl_text_context->saHpiCtrlTextRDR_len);
+
+	CONTAINER_INSERT (cb.container, ctrl_text_context);
+		
+	ctrl_text_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
 }
 
 /*

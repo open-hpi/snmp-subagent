@@ -70,14 +70,14 @@ typedef struct saHpiCtrlTextTable_context_s {
             long saHpiCtrlTextDefaultLine;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiCtrlTextDefault[65535];
+            unsigned char saHpiCtrlTextDefault[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCtrlTextDefault_len;
 
         /** Unsigned8 = ASN_INTEGER */
             long saHpiCtrlTextLine;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiCtrlTextState[65535];
+            unsigned char saHpiCtrlTextState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCtrlTextState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -135,7 +135,14 @@ extern oid saHpiCtrlTextTable_oid[];
 extern size_t saHpiCtrlTextTable_oid_len;
 
 #define saHpiCtrlTextTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,11
-    
+
+/* Number of table Indexes */
+#define CTRL_TEXT_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlTextEntryId_INDEX 3
+
 /*************************************************************
  * column number definitions for table saHpiCtrlTextTable
  */
