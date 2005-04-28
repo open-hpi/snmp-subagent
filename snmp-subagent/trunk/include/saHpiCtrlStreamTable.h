@@ -92,9 +92,7 @@ typedef struct saHpiCtrlStreamTable_context_s {
 /*************************************************************
  * set funtions
  */
-int set_table_ctrl_stream_mode (saHpiCtrlStreamTable_context *row_ctx);
-int set_table_ctrl_stream_state (saHpiCtrlStreamTable_context *row_ctx);
-
+int set_table_ctrl_stream (saHpiCtrlStreamTable_context *row_ctx);
 
 /*************************************************************
  * function declarations
