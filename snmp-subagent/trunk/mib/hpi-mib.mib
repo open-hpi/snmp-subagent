@@ -6953,25 +6953,25 @@ saHpiCtrlStreamEntry OBJECT-TYPE
 
 
 SaHpiCtrlStreamEntry ::= SEQUENCE {
-		saHpiCtrlStreamEntryId 		SaHpiEntryId,
-		saHpiCtrlStreamNum 			SaHpiInstrumentId,
+	saHpiCtrlStreamEntryId 			SaHpiEntryId,
+	saHpiCtrlStreamNum 			SaHpiInstrumentId,
         saHpiCtrlStreamOutputType		SaHpiCtrlOutputType,
 
-        saHpiCtrlStreamDefaultMode     	SaHpiCtrlMode,        
+        saHpiCtrlStreamDefaultMode     		SaHpiCtrlMode,        
         saHpiCtrlStreamMode     		SaHpiCtrlMode,        
 
         saHpiCtrlStreamIsReadOnly 		TruthValue,
         saHpiCtrlStreamIsWriteOnly		TruthValue,
 
-		saHpiCtrlStreamDefaultRepeat	TruthValue,
-		saHpiCtrlStreamDefaultState		Unsigned32,	
+	saHpiCtrlStreamDefaultRepeat		TruthValue,
+	saHpiCtrlStreamDefaultState		SaHpiText,	
 
-		saHpiCtrlStreamRepeat			TruthValue,
-		saHpiCtrlStreamState			Unsigned32,
+	saHpiCtrlStreamRepeat			TruthValue,
+	saHpiCtrlStreamState			SaHpiText,
 
-        saHpiCtrlStreamOem              Unsigned32, 
+        saHpiCtrlStreamOem              	Unsigned32, 
    
-        saHpiCtrlStreamRDR              RowPointer
+        saHpiCtrlStreamRDR              	RowPointer
 }
 
 saHpiCtrlStreamEntryId OBJECT-TYPE 
@@ -7087,7 +7087,7 @@ saHpiCtrlStreamDefaultRepeat          OBJECT-TYPE
         ::= {saHpiCtrlStreamEntry 8}
 
 saHpiCtrlStreamDefaultState         OBJECT-TYPE
-        SYNTAX          Unsigned32 
+        SYNTAX          SaHpiText 
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     
@@ -7140,7 +7140,7 @@ saHpiCtrlStreamRepeat          OBJECT-TYPE
         ::= {saHpiCtrlStreamEntry 10}
 
 saHpiCtrlStreamState OBJECT-TYPE
-        SYNTAX          Unsigned32 
+        SYNTAX          SaHpiText 
         MAX-ACCESS      read-write
         STATUS          current
         DESCRIPTION     
