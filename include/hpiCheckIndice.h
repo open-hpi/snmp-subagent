@@ -46,6 +46,11 @@ int saHpiCtrlAnalogEntryId_check_index(long val);
 /**************************/
 int saHpiCtrlStreamEntryId_check_index(long val);
 
+/**************************/
+/* saHpiCtrlTextTable  */    
+/**************************/
+int saHpiCtrlTextEntryId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
