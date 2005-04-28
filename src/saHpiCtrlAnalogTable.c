@@ -126,7 +126,7 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
 	if (dr_entry == NULL) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_ctrl_discrete() domain_resource_pair_get returned NULL\n"));
+		"ERROR: populate_ctrl_analog() domain_resource_pair_get returned NULL\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	ctrl_analog_oid[3] = dr_entry->entry_id++;
