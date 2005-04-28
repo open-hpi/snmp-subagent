@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiCtrlTextTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,9 +52,75 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiCtrlTextTable_oid[] = { saHpiCtrlTextTable_TABLE_OID };
 size_t saHpiCtrlTextTable_oid_len = OID_LENGTH(saHpiCtrlTextTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiCtrlTextTable_IDX2
-/************************************************************
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;               
+static GHashTable *dr_table;
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long ctrl_text_entry_count = 0;
+static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
+int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
+				   netsnmp_handler_registration *reginfo,
+				   netsnmp_agent_request_info   *reqinfo,
+				   netsnmp_request_info         *requests);
+int initialize_table_saHpiCtrlTextEntryCount(void);
+
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry,
+			    oid *full_oid, size_t full_oid_len,
+			    oid *child_oid, size_t *child_oid_len)
+{
+	return 0;
+}
+
+/*
+ * SaErrorT set_table_ctrl_text()
+ */
+int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx) 
+{
+	return 0;
+}
+
+/*
+ * SaErrorT handle_saHpiCtrlTextEntryCount()
+ */
+int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
+				   netsnmp_handler_registration *reginfo,
+				   netsnmp_agent_request_info   *reqinfo,
+				   netsnmp_request_info         *requests) 
+{
+	return 0;
+}
+
+/*
+ * SaErrorT initialize_table_saHpiCtrlTextEntryCount()
+ */
+int initialize_table_saHpiCtrlTextEntryCount(void)
+{
+	return 0;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
+
+ /************************************************************
  * keep binary tree to find context by name
  */
 static int saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs );
@@ -69,68 +143,55 @@ saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs )
      */
     int rc;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiCtrlTextTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	DEBUGMSGTL ((AGENT, "saHpiCtrlTextTable_cmp, called\n"));
+
+	/* check for NULL pointers */
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;
+
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;
+
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by third index */
+			/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+				return -1;
+
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 1;
+
+			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+				/* If saHpiResourceIsHistorical index is equal sort by forth index */
+				/* CHECK FORTH INDEX,  saHpiCtrlTextEntryId */
+				if ( context_l->index.oids[3] < context_r->index.oids[3])
+					return -1;
+
+				if ( context_l->index.oids[3] > context_r->index.oids[3])
+					return 1;
+
+				if ( context_l->index.oids[3] == context_r->index.oids[3])
+					return 0;
+			}
+		}
+	}
+
+	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiCtrlTextTable_context *
-saHpiCtrlTextTable_get( const char *name, int len )
-{
-    saHpiCtrlTextTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlTextTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiCtrlTextTable module
@@ -140,13 +201,10 @@ init_saHpiCtrlTextTable(void)
 {
     initialize_table_saHpiCtrlTextTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiCtrlTextTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiCtrlTextEntryCount();
+
+    domain_resource_pair_initialize(&initialized, &dr_table);
+
 }
 
 /************************************************************
@@ -215,8 +273,6 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiCtrlTextTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -262,42 +318,22 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlTextTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlTextTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlTextTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlTextEntryId;
 
        memset( &var_saHpiCtrlTextEntryId, 0x00, sizeof(var_saHpiCtrlTextEntryId) );
        var_saHpiCtrlTextEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlTextTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiCtrlTextEntryId.next_variable = &var_XX;
-#endif
+       var_saHpiCtrlTextEntryId.next_variable = NULL;
 
 
     /*
@@ -315,36 +351,16 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
               /** skipping external index saHpiResourceIsHistorical */
    
                 ctx->saHpiCtrlTextEntryId = *var_saHpiCtrlTextEntryId.val.integer;
+
+		err = saHpiDomainId_check_index(
+			*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+			*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+			*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiCtrlTextEntryId_check_index(
+			*var_saHpiCtrlTextEntryId.val.integer);   
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiCtrlTextEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
     }
 
     /*
@@ -423,7 +439,6 @@ int saHpiCtrlTextTable_can_delete(saHpiCtrlTextTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiCtrlTextTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -472,7 +487,6 @@ saHpiCtrlTextTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -722,23 +736,6 @@ void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiCtrlTextTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -844,8 +841,8 @@ void saHpiCtrlTextTable_set_free( netsnmp_request_group *rg )
             /** SaHpiText = ASN_OCTET_STR */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+		break;
         }
     }
 
@@ -912,9 +909,6 @@ void saHpiCtrlTextTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiCtrlTextTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiCtrlTextTable table by defining its contents and how it's structured
@@ -978,18 +972,17 @@ initialize_table_saHpiCtrlTextTable(void)
     cb.container = netsnmp_container_find("saHpiCtrlTextTable_primary:"
                                           "saHpiCtrlTextTable:"
                                           "table_container");
-#ifdef saHpiCtrlTextTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiCtrlTextTable_secondary:"
                                                        "saHpiCtrlTextTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiCtrlTextTable_cmp;
-#endif
-#ifdef saHpiCtrlTextTable_SET_HANDLING
+
     cb.can_set = 1;
-#ifdef saHpiCtrlTextTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiCtrlTextTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiCtrlTextTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiCtrlTextTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlTextTable_row_copy;
@@ -1004,7 +997,7 @@ initialize_table_saHpiCtrlTextTable(void)
     cb.set_commit = saHpiCtrlTextTable_set_commit;
     cb.set_free = saHpiCtrlTextTable_set_free;
     cb.set_undo = saHpiCtrlTextTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiCtrlTextTable",
                 "Registering table saHpiCtrlTextTable "
                 "as a table array\n"));
