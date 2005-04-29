@@ -14,107 +14,107 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiCtrlTextEntryId is internal */
+	/** Index saHpiDomainId is external */
+	/** Index saHpiResourceId is external */
+	/** Index saHpiResourceIsHistorical is external */
+	/** Index saHpiCtrlTextEntryId is internal */
 
-typedef struct saHpiCtrlTextTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+	typedef struct saHpiCtrlTextTable_context_s {
+		netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
-        /** SaHpiEntryId = ASN_UNSIGNED */
-            unsigned long saHpiCtrlTextEntryId;
+		/*************************************************************
+		 * You can store data internally in this structure.
+		 *
+		 * TODO: You will probably have to fix a few types here...
+		 */
+		/** TODO: add storage for external index(s)! */
+		/** SaHpiEntryId = ASN_UNSIGNED */
+		unsigned long saHpiCtrlTextEntryId;
 
-        /** SaHpiInstrumentId = ASN_UNSIGNED */
-            unsigned long saHpiCtrlTextNum;
+		/** SaHpiInstrumentId = ASN_UNSIGNED */
+		unsigned long saHpiCtrlTextNum;
 
-        /** SaHpiCtrlOutputType = ASN_INTEGER */
-            long saHpiCtrlTextOutputType;
+		/** SaHpiCtrlOutputType = ASN_INTEGER */
+		long saHpiCtrlTextOutputType;
 
-        /** SaHpiCtrlMode = ASN_INTEGER */
-            long saHpiCtrlTextDefaultMode;
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		long saHpiCtrlTextDefaultMode;
 
-        /** SaHpiCtrlMode = ASN_INTEGER */
-            long saHpiCtrlTextMode;
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		long saHpiCtrlTextMode;
 
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlTextIsReadOnly;
+		/** TruthValue = ASN_INTEGER */
+		long saHpiCtrlTextIsReadOnly;
 
-        /** TruthValue = ASN_INTEGER */
-            long saHpiCtrlTextIsWriteOnly;
+		/** TruthValue = ASN_INTEGER */
+		long saHpiCtrlTextIsWriteOnly;
 
-        /** Unsigned8 = ASN_INTEGER */
-            long saHpiCtrlTextMaxChars;
+		/** Unsigned8 = ASN_INTEGER */
+		long saHpiCtrlTextMaxChars;
 
-        /** Unsigned8 = ASN_INTEGER */
-            long saHpiCtrlTextMaxLines;
+		/** Unsigned8 = ASN_INTEGER */
+		long saHpiCtrlTextMaxLines;
 
-        /** SaHpiTextLanguage = ASN_INTEGER */
-            long saHpiCtrlTextLanguage;
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		long saHpiCtrlTextLanguage;
 
-        /** SaHpiTextType = ASN_INTEGER */
-            long saHpiCtrlTextType;
+		/** SaHpiTextType = ASN_INTEGER */
+		long saHpiCtrlTextType;
 
-        /** Unsigned8 = ASN_INTEGER */
-            long saHpiCtrlTextDefaultLine;
+		/** Unsigned8 = ASN_INTEGER */
+		long saHpiCtrlTextDefaultLine;
 
-        /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiCtrlTextDefault[SAHPI_MAX_TEXT_BUFFER_LENGTH];
-            long saHpiCtrlTextDefault_len;
+		/** SaHpiText = ASN_OCTET_STR */
+		unsigned char saHpiCtrlTextDefault[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+		long saHpiCtrlTextDefault_len;
 
-        /** Unsigned8 = ASN_INTEGER */
-            long saHpiCtrlTextLine;
+		/** Unsigned8 = ASN_INTEGER */
+		long saHpiCtrlTextLine;
 
-        /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiCtrlTextState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
-            long saHpiCtrlTextState_len;
+		/** SaHpiText = ASN_OCTET_STR */
+		unsigned char saHpiCtrlTextState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+		long saHpiCtrlTextState_len;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiCtrlTextOem;
+		/** UNSIGNED32 = ASN_UNSIGNED */
+		unsigned long saHpiCtrlTextOem;
 
-        /** RowPointer = ASN_OBJECT_ID */
-            oid saHpiCtrlTextRDR[MAX_OID_LEN];
-            long saHpiCtrlTextRDR_len;
+		/** RowPointer = ASN_OBJECT_ID */
+		oid saHpiCtrlTextRDR[MAX_OID_LEN];
+		long saHpiCtrlTextRDR_len;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+		/*
+		 * OR
+		 *
+		 * Keep a pointer to your data
+		 */
+		void * data;
 
-    /*
-     *add anything else you want here
-     */
+		/*
+		 *add anything else you want here
+		 */
 
-} saHpiCtrlTextTable_context;
+	} saHpiCtrlTextTable_context;
 
 /*************************************************************
  * set funtions
  */
-int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx);
+	int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx);
 
 
 /*************************************************************
  * function declarations
  */
-SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid, 
-			    SaHpiRdrT *rdr_entry,
-			    SaHpiRptEntryT *rpt_entry,
-			    oid *full_oid, size_t full_oid_len,
-			    oid *child_oid, size_t *child_oid_len);
+	SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid, 
+				    SaHpiRdrT *rdr_entry,
+				    SaHpiRptEntryT *rpt_entry,
+				    oid *full_oid, size_t full_oid_len,
+				    oid *child_oid, size_t *child_oid_len);
 
 
 /*************************************************************
@@ -124,7 +124,7 @@ void init_saHpiCtrlTextTable(void);
 void initialize_table_saHpiCtrlTextTable(void);
 const saHpiCtrlTextTable_context * saHpiCtrlTextTable_get_by_idx(netsnmp_index *);
 const saHpiCtrlTextTable_context * saHpiCtrlTextTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+								    int row_status);
 int saHpiCtrlTextTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -194,23 +194,23 @@ saHpiCtrlTextTable_context * saHpiCtrlTextTable_duplicate_row( saHpiCtrlTextTabl
 netsnmp_index * saHpiCtrlTextTable_delete_row( saHpiCtrlTextTable_context* );
 
 int saHpiCtrlTextTable_can_activate(saHpiCtrlTextTable_context *undo_ctx,
-                      saHpiCtrlTextTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+				    saHpiCtrlTextTable_context *row_ctx,
+				    netsnmp_request_group * rg);
 int saHpiCtrlTextTable_can_deactivate(saHpiCtrlTextTable_context *undo_ctx,
-                        saHpiCtrlTextTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+				      saHpiCtrlTextTable_context *row_ctx,
+				      netsnmp_request_group * rg);
 int saHpiCtrlTextTable_can_delete(saHpiCtrlTextTable_context *undo_ctx,
-                    saHpiCtrlTextTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+					  saHpiCtrlTextTable_context *row_ctx,
+					  netsnmp_request_group * rg);
+
+
 #ifdef saHpiCtrlTextTable_ROW_CREATION
-saHpiCtrlTextTable_context * saHpiCtrlTextTable_create_row( netsnmp_index* );
+	saHpiCtrlTextTable_context * saHpiCtrlTextTable_create_row( netsnmp_index* );
 #endif
 #endif
 
 #ifdef saHpiCtrlTextTable_IDX2
-saHpiCtrlTextTable_context * saHpiCtrlTextTable_get( const char *name, int len );
+	saHpiCtrlTextTable_context * saHpiCtrlTextTable_get( const char *name, int len );
 #endif
 
 #ifdef __cplusplus
