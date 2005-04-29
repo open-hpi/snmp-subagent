@@ -248,9 +248,48 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
  */
 int set_table_ctrl_oem (saHpiCtrlOemTable_context *row_ctx)
 {
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
 	DEBUGMSGTL ((AGENT, "set_table_ctrl_oem, called\n"));
 
-	return 0;
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	/* body */
+	memset(ctrl_state.StateUnion.Oem.Body, 0, 
+	       sizeof(ctrl_state.StateUnion.Oem.Body));
+	memcpy(ctrl_state.StateUnion.Oem.Body,
+	       row_ctx->saHpiCtrlOemState, 
+	       row_ctx->saHpiCtrlOemState_len);
+
+	/* body length */
+	ctrl_state.StateUnion.Oem.BodyLength = row_ctx->saHpiCtrlOemState_len;
+
+	/* type */
+	ctrl_state.Type = SAHPI_CTRL_TYPE_OEM;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlOemNum, 
+			     row_ctx->saHpiCtrlOemMode - 1, 
+			     &ctrl_state); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_OEM: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_OEM: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 /*************************************************************
@@ -760,16 +799,26 @@ void saHpiCtrlOemTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPICTRLOEMMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiCtrlOemMode));
-        break;
+		break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
-            /** OCTETSTR = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiCtrlOemState));
-        break;
+	case COLUMN_SAHPICTRLOEMSTATE:
+		/** SaHpiText = ASN_OCTET_STR */
+		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+		if (rc == SNMP_ERR_NOERROR ) {
+			if (var->val_len > sizeof(row_ctx->saHpiCtrlOemState)) {
+				rc = SNMP_ERR_WRONGLENGTH;
+			}
+		}
+		if (rc == SNMP_ERR_NOERROR)
+			DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICTRLOEMSTATE NO ERROR: %d\n", rc));
+		else
+			DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICTRLOEMSTATE ERROR: %d\n", rc));
+		break;
 
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
@@ -810,18 +859,18 @@ void saHpiCtrlOemTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPICTRLOEMMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+			    /** SaHpiCtrlMode = ASN_INTEGER */
+		if (row_ctx->saHpiCtrlOemIsReadOnly == MIB_TRUE) {
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOEMMODE mode is ReadOnly, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOEMMODE mode is ReadOnly, Failed\n"));
+			rc = SNMP_ERR_READONLY;
+		}  
+		if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOEMMODE Invalid Mode, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOEMMODE Invalid Mode, Failed\n"));
+			rc = SNMP_ERR_BADVALUE;
+		}
+		break;
 
         case COLUMN_SAHPICTRLOEMSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
@@ -884,12 +933,14 @@ void saHpiCtrlOemTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPICTRLOEMMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             row_ctx->saHpiCtrlOemMode = *var->val.integer;
+	    row_err = set_table_ctrl_oem(row_ctx);
         break;
 
         case COLUMN_SAHPICTRLOEMSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiCtrlOemState,var->val.string,var->val_len);
             row_ctx->saHpiCtrlOemState_len = var->val_len;
+	    row_err = set_table_ctrl_oem(row_ctx);
         break;
 
         default: /** We shouldn't get here */
