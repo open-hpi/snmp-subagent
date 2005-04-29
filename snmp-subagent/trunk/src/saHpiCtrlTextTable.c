@@ -827,12 +827,21 @@ void saHpiCtrlTextTable_set_reserve1( netsnmp_request_group *rg )
                                                 sizeof(row_ctx->saHpiCtrlTextLine));
         break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiCtrlTextState));
-        break;
-
+	case COLUMN_SAHPICTRLTEXTSTATE:
+		/** SaHpiText = ASN_OCTET_STR */
+		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+		if (rc == SNMP_ERR_NOERROR ) {
+			if (var->val_len > sizeof(row_ctx->saHpiCtrlTextState)) {
+				rc = SNMP_ERR_WRONGLENGTH;
+			}
+		}
+		if (rc == SNMP_ERR_NOERROR)
+			DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICTRLTEXTSTATE NO ERROR: %d\n", rc));
+		else
+			DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICTRLTEXTSTATE ERROR: %d\n", rc));
+		break;
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -872,35 +881,27 @@ void saHpiCtrlTextTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
-
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		if (row_ctx->saHpiCtrlTextIsReadOnly == MIB_TRUE) {
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n"));
+			rc = SNMP_ERR_READONLY;
+		}  
+		if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n"));
+			rc = SNMP_ERR_BADVALUE;
+		}
+		break;
         case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+		/** Unsigned8 = ASN_INTEGER */
+		if ( *var->val.integer > 255 ) 
+			rc = SNMP_ERR_BADVALUE;
+		break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
+	case COLUMN_SAHPICTRLTEXTSTATE:
+		/* length checked in reserve1() */
+		/** SaHpiText = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -960,17 +961,20 @@ void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPICTRLTEXTMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             row_ctx->saHpiCtrlTextMode = *var->val.integer;
+	    row_err = set_table_ctrl_text (row_ctx);
         break;
 
         case COLUMN_SAHPICTRLTEXTLINE:
             /** Unsigned8 = ASN_INTEGER */
             row_ctx->saHpiCtrlTextLine = *var->val.integer;
+	    row_err = set_table_ctrl_text (row_ctx);
         break;
 
         case COLUMN_SAHPICTRLTEXTSTATE:
             /** SaHpiText = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiCtrlTextState,var->val.string,var->val_len);
             row_ctx->saHpiCtrlTextState_len = var->val_len;
+	    row_err = set_table_ctrl_text (row_ctx);
         break;
 
         default: /** We shouldn't get here */
