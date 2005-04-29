@@ -104,17 +104,17 @@ extern "C" {
 /*************************************************************
  * set funtions
  */
-	int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx);
+int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx);
 
 
 /*************************************************************
  * function declarations
  */
-	SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid, 
-				    SaHpiRdrT *rdr_entry,
-				    SaHpiRptEntryT *rpt_entry,
-				    oid *full_oid, size_t full_oid_len,
-				    oid *child_oid, size_t *child_oid_len);
+SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry,
+			    oid *full_oid, size_t full_oid_len,
+			    oid *child_oid, size_t *child_oid_len);
 
 
 /*************************************************************

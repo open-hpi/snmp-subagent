@@ -100,6 +100,22 @@ typedef struct saHpiSensorTable_context_s {
 } saHpiSensorTable_context;
 
 /*************************************************************
+ * set funtions
+ */
+int set_table_sensor (saHpiSensorTable_context *row_ctx);
+
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_sensor(SaHpiSessionIdT sessionid, 
+			 SaHpiRdrT *rdr_entry,
+			 SaHpiRptEntryT *rpt_entry,
+			 oid *full_oid, size_t full_oid_len,
+			 oid *child_oid, size_t *child_oid_len);
+
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiSensorTable(void);
@@ -117,6 +133,13 @@ extern oid saHpiSensorTable_oid[];
 extern size_t saHpiSensorTable_oid_len;
 
 #define saHpiSensorTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,2
+
+/* Number of table Indexes */
+#define SENSOR_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorEntryId_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiSensorTable
