@@ -58,18 +58,18 @@ typedef struct saHpiCtrlOemTable_context_s {
             unsigned long saHpiCtrlOemManufacturerId;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlOemDefaultConfigData[65535];
+            unsigned char saHpiCtrlOemDefaultConfigData[SAHPI_CTRL_MAX_OEM_BODY_LENGTH];
             long saHpiCtrlOemDefaultConfigData_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
             unsigned long saHpiCtrlOemDefaultMId;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlOemDefaultState[65535];
+            unsigned char saHpiCtrlOemDefaultState[SAHPI_CTRL_MAX_OEM_BODY_LENGTH];
             long saHpiCtrlOemDefaultState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlOemState[65535];
+            unsigned char saHpiCtrlOemState[SAHPI_CTRL_MAX_OEM_BODY_LENGTH];
             long saHpiCtrlOemState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -94,6 +94,20 @@ typedef struct saHpiCtrlOemTable_context_s {
 } saHpiCtrlOemTable_context;
 
 /*************************************************************
+ * set funtions
+ */
+int set_table_ctrl_oem (saHpiCtrlOemTable_context *row_ctx);
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry,
+			    oid *full_oid, size_t full_oid_len,
+			    oid *child_oid, size_t *child_oid_len);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiCtrlOemTable(void);
@@ -111,6 +125,14 @@ extern oid saHpiCtrlOemTable_oid[];
 extern size_t saHpiCtrlOemTable_oid_len;
 
 #define saHpiCtrlOemTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,7,13
+
+
+/* Number of table Indexes */
+#define CTRL_OEM_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlOemEntryId_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiCtrlOemTable
