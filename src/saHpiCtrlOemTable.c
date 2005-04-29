@@ -51,8 +51,110 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiCtrlOemTable_oid[] = { saHpiCtrlOemTable_TABLE_OID };
 size_t saHpiCtrlOemTable_oid_len = OID_LENGTH(saHpiCtrlOemTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiCtrlOemTable_IDX2
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;               
+static GHashTable *dr_table;
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long ctrl_oem_entry_count = 0;
+static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
+int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
+				  netsnmp_handler_registration *reginfo,
+				  netsnmp_agent_request_info   *reqinfo,
+				  netsnmp_request_info         *requests);
+int initialize_table_saHpiCtrlOemEntryCount(void);
+
+/*************************************************************
+ * SaErrorT  populate_ctrl_oem
+ */
+SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry,
+			    oid *full_oid, size_t full_oid_len,
+			    oid *child_oid, size_t *child_oid_len)
+{
+	DEBUGMSGTL ((AGENT, "populate_ctrl_oem, called\n"));
+
+	return 0;
+}
+
+/*************************************************************
+ * int set_table_ctrl_oem()
+ */
+int set_table_ctrl_oem (saHpiCtrlOemTable_context *row_ctx)
+{
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_oem, called\n"));
+
+	return 0;
+}
+
+/*************************************************************
+ * int handle_saHpiCtrlOemEntryCount()
+ */
+int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
+				  netsnmp_handler_registration *reginfo,
+				  netsnmp_agent_request_info   *reqinfo,
+				  netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+
+	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlOemEntryCount, called\n"));
+
+	switch(reqinfo->mode) {
+	
+	    case MODE_GET:
+		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+				     (u_char *) &ctrl_oem_entry_count,
+				     sizeof(ctrl_oem_entry_count));
+		break;
+	
+	    default:
+		/* we should never get here, so this is a really bad error */
+		return SNMP_ERR_GENERR;
+	}
+	
+	return SNMP_ERR_NOERROR;
+}
+
+/*************************************************************
+ * int initialize_table_saHpiCtrlOemEntryCount()
+ */
+int initialize_table_saHpiCtrlOemEntryCount(void)
+{
+
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlOemEntryCount, called\n"));
+
+	netsnmp_register_scalar(
+		netsnmp_create_handler_registration(
+			"saHpiCtrlOemEntryCount", 
+			handle_saHpiCtrlOemEntryCount,
+                        saHpiCtrlOemEntryCount_oid, 
+			OID_LENGTH(saHpiCtrlOemEntryCount_oid),
+                        HANDLER_CAN_RONLY));
+
+    return 0;
+}
+
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -65,79 +167,67 @@ static int saHpiCtrlOemTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiCtrlOemTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiCtrlOemTable_context *context_l =
-        (saHpiCtrlOemTable_context *)lhs;
-    saHpiCtrlOemTable_context *context_r =
-        (saHpiCtrlOemTable_context *)rhs;
+	saHpiCtrlOemTable_context *context_l =
+	    (saHpiCtrlOemTable_context *)lhs;
+	saHpiCtrlOemTable_context *context_r =
+	    (saHpiCtrlOemTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+	/*
+	 * check primary key, then secondary. Add your own code if
+	 * there are more than 2 indexes
+	 */
+	int rc;
+	
+	DEBUGMSGTL ((AGENT, "saHpiCtrlOemTable_cmp, called\n"));
+	
+	/* check for NULL pointers */
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+	
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;
+	
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+		    return -1;
+	
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+		    return 1;
+	
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		    /* If saHpiResourceEntryId index is equal sort by third index */
+		    /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+		    if ( context_l->index.oids[2] < context_r->index.oids[2])
+			    return -1;
+	
+		    if ( context_l->index.oids[2] > context_r->index.oids[2])
+			    return 1;
+	
+		    if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+			    /* If saHpiResourceIsHistorical index is equal sort by forth index */
+			    /* CHECK FORTH INDEX,  saHpiCtrlOemEntryId */
+			    if ( context_l->index.oids[3] < context_r->index.oids[3])
+				    return -1;
+	
+			    if ( context_l->index.oids[3] > context_r->index.oids[3])
+				    return 1;
+	
+			    if ( context_l->index.oids[3] == context_r->index.oids[3])
+				    return 0;
+		    }
+		}
+	}
+	
+	return 0;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiCtrlOemTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiCtrlOemTable_context *
-saHpiCtrlOemTable_get( const char *name, int len )
-{
-    saHpiCtrlOemTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCtrlOemTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiCtrlOemTable module
@@ -147,13 +237,10 @@ init_saHpiCtrlOemTable(void)
 {
     initialize_table_saHpiCtrlOemTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiCtrlOemTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiCtrlOemEntryCount();
+
+    domain_resource_pair_initialize(&initialized, &dr_table);
+
 }
 
 /************************************************************
@@ -217,7 +304,6 @@ static int saHpiCtrlOemTable_row_copy(saHpiCtrlOemTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiCtrlOemTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -384,7 +470,6 @@ int saHpiCtrlOemTable_can_delete(saHpiCtrlOemTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiCtrlOemTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -432,7 +517,6 @@ saHpiCtrlOemTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -818,9 +902,6 @@ void saHpiCtrlOemTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiCtrlOemTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiCtrlOemTable table by defining its contents and how it's structured
@@ -884,18 +965,17 @@ initialize_table_saHpiCtrlOemTable(void)
     cb.container = netsnmp_container_find("saHpiCtrlOemTable_primary:"
                                           "saHpiCtrlOemTable:"
                                           "table_container");
-#ifdef saHpiCtrlOemTable_IDX2
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiCtrlOemTable_secondary:"
                                                        "saHpiCtrlOemTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiCtrlOemTable_cmp;
-#endif
-#ifdef saHpiCtrlOemTable_SET_HANDLING
+                      
+
     cb.can_set = 1;
-#ifdef saHpiCtrlOemTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiCtrlOemTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiCtrlOemTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiCtrlOemTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlOemTable_row_copy;
@@ -910,7 +990,7 @@ initialize_table_saHpiCtrlOemTable(void)
     cb.set_commit = saHpiCtrlOemTable_set_commit;
     cb.set_free = saHpiCtrlOemTable_set_free;
     cb.set_undo = saHpiCtrlOemTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiCtrlOemTable",
                 "Registering table saHpiCtrlOemTable "
                 "as a table array\n"));
