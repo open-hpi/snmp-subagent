@@ -49,7 +49,7 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiCtrlTextTable_oid[] = { saHpiCtrlTextTable_TABLE_OID };
+oid saHpiCtrlTextTable_oid[] = { saHpiCtrlTextTable_TABLE_OID};
 size_t saHpiCtrlTextTable_oid_len = OID_LENGTH(saHpiCtrlTextTable_oid);
 
 /************************************************************/
@@ -67,7 +67,7 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_text_entry_count = 0;
-static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
+static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10};
 int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 				   netsnmp_handler_registration *reginfo,
 				   netsnmp_agent_request_info   *reqinfo,
@@ -83,7 +83,7 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 			    oid *full_oid, size_t full_oid_len,
 			    oid *child_oid, size_t *child_oid_len)
 {
- 	DEBUGMSGTL ((AGENT, "populate_ctrl_text, called\n"));
+	DEBUGMSGTL ((AGENT, "populate_ctrl_text, called\n"));
 	SaErrorT rv = SA_OK;
 
 	oid ctrl_text_oid[CTRL_TEXT_INDEX_NR];
@@ -101,35 +101,35 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
-	}    
+	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
 	/* BUILD oid for new row */
-		/* assign the number of indices */
+	/* assign the number of indices */
 	ctrl_text_index.len = CTRL_TEXT_INDEX_NR;
-		/** Index saHpiDomainId is external */
+	/** Index saHpiDomainId is external */
 	ctrl_text_oid[0] = get_domain_id(sessionid);
-		/** Index saHpiResourceId is external */
+	/** Index saHpiResourceId is external */
 	ctrl_text_oid[1] = rpt_entry->ResourceId;
-		/** Index saHpiResourceIsHistorical is external */
+	/** Index saHpiResourceIsHistorical is external */
 	ctrl_text_oid[2] = MIB_FALSE;
-		/** Index saHpiCtrlTextEntryId is internal */
+	/** Index saHpiCtrlTextEntryId is internal */
 	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
 	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
 	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
 	if (dr_entry == NULL) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_ctrl_text() domain_resource_pair_get returned NULL\n"));
+			     "ERROR: populate_ctrl_text() domain_resource_pair_get returned NULL\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	ctrl_text_oid[3] = dr_entry->entry_id++;
-		/* assign the indices to the index */
+	/* assign the indices to the index */
 	ctrl_text_index.oids = (oid *) & ctrl_text_oid;
 
 	/* create full oid on This row for parent RowPointer */
@@ -137,101 +137,101 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	column[1] = COLUMN_SAHPICTRLTEXTNUM;
 	memset(child_oid, 0, sizeof(child_oid_len));
 	build_full_oid(saHpiCtrlTextTable_oid, saHpiCtrlTextTable_oid_len,
-			column, column_len,
-			&ctrl_text_index,
-			child_oid, MAX_OID_LEN, child_oid_len);
+		       column, column_len,
+		       &ctrl_text_index,
+		       child_oid, MAX_OID_LEN, child_oid_len);
 
 	/* See if Row exists. */
 	ctrl_text_context = NULL;
 	ctrl_text_context = CONTAINER_FIND(cb.container, &ctrl_text_index);
 
-	if (!ctrl_text_context) { 
+	if (!ctrl_text_context) {
 		// New entry. Add it
 		ctrl_text_context = 
-			saHpiCtrlTextTable_create_row(&ctrl_text_index);
+		saHpiCtrlTextTable_create_row(&ctrl_text_index);
 	}
 	if (!ctrl_text_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
-	} 
+	}
 
 	/** SaHpiEntryId = ASN_UNSIGNED */
-        ctrl_text_context->saHpiCtrlTextEntryId =
-		ctrl_text_oid[3];
+	ctrl_text_context->saHpiCtrlTextEntryId =
+	ctrl_text_oid[3];
 
-        /** SaHpiInstrumentId = ASN_UNSIGNED */
-        ctrl_text_context->saHpiCtrlTextNum =
-		rdr_entry->RdrTypeUnion.CtrlRec.Num;
+	/** SaHpiInstrumentId = ASN_UNSIGNED */
+	ctrl_text_context->saHpiCtrlTextNum =
+	rdr_entry->RdrTypeUnion.CtrlRec.Num;
 
-        /** SaHpiCtrlOutputType = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextOutputType = 
-		rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+	/** SaHpiCtrlOutputType = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextOutputType = 
+	rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
 
-        /** SaHpiCtrlMode = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextDefaultMode = 
-		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextDefaultMode = 
+	rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
 
-        /** SaHpiCtrlMode = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextMode = 
-		rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextMode = 
+	rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
 
-        /** TruthValue = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextIsReadOnly =
-		(rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
-			? MIB_TRUE : MIB_FALSE;
+	/** TruthValue = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextIsReadOnly =
+	(rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+	? MIB_TRUE : MIB_FALSE;
 
-        /** TruthValue = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextIsWriteOnly =
-		(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
-			? MIB_TRUE : MIB_FALSE;
+	/** TruthValue = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextIsWriteOnly =
+	(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+	? MIB_TRUE : MIB_FALSE;
 
-        /** Unsigned8 = ASN_INTEGER */
-        ctrl_text_context->saHpiCtrlTextMaxChars =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxChars;
+	/** Unsigned8 = ASN_INTEGER */
+	ctrl_text_context->saHpiCtrlTextMaxChars =
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxChars;
 
-        /** Unsigned8 = ASN_INTEGER */
+	/** Unsigned8 = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextMaxLines = 
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxLines;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.MaxLines;
 
-        /** SaHpiTextLanguage = ASN_INTEGER */
+	/** SaHpiTextLanguage = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextLanguage =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Language + 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Language + 1;
 
-        /** SaHpiTextType = ASN_INTEGER */
+	/** SaHpiTextType = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextType =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.DataType + 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.DataType + 1;
 
-        /** Unsigned8 = ASN_INTEGER */
+	/** Unsigned8 = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextLine =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
 
-        /** SaHpiText = ASN_OCTET_STR */
+	/** SaHpiText = ASN_OCTET_STR */
 	memset(ctrl_text_context->saHpiCtrlTextDefault, 0, 
 	       sizeof(ctrl_text_context->saHpiCtrlTextDefault));
 	memcpy(ctrl_text_context->saHpiCtrlTextDefault, 
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
 	ctrl_text_context->saHpiCtrlTextDefault_len = 
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
 
-        /** Unsigned8 = ASN_INTEGER */
+	/** Unsigned8 = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextLine =
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Line;
 
-        /** SaHpiText = ASN_OCTET_STR */
+	/** SaHpiText = ASN_OCTET_STR */
 	memset(ctrl_text_context->saHpiCtrlTextState, 0, 
 	       sizeof(ctrl_text_context->saHpiCtrlTextState));
 	memcpy(ctrl_text_context->saHpiCtrlTextState, 
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
 	ctrl_text_context->saHpiCtrlTextState_len = 
-		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
 
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        ctrl_text_context->saHpiCtrlTextOem = 
-		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	ctrl_text_context->saHpiCtrlTextOem = 
+	rdr_entry->RdrTypeUnion.CtrlRec.Oem;
 
-        /** RowPointer = ASN_OBJECT_ID */
+	/** RowPointer = ASN_OBJECT_ID */
 	memset(ctrl_text_context->saHpiCtrlTextRDR, 
 	       0, 
 	       sizeof(ctrl_text_context->saHpiCtrlTextRDR));
@@ -242,7 +242,7 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	       ctrl_text_context->saHpiCtrlTextRDR_len);
 
 	CONTAINER_INSERT (cb.container, ctrl_text_context);
-		
+
 	ctrl_text_entry_count = CONTAINER_SIZE (cb.container);
 
 	return rv;
@@ -256,9 +256,9 @@ int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx)
 	SaErrorT            rc = SA_OK;
 	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
-	SaHpiCtrlStateT	    ctrl_state;	
+	SaHpiCtrlStateT     ctrl_state; 
 
-	DEBUGMSGTL ((AGENT, "set_table_ctrl_text, called\n"));	
+	DEBUGMSGTL ((AGENT, "set_table_ctrl_text, called\n"));  
 
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
@@ -269,22 +269,22 @@ int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx)
 	/* line */
 	ctrl_state.StateUnion.Text.Line = row_ctx->saHpiCtrlTextLine;
 
-      	/* data, len */
+	/* data, len */
 	memset(ctrl_state.StateUnion.Text.Text.Data, 0, 
 	       sizeof(ctrl_state.StateUnion.Text.Text.Data));
 	memcpy(ctrl_state.StateUnion.Text.Text.Data,
 	       row_ctx->saHpiCtrlTextState, 
 	       row_ctx->saHpiCtrlTextState_len);
 	ctrl_state.StateUnion.Text.Text.DataLength = 
-		row_ctx->saHpiCtrlTextState_len;
+	row_ctx->saHpiCtrlTextState_len;
 
 	/* Datatype */
 	ctrl_state.StateUnion.Text.Text.DataType = 
-		row_ctx->saHpiCtrlTextType - 1;
+	row_ctx->saHpiCtrlTextType - 1;
 
 	/* language */
 	ctrl_state.StateUnion.Text.Text.Language = 
-		row_ctx->saHpiCtrlTextLanguage - 1;
+	row_ctx->saHpiCtrlTextLanguage - 1;
 
 	/* type */
 	ctrl_state.Type = SAHPI_CTRL_TYPE_TEXT;
@@ -302,7 +302,7 @@ int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx)
 			     "SAHPI_CTRL_TYPE_TEXT: Call to saHpiControlSet failed to set Mode rc: %s.\n",
 			     oh_lookup_error(rc)));
 		return get_snmp_error(rc);
-	} 
+	}
 
 	return SNMP_ERR_NOERROR;
 }
@@ -315,27 +315,27 @@ int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 				   netsnmp_agent_request_info   *reqinfo,
 				   netsnmp_request_info         *requests)
 {
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
+	/* We are never called for a GETNEXT if it's registered as a
+	   "instance", as it's "magically" handled for us.  */
 
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
+	/* a instance handler also only hands us one request at a time, so
+	   we don't need to loop over a list of requests; we'll only get one. */
 
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) &ctrl_text_entry_count,
-				     sizeof(ctrl_text_entry_count));
-            break;
+	switch (reqinfo->mode) {
+	
+	case MODE_GET:
+		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+					 (u_char *) &ctrl_text_entry_count,
+					 sizeof(ctrl_text_entry_count));
+		break;
 
 
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
+	default:
+		/* we should never get here, so this is a really bad error */
+		return SNMP_ERR_GENERR;
+	}
 
-    return SNMP_ERR_NOERROR;
+	return SNMP_ERR_NOERROR;
 }
 
 /*
@@ -345,12 +345,12 @@ int initialize_table_saHpiCtrlTextEntryCount(void)
 {
 
 	netsnmp_register_scalar(
-		netsnmp_create_handler_registration(
-			"saHpiCtrlTextEntryCount", 
-			handle_saHpiCtrlTextEntryCount,
-			saHpiCtrlTextEntryCount_oid, 
-			OID_LENGTH(saHpiCtrlTextEntryCount_oid),
-			HANDLER_CAN_RONLY));
+			       netsnmp_create_handler_registration(
+								  "saHpiCtrlTextEntryCount", 
+								  handle_saHpiCtrlTextEntryCount,
+								  saHpiCtrlTextEntryCount_oid, 
+								  OID_LENGTH(saHpiCtrlTextEntryCount_oid),
+								  HANDLER_CAN_RONLY));
 
 	return 0;
 }
@@ -362,9 +362,9 @@ int initialize_table_saHpiCtrlTextEntryCount(void)
 
 
 
- /************************************************************
- * keep binary tree to find context by name
- */
+/************************************************************
+* keep binary tree to find context by name
+*/
 static int saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs );
 
 /************************************************************
@@ -374,16 +374,16 @@ static int saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiCtrlTextTable_context *context_l =
-        (saHpiCtrlTextTable_context *)lhs;
-    saHpiCtrlTextTable_context *context_r =
-        (saHpiCtrlTextTable_context *)rhs;
+	saHpiCtrlTextTable_context *context_l =
+	(saHpiCtrlTextTable_context *)lhs;
+	saHpiCtrlTextTable_context *context_r =
+	(saHpiCtrlTextTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+	/*
+	 * check primary key, then secondary. Add your own code if
+	 * there are more than 2 indexes
+	 */
+	int rc;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlTextTable_cmp, called\n"));
 
@@ -441,11 +441,11 @@ saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiCtrlTextTable(void)
 {
-    initialize_table_saHpiCtrlTextTable();
+	initialize_table_saHpiCtrlTextTable();
 
-    initialize_table_saHpiCtrlTextEntryCount();
+	initialize_table_saHpiCtrlTextEntryCount();
 
-    domain_resource_pair_initialize(&initialized, &dr_table);
+	domain_resource_pair_initialize(&initialized, &dr_table);
 
 }
 
@@ -453,66 +453,66 @@ init_saHpiCtrlTextTable(void)
  * the *_row_copy routine
  */
 static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
-                         saHpiCtrlTextTable_context * src)
+				       saHpiCtrlTextTable_context * src)
 {
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
+	if (!dst||!src)
+		return 1;
 
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiCtrlTextEntryId = src->saHpiCtrlTextEntryId;
+	/*
+	 * copy index, if provided
+	 */
+	if (dst->index.oids)
+		free(dst->index.oids);
+	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+			    src->index.len * sizeof(oid) )) {
+		dst->index.oids = NULL;
+		return 1;
+	}
+	dst->index.len = src->index.len;
 
-    dst->saHpiCtrlTextNum = src->saHpiCtrlTextNum;
 
-    dst->saHpiCtrlTextOutputType = src->saHpiCtrlTextOutputType;
+	/*
+	 * copy components into the context structure
+	 */
+	/** TODO: add code for external index(s)! */
+	dst->saHpiCtrlTextEntryId = src->saHpiCtrlTextEntryId;
 
-    dst->saHpiCtrlTextDefaultMode = src->saHpiCtrlTextDefaultMode;
+	dst->saHpiCtrlTextNum = src->saHpiCtrlTextNum;
 
-    dst->saHpiCtrlTextMode = src->saHpiCtrlTextMode;
+	dst->saHpiCtrlTextOutputType = src->saHpiCtrlTextOutputType;
 
-    dst->saHpiCtrlTextIsReadOnly = src->saHpiCtrlTextIsReadOnly;
+	dst->saHpiCtrlTextDefaultMode = src->saHpiCtrlTextDefaultMode;
 
-    dst->saHpiCtrlTextIsWriteOnly = src->saHpiCtrlTextIsWriteOnly;
+	dst->saHpiCtrlTextMode = src->saHpiCtrlTextMode;
 
-    dst->saHpiCtrlTextMaxChars = src->saHpiCtrlTextMaxChars;
+	dst->saHpiCtrlTextIsReadOnly = src->saHpiCtrlTextIsReadOnly;
 
-    dst->saHpiCtrlTextMaxLines = src->saHpiCtrlTextMaxLines;
+	dst->saHpiCtrlTextIsWriteOnly = src->saHpiCtrlTextIsWriteOnly;
 
-    dst->saHpiCtrlTextLanguage = src->saHpiCtrlTextLanguage;
+	dst->saHpiCtrlTextMaxChars = src->saHpiCtrlTextMaxChars;
 
-    dst->saHpiCtrlTextType = src->saHpiCtrlTextType;
+	dst->saHpiCtrlTextMaxLines = src->saHpiCtrlTextMaxLines;
 
-    dst->saHpiCtrlTextDefaultLine = src->saHpiCtrlTextDefaultLine;
+	dst->saHpiCtrlTextLanguage = src->saHpiCtrlTextLanguage;
 
-    memcpy( dst->saHpiCtrlTextDefault, src->saHpiCtrlTextDefault, src->saHpiCtrlTextDefault_len );
-    dst->saHpiCtrlTextDefault_len = src->saHpiCtrlTextDefault_len;
+	dst->saHpiCtrlTextType = src->saHpiCtrlTextType;
 
-    dst->saHpiCtrlTextLine = src->saHpiCtrlTextLine;
+	dst->saHpiCtrlTextDefaultLine = src->saHpiCtrlTextDefaultLine;
 
-    memcpy( dst->saHpiCtrlTextState, src->saHpiCtrlTextState, src->saHpiCtrlTextState_len );
-    dst->saHpiCtrlTextState_len = src->saHpiCtrlTextState_len;
+	memcpy( dst->saHpiCtrlTextDefault, src->saHpiCtrlTextDefault, src->saHpiCtrlTextDefault_len );
+	dst->saHpiCtrlTextDefault_len = src->saHpiCtrlTextDefault_len;
 
-    dst->saHpiCtrlTextOem = src->saHpiCtrlTextOem;
+	dst->saHpiCtrlTextLine = src->saHpiCtrlTextLine;
 
-    memcpy( dst->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR_len );
-    dst->saHpiCtrlTextRDR_len = src->saHpiCtrlTextRDR_len;
+	memcpy( dst->saHpiCtrlTextState, src->saHpiCtrlTextState, src->saHpiCtrlTextState_len );
+	dst->saHpiCtrlTextState_len = src->saHpiCtrlTextState_len;
 
-    return 0;
+	dst->saHpiCtrlTextOem = src->saHpiCtrlTextOem;
+
+	memcpy( dst->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR_len );
+	dst->saHpiCtrlTextRDR_len = src->saHpiCtrlTextRDR_len;
+
+	return 0;
 }
 
 /**
@@ -526,91 +526,91 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
 int
 saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiCtrlTextEntryId;
-    int err;
+	/*
+	 * temporary local storage for extracting oid index
+	 *
+	 * extract index uses varbinds (netsnmp_variable_list) to parse
+	 * the index OID into the individual components for each index part.
+	 */
+	/** TODO: add storage for external index(s)! */
+	netsnmp_variable_list var_saHpiDomainId;
+	netsnmp_variable_list var_saHpiResourceId;
+	netsnmp_variable_list var_saHpiResourceIsHistorical;
+	netsnmp_variable_list var_saHpiCtrlTextEntryId;
+	int err;
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
+	/*
+	 * copy index, if provided
+	 */
+	if (hdr) {
+		netsnmp_assert(ctx->index.oids == NULL);
+		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+				    hdr->len * sizeof(oid) )) {
+			return -1;
+		}
+		ctx->index.len = hdr->len;
+	}
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
+	/*
+	 * initialize variable that will hold each component of the index.
+	 * If there are multiple indexes for the table, the variable_lists
+	 * need to be linked together, in order.
+	 */
+	/** TODO: add code for external index(s)! */
+	memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+	var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
+	memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+	var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlTextEntryId;
+	memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+	var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiResourceIsHistorical.next_variable = &var_saHpiCtrlTextEntryId;
 
-       memset( &var_saHpiCtrlTextEntryId, 0x00, sizeof(var_saHpiCtrlTextEntryId) );
-       var_saHpiCtrlTextEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiCtrlTextEntryId.next_variable = NULL;
+	memset( &var_saHpiCtrlTextEntryId, 0x00, sizeof(var_saHpiCtrlTextEntryId) );
+	var_saHpiCtrlTextEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+	/** TODO: link this index to the next, or NULL for the last one */
+	var_saHpiCtrlTextEntryId.next_variable = NULL;
 
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiResourceIsHistorical */
-   
-                ctx->saHpiCtrlTextEntryId = *var_saHpiCtrlTextEntryId.val.integer;
+	/*
+	 * parse the oid into the individual index components
+	 */
+	err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+	if (err == SNMP_ERR_NOERROR) {
+		/*
+		 * copy index components into the context structure
+		 */
+		/** skipping external index saHpiDomainId */
+
+		/** skipping external index saHpiResourceId */
+
+		/** skipping external index saHpiResourceIsHistorical */
+
+		ctx->saHpiCtrlTextEntryId = *var_saHpiCtrlTextEntryId.val.integer;
 
 		err = saHpiDomainId_check_index(
-			*var_saHpiDomainId.val.integer);
+					       *var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-			*var_saHpiResourceId.val.integer);  
+						      *var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-			*var_saHpiResourceIsHistorical.val.integer);
+							   *var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiCtrlTextEntryId_check_index(
-			*var_saHpiCtrlTextEntryId.val.integer);   
-   
-    }
+						      *var_saHpiCtrlTextEntryId.val.integer);   
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+	}
 
-    return err;
+	/*
+	 * parsing may have allocated memory. free it.
+	 */
+	snmp_reset_var_buffers( &var_saHpiDomainId );
+
+	return err;
 }
 
 /************************************************************
@@ -623,18 +623,18 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiCtrlTextTable_can_activate(saHpiCtrlTextTable_context *undo_ctx,
-                      saHpiCtrlTextTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+				    saHpiCtrlTextTable_context *row_ctx,
+				    netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for activation requirements here
-     */
+	/*
+	 * TODO: check for activation requirements here
+	 */
 
 
-    /*
-     * be optimistic.
-     */
-    return 1;
+	/*
+	 * be optimistic.
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -648,13 +648,13 @@ int saHpiCtrlTextTable_can_activate(saHpiCtrlTextTable_context *undo_ctx,
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiCtrlTextTable_can_deactivate(saHpiCtrlTextTable_context *undo_ctx,
-                        saHpiCtrlTextTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+				      saHpiCtrlTextTable_context *row_ctx,
+				      netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+	/*
+	 * TODO: check for deactivation requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -665,20 +665,20 @@ int saHpiCtrlTextTable_can_deactivate(saHpiCtrlTextTable_context *undo_ctx,
  * return 0 if the row cannot be deleted
  */
 int saHpiCtrlTextTable_can_delete(saHpiCtrlTextTable_context *undo_ctx,
-                    saHpiCtrlTextTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+				  saHpiCtrlTextTable_context *row_ctx,
+				  netsnmp_request_group * rg)
 {
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiCtrlTextTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+	/*
+	 * probably shouldn't delete a row that we can't
+	 * deactivate.
+	 */
+	if (saHpiCtrlTextTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+		return 0;
+
+	/*
+	 * TODO: check for other deletion requirements here
+	 */
+	return 1;
 }
 
 /************************************************************
@@ -698,36 +698,36 @@ int saHpiCtrlTextTable_can_delete(saHpiCtrlTextTable_context *undo_ctx,
 saHpiCtrlTextTable_context *
 saHpiCtrlTextTable_create_row( netsnmp_index* hdr)
 {
-    saHpiCtrlTextTable_context * ctx =
-        SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
-    if(!ctx)
-        return NULL;
-        
-    /*
-     * TODO: check indexes, if necessary.
-     */
-    if(saHpiCtrlTextTable_extract_index( ctx, hdr )) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
-    }
+	saHpiCtrlTextTable_context * ctx =
+	SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
+	if (!ctx)
+		return NULL;
 
-    /* netsnmp_mutex_init(ctx->lock);
-       netsnmp_mutex_lock(ctx->lock); */
+	/*
+	 * TODO: check indexes, if necessary.
+	 */
+	if (saHpiCtrlTextTable_extract_index( ctx, hdr )) {
+		free(ctx->index.oids);
+		free(ctx);
+		return NULL;
+	}
 
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-     ctx->saHpiCtrlTextMode = 0;
-     ctx->saHpiCtrlTextLine = 0;
-     ctx->saHpiCtrlTextState = 0;
-    */
+	/* netsnmp_mutex_init(ctx->lock);
+	   netsnmp_mutex_lock(ctx->lock); */
 
-    return ctx;
+	/*
+	 * TODO: initialize any default values here. This is also
+	 * first place you really should allocate any memory for
+	 * yourself to use.  If you allocated memory earlier,
+	 * make sure you free it for earlier error cases!
+	 */
+	/**
+	 ctx->saHpiCtrlTextMode = 0;
+	 ctx->saHpiCtrlTextLine = 0;
+	 ctx->saHpiCtrlTextState = 0;
+	*/
+
+	return ctx;
 }
 
 /************************************************************
@@ -736,21 +736,21 @@ saHpiCtrlTextTable_create_row( netsnmp_index* hdr)
 saHpiCtrlTextTable_context *
 saHpiCtrlTextTable_duplicate_row( saHpiCtrlTextTable_context * row_ctx)
 {
-    saHpiCtrlTextTable_context * dup;
+	saHpiCtrlTextTable_context * dup;
 
-    if(!row_ctx)
-        return NULL;
+	if (!row_ctx)
+		return NULL;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
-    if(!dup)
-        return NULL;
-        
-    if(saHpiCtrlTextTable_row_copy(dup,row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
+	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
+	if (!dup)
+		return NULL;
 
-    return dup;
+	if (saHpiCtrlTextTable_row_copy(dup,row_ctx)) {
+		free(dup);
+		dup = NULL;
+	}
+
+	return dup;
 }
 
 /************************************************************
@@ -758,21 +758,21 @@ saHpiCtrlTextTable_duplicate_row( saHpiCtrlTextTable_context * row_ctx)
  */
 netsnmp_index * saHpiCtrlTextTable_delete_row( saHpiCtrlTextTable_context * ctx )
 {
-  /* netsnmp_mutex_destroy(ctx->lock); */
+	/* netsnmp_mutex_destroy(ctx->lock); */
 
-    if(ctx->index.oids)
-        free(ctx->index.oids);
+	if (ctx->index.oids)
+		free(ctx->index.oids);
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
+	/*
+	 * TODO: release any memory you allocated here...
+	 */
 
-    /*
-     * release header
-     */
-    free( ctx );
+	/*
+	 * release header
+	 */
+	free( ctx );
 
-    return NULL;
+	return NULL;
 }
 
 
@@ -793,139 +793,139 @@ netsnmp_index * saHpiCtrlTextTable_delete_row( saHpiCtrlTextTable_context * ctx 
  */
 void saHpiCtrlTextTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiCtrlTextTable_context *row_ctx =
-            (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx =
-            (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int rc;
+	saHpiCtrlTextTable_context *row_ctx =
+	(saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx =
+	(saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_variable_list *var;
+	netsnmp_request_group_item *current;
+	int rc;
 
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, check syntax and lengths. For
+	 * columns which have no dependencies, you could also move
+	 * the value/range checking here to attempt to catch error
+	 * cases as early as possible.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlTextMode));
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiCtrlTextMode));
-        break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+							    sizeof(row_ctx->saHpiCtrlTextLine));
+			break;
 
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiCtrlTextLine));
-        break;
-
-	case COLUMN_SAHPICTRLTEXTSTATE:
-		/** SaHpiText = ASN_OCTET_STR */
-		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
-		if (rc == SNMP_ERR_NOERROR ) {
-			if (var->val_len > sizeof(row_ctx->saHpiCtrlTextState)) {
-				rc = SNMP_ERR_WRONGLENGTH;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/** SaHpiText = ASN_OCTET_STR */
+			rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+			if (rc == SNMP_ERR_NOERROR ) {
+				if (var->val_len > sizeof(row_ctx->saHpiCtrlTextState)) {
+					rc = SNMP_ERR_WRONGLENGTH;
+				}
 			}
+			if (rc == SNMP_ERR_NOERROR)
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPICTRLTEXTSTATE NO ERROR: %d\n", rc));
+			else
+				DEBUGMSGTL ((AGENT, 
+					     "COLUMN_SAHPICTRLTEXTSTATE ERROR: %d\n", rc));
+			break;
+		default: /** We shouldn't get here */
+			rc = SNMP_ERR_GENERR;
+			snmp_log(LOG_ERR, "unknown column in "
+				 "saHpiCtrlTextTable_set_reserve1\n");
 		}
-		if (rc == SNMP_ERR_NOERROR)
-			DEBUGMSGTL ((AGENT, 
-			    "COLUMN_SAHPICTRLTEXTSTATE NO ERROR: %d\n", rc));
-		else
-			DEBUGMSGTL ((AGENT, 
-			    "COLUMN_SAHPICTRLTEXTSTATE ERROR: %d\n", rc));
-		break;
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiCtrlTextTable_set_reserve1\n");
-        }
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-        rg->status = SNMP_MAX( rg->status, current->ri->status );
-    }
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+		rg->status = SNMP_MAX( rg->status, current->ri->status );
+	}
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 void saHpiCtrlTextTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int rc;
+	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	int rc;
 
-    rg->rg_void = rg->list->ri;
+	rg->rg_void = rg->list->ri;
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, check for valid
+	 * values and any range constraints.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+		var = current->ri->requestvb;
+		rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			if (row_ctx->saHpiCtrlTextIsReadOnly == MIB_TRUE) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n"));
+				rc = SNMP_ERR_READONLY;
+			}
+			if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
+				snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n");
+				DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n"));
+				rc = SNMP_ERR_BADVALUE;
+			}
+			break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			if ( *var->val.integer > 255 )
+				rc = SNMP_ERR_BADVALUE;
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-		/** SaHpiCtrlMode = ASN_INTEGER */
-		if (row_ctx->saHpiCtrlTextIsReadOnly == MIB_TRUE) {
-			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n");
-			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE mode is ReadOnly, Failed\n"));
-			rc = SNMP_ERR_READONLY;
-		}  
-		if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
-			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n");
-			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLTEXTMODE Invalid Mode, Failed\n"));
-			rc = SNMP_ERR_BADVALUE;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/* length checked in reserve1() */
+			/** SaHpiText = ASN_OCTET_STR */
+			/*
+			 * TODO: routine to check valid values
+			 *
+			 * EXAMPLE:
+			 *
+			* if ( XXX_check_value( var->val.string, XXX ) ) {
+		    *    rc = SNMP_ERR_INCONSISTENTVALUE;
+		    *    rc = SNMP_ERR_BADVALUE;
+		    * }
+		    */
+			break;
+
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
 		}
-		break;
-        case COLUMN_SAHPICTRLTEXTLINE:
-		/** Unsigned8 = ASN_INTEGER */
-		if ( *var->val.integer > 255 ) 
-			rc = SNMP_ERR_BADVALUE;
-		break;
 
-	case COLUMN_SAHPICTRLTEXTSTATE:
-		/* length checked in reserve1() */
-		/** SaHpiText = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+		if (rc)
+			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -941,58 +941,58 @@ void saHpiCtrlTextTable_set_reserve2( netsnmp_request_group *rg )
  */
 void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+	int            row_err = 0;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * TODO: loop through columns, copy varbind values
+	 * to context structure for the row.
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			row_ctx->saHpiCtrlTextMode = *var->val.integer;
+			row_err = set_table_ctrl_text (row_ctx);
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            row_ctx->saHpiCtrlTextMode = *var->val.integer;
-	    row_err = set_table_ctrl_text (row_ctx);
-        break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			row_ctx->saHpiCtrlTextLine = *var->val.integer;
+			row_err = set_table_ctrl_text (row_ctx);
+			break;
 
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-            row_ctx->saHpiCtrlTextLine = *var->val.integer;
-	    row_err = set_table_ctrl_text (row_ctx);
-        break;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/** SaHpiText = ASN_OCTET_STR */
+			memcpy(row_ctx->saHpiCtrlTextState,var->val.string,var->val_len);
+			row_ctx->saHpiCtrlTextState_len = var->val_len;
+			row_err = set_table_ctrl_text (row_ctx);
+			break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiCtrlTextState,var->val.string,var->val_len);
-            row_ctx->saHpiCtrlTextState_len = var->val_len;
-	    row_err = set_table_ctrl_text (row_ctx);
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
+	if (row_err) {
+		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+					       (netsnmp_request_info*)rg->rg_void,
+					       row_err);
+		return;
+	}
 
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
+	/*
+	 * TODO: if you have dependencies on other tables, this would be
+	 * a good place to check those, too.
+	 */
 }
 
 /************************************************************
@@ -1014,41 +1014,41 @@ void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiCtrlTextTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1061,41 +1061,41 @@ void saHpiCtrlTextTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiCtrlTextTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		default: 
+			break;
+		}
+	}
 
-        default: 
-		break;
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1118,41 +1118,41 @@ void saHpiCtrlTextTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiCtrlTextTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-    saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+	netsnmp_variable_list *var;
+	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+	netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+	/*
+	 * loop through columns
+	 */
+	for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+		var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+		switch (current->tri->colnum) {
+		
+		case COLUMN_SAHPICTRLTEXTMODE:
+			/** SaHpiCtrlMode = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTLINE:
+			/** Unsigned8 = ASN_INTEGER */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-        break;
+		case COLUMN_SAHPICTRLTEXTSTATE:
+			/** SaHpiText = ASN_OCTET_STR */
+			break;
 
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-        break;
+		default: /** We shouldn't get here */
+			netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+		}
+	}
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
-        }
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+	/*
+	 * done with all the columns. Could check row related
+	 * requirements here.
+	 */
 }
 
 /************************************************************
@@ -1162,93 +1162,93 @@ void saHpiCtrlTextTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiCtrlTextTable(void)
 {
-    netsnmp_table_registration_info *table_info;
+	netsnmp_table_registration_info *table_info;
 
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiCtrlTextTable_handler called again\n");
-        return;
-    }
+	if (my_handler) {
+		snmp_log(LOG_ERR, "initialize_table_saHpiCtrlTextTable_handler called again\n");
+		return;
+	}
 
-    memset(&cb, 0x00, sizeof(cb));
+	memset(&cb, 0x00, sizeof(cb));
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+	/** create the table structure itself */
+	table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiCtrlTextTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiCtrlTextTable_oid,
-                                             saHpiCtrlTextTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiCtrlTextTable_handler\n");
-        return; /** mallocs failed */
-    }
+	/* if your table is read only, it's easiest to change the
+	   HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+	my_handler = netsnmp_create_handler_registration("saHpiCtrlTextTable",
+							 netsnmp_table_array_helper_handler,
+							 saHpiCtrlTextTable_oid,
+							 saHpiCtrlTextTable_oid_len,
+							 HANDLER_CAN_RWRITE);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
-        /** TODO: add code for external index(s)! */
+	if (!my_handler || !table_info) {
+		snmp_log(LOG_ERR, "malloc failed in "
+			 "initialize_table_saHpiCtrlTextTable_handler\n");
+		return;	/** mallocs failed */
+	}
 
-    /*
-     * internal indexes
-     */
-        /** index: saHpiDomainId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceIsHistorical */
-        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
-        /** index: saHpiCtrlTextEntryId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/***************************************************
+	 * Setting up the table's definition
+	 */
+	/*
+	 * TODO: add any external indexes here.
+	 */
+	/** TODO: add code for external index(s)! */
 
-    table_info->min_column = saHpiCtrlTextTable_COL_MIN;
-    table_info->max_column = saHpiCtrlTextTable_COL_MAX;
+	/*
+	 * internal indexes
+	 */
+	/** index: saHpiDomainId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+	/** index: saHpiResourceIsHistorical */
+	netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
+	/** index: saHpiCtrlTextEntryId */
+	netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiCtrlTextTable_get_value;
-    cb.container = netsnmp_container_find("saHpiCtrlTextTable_primary:"
-                                          "saHpiCtrlTextTable:"
-                                          "table_container");
+	table_info->min_column = saHpiCtrlTextTable_COL_MIN;
+	table_info->max_column = saHpiCtrlTextTable_COL_MAX;
 
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiCtrlTextTable_secondary:"
-                                                       "saHpiCtrlTextTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiCtrlTextTable_cmp;
+	/***************************************************
+	 * registering the table with the master agent
+	 */
+	cb.get_value = saHpiCtrlTextTable_get_value;
+	cb.container = netsnmp_container_find("saHpiCtrlTextTable_primary:"
+					      "saHpiCtrlTextTable:"
+					      "table_container");
 
-    cb.can_set = 1;
+	netsnmp_container_add_index(cb.container,
+				    netsnmp_container_find("saHpiCtrlTextTable_secondary:"
+							   "saHpiCtrlTextTable:"
+							   "table_container"));
+	cb.container->next->compare = saHpiCtrlTextTable_cmp;
 
-    cb.create_row = (UserRowMethod*)saHpiCtrlTextTable_create_row;
+	cb.can_set = 1;
 
-    cb.duplicate_row = (UserRowMethod*)saHpiCtrlTextTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiCtrlTextTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlTextTable_row_copy;
+	cb.create_row = (UserRowMethod*)saHpiCtrlTextTable_create_row;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_delete;
+	cb.duplicate_row = (UserRowMethod*)saHpiCtrlTextTable_duplicate_row;
+	cb.delete_row = (UserRowMethod*)saHpiCtrlTextTable_delete_row;
+	cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCtrlTextTable_row_copy;
 
-    cb.set_reserve1 = saHpiCtrlTextTable_set_reserve1;
-    cb.set_reserve2 = saHpiCtrlTextTable_set_reserve2;
-    cb.set_action = saHpiCtrlTextTable_set_action;
-    cb.set_commit = saHpiCtrlTextTable_set_commit;
-    cb.set_free = saHpiCtrlTextTable_set_free;
-    cb.set_undo = saHpiCtrlTextTable_set_undo;
+	cb.can_activate = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_activate;
+	cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_deactivate;
+	cb.can_delete = (Netsnmp_User_Row_Action *)saHpiCtrlTextTable_can_delete;
 
-    DEBUGMSGTL(("initialize_table_saHpiCtrlTextTable",
-                "Registering table saHpiCtrlTextTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+	cb.set_reserve1 = saHpiCtrlTextTable_set_reserve1;
+	cb.set_reserve2 = saHpiCtrlTextTable_set_reserve2;
+	cb.set_action = saHpiCtrlTextTable_set_action;
+	cb.set_commit = saHpiCtrlTextTable_set_commit;
+	cb.set_free = saHpiCtrlTextTable_set_free;
+	cb.set_undo = saHpiCtrlTextTable_set_undo;
+
+	DEBUGMSGTL(("initialize_table_saHpiCtrlTextTable",
+		    "Registering table saHpiCtrlTextTable "
+		    "as a table array\n"));
+	netsnmp_table_container_register(my_handler, table_info, &cb,
+					 cb.container, 1);
 }
 
 /************************************************************
@@ -1260,140 +1260,140 @@ initialize_table_saHpiCtrlTextTable(void)
  * change in code in this fuction.
  */
 int saHpiCtrlTextTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+				netsnmp_request_info *request,
+				netsnmp_index *item,
+				netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiCtrlTextTable_context *context = (saHpiCtrlTextTable_context *)item;
+	netsnmp_variable_list *var = request->requestvb;
+	saHpiCtrlTextTable_context *context = (saHpiCtrlTextTable_context *)item;
 
-    switch(table_info->colnum) {
+	switch (table_info->colnum) {
+	
+	case COLUMN_SAHPICTRLTEXTENTRYID:
+		/** SaHpiEntryId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlTextEntryId,
+					 sizeof(context->saHpiCtrlTextEntryId) );
+		break;
 
-        case COLUMN_SAHPICTRLTEXTENTRYID:
-            /** SaHpiEntryId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlTextEntryId,
-                         sizeof(context->saHpiCtrlTextEntryId) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTNUM:
-            /** SaHpiInstrumentId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlTextNum,
-                         sizeof(context->saHpiCtrlTextNum) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTOUTPUTTYPE:
-            /** SaHpiCtrlOutputType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextOutputType,
-                         sizeof(context->saHpiCtrlTextOutputType) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTDEFAULTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextDefaultMode,
-                         sizeof(context->saHpiCtrlTextDefaultMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTMODE:
-            /** SaHpiCtrlMode = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextMode,
-                         sizeof(context->saHpiCtrlTextMode) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTISREADONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextIsReadOnly,
-                         sizeof(context->saHpiCtrlTextIsReadOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTISWRITEONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextIsWriteOnly,
-                         sizeof(context->saHpiCtrlTextIsWriteOnly) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTMAXCHARS:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextMaxChars,
-                         sizeof(context->saHpiCtrlTextMaxChars) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTMAXLINES:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextMaxLines,
-                         sizeof(context->saHpiCtrlTextMaxLines) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTLANGUAGE:
-            /** SaHpiTextLanguage = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextLanguage,
-                         sizeof(context->saHpiCtrlTextLanguage) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTTYPE:
-            /** SaHpiTextType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextType,
-                         sizeof(context->saHpiCtrlTextType) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTDEFAULTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextDefaultLine,
-                         sizeof(context->saHpiCtrlTextDefaultLine) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTDEFAULT:
-            /** SaHpiText = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlTextDefault,
-                         context->saHpiCtrlTextDefault_len );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTLINE:
-            /** Unsigned8 = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlTextLine,
-                         sizeof(context->saHpiCtrlTextLine) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTSTATE:
-            /** SaHpiText = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlTextState,
-                         context->saHpiCtrlTextState_len );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTOEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlTextOem,
-                         sizeof(context->saHpiCtrlTextOem) );
-        break;
-    
-        case COLUMN_SAHPICTRLTEXTRDR:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiCtrlTextRDR,
-                         context->saHpiCtrlTextRDR_len );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiCtrlTextTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+	case COLUMN_SAHPICTRLTEXTNUM:
+		/** SaHpiInstrumentId = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlTextNum,
+					 sizeof(context->saHpiCtrlTextNum) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTOUTPUTTYPE:
+		/** SaHpiCtrlOutputType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextOutputType,
+					 sizeof(context->saHpiCtrlTextOutputType) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTDEFAULTMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextDefaultMode,
+					 sizeof(context->saHpiCtrlTextDefaultMode) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTMODE:
+		/** SaHpiCtrlMode = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextMode,
+					 sizeof(context->saHpiCtrlTextMode) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTISREADONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextIsReadOnly,
+					 sizeof(context->saHpiCtrlTextIsReadOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTISWRITEONLY:
+		/** TruthValue = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextIsWriteOnly,
+					 sizeof(context->saHpiCtrlTextIsWriteOnly) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTMAXCHARS:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextMaxChars,
+					 sizeof(context->saHpiCtrlTextMaxChars) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTMAXLINES:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextMaxLines,
+					 sizeof(context->saHpiCtrlTextMaxLines) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTLANGUAGE:
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextLanguage,
+					 sizeof(context->saHpiCtrlTextLanguage) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTTYPE:
+		/** SaHpiTextType = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextType,
+					 sizeof(context->saHpiCtrlTextType) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTDEFAULTLINE:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextDefaultLine,
+					 sizeof(context->saHpiCtrlTextDefaultLine) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTDEFAULT:
+		/** SaHpiText = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiCtrlTextDefault,
+					 context->saHpiCtrlTextDefault_len );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTLINE:
+		/** Unsigned8 = ASN_INTEGER */
+		snmp_set_var_typed_value(var, ASN_INTEGER,
+					 (char*)&context->saHpiCtrlTextLine,
+					 sizeof(context->saHpiCtrlTextLine) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTSTATE:
+		/** SaHpiText = ASN_OCTET_STR */
+		snmp_set_var_typed_value(var, ASN_OCTET_STR,
+					 (char*)&context->saHpiCtrlTextState,
+					 context->saHpiCtrlTextState_len );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTOEM:
+		/** UNSIGNED32 = ASN_UNSIGNED */
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
+					 (char*)&context->saHpiCtrlTextOem,
+					 sizeof(context->saHpiCtrlTextOem) );
+		break;
+
+	case COLUMN_SAHPICTRLTEXTRDR:
+		/** RowPointer = ASN_OBJECT_ID */
+		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+					 (char*)&context->saHpiCtrlTextRDR,
+					 context->saHpiCtrlTextRDR_len );
+		break;
+
+	default: /** We shouldn't get here */
+		snmp_log(LOG_ERR, "unknown column in "
+			 "saHpiCtrlTextTable_get_value\n");
+		return SNMP_ERR_GENERR;
+	}
+	return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -1402,8 +1402,8 @@ int saHpiCtrlTextTable_get_value(
 const saHpiCtrlTextTable_context *
 saHpiCtrlTextTable_get_by_idx(netsnmp_index * hdr)
 {
-    return (const saHpiCtrlTextTable_context *)
-        CONTAINER_FIND(cb.container, hdr );
+	return(const saHpiCtrlTextTable_context *)
+	CONTAINER_FIND(cb.container, hdr );
 }
 
 
