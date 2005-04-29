@@ -58,7 +58,7 @@ typedef struct saHpiCtrlOemTable_context_s {
             unsigned long saHpiCtrlOemManufacturerId;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiCtrlOemDefaultConfigData[SAHPI_CTRL_MAX_OEM_BODY_LENGTH];
+            unsigned char saHpiCtrlOemDefaultConfigData[SAHPI_CTRL_OEM_CONFIG_LENGTH];
             long saHpiCtrlOemDefaultConfigData_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */

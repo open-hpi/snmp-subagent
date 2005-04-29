@@ -84,7 +84,163 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 {
 	DEBUGMSGTL ((AGENT, "populate_ctrl_oem, called\n"));
 
-	return 0;
+	SaErrorT rv = SA_OK;
+
+	oid ctrl_oem_oid[CTRL_OEM_INDEX_NR];
+	netsnmp_index ctrl_oem_index;
+	saHpiCtrlOemTable_context *ctrl_oem_context;
+
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_OEM populate_ctrl_text() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_oem() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_oem() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	ctrl_oem_index.len = CTRL_OEM_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	ctrl_oem_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	ctrl_oem_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	ctrl_oem_oid[2] = MIB_FALSE;
+	/** Index saHpiCtrlTextEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = rpt_entry->ResourceId;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_oem() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	ctrl_oem_oid[3] = dr_entry->entry_id++;
+	/* assign the indices to the index */
+	ctrl_oem_index.oids = (oid *) & ctrl_oem_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPICTRLOEMNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiCtrlOemTable_oid, saHpiCtrlOemTable_oid_len,
+		       column, column_len,
+		       &ctrl_oem_index,
+		       child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	ctrl_oem_context = NULL;
+	ctrl_oem_context = CONTAINER_FIND(cb.container, &ctrl_oem_index);
+
+	if (!ctrl_oem_context) {
+		// New entry. Add it
+		ctrl_oem_context = 
+		saHpiCtrlOemTable_create_row(&ctrl_oem_index);
+	}
+	if (!ctrl_oem_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** SaHpiEntryId = ASN_UNSIGNED */
+	ctrl_oem_context->saHpiCtrlOemEntryId =
+	ctrl_oem_oid[3];
+
+	/** SaHpiInstrumentId = ASN_UNSIGNED */
+	ctrl_oem_context->saHpiCtrlOemNum =
+	rdr_entry->RdrTypeUnion.CtrlRec.Num;
+
+	/** SaHpiCtrlOutputType = ASN_INTEGER */
+	ctrl_oem_context->saHpiCtrlOemOutputType = 
+	rdr_entry->RdrTypeUnion.CtrlRec.OutputType + 1;
+
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	ctrl_oem_context->saHpiCtrlOemDefaultMode = 
+	rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+	/** SaHpiCtrlMode = ASN_INTEGER */
+	ctrl_oem_context->saHpiCtrlOemMode = 
+	rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.Mode + 1;
+
+	/** TruthValue = ASN_INTEGER */
+	ctrl_oem_context->saHpiCtrlOemIsReadOnly =
+	(rdr_entry->RdrTypeUnion.CtrlRec.DefaultMode.ReadOnly == SAHPI_TRUE)
+	? MIB_TRUE : MIB_FALSE;
+
+	/** TruthValue = ASN_INTEGER */
+	ctrl_oem_context->saHpiCtrlOemIsWriteOnly =
+	(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
+	? MIB_TRUE : MIB_FALSE;
+
+
+
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+        ctrl_oem_context->saHpiCtrlOemManufacturerId =    
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.MId;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+	memset(ctrl_oem_context->saHpiCtrlOemDefaultConfigData, 0, 
+	       sizeof(ctrl_oem_context->saHpiCtrlOemDefaultConfigData));
+	memcpy(ctrl_oem_context->saHpiCtrlOemDefaultConfigData,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.ConfigData,
+	       SAHPI_CTRL_OEM_CONFIG_LENGTH);
+	ctrl_oem_context->saHpiCtrlOemDefaultState_len = 
+		SAHPI_CTRL_OEM_CONFIG_LENGTH;
+
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+	ctrl_oem_context->saHpiCtrlOemDefaultMId = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.MId;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+	memset(ctrl_oem_context->saHpiCtrlOemDefaultState, 0, 
+	       sizeof(ctrl_oem_context->saHpiCtrlOemDefaultState));
+	memcpy(ctrl_oem_context->saHpiCtrlOemDefaultState,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.Body,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.BodyLength);
+	ctrl_oem_context->saHpiCtrlOemDefaultState_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.BodyLength;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+	memset(ctrl_oem_context->saHpiCtrlOemState, 0,
+	       sizeof(ctrl_oem_context->saHpiCtrlOemState));
+	memcpy(ctrl_oem_context->saHpiCtrlOemState,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.Body,
+	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.BodyLength);
+	ctrl_oem_context->saHpiCtrlOemState_len = 
+		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.Default.BodyLength;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+	ctrl_oem_context->saHpiCtrlOemValue = 
+		rdr_entry->RdrTypeUnion.CtrlRec.Oem;
+
+	/** RowPointer = ASN_OBJECT_ID */
+	memset(ctrl_oem_context->saHpiCtrlOemRDR, 
+	       0, 
+	       sizeof(ctrl_oem_context->saHpiCtrlOemRDR));
+
+	ctrl_oem_context->saHpiCtrlOemRDR_len = full_oid_len * sizeof(oid);
+	memcpy(ctrl_oem_context->saHpiCtrlOemRDR, 
+	       full_oid, 
+	       ctrl_oem_context->saHpiCtrlOemRDR_len);
+
+	CONTAINER_INSERT (cb.container, ctrl_oem_context);
+
+	ctrl_oem_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
 }
 
 /*************************************************************
