@@ -179,67 +179,61 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
 			switch (rdr_entry.RdrTypeUnion.CtrlRec.Type) {
 			case SAHPI_CTRL_TYPE_DIGITAL:
-				rv = populate_ctrl_digital(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_digital(sessionid,
+							   &rdr_entry,
+							   rpt_entry,
+							   full_oid, full_oid_len,
+							   child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_digital rv: %s\n",
 					    oh_lookup_error(rv)));
  				break;
 			case SAHPI_CTRL_TYPE_DISCRETE:
-				rv = populate_ctrl_discrete(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_discrete(sessionid,
+							    &rdr_entry,
+							    rpt_entry,
+							    full_oid, full_oid_len,
+							    child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_discrete rv: %s\n",
 					    oh_lookup_error(rv)));            
 				break;
 			case SAHPI_CTRL_TYPE_ANALOG:
-				rv = populate_ctrl_analog(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_analog(sessionid,
+							  &rdr_entry,
+							  rpt_entry,
+							  full_oid, full_oid_len,
+							  child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_analog rv: %s\n",
 					    oh_lookup_error(rv))); 
 				break;
 			case SAHPI_CTRL_TYPE_STREAM:
-				rv = populate_ctrl_stream(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_stream(sessionid,
+							  &rdr_entry,
+							  rpt_entry,
+							  full_oid, full_oid_len,
+							  child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_stream rv: %s\n",
 					    oh_lookup_error(rv))); 
 				break;
 			case SAHPI_CTRL_TYPE_TEXT:
-				rv = populate_ctrl_text(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_text(sessionid,
+							&rdr_entry,
+							rpt_entry,
+							full_oid, full_oid_len,
+							child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_text rv: %s\n",
 					    oh_lookup_error(rv))); 
 				break;
 			case SAHPI_CTRL_TYPE_OEM:
-				rv = populate_ctrl_oem(
-					sessionid,
-					&rdr_entry,
-					rpt_entry,
-					full_oid, full_oid_len,
-					child_oid, &child_oid_len);
+				rv = populate_ctrl_oem(sessionid,
+						       &rdr_entry,
+						       rpt_entry,
+						       full_oid, full_oid_len,
+						       child_oid, &child_oid_len);
 				DEBUGMSGTL((AGENT,
 					    "populate_ctrl_oem rv: %s\n",
 					    oh_lookup_error(rv)));
@@ -249,15 +243,15 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				break;
 			}
 			break;
-/*
+
 		case SAHPI_SENSOR_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_sensor; RPT: %d, RDR: %d, SensorRec.Num: %d\n",
+				     "SAHPI_CTRL_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      rdr_entry.RdrTypeUnion.SensorRec.Num));
-			rv = populate_sensor (rdr_entry.RecordId, 
-					      &rdr_entry.RdrTypeUnion.SensorRec,
+				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
+			rv = populate_sensor (sessionid,
+					      &rdr_entry,
 					      rpt_entry,
 					      full_oid, full_oid_len,
 					      child_oid, &child_oid_len);
@@ -266,7 +260,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				     rv));
 			break;
 
-		case SAHPI_INVENTORY_RDR:
+/*		case SAHPI_INVENTORY_RDR:
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.EirId: %d\n",
 				      rpt_entry->ResourceId,
