@@ -22,7 +22,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiCtrlDiscreteTable.c \
 			saHpiCtrlAnalogTable.c \
 			saHpiCtrlStreamTable.c \
-			saHpiCtrlTextTable.c 
+			saHpiCtrlTextTable.c \
+			saHpiCtrlOemTable.c 
 
 
 hpiSubagent_LDADD	= 

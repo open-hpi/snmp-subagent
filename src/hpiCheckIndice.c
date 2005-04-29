@@ -93,6 +93,14 @@ int saHpiCtrlTextEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiCtrlOemTable  */    
+/**************************/
+int saHpiCtrlOemEntryId_check_index(long val)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
