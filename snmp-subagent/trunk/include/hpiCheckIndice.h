@@ -56,6 +56,11 @@ int saHpiCtrlTextEntryId_check_index(long val);
 /**************************/
 int saHpiCtrlOemEntryId_check_index(long val);
 
+/**************************/
+/* saHpiSensorTable  */    
+/**************************/
+int saHpiSensorNum_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
@@ -130,11 +135,6 @@ int saHpiEntryId_check_index(long val);
 /* saHpiEnableChangeEventTable  */    
 /********************************/
 int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiSensorEnableChangeEventTimestamp);
-
-/********************************/
-/* saHpiSensorTable  */    
-/********************************/
-int saHpiSensorNum_check_index(long val);
 
 /********************************/
 /* saHpiWatchdogTable  		*/    
