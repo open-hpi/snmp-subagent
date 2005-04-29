@@ -101,6 +101,14 @@ int saHpiCtrlOemEntryId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiSensorTable  */    
+/**************************/
+int saHpiSensorNum_check_index(long val)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
@@ -247,15 +255,6 @@ int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiTimeString_chec
 	return 0;
 
 }
-
-/********************************/
-/* saHpiSensorTable  */    
-/********************************/
-int saHpiSensorNum_check_index(long val)
-{
-	return 0;
-}
-
 /********************************/
 /* saHpiWatchdogTable  */    
 /********************************/
