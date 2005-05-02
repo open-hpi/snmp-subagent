@@ -49,7 +49,7 @@ typedef struct saHpiSensorTable_context_s {
             long saHpiSensorEventCtrl;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorSupportedEventStates[65535];
+            unsigned char saHpiSensorSupportedEventStates[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorSupportedEventStates_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -71,7 +71,7 @@ typedef struct saHpiSensorTable_context_s {
             long saHpiSensorPercentage;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiSensorRangeFlags[65535];
+            unsigned char saHpiSensorRangeFlags[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorRangeFlags_len;
 
         /** Float64 = ASN_OPAQUE */
