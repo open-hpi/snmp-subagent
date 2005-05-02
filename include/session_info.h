@@ -84,4 +84,13 @@ SaErrorT domain_resource_pair_initialize(int *initialized, GHashTable **oh_ep_ta
 DR_XREF *domain_resource_pair_get(SaHpiDomainIdResourceIdArrayT *ep, GHashTable **oh_ep_table); 
 DR_XREF *domain_resoruce_pair_lookup(SaHpiDomainIdResourceIdArrayT *ep, GHashTable **oh_ep_table);
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/**************************************************/
+/**************************************************/
+SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer, 
+				   SaHpiSensorRangeFlagsT sensor_range_flags);
+
 #endif //_SESSION_INFO_H_

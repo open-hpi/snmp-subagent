@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
- 
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
@@ -68,34 +68,31 @@ int build_full_oid (oid * prefix, size_t prefix_len,
 		    oid * out_oid, size_t in_len, size_t * out_len)
 {
 
-  int register len = prefix_len + column_len;
-  int register i = 0;
+	int register len = prefix_len + column_len;
+	int register i = 0;
 
-  DEBUGMSGTL((AGENT, "build_full_oid() called\n"));
+	DEBUGMSGTL((AGENT, "build_full_oid() called\n"));
 
-  if (index)
-    len += index->len;
+	if (index)
+		len += index->len;
 
-  if (len > in_len)
-    return AGENT_ERR_MEMORY_FAULT;
+	if (len > in_len)
+		return AGENT_ERR_MEMORY_FAULT;
 
-  *out_len = len;
-  memcpy (out_oid, prefix, prefix_len * sizeof (oid));
+	*out_len = len;
+	memcpy (out_oid, prefix, prefix_len * sizeof (oid));
 
-  for (; i < column_len; i++)
-    {
-      out_oid[prefix_len + i] = column[i];
-    }
-  len = prefix_len + i;
+	for (; i < column_len; i++) {
+		out_oid[prefix_len + i] = column[i];
+	}
+	len = prefix_len + i;
 
-  if (index)
-    {
-      for (i = 0; i < index->len; i++)
-        {
-          out_oid[len + i] = index->oids[i];
-        }
-    }
-  return AGENT_ERR_NOERROR;
+	if (index) {
+		for (i = 0; i < index->len; i++) {
+			out_oid[len + i] = index->oids[i];
+		}
+	}
+	return AGENT_ERR_NOERROR;
 }
 
 /**************************************************/
@@ -198,24 +195,24 @@ gboolean domain_resource_pair_equal(gconstpointer a, gconstpointer b);
  */
 guint domain_resource_pair_hash(gconstpointer key)
 {
-        const char *p = key;
-        guint h = *p;
+	const char *p = key;
+	guint h = *p;
 
-        int i;
+	int i;
 
-        int dr_pair_len;
+	int dr_pair_len;
 
-        dr_pair_len = sizeof(SaHpiDomainIdResourceIdArrayT);
-        
-        p += 1;
-        
-        for( i=0; i < dr_pair_len - 1; i++ ){
+	dr_pair_len = sizeof(SaHpiDomainIdResourceIdArrayT);
+
+	p += 1;
+
+	for ( i=0; i < dr_pair_len - 1; i++ ) {
 		h = (h * 131) + *p;
-                p++;                          
-        }
+		p++;                          
+	}
 
 	/* don't change the 1009, its magic */
-    	return( h % 1009 );
+	return( h % 1009 );
 
 }
 
@@ -227,11 +224,10 @@ guint domain_resource_pair_hash(gconstpointer key)
 gboolean domain_resource_pair_equal(gconstpointer a, gconstpointer b)
 {
 	if (!memcmp(a, b, sizeof(SaHpiDomainIdResourceIdArrayT))) {
-                return 1;
-        }
-        else {
-                return 0;
-        }
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 /**
@@ -245,19 +241,21 @@ gboolean domain_resource_pair_equal(gconstpointer a, gconstpointer b)
  **/
 SaErrorT domain_resource_pair_initialize(int *initialized, GHashTable **oh_ep_table) 
 {
-        SaErrorT rval = SA_OK;
-        
-        if(!*initialized) {
+	SaErrorT rval = SA_OK;
 
-                /* initialize hash tables */
-                *oh_ep_table = g_hash_table_new(domain_resource_pair_hash, 
-			domain_resource_pair_equal);
+	if (!*initialized) {
 
-                *initialized = TRUE;
+		/* initialize hash tables */
+		*oh_ep_table = g_hash_table_new(domain_resource_pair_hash, 
+						domain_resource_pair_equal);
 
-        } else { rval = SA_ERR_HPI_ERROR; }
+		*initialized = TRUE;
 
-        return(rval);
+	} else {
+		rval = SA_ERR_HPI_ERROR;
+	}
+
+	return(rval);
 
 }
 
@@ -274,36 +272,36 @@ SaErrorT domain_resource_pair_initialize(int *initialized, GHashTable **oh_ep_ta
  **/
 DR_XREF *domain_resource_pair_get(SaHpiDomainIdResourceIdArrayT *dr, GHashTable **oh_ep_table) 
 {
-        gpointer key;
+	gpointer key;
 	gpointer value;
 
-        DR_XREF *dr_xref;
+	DR_XREF *dr_xref;
 
-        if (!dr) return 0;
+	if (!dr) return 0;
 
 	key = dr;
 
-        /* check for presence of EP and */
-        /* previously assigned uid      */        
-        dr_xref = (DR_XREF *)g_hash_table_lookup (*oh_ep_table, key);        
-        if (dr_xref) {
+	/* check for presence of EP and */
+	/* previously assigned uid      */        
+	dr_xref = (DR_XREF *)g_hash_table_lookup (*oh_ep_table, key);        
+	if (dr_xref) {
 		return dr_xref;
-        }
+	}
 
-        /* allocate storage for EP cross reference data structure*/
-        dr_xref = (DR_XREF *)g_malloc0(sizeof(DR_XREF));
-        if(!dr_xref) { 
+	/* allocate storage for EP cross reference data structure*/
+	dr_xref = (DR_XREF *)g_malloc0(sizeof(DR_XREF));
+	if (!dr_xref) {
 		DEBUGMSGTL ((HASH_FILE, "malloc failed"));
-                return NULL;                
-        }
-        memcpy(&dr_xref->dr_pair, dr, sizeof(SaHpiDomainIdResourceIdArrayT));
+		return NULL;                
+	}
+	memcpy(&dr_xref->dr_pair, dr, sizeof(SaHpiDomainIdResourceIdArrayT));
 
-        /* entity path based key */   
-        key = (gpointer)&dr_xref->dr_pair; 
+	/* entity path based key */   
+	key = (gpointer)&dr_xref->dr_pair; 
 	value = (gpointer)dr_xref;
-        g_hash_table_insert(*oh_ep_table, key, value);
+	g_hash_table_insert(*oh_ep_table, key, value);
 
-        return dr_xref;
+	return dr_xref;
 }               
 
 /**
@@ -316,22 +314,22 @@ DR_XREF *domain_resource_pair_get(SaHpiDomainIdResourceIdArrayT *dr, GHashTable 
  **/
 DR_XREF *domain_resoruce_pair_lookup(SaHpiDomainIdResourceIdArrayT *dr, GHashTable **oh_ep_table)
 {
-        DR_XREF *dr_xref;
+	DR_XREF *dr_xref;
 
-        gpointer key;
+	gpointer key;
 
-        if (!dr) return 0;
-        
+	if (!dr) return 0;
+
 	key = dr;
-        
-        /* check hash table for entry in oh_ep_table */
-        dr_xref = (DR_XREF *)g_hash_table_lookup (*oh_ep_table, key);
-        if(!dr_xref) {
-		DEBUGMSGTL ((HASH_FILE, "error looking up EP to get uid"));
-                return NULL;
-        }
 
-        return dr_xref;
+	/* check hash table for entry in oh_ep_table */
+	dr_xref = (DR_XREF *)g_hash_table_lookup (*oh_ep_table, key);
+	if (!dr_xref) {
+		DEBUGMSGTL ((HASH_FILE, "error looking up EP to get uid"));
+		return NULL;
+	}
+
+	return dr_xref;
 }
 /**************************************************/
 /*** END: *****************************************/
@@ -339,6 +337,50 @@ DR_XREF *domain_resoruce_pair_lookup(SaHpiDomainIdResourceIdArrayT *dr, GHashTab
 /*** tracking unique indices when required      ***/
 /**************************************************/
 /**************************************************/
+
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** decode_sensor_range_flags		        ***/
+/**************************************************/
+/**************************************************/
+typedef struct  {
+	SaHpiSensorRangeFlagsT 	flag;
+	const unsigned char* 	str;
+} sensor_range_flags;
+
+static sensor_range_flags range_flags[] = {
+	{SAHPI_SRF_MIN,"MIN, "},
+	{SAHPI_SRF_MAX, "MAX, "},
+	{SAHPI_SRF_NORMAL_MIN, "NORMAL_MIN, "},
+	{SAHPI_SRF_NORMAL_MAX, "NORMAL_MAX, "},
+	{SAHPI_SRF_NOMINAL,"NOMINAL, "}};
+#define RANGE_FLAGS_LEN 5
+
+SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer, 
+				   SaHpiSensorRangeFlagsT sensor_range_flags)
+{
+
+	int i,len;
+
+	memset(buffer, 0, sizeof(*buffer));
+
+	for (i = 0; i < RANGE_FLAGS_LEN; i++) {
+		if ((sensor_range_flags & range_flags[i].flag) == range_flags[i].flag) {
+			len = strlen(range_flags[i].str);
+			if (len + buffer->DataLength  > SAHPI_MAX_TEXT_BUFFER_LENGTH)
+				return SA_ERR_HPI_OUT_OF_SPACE;
+
+			memcpy(buffer->Data + buffer->DataLength,
+			       range_flags[i].str,
+			       len);
+
+			buffer->DataLength += len;
+		}
+	}
+
+	return SA_OK;
+}
+
 
 
 
