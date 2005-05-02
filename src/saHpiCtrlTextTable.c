@@ -212,7 +212,7 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
 	ctrl_text_context->saHpiCtrlTextDefault_len = 
-	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength;
 
 	/** Unsigned8 = ASN_INTEGER */
 	ctrl_text_context->saHpiCtrlTextLine =
@@ -225,7 +225,7 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.Data,
 	       rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength);
 	ctrl_text_context->saHpiCtrlTextState_len = 
-	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength - 1;
+	rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Text.Default.Text.DataLength;
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	ctrl_text_context->saHpiCtrlTextOem = 

@@ -185,8 +185,6 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 	(rdr_entry->RdrTypeUnion.CtrlRec.WriteOnly == SAHPI_TRUE) 
 	? MIB_TRUE : MIB_FALSE;
 
-
-
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         ctrl_oem_context->saHpiCtrlOemManufacturerId =    
 		rdr_entry->RdrTypeUnion.CtrlRec.TypeUnion.Oem.MId;
