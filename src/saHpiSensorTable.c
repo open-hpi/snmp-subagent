@@ -57,12 +57,6 @@ size_t saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oid);
 /************************************************************/
 
 /*************************************************************
- * objects for hash table
- */
-static int initialized = FALSE;               
-static GHashTable *dr_table;
-
-/*************************************************************
  * oid and fucntion declarations scalars
  */
 static u_long sensor_entry_count = 0;
@@ -85,7 +79,166 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 
 	DEBUGMSGTL ((AGENT, "populate_sensor, called\n"));
 
-	return 0;
+	SaErrorT rv = SA_OK;
+
+	oid sensor_oid[SENSOR_INDEX_NR];
+	netsnmp_index sensor_index;
+	saHpiSensorTable_context *sensor_context;
+
+	SaHpiTextBufferT buffer;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT populate_ctrl_text() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	sensor_index.len = SENSOR_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	sensor_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	sensor_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	sensor_oid[2] = MIB_FALSE;
+	/** Index saHpiSensorNum */
+	sensor_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	/* assign the indices to the index */
+	sensor_index.oids = (oid *) & sensor_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSORNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiSensorTable_oid, saHpiSensorTable_oid_len,
+		       column, column_len,
+		       &sensor_index,
+		       child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	sensor_context = NULL;
+	sensor_context = CONTAINER_FIND(cb.container, &sensor_index);
+
+	if (!sensor_context) {
+		// New entry. Add it
+		sensor_context = 
+		saHpiSensorTable_create_row(&sensor_index);
+	}
+	if (!sensor_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** SaHpiInstrumentId = ASN_UNSIGNED */
+        sensor_context->saHpiSensorNum = 
+		rdr_entry->RdrTypeUnion.SensorRec.Num;
+
+        /** SaHpiSensorType = ASN_INTEGER */
+        sensor_context->saHpiSensorReadingType =
+		rdr_entry->RdrTypeUnion.SensorRec.Type + 1;
+
+        /** SaHpiEventCategory = ASN_INTEGER */
+        sensor_context->saHpiSensorCategory =
+		rdr_entry->RdrTypeUnion.SensorRec.Category + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        sensor_context->saHpiSensorEnableCtrl = 
+		(rdr_entry->RdrTypeUnion.SensorRec.EnableCtrl == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE; 
+
+        /** INTEGER = ASN_INTEGER */
+        sensor_context->saHpiSensorEventCtrl =
+		rdr_entry->RdrTypeUnion.SensorRec.EventCtrl + 1;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+	memset(&buffer, 0, sizeof(buffer));
+        rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, //SaHpiEventStateT event_state,
+			          rdr_entry->RdrTypeUnion.SensorRec.Category, // SaHpiEventCategoryT event_cat,
+			          &buffer); //SaHpiTextBufferT *buffer
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	memset(sensor_context->saHpiSensorSupportedEventStates, 0, 
+	       sizeof(sensor_context->saHpiSensorSupportedEventStates));
+	memcpy(sensor_context->saHpiSensorSupportedEventStates,
+	       buffer.Data, buffer.DataLength);
+	sensor_context->saHpiSensorSupportedEventStates_len =
+		buffer.DataLength;
+
+        /** TruthValue = ASN_INTEGER */
+        sensor_context->saHpiSensorIsSupported =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported;
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sensor_context->saHpiSensorReadingType =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
+
+        /** SaHpiSensorUnits = ASN_INTEGER */
+	sensor_context->saHpiSensorBaseUnits = 
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.BaseUnits + 1;
+
+        /** SaHpiSensorUnits = ASN_INTEGER */   
+	sensor_context->saHpiSensorBaseUnits =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUnits + 1;
+
+        /** INTEGER = ASN_INTEGER */
+	sensor_context->saHpiSensorModifierUse =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUse + 1;
+
+        /** TruthValue = ASN_INTEGER */
+	sensor_context->saHpiSensorPercentage =
+		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Percentage == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+	rv = decode_sensor_range_flags(&buffer, 
+	        rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Flags);
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
+	sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
+
+        /** Float64 = ASN_OPAQUE */
+    /** TODO: Is this type correct? */                        
+//	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
+//	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
+//	       sizeof(sensor_context->saHpiSensorAccuracyFactor));
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+	sensor_context->saHpiSensorOem =
+		rdr_entry->RdrTypeUnion.SensorRec.Oem;
+
+	/** RowPointer = ASN_OBJECT_ID */
+	memset(sensor_context->saHpiSensorRDR, 
+	       0, 
+	       sizeof(sensor_context->saHpiSensorRDR));
+	sensor_context->saHpiSensorRDR_len = full_oid_len * sizeof(oid);
+	memcpy(sensor_context->saHpiSensorRDR, 
+	       full_oid, 
+	       sensor_context->saHpiSensorRDR_len);
+
+	CONTAINER_INSERT (cb.container, sensor_context);
+
+	sensor_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
 } 
 
 /*
@@ -225,11 +378,9 @@ init_saHpiSensorTable(void)
 {
 	DEBUGMSGTL ((AGENT, "init_saHpiSensorTable, called\n"));
 
-    initialize_table_saHpiSensorTable();
+	initialize_table_saHpiSensorTable();
 
-    initialize_table_saHpiSensorEntryCount();
-
-    domain_resource_pair_initialize(&initialized, &dr_table);
+	initialize_table_saHpiSensorEntryCount();
 }
 
 /************************************************************
@@ -292,7 +443,7 @@ static int saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
 
     dst->saHpiSensorOem = src->saHpiSensorOem;
 
-    memcpy( src->saHpiSensorRDR, dst->saHpiSensorRDR, src->saHpiSensorRDR_len );
+    memcpy( dst->saHpiSensorRDR, src->saHpiSensorRDR, src->saHpiSensorRDR_len );
     dst->saHpiSensorRDR_len = src->saHpiSensorRDR_len;
 
     return 0;
