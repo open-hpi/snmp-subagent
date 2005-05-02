@@ -83,6 +83,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			 oid *child_oid, size_t *child_oid_len)
 {
 
+	DEBUGMSGTL ((AGENT, "populate_sensor, called\n"));
+
 	return 0;
 } 
 
@@ -99,6 +101,8 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
 
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
+
+	DEBUGMSGTL ((AGENT, "handle_saHpiSensorEntryCount, called\n"));
     
     switch(reqinfo->mode) {
 
@@ -121,6 +125,9 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
  */
 int initialize_table_saHpiSensorEntryCount(void)
 {
+
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
+
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
 			"saHpiSensorEntryCount", 
@@ -214,7 +221,10 @@ saHpiSensorTable_cmp( const void *lhs, const void *rhs )
  */
 void
 init_saHpiSensorTable(void)
+
 {
+	DEBUGMSGTL ((AGENT, "init_saHpiSensorTable, called\n"));
+
     initialize_table_saHpiSensorTable();
 
     initialize_table_saHpiSensorEntryCount();
@@ -230,6 +240,8 @@ static int saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
 {
     if(!dst||!src)
         return 1;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_row_copy, called\n"));
         
     /*
      * copy index, if provided
@@ -310,6 +322,8 @@ saHpiSensorTable_extract_index( saHpiSensorTable_context * ctx, netsnmp_index * 
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiSensorNum;
     int err;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_extract_index, called\n"));
 
     /*
      * copy index, if provided
@@ -397,6 +411,7 @@ int saHpiSensorTable_can_activate(saHpiSensorTable_context *undo_ctx,
                       saHpiSensorTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_can_activate, called\n"));
     /*
      * TODO: check for activation requirements here
      */
@@ -422,6 +437,7 @@ int saHpiSensorTable_can_deactivate(saHpiSensorTable_context *undo_ctx,
                         saHpiSensorTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -439,6 +455,8 @@ int saHpiSensorTable_can_delete(saHpiSensorTable_context *undo_ctx,
                     saHpiSensorTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -469,6 +487,8 @@ int saHpiSensorTable_can_delete(saHpiSensorTable_context *undo_ctx,
 saHpiSensorTable_context *
 saHpiSensorTable_create_row( netsnmp_index* hdr)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_create_row, called\n"));
+
     saHpiSensorTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorTable_context);
     if(!ctx)
@@ -506,6 +526,8 @@ saHpiSensorTable_duplicate_row( saHpiSensorTable_context * row_ctx)
 {
     saHpiSensorTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -527,6 +549,8 @@ saHpiSensorTable_duplicate_row( saHpiSensorTable_context * row_ctx)
 netsnmp_index * saHpiSensorTable_delete_row( saHpiSensorTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -569,6 +593,7 @@ void saHpiSensorTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -607,6 +632,8 @@ void saHpiSensorTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -654,6 +681,8 @@ void saHpiSensorTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_action, called\n"));
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -707,6 +736,8 @@ void saHpiSensorTable_set_commit( netsnmp_request_group *rg )
     saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -741,6 +772,8 @@ void saHpiSensorTable_set_free( netsnmp_request_group *rg )
     saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
     saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -787,6 +820,8 @@ void saHpiSensorTable_set_undo( netsnmp_request_group *rg )
     saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -816,6 +851,8 @@ void
 initialize_table_saHpiSensorTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiSensorTable_handler called again\n");
@@ -919,6 +956,8 @@ int saHpiSensorTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiSensorTable_context *context = (saHpiSensorTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -1048,6 +1087,9 @@ int saHpiSensorTable_get_value(
 const saHpiSensorTable_context *
 saHpiSensorTable_get_by_idx(netsnmp_index * hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorTable_get_by_idx, called\n"));
+
     return (const saHpiSensorTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
