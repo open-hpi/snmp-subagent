@@ -138,7 +138,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	}
 	if (!sensor_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
-		rv = AGENT_ERR_INTERNAL_ERROR;
+		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
 	/** SaHpiInstrumentId = ASN_UNSIGNED */
@@ -170,6 +170,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
+		saHpiSensorTable_delete_row( sensor_context );
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	memset(sensor_context->saHpiSensorSupportedEventStates, 0, 

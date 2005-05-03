@@ -393,6 +393,7 @@ main (int argc, char **argv)
 		init_saHpiCtrlTextTable();
 		init_saHpiCtrlOemTable();
 		init_saHpiSensorTable();
+		init_saHpiCurrentSensorStateTable();
 		
 /*		init_saHpiAnnunciatorTable();
 		
@@ -400,7 +401,6 @@ main (int argc, char **argv)
 		init_saHpiFieldTable();
 		init_saHpiAreaTable();
 		
-		init_saHpiCurrentSensorStateTable();
 		init_saHpiSensorReadingMaxTable();
 		init_saHpiSensorReadingMinTable();
 		init_saHpiSensorReadingNominalTable();
@@ -465,7 +465,7 @@ main (int argc, char **argv)
 			 *	populate_saHpiCtrlTextTable();		
 			 *	populate_saHpiCtrlOemTable();		
 			 *	populate_saHpiSensorTable();		
-			 *		populate_saHpiSensorThdLowCriticalTable();		
+			 *	populate_saHpiCurrentSensorStateTable();		
 			 */
 
     		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");

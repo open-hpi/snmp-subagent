@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiCurrentSensorStateTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +52,28 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiCurrentSensorStateTable_oid[] = { saHpiCurrentSensorStateTable_TABLE_OID };
 size_t saHpiCurrentSensorStateTable_oid_len = OID_LENGTH(saHpiCurrentSensorStateTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiCurrentSensorStateTable_IDX2
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid, 
+				       SaHpiRdrT *rdr_entry,
+				       SaHpiRptEntryT *rpt_entry,
+				       oid *full_oid, size_t full_oid_len)
+{
+	return SA_OK;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -69,31 +97,45 @@ saHpiCurrentSensorStateTable_cmp( const void *lhs, const void *rhs )
      */
     int rc;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiCurrentSensorStateTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+ 	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_cmp, called\n"));
+
+	/* check for NULL pointers */
+	if(lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,"saHpiCurrentSensorStateTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}	
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+	    return -1;
+		
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+	    return 1;			         
+	       
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+	       /* If saHpiDomainId index is equal sort by second index */
+	       /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+	       if ( context_l->index.oids[1] < context_r->index.oids[1])
+		  return -1;
+		
+	       if ( context_l->index.oids[1] > context_r->index.oids[1])
+		  return 1;			
+		      
+	        if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		/* If saHpiResourceEntryId index is equal sort by third index */
+		/* CHECK THIRD INDEX,  saHpiSensorNum */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+				return -1;
+				
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 1;
+					
+			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+				return 0;
+			}
+		}
+	}
+
+	return 0;
 }
 
 /************************************************************
@@ -129,8 +171,6 @@ saHpiCurrentSensorStateTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
-
 
 /************************************************************
  * Initializes the saHpiCurrentSensorStateTable module
@@ -138,15 +178,10 @@ saHpiCurrentSensorStateTable_get( const char *name, int len )
 void
 init_saHpiCurrentSensorStateTable(void)
 {
+	DEBUGMSGTL((AGENT, "Called init_saHpiCurrentSensorStateTable()\n"));
+
     initialize_table_saHpiCurrentSensorStateTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiCurrentSensorStateTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
 }
 
 /************************************************************
@@ -198,8 +233,6 @@ static int saHpiCurrentSensorStateTable_row_copy(saHpiCurrentSensorStateTable_co
     return 0;
 }
 
-#ifdef saHpiCurrentSensorStateTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -244,32 +277,17 @@ saHpiCurrentSensorStateTable_extract_index( saHpiCurrentSensorStateTable_context
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCurrentSensorStateTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCurrentSensorStateTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiSensorNum;
 
        memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
        var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiCurrentSensorStateTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiSensorNum.next_variable = &var_XX;
-#endif
+       var_saHpiSensorNum.next_variable = NULL;
 
 
     /*
@@ -277,37 +295,12 @@ saHpiCurrentSensorStateTable_extract_index( saHpiCurrentSensorStateTable_context
      */
     err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
     if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiSensorNum */
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiSensorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+	    err = saHpiDomainId_check_index(
+		    *var_saHpiDomainId.val.integer);
+	    err = saHpiResourceEntryId_check_index(
+		    *var_saHpiResourceId.val.integer);  
+	    err = saHpiSensorNum_check_index(
+		    *var_saHpiSensorNum.val.integer);
     }
 
     /*
@@ -386,7 +379,6 @@ int saHpiCurrentSensorStateTable_can_delete(saHpiCurrentSensorStateTable_context
     return 1;
 }
 
-#ifdef saHpiCurrentSensorStateTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -436,7 +428,6 @@ saHpiCurrentSensorStateTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -694,23 +685,6 @@ void saHpiCurrentSensorStateTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiCurrentSensorStateTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -824,8 +798,8 @@ void saHpiCurrentSensorStateTable_set_free( netsnmp_request_group *rg )
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+		break;
         }
     }
 
@@ -896,9 +870,6 @@ void saHpiCurrentSensorStateTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiCurrentSensorStateTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiCurrentSensorStateTable table by defining its contents and how it's structured
@@ -960,18 +931,18 @@ initialize_table_saHpiCurrentSensorStateTable(void)
     cb.container = netsnmp_container_find("saHpiCurrentSensorStateTable_primary:"
                                           "saHpiCurrentSensorStateTable:"
                                           "table_container");
-#ifdef saHpiCurrentSensorStateTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiCurrentSensorStateTable_secondary:"
                                                        "saHpiCurrentSensorStateTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiCurrentSensorStateTable_cmp;
-#endif
-#ifdef saHpiCurrentSensorStateTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiCurrentSensorStateTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiCurrentSensorStateTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiCurrentSensorStateTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiCurrentSensorStateTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiCurrentSensorStateTable_row_copy;
@@ -986,7 +957,7 @@ initialize_table_saHpiCurrentSensorStateTable(void)
     cb.set_commit = saHpiCurrentSensorStateTable_set_commit;
     cb.set_free = saHpiCurrentSensorStateTable_set_free;
     cb.set_undo = saHpiCurrentSensorStateTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiCurrentSensorStateTable",
                 "Registering table saHpiCurrentSensorStateTable "
                 "as a table array\n"));

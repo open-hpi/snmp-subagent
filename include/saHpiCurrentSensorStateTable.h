@@ -77,6 +77,15 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
 /*************************************************************
  * function declarations
  */
+SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid, 
+				       SaHpiRdrT *rdr_entry,
+				       SaHpiRptEntryT *rpt_entry,
+				       oid *full_oid, size_t full_oid_len);
+
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiCurrentSensorStateTable(void);
 void initialize_table_saHpiCurrentSensorStateTable(void);
 const saHpiCurrentSensorStateTable_context * saHpiCurrentSensorStateTable_get_by_idx(netsnmp_index *);
@@ -92,6 +101,12 @@ extern oid saHpiCurrentSensorStateTable_oid[];
 extern size_t saHpiCurrentSensorStateTable_oid_len;
 
 #define saHpiCurrentSensorStateTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,3
+
+/* Number of table Indexes */
+#define CURRENT_SENSOR_STATE_INDEX_NR 3
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiSensorNum_INDEX 2
     
 /*************************************************************
  * column number definitions for table saHpiCurrentSensorStateTable
@@ -106,21 +121,6 @@ extern size_t saHpiCurrentSensorStateTable_oid_len;
 #define COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK 8
 #define saHpiCurrentSensorStateTable_COL_MIN 1
 #define saHpiCurrentSensorStateTable_COL_MAX 8
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiCurrentSensorStateTable */
-#define saHpiCurrentSensorStateTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiCurrentSensorStateTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiCurrentSensorStateTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiCurrentSensorStateTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiCurrentSensorStateTable_SET_HANDLING
 
 int saHpiCurrentSensorStateTable_extract_index( saHpiCurrentSensorStateTable_context * ctx, netsnmp_index * hdr );
 
@@ -145,14 +145,9 @@ int saHpiCurrentSensorStateTable_can_delete(saHpiCurrentSensorStateTable_context
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiCurrentSensorStateTable_ROW_CREATION
 saHpiCurrentSensorStateTable_context * saHpiCurrentSensorStateTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiCurrentSensorStateTable_IDX2
 saHpiCurrentSensorStateTable_context * saHpiCurrentSensorStateTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };

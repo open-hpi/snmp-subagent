@@ -255,9 +255,14 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					      rpt_entry,
 					      full_oid, full_oid_len,
 					      child_oid, &child_oid_len);
-			DEBUGMSGTL ((AGENT,
-				     "Called populate_sensor(); rc: %d\n",
-				     rv));
+			DEBUGMSGTL((AGENT, 
+		        "Called populate_sensor(); rc: %d\n",rv));
+			rv = populate_current_sensor_state (sessionid,
+							    &rdr_entry,
+							    rpt_entry,
+							    full_oid, full_oid_len);
+			DEBUGMSGTL((AGENT, 
+			"Called populate_current_sensor_state(); rc: %d\n", rv));
 			break;
 
 /*		case SAHPI_INVENTORY_RDR:
