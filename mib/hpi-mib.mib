@@ -165,7 +165,7 @@ Unsigned8 ::= TEXTUAL-CONVENTION
         "Derived from SAI-HPI-B.01.01 specification, section 8.1."
 	SYNTAX      Integer32 (0..255)
 
-Float64 ::= TEXTUAL-CONVENTION
+Double ::= TEXTUAL-CONVENTION
 	STATUS      current
 	DESCRIPTION
         "Textual convention for an 64 bit float number, 
@@ -174,7 +174,7 @@ Float64 ::= TEXTUAL-CONVENTION
         "Derived from SAI-HPI-B.01.01 specification, section 8.1.
         The 64bit float number is assumed to be a IEEE-754 64 bit floating 
 	value of the type: sign(1)exponent(11)mantissa(52)."
-	SYNTAX      OCTET STRING (SIZE(0..65))
+	SYNTAX      OCTET STRING (SIZE(0..8))
     
 SaHpiEntityPath ::= TEXTUAL-CONVENTION
         STATUS          current
@@ -7911,7 +7911,7 @@ SaHpiSensorEntry ::= SEQUENCE {
         saHpiSensorPercentage                   TruthValue,
                 
         saHpiSensorRangeFlags                   OCTET STRING,                                           
-        saHpiSensorAccuracyFactor               Float64,
+        saHpiSensorAccuracyFactor               Double,
         
         saHpiSensorOem                          Unsigned32,
         
@@ -8089,7 +8089,7 @@ saHpiSensorRangeFlags   OBJECT-TYPE
         ::= {saHpiSensorEntry 13}
         
 saHpiSensorAccuracyFactor     OBJECT-TYPE
-        SYNTAX          Float64
+        SYNTAX          Double
         MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION
