@@ -74,9 +74,9 @@ typedef struct saHpiSensorTable_context_s {
             unsigned char saHpiSensorRangeFlags[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorRangeFlags_len;
 
-        /** Float64 = ASN_OPAQUE */
-    /** TODO: Is this type correct? */
-            long saHpiSensorAccuracyFactor;
+        /** Double = ASN_OCTET_STR */
+            unsigned char saHpiSensorAccuracyFactor[sizeof(SaHpiFloat64T)];
+            long saHpiSensorAccuracyFactor_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiSensorOem;
