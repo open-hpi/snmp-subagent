@@ -360,13 +360,17 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 				   SaHpiSensorRangeFlagsT sensor_range_flags)
 {
 
-	int i,len;
+	int i = 0;
+	int len = 0;
 
 	memset(buffer, 0, sizeof(*buffer));
 
 	for (i = 0; i < RANGE_FLAGS_LEN; i++) {
+
 		if ((sensor_range_flags & range_flags[i].flag) == range_flags[i].flag) {
+
 			len = strlen(range_flags[i].str);
+
 			if (len + buffer->DataLength  > SAHPI_MAX_TEXT_BUFFER_LENGTH)
 				return SA_ERR_HPI_OUT_OF_SPACE;
 
@@ -376,6 +380,7 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 
 			buffer->DataLength += len;
 		}
+
 	}
 
 	return SA_OK;
