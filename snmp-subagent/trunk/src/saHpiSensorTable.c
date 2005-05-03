@@ -215,11 +215,13 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
 	sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
 
-        /** Float64 = ASN_OPAQUE */
-    /** TODO: Is this type correct? */                        
-//	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
-//	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
-//	       sizeof(sensor_context->saHpiSensorAccuracyFactor));
+        /** Double = ASN_OCTET_STR */
+	memset(sensor_context->saHpiSensorAccuracyFactor, 
+	       0, sizeof(SaHpiFloat64T));
+	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
+	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
+	       sizeof(SaHpiFloat64T));
+	sensor_context->saHpiSensorAccuracyFactor_len = sizeof(SaHpiFloat64T);
 
         /** UNSIGNED32 = ASN_UNSIGNED */
 	sensor_context->saHpiSensorOem =
@@ -439,7 +441,8 @@ static int saHpiSensorTable_row_copy(saHpiSensorTable_context * dst,
     memcpy( dst->saHpiSensorRangeFlags, src->saHpiSensorRangeFlags, src->saHpiSensorRangeFlags_len );
     dst->saHpiSensorRangeFlags_len = src->saHpiSensorRangeFlags_len;
 
-    dst->saHpiSensorAccuracyFactor = src->saHpiSensorAccuracyFactor;
+    memcpy( dst->saHpiSensorAccuracyFactor, src->saHpiSensorAccuracyFactor, src->saHpiSensorAccuracyFactor_len );
+    dst->saHpiSensorAccuracyFactor_len = src->saHpiSensorAccuracyFactor_len;
 
     dst->saHpiSensorOem = src->saHpiSensorOem;
 
@@ -1204,10 +1207,10 @@ int saHpiSensorTable_get_value(
         break;
     
         case COLUMN_SAHPISENSORACCURACYFACTOR:
-            /** Float64 = ASN_OPAQUE */
-            snmp_set_var_typed_value(var, ASN_OPAQUE,
+            /** Double = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (char*)&context->saHpiSensorAccuracyFactor,
-                         sizeof(context->saHpiSensorAccuracyFactor) );
+                         context->saHpiSensorAccuracyFactor_len );
         break;
     
         case COLUMN_SAHPISENSOROEM:
