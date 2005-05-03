@@ -1,0 +1,7 @@
+snmptranslate -m ./hpi-mib.mib  .1.3.6.1.4.1.18568.2.1.1
+
+snmptranslate -M mibs -Td -Ib hpiB0101
+
+
+mib2c -c mib2c.array-user.conf hpiB0101
+
