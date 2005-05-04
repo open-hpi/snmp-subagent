@@ -164,9 +164,9 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 
         /** SaHpiEventState = ASN_OCTET_STR */
 	memset(&buffer, 0, sizeof(buffer));
-        rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, //SaHpiEventStateT event_state,
-			          rdr_entry->RdrTypeUnion.SensorRec.Category, // SaHpiEventCategoryT event_cat,
-			          &buffer); //SaHpiTextBufferT *buffer
+        rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, 
+			          rdr_entry->RdrTypeUnion.SensorRec.Category,
+			          &buffer); 
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
@@ -211,6 +211,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
+		saHpiSensorTable_delete_row( sensor_context );
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);

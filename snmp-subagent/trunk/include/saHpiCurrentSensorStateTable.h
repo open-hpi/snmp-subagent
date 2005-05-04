@@ -39,11 +39,11 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
             long saHpiCurrentSensorStateType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateValue[65535];
+            unsigned char saHpiCurrentSensorStateValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiCurrentSensorStateValue_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateEventState[65535];
+            unsigned char saHpiCurrentSensorStateEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCurrentSensorStateEventState_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -53,11 +53,11 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
             long saHpiCurrentSensorStateEventEnable;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateAssertEventMask[65535];
+            unsigned char saHpiCurrentSensorStateAssertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCurrentSensorStateAssertEventMask_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateDeassertEventMask[65535];
+            unsigned char saHpiCurrentSensorStateDeassertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiCurrentSensorStateDeassertEventMask_len;
 
 
