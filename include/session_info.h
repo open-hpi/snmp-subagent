@@ -93,4 +93,10 @@ DR_XREF *domain_resoruce_pair_lookup(SaHpiDomainIdResourceIdArrayT *ep, GHashTab
 SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer, 
 				   SaHpiSensorRangeFlagsT sensor_range_flags);
 
+int set_sensor_reading_value(SaHpiSensorReadingT *reading, 
+			     unsigned char *saHpiCurrentSensorStateValue);
+
+
+void oh_replace_char(SaHpiTextBufferT *buffer);
+
 #endif //_SESSION_INFO_H_

@@ -387,11 +387,51 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 }
 
 
+int set_sensor_reading_value(SaHpiSensorReadingT *reading, 
+			     unsigned char *saHpiCurrentSensorStateValue)
+{
+	switch (reading->Type) {
+	case SAHPI_SENSOR_READING_TYPE_INT64:
+		memcpy(saHpiCurrentSensorStateValue, 
+		       &reading->Value.SensorInt64, 
+		       sizeof(SaHpiInt64T));
+		return sizeof(SaHpiInt64T);
+		break;
+	case SAHPI_SENSOR_READING_TYPE_UINT64:
+		memcpy(saHpiCurrentSensorStateValue, 
+		       &reading->Value.SensorUint64, 
+		       sizeof(SaHpiUint64T));
+		return sizeof(SaHpiUint64T);
+		break;
+	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
+		memcpy(saHpiCurrentSensorStateValue, 
+		       &reading->Value.SensorFloat64, 
+		       sizeof(SaHpiFloat64T));
+		return sizeof(SaHpiFloat64T);
+		break;
+	case SAHPI_SENSOR_READING_TYPE_BUFFER:
+		memcpy(saHpiCurrentSensorStateValue, 
+		       reading->Value.SensorBuffer, 
+		       SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T));
+		return SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T);
+		break;
+	default:
+		return 0;
+	}
+
+	return 0;
+}
 
 
+void oh_replace_char(SaHpiTextBufferT *buffer)
+{
+	int i = 0;
 
-
-
+	for (i = 0; i < buffer->DataLength; i++) {
+		if ( buffer->Data[i] == "|" )
+			buffer->Data[i] = ",";
+	}
+}
 
 
 
