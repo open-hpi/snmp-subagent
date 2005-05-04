@@ -97,6 +97,9 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 			     unsigned char *saHpiCurrentSensorStateValue);
 
 
-void oh_replace_char(SaHpiTextBufferT *buffer);
+void oh_decode_char(SaHpiTextBufferT *buffer);
+
+
+void oh_encode_char(SaHpiTextBufferT *buffer);
 
 #endif //_SESSION_INFO_H_
