@@ -75,6 +75,12 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
 } saHpiCurrentSensorStateTable_context;
 
 /*************************************************************
+ * set funtions
+ */
+int set_table_sensor_enable (saHpiCurrentSensorStateTable_context *row_ctx);
+int set_table_sensor_event_enable (saHpiCurrentSensorStateTable_context *row_ctx);
+
+/*************************************************************
  * function declarations
  */
 SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid, 
