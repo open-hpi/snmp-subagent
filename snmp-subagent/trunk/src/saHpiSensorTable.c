@@ -167,6 +167,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
         rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, 
 			          rdr_entry->RdrTypeUnion.SensorRec.Category,
 			          &buffer); 
+	oh_replace_char(&buffer);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));

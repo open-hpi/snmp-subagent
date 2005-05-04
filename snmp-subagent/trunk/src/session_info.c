@@ -428,8 +428,8 @@ void oh_replace_char(SaHpiTextBufferT *buffer)
 	int i = 0;
 
 	for (i = 0; i < buffer->DataLength; i++) {
-		if ( buffer->Data[i] == "|" )
-			buffer->Data[i] = ",";
+		if ( buffer->Data[i] == '|' )
+			buffer->Data[i] = ',';
 	}
 }
 
