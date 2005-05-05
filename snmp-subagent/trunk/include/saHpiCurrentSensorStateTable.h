@@ -53,12 +53,20 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
             long saHpiCurrentSensorStateEventEnable;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateAssertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
-            long saHpiCurrentSensorStateAssertEventMask_len;
+            unsigned char saHpiCurrentSensorStateAssertAddEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            long saHpiCurrentSensorStateAssertAddEventMask_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiCurrentSensorStateDeassertEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
-            long saHpiCurrentSensorStateDeassertEventMask_len;
+            unsigned char saHpiCurrentSensorStateAssertRemoveEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            long saHpiCurrentSensorStateAssertRemoveEventMask_len;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+            unsigned char saHpiCurrentSensorStateDeassertAddEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            long saHpiCurrentSensorStateDeassertAddEventMask_len;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+            unsigned char saHpiCurrentSensorStateDeassertRemoveEventMask[SAHPI_MAX_TEXT_BUFFER_LENGTH];
+            long saHpiCurrentSensorStateDeassertRemoveEventMask_len;
 
 
     /*
@@ -79,6 +87,8 @@ typedef struct saHpiCurrentSensorStateTable_context_s {
  */
 int set_table_sensor_enable (saHpiCurrentSensorStateTable_context *row_ctx);
 int set_table_sensor_event_enable (saHpiCurrentSensorStateTable_context *row_ctx);
+int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
+			    int column);
 
 /*************************************************************
  * function declarations
@@ -123,10 +133,12 @@ extern size_t saHpiCurrentSensorStateTable_oid_len;
 #define COLUMN_SAHPICURRENTSENSORSTATEEVENTSTATE 4
 #define COLUMN_SAHPICURRENTSENSORSTATESENSORENABLE 5
 #define COLUMN_SAHPICURRENTSENSORSTATEEVENTENABLE 6
-#define COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK 7
-#define COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK 8
+#define COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK 7
+#define COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK 8
+#define COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK 9
+#define COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK 10
 #define saHpiCurrentSensorStateTable_COL_MIN 1
-#define saHpiCurrentSensorStateTable_COL_MAX 8
+#define saHpiCurrentSensorStateTable_COL_MAX 10
 
 int saHpiCurrentSensorStateTable_extract_index( saHpiCurrentSensorStateTable_context * ctx, netsnmp_index * hdr );
 
