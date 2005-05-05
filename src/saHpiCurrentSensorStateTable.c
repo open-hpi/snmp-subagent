@@ -79,10 +79,10 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	SaHpiEventStateT	event_state;
 
 	SaHpiBoolT		sensor_enabled;
-	SaHpiBoolT		sensor_events_enabled;
+	SaHpiBoolT	 	sensor_events_enabled;
 
-	SaHpiEventStateT      assert_event_mask;
-	SaHpiEventStateT      deassert_event_mask;
+	SaHpiEventStateT      	assert_event_mask;
+	SaHpiEventStateT      	deassert_event_mask;
 
 	DEBUGMSGTL ((AGENT, "SAHPI_SENSOR_RDR populate_current_sensor_state() called\n"));
 
@@ -195,32 +195,55 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 		(sensor_events_enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
 
+
+	/*******************************************************/
 	/* get EventMasks and convert to string representation */
+	/*******************************************************/
 	rv = saHpiSensorEventMasksGet (sessionid,
 				       rpt_entry->ResourceId,
 				       rdr_entry->RdrTypeUnion.SensorRec.Num,
 				       &assert_event_mask,
 				       &deassert_event_mask);
 
-        /** SaHpiEventState = ASN_OCTET_STR */
+	/*******************************************************/
+	/* decode assert values  			       */
+	/*******************************************************/
 	rv = oh_decode_eventstate(assert_event_mask,
 				  rdr_entry->RdrTypeUnion.SensorRec.Category,
 				  &buffer);
 	oh_decode_char(&buffer);
-	memcpy(current_sensor_state_context->saHpiCurrentSensorStateAssertEventMask,
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateAssertAddEventMask,
 	       buffer.Data, buffer.DataLength);
-	current_sensor_state_context->saHpiCurrentSensorStateAssertEventMask_len =
+	current_sensor_state_context->saHpiCurrentSensorStateAssertAddEventMask_len =
 		buffer.DataLength;
 
         /** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateAssertRemoveEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateAssertRemoveEventMask_len =
+		buffer.DataLength;
+
+	/*******************************************************/
+	/* decode deassert values  			       */
+	/*******************************************************/
 	rv = oh_decode_eventstate(deassert_event_mask,
 				  rdr_entry->RdrTypeUnion.SensorRec.Category,
 				  &buffer);
 	oh_decode_char(&buffer);
-	memcpy(current_sensor_state_context->saHpiCurrentSensorStateDeassertEventMask,
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateDeassertAddEventMask,
 	       buffer.Data, buffer.DataLength);
-	current_sensor_state_context->saHpiCurrentSensorStateDeassertEventMask_len =
+	current_sensor_state_context->saHpiCurrentSensorStateDeassertAddEventMask_len =
 		buffer.DataLength;                    
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateDeassertRemoveEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateDeassertRemoveEventMask_len =
+		buffer.DataLength;  
 
 	CONTAINER_INSERT (cb.container, current_sensor_state_context);
 
@@ -307,6 +330,132 @@ int set_table_sensor_event_enable (saHpiCurrentSensorStateTable_context *row_ctx
 	return SNMP_ERR_NOERROR;
 }
 
+/*
+ * int set_table_sensor_assert (saHpiCurrentSensorStateTable_context *row_ctx) 
+ */ 
+int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx, 
+			    int column) 
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiTextBufferT    buffer;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiSensorNumT	    sensor_num;
+	SaHpiEventStateT    event_mask;
+	SaHpiEventCategoryT event_cat;
+	int rv = SNMP_ERR_NOERROR;
+
+	DEBUGMSGTL ((AGENT, "set_table_sensor_enable, called\n"));  
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX]; 
+
+	switch (column) {
+	case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
+		memcpy(buffer.Data, 
+		       row_ctx->saHpiCurrentSensorStateAssertAddEventMask, 
+		       row_ctx->saHpiCurrentSensorStateAssertAddEventMask_len);
+		buffer.DataLength = 
+			row_ctx->saHpiCurrentSensorStateAssertAddEventMask_len;
+		oh_encode_char(&buffer);
+		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
+		if (rc != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"set_table_sensor_masks: ASSERT_ADD_EVENT_MASK: FALIED\n"));
+			break;
+		}
+		rc = saHpiSensorEventMasksSet (session_id, 
+					       resource_id, 
+					       sensor_num, 
+					       SAHPI_SENS_ADD_EVENTS_TO_MASKS, 
+					       event_mask, 
+					       0);
+		break;
+
+	case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+		memcpy(buffer.Data, 
+		       row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask, 
+		       row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask_len);
+		buffer.DataLength = 
+			row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask_len;
+		oh_encode_char(&buffer);
+		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
+		if (rc != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"set_table_sensor_masks: ASSERT_REMOVE_EVENT_MASK: FALIED\n"));
+			break;
+		}
+		rc = saHpiSensorEventMasksSet (session_id, 
+					       resource_id, 
+					       sensor_num, 
+					       SAHPI_SENS_REMOVE_EVENTS_FROM_MASKS, 
+					       event_mask, 
+					       0);
+		break;
+
+	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+		memcpy(buffer.Data, 
+		       row_ctx->saHpiCurrentSensorStateDeassertAddEventMask, 
+		       row_ctx->saHpiCurrentSensorStateDeassertAddEventMask_len);
+		buffer.DataLength = 
+			row_ctx->saHpiCurrentSensorStateDeassertAddEventMask_len;
+		oh_encode_char(&buffer);
+		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
+		if (rc != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"set_table_sensor_masks: DEASSERT_ADD_EVENT_MASK: FALIED\n"));
+			break;
+		}
+		rc = saHpiSensorEventMasksSet (session_id, 
+					       resource_id, 
+					       sensor_num, 
+					       SAHPI_SENS_ADD_EVENTS_TO_MASKS, 
+					       0, 
+					       event_mask);
+		break;
+
+	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
+		memcpy(buffer.Data, 
+		       row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask, 
+		       row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask_len);
+		buffer.DataLength = 
+			row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask_len;
+		oh_encode_char(&buffer);
+		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
+		if (rc != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"set_table_sensor_masks: DEASSERT_REMOVE_EVENT_MASK: FALIED\n"));
+			break;
+		}
+		rc = saHpiSensorEventMasksSet (session_id, 
+					       resource_id, 
+					       sensor_num, 
+					       SAHPI_SENS_REMOVE_EVENTS_FROM_MASKS, 
+					       0, 
+					       event_mask);
+		break;
+
+	default:
+		DEBUGMSGTL ((AGENT, "set_table_sensor_masks: ERROR: \n"));  
+		rv = SNMP_ERR_BADVALUE;
+	}
+		 
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "saHpiSensorEventEnableSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "saHpiSensorEventEnableSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		rv =  get_snmp_error(rc);
+	}
+
+	return rv;
+}
 
 /************************************************************/
 /************************************************************/
@@ -430,11 +579,17 @@ static int saHpiCurrentSensorStateTable_row_copy(saHpiCurrentSensorStateTable_co
 
     dst->saHpiCurrentSensorStateEventEnable = src->saHpiCurrentSensorStateEventEnable;
 
-    memcpy( dst->saHpiCurrentSensorStateAssertEventMask, src->saHpiCurrentSensorStateAssertEventMask, src->saHpiCurrentSensorStateAssertEventMask_len );
-    dst->saHpiCurrentSensorStateAssertEventMask_len = src->saHpiCurrentSensorStateAssertEventMask_len;
+    memcpy( dst->saHpiCurrentSensorStateAssertAddEventMask, src->saHpiCurrentSensorStateAssertAddEventMask, src->saHpiCurrentSensorStateAssertAddEventMask_len );
+    dst->saHpiCurrentSensorStateAssertAddEventMask_len = src->saHpiCurrentSensorStateAssertAddEventMask_len;
 
-    memcpy( dst->saHpiCurrentSensorStateDeassertEventMask, src->saHpiCurrentSensorStateDeassertEventMask, src->saHpiCurrentSensorStateDeassertEventMask_len );
-    dst->saHpiCurrentSensorStateDeassertEventMask_len = src->saHpiCurrentSensorStateDeassertEventMask_len;
+    memcpy( dst->saHpiCurrentSensorStateAssertRemoveEventMask, src->saHpiCurrentSensorStateAssertRemoveEventMask, src->saHpiCurrentSensorStateAssertRemoveEventMask_len );
+    dst->saHpiCurrentSensorStateAssertRemoveEventMask_len = src->saHpiCurrentSensorStateAssertRemoveEventMask_len;
+
+    memcpy( dst->saHpiCurrentSensorStateDeassertAddEventMask, src->saHpiCurrentSensorStateDeassertAddEventMask, src->saHpiCurrentSensorStateDeassertAddEventMask_len );
+    dst->saHpiCurrentSensorStateDeassertAddEventMask_len = src->saHpiCurrentSensorStateDeassertAddEventMask_len;
+
+    memcpy( dst->saHpiCurrentSensorStateDeassertRemoveEventMask, src->saHpiCurrentSensorStateDeassertRemoveEventMask, src->saHpiCurrentSensorStateDeassertRemoveEventMask_len );
+    dst->saHpiCurrentSensorStateDeassertRemoveEventMask_len = src->saHpiCurrentSensorStateDeassertRemoveEventMask_len;
 
     return 0;
 }
@@ -628,8 +783,10 @@ saHpiCurrentSensorStateTable_create_row( netsnmp_index* hdr)
     /**
      ctx->saHpiCurrentSensorStateSensorEnable = 0;
      ctx->saHpiCurrentSensorStateEventEnable = 0;
-     ctx->saHpiCurrentSensorStateAssertEventMask = 0;
-     ctx->saHpiCurrentSensorStateDeassertEventMask = 0;
+     ctx->saHpiCurrentSensorStateAssertAddEventMask = 0;
+     ctx->saHpiCurrentSensorStateAssertRemoveEventMask = 0;
+     ctx->saHpiCurrentSensorStateDeassertAddEventMask = 0;
+     ctx->saHpiCurrentSensorStateDeassertRemoveEventMask = 0;
     */
 
     return ctx;
@@ -723,47 +880,65 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPICURRENTSENSORSTATESENSORENABLE:
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-	         sizeof(row_ctx->saHpiCurrentSensorStateSensorEnable));
-        break;
+	            sizeof(row_ctx->saHpiCurrentSensorStateSensorEnable));
+	    break;
 
         case COLUMN_SAHPICURRENTSENSORSTATEEVENTENABLE:
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                 sizeof(row_ctx->saHpiCurrentSensorStateEventEnable));
-        break;
+                    sizeof(row_ctx->saHpiCurrentSensorStateEventEnable));
+	    break;
 
-	case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
-		/** SaHpiEventState = ASN_OCTET_STR */
+	case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
 		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
 		if (rc == SNMP_ERR_NOERROR ) {
 			if (var->val_len > 
-			    sizeof(row_ctx->saHpiCurrentSensorStateAssertEventMask_len)) {
-				rc = SNMP_ERR_WRONGLENGTH;
+			    sizeof(row_ctx->saHpiCurrentSensorStateAssertAddEventMask)) {
+			    DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK ERROR: %d\n", rc));
+		            rc = SNMP_ERR_WRONGLENGTH;
 			}
 		}
-		if (rc == SNMP_ERR_NOERROR)
-			DEBUGMSGTL ((AGENT, 
-			"COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK NO ERROR: %d\n", rc));
-		else
-			DEBUGMSGTL ((AGENT, 
-			"COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK ERROR: %d\n", rc));
 		break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
-		/** SaHpiEventState = ASN_OCTET_STR */
+	case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
 		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
 		if (rc == SNMP_ERR_NOERROR ) {
 			if (var->val_len > 
-			    sizeof(row_ctx->saHpiCurrentSensorStateDeassertEventMask_len)) {
-				rc = SNMP_ERR_WRONGLENGTH;
+			    sizeof(row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask)) {
+			    DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
+		            rc = SNMP_ERR_WRONGLENGTH;
 			}
 		}
-		if (rc == SNMP_ERR_NOERROR)
-			DEBUGMSGTL ((AGENT, 
-			"COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK NO ERROR: %d\n", rc));
-		else
-			DEBUGMSGTL ((AGENT, 
-			"COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK ERROR: %d\n", rc));
+		break;
+
+	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+		if (rc == SNMP_ERR_NOERROR ) {
+			if (var->val_len > 
+			    sizeof(row_ctx->saHpiCurrentSensorStateDeassertAddEventMask)) {
+			    DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK ERROR: %d\n", rc));
+		            rc = SNMP_ERR_WRONGLENGTH;
+			}
+		}
+		break;
+
+	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+		if (rc == SNMP_ERR_NOERROR ) {
+			if (var->val_len > 
+			    sizeof(row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask)) {
+			    DEBUGMSGTL ((AGENT, 
+			    "COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
+		            rc = SNMP_ERR_WRONGLENGTH;
+			}
+		}
 		break;
 
         default: /** We shouldn't get here */
@@ -819,32 +994,62 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
                 rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
 		oh_encode_char(&buffer);
-                rv = oh_encode_eventstate(&buffer,
+		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
 					  &event_cat);
 		if (rv != SA_OK) {
 			DEBUGMSGTL((AGENT, 
-		        "COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK: FALIED\n"));
+			"reserve2: ASSERT_ADD_EVENT_MASK: FALIED\n"));
 			rc = SNMP_ERR_BADVALUE;
 		}
 		break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
 		oh_encode_char(&buffer);
-                rv = oh_encode_eventstate(&buffer,
+		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
 					  &event_cat);
 		if (rv != SA_OK) {
 			DEBUGMSGTL((AGENT, 
-		        "COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK: FALIED\n"));
+			"reserve2: ASSERT_REMOVE_EVENT_MASK: FALIED\n"));
+			rc = SNMP_ERR_BADVALUE;
+		}
+		break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+		memcpy(buffer.Data, var->val.string, var->val_len);
+		buffer.DataLength = var->val_len;
+		oh_encode_char(&buffer);
+		rv = oh_encode_eventstate(&buffer,
+					  &event_state,
+					  &event_cat);
+		if (rv != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"reserve2: DEASSERT_ADD_EVENT_MASK: FALIED\n"));
+			rc = SNMP_ERR_BADVALUE;
+		}
+		break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+		memcpy(buffer.Data, var->val.string, var->val_len);
+		buffer.DataLength = var->val_len;
+		oh_encode_char(&buffer);
+		rv = oh_encode_eventstate(&buffer,
+					  &event_state,
+					  &event_cat);
+		if (rv != SA_OK) {
+			DEBUGMSGTL((AGENT, 
+			"reserve2: DEASSERT_REMOVE_EVENT_MASK: FALIED\n"));
 			rc = SNMP_ERR_BADVALUE;
 		}
 		break;
@@ -883,6 +1088,11 @@ void saHpiCurrentSensorStateTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    SaHpiTextBufferT 	buffer;
+    SaHpiEventStateT 	event_state;
+    SaHpiEventCategoryT event_cat;
+    SaErrorT 		rv;
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -905,17 +1115,45 @@ void saHpiCurrentSensorStateTable_set_action( netsnmp_request_group *rg )
 	    row_err = set_table_sensor_event_enable (row_ctx);
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiCurrentSensorStateAssertEventMask,var->val.string,var->val_len);
-            row_ctx->saHpiCurrentSensorStateAssertEventMask_len = var->val_len;
+	    memcpy(row_ctx->saHpiCurrentSensorStateAssertAddEventMask,
+		   var->val.string, var->val_len);
+            row_ctx->saHpiCurrentSensorStateAssertAddEventMask_len = 
+		    var->val_len;
+	    row_err = set_table_sensor_masks (row_ctx, 
+			COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK);
+	    break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask,
+		   var->val.string, var->val_len);
+            row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask_len = 
+		    var->val_len;
+	    row_err = set_table_sensor_masks (row_ctx, 
+			COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK);
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiCurrentSensorStateDeassertEventMask,var->val.string,var->val_len);
-            row_ctx->saHpiCurrentSensorStateDeassertEventMask_len = var->val_len;
-        break;
+            memcpy(row_ctx->saHpiCurrentSensorStateDeassertAddEventMask,
+		   var->val.string, var->val_len);
+            row_ctx->saHpiCurrentSensorStateDeassertAddEventMask_len = 
+		    var->val_len;
+	    row_err = set_table_sensor_masks (row_ctx, 
+			COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK);
+	    break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+            memcpy(row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask,
+		   var->val.string, var->val_len);
+            row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask_len = 
+		    var->val_len;
+	    row_err = set_table_sensor_masks (row_ctx, 
+			COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK);
+	    break;
 
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
@@ -976,11 +1214,19 @@ void saHpiCurrentSensorStateTable_set_commit( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
@@ -1027,11 +1273,19 @@ void saHpiCurrentSensorStateTable_set_free( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
@@ -1088,11 +1342,19 @@ void saHpiCurrentSensorStateTable_set_undo( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+        break;
+
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
         break;
 
@@ -1262,18 +1524,32 @@ int saHpiCurrentSensorStateTable_get_value(
                          sizeof(context->saHpiCurrentSensorStateEventEnable) );
         break;
     
-        case COLUMN_SAHPICURRENTSENSORSTATEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCurrentSensorStateAssertEventMask,
-                         context->saHpiCurrentSensorStateAssertEventMask_len );
+                         (char*)&context->saHpiCurrentSensorStateAssertAddEventMask,
+                         context->saHpiCurrentSensorStateAssertAddEventMask_len );
         break;
     
-        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTEVENTMASK:
+        case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCurrentSensorStateDeassertEventMask,
-                         context->saHpiCurrentSensorStateDeassertEventMask_len );
+                         (char*)&context->saHpiCurrentSensorStateAssertRemoveEventMask,
+                         context->saHpiCurrentSensorStateAssertRemoveEventMask_len );
+        break;
+    
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&context->saHpiCurrentSensorStateDeassertAddEventMask,
+                         context->saHpiCurrentSensorStateDeassertAddEventMask_len );
+        break;
+    
+        case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
+            /** SaHpiEventState = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                         (char*)&context->saHpiCurrentSensorStateDeassertRemoveEventMask,
+                         context->saHpiCurrentSensorStateDeassertRemoveEventMask_len );
         break;
     
     default: /** We shouldn't get here */
@@ -1293,5 +1569,3 @@ saHpiCurrentSensorStateTable_get_by_idx(netsnmp_index * hdr)
     return (const saHpiCurrentSensorStateTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
-
-
