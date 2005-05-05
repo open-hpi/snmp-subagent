@@ -361,7 +361,6 @@ int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
 		       row_ctx->saHpiCurrentSensorStateAssertAddEventMask_len);
 		buffer.DataLength = 
 			row_ctx->saHpiCurrentSensorStateAssertAddEventMask_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
 		if (rc != SA_OK) {
@@ -383,7 +382,6 @@ int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
 		       row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask_len);
 		buffer.DataLength = 
 			row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
 		if (rc != SA_OK) {
@@ -405,7 +403,6 @@ int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
 		       row_ctx->saHpiCurrentSensorStateDeassertAddEventMask_len);
 		buffer.DataLength = 
 			row_ctx->saHpiCurrentSensorStateDeassertAddEventMask_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
 		if (rc != SA_OK) {
@@ -427,7 +424,6 @@ int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
 		       row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask_len);
 		buffer.DataLength = 
 			row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rc = oh_encode_eventstate(&buffer, &event_mask, &event_cat);
 		if (rc != SA_OK) {
@@ -1002,7 +998,6 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
@@ -1018,7 +1013,6 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
@@ -1034,7 +1028,6 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
@@ -1050,7 +1043,6 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
             /** SaHpiEventState = ASN_OCTET_STR */
 		memcpy(buffer.Data, var->val.string, var->val_len);
 		buffer.DataLength = var->val_len;
-		buffer.Data[buffer.DataLength] = 0x00;
 		oh_encode_char(&buffer);
 		rv = oh_encode_eventstate(&buffer,
 					  &event_state,
