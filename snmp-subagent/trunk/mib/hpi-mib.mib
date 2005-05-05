@@ -11133,7 +11133,7 @@ saHpiCurrentSensorStateGroup OBJECT-GROUP
 		saHpiCurrentSensorStateEventEnable,
 		saHpiCurrentSensorStateAssertAddEventMask,
 		saHpiCurrentSensorStateAssertRemoveEventMask,
-		saHpiCurrentSensorStateDeassertAddEventMask
+		saHpiCurrentSensorStateDeassertAddEventMask,
 		saHpiCurrentSensorStateDeassertRemoveEventMask
 	}
 	STATUS	current
