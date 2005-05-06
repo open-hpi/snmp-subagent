@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorReadingMaxTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +52,94 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiSensorReadingMaxTable_oid[] = { saHpiSensorReadingMaxTable_TABLE_OID };
 size_t saHpiSensorReadingMaxTable_oid_len = OID_LENGTH(saHpiSensorReadingMaxTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiSensorReadingMaxTable_IDX2
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry)
+{
+
+	DEBUGMSGTL ((AGENT, "populate_sensor_max, called\n"));
+
+	SaErrorT rv = SA_OK;
+
+	oid sensor_max_oid[SENSOR_READING_MAX_INDEX_NR];
+	netsnmp_index sensor_max_index;
+	saHpiSensorReadingMaxTable_context *sensor_max_context;
+
+	SaHpiTextBufferT buffer;
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	sensor_max_index.len = SENSOR_READING_MAX_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	sensor_max_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	sensor_max_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	sensor_max_oid[2] = MIB_FALSE;
+	/** Index saHpiSensorNum */
+	sensor_max_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	/* assign the indices to the index */
+	sensor_max_index.oids = (oid *) & sensor_max_oid;
+
+	/* See if Row exists. */
+	sensor_max_context = NULL;
+	sensor_max_context = CONTAINER_FIND(cb.container, &sensor_max_index);
+
+	if (!sensor_max_context) {
+		// New entry. Add it
+		sensor_max_context = 
+		saHpiSensorReadingMaxTable_create_row(&sensor_max_index);
+	}
+	if (!sensor_max_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** TruthValue = ASN_INTEGER */
+        sensor_max_context->saHpiSensorReadingMaxIsSupported =
+		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max.IsSupported
+		  == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sensor_max_context->saHpiSensorReadingMaxType = 
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max.Type + 1;
+
+        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	sensor_max_context->saHpiSensorReadingMaxValue_len =
+		 set_sensor_reading_value(
+			 &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max,
+                         sensor_max_context->saHpiSensorReadingMaxValue);
+
+	CONTAINER_INSERT (cb.container, sensor_max_context);
+
+	return rv;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -67,69 +161,55 @@ saHpiSensorReadingMaxTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiSensorReadingMaxTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	/* check for NULL pointers */
+	if(lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,"saHpiRdrTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}	
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+	    return -1;
+		
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+	    return 1;			         
+	       
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+	       /* If saHpiDomainId index is equal sort by second index */
+	       /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+	       if ( context_l->index.oids[1] < context_r->index.oids[1])
+		  return -1;
+		
+	       if ( context_l->index.oids[1] > context_r->index.oids[1])
+		  return 1;			
+		      
+	        if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		/* If saHpiResourceEntryId index is equal sort by third index */
+		/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+			     return -1;
+				
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+			     return 1;
+					
+			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+				/* If saHpiResourceIsHistorical index is equal sort by forth index */
+				/* CHECK FORTH INDEX,  saHpiSensorNum */
+				if ( context_l->index.oids[3] < context_r->index.oids[3])
+				     return -1;
+					
+				if ( context_l->index.oids[3] > context_r->index.oids[3])
+				     return 1;
+						
+				if ( context_l->index.oids[3] == context_r->index.oids[3])
+				     return 0;
+			}
+		}
+	}
+
+	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiSensorReadingMaxTable_context *
-saHpiSensorReadingMaxTable_get( const char *name, int len )
-{
-    saHpiSensorReadingMaxTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorReadingMaxTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
 
 
 /************************************************************
@@ -138,15 +218,10 @@ saHpiSensorReadingMaxTable_get( const char *name, int len )
 void
 init_saHpiSensorReadingMaxTable(void)
 {
+	DEBUGMSGTL ((AGENT, "init_saHpiSensorReadingMaxTable, called\n"));
+
     initialize_table_saHpiSensorReadingMaxTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiSensorReadingMaxTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
 }
 
 /************************************************************
@@ -157,6 +232,8 @@ static int saHpiSensorReadingMaxTable_row_copy(saHpiSensorReadingMaxTable_contex
 {
     if(!dst||!src)
         return 1;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_row_copy, called\n"));
         
     /*
      * copy index, if provided
@@ -185,7 +262,6 @@ static int saHpiSensorReadingMaxTable_row_copy(saHpiSensorReadingMaxTable_contex
     return 0;
 }
 
-#ifdef saHpiSensorReadingMaxTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -209,7 +285,9 @@ saHpiSensorReadingMaxTable_extract_index( saHpiSensorReadingMaxTable_context * c
     netsnmp_variable_list var_saHpiResourceId;
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiSensorNum;
-    int err;
+    int err;         
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_extract_index, called\n"));
 
     /*
      * copy index, if provided
@@ -232,42 +310,22 @@ saHpiSensorReadingMaxTable_extract_index( saHpiSensorReadingMaxTable_context * c
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorReadingMaxTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorReadingMaxTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorReadingMaxTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiSensorNum;
 
        memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
        var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorReadingMaxTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiSensorNum.next_variable = &var_XX;
-#endif
+       var_saHpiSensorNum.next_variable = NULL;
 
 
     /*
@@ -287,35 +345,14 @@ saHpiSensorReadingMaxTable_extract_index( saHpiSensorReadingMaxTable_context * c
               /** skipping external index saHpiSensorNum */
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiSensorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
+		err = saHpiDomainId_check_index(
+			*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+			*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+			*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiSensorNum_check_index(
+			*var_saHpiSensorNum.val.integer);      }
 
     /*
      * parsing may have allocated memory. free it.
@@ -338,6 +375,7 @@ int saHpiSensorReadingMaxTable_can_activate(saHpiSensorReadingMaxTable_context *
                       saHpiSensorReadingMaxTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_can_activate, called\n"));
     /*
      * TODO: check for activation requirements here
      */
@@ -363,6 +401,7 @@ int saHpiSensorReadingMaxTable_can_deactivate(saHpiSensorReadingMaxTable_context
                         saHpiSensorReadingMaxTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -380,6 +419,7 @@ int saHpiSensorReadingMaxTable_can_delete(saHpiSensorReadingMaxTable_context *un
                     saHpiSensorReadingMaxTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -393,7 +433,6 @@ int saHpiSensorReadingMaxTable_can_delete(saHpiSensorReadingMaxTable_context *un
     return 1;
 }
 
-#ifdef saHpiSensorReadingMaxTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -411,6 +450,9 @@ int saHpiSensorReadingMaxTable_can_delete(saHpiSensorReadingMaxTable_context *un
 saHpiSensorReadingMaxTable_context *
 saHpiSensorReadingMaxTable_create_row( netsnmp_index* hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_create_row, called\n"));
+
     saHpiSensorReadingMaxTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorReadingMaxTable_context);
     if(!ctx)
@@ -439,7 +481,6 @@ saHpiSensorReadingMaxTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -448,6 +489,8 @@ saHpiSensorReadingMaxTable_context *
 saHpiSensorReadingMaxTable_duplicate_row( saHpiSensorReadingMaxTable_context * row_ctx)
 {
     saHpiSensorReadingMaxTable_context * dup;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_duplicate_row, called\n"));
 
     if(!row_ctx)
         return NULL;
@@ -470,6 +513,8 @@ saHpiSensorReadingMaxTable_duplicate_row( saHpiSensorReadingMaxTable_context * r
 netsnmp_index * saHpiSensorReadingMaxTable_delete_row( saHpiSensorReadingMaxTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -512,6 +557,7 @@ void saHpiSensorReadingMaxTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -550,6 +596,8 @@ void saHpiSensorReadingMaxTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -598,6 +646,8 @@ void saHpiSensorReadingMaxTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_action, called\n"));
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -613,23 +663,6 @@ void saHpiSensorReadingMaxTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiSensorReadingMaxTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -667,6 +700,8 @@ void saHpiSensorReadingMaxTable_set_commit( netsnmp_request_group *rg )
     saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -702,6 +737,8 @@ void saHpiSensorReadingMaxTable_set_free( netsnmp_request_group *rg )
     saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_free, called\n"));
+
     /*
      * loop through columns
      */
@@ -711,8 +748,10 @@ void saHpiSensorReadingMaxTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+		break;
+		/** We shouldn't get here */
+		/** should have been logged in reserve1 */
         }
     }
 
@@ -747,6 +786,8 @@ void saHpiSensorReadingMaxTable_set_undo( netsnmp_request_group *rg )
     saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -767,8 +808,6 @@ void saHpiSensorReadingMaxTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiSensorReadingMaxTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -778,6 +817,8 @@ void
 initialize_table_saHpiSensorReadingMaxTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorReadingMaxTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiSensorReadingMaxTable_handler called again\n");
@@ -833,18 +874,18 @@ initialize_table_saHpiSensorReadingMaxTable(void)
     cb.container = netsnmp_container_find("saHpiSensorReadingMaxTable_primary:"
                                           "saHpiSensorReadingMaxTable:"
                                           "table_container");
-#ifdef saHpiSensorReadingMaxTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiSensorReadingMaxTable_secondary:"
                                                        "saHpiSensorReadingMaxTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiSensorReadingMaxTable_cmp;
-#endif
-#ifdef saHpiSensorReadingMaxTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiSensorReadingMaxTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiSensorReadingMaxTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiSensorReadingMaxTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiSensorReadingMaxTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorReadingMaxTable_row_copy;
@@ -859,7 +900,7 @@ initialize_table_saHpiSensorReadingMaxTable(void)
     cb.set_commit = saHpiSensorReadingMaxTable_set_commit;
     cb.set_free = saHpiSensorReadingMaxTable_set_free;
     cb.set_undo = saHpiSensorReadingMaxTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiSensorReadingMaxTable",
                 "Registering table saHpiSensorReadingMaxTable "
                 "as a table array\n"));
@@ -882,6 +923,8 @@ int saHpiSensorReadingMaxTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiSensorReadingMaxTable_context *context = (saHpiSensorReadingMaxTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -920,6 +963,9 @@ int saHpiSensorReadingMaxTable_get_value(
 const saHpiSensorReadingMaxTable_context *
 saHpiSensorReadingMaxTable_get_by_idx(netsnmp_index * hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_get_by_idx, called\n"));
+
     return (const saHpiSensorReadingMaxTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
