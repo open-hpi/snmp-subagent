@@ -535,7 +535,7 @@ init_saHpiCurrentSensorStateTable(void)
 {
 	DEBUGMSGTL((AGENT, "Called init_saHpiCurrentSensorStateTable()\n"));
 
-    initialize_table_saHpiCurrentSensorStateTable();
+	initialize_table_saHpiCurrentSensorStateTable();
 
 }
 
@@ -547,6 +547,8 @@ static int saHpiCurrentSensorStateTable_row_copy(saHpiCurrentSensorStateTable_co
 {
     if(!dst||!src)
         return 1;
+
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_row_copy, called\n"));
         
     /*
      * copy index, if provided
@@ -617,6 +619,8 @@ saHpiCurrentSensorStateTable_extract_index( saHpiCurrentSensorStateTable_context
     netsnmp_variable_list var_saHpiSensorNum;
     int err;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_extract_index, called\n"));
+
     /*
      * copy index, if provided
      */
@@ -685,6 +689,8 @@ int saHpiCurrentSensorStateTable_can_activate(saHpiCurrentSensorStateTable_conte
                       saHpiCurrentSensorStateTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_can_activate, called\n"));
     /*
      * TODO: check for activation requirements here
      */
@@ -710,6 +716,8 @@ int saHpiCurrentSensorStateTable_can_deactivate(saHpiCurrentSensorStateTable_con
                         saHpiCurrentSensorStateTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -727,6 +735,9 @@ int saHpiCurrentSensorStateTable_can_delete(saHpiCurrentSensorStateTable_context
                     saHpiCurrentSensorStateTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_can_delete, called\n"));
+
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -757,10 +768,14 @@ int saHpiCurrentSensorStateTable_can_delete(saHpiCurrentSensorStateTable_context
 saHpiCurrentSensorStateTable_context *
 saHpiCurrentSensorStateTable_create_row( netsnmp_index* hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_create_row, called\n"));
+
     saHpiCurrentSensorStateTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiCurrentSensorStateTable_context);
     if(!ctx)
         return NULL;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -800,6 +815,8 @@ saHpiCurrentSensorStateTable_duplicate_row( saHpiCurrentSensorStateTable_context
 {
     saHpiCurrentSensorStateTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -820,6 +837,9 @@ saHpiCurrentSensorStateTable_duplicate_row( saHpiCurrentSensorStateTable_context
  */
 netsnmp_index * saHpiCurrentSensorStateTable_delete_row( saHpiCurrentSensorStateTable_context * ctx )
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_delete_row, called\n"));
+
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -863,6 +883,7 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -970,6 +991,8 @@ void saHpiCurrentSensorStateTable_set_reserve2( netsnmp_request_group *rg )
     SaHpiEventStateT 	event_state;
     SaHpiEventCategoryT event_cat;
     SaErrorT 		rv;
+
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -1088,6 +1111,8 @@ void saHpiCurrentSensorStateTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_action, called\n"));
+
     SaHpiTextBufferT 	buffer;
     SaHpiEventStateT 	event_state;
     SaHpiEventCategoryT event_cat;
@@ -1197,6 +1222,8 @@ void saHpiCurrentSensorStateTable_set_commit( netsnmp_request_group *rg )
     saHpiCurrentSensorStateTable_context *undo_ctx = (saHpiCurrentSensorStateTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -1255,6 +1282,8 @@ void saHpiCurrentSensorStateTable_set_free( netsnmp_request_group *rg )
     saHpiCurrentSensorStateTable_context *row_ctx = (saHpiCurrentSensorStateTable_context *)rg->existing_row;
     saHpiCurrentSensorStateTable_context *undo_ctx = (saHpiCurrentSensorStateTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -1325,6 +1354,8 @@ void saHpiCurrentSensorStateTable_set_undo( netsnmp_request_group *rg )
     saHpiCurrentSensorStateTable_context *undo_ctx = (saHpiCurrentSensorStateTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -1377,6 +1408,8 @@ void
 initialize_table_saHpiCurrentSensorStateTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiCurrentSensorStateTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiCurrentSensorStateTable_handler called again\n");
@@ -1480,6 +1513,8 @@ int saHpiCurrentSensorStateTable_get_value(
     netsnmp_variable_list *var = request->requestvb;
     saHpiCurrentSensorStateTable_context *context = (saHpiCurrentSensorStateTable_context *)item;
 
+    DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_get_value, called\n"));
+
     switch(table_info->colnum) {
 
         case COLUMN_SAHPICURRENTSENSORSTATEDATAPRESENT:
@@ -1566,6 +1601,8 @@ int saHpiCurrentSensorStateTable_get_value(
 const saHpiCurrentSensorStateTable_context *
 saHpiCurrentSensorStateTable_get_by_idx(netsnmp_index * hdr)
 {
+	DEBUGMSGTL ((AGENT, "saHpiCurrentSensorStateTable_get_by_idx, called\n"));
+
     return (const saHpiCurrentSensorStateTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
