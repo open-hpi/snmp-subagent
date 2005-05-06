@@ -148,7 +148,7 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 	if (!ctrl_stream_context) { 
 		// New entry. Add it
 		ctrl_stream_context = 
-			saHpiCtrlDiscreteTable_create_row(&ctrl_stream_index);
+			saHpiCtrlStreamTable_create_row(&ctrl_stream_index);
 	}
 	if (!ctrl_stream_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");

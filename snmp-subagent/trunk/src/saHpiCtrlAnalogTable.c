@@ -149,7 +149,7 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	if (!ctrl_analog_context) { 
 		// New entry. Add it
 		ctrl_analog_context = 
-			saHpiCtrlDiscreteTable_create_row(&ctrl_analog_index);
+			saHpiCtrlAnalogTable_create_row(&ctrl_analog_index);
 	}
 	if (!ctrl_analog_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
