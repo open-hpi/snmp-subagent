@@ -40,7 +40,7 @@ typedef struct saHpiSensorReadingMaxTable_context_s {
             long saHpiSensorReadingMaxType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingMaxValue[65535];
+            unsigned char saHpiSensorReadingMaxValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorReadingMaxValue_len;
 
 
@@ -56,6 +56,15 @@ typedef struct saHpiSensorReadingMaxTable_context_s {
      */
 
 } saHpiSensorReadingMaxTable_context;
+
+
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid, 
+			    SaHpiRdrT *rdr_entry,
+			    SaHpiRptEntryT *rpt_entry);
+
 
 /*************************************************************
  * function declarations
@@ -75,6 +84,7 @@ extern oid saHpiSensorReadingMaxTable_oid[];
 extern size_t saHpiSensorReadingMaxTable_oid_len;
 
 #define saHpiSensorReadingMaxTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,4
+
     
 /*************************************************************
  * column number definitions for table saHpiSensorReadingMaxTable
