@@ -356,6 +356,13 @@ static sensor_range_flags range_flags[] = {
 	{SAHPI_SRF_NOMINAL,"NOMINAL, "}};
 #define RANGE_FLAGS_LEN 5
 
+/**
+ * 
+ * @buffer:
+ * @sensor_range_flags:
+ * 
+ * Returns: 
+ */
 SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer, 
 				   SaHpiSensorRangeFlagsT sensor_range_flags)
 {
@@ -387,6 +394,16 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 }
 
 
+/**
+ * 
+ * @reading:
+ * @saHpiCurrentSensorStateValue:
+ * 
+ * Copies reading into text buffer and returns number of 
+ * bytes copied.
+ * 
+ * Returns: 
+ */
 int set_sensor_reading_value(SaHpiSensorReadingT *reading, 
 			     unsigned char *saHpiCurrentSensorStateValue)
 {
@@ -423,6 +440,12 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 }
 
 
+/**
+ * 
+ * @buffer
+ * 
+ * Changes '|' to a ','
+ */
 void oh_decode_char(SaHpiTextBufferT *buffer)
 {
 	int i = 0;
@@ -433,6 +456,12 @@ void oh_decode_char(SaHpiTextBufferT *buffer)
 	}
 }
 
+/**
+ * 
+ * @buffer
+ * 
+ * Changes ',' to a '|'
+ */
 void oh_encode_char(SaHpiTextBufferT *buffer)
 {
 	int i = 0;
