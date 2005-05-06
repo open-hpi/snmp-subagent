@@ -394,6 +394,7 @@ main (int argc, char **argv)
 		init_saHpiCtrlOemTable();
 		init_saHpiSensorTable();
 		init_saHpiCurrentSensorStateTable();
+		init_saHpiSensorReadingMaxTable();
 		
 /*		init_saHpiAnnunciatorTable();
 		
@@ -401,7 +402,6 @@ main (int argc, char **argv)
 		init_saHpiFieldTable();
 		init_saHpiAreaTable();
 		
-		init_saHpiSensorReadingMaxTable();
 		init_saHpiSensorReadingMinTable();
 		init_saHpiSensorReadingNominalTable();
 		init_saHpiSensorReadingNormalMaxTable();
@@ -456,17 +456,18 @@ main (int argc, char **argv)
 		poplulate_saHpiDomainReferenceTable(sessionid);	
 
 		populate_saHpiResourceTable(sessionid);
-			/* populate_saHpiResourceTable() calls:
-			 * populate_saHpiRdrTable(); calls:
-			 *	populate_saHpiCtrlDigitalTable();		
-			 *	populate_saHpiCtrlDiscreteTable();		
-			 *	populate_saHpiCtrlAnalogTable();		
-			 *	populate_saHpiCtrlStreamTable();		
-			 *	populate_saHpiCtrlTextTable();		
-			 *	populate_saHpiCtrlOemTable();		
-			 *	populate_saHpiSensorTable();		
-			 *	populate_saHpiCurrentSensorStateTable();		
-			 */
+		    /* populate_saHpiResourceTable() calls:
+		     *     populate_saHpiRdrTable(); calls:
+		     *         populate_saHpiCtrlDigitalTable();		
+		     *	       populate_saHpiCtrlDiscreteTable();		
+		     *	       populate_saHpiCtrlAnalogTable();		
+		     *	       populate_saHpiCtrlStreamTable();		
+		     *	       populate_saHpiCtrlTextTable();		
+		     *	       populate_saHpiCtrlOemTable();		
+		     *	       populate_saHpiSensorTable();		
+		     *	           populate_saHpiSesnorReadingMaxTable();		
+		     *	       populate_saHpiCurrentSensorStateTable();		
+		     */
 
     		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
 

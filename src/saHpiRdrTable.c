@@ -239,17 +239,21 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					    oh_lookup_error(rv)));
 				break;
 			default:
-				DEBUGMSGTL ((AGENT, "SAHPI_CTRL_RDR UNKNOWN TYPE: Not implemented\n"));
+				DEBUGMSGTL ((AGENT, 
+		                "SAHPI_CTRL_RDR UNKNOWN TYPE: Not implemented\n"));
 				break;
 			}
 			break;
 
 		case SAHPI_SENSOR_RDR:
+
 			DEBUGMSGTL ((AGENT,
 				     "SAHPI_CTRL_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
+
+			/* saHpiSensorTable */
 			rv = populate_sensor (sessionid,
 					      &rdr_entry,
 					      rpt_entry,
@@ -257,12 +261,15 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					      child_oid, &child_oid_len);
 			DEBUGMSGTL((AGENT, 
 		        "Called populate_sensor(); rc: %d\n",rv));
+
+			/* saHpiCurrentSensorStateTable */
 			rv = populate_current_sensor_state (sessionid,
 							    &rdr_entry,
 							    rpt_entry,
 							    full_oid, full_oid_len);
 			DEBUGMSGTL((AGENT, 
-			"Called populate_current_sensor_state(); rc: %d\n", rv));
+		       "Called populate_current_sensor_state(); rc: %d\n", rv));
+
 			break;
 
 /*		case SAHPI_INVENTORY_RDR:
