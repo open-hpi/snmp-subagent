@@ -230,6 +230,8 @@ static int saHpiSensorReadingNormalMinTable_row_copy(saHpiSensorReadingNormalMin
 {
     if(!dst||!src)
         return 1;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_row_copy, called\n"));
         
     /*
      * copy index, if provided
@@ -281,6 +283,8 @@ saHpiSensorReadingNormalMinTable_extract_index( saHpiSensorReadingNormalMinTable
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiSensorNum;
     int err;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_extract_index, called\n"));
 
     /*
      * copy index, if provided
@@ -369,6 +373,9 @@ int saHpiSensorReadingNormalMinTable_can_activate(saHpiSensorReadingNormalMinTab
                       saHpiSensorReadingNormalMinTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -394,6 +401,9 @@ int saHpiSensorReadingNormalMinTable_can_deactivate(saHpiSensorReadingNormalMinT
                         saHpiSensorReadingNormalMinTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_can_deactivate, called\n"));
+
     /*
      * TODO: check for deactivation requirements here
      */
@@ -411,6 +421,9 @@ int saHpiSensorReadingNormalMinTable_can_delete(saHpiSensorReadingNormalMinTable
                     saHpiSensorReadingNormalMinTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_can_delete, called\n"));
+
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -441,8 +454,12 @@ int saHpiSensorReadingNormalMinTable_can_delete(saHpiSensorReadingNormalMinTable
 saHpiSensorReadingNormalMinTable_context *
 saHpiSensorReadingNormalMinTable_create_row( netsnmp_index* hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_create_row, called\n"));
+
     saHpiSensorReadingNormalMinTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorReadingNormalMinTable_context);
+
     if(!ctx)
         return NULL;
         
@@ -478,6 +495,8 @@ saHpiSensorReadingNormalMinTable_duplicate_row( saHpiSensorReadingNormalMinTable
 {
     saHpiSensorReadingNormalMinTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -499,6 +518,8 @@ saHpiSensorReadingNormalMinTable_duplicate_row( saHpiSensorReadingNormalMinTable
 netsnmp_index * saHpiSensorReadingNormalMinTable_delete_row( saHpiSensorReadingNormalMinTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -541,6 +562,7 @@ void saHpiSensorReadingNormalMinTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -579,6 +601,8 @@ void saHpiSensorReadingNormalMinTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -626,6 +650,8 @@ void saHpiSensorReadingNormalMinTable_set_action( netsnmp_request_group *rg )
 //    saHpiSensorReadingNormalMinTable_context *undo_ctx = 
 // 	(saHpiSensorReadingNormalMinTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_action, called\n"));
 
     int            row_err = 0;
 
@@ -683,6 +709,8 @@ void saHpiSensorReadingNormalMinTable_set_commit( netsnmp_request_group *rg )
 // 	(saHpiSensorReadingNormalMinTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -719,6 +747,8 @@ void saHpiSensorReadingNormalMinTable_set_free( netsnmp_request_group *rg )
 //    saHpiSensorReadingNormalMinTable_context *undo_ctx = 
 // 	(saHpiSensorReadingNormalMinTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -769,6 +799,8 @@ void saHpiSensorReadingNormalMinTable_set_undo( netsnmp_request_group *rg )
 // 	(saHpiSensorReadingNormalMinTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -797,6 +829,8 @@ void
 initialize_table_saHpiSensorReadingNormalMinTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorReadingNormalMinTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiSensorReadingNormalMinTable_handler called again\n");
@@ -902,6 +936,8 @@ int saHpiSensorReadingNormalMinTable_get_value(
     netsnmp_variable_list *var = request->requestvb;
     saHpiSensorReadingNormalMinTable_context *context = (saHpiSensorReadingNormalMinTable_context *)item;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_get_value, called\n"));
+
     switch(table_info->colnum) {
 
         case COLUMN_SAHPISENSORREADINGNORMALMINISSUPPORTED:
@@ -939,6 +975,9 @@ int saHpiSensorReadingNormalMinTable_get_value(
 const saHpiSensorReadingNormalMinTable_context *
 saHpiSensorReadingNormalMinTable_get_by_idx(netsnmp_index * hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_get_by_idx, called\n"));
+
     return (const saHpiSensorReadingNormalMinTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
