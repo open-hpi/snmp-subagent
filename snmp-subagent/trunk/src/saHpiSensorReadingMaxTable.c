@@ -345,13 +345,13 @@ saHpiSensorReadingMaxTable_extract_index( saHpiSensorReadingMaxTable_context * c
 
 
 		err = saHpiDomainId_check_index(
-					       *var_saHpiDomainId.val.integer);
+				*var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-						      *var_saHpiResourceId.val.integer);  
+				*var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-							   *var_saHpiResourceIsHistorical.val.integer);
+				*var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiSensorNum_check_index(
-						*var_saHpiSensorNum.val.integer);
+				*var_saHpiSensorNum.val.integer);
 	}
 
 	/*

@@ -85,20 +85,6 @@ extern size_t saHpiSensorReadingNominalTable_oid_len;
 #define saHpiSensorReadingNominalTable_COL_MIN 1
 #define saHpiSensorReadingNominalTable_COL_MAX 3
 
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorReadingNominalTable */
-#define saHpiSensorReadingNominalTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorReadingNominalTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorReadingNominalTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorReadingNominalTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorReadingNominalTable_SET_HANDLING
 
 int saHpiSensorReadingNominalTable_extract_index( saHpiSensorReadingNominalTable_context * ctx, netsnmp_index * hdr );
 
@@ -123,14 +109,9 @@ int saHpiSensorReadingNominalTable_can_delete(saHpiSensorReadingNominalTable_con
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorReadingNominalTable_ROW_CREATION
 saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorReadingNominalTable_IDX2
 saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
