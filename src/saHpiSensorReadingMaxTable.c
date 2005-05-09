@@ -253,7 +253,9 @@ static int saHpiSensorReadingMaxTable_row_copy(saHpiSensorReadingMaxTable_contex
 
 	dst->saHpiSensorReadingMaxType = src->saHpiSensorReadingMaxType;
 
-	memcpy( dst->saHpiSensorReadingMaxValue, src->saHpiSensorReadingMaxValue, src->saHpiSensorReadingMaxValue_len );
+	memcpy( dst->saHpiSensorReadingMaxValue, 
+		src->saHpiSensorReadingMaxValue, 
+		src->saHpiSensorReadingMaxValue_len );
 	dst->saHpiSensorReadingMaxValue_len = src->saHpiSensorReadingMaxValue_len;
 
 	return 0;
