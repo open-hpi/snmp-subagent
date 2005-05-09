@@ -114,17 +114,17 @@ SaErrorT populate_sensor_min(SaHpiSessionIdT sessionid,
 
 	/** TruthValue = ASN_INTEGER */
 	sensor_min_context->saHpiSensorReadingMinIsSupported =
-	(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max.IsSupported
+	(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Min.IsSupported
 	 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
 	/** SaHpiSensorReadingType = ASN_INTEGER */
 	sensor_min_context->saHpiSensorReadingMinType = 
-	rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max.Type + 1;
+	rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Min.Type + 1;
 
 	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 	sensor_min_context->saHpiSensorReadingMinValue_len =
 	set_sensor_reading_value(
-				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max,
+				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Min,
 				sensor_min_context->saHpiSensorReadingMinValue);
 
 	CONTAINER_INSERT (cb.container, sensor_min_context);
