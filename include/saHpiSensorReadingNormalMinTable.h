@@ -40,7 +40,7 @@ typedef struct saHpiSensorReadingNormalMinTable_context_s {
             long saHpiSensorReadingNormalMinType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingNormalMinValue[65535];
+            unsigned char saHpiSensorReadingNormalMinValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorReadingNormalMinValue_len;
 
 
@@ -56,6 +56,14 @@ typedef struct saHpiSensorReadingNormalMinTable_context_s {
      */
 
 } saHpiSensorReadingNormalMinTable_context;
+
+/*
+ * SaErrorT populate_sensor_max()
+ */
+SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid, 
+				    SaHpiRdrT *rdr_entry,
+				    SaHpiRptEntryT *rpt_entry);
+
 
 /*************************************************************
  * function declarations
@@ -75,6 +83,9 @@ extern oid saHpiSensorReadingNormalMinTable_oid[];
 extern size_t saHpiSensorReadingNormalMinTable_oid_len;
 
 #define saHpiSensorReadingNormalMinTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,8
+
+/* Number of table Indexes */
+#define SENSOR_READING_NORMAL_MIN_INDEX_NR 4 
     
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNormalMinTable
@@ -84,21 +95,6 @@ extern size_t saHpiSensorReadingNormalMinTable_oid_len;
 #define COLUMN_SAHPISENSORREADINGNORMALMINVALUE 3
 #define saHpiSensorReadingNormalMinTable_COL_MIN 1
 #define saHpiSensorReadingNormalMinTable_COL_MAX 3
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorReadingNormalMinTable */
-#define saHpiSensorReadingNormalMinTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorReadingNormalMinTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorReadingNormalMinTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorReadingNormalMinTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorReadingNormalMinTable_SET_HANDLING
 
 int saHpiSensorReadingNormalMinTable_extract_index( saHpiSensorReadingNormalMinTable_context * ctx, netsnmp_index * hdr );
 
@@ -123,14 +119,9 @@ int saHpiSensorReadingNormalMinTable_can_delete(saHpiSensorReadingNormalMinTable
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorReadingNormalMinTable_ROW_CREATION
 saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorReadingNormalMinTable_IDX2
 saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
