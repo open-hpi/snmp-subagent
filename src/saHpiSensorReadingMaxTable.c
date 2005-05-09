@@ -75,12 +75,12 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		"ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+		"ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
