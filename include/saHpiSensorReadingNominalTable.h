@@ -14,55 +14,55 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiSensorNum is external */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiSensorNum is external */
 
 typedef struct saHpiSensorReadingNominalTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+	netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
-        /** TruthValue = ASN_INTEGER */
-            long saHpiSensorReadingNominalIsSupported;
+	/*************************************************************
+	 * You can store data internally in this structure.
+	 *
+	 * TODO: You will probably have to fix a few types here...
+	 */
+	/** TODO: add storage for external index(s)! */
+	/** TruthValue = ASN_INTEGER */
+	long saHpiSensorReadingNominalIsSupported;
 
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-            long saHpiSensorReadingNominalType;
+	/** SaHpiSensorReadingType = ASN_INTEGER */
+	long saHpiSensorReadingNominalType;
 
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingNominalValue[SAHPI_SENSOR_BUFFER_LENGTH];
-            long saHpiSensorReadingNominalValue_len;
+	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	unsigned char saHpiSensorReadingNominalValue[SAHPI_SENSOR_BUFFER_LENGTH];
+	long saHpiSensorReadingNominalValue_len;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+	/*
+	 * OR
+	 *
+	 * Keep a pointer to your data
+	 */
+	void * data;
 
-    /*
-     *add anything else you want here
-     */
+	/*
+	 *add anything else you want here
+	 */
 
 } saHpiSensorReadingNominalTable_context;
 
 /*
  * SaErrorT populate_sensor_nominal()
  */
-SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid, 
-			     SaHpiRdrT *rdr_entry,
-			     SaHpiRptEntryT *rpt_entry);
+	SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid, 
+					 SaHpiRdrT *rdr_entry,
+					 SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * function declarations
@@ -71,7 +71,7 @@ void init_saHpiSensorReadingNominalTable(void);
 void initialize_table_saHpiSensorReadingNominalTable(void);
 const saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_get_by_idx(netsnmp_index *);
 const saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+											    int row_status);
 int saHpiSensorReadingNominalTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -85,7 +85,7 @@ extern size_t saHpiSensorReadingNominalTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_READING_NOMINAL_INDEX_NR 4 
-    
+
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNominalTable
  */
@@ -109,16 +109,16 @@ saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_duplicat
 netsnmp_index * saHpiSensorReadingNominalTable_delete_row( saHpiSensorReadingNominalTable_context* );
 
 int saHpiSensorReadingNominalTable_can_activate(saHpiSensorReadingNominalTable_context *undo_ctx,
-                      saHpiSensorReadingNominalTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+						saHpiSensorReadingNominalTable_context *row_ctx,
+						netsnmp_request_group * rg);
 int saHpiSensorReadingNominalTable_can_deactivate(saHpiSensorReadingNominalTable_context *undo_ctx,
-                        saHpiSensorReadingNominalTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+						  saHpiSensorReadingNominalTable_context *row_ctx,
+						  netsnmp_request_group * rg);
 int saHpiSensorReadingNominalTable_can_delete(saHpiSensorReadingNominalTable_context *undo_ctx,
-                    saHpiSensorReadingNominalTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+					      saHpiSensorReadingNominalTable_context *row_ctx,
+					      netsnmp_request_group * rg);
+
+
 saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_create_row( netsnmp_index* );
 
 saHpiSensorReadingNominalTable_context * saHpiSensorReadingNominalTable_get( const char *name, int len );
