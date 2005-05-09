@@ -269,7 +269,7 @@ int set_table_sensor_enable (saHpiCurrentSensorStateTable_context *row_ctx)
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
-	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX]; 
+	sensor_num = row_ctx->index.oids[saHpiSensorNumCurrent_INDEX]; 
 	sensor_enabled = 
 	(row_ctx->saHpiCurrentSensorStateSensorEnable == MIB_TRUE ) ? 
 	SAHPI_TRUE : SAHPI_FALSE;
@@ -309,7 +309,7 @@ int set_table_sensor_event_enable (saHpiCurrentSensorStateTable_context *row_ctx
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
-	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX]; 
+	sensor_num = row_ctx->index.oids[saHpiSensorNumCurrent_INDEX]; 
 	sensor_event_enabled = 
 	(row_ctx->saHpiCurrentSensorStateEventEnable == MIB_TRUE ) ? 
 	SAHPI_TRUE : SAHPI_FALSE;
@@ -352,7 +352,7 @@ int set_table_sensor_masks (saHpiCurrentSensorStateTable_context *row_ctx,
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
-	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX]; 
+	sensor_num = row_ctx->index.oids[saHpiSensorNumCurrent_INDEX]; 
 
 	switch (column) {
 	case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
