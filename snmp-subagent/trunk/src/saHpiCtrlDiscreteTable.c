@@ -373,8 +373,6 @@ saHpiCtrlDiscreteTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
-
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDiscreteTable_cmp, called\n"));
 
 	/* check for NULL pointers */
@@ -781,8 +779,8 @@ void saHpiCtrlDiscreteTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlDiscreteTable_context *row_ctx =
 	(saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx =
-	(saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *undo_ctx =
+//	(saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -833,7 +831,7 @@ void saHpiCtrlDiscreteTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlDiscreteTable_set_reserve2( netsnmp_request_group *rg )
 {
 	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc = SNMP_ERR_NOERROR;
@@ -907,7 +905,7 @@ void saHpiCtrlDiscreteTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -973,8 +971,8 @@ void saHpiCtrlDiscreteTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlDiscreteTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
+//	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*
@@ -1016,8 +1014,8 @@ void saHpiCtrlDiscreteTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlDiscreteTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
+//	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*
@@ -1071,8 +1069,8 @@ void saHpiCtrlDiscreteTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlDiscreteTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
-	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
+//	saHpiCtrlDiscreteTable_context *row_ctx = (saHpiCtrlDiscreteTable_context *)rg->existing_row;
+//	saHpiCtrlDiscreteTable_context *undo_ctx = (saHpiCtrlDiscreteTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*
