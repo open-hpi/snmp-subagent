@@ -87,10 +87,6 @@ extern size_t saHpiSensorReadingMaxTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_READING_MAX_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorEntryId_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorReadingMaxTable

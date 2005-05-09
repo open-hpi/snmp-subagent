@@ -44,6 +44,12 @@
 #include <saHpiCtrlDigitalTable.h>
 #include <saHpiCtrlDiscreteTable.h>
 #include <saHpiCtrlAnalogTable.h>
+#include <saHpiCtrlStreamTable.h>
+#include <saHpiCtrlTextTable.h>
+#include <saHpiCtrlOemTable.h>
+#include <saHpiSensorTable.h>
+#include <saHpiCurrentSensorStateTable.h>
+
 #include <session_info.h>
 
 #include <oh_utils.h>
