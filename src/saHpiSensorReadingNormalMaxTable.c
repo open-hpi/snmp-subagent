@@ -215,6 +215,8 @@ saHpiSensorReadingNormalMaxTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiSensorReadingNormalMaxTable(void)
 {
+
+	DEBUGMSGTL ((AGENT, "init_saHpiSensorReadingNormalMaxTable, called\n"));
     initialize_table_saHpiSensorReadingNormalMaxTable();
 
 }
@@ -227,6 +229,8 @@ static int saHpiSensorReadingNormalMaxTable_row_copy(saHpiSensorReadingNormalMax
 {
     if(!dst||!src)
         return 1;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_row_copy, called\n"));
         
     /*
      * copy index, if provided
@@ -278,6 +282,8 @@ saHpiSensorReadingNormalMaxTable_extract_index( saHpiSensorReadingNormalMaxTable
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiSensorNum;
     int err;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_extract_index, called\n"));
 
     /*
      * copy index, if provided
@@ -366,6 +372,9 @@ int saHpiSensorReadingNormalMaxTable_can_activate(saHpiSensorReadingNormalMaxTab
                       saHpiSensorReadingNormalMaxTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -391,6 +400,8 @@ int saHpiSensorReadingNormalMaxTable_can_deactivate(saHpiSensorReadingNormalMaxT
                         saHpiSensorReadingNormalMaxTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -408,6 +419,8 @@ int saHpiSensorReadingNormalMaxTable_can_delete(saHpiSensorReadingNormalMaxTable
                     saHpiSensorReadingNormalMaxTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -440,6 +453,9 @@ saHpiSensorReadingNormalMaxTable_create_row( netsnmp_index* hdr)
 {
     saHpiSensorReadingNormalMaxTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorReadingNormalMaxTable_context);
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_create_row, called\n"));
+
     if(!ctx)
         return NULL;
         
@@ -475,6 +491,8 @@ saHpiSensorReadingNormalMaxTable_duplicate_row( saHpiSensorReadingNormalMaxTable
 {
     saHpiSensorReadingNormalMaxTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -496,6 +514,8 @@ saHpiSensorReadingNormalMaxTable_duplicate_row( saHpiSensorReadingNormalMaxTable
 netsnmp_index * saHpiSensorReadingNormalMaxTable_delete_row( saHpiSensorReadingNormalMaxTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -538,6 +558,7 @@ void saHpiSensorReadingNormalMaxTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -578,6 +599,8 @@ void saHpiSensorReadingNormalMaxTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -625,6 +648,8 @@ void saHpiSensorReadingNormalMaxTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_action, called\n"));
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -678,6 +703,8 @@ void saHpiSensorReadingNormalMaxTable_set_commit( netsnmp_request_group *rg )
 //    saHpiSensorReadingNormalMaxTable_context *undo_ctx = (saHpiSensorReadingNormalMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -712,6 +739,8 @@ void saHpiSensorReadingNormalMaxTable_set_free( netsnmp_request_group *rg )
 //    saHpiSensorReadingNormalMaxTable_context *row_ctx = (saHpiSensorReadingNormalMaxTable_context *)rg->existing_row;
 //    saHpiSensorReadingNormalMaxTable_context *undo_ctx = (saHpiSensorReadingNormalMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -760,6 +789,8 @@ void saHpiSensorReadingNormalMaxTable_set_undo( netsnmp_request_group *rg )
 //    saHpiSensorReadingNormalMaxTable_context *undo_ctx = (saHpiSensorReadingNormalMaxTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -788,6 +819,8 @@ void
 initialize_table_saHpiSensorReadingNormalMaxTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorReadingNormalMaxTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiSensorReadingNormalMaxTable_handler called again\n");
@@ -893,6 +926,8 @@ int saHpiSensorReadingNormalMaxTable_get_value(
     netsnmp_variable_list *var = request->requestvb;
     saHpiSensorReadingNormalMaxTable_context *context = (saHpiSensorReadingNormalMaxTable_context *)item;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_get_value, called\n"));
+
     switch(table_info->colnum) {
 
         case COLUMN_SAHPISENSORREADINGNORMALMAXISSUPPORTED:
@@ -930,6 +965,9 @@ int saHpiSensorReadingNormalMaxTable_get_value(
 const saHpiSensorReadingNormalMaxTable_context *
 saHpiSensorReadingNormalMaxTable_get_by_idx(netsnmp_index * hdr)
 {
+
+	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMaxTable_get_by_idx, called\n"));
+
     return (const saHpiSensorReadingNormalMaxTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
