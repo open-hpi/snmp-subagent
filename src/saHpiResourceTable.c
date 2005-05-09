@@ -41,6 +41,7 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <session_info.h>
+#include <saHpiRdrTable.h>
 
 #include <oh_utils.h>
 

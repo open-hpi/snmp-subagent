@@ -41,16 +41,30 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 
+#include <oh_utils.h>
+
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
+
+oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
+size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /*************************************************************
  * oid declarations scalars
  */
 static u_long domain_info_entry_count = 0;
+static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
+int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests);
+int initialize_table_saHpiDomainInfoEntryCount(void);
 
-oid saHpiDomainInfoTable_oid[] = { saHpiDomainInfoTable_TABLE_OID };
-size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
 
 /*
  *  int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
@@ -237,6 +251,10 @@ int initialize_table_saHpiDomainInfoEntryCount(void)
             HANDLER_CAN_RONLY) ); 
 	return 0;
 }
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /************************************************************
  * keep binary tree to find context by name
@@ -269,6 +287,8 @@ saHpiDomainInfoTable_cmp( const void *lhs, const void *rhs )
 		
 	if ( context_l->index.oids[0] > context_r->index.oids[0])
 		return 1;			     
+
+	return 0;
 		
 }
 

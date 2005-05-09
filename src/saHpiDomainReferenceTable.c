@@ -44,13 +44,33 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-/*************************************************************
- * oid declarations scalars
- */
-static u_long domain_reference_entry_count = 0;
 
 oid saHpiDomainReferenceTable_oid[] = { saHpiDomainReferenceTable_TABLE_OID };
 size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_oid);
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long domain_reference_entry_count = 0;
+
+/**
+ * int handle_saHpiDomainReferenceEntryCount()  
+ */
+int
+handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests);
+
+/**
+ * int initialize_table_saHpiDomainReferenceEntryCount(void)
+ */
+int initialize_table_saHpiDomainReferenceEntryCount(void);
 
 /*
  * void poplulate_saHpiDomainReferenceTable()  
@@ -168,15 +188,19 @@ initialize_table_saHpiDomainReferenceEntryCount(void)
 	DEBUGMSGTL ((AGENT, 
 		"initialize_table_saHpiDomainReferenceEntryCount, called\n"));
 			
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration(
-        	"saHpiDomainReferenceEntryCount", 
-        	handle_saHpiDomainReferenceEntryCount,
-            saHpiDomainReferenceEntryCount_oid, 
-            OID_LENGTH(saHpiDomainReferenceEntryCount_oid),
-           HANDLER_CAN_RONLY )); 
+	netsnmp_register_scalar(
+		netsnmp_create_handler_registration(
+			"saHpiDomainReferenceEntryCount", 
+			handle_saHpiDomainReferenceEntryCount,
+			saHpiDomainReferenceEntryCount_oid, 
+			OID_LENGTH(saHpiDomainReferenceEntryCount_oid),
+			HANDLER_CAN_RONLY )); 
 	return 0;
 }
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /************************************************************
  * keep binary tree to find context by name
