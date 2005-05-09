@@ -36,7 +36,14 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorReadingNominalTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+
+#include <oh_utils.h>
+					 
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -49,8 +56,81 @@ size_t saHpiSensorReadingNominalTable_oid_len = OID_LENGTH(saHpiSensorReadingNom
 /************************************************************/
 /************************************************************/
 
+/*
+ * SaErrorT populate_sensor_nominal()
+ */
+SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid, 
+			     SaHpiRdrT *rdr_entry,
+			     SaHpiRptEntryT *rpt_entry)
+{
 
+	DEBUGMSGTL ((AGENT, "populate_sensor_nominal, called\n"));
 
+	SaErrorT rv = SA_OK;
+
+	oid sensor_nominal_oid[SENSOR_READING_NOMINAL_INDEX_NR];
+	netsnmp_index sensor_nominal_index;
+	saHpiSensorReadingNominalTable_context *sensor_nominal_context;
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_sensor_nominal() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_sensor_nominal() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	sensor_nominal_index.len = SENSOR_READING_NOMINAL_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	sensor_nominal_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	sensor_nominal_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	sensor_nominal_oid[2] = MIB_FALSE;
+	/** Index saHpiSensorNum */
+	sensor_nominal_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	/* assign the indices to the index */
+	sensor_nominal_index.oids = (oid *) & sensor_nominal_oid;
+
+	/* See if Row exists. */
+	sensor_nominal_context = NULL;
+	sensor_nominal_context = CONTAINER_FIND(cb.container, &sensor_nominal_index);
+
+	if (!sensor_nominal_context) {
+		// New entry. Add it
+		sensor_nominal_context = 
+		saHpiSensorReadingNominalTable_create_row(&sensor_nominal_index);
+	}
+	if (!sensor_nominal_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Nominal row!");
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** TruthValue = ASN_INTEGER */
+	sensor_nominal_context->saHpiSensorReadingNominalIsSupported =
+	(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Nominal.IsSupported
+	 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+	/** SaHpiSensorReadingType = ASN_INTEGER */
+	sensor_nominal_context->saHpiSensorReadingNominalType = 
+	rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Nominal.Type + 1;
+
+	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	sensor_nominal_context->saHpiSensorReadingNominalValue_len =
+	set_sensor_reading_value(
+				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Nominal,
+				sensor_nominal_context->saHpiSensorReadingNominalValue);
+
+	CONTAINER_INSERT (cb.container, sensor_nominal_context);
+
+	return rv;
+}
 
 /************************************************************/
 /************************************************************/
@@ -78,33 +158,54 @@ saHpiSensorReadingNominalTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+    DEBUGMSGTL ((AGENT, "saHpiSensorReadingNominalTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiSensorReadingNominalTable_compare not implemented! Container order undefined\n" );
+    /* check for NULL pointers */
+    if (lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,"saHpiSensorReadingNominalTable_cmp() NULL pointer ERROR\n" ));
+	    return 0;
+    }
+    /* CHECK FIRST INDEX,  saHpiDomainId */
+    if ( context_l->index.oids[0] < context_r->index.oids[0])
+	    return -1;
+
+    if ( context_l->index.oids[0] > context_r->index.oids[0])
+	    return 1;
+
+    if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+	    /* If saHpiDomainId index is equal sort by second index */
+	    /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+	    if ( context_l->index.oids[1] < context_r->index.oids[1])
+		    return -1;
+
+	    if ( context_l->index.oids[1] > context_r->index.oids[1])
+		    return 1;
+
+	    if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+		    /* If saHpiResourceEntryId index is equal sort by third index */
+		    /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+		    if ( context_l->index.oids[2] < context_r->index.oids[2])
+			    return -1;
+
+		    if ( context_l->index.oids[2] > context_r->index.oids[2])
+			    return 1;
+
+		    if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+			    /* If saHpiResourceIsHistorical index is equal sort by forth index */
+			    /* CHECK FORTH INDEX,  saHpiSensorNum */
+			    if ( context_l->index.oids[3] < context_r->index.oids[3])
+				    return -1;
+
+			    if ( context_l->index.oids[3] > context_r->index.oids[3])
+				    return 1;
+
+			    if ( context_l->index.oids[3] == context_r->index.oids[3])
+				    return 0;
+		    }
+	    }
+    }
+
     return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
 }
 
 /************************************************************
@@ -206,22 +307,22 @@ saHpiSensorReadingNominalTable_extract_index( saHpiSensorReadingNominalTable_con
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_XX;
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_XX;
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiSensorNum;
 
        memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
        var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiSensorNum.next_variable = &var_XX;
+       var_saHpiSensorNum.next_variable = NULL;
 
 
     /*
@@ -240,35 +341,15 @@ saHpiSensorReadingNominalTable_extract_index( saHpiSensorReadingNominalTable_con
    
               /** skipping external index saHpiSensorNum */
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiSensorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		err = saHpiDomainId_check_index(
+				*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+				*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+				*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiSensorNum_check_index(
+				*var_saHpiSensorNum.val.integer);
+
     }
 
     /*
@@ -456,10 +537,10 @@ netsnmp_index * saHpiSensorReadingNominalTable_delete_row( saHpiSensorReadingNom
  */
 void saHpiSensorReadingNominalTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiSensorReadingNominalTable_context *row_ctx =
-            (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx =
-            (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx =
+//            (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx =
+//            (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -497,8 +578,8 @@ void saHpiSensorReadingNominalTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorReadingNominalTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -544,8 +625,8 @@ void saHpiSensorReadingNominalTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiSensorReadingNominalTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -598,8 +679,8 @@ void saHpiSensorReadingNominalTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorReadingNominalTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -633,8 +714,8 @@ void saHpiSensorReadingNominalTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorReadingNominalTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -680,8 +761,8 @@ void saHpiSensorReadingNominalTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorReadingNominalTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
-    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
+//    saHpiSensorReadingNominalTable_context *row_ctx = (saHpiSensorReadingNominalTable_context *)rg->existing_row;
+//    saHpiSensorReadingNominalTable_context *undo_ctx = (saHpiSensorReadingNominalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
