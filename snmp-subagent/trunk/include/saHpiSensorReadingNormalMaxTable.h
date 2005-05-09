@@ -40,7 +40,7 @@ typedef struct saHpiSensorReadingNormalMaxTable_context_s {
             long saHpiSensorReadingNormalMaxType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingNormalMaxValue[65535];
+            unsigned char saHpiSensorReadingNormalMaxValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorReadingNormalMaxValue_len;
 
 
@@ -56,6 +56,13 @@ typedef struct saHpiSensorReadingNormalMaxTable_context_s {
      */
 
 } saHpiSensorReadingNormalMaxTable_context;
+
+/*
+ * SaErrorT populate_sensor_max()
+ */
+SaErrorT populate_sensor_normal_max(SaHpiSessionIdT sessionid, 
+				     SaHpiRdrT *rdr_entry,
+				     SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * function declarations
@@ -75,6 +82,9 @@ extern oid saHpiSensorReadingNormalMaxTable_oid[];
 extern size_t saHpiSensorReadingNormalMaxTable_oid_len;
 
 #define saHpiSensorReadingNormalMaxTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,7
+
+/* Number of table Indexes */
+#define SENSOR_READING_NORMAL_MAX_INDEX_NR 4 
     
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNormalMaxTable
@@ -84,21 +94,6 @@ extern size_t saHpiSensorReadingNormalMaxTable_oid_len;
 #define COLUMN_SAHPISENSORREADINGNORMALMAXVALUE 3
 #define saHpiSensorReadingNormalMaxTable_COL_MIN 1
 #define saHpiSensorReadingNormalMaxTable_COL_MAX 3
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorReadingNormalMaxTable */
-#define saHpiSensorReadingNormalMaxTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorReadingNormalMaxTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorReadingNormalMaxTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorReadingNormalMaxTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorReadingNormalMaxTable_SET_HANDLING
 
 int saHpiSensorReadingNormalMaxTable_extract_index( saHpiSensorReadingNormalMaxTable_context * ctx, netsnmp_index * hdr );
 
@@ -123,14 +118,9 @@ int saHpiSensorReadingNormalMaxTable_can_delete(saHpiSensorReadingNormalMaxTable
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorReadingNormalMaxTable_ROW_CREATION
 saHpiSensorReadingNormalMaxTable_context * saHpiSensorReadingNormalMaxTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorReadingNormalMaxTable_IDX2
 saHpiSensorReadingNormalMaxTable_context * saHpiSensorReadingNormalMaxTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
