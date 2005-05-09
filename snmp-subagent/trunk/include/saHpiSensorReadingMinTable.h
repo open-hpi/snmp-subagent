@@ -57,6 +57,13 @@ typedef struct saHpiSensorReadingMinTable_context_s {
 
 } saHpiSensorReadingMinTable_context;
 
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_sensor_min(SaHpiSessionIdT sessionid, 
+				     SaHpiRdrT *rdr_entry,
+				     SaHpiRptEntryT *rpt_entry);
+
 /*************************************************************
  * function declarations
  */
@@ -74,6 +81,9 @@ int saHpiSensorReadingMinTable_get_value(netsnmp_request_info *, netsnmp_index *
 extern oid saHpiSensorReadingMinTable_oid[];
 extern size_t saHpiSensorReadingMinTable_oid_len;
 
+/* Number of table Indexes */
+#define SENSOR_READING_MIN_INDEX_NR 4 
+
 #define saHpiSensorReadingMinTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,5
     
 /*************************************************************
@@ -84,21 +94,6 @@ extern size_t saHpiSensorReadingMinTable_oid_len;
 #define COLUMN_SAHPISENSORREADINGMINVALUE 3
 #define saHpiSensorReadingMinTable_COL_MIN 1
 #define saHpiSensorReadingMinTable_COL_MAX 3
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorReadingMinTable */
-#define saHpiSensorReadingMinTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorReadingMinTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorReadingMinTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorReadingMinTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorReadingMinTable_SET_HANDLING
 
 int saHpiSensorReadingMinTable_extract_index( saHpiSensorReadingMinTable_context * ctx, netsnmp_index * hdr );
 
@@ -123,14 +118,9 @@ int saHpiSensorReadingMinTable_can_delete(saHpiSensorReadingMinTable_context *un
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorReadingMinTable_ROW_CREATION
 saHpiSensorReadingMinTable_context * saHpiSensorReadingMinTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorReadingMinTable_IDX2
 saHpiSensorReadingMinTable_context * saHpiSensorReadingMinTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
