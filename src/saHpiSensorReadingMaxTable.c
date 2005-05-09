@@ -57,7 +57,7 @@ size_t saHpiSensorReadingMaxTable_oid_len = OID_LENGTH(saHpiSensorReadingMaxTabl
 /************************************************************/
 
 /*
- * SaErrorT populate_ctrl_text()
+ * SaErrorT populate_sensor_max()
  */
 SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid, 
 			     SaHpiRdrT *rdr_entry,
