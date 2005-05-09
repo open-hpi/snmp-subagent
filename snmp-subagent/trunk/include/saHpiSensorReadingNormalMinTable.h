@@ -14,46 +14,46 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiSensorNum is external */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiSensorNum is external */
 
 typedef struct saHpiSensorReadingNormalMinTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+	netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
-        /** TruthValue = ASN_INTEGER */
-            long saHpiSensorReadingNormalMinIsSupported;
+	/*************************************************************
+	 * You can store data internally in this structure.
+	 *
+	 * TODO: You will probably have to fix a few types here...
+	 */
+	/** TODO: add storage for external index(s)! */
+	/** TruthValue = ASN_INTEGER */
+	long saHpiSensorReadingNormalMinIsSupported;
 
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-            long saHpiSensorReadingNormalMinType;
+	/** SaHpiSensorReadingType = ASN_INTEGER */
+	long saHpiSensorReadingNormalMinType;
 
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingNormalMinValue[SAHPI_SENSOR_BUFFER_LENGTH];
-            long saHpiSensorReadingNormalMinValue_len;
+	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	unsigned char saHpiSensorReadingNormalMinValue[SAHPI_SENSOR_BUFFER_LENGTH];
+	long saHpiSensorReadingNormalMinValue_len;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+	/*
+	 * OR
+	 *
+	 * Keep a pointer to your data
+	 */
+	void * data;
 
-    /*
-     *add anything else you want here
-     */
+	/*
+	 *add anything else you want here
+	 */
 
 } saHpiSensorReadingNormalMinTable_context;
 
@@ -61,8 +61,8 @@ typedef struct saHpiSensorReadingNormalMinTable_context_s {
  * SaErrorT populate_sensor_max()
  */
 SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid, 
-				    SaHpiRdrT *rdr_entry,
-				    SaHpiRptEntryT *rpt_entry);
+					    SaHpiRdrT *rdr_entry,
+					    SaHpiRptEntryT *rpt_entry);
 
 
 /*************************************************************
@@ -72,7 +72,7 @@ void init_saHpiSensorReadingNormalMinTable(void);
 void initialize_table_saHpiSensorReadingNormalMinTable(void);
 const saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_get_by_idx(netsnmp_index *);
 const saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+												int row_status);
 int saHpiSensorReadingNormalMinTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -86,7 +86,7 @@ extern size_t saHpiSensorReadingNormalMinTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_READING_NORMAL_MIN_INDEX_NR 4 
-    
+
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNormalMinTable
  */
@@ -109,16 +109,16 @@ saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_dupl
 netsnmp_index * saHpiSensorReadingNormalMinTable_delete_row( saHpiSensorReadingNormalMinTable_context* );
 
 int saHpiSensorReadingNormalMinTable_can_activate(saHpiSensorReadingNormalMinTable_context *undo_ctx,
-                      saHpiSensorReadingNormalMinTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+						  saHpiSensorReadingNormalMinTable_context *row_ctx,
+						  netsnmp_request_group * rg);
 int saHpiSensorReadingNormalMinTable_can_deactivate(saHpiSensorReadingNormalMinTable_context *undo_ctx,
-                        saHpiSensorReadingNormalMinTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+						    saHpiSensorReadingNormalMinTable_context *row_ctx,
+						    netsnmp_request_group * rg);
 int saHpiSensorReadingNormalMinTable_can_delete(saHpiSensorReadingNormalMinTable_context *undo_ctx,
-                    saHpiSensorReadingNormalMinTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+						saHpiSensorReadingNormalMinTable_context *row_ctx,
+						netsnmp_request_group * rg);
+
+
 saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_create_row( netsnmp_index* );
 
 saHpiSensorReadingNormalMinTable_context * saHpiSensorReadingNormalMinTable_get( const char *name, int len );
