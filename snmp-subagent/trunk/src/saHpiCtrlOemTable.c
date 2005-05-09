@@ -369,8 +369,6 @@ saHpiCtrlOemTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
-	
 	DEBUGMSGTL ((AGENT, "saHpiCtrlOemTable_cmp, called\n"));
 	
 	/* check for NULL pointers */
@@ -776,8 +774,8 @@ void saHpiCtrlOemTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiCtrlOemTable_context *row_ctx =
             (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx =
-            (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *undo_ctx =
+//            (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -838,7 +836,7 @@ void saHpiCtrlOemTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlOemTable_set_reserve2( netsnmp_request_group *rg )
 {
     saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -913,7 +911,7 @@ void saHpiCtrlOemTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -979,8 +977,8 @@ void saHpiCtrlOemTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlOemTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
+//    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1022,8 +1020,8 @@ void saHpiCtrlOemTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlOemTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
+//    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1075,8 +1073,8 @@ void saHpiCtrlOemTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlOemTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
-    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
+//    saHpiCtrlOemTable_context *row_ctx = (saHpiCtrlOemTable_context *)rg->existing_row;
+//    saHpiCtrlOemTable_context *undo_ctx = (saHpiCtrlOemTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

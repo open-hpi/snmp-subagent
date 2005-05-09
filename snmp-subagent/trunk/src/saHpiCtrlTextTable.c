@@ -383,8 +383,6 @@ saHpiCtrlTextTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
-
 	DEBUGMSGTL ((AGENT, "saHpiCtrlTextTable_cmp, called\n"));
 
 	/* check for NULL pointers */
@@ -795,8 +793,8 @@ void saHpiCtrlTextTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlTextTable_context *row_ctx =
 	(saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx =
-	(saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *undo_ctx =
+//	(saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -862,7 +860,7 @@ void saHpiCtrlTextTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlTextTable_set_reserve2( netsnmp_request_group *rg )
 {
 	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
@@ -943,7 +941,7 @@ void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -1015,8 +1013,8 @@ void saHpiCtrlTextTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlTextTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+//	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*
@@ -1062,8 +1060,8 @@ void saHpiCtrlTextTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlTextTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+//	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*
@@ -1119,8 +1117,8 @@ void saHpiCtrlTextTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlTextTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
-	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
+//	saHpiCtrlTextTable_context *row_ctx = (saHpiCtrlTextTable_context *)rg->existing_row;
+//	saHpiCtrlTextTable_context *undo_ctx = (saHpiCtrlTextTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	/*

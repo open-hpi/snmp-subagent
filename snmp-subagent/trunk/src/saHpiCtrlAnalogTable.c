@@ -385,8 +385,6 @@ saHpiCtrlAnalogTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
-
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_cmp, called\n"));
 
        /* check for NULL pointers */
@@ -807,8 +805,8 @@ void saHpiCtrlAnalogTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlAnalogTable_context *row_ctx =
 	(saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx =
-	(saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *undo_ctx =
+//	(saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -860,7 +858,7 @@ void saHpiCtrlAnalogTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlAnalogTable_set_reserve2( netsnmp_request_group *rg )
 {
 	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc = SNMP_ERR_NOERROR;
@@ -931,7 +929,7 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int	row_err = 0;
@@ -998,8 +996,8 @@ void saHpiCtrlAnalogTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlAnalogTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+//	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_commit, called\n"));
@@ -1043,8 +1041,8 @@ void saHpiCtrlAnalogTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlAnalogTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+//	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_free, called\n"));
@@ -1098,8 +1096,8 @@ void saHpiCtrlAnalogTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlAnalogTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
-	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
+//	saHpiCtrlAnalogTable_context *row_ctx = (saHpiCtrlAnalogTable_context *)rg->existing_row;
+//	saHpiCtrlAnalogTable_context *undo_ctx = (saHpiCtrlAnalogTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_set_undo, called\n"));

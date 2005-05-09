@@ -359,8 +359,6 @@ saHpiCtrlStreamTable_cmp( const void *lhs, const void *rhs )
 	 * check primary key, then secondary. Add your own code if
 	 * there are more than 2 indexes
 	 */
-	int rc;
-
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_cmp, called\n"));
 
 	/* check for NULL pointers */
@@ -784,8 +782,8 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlStreamTable_context *row_ctx =
 	(saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx =
-	(saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *undo_ctx =
+//	(saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -853,7 +851,7 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 {
 	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
@@ -941,7 +939,7 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -1015,8 +1013,8 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlStreamTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
+//	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_commit, called\n"));
@@ -1064,8 +1062,8 @@ void saHpiCtrlStreamTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlStreamTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
+//	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_free, called\n"));
@@ -1123,8 +1121,8 @@ void saHpiCtrlStreamTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlStreamTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
-	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
+//	saHpiCtrlStreamTable_context *row_ctx = (saHpiCtrlStreamTable_context *)rg->existing_row;
+//	saHpiCtrlStreamTable_context *undo_ctx = (saHpiCtrlStreamTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_set_undo, called\n"));
