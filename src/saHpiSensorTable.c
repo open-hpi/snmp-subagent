@@ -244,6 +244,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	/* populate the range reading tables */
 	rv = populate_sensor_max(sessionid, rdr_entry, rpt_entry);
 	rv = populate_sensor_min(sessionid, rdr_entry, rpt_entry); 
+	rv = populate_sensor_nominal(sessionid, rdr_entry, rpt_entry); 
+	
 
 	CONTAINER_INSERT (cb.container, sensor_context);
 
