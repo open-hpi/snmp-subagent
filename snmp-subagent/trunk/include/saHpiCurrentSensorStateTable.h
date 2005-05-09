@@ -122,7 +122,7 @@ extern size_t saHpiCurrentSensorStateTable_oid_len;
 #define CURRENT_SENSOR_STATE_INDEX_NR 3
 #define saHpiDomainId_INDEX 0
 #define saHpiResourceEntryId_INDEX 1
-#define saHpiSensorNum_INDEX 2
+#define saHpiSensorNumCurrent_INDEX 2
     
 /*************************************************************
  * column number definitions for table saHpiCurrentSensorStateTable
