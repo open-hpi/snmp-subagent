@@ -334,8 +334,6 @@ saHpiSensorTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
-
 	DEBUGMSGTL ((AGENT, "saHpiSensorTable_cmp, called\n"));
 
 	/* check for NULL pointers */
@@ -754,10 +752,10 @@ netsnmp_index * saHpiSensorTable_delete_row( saHpiSensorTable_context * ctx )
  */
 void saHpiSensorTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiSensorTable_context *row_ctx =
-            (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx =
-            (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx =
+//            (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx =
+//            (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -796,8 +794,8 @@ void saHpiSensorTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -845,8 +843,8 @@ void saHpiSensorTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiSensorTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -901,8 +899,8 @@ void saHpiSensorTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_commit, called\n"));
@@ -938,8 +936,8 @@ void saHpiSensorTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_free, called\n"));
@@ -985,8 +983,8 @@ void saHpiSensorTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
-    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
+//    saHpiSensorTable_context *row_ctx = (saHpiSensorTable_context *)rg->existing_row;
+//    saHpiSensorTable_context *undo_ctx = (saHpiSensorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorTable_set_undo, called\n"));
