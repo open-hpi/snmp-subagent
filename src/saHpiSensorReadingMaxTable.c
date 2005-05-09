@@ -73,8 +73,6 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 	netsnmp_index sensor_max_index;
 	saHpiSensorReadingMaxTable_context *sensor_max_context;
 
-	SaHpiTextBufferT buffer;
-
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
