@@ -59,7 +59,7 @@ typedef struct saHpiSensorReadingMaxTable_context_s {
 
 
 /*
- * SaErrorT populate_ctrl_text()
+ * SaErrorT populate_sensor_max()
  */
 SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid, 
 				     SaHpiRdrT *rdr_entry,
