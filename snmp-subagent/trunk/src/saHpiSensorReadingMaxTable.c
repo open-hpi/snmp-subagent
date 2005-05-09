@@ -40,7 +40,6 @@
 #include "saHpiSensorReadingMaxTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
-#include <saHpiResourceTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -109,7 +108,7 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 		saHpiSensorReadingMaxTable_create_row(&sensor_max_index);
 	}
 	if (!sensor_max_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		snmp_log (LOG_ERR, "Not enough memory for a Max row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -163,7 +162,7 @@ saHpiSensorReadingMaxTable_cmp( const void *lhs, const void *rhs )
 
 	/* check for NULL pointers */
 	if (lhs == NULL || rhs == NULL ) {
-		DEBUGMSGTL((AGENT,"saHpiRdrTable_cmp() NULL pointer ERROR\n" ));
+		DEBUGMSGTL((AGENT,"saHpiSensorReadingMaxTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
 	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */
@@ -548,10 +547,10 @@ netsnmp_index * saHpiSensorReadingMaxTable_delete_row( saHpiSensorReadingMaxTabl
  */
 void saHpiSensorReadingMaxTable_set_reserve1( netsnmp_request_group *rg )
 {
-	saHpiSensorReadingMaxTable_context *row_ctx =
-	(saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx =
-	(saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx =
+//	(saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx =
+//	(saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -590,8 +589,8 @@ void saHpiSensorReadingMaxTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorReadingMaxTable_set_reserve2( netsnmp_request_group *rg )
 {
-	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
@@ -639,8 +638,8 @@ void saHpiSensorReadingMaxTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiSensorReadingMaxTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -695,8 +694,8 @@ void saHpiSensorReadingMaxTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorReadingMaxTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_commit, called\n"));
@@ -732,8 +731,8 @@ void saHpiSensorReadingMaxTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorReadingMaxTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_free, called\n"));
@@ -781,8 +780,8 @@ void saHpiSensorReadingMaxTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorReadingMaxTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
-	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
+//	saHpiSensorReadingMaxTable_context *row_ctx = (saHpiSensorReadingMaxTable_context *)rg->existing_row;
+//	saHpiSensorReadingMaxTable_context *undo_ctx = (saHpiSensorReadingMaxTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingMaxTable_set_undo, called\n"));
