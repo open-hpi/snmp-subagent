@@ -40,7 +40,7 @@ typedef struct saHpiSensorReadingNominalTable_context_s {
             long saHpiSensorReadingNominalType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorReadingNominalValue[65535];
+            unsigned char saHpiSensorReadingNominalValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorReadingNominalValue_len;
 
 
@@ -56,6 +56,13 @@ typedef struct saHpiSensorReadingNominalTable_context_s {
      */
 
 } saHpiSensorReadingNominalTable_context;
+
+/*
+ * SaErrorT populate_sensor_nominal()
+ */
+SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid, 
+			     SaHpiRdrT *rdr_entry,
+			     SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * function declarations
@@ -75,6 +82,9 @@ extern oid saHpiSensorReadingNominalTable_oid[];
 extern size_t saHpiSensorReadingNominalTable_oid_len;
 
 #define saHpiSensorReadingNominalTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,6
+
+/* Number of table Indexes */
+#define SENSOR_READING_NOMINAL_INDEX_NR 4 
     
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNominalTable
