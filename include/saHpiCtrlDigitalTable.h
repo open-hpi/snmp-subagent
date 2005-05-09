@@ -144,16 +144,6 @@ extern size_t saHpiCtrlDigitalTable_oid_len;
 #define saHpiCtrlDigitalTable_COL_MIN 2
 #define saHpiCtrlDigitalTable_COL_MAX 11
 
-/* comment out the following line if you don't handle SET-REQUEST for saHpiCtrlDigitalTable */
-#define saHpiCtrlDigitalTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiCtrlDigitalTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiCtrlDigitalTable_IDX2
-
-#ifdef saHpiCtrlDigitalTable_SET_HANDLING
 
 int saHpiCtrlDigitalTable_extract_index( saHpiCtrlDigitalTable_context * ctx, netsnmp_index * hdr );
 
@@ -167,19 +157,24 @@ void saHpiCtrlDigitalTable_set_undo( netsnmp_request_group * );
 saHpiCtrlDigitalTable_context * saHpiCtrlDigitalTable_duplicate_row( saHpiCtrlDigitalTable_context* );
 netsnmp_index * saHpiCtrlDigitalTable_delete_row( saHpiCtrlDigitalTable_context* );
 
+
+
+int saHpiCtrlDigitalTable_can_activate(saHpiCtrlDigitalTable_context *undo_ctx,
+				       saHpiCtrlDigitalTable_context *row_ctx,
+				       netsnmp_request_group * rg);
+
+int saHpiCtrlDigitalTable_can_deactivate(saHpiCtrlDigitalTable_context *undo_ctx,
+					 saHpiCtrlDigitalTable_context *row_ctx,
+					 netsnmp_request_group * rg);
+
 int saHpiCtrlDigitalTable_can_delete(saHpiCtrlDigitalTable_context *undo_ctx,
                     saHpiCtrlDigitalTable_context *row_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiCtrlDigitalTable_ROW_CREATION
 saHpiCtrlDigitalTable_context * saHpiCtrlDigitalTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiCtrlDigitalTable_IDX2
 saHpiCtrlDigitalTable_context * saHpiCtrlDigitalTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
