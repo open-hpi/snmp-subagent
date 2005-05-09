@@ -105,95 +105,95 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	}	
 
 	/** SaHpiDomainId = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainId;
+        domain_info_context->saHpiDomainId = domain_info.DomainId;
 
-    /** BITS = ASN_OCTET_STR */
-    memset(	domain_info_context->saHpiDomainCapabilities, 
+	/** BITS = ASN_OCTET_STR */
+	memset(	domain_info_context->saHpiDomainCapabilities, 
     		0, 
     		sizeof(domain_info_context->saHpiDomainCapabilities));
-    if(domain_info.DomainCapabilities == (SaHpiDomainCapabilitiesT)0X00000001) {
+	if(domain_info.DomainCapabilities == (SaHpiDomainCapabilitiesT)0X00000001) {
     	memcpy(	domain_info_context->saHpiDomainCapabilities,
     			"SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY",
     			sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY") );
      	domain_info_context->saHpiDomainCapabilities_len = 
     		sizeof("SAHPI_DOMAIN_CAP_AUTOINSERT_READ_ONLY");   		
-    } else {
-    	domain_info_context->saHpiDomainCapabilities_len = 0;
-    }
+	} else {
+		domain_info_context->saHpiDomainCapabilities_len = 0;
+	}
 
-    /** TruthValue = ASN_INTEGER */
-    domain_info_context->saHpiDomainIsPeer =
-    	(domain_info.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	/** TruthValue = ASN_INTEGER */
+	domain_info_context->saHpiDomainIsPeer =
+		(domain_info.IsPeer == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-    /** SaHpiTextType = ASN_INTEGER */
-    domain_info_context->saHpiDomainTagTextType =
-    	domain_info.DomainTag.DataType;
+	/** SaHpiTextType = ASN_INTEGER */
+	domain_info_context->saHpiDomainTagTextType =
+		domain_info.DomainTag.DataType;
 
    	/** SaHpiTextLanguage = ASN_INTEGER */
-    domain_info_context->saHpiDomainTagTextLanguage =
-    	domain_info.DomainTag.Language;
+	domain_info_context->saHpiDomainTagTextLanguage =
+		domain_info.DomainTag.Language;
 
-    /** SaHpiText = ASN_OCTET_STR */
+	/** SaHpiText = ASN_OCTET_STR */
 	memcpy(domain_info_context->saHpiDomainTag, 
 		domain_info.DomainTag.Data,
 		domain_info.DomainTag.DataLength);
-    domain_info_context->saHpiDomainTag_len =
-    	domain_info.DomainTag.DataLength;
+	domain_info_context->saHpiDomainTag_len =
+		domain_info.DomainTag.DataLength;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainReferenceUpdateCount =
-    	domain_info.DrtUpdateCount;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainReferenceUpdateCount =
+		domain_info.DrtUpdateCount;
 
-    /** SaHpiTime = ASN_COUNTER64 */
-    domain_info_context->saHpiDomainReferenceUpdateTimestamp =
-    	domain_info.DrtUpdateTimestamp;
+	/** SaHpiTime = ASN_COUNTER64 */
+	domain_info_context->saHpiDomainReferenceUpdateTimestamp =
+		domain_info.DrtUpdateTimestamp;
     	
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainResourcePresenceUpdateCount =
-    	domain_info.RptUpdateCount;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainResourcePresenceUpdateCount =
+		domain_info.RptUpdateCount;
     	
-    /** SaHpiTime = ASN_COUNTER64 */
-    domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp =
-    	domain_info.RptUpdateTimestamp;
+	/** SaHpiTime = ASN_COUNTER64 */
+	domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp =
+		domain_info.RptUpdateTimestamp;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainAlarmUpdateCount =
-    	domain_info.DatUpdateCount;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainAlarmUpdateCount =
+		domain_info.DatUpdateCount;
 
-    /** SaHpiTime = ASN_COUNTER64 */
-    domain_info_context->saHpiDomainAlarmUpdateTimestamp =
-    	domain_info.DatUpdateTimestamp;
+	/** SaHpiTime = ASN_COUNTER64 */
+	domain_info_context->saHpiDomainAlarmUpdateTimestamp =
+		domain_info.DatUpdateTimestamp;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainActiveAlarms =
-    	domain_info.ActiveAlarms;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainActiveAlarms =
+		domain_info.ActiveAlarms;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainCriticalAlarms =
-    	domain_info.CriticalAlarms;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainCriticalAlarms =
+		domain_info.CriticalAlarms;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainMajorAlarms = 
-    	domain_info.MajorAlarms;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainMajorAlarms = 
+		domain_info.MajorAlarms;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainMinorAlarms =
-    	domain_info.MinorAlarms;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainMinorAlarms =
+		domain_info.MinorAlarms;
 
-    /** UNSIGNED32 = ASN_UNSIGNED */
-    domain_info_context->saHpiDomainAlarmUserLimit =
-    	domain_info.DatUserAlarmLimit;
+	/** UNSIGNED32 = ASN_UNSIGNED */
+	domain_info_context->saHpiDomainAlarmUserLimit =
+		domain_info.DatUserAlarmLimit;
 
-    /** TruthValue = ASN_INTEGER */
-    domain_info_context->saHpiDomainAlarmOverflow =
-    	(domain_info.DatOverflow == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	/** TruthValue = ASN_INTEGER */
+	domain_info_context->saHpiDomainAlarmOverflow =
+		(domain_info.DatOverflow == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-    /** SaHpiGuid = ASN_OCTET_STR */
-    /* typedef SaHpiUint8T    SaHpiGuidT[16]; */
+	/** SaHpiGuid = ASN_OCTET_STR */
+	/* typedef SaHpiUint8T    SaHpiGuidT[16]; */
 	memcpy(domain_info_context->saHpiDomainGuid, 
 		domain_info.Guid,
 		16);
-    domain_info_context->saHpiDomainGuid_len = 16;
+	domain_info_context->saHpiDomainGuid_len = 16;
 	
 	CONTAINER_INSERT (cb.container, domain_info_context);
 	
@@ -630,8 +630,8 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiDomainInfoTable_context *row_ctx =
             (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx =
-            (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *undo_ctx =
+//            (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -703,8 +703,8 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiDomainInfoTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
+//    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -783,10 +783,10 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+//    int            row_err = 0;
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -845,8 +845,8 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
 void saHpiDomainInfoTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
+//    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -892,8 +892,8 @@ void saHpiDomainInfoTable_set_commit( netsnmp_request_group *rg )
 void saHpiDomainInfoTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
+//    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -950,8 +950,8 @@ void saHpiDomainInfoTable_set_free( netsnmp_request_group *rg )
 void saHpiDomainInfoTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
-    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
+//    saHpiDomainInfoTable_context *row_ctx = (saHpiDomainInfoTable_context *)rg->existing_row;
+//    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
