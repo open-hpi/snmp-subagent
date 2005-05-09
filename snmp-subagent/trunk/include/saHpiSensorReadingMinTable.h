@@ -40,7 +40,7 @@ typedef struct saHpiSensorReadingMinTable_context_s {
 	long saHpiSensorReadingMinType;
 
 	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
-	unsigned char saHpiSensorReadingMinValue[65535];
+	unsigned char saHpiSensorReadingMinValue[SAHPI_SENSOR_BUFFER_LENGTH];
 	long saHpiSensorReadingMinValue_len;
 
 
