@@ -57,6 +57,11 @@ int saHpiCtrlTextEntryId_check_index(long val);
 int saHpiCtrlOemEntryId_check_index(long val);
 
 /**************************/
+/* saHpiRdrTable  */    
+/**************************/
+int saHpiRdrType_check_index(long val);
+
+/**************************/
 /* saHpiSensorTable  */    
 /**************************/
 int saHpiSensorNum_check_index(long val);
