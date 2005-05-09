@@ -775,8 +775,8 @@ void saHpiCtrlDigitalTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiCtrlDigitalTable_context *row_ctx =
 	(saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx =
-	(saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *undo_ctx =
+//	(saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -828,7 +828,7 @@ void saHpiCtrlDigitalTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiCtrlDigitalTable_set_reserve2( netsnmp_request_group *rg )
 {
 	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc = SNMP_ERR_NOERROR;
@@ -904,7 +904,7 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -972,8 +972,8 @@ void saHpiCtrlDigitalTable_set_action( netsnmp_request_group *rg )
 void saHpiCtrlDigitalTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+//	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_commit, called\n"));
@@ -1017,8 +1017,8 @@ void saHpiCtrlDigitalTable_set_commit( netsnmp_request_group *rg )
 void saHpiCtrlDigitalTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+//	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 
@@ -1075,8 +1075,8 @@ void saHpiCtrlDigitalTable_set_free( netsnmp_request_group *rg )
 void saHpiCtrlDigitalTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
-	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
+//	saHpiCtrlDigitalTable_context *row_ctx = (saHpiCtrlDigitalTable_context *)rg->existing_row;
+//	saHpiCtrlDigitalTable_context *undo_ctx = (saHpiCtrlDigitalTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlDigitalTable_set_undo, called\n"));

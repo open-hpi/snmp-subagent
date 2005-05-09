@@ -82,7 +82,6 @@ int initialize_table_saHpiDomainReferenceEntryCount(void);
 	SaErrorT rv;
 	SaHpiDomainInfoT domain_info;
 	
-        SaHpiEntryIdT 	EntryId;
 	SaHpiEntryIdT 	NextEntryId;
 	SaHpiDrtEntryT	DrtEntry;		
 	
@@ -223,33 +222,35 @@ saHpiDomainReferenceTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiDomainReferenceTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	DEBUGMSGTL ((AGENT, "saHpiDomainReferenceTable_cmp, called\n"));
+
+	/* check for NULL pointers */
+	if(lhs == NULL || rhs == NULL ) {
+	    DEBUGMSGTL((AGENT,
+	        "saHpiDomainReferenceTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}	
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+	    return -1;
+		
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+	    return 1;			         
+	       
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+	       /* If saHpiDomainId index is equal sort by second index */
+	       /* CHECK SECOND INDEX,  saHpiDomainRef */
+	       if ( context_l->index.oids[1] < context_r->index.oids[1])
+		  return -1;
+		
+	       if ( context_l->index.oids[1] > context_r->index.oids[1])
+		  return 1;
+
+	       if ( context_l->index.oids[1] == context_r->index.oids[1])
+		  return 0;
+	}
+	return 0;
 }
 
 /************************************************************
@@ -262,13 +263,6 @@ init_saHpiDomainReferenceTable(void)
     
     initialize_table_saHpiDomainReferenceEntryCount();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiDomainReferenceTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
 }
 
 /************************************************************
@@ -565,10 +559,10 @@ netsnmp_index * saHpiDomainReferenceTable_delete_row( saHpiDomainReferenceTable_
  */
 void saHpiDomainReferenceTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiDomainReferenceTable_context *row_ctx =
-            (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx =
-            (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx =
+//            (saHpiDomainReferenceTable_context *)rg->existing_row;
+//    saHpiDomainReferenceTable_context *undo_ctx =
+//            (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -606,8 +600,8 @@ void saHpiDomainReferenceTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiDomainReferenceTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
+//    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -653,11 +647,11 @@ void saHpiDomainReferenceTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
+//   saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+//    int            row_err = 0;
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -700,8 +694,8 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
 void saHpiDomainReferenceTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
+//    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -735,8 +729,8 @@ void saHpiDomainReferenceTable_set_commit( netsnmp_request_group *rg )
 void saHpiDomainReferenceTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
+//    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -780,8 +774,8 @@ void saHpiDomainReferenceTable_set_free( netsnmp_request_group *rg )
 void saHpiDomainReferenceTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
-    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
+//    saHpiDomainReferenceTable_context *row_ctx = (saHpiDomainReferenceTable_context *)rg->existing_row;
+//    saHpiDomainReferenceTable_context *undo_ctx = (saHpiDomainReferenceTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

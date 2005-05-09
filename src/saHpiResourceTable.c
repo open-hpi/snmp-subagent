@@ -1026,8 +1026,8 @@ void saHpiResourceTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiResourceTable_context *row_ctx =
 	(saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx =
-	(saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *undo_ctx =
+//	(saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -1118,8 +1118,8 @@ void saHpiResourceTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiResourceTable_set_reserve2( netsnmp_request_group *rg )
 {
-	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+//	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
@@ -1227,7 +1227,7 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int row_err = 0;
@@ -1331,8 +1331,8 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 void saHpiResourceTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+//	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_commit, called\n"));
@@ -1396,8 +1396,8 @@ void saHpiResourceTable_set_commit( netsnmp_request_group *rg )
 void saHpiResourceTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+//	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_free, called\n"));
@@ -1472,8 +1472,8 @@ void saHpiResourceTable_set_free( netsnmp_request_group *rg )
 void saHpiResourceTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
-	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
+//	saHpiResourceTable_context *row_ctx = (saHpiResourceTable_context *)rg->existing_row;
+//	saHpiResourceTable_context *undo_ctx = (saHpiResourceTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiResourceTable_set_undo, called\n"));
