@@ -43,6 +43,9 @@
 #include <saHpiResourceTable.h>
 #include <saHpiSensorReadingMaxTable.h>
 #include <saHpiSensorReadingMinTable.h>
+#include <saHpiSensorReadingNominalTable.h>
+#include <saHpiSensorReadingNormalMaxTable.h>
+#include <saHpiSensorReadingNormalMinTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -245,6 +248,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	rv = populate_sensor_max(sessionid, rdr_entry, rpt_entry);
 	rv = populate_sensor_min(sessionid, rdr_entry, rpt_entry); 
 	rv = populate_sensor_nominal(sessionid, rdr_entry, rpt_entry); 
+	rv = populate_sensor_normal_max(sessionid, rdr_entry, rpt_entry); 
 	
 
 	CONTAINER_INSERT (cb.container, sensor_context);
