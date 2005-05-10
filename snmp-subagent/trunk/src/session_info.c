@@ -394,6 +394,42 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 }
 
 
+
+/**
+ * 
+ * @netsnmp_variable_list:
+ * @saHpiSensorThdLowCriticalTable_context:
+ * 
+ * Checks length of var.string val is correct for data type supported. 
+ * 
+ * Returns: 
+ */
+int check_sensor_reading_value(size_t val_len, long type)
+{
+	switch (type - 1) {                        
+	case SAHPI_SENSOR_READING_TYPE_INT64:
+		if(val_len <= sizeof(SaHpiInt64T))
+			return SNMP_ERR_NOERROR;
+		break;
+	case SAHPI_SENSOR_READING_TYPE_UINT64:
+		if(val_len <= sizeof(SaHpiUint64T))
+			return SNMP_ERR_NOERROR;
+		break;
+	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
+		if(val_len <= sizeof(SaHpiFloat64T))
+			return SNMP_ERR_NOERROR;
+		break;
+	case SAHPI_SENSOR_READING_TYPE_BUFFER:
+		if(val_len <= sizeof(SaHpiUint8T))
+			return SNMP_ERR_NOERROR;
+		break;
+	default:
+		return SNMP_ERR_WRONGLENGTH;
+	}
+
+	return SNMP_ERR_WRONGLENGTH;
+}
+
 /**
  * 
  * @reading:
@@ -438,6 +474,45 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 
 	return 0;
 }
+
+/**
+ * 
+ * @value:
+ * @type:
+ * @val:
+ * @val_len:
+ * 
+ * @returns: 
+ */
+SaErrorT set_sen_thd_value(SaHpiSensorReadingUnionT *value, 
+			       SaHpiSensorReadingTypeT type,
+			       u_char *val, size_t val_len)
+{
+	switch (type) {
+	case SAHPI_SENSOR_READING_TYPE_INT64:
+		if (val_len > sizeof(SaHpiInt64T)) 
+			return SA_ERR_HPI_INVALID_DATA;
+		memcpy(&value->SensorInt64, val, val_len);
+	case SAHPI_SENSOR_READING_TYPE_UINT64:
+		if (val_len > sizeof(SaHpiUint64T)) 
+			return SA_ERR_HPI_INVALID_DATA;
+		memcpy(&value->SensorUint64, val, val_len);
+	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
+		if (val_len > sizeof(SaHpiFloat64T)) 
+			return SA_ERR_HPI_INVALID_DATA;
+		memcpy(&value->SensorFloat64, val, val_len);
+	case SAHPI_SENSOR_READING_TYPE_BUFFER:
+		if (val_len > SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T)) 
+			return SA_ERR_HPI_INVALID_DATA;
+		memcpy(&value->SensorBuffer, val, val_len);
+	default:
+		return SA_ERR_HPI_UNKNOWN;
+	}
+
+	return SA_OK;
+
+}
+
 
 
 /**
