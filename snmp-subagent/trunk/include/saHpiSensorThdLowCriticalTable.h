@@ -43,7 +43,7 @@ typedef struct saHpiSensorThdLowCriticalTable_context_s {
             long saHpiSensorThdLowCriticalType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdLowCriticalValue[65535];
+            unsigned char saHpiSensorThdLowCriticalValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorThdLowCriticalValue_len;
 
         /** TruthValue = ASN_INTEGER */
@@ -64,6 +64,21 @@ typedef struct saHpiSensorThdLowCriticalTable_context_s {
 } saHpiSensorThdLowCriticalTable_context;
 
 /*************************************************************
+ * set funtions
+ */
+int set_table_sen_thds (saHpiSensorThdLowCriticalTable_context *row_ctx);
+
+/**
+ * 
+ **/
+SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid, 
+				   SaHpiRdrT *rdr_entry,
+				   SaHpiRptEntryT *rpt_entry,
+				   SaHpiSensorThresholdsT *sensor_thresholds);
+
+
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiSensorThdLowCriticalTable(void);
@@ -81,6 +96,14 @@ extern oid saHpiSensorThdLowCriticalTable_oid[];
 extern size_t saHpiSensorThdLowCriticalTable_oid_len;
 
 #define saHpiSensorThdLowCriticalTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,9
+
+/* Number of table Indexes */
+#define SEN_THD_LOW_CRIT_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
+
     
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowCriticalTable
@@ -92,21 +115,6 @@ extern size_t saHpiSensorThdLowCriticalTable_oid_len;
 #define COLUMN_SAHPISENSORTHDLOWCRITICALNONLINEAR 5
 #define saHpiSensorThdLowCriticalTable_COL_MIN 1
 #define saHpiSensorThdLowCriticalTable_COL_MAX 5
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorThdLowCriticalTable */
-#define saHpiSensorThdLowCriticalTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorThdLowCriticalTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorThdLowCriticalTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorThdLowCriticalTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorThdLowCriticalTable_SET_HANDLING
 
 int saHpiSensorThdLowCriticalTable_extract_index( saHpiSensorThdLowCriticalTable_context * ctx, netsnmp_index * hdr );
 
@@ -131,14 +139,9 @@ int saHpiSensorThdLowCriticalTable_can_delete(saHpiSensorThdLowCriticalTable_con
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorThdLowCriticalTable_ROW_CREATION
 saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorThdLowCriticalTable_IDX2
 saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
