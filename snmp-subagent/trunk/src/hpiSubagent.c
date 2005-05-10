@@ -399,6 +399,7 @@ main (int argc, char **argv)
 		init_saHpiSensorReadingNominalTable();
 		init_saHpiSensorReadingNormalMaxTable();
 		init_saHpiSensorReadingNormalMinTable();
+		init_saHpiSensorThdLowCriticalTable();
 		
 /*		init_saHpiAnnunciatorTable();
 		
@@ -406,7 +407,6 @@ main (int argc, char **argv)
 		init_saHpiFieldTable();
 		init_saHpiAreaTable();
 		
-		init_saHpiSensorThdLowCriticalTable();
 		init_saHpiSensorThdLowMajorTable();
 		init_saHpiSensorThdLowMinorTable();
 		init_saHpiSensorThdNegHysteresisTable();
@@ -470,6 +470,7 @@ main (int argc, char **argv)
 		     *	           populate_saHpiSesnorReadingNominalTable();		
 		     *	           populate_saHpiSesnorReadingNormalMaxTable();		
 		     *	           populate_saHpiSesnorReadingNormalMinTable();		
+		     *	           populate_saHpiSensorThdLowCriticalTable();		
 		     *	       populate_saHpiCurrentSensorStateTable();		
 		     */
 
