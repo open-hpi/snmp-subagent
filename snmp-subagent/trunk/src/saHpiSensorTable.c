@@ -46,6 +46,7 @@
 #include <saHpiSensorReadingNominalTable.h>
 #include <saHpiSensorReadingNormalMaxTable.h>
 #include <saHpiSensorReadingNormalMinTable.h>
+#include <saHpiSensorThdLowCriticalTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -84,13 +85,13 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 
 	DEBUGMSGTL ((AGENT, "populate_sensor, called\n"));
 
-	SaErrorT rv = SA_OK;
+	SaErrorT rv = SA_OK;	
+	SaHpiTextBufferT buffer;
+	SaHpiSensorThresholdsT sensor_thresholds;
 
 	oid sensor_oid[SENSOR_INDEX_NR];
 	netsnmp_index sensor_index;
 	saHpiSensorTable_context *sensor_context;
-
-	SaHpiTextBufferT buffer;
 
 	oid column[2];
 	int column_len = 2;
@@ -250,6 +251,26 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	rv = populate_sensor_nominal(sessionid, rdr_entry, rpt_entry); 
 	rv = populate_sensor_normal_max(sessionid, rdr_entry, rpt_entry); 
 	rv = populate_sensor_normal_min(sessionid, rdr_entry, rpt_entry); 
+
+	/* populate the threshold reading tables */
+	rv = saHpiSensorThresholdsGet(sessionid,
+				      rpt_entry->ResourceId, 
+				      rdr_entry->RdrTypeUnion.SensorRec.Num,
+				      &sensor_thresholds);
+	if (rv == SA_OK) {
+		rv = populate_sen_thd_low_crit(sessionid, rdr_entry, 
+					       rpt_entry, &sensor_thresholds);
+
+	} else {   		
+		snmp_log (LOG_ERR,
+			  "Call to saHpiResourceSeverity failed with return code: %s.\n",
+			  oh_lookup_error(rv));
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sen_thd_low_crit() saHpiSensorThresholdsGet() ERROR: %s\n",
+			     oh_lookup_error(rv)));
+	}
+
+
 	
 
 	CONTAINER_INSERT (cb.container, sensor_context);
