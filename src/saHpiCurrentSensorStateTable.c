@@ -899,13 +899,13 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
 		case COLUMN_SAHPICURRENTSENSORSTATESENSORENABLE:
 			/** TruthValue = ASN_INTEGER */
 			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-							    sizeof(row_ctx->saHpiCurrentSensorStateSensorEnable));
+				sizeof(row_ctx->saHpiCurrentSensorStateSensorEnable));
 			break;
 
 		case COLUMN_SAHPICURRENTSENSORSTATEEVENTENABLE:
 			/** TruthValue = ASN_INTEGER */
 			rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-							    sizeof(row_ctx->saHpiCurrentSensorStateEventEnable));
+				sizeof(row_ctx->saHpiCurrentSensorStateEventEnable));
 			break;
 
 		case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
@@ -915,7 +915,8 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
 				if (var->val_len > 
 				    sizeof(row_ctx->saHpiCurrentSensorStateAssertAddEventMask)) {
 					DEBUGMSGTL ((AGENT, 
-						     "COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK ERROR: %d\n", rc));
+					"COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK ERROR: %d\n", 
+					rc));
 					rc = SNMP_ERR_WRONGLENGTH;
 				}
 			}
@@ -928,7 +929,7 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
 				if (var->val_len > 
 				    sizeof(row_ctx->saHpiCurrentSensorStateAssertRemoveEventMask)) {
 					DEBUGMSGTL ((AGENT, 
-						     "COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
+					"COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
 					rc = SNMP_ERR_WRONGLENGTH;
 				}
 			}
@@ -941,7 +942,7 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
 				if (var->val_len > 
 				    sizeof(row_ctx->saHpiCurrentSensorStateDeassertAddEventMask)) {
 					DEBUGMSGTL ((AGENT, 
-						     "COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK ERROR: %d\n", rc));
+					"COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK ERROR: %d\n", rc));
 					rc = SNMP_ERR_WRONGLENGTH;
 				}
 			}
@@ -954,7 +955,7 @@ void saHpiCurrentSensorStateTable_set_reserve1( netsnmp_request_group *rg )
 				if (var->val_len > 
 				    sizeof(row_ctx->saHpiCurrentSensorStateDeassertRemoveEventMask)) {
 					DEBUGMSGTL ((AGENT, 
-						     "COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
+					"COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK ERROR: %d\n", rc));
 					rc = SNMP_ERR_WRONGLENGTH;
 				}
 			}
