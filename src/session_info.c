@@ -420,7 +420,7 @@ int check_sensor_reading_value(size_t val_len, long type)
 			return SNMP_ERR_NOERROR;
 		break;
 	case SAHPI_SENSOR_READING_TYPE_BUFFER:
-		if(val_len <= sizeof(SaHpiUint8T))
+		if(val_len <= (SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T)))
 			return SNMP_ERR_NOERROR;
 		break;
 	default:
