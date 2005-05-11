@@ -112,14 +112,24 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	}
 
 	/** TruthValue = ASN_INTEGER */
-        sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsReadable = 
-		(rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold
-		 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	if (SAHPI_STM_LOW_CRIT && 
+		rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold) {
+		sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsReadable =
+			MIB_TRUE;
+	} else {
+		sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsReadable =
+			MIB_FALSE;
+	}
 
         /** TruthValue = ASN_INTEGER */
-        sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsWritable = 
-		(rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold
-		 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+	if (SAHPI_STM_LOW_CRIT && 
+		rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
+		sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsWritable =
+			MIB_TRUE;
+	} else {
+		sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsWritable =
+			MIB_FALSE;
+	}
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
 	sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalType = 
