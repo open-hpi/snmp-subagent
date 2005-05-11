@@ -66,7 +66,7 @@ typedef struct saHpiSensorThdLowCriticalTable_context_s {
 /*************************************************************
  * set funtions
  */
-int set_table_sen_thds (saHpiSensorThdLowCriticalTable_context *row_ctx);
+int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx);
 
 /**
  * 

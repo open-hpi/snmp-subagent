@@ -153,10 +153,10 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 /*
  * int set_table_ctrl_analog_mode()
  */
-int set_table_sen_thds (saHpiSensorThdLowCriticalTable_context *row_ctx)
+static int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx)
 {
 
- 	DEBUGMSGTL ((AGENT, "set_table_sen_thds, called\n"));
+ 	DEBUGMSGTL ((AGENT, "set_table_sen_thds_low_crit, called\n"));
 
 	SaErrorT            	rc = SA_OK;
 	SaHpiSessionIdT     	session_id;
@@ -769,7 +769,7 @@ void saHpiSensorThdLowCriticalTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiSensorThdLowCriticalValue, var->val.string,
 		   var->val_len);
             row_ctx->saHpiSensorThdLowCriticalValue_len = var->val_len;
-	    row_err = set_table_sen_thds (row_ctx);
+	    row_err = set_table_sen_thds_low_crit (row_ctx);
 	    break;
 
         default: /** We shouldn't get here */
