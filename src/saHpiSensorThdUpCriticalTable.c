@@ -618,8 +618,8 @@ void saHpiSensorThdUpCriticalTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiSensorThdUpCriticalTable_context *row_ctx =
             (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx =
-            (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx =
+//            (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -674,8 +674,8 @@ void saHpiSensorThdUpCriticalTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorThdUpCriticalTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -738,7 +738,7 @@ void saHpiSensorThdUpCriticalTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -800,8 +800,8 @@ void saHpiSensorThdUpCriticalTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorThdUpCriticalTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorThdUpCriticalTable_set_commit, called\n"));
@@ -841,8 +841,8 @@ void saHpiSensorThdUpCriticalTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorThdUpCriticalTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorThdUpCriticalTable_set_free, called\n"));
@@ -894,8 +894,8 @@ void saHpiSensorThdUpCriticalTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorThdUpCriticalTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
-    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
+//    saHpiSensorThdUpCriticalTable_context *row_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->existing_row;
+//    saHpiSensorThdUpCriticalTable_context *undo_ctx = (saHpiSensorThdUpCriticalTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiSensorThdUpCriticalTable_set_undo, called\n"));
