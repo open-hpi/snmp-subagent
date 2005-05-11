@@ -64,6 +64,16 @@ typedef struct saHpiSensorThdUpCriticalTable_context_s {
 } saHpiSensorThdUpCriticalTable_context;
 
 /*************************************************************
+ * funtions
+ */
+SaErrorT populate_sen_thd_up_crit(SaHpiSessionIdT sessionid, 
+				  SaHpiRdrT *rdr_entry,
+				  SaHpiRptEntryT *rpt_entry,
+				  SaHpiSensorThresholdsT *sensor_thresholds);
+
+int set_table_sen_thds_up_crit (saHpiSensorThdUpCriticalTable_context *row_ctx);
+
+/*************************************************************
  * function declarations
  */
 void init_saHpiSensorThdUpCriticalTable(void);
@@ -81,6 +91,13 @@ extern oid saHpiSensorThdUpCriticalTable_oid[];
 extern size_t saHpiSensorThdUpCriticalTable_oid_len;
 
 #define saHpiSensorThdUpCriticalTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,12
+
+/* Number of table Indexes */
+#define SEN_THD_UP_CRIT_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpCriticalTable
