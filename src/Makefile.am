@@ -32,7 +32,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSensorReadingNormalMaxTable.c \
 			saHpiSensorReadingNormalMinTable.c \ 
 			saHpiSensorThdLowCriticalTable.c \
-			saHpiSensorThdLowMajorTable.c 
+			saHpiSensorThdLowMajorTable.c \
+			saHpiSensorThdLowMinorTable.c 
 
 
 hpiSubagent_LDADD	= 
@@ -67,7 +68,6 @@ clean:
 #			saHpiSensorEnableChangeEventTable.c \
 #			saHpiSensorEventLogTable.c \
 #			saHpiSensorEventTable.c \
-#			saHpiSensorThdLowMinorTable.c \
 #			saHpiSensorThdNegHysteresisTable.c \
 #			saHpiSensorThdPosHysteresisTable.c \
 #			saHpiSensorThdUpCriticalTable.c \
