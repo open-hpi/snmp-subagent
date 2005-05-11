@@ -64,13 +64,11 @@ typedef struct saHpiSensorThdLowCriticalTable_context_s {
 } saHpiSensorThdLowCriticalTable_context;
 
 /*************************************************************
- * set funtions
+ * funtions
  */
 int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx);
 
-/**
- * 
- **/
+
 SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid, 
 				   SaHpiRdrT *rdr_entry,
 				   SaHpiRptEntryT *rpt_entry,
