@@ -621,8 +621,8 @@ void saHpiSensorThdLowMajorTable_set_reserve1( netsnmp_request_group *rg )
 {
 	saHpiSensorThdLowMajorTable_context *row_ctx =
 	(saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx =
-	(saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx =
+//	(saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_variable_list *var;
 	netsnmp_request_group_item *current;
 	int rc;
@@ -676,8 +676,8 @@ void saHpiSensorThdLowMajorTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorThdLowMajorTable_set_reserve2( netsnmp_request_group *rg )
 {
-	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 	netsnmp_variable_list *var;
 	int rc;
@@ -740,7 +740,7 @@ void saHpiSensorThdLowMajorTable_set_action( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
 	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
@@ -803,8 +803,8 @@ void saHpiSensorThdLowMajorTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorThdLowMajorTable_set_commit( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorThdLowMajorTable_set_commit, called\n"));
@@ -844,8 +844,8 @@ void saHpiSensorThdLowMajorTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorThdLowMajorTable_set_free( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorThdLowMajorTable_set_free, called\n"));
@@ -897,8 +897,8 @@ void saHpiSensorThdLowMajorTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorThdLowMajorTable_set_undo( netsnmp_request_group *rg )
 {
 	netsnmp_variable_list *var;
-	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
-	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
+//	saHpiSensorThdLowMajorTable_context *row_ctx = (saHpiSensorThdLowMajorTable_context *)rg->existing_row;
+//	saHpiSensorThdLowMajorTable_context *undo_ctx = (saHpiSensorThdLowMajorTable_context *)rg->undo_info;
 	netsnmp_request_group_item *current;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorThdLowMajorTable_set_undo, called\n"));
