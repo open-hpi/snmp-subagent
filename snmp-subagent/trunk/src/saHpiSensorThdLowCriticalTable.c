@@ -174,17 +174,14 @@ int set_table_sen_thds (saHpiSensorThdLowCriticalTable_context *row_ctx)
 	memset(&sensor_thresholds, 0, sizeof(sensor_thresholds));
 
 	sensor_thresholds.LowCritical.IsSupported = SAHPI_TRUE;
-	sensor_thresholds.LowCritical.Type = row_ctx->saHpiSensorThdLowCriticalType;
+	sensor_thresholds.LowCritical.Type = row_ctx->saHpiSensorThdLowCriticalType - 1;
 	set_sen_thd_value(&sensor_thresholds.LowCritical.Value,
 			  sensor_thresholds.LowCritical.Type,
 			  row_ctx->saHpiSensorThdLowCriticalValue, 
 			  row_ctx->saHpiSensorThdLowCriticalValue_len);
 
-	rc = saHpiSensorThresholdsSet(
-		get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]),
-		row_ctx->index.oids[saHpiResourceEntryId_INDEX],
-		row_ctx->index.oids[saHpiSensorNum_INDEX],
-		&sensor_thresholds);
+	rc = saHpiSensorThresholdsSet(session_id, resource_id, 
+				      sensor_num, &sensor_thresholds);
 
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
