@@ -63,6 +63,19 @@ typedef struct saHpiSensorThdLowMajorTable_context_s {
 
 } saHpiSensorThdLowMajorTable_context;
 
+/*
+ * int set_table_ctrl_analog_mode()
+ */
+int set_table_sen_thds_low_major (saHpiSensorThdLowMajorTable_context *row_ctx);
+
+/*
+ * SaErrorT populate_sensor_max()
+ */
+SaErrorT populate_sen_thd_low_major(SaHpiSessionIdT sessionid, 
+				    SaHpiRdrT *rdr_entry,
+				    SaHpiRptEntryT *rpt_entry,
+				    SaHpiSensorThresholdsT *sensor_thresholds);
+
 /*************************************************************
  * function declarations
  */
@@ -81,6 +94,13 @@ extern oid saHpiSensorThdLowMajorTable_oid[];
 extern size_t saHpiSensorThdLowMajorTable_oid_len;
 
 #define saHpiSensorThdLowMajorTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,10
+
+/* Number of table Indexes */
+#define SEN_THD_LOW_MAJOR_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowMajorTable
