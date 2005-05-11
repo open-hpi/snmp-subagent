@@ -153,7 +153,7 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 /*
  * int set_table_ctrl_analog_mode()
  */
-static int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx)
+int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx)
 {
 
  	DEBUGMSGTL ((AGENT, "set_table_sen_thds_low_crit, called\n"));
