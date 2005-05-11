@@ -14,52 +14,52 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiSensorNum is external */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiSensorNum is external */
 
 typedef struct saHpiSensorThdLowCriticalTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+	netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
-        /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdLowCriticalIsReadable;
+	/*************************************************************
+	 * You can store data internally in this structure.
+	 *
+	 * TODO: You will probably have to fix a few types here...
+	 */
+	/** TODO: add storage for external index(s)! */
+	/** TruthValue = ASN_INTEGER */
+	long saHpiSensorThdLowCriticalIsReadable;
 
-        /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdLowCriticalIsWritable;
+	/** TruthValue = ASN_INTEGER */
+	long saHpiSensorThdLowCriticalIsWritable;
 
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-            long saHpiSensorThdLowCriticalType;
+	/** SaHpiSensorReadingType = ASN_INTEGER */
+	long saHpiSensorThdLowCriticalType;
 
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdLowCriticalValue[SAHPI_SENSOR_BUFFER_LENGTH];
-            long saHpiSensorThdLowCriticalValue_len;
+	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	unsigned char saHpiSensorThdLowCriticalValue[SAHPI_SENSOR_BUFFER_LENGTH];
+	long saHpiSensorThdLowCriticalValue_len;
 
-        /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdLowCriticalNonLinear;
+	/** TruthValue = ASN_INTEGER */
+	long saHpiSensorThdLowCriticalNonLinear;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+	/*
+	 * OR
+	 *
+	 * Keep a pointer to your data
+	 */
+	void * data;
 
-    /*
-     *add anything else you want here
-     */
+	/*
+	 *add anything else you want here
+	 */
 
 } saHpiSensorThdLowCriticalTable_context;
 
@@ -70,9 +70,9 @@ int set_table_sen_thds_low_crit (saHpiSensorThdLowCriticalTable_context *row_ctx
 
 
 SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid, 
-				   SaHpiRdrT *rdr_entry,
-				   SaHpiRptEntryT *rpt_entry,
-				   SaHpiSensorThresholdsT *sensor_thresholds);
+					   SaHpiRdrT *rdr_entry,
+					   SaHpiRptEntryT *rpt_entry,
+					   SaHpiSensorThresholdsT *sensor_thresholds);
 
 
 
@@ -83,7 +83,7 @@ void init_saHpiSensorThdLowCriticalTable(void);
 void initialize_table_saHpiSensorThdLowCriticalTable(void);
 const saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_get_by_idx(netsnmp_index *);
 const saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+											    int row_status);
 int saHpiSensorThdLowCriticalTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -102,7 +102,6 @@ extern size_t saHpiSensorThdLowCriticalTable_oid_len;
 #define saHpiResourceIsHistorical_INDEX 2
 #define saHpiSensorNum_INDEX 3
 
-    
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowCriticalTable
  */
@@ -127,16 +126,16 @@ saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_duplicat
 netsnmp_index * saHpiSensorThdLowCriticalTable_delete_row( saHpiSensorThdLowCriticalTable_context* );
 
 int saHpiSensorThdLowCriticalTable_can_activate(saHpiSensorThdLowCriticalTable_context *undo_ctx,
-                      saHpiSensorThdLowCriticalTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+						saHpiSensorThdLowCriticalTable_context *row_ctx,
+						netsnmp_request_group * rg);
 int saHpiSensorThdLowCriticalTable_can_deactivate(saHpiSensorThdLowCriticalTable_context *undo_ctx,
-                        saHpiSensorThdLowCriticalTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+						  saHpiSensorThdLowCriticalTable_context *row_ctx,
+						  netsnmp_request_group * rg);
 int saHpiSensorThdLowCriticalTable_can_delete(saHpiSensorThdLowCriticalTable_context *undo_ctx,
-                    saHpiSensorThdLowCriticalTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+					      saHpiSensorThdLowCriticalTable_context *row_ctx,
+					      netsnmp_request_group * rg);
+
+
 saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_create_row( netsnmp_index* );
 
 saHpiSensorThdLowCriticalTable_context * saHpiSensorThdLowCriticalTable_get( const char *name, int len );
