@@ -75,12 +75,12 @@ SaErrorT populate_sen_thd_up_crit(SaHpiSessionIdT sessionid,
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
+		"ERROR: populate_sen_thd_up_crit() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
+		"ERROR: populate_sen_thd_up_crit() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -108,12 +108,12 @@ SaErrorT populate_sen_thd_up_crit(SaHpiSessionIdT sessionid,
 		saHpiSensorThdUpCriticalTable_create_row(&sen_thd_up_crit_idx);
 	}
 	if (!sen_thd_up_crit_ctx) {
-		snmp_log (LOG_ERR, "Not enough memory for a ThdLowCrit row!");
+		snmp_log (LOG_ERR, "Not enough memory for a ThdUpCrit row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
 	/** TruthValue = ASN_INTEGER */
-	if (SAHPI_STM_UP_CRIT && 
+	if (SAHPI_STM_UP_CRIT & 
 		rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold) {
 		sen_thd_up_crit_ctx->saHpiSensorThdUpCriticalIsReadable =
 			MIB_TRUE;
