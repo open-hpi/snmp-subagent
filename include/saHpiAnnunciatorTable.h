@@ -21,6 +21,7 @@ extern "C" {
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
+        /** Index saHpiResourceIsHistorical is external */
         /** Index saHpiAnnunciatorNum is internal */
 
 typedef struct saHpiAnnunciatorTable_context_s {
@@ -97,7 +98,7 @@ extern size_t saHpiAnnunciatorTable_oid_len;
 #define COLUMN_SAHPIANNUNCIATORMODE 5
 #define COLUMN_SAHPIANNUNCIATOROEM 6
 #define COLUMN_SAHPIANNUNCIATORRDR 7
-#define saHpiAnnunciatorTable_COL_MIN 1
+#define saHpiAnnunciatorTable_COL_MIN 2
 #define saHpiAnnunciatorTable_COL_MAX 7
 
 /* comment out the following line if you don't handle SET-REQUEST for saHpiAnnunciatorTable */
