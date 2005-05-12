@@ -100,12 +100,6 @@ typedef struct saHpiSensorTable_context_s {
 } saHpiSensorTable_context;
 
 /*************************************************************
- * set funtions
- */
-int set_table_sensor (saHpiSensorTable_context *row_ctx);
-
-
-/*************************************************************
  * function declarations
  */
 SaErrorT populate_sensor(SaHpiSessionIdT sessionid, 
