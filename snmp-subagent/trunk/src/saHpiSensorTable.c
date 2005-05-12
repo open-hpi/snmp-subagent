@@ -50,6 +50,7 @@
 #include <saHpiSensorThdLowMajorTable.h>
 #include <saHpiSensorThdLowMinorTable.h>
 #include <saHpiSensorThdUpCriticalTable.h>
+#include <saHpiSensorThdUpMajorTable.h>
 #include <session_info.h>
 
 #include <oh_utils.h>
@@ -268,6 +269,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		rv = populate_sen_thd_low_minor(sessionid, rdr_entry, 
 						rpt_entry, &sensor_thresholds);
 		rv = populate_sen_thd_up_crit(sessionid, rdr_entry, 
+					      rpt_entry, &sensor_thresholds);
+		rv = populate_sen_thd_up_major(sessionid, rdr_entry, 
 					      rpt_entry, &sensor_thresholds);
 
 
