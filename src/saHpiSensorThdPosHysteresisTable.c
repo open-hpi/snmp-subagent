@@ -123,7 +123,7 @@ SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid,
         }
 
         /** TruthValue = ASN_INTEGER */
-        if (SAHPI_STM_LOW_CRIT && 
+        if (SAHPI_STM_UP_HYSTERESIS & 
             rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
                 sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisIsWritable =
                 MIB_TRUE;

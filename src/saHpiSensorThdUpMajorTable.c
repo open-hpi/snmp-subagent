@@ -123,7 +123,7 @@ SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid,
         }
 
         /** TruthValue = ASN_INTEGER */
-        if (SAHPI_STM_LOW_CRIT && 
+        if (SAHPI_STM_UP_MAJOR & 
             rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
                 sen_thd_up_major_ctx->saHpiSensorThdUpMajorIsWritable =
                 MIB_TRUE;
