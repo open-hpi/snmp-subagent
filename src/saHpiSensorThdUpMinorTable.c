@@ -618,8 +618,8 @@ void saHpiSensorThdUpMinorTable_set_reserve1( netsnmp_request_group *rg )
 {
         saHpiSensorThdUpMinorTable_context *row_ctx =
         (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx =
-        (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx =
+//        (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_variable_list *var;
         netsnmp_request_group_item *current;
         int rc;
@@ -674,8 +674,8 @@ void saHpiSensorThdUpMinorTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorThdUpMinorTable_set_reserve2( netsnmp_request_group *rg )
 {
-        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
         netsnmp_variable_list *var;
         int rc;
@@ -738,7 +738,7 @@ void saHpiSensorThdUpMinorTable_set_action( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
         saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         int            row_err = 0;
@@ -801,8 +801,8 @@ void saHpiSensorThdUpMinorTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorThdUpMinorTable_set_commit( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_commit, called\n"));
@@ -842,8 +842,8 @@ void saHpiSensorThdUpMinorTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorThdUpMinorTable_set_free( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_free, called\n"));
@@ -895,8 +895,8 @@ void saHpiSensorThdUpMinorTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorThdUpMinorTable_set_undo( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
-        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
+//        saHpiSensorThdUpMinorTable_context *row_ctx = (saHpiSensorThdUpMinorTable_context *)rg->existing_row;
+//        saHpiSensorThdUpMinorTable_context *undo_ctx = (saHpiSensorThdUpMinorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMinorTable_set_undo, called\n"));
