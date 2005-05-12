@@ -616,8 +616,8 @@ void saHpiSensorThdPosHysteresisTable_set_reserve1( netsnmp_request_group *rg )
 {
         saHpiSensorThdPosHysteresisTable_context *row_ctx =
         (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx =
-        (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx =
+//        (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_variable_list *var;
         netsnmp_request_group_item *current;
         int rc;
@@ -672,8 +672,8 @@ void saHpiSensorThdPosHysteresisTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorThdPosHysteresisTable_set_reserve2( netsnmp_request_group *rg )
 {
-        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
         netsnmp_variable_list *var;
         int rc;
@@ -736,7 +736,7 @@ void saHpiSensorThdPosHysteresisTable_set_action( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
         saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         int            row_err = 0;
@@ -798,8 +798,8 @@ void saHpiSensorThdPosHysteresisTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorThdPosHysteresisTable_set_commit( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_commit, called\n"));
@@ -839,8 +839,8 @@ void saHpiSensorThdPosHysteresisTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorThdPosHysteresisTable_set_free( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_free, called\n"));
@@ -892,8 +892,8 @@ void saHpiSensorThdPosHysteresisTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorThdPosHysteresisTable_set_undo( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
-        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
+//        saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
+//        saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_undo, called\n"));
