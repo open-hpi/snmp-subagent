@@ -8150,8 +8150,10 @@ SaHpiCurrentSensorStateEntry ::= SEQUENCE {
         saHpiCurrentSensorStateEventState       SaHpiEventState,
 	saHpiCurrentSensorStateSensorEnable     TruthValue,
 	saHpiCurrentSensorStateEventEnable      TruthValue,
-        saHpiCurrentSensorStateAssertEventMask  	SaHpiEventState,   
-        saHpiCurrentSensorStateDeassertEventMask	SaHpiEventState 	
+        saHpiCurrentSensorStateAssertAddEventMask  	SaHpiEventState,   
+        saHpiCurrentSensorStateAssertRemoveEventMask  	SaHpiEventState,   
+        saHpiCurrentSensorStateDeassertAddEventMask	SaHpiEventState, 	
+        saHpiCurrentSensorStateDeassertRemoveEventMask	SaHpiEventState 	
         }
 
 saHpiCurrentSensorStateDataPresent  OBJECT-TYPE
@@ -10184,7 +10186,7 @@ saHpiAnnunciatorEntry OBJECT-TYPE
 	automatically by the HPI implementation, it is implementation-specific 
 	which announcements are added or removed."
 	
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiAnnunciatorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiAnnunciatorNum }
         ::= {saHpiAnnunciatorTable 1}
 
 SaHpiAnnunciatorEntry ::= SEQUENCE {
