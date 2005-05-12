@@ -74,12 +74,12 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_sen_thd_low_crit() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_sensor_max() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_sen_thd_low_crit() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -412,13 +412,13 @@ saHpiSensorThdLowCriticalTable_extract_index( saHpiSensorThdLowCriticalTable_con
 
 
 		err = saHpiDomainId_check_index(
-					       *var_saHpiDomainId.val.integer);
+                                *var_saHpiDomainId.val.integer);
 		err = saHpiResourceEntryId_check_index(
-						      *var_saHpiResourceId.val.integer);  
+			        *var_saHpiResourceId.val.integer);  
 		err = saHpiResourceIsHistorical_check_index(
-							   *var_saHpiResourceIsHistorical.val.integer);
+				*var_saHpiResourceIsHistorical.val.integer);
 		err = saHpiSensorNum_check_index(
-						*var_saHpiSensorNum.val.integer);
+				*var_saHpiSensorNum.val.integer);
 	}
 
 	/*
