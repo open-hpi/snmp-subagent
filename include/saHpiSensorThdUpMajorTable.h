@@ -14,54 +14,64 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiSensorNum is external */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiSensorNum is external */
 
 typedef struct saHpiSensorThdUpMajorTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+        netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
+        /*************************************************************
+         * You can store data internally in this structure.
+         *
+         * TODO: You will probably have to fix a few types here...
+         */
+        /** TODO: add storage for external index(s)! */
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdUpMajorIsReadable;
+        long saHpiSensorThdUpMajorIsReadable;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdUpMajorIsWritable;
+        long saHpiSensorThdUpMajorIsWritable;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
-            long saHpiSensorThdUpMajorType;
+        long saHpiSensorThdUpMajorType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdUpMajorValue[65535];
-            long saHpiSensorThdUpMajorValue_len;
+        unsigned char saHpiSensorThdUpMajorValue[65535];
+        long saHpiSensorThdUpMajorValue_len;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdUpMajorNonLinear;
+        long saHpiSensorThdUpMajorNonLinear;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+        /*
+         * OR
+         *
+         * Keep a pointer to your data
+         */
+        void * data;
 
-    /*
-     *add anything else you want here
-     */
+        /*
+         *add anything else you want here
+         */
 
-} saHpiSensorThdUpMajorTable_context;
+} saHpiSensorThdUpMajorTable_context;  
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid, 
+                                           SaHpiRdrT *rdr_entry,
+                                           SaHpiRptEntryT *rpt_entry,
+                                           SaHpiSensorThresholdsT *sensor_thresholds);
+
+int set_table_sen_thds_up_major (saHpiSensorThdUpMajorTable_context *row_ctx);
 
 /*************************************************************
  * function declarations
@@ -70,7 +80,7 @@ void init_saHpiSensorThdUpMajorTable(void);
 void initialize_table_saHpiSensorThdUpMajorTable(void);
 const saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_get_by_idx(netsnmp_index *);
 const saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+                                                                                    int row_status);
 int saHpiSensorThdUpMajorTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -81,7 +91,14 @@ extern oid saHpiSensorThdUpMajorTable_oid[];
 extern size_t saHpiSensorThdUpMajorTable_oid_len;
 
 #define saHpiSensorThdUpMajorTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,13
-    
+
+/* Number of table Indexes */
+#define SEN_THD_UP_MAJOR_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
+
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpMajorTable
  */
@@ -92,21 +109,6 @@ extern size_t saHpiSensorThdUpMajorTable_oid_len;
 #define COLUMN_SAHPISENSORTHDUPMAJORNONLINEAR 5
 #define saHpiSensorThdUpMajorTable_COL_MIN 1
 #define saHpiSensorThdUpMajorTable_COL_MAX 5
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorThdUpMajorTable */
-#define saHpiSensorThdUpMajorTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorThdUpMajorTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorThdUpMajorTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorThdUpMajorTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorThdUpMajorTable_SET_HANDLING
 
 int saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * ctx, netsnmp_index * hdr );
 
@@ -121,24 +123,19 @@ saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_duplicate_row( s
 netsnmp_index * saHpiSensorThdUpMajorTable_delete_row( saHpiSensorThdUpMajorTable_context* );
 
 int saHpiSensorThdUpMajorTable_can_activate(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                      saHpiSensorThdUpMajorTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+                                            saHpiSensorThdUpMajorTable_context *row_ctx,
+                                            netsnmp_request_group * rg);
 int saHpiSensorThdUpMajorTable_can_deactivate(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                        saHpiSensorThdUpMajorTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+                                              saHpiSensorThdUpMajorTable_context *row_ctx,
+                                              netsnmp_request_group * rg);
 int saHpiSensorThdUpMajorTable_can_delete(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                    saHpiSensorThdUpMajorTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
-#ifdef saHpiSensorThdUpMajorTable_ROW_CREATION
-saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_create_row( netsnmp_index* );
-#endif
-#endif
+                                          saHpiSensorThdUpMajorTable_context *row_ctx,
+                                          netsnmp_request_group * rg);
 
-#ifdef saHpiSensorThdUpMajorTable_IDX2
+
+saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_create_row( netsnmp_index* );
+
 saHpiSensorThdUpMajorTable_context * saHpiSensorThdUpMajorTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
