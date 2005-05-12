@@ -66,6 +66,15 @@ typedef struct saHpiSensorThdPosHysteresisTable_context_s {
 /*************************************************************
  * function declarations
  */
+SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid, 
+				  SaHpiRdrT *rdr_entry,
+				  SaHpiRptEntryT *rpt_entry,
+				  SaHpiSensorThresholdsT *sensor_thresholds);
+int set_table_sen_thds_pos_hys (saHpiSensorThdPosHysteresisTable_context *row_ctx);
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiSensorThdPosHysteresisTable(void);
 void initialize_table_saHpiSensorThdPosHysteresisTable(void);
 const saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_get_by_idx(netsnmp_index *);
@@ -81,6 +90,13 @@ extern oid saHpiSensorThdPosHysteresisTable_oid[];
 extern size_t saHpiSensorThdPosHysteresisTable_oid_len;
 
 #define saHpiSensorThdPosHysteresisTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,15
+
+/* Number of table Indexes */
+#define SEN_THD_POS_HYS_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiSensorThdPosHysteresisTable
