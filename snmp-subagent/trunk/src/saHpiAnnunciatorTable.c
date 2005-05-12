@@ -199,6 +199,41 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
 	return rv;
 } 
 
+int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx)
+{
+
+ 	DEBUGMSGTL ((AGENT, "set_table_annun_mode, called\n"));
+
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+	SaHpiAnnunciatorModeT	mode;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+        mode =  row_ctx->saHpiAnnunciatorMode - 1;
+
+        rc = saHpiAnnunciatorModeSet(session_id, 
+                                     resource_id,
+                                     row_ctx->saHpiAnnunciatorNum,
+                                     mode);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
 /**
  * 
  * @handler:
@@ -814,6 +849,7 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNUNCIATORMODE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiAnnunciatorMode = *var->val.integer;
+            row_err = set_table_annun_mode (row_ctx);
         break;
 
         default: /** We shouldn't get here */
