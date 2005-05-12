@@ -63,6 +63,16 @@ typedef struct saHpiSensorThdNegHysteresisTable_context_s {
 
 } saHpiSensorThdNegHysteresisTable_context;
 
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_sen_thd_neg_hys(SaHpiSessionIdT sessionid, 
+				  SaHpiRdrT *rdr_entry,
+				  SaHpiRptEntryT *rpt_entry,
+				  SaHpiSensorThresholdsT *sensor_thresholds);
+int set_table_sen_thds_neg_hys (saHpiSensorThdNegHysteresisTable_context *row_ctx);
+
 /*************************************************************
  * function declarations
  */
@@ -81,7 +91,14 @@ extern oid saHpiSensorThdNegHysteresisTable_oid[];
 extern size_t saHpiSensorThdNegHysteresisTable_oid_len;
 
 #define saHpiSensorThdNegHysteresisTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,16
-    
+
+/* Number of table Indexes */
+#define SEN_THD_NEG_HYS_IDX_NR 4
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorNum_INDEX 3
+
 /*************************************************************
  * column number definitions for table saHpiSensorThdNegHysteresisTable
  */
