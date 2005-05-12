@@ -55,7 +55,6 @@
 #include <saHpiSensorThdPosHysteresisTable.h>
 #include <saHpiSensorThdNegHysteresisTable.h>
 #include <session_info.h>
-
 #include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -81,7 +80,7 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
 int initialize_table_saHpiSensorEntryCount(void);
 
 /*
- * SaErrorT populate_ctrl_text()
+ * SaErrorT populate_sensor()
  */
 SaErrorT populate_sensor(SaHpiSessionIdT sessionid, 
 			 SaHpiRdrT *rdr_entry,
@@ -103,17 +102,17 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	oid column[2];
 	int column_len = 2;
 
-	DEBUGMSGTL ((AGENT, "SAHPI_CTRL_TYPE_TEXT populate_ctrl_text() called\n"));
+	DEBUGMSGTL ((AGENT, "SAHPI_SENSOR_RDR populate_sensor() called\n"));
 
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_sensor() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_ctrl_text() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_sensor() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -150,7 +149,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		saHpiSensorTable_create_row(&sensor_index);
 	}
 	if (!sensor_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		snmp_log (LOG_ERR, "Not enough memory for a Sensor row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
