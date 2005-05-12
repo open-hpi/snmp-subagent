@@ -43,7 +43,7 @@ typedef struct saHpiSensorThdNegHysteresisTable_context_s {
             long saHpiSensorThdNegHysteresisType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdNegHysteresisValue[65535];
+            unsigned char saHpiSensorThdNegHysteresisValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorThdNegHysteresisValue_len;
 
         /** TruthValue = ASN_INTEGER */

@@ -43,7 +43,7 @@ typedef struct saHpiSensorThdUpMinorTable_context_s {
             long saHpiSensorThdUpMinorType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdUpMinorValue[65535];
+            unsigned char saHpiSensorThdUpMinorValue[SAHPI_SENSOR_BUFFER_LENGTH];
             long saHpiSensorThdUpMinorValue_len;
 
         /** TruthValue = ASN_INTEGER */
