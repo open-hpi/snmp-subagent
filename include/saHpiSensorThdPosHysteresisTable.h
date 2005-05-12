@@ -14,52 +14,52 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiSensorNum is external */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiSensorNum is external */
 
 typedef struct saHpiSensorThdPosHysteresisTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+        netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
+        /*************************************************************
+         * You can store data internally in this structure.
+         *
+         * TODO: You will probably have to fix a few types here...
+         */
+        /** TODO: add storage for external index(s)! */
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdPosHysteresisIsReadable;
+        long saHpiSensorThdPosHysteresisIsReadable;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdPosHysteresisIsWritable;
+        long saHpiSensorThdPosHysteresisIsWritable;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
-            long saHpiSensorThdPosHysteresisType;
+        long saHpiSensorThdPosHysteresisType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorThdPosHysteresisValue[SAHPI_SENSOR_BUFFER_LENGTH];
-            long saHpiSensorThdPosHysteresisValue_len;
+        unsigned char saHpiSensorThdPosHysteresisValue[SAHPI_SENSOR_BUFFER_LENGTH];
+        long saHpiSensorThdPosHysteresisValue_len;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiSensorThdPosHysteresisNonLinear;
+        long saHpiSensorThdPosHysteresisNonLinear;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+        /*
+         * OR
+         *
+         * Keep a pointer to your data
+         */
+        void * data;
 
-    /*
-     *add anything else you want here
-     */
+        /*
+         *add anything else you want here
+         */
 
 } saHpiSensorThdPosHysteresisTable_context;
 
@@ -67,9 +67,9 @@ typedef struct saHpiSensorThdPosHysteresisTable_context_s {
  * function declarations
  */
 SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid, 
-				  SaHpiRdrT *rdr_entry,
-				  SaHpiRptEntryT *rpt_entry,
-				  SaHpiSensorThresholdsT *sensor_thresholds);
+                                          SaHpiRdrT *rdr_entry,
+                                          SaHpiRptEntryT *rpt_entry,
+                                          SaHpiSensorThresholdsT *sensor_thresholds);
 int set_table_sen_thds_pos_hys (saHpiSensorThdPosHysteresisTable_context *row_ctx);
 
 /*************************************************************
@@ -79,7 +79,7 @@ void init_saHpiSensorThdPosHysteresisTable(void);
 void initialize_table_saHpiSensorThdPosHysteresisTable(void);
 const saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_get_by_idx(netsnmp_index *);
 const saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+                                                                                                int row_status);
 int saHpiSensorThdPosHysteresisTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -97,7 +97,7 @@ extern size_t saHpiSensorThdPosHysteresisTable_oid_len;
 #define saHpiResourceEntryId_INDEX 1
 #define saHpiResourceIsHistorical_INDEX 2
 #define saHpiSensorNum_INDEX 3
-    
+
 /*************************************************************
  * column number definitions for table saHpiSensorThdPosHysteresisTable
  */
@@ -108,21 +108,6 @@ extern size_t saHpiSensorThdPosHysteresisTable_oid_len;
 #define COLUMN_SAHPISENSORTHDPOSHYSTERESISNONLINEAR 5
 #define saHpiSensorThdPosHysteresisTable_COL_MIN 1
 #define saHpiSensorThdPosHysteresisTable_COL_MAX 5
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorThdPosHysteresisTable */
-#define saHpiSensorThdPosHysteresisTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorThdPosHysteresisTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorThdPosHysteresisTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorThdPosHysteresisTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorThdPosHysteresisTable_SET_HANDLING
 
 int saHpiSensorThdPosHysteresisTable_extract_index( saHpiSensorThdPosHysteresisTable_context * ctx, netsnmp_index * hdr );
 
@@ -137,24 +122,19 @@ saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_dupl
 netsnmp_index * saHpiSensorThdPosHysteresisTable_delete_row( saHpiSensorThdPosHysteresisTable_context* );
 
 int saHpiSensorThdPosHysteresisTable_can_activate(saHpiSensorThdPosHysteresisTable_context *undo_ctx,
-                      saHpiSensorThdPosHysteresisTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+                                                  saHpiSensorThdPosHysteresisTable_context *row_ctx,
+                                                  netsnmp_request_group * rg);
 int saHpiSensorThdPosHysteresisTable_can_deactivate(saHpiSensorThdPosHysteresisTable_context *undo_ctx,
-                        saHpiSensorThdPosHysteresisTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+                                                    saHpiSensorThdPosHysteresisTable_context *row_ctx,
+                                                    netsnmp_request_group * rg);
 int saHpiSensorThdPosHysteresisTable_can_delete(saHpiSensorThdPosHysteresisTable_context *undo_ctx,
-                    saHpiSensorThdPosHysteresisTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
-#ifdef saHpiSensorThdPosHysteresisTable_ROW_CREATION
-saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_create_row( netsnmp_index* );
-#endif
-#endif
+                                                saHpiSensorThdPosHysteresisTable_context *row_ctx,
+                                                netsnmp_request_group * rg);
 
-#ifdef saHpiSensorThdPosHysteresisTable_IDX2
+
+saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_create_row( netsnmp_index* );
+
 saHpiSensorThdPosHysteresisTable_context * saHpiSensorThdPosHysteresisTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
