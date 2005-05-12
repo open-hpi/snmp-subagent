@@ -49,6 +49,7 @@
 #include <saHpiCtrlOemTable.h>
 #include <saHpiSensorTable.h>
 #include <saHpiCurrentSensorStateTable.h>
+#include <saHpiAnnunciatorTable.h>
 
 #include <session_info.h>
 
@@ -252,7 +253,6 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			break;
 
 		case SAHPI_SENSOR_RDR:
-
 			DEBUGMSGTL ((AGENT,
 				     "SAHPI_CTRL_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
@@ -309,24 +309,24 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				     "Called populate_watchdog(); rc: %d\n",
 				     rv));
 			break;
-
+*/
 		case SAHPI_ANNUNCIATOR_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_annunciator; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      "SAHPI_ANNUNCIATOR_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.AnnunciatorRec.AnnunciatorNum));
-			rv = populate_annunciator (rdr_entry.RecordId,
-						&rdr_entry.RdrTypeUnion.AnnunciatorRec,
-						rpt_entry,
-						full_oid, full_oid_len,
-						child_oid, &child_oid_len);
+			rv = populate_annunciator (sessionid,
+                                                   &rdr_entry,
+                                                   rpt_entry,
+                                                   full_oid, full_oid_len,
+                                                   child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_annunciator(); rc: %d\n",
 				     rv));
 
 			break;
-*/
+
 		default:
 			DEBUGMSGTL((AGENT, "RdrType,default: Not Implemented\n"));
 			break;
