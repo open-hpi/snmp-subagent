@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiAnnunciatorTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,6 +50,262 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiAnnunciatorTable_oid[] = { saHpiAnnunciatorTable_TABLE_OID };
 size_t saHpiAnnunciatorTable_oid_len = OID_LENGTH(saHpiAnnunciatorTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long annunciator_entry_count = 0;
+static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5 };
+int handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
+                                      netsnmp_handler_registration *reginfo,
+                                      netsnmp_agent_request_info   *reqinfo,
+                                      netsnmp_request_info         *requests);
+int initialize_table_saHpiAnnunciatorEntryCount(void);
+
+/*
+ * SaErrorT populate_ctrl_text()
+ */
+SaErrorT populate_annunciator(SaHpiSessionIdT sessionid, 
+                              SaHpiRdrT *rdr_entry,
+                              SaHpiRptEntryT *rpt_entry,
+                              oid *full_oid, size_t full_oid_len,
+                              oid *child_oid, size_t *child_oid_len)
+{
+
+	DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
+
+	SaErrorT rv = SA_OK;	
+	SaHpiTextBufferT buffer;
+	SaHpiSensorThresholdsT sensor_thresholds;
+
+	oid sensor_oid[ANNUNCIATOR_INDEX_NR];
+	netsnmp_index sensor_index;
+	saHpiAnnunciatorTable_context *sensor_context;
+
+	oid column[2];
+	int column_len = 2;
+
+	DEBUGMSGTL ((AGENT, "SAHPI_ANNUNCIATOR_RDR populate_annunciator() called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	sensor_index.len = ANNUNCIATOR_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	sensor_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	sensor_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	sensor_oid[2] = MIB_FALSE;
+	/** Index saHpiSensorNum */
+	sensor_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	/* assign the indices to the index */
+	sensor_index.oids = (oid *) & sensor_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSORNUM;
+	memset(child_oid, 0, sizeof(child_oid_len));
+	build_full_oid(saHpiSensorTable_oid, saHpiSensorTable_oid_len,
+		       column, column_len,
+		       &sensor_index,
+		       child_oid, MAX_OID_LEN, child_oid_len);
+
+	/* See if Row exists. */
+	sensor_context = NULL;
+	sensor_context = CONTAINER_FIND(cb.container, &sensor_index);
+
+	if (!sensor_context) {
+		// New entry. Add it
+		sensor_context = 
+		saHpiSensorTable_create_row(&sensor_index);
+	}
+	if (!sensor_context) {
+		snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** SaHpiInstrumentId = ASN_UNSIGNED */
+        sensor_context->saHpiSensorNum = 
+		rdr_entry->RdrTypeUnion.SensorRec.Num;
+
+        /** SaHpiSensorType = ASN_INTEGER */
+        sensor_context->saHpiSensorReadingType =
+		rdr_entry->RdrTypeUnion.SensorRec.Type + 1;
+
+        /** SaHpiEventCategory = ASN_INTEGER */
+        sensor_context->saHpiSensorCategory =
+		rdr_entry->RdrTypeUnion.SensorRec.Category + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        sensor_context->saHpiSensorEnableCtrl = 
+		(rdr_entry->RdrTypeUnion.SensorRec.EnableCtrl == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE; 
+
+        /** INTEGER = ASN_INTEGER */
+        sensor_context->saHpiSensorEventCtrl =
+		rdr_entry->RdrTypeUnion.SensorRec.EventCtrl + 1;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+	memset(&buffer, 0, sizeof(buffer));
+        rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, 
+			          rdr_entry->RdrTypeUnion.SensorRec.Category,
+			          &buffer); 
+	oh_decode_char(&buffer);
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
+		saHpiSensorTable_delete_row( sensor_context );
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	memset(sensor_context->saHpiSensorSupportedEventStates, 0, 
+	       sizeof(sensor_context->saHpiSensorSupportedEventStates));
+	memcpy(sensor_context->saHpiSensorSupportedEventStates,
+	       buffer.Data, buffer.DataLength);
+	sensor_context->saHpiSensorSupportedEventStates_len =
+		buffer.DataLength;
+
+        /** TruthValue = ASN_INTEGER */
+        sensor_context->saHpiSensorIsSupported =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported;
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sensor_context->saHpiSensorReadingType =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
+
+        /** SaHpiSensorUnits = ASN_INTEGER */
+	sensor_context->saHpiSensorBaseUnits = 
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.BaseUnits + 1;
+
+        /** SaHpiSensorUnits = ASN_INTEGER */   
+	sensor_context->saHpiSensorBaseUnits =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUnits + 1;
+
+        /** INTEGER = ASN_INTEGER */
+	sensor_context->saHpiSensorModifierUse =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUse + 1;
+
+        /** TruthValue = ASN_INTEGER */
+	sensor_context->saHpiSensorPercentage =
+		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Percentage == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+	rv = decode_sensor_range_flags(&buffer, 
+	        rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Flags);
+	if (rv != SA_OK) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
+		saHpiSensorTable_delete_row( sensor_context );
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
+	sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
+
+        /** Double = ASN_OCTET_STR */
+	memset(sensor_context->saHpiSensorAccuracyFactor, 
+	       0, sizeof(SaHpiFloat64T));
+	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
+	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
+	       sizeof(SaHpiFloat64T));
+	sensor_context->saHpiSensorAccuracyFactor_len = sizeof(SaHpiFloat64T);
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+	sensor_context->saHpiSensorOem =
+		rdr_entry->RdrTypeUnion.SensorRec.Oem;
+
+	/** RowPointer = ASN_OBJECT_ID */
+	memset(sensor_context->saHpiSensorRDR, 
+	       0, 
+	       sizeof(sensor_context->saHpiSensorRDR));
+	sensor_context->saHpiSensorRDR_len = full_oid_len * sizeof(oid);
+	memcpy(sensor_context->saHpiSensorRDR, 
+	       full_oid, 
+	       sensor_context->saHpiSensorRDR_len);
+
+	CONTAINER_INSERT (cb.container, sensor_context);
+
+	sensor_entry_count = CONTAINER_SIZE (cb.container);
+
+	return rv;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
+                                  netsnmp_handler_registration *reginfo,
+                                  netsnmp_agent_request_info   *reqinfo,
+                                  netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &annunciator_entry_count,
+                                     sizeof(annunciator_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/*
+ * int initialize_table_saHpiSensorEntryCount()
+ */
+int initialize_table_saHpiAnnunciatorEntryCount(void)
+{
+
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiAnnunciatorEntryCount", 
+                        handle_saHpiAnnunciatorEntryCount,
+                        saHpiAnnunciatorEntryCount_oid, 
+                        OID_LENGTH(saHpiAnnunciatorEntryCount_oid),
+                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /************************************************************
  * keep binary tree to find context by name
@@ -123,6 +385,8 @@ void
 init_saHpiAnnunciatorTable(void)
 {
     initialize_table_saHpiAnnunciatorTable();
+
+    initialize_table_saHpiAnnunciatorEntryCount();
 
 }
 
@@ -215,22 +479,22 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_XX;
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_XX;
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiAnnunciatorNum;
 
        memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
        var_saHpiAnnunciatorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiAnnunciatorNum.next_variable = &var_XX;
+       var_saHpiAnnunciatorNum.next_variable = NULL;
 
 
     /*
@@ -250,34 +514,14 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiAnnunciatorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		err = saHpiDomainId_check_index(
+			*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+			*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+			*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiAnnunciatorNum_check_index(
+			*var_saHpiAnnunciatorNum.val.integer);    
     }
 
     /*
@@ -689,8 +933,10 @@ void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
             /** INTEGER = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 

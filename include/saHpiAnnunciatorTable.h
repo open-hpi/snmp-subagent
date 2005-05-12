@@ -72,6 +72,15 @@ typedef struct saHpiAnnunciatorTable_context_s {
 /*************************************************************
  * function declarations
  */
+SaErrorT populate_annunciator(SaHpiSessionIdT sessionid, 
+                              SaHpiRdrT *rdr_entry,
+                              SaHpiRptEntryT *rpt_entry,
+                              oid *full_oid, size_t full_oid_len,
+                              oid *child_oid, size_t *child_oid_len);
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiAnnunciatorTable(void);
 void initialize_table_saHpiAnnunciatorTable(void);
 const saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_get_by_idx(netsnmp_index *);
@@ -87,6 +96,13 @@ extern oid saHpiAnnunciatorTable_oid[];
 extern size_t saHpiAnnunciatorTable_oid_len;
 
 #define saHpiAnnunciatorTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,6
+
+/* Number of table Indexes */
+#define ANNUNCIATOR_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiAnnunciatorNum_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiAnnunciatorTable
@@ -101,20 +117,6 @@ extern size_t saHpiAnnunciatorTable_oid_len;
 #define saHpiAnnunciatorTable_COL_MIN 2
 #define saHpiAnnunciatorTable_COL_MAX 7
 
-/* comment out the following line if you don't handle SET-REQUEST for saHpiAnnunciatorTable */
-#define saHpiAnnunciatorTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiAnnunciatorTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiAnnunciatorTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiAnnunciatorTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiAnnunciatorTable_SET_HANDLING
 
 int saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnmp_index * hdr );
 
@@ -139,14 +141,9 @@ int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiAnnunciatorTable_ROW_CREATION
 saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiAnnunciatorTable_IDX2
 saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
