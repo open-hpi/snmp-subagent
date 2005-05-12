@@ -381,7 +381,7 @@ saHpiSensorTable_cmp( const void *lhs, const void *rhs )
 
 	/* check for NULL pointers */
 	if (lhs == NULL || rhs == NULL ) {
-		DEBUGMSGTL((AGENT,"saHpiCtrlDigitalTable_cmp() NULL pointer ERROR\n" ));
+		DEBUGMSGTL((AGENT,"saHpiSensorTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
 	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */
