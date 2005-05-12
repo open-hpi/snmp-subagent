@@ -215,6 +215,7 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
     /** TODO: add storage for external index(s)! */
     netsnmp_variable_list var_saHpiDomainId;
     netsnmp_variable_list var_saHpiResourceId;
+    netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiAnnunciatorNum;
     int err;
 
@@ -256,6 +257,16 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
        var_saHpiResourceId.next_variable = &var_XX;
 #endif
 
+       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+       /** TODO: link this index to the next, or NULL for the last one */
+#ifdef TABLE_CONTAINER_TODO
+    snmp_log(LOG_ERR, "saHpiAnnunciatorTable_extract_index index list not implemented!\n" );
+    return 0;
+#else
+       var_saHpiResourceIsHistorical.next_variable = &var_XX;
+#endif
+
        memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
        var_saHpiAnnunciatorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
@@ -279,6 +290,8 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
    
               /** skipping external index saHpiResourceId */
    
+              /** skipping external index saHpiResourceIsHistorical */
+   
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
    
    
@@ -293,6 +306,13 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
             * TODO: check index for valid values. For EXAMPLE:
             *
               * if ( *var_saHpiResourceId.val.integer != XXX ) {
+          *    err = -1;
+          * }
+          */
+           /*
+            * TODO: check index for valid values. For EXAMPLE:
+            *
+              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
           *    err = -1;
           * }
           */
@@ -844,6 +864,8 @@ initialize_table_saHpiAnnunciatorTable(void)
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiResourceId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
+        /** index: saHpiResourceIsHistorical */
+        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
         /** index: saHpiAnnunciatorNum */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
