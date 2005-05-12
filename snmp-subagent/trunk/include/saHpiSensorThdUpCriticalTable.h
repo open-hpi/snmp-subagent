@@ -43,7 +43,7 @@ typedef struct saHpiSensorThdUpCriticalTable_context_s {
         long saHpiSensorThdUpCriticalType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        unsigned char saHpiSensorThdUpCriticalValue[65535];
+        unsigned char saHpiSensorThdUpCriticalValue[SAHPI_SENSOR_BUFFER_LENGTH];
         long saHpiSensorThdUpCriticalValue_len;
 
         /** TruthValue = ASN_INTEGER */
