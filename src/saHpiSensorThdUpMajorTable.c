@@ -36,16 +36,173 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorThdUpMajorTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiSensorThdUpMajorTable_oid[] = { saHpiSensorThdUpMajorTable_TABLE_OID };
+oid saHpiSensorThdUpMajorTable_oid[] = { saHpiSensorThdUpMajorTable_TABLE_OID};
 size_t saHpiSensorThdUpMajorTable_oid_len = OID_LENGTH(saHpiSensorThdUpMajorTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiSensorThdUpMajorTable_IDX2
+/*
+ * SaErrorT populate_sensor_max()
+ */
+SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid, 
+                                   SaHpiRdrT *rdr_entry,
+                                   SaHpiRptEntryT *rpt_entry,
+                                   SaHpiSensorThresholdsT *sensor_thresholds)
+{
+
+        DEBUGMSGTL ((AGENT, "populate_sen_thd_up_major, called\n"));
+
+        SaErrorT rv = SA_OK;
+
+        oid sen_thd_up_major_oid[SEN_THD_UP_MAJOR_IDX_NR];
+        netsnmp_index sen_thd_up_major_idx;
+        saHpiSensorThdUpMajorTable_context *sen_thd_up_major_ctx;
+
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_sen_thd_up_major() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_sen_thd_up_major() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        sen_thd_up_major_idx.len = SEN_THD_UP_MAJOR_IDX_NR;
+        /** Index saHpiDomainId is external */
+        sen_thd_up_major_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        sen_thd_up_major_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        sen_thd_up_major_oid[2] = MIB_FALSE;
+        /** Index saHpiSensorNum */
+        sen_thd_up_major_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+        /* assign the indices to the index */
+        sen_thd_up_major_idx.oids = (oid *) & sen_thd_up_major_oid;
+
+        /* See if Row exists. */
+        sen_thd_up_major_ctx = NULL;
+        sen_thd_up_major_ctx = CONTAINER_FIND(cb.container, &sen_thd_up_major_idx);
+
+        if (!sen_thd_up_major_ctx) {
+                // New entry. Add it
+                sen_thd_up_major_ctx = 
+                saHpiSensorThdUpMajorTable_create_row(&sen_thd_up_major_idx);
+        }
+        if (!sen_thd_up_major_ctx) {
+                snmp_log (LOG_ERR, "Not enough memory for a ThdUpMajor row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /** TruthValue = ASN_INTEGER */
+        if (SAHPI_STM_UP_MAJOR && 
+            rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold) {
+                sen_thd_up_major_ctx->saHpiSensorThdUpMajorIsReadable =
+                MIB_TRUE;
+        } else {
+                sen_thd_up_major_ctx->saHpiSensorThdUpMajorIsReadable =
+                MIB_FALSE;
+        }
+
+        /** TruthValue = ASN_INTEGER */
+        if (SAHPI_STM_LOW_CRIT && 
+            rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
+                sen_thd_up_major_ctx->saHpiSensorThdUpMajorIsWritable =
+                MIB_TRUE;
+        } else {
+                sen_thd_up_major_ctx->saHpiSensorThdUpMajorIsWritable =
+                MIB_FALSE;
+        }
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sen_thd_up_major_ctx->saHpiSensorThdUpMajorType = 
+        sensor_thresholds->UpMajor.Type + 1; 
+
+        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+        sen_thd_up_major_ctx->saHpiSensorThdUpMajorValue_len =
+        set_sensor_reading_value(&sensor_thresholds->UpMajor,
+                                 sen_thd_up_major_ctx->saHpiSensorThdUpMajorValue);
+
+        /** TruthValue = ASN_INTEGER */
+        sen_thd_up_major_ctx->saHpiSensorThdUpMajorNonLinear = 
+        (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
+         == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        CONTAINER_INSERT (cb.container, sen_thd_up_major_ctx);
+
+        return rv;
+}
+
+/*
+ * int set_table_ctrl_analog_mode()
+ */
+int set_table_sen_thds_up_major (saHpiSensorThdUpMajorTable_context *row_ctx)
+{
+
+        DEBUGMSGTL ((AGENT, "set_table_sen_thds_up_major, called\n"));
+
+        SaErrorT                rc = SA_OK;
+        SaHpiSessionIdT         session_id;
+        SaHpiResourceIdT        resource_id;
+        SaHpiSensorNumT         sensor_num;     
+        SaHpiSensorThresholdsT  sensor_thresholds;
+
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
+
+        session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+        resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+        sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX];
+
+        memset(&sensor_thresholds, 0, sizeof(sensor_thresholds));
+
+        sensor_thresholds.UpMajor.IsSupported = SAHPI_TRUE;
+        sensor_thresholds.UpMajor.Type = row_ctx->saHpiSensorThdUpMajorType - 1;
+        set_sen_thd_value(&sensor_thresholds.UpMajor.Value,
+                          sensor_thresholds.UpMajor.Type,
+                          row_ctx->saHpiSensorThdUpMajorValue, 
+                          row_ctx->saHpiSensorThdUpMajorValue_len);
+
+        rc = saHpiSensorThresholdsSet(session_id, resource_id, 
+                                      sensor_num, &sensor_thresholds);
+
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                          "SAHPI_STM_UP_MAJOR: Call to saHpiSensorThresholdsSet failed to set Mode rc: %s.\n",
+                          oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                             "SAHPI_STM_UP_MAJOR: Call to saHpiSensorThresholdsSet failed to set Mode rc: %s.\n",
+                             oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        }
+
+        return SNMP_ERR_NOERROR; 
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,78 +215,66 @@ static int saHpiSensorThdUpMajorTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiSensorThdUpMajorTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiSensorThdUpMajorTable_context *context_l =
+        saHpiSensorThdUpMajorTable_context *context_l =
         (saHpiSensorThdUpMajorTable_context *)lhs;
-    saHpiSensorThdUpMajorTable_context *context_r =
+        saHpiSensorThdUpMajorTable_context *context_r =
         (saHpiSensorThdUpMajorTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiSensorThdUpMajorTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+        /*
+         * check primary key, then secondary. Add your own code if
+         * there are more than 2 indexes
+         */
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdLowCriticalTable_cmp, called\n"));
+
+        /* check for NULL pointers */
+        if (lhs == NULL || rhs == NULL ) {
+                DEBUGMSGTL((AGENT,"saHpiSensorThdLowCriticalTable_cmp() NULL pointer ERROR\n" ));
+                return 0;
+        }
+        /* CHECK FIRST INDEX,  saHpiDomainId */
+        if ( context_l->index.oids[0] < context_r->index.oids[0])
+                return -1;
+
+        if ( context_l->index.oids[0] > context_r->index.oids[0])
+                return 1;
+
+        if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+                /* If saHpiDomainId index is equal sort by second index */
+                /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+                if ( context_l->index.oids[1] < context_r->index.oids[1])
+                        return -1;
+
+                if ( context_l->index.oids[1] > context_r->index.oids[1])
+                        return 1;
+
+                if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+                        /* If saHpiResourceEntryId index is equal sort by third index */
+                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        if ( context_l->index.oids[2] < context_r->index.oids[2])
+                                return -1;
+
+                        if ( context_l->index.oids[2] > context_r->index.oids[2])
+                                return 1;
+
+                        if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiSensorNum */
+                                if ( context_l->index.oids[3] < context_r->index.oids[3])
+                                        return -1;
+
+                                if ( context_l->index.oids[3] > context_r->index.oids[3])
+                                        return 1;
+
+                                if ( context_l->index.oids[3] == context_r->index.oids[3])
+                                        return 0;
+                        }
+                }
+        }
+
+        return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiSensorThdUpMajorTable_context *
-saHpiSensorThdUpMajorTable_get( const char *name, int len )
-{
-    saHpiSensorThdUpMajorTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdUpMajorTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
 
 
 /************************************************************
@@ -138,58 +283,60 @@ saHpiSensorThdUpMajorTable_get( const char *name, int len )
 void
 init_saHpiSensorThdUpMajorTable(void)
 {
-    initialize_table_saHpiSensorThdUpMajorTable();
+        DEBUGMSGTL ((AGENT, "init_saHpiSensorThdUpMajorTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiSensorThdUpMajorTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiSensorThdUpMajorTable();
+
+        /*
+         * TODO: perform any startup stuff here, such as
+         * populating the table with initial data.
+         *
+         * saHpiSensorThdUpMajorTable_context * new_row = create_row(index);
+         * CONTAINER_INSERT(cb.container,new_row);
+         */
 }
 
 /************************************************************
  * the *_row_copy routine
  */
 static int saHpiSensorThdUpMajorTable_row_copy(saHpiSensorThdUpMajorTable_context * dst,
-                         saHpiSensorThdUpMajorTable_context * src)
+                                               saHpiSensorThdUpMajorTable_context * src)
 {
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_row_copy, called\n"));
 
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiSensorThdUpMajorIsReadable = src->saHpiSensorThdUpMajorIsReadable;
+        if (!dst||!src)
+                return 1;
 
-    dst->saHpiSensorThdUpMajorIsWritable = src->saHpiSensorThdUpMajorIsWritable;
+        /*
+         * copy index, if provided
+         */
+        if (dst->index.oids)
+                free(dst->index.oids);
+        if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+                            src->index.len * sizeof(oid) )) {
+                dst->index.oids = NULL;
+                return 1;
+        }
+        dst->index.len = src->index.len;
 
-    dst->saHpiSensorThdUpMajorType = src->saHpiSensorThdUpMajorType;
 
-    memcpy( dst->saHpiSensorThdUpMajorValue, src->saHpiSensorThdUpMajorValue, src->saHpiSensorThdUpMajorValue_len );
-    dst->saHpiSensorThdUpMajorValue_len = src->saHpiSensorThdUpMajorValue_len;
+        /*
+         * copy components into the context structure
+         */
+        /** TODO: add code for external index(s)! */
+        dst->saHpiSensorThdUpMajorIsReadable = src->saHpiSensorThdUpMajorIsReadable;
 
-    dst->saHpiSensorThdUpMajorNonLinear = src->saHpiSensorThdUpMajorNonLinear;
+        dst->saHpiSensorThdUpMajorIsWritable = src->saHpiSensorThdUpMajorIsWritable;
 
-    return 0;
+        dst->saHpiSensorThdUpMajorType = src->saHpiSensorThdUpMajorType;
+
+        memcpy( dst->saHpiSensorThdUpMajorValue, src->saHpiSensorThdUpMajorValue, src->saHpiSensorThdUpMajorValue_len );
+        dst->saHpiSensorThdUpMajorValue_len = src->saHpiSensorThdUpMajorValue_len;
+
+        dst->saHpiSensorThdUpMajorNonLinear = src->saHpiSensorThdUpMajorNonLinear;
+
+        return 0;
 }
-
-#ifdef saHpiSensorThdUpMajorTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -202,131 +349,91 @@ static int saHpiSensorThdUpMajorTable_row_copy(saHpiSensorThdUpMajorTable_contex
 int
 saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiSensorNum;
-    int err;
+        /*
+         * temporary local storage for extracting oid index
+         *
+         * extract index uses varbinds (netsnmp_variable_list) to parse
+         * the index OID into the individual components for each index part.
+         */
+        /** TODO: add storage for external index(s)! */
+        netsnmp_variable_list var_saHpiDomainId;
+        netsnmp_variable_list var_saHpiResourceId;
+        netsnmp_variable_list var_saHpiResourceIsHistorical;
+        netsnmp_variable_list var_saHpiSensorNum;
+        int err;
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_extract_index, called\n"));
+
+        /*
+         * copy index, if provided
+         */
+        if (hdr) {
+                netsnmp_assert(ctx->index.oids == NULL);
+                if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+                                    hdr->len * sizeof(oid) )) {
+                        return -1;
+                }
+                ctx->index.len = hdr->len;
         }
-        ctx->index.len = hdr->len;
-    }
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdUpMajorTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+        /*
+         * initialize variable that will hold each component of the index.
+         * If there are multiple indexes for the table, the variable_lists
+         * need to be linked together, in order.
+         */
+        /** TODO: add code for external index(s)! */
+        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdUpMajorTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdUpMajorTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiResourceIsHistorical.next_variable = &var_saHpiSensorNum;
 
-       memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
-       var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdUpMajorTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiSensorNum.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
+        var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiSensorNum.next_variable = NULL;
 
+        /*
+         * parse the oid into the individual index components
+         */
+        err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+        if (err == SNMP_ERR_NOERROR) {
+                /*
+                 * copy index components into the context structure
+                 */
+                /** skipping external index saHpiDomainId */
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiResourceIsHistorical */
-   
-              /** skipping external index saHpiSensorNum */
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiSensorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
+                /** skipping external index saHpiResourceId */
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+                /** skipping external index saHpiResourceIsHistorical */
 
-    return err;
+                /** skipping external index saHpiSensorNum */
+
+                err = saHpiDomainId_check_index(
+                                               *var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(
+                                                      *var_saHpiResourceId.val.integer);  
+                err = saHpiResourceIsHistorical_check_index(
+                                                           *var_saHpiResourceIsHistorical.val.integer);
+                err = saHpiSensorNum_check_index(
+                                                *var_saHpiSensorNum.val.integer);
+        }
+
+        /*
+         * parsing may have allocated memory. free it.
+         */
+        snmp_reset_var_buffers( &var_saHpiDomainId );
+
+        return err;
 }
 
 /************************************************************
@@ -339,18 +446,20 @@ saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * c
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiSensorThdUpMajorTable_can_activate(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                      saHpiSensorThdUpMajorTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+                                            saHpiSensorThdUpMajorTable_context *row_ctx,
+                                            netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for activation requirements here
-     */
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_can_activate, called\n"));
+
+        /*
+         * TODO: check for activation requirements here
+         */
 
 
-    /*
-     * be optimistic.
-     */
-    return 1;
+        /*
+         * be optimistic.
+         */
+        return 1;
 }
 
 /************************************************************
@@ -364,13 +473,15 @@ int saHpiSensorThdUpMajorTable_can_activate(saHpiSensorThdUpMajorTable_context *
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiSensorThdUpMajorTable_can_deactivate(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                        saHpiSensorThdUpMajorTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+                                              saHpiSensorThdUpMajorTable_context *row_ctx,
+                                              netsnmp_request_group * rg)
 {
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_can_deactivate, called\n"));
+
+        /*
+         * TODO: check for deactivation requirements here
+         */
+        return 1;
 }
 
 /************************************************************
@@ -381,23 +492,24 @@ int saHpiSensorThdUpMajorTable_can_deactivate(saHpiSensorThdUpMajorTable_context
  * return 0 if the row cannot be deleted
  */
 int saHpiSensorThdUpMajorTable_can_delete(saHpiSensorThdUpMajorTable_context *undo_ctx,
-                    saHpiSensorThdUpMajorTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+                                          saHpiSensorThdUpMajorTable_context *row_ctx,
+                                          netsnmp_request_group * rg)
 {
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiSensorThdUpMajorTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_can_delete, called\n"));
+
+        /*
+         * probably shouldn't delete a row that we can't
+         * deactivate.
+         */
+        if (saHpiSensorThdUpMajorTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+                return 0;
+
+        /*
+         * TODO: check for other deletion requirements here
+         */
+        return 1;
 }
 
-#ifdef saHpiSensorThdUpMajorTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -415,36 +527,38 @@ int saHpiSensorThdUpMajorTable_can_delete(saHpiSensorThdUpMajorTable_context *un
 saHpiSensorThdUpMajorTable_context *
 saHpiSensorThdUpMajorTable_create_row( netsnmp_index* hdr)
 {
-    saHpiSensorThdUpMajorTable_context * ctx =
+        saHpiSensorThdUpMajorTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorThdUpMajorTable_context);
-    if(!ctx)
-        return NULL;
-        
-    /*
-     * TODO: check indexes, if necessary.
-     */
-    if(saHpiSensorThdUpMajorTable_extract_index( ctx, hdr )) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
-    }
 
-    /* netsnmp_mutex_init(ctx->lock);
-       netsnmp_mutex_lock(ctx->lock); */
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_create_row, called\n"));
 
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-     ctx->saHpiSensorThdUpMajorValue = 0;
-    */
+        if (!ctx)
+                return NULL;
 
-    return ctx;
+        /*
+         * TODO: check indexes, if necessary.
+         */
+        if (saHpiSensorThdUpMajorTable_extract_index( ctx, hdr )) {
+                free(ctx->index.oids);
+                free(ctx);
+                return NULL;
+        }
+
+        /* netsnmp_mutex_init(ctx->lock);
+           netsnmp_mutex_lock(ctx->lock); */
+
+        /*
+         * TODO: initialize any default values here. This is also
+         * first place you really should allocate any memory for
+         * yourself to use.  If you allocated memory earlier,
+         * make sure you free it for earlier error cases!
+         */
+        /**
+         ctx->saHpiSensorThdUpMajorValue = 0;
+        */
+
+        return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -452,21 +566,23 @@ saHpiSensorThdUpMajorTable_create_row( netsnmp_index* hdr)
 saHpiSensorThdUpMajorTable_context *
 saHpiSensorThdUpMajorTable_duplicate_row( saHpiSensorThdUpMajorTable_context * row_ctx)
 {
-    saHpiSensorThdUpMajorTable_context * dup;
+        saHpiSensorThdUpMajorTable_context * dup;
 
-    if(!row_ctx)
-        return NULL;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_duplicate_row, called\n"));
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiSensorThdUpMajorTable_context);
-    if(!dup)
-        return NULL;
-        
-    if(saHpiSensorThdUpMajorTable_row_copy(dup,row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
+        if (!row_ctx)
+                return NULL;
 
-    return dup;
+        dup = SNMP_MALLOC_TYPEDEF(saHpiSensorThdUpMajorTable_context);
+        if (!dup)
+                return NULL;
+
+        if (saHpiSensorThdUpMajorTable_row_copy(dup,row_ctx)) {
+                free(dup);
+                dup = NULL;
+        }
+
+        return dup;
 }
 
 /************************************************************
@@ -474,21 +590,23 @@ saHpiSensorThdUpMajorTable_duplicate_row( saHpiSensorThdUpMajorTable_context * r
  */
 netsnmp_index * saHpiSensorThdUpMajorTable_delete_row( saHpiSensorThdUpMajorTable_context * ctx )
 {
-  /* netsnmp_mutex_destroy(ctx->lock); */
+        /* netsnmp_mutex_destroy(ctx->lock); */
 
-    if(ctx->index.oids)
-        free(ctx->index.oids);
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_delete_row, called\n"));
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
+        if (ctx->index.oids)
+                free(ctx->index.oids);
 
-    /*
-     * release header
-     */
-    free( ctx );
+        /*
+         * TODO: release any memory you allocated here...
+         */
 
-    return NULL;
+        /*
+         * release header
+         */
+        free( ctx );
+
+        return NULL;
 }
 
 
@@ -509,98 +627,110 @@ netsnmp_index * saHpiSensorThdUpMajorTable_delete_row( saHpiSensorThdUpMajorTabl
  */
 void saHpiSensorThdUpMajorTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiSensorThdUpMajorTable_context *row_ctx =
-            (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx =
-            (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int rc;
+        saHpiSensorThdUpMajorTable_context *row_ctx =
+        (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx =
+        (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_variable_list *var;
+        netsnmp_request_group_item *current;
+        int rc;
 
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_reserve1, called\n"));
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        /*
+         * TODO: loop through columns, check syntax and lengths. For
+         * columns which have no dependencies, you could also move
+         * the value/range checking here to attempt to catch error
+         * cases as early as possible.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+                var = current->ri->requestvb;
+                rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+                        if (rc == SNMP_ERR_NOERROR ) {
+                                rc = check_sensor_reading_value(
+                                                               var->val_len, 
+                                                               row_ctx->saHpiSensorThdUpMajorType);
+                                if (rc != SNMP_ERR_NOERROR) {
+                                        DEBUGMSGTL ((AGENT, 
+                                                     "COLUMN_SAHPISENSORTHDUPMAJORVALUE ERROR: %d\n", 
+                                                     rc));
+                                }
+                        }
+                        break;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiSensorThdUpMajorValue));
-        break;
+                default: /** We shouldn't get here */
+                        rc = SNMP_ERR_GENERR;
+                        snmp_log(LOG_ERR, "unknown column in "
+                                 "saHpiSensorThdUpMajorTable_set_reserve1\n");
+                }
 
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiSensorThdUpMajorTable_set_reserve1\n");
+                if (rc)
+                        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+                rg->status = SNMP_MAX( rg->status, current->ri->status );
         }
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-        rg->status = SNMP_MAX( rg->status, current->ri->status );
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 void saHpiSensorThdUpMajorTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int rc;
+        saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        int rc;
 
-    rg->rg_void = rg->list->ri;
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_reserve2, called\n"));
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        rg->rg_void = rg->list->ri;
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+        /*
+         * TODO: loop through columns, check for valid
+         * values and any range constraints.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+                var = current->ri->requestvb;
+                rc = SNMP_ERR_NOERROR;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        /*
+                         * TODO: routine to check valid values
+                         *
+                         * EXAMPLE:
+                         *
+                        * if ( XXX_check_value( var->val.string, XXX ) ) {
+                    *    rc = SNMP_ERR_INCONSISTENTVALUE;
+                    *    rc = SNMP_ERR_BADVALUE;
+                    * }
+                    */
+                        break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
+
+                if (rc)
+                        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
         }
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -616,62 +746,49 @@ void saHpiSensorThdUpMajorTable_set_reserve2( netsnmp_request_group *rg )
  */
 void saHpiSensorThdUpMajorTable_set_action( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+        int            row_err = 0;
 
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_action, called\n"));
 
-        var = current->ri->requestvb;
+        /*
+         * TODO: loop through columns, copy varbind values
+         * to context structure for the row.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+                var = current->ri->requestvb;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiSensorThdUpMajorValue,var->val.string,var->val_len);
-            row_ctx->saHpiSensorThdUpMajorValue_len = var->val_len;
-        break;
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        memcpy(row_ctx->saHpiSensorThdUpMajorValue, 
+                               var->val.string,var->val_len);
+                        row_ctx->saHpiSensorThdUpMajorValue_len = var->val_len;
+                        row_err = set_table_sen_thds_up_major (row_ctx);
+                        break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiSensorThdUpMajorTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
+        if (row_err) {
+                netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+                                               (netsnmp_request_info*)rg->rg_void,
+                                               row_err);
+                return;
+        }
 
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
-
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
+        /*
+         * TODO: if you have dependencies on other tables, this would be
+         * a good place to check those, too.
+         */
 }
 
 /************************************************************
@@ -693,33 +810,35 @@ void saHpiSensorThdUpMajorTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiSensorThdUpMajorTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_commit, called\n"));
 
-        var = current->ri->requestvb;
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+                var = current->ri->requestvb;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        break;
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -732,33 +851,37 @@ void saHpiSensorThdUpMajorTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiSensorThdUpMajorTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_free, called\n"));
 
-        var = current->ri->requestvb;
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+                var = current->ri->requestvb;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        break;
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+                default: 
+                        break;
+                        /** We shouldn't get here */
+                        /** should have been logged in reserve1 */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -781,36 +904,36 @@ void saHpiSensorThdUpMajorTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiSensorThdUpMajorTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
-    saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiSensorThdUpMajorTable_context *row_ctx = (saHpiSensorThdUpMajorTable_context *)rg->existing_row;
+        saHpiSensorThdUpMajorTable_context *undo_ctx = (saHpiSensorThdUpMajorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_set_undo, called\n"));
 
-        var = current->ri->requestvb;
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        switch(current->tri->colnum) {
+                var = current->ri->requestvb;
 
-        case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        break;
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
+                        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                        break;
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
-
-#endif /** saHpiSensorThdUpMajorTable_SET_HANDLING */
 
 
 /************************************************************
@@ -820,43 +943,45 @@ void saHpiSensorThdUpMajorTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiSensorThdUpMajorTable(void)
 {
-    netsnmp_table_registration_info *table_info;
+        netsnmp_table_registration_info *table_info;
 
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiSensorThdUpMajorTable_handler called again\n");
-        return;
-    }
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorThdUpMajorTable, called\n"));
 
-    memset(&cb, 0x00, sizeof(cb));
+        if (my_handler) {
+                snmp_log(LOG_ERR, "initialize_table_saHpiSensorThdUpMajorTable_handler called again\n");
+                return;
+        }
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+        memset(&cb, 0x00, sizeof(cb));
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiSensorThdUpMajorTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiSensorThdUpMajorTable_oid,
-                                             saHpiSensorThdUpMajorTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiSensorThdUpMajorTable_handler\n");
-        return; /** mallocs failed */
-    }
+        /** create the table structure itself */
+        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
+        /* if your table is read only, it's easiest to change the
+           HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+        my_handler = netsnmp_create_handler_registration("saHpiSensorThdUpMajorTable",
+                                                         netsnmp_table_array_helper_handler,
+                                                         saHpiSensorThdUpMajorTable_oid,
+                                                         saHpiSensorThdUpMajorTable_oid_len,
+                                                         HANDLER_CAN_RWRITE);
+
+        if (!my_handler || !table_info) {
+                snmp_log(LOG_ERR, "malloc failed in "
+                         "initialize_table_saHpiSensorThdUpMajorTable_handler\n");
+                return; /** mallocs failed */
+        }
+
+        /***************************************************
+         * Setting up the table's definition
+         */
+        /*
+         * TODO: add any external indexes here.
+         */
         /** TODO: add code for external index(s)! */
 
-    /*
-     * internal indexes
-     */
+        /*
+         * internal indexes
+         */
         /** index: saHpiDomainId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiResourceId */
@@ -866,48 +991,48 @@ initialize_table_saHpiSensorThdUpMajorTable(void)
         /** index: saHpiSensorNum */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    table_info->min_column = saHpiSensorThdUpMajorTable_COL_MIN;
-    table_info->max_column = saHpiSensorThdUpMajorTable_COL_MAX;
+        table_info->min_column = saHpiSensorThdUpMajorTable_COL_MIN;
+        table_info->max_column = saHpiSensorThdUpMajorTable_COL_MAX;
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiSensorThdUpMajorTable_get_value;
-    cb.container = netsnmp_container_find("saHpiSensorThdUpMajorTable_primary:"
-                                          "saHpiSensorThdUpMajorTable:"
-                                          "table_container");
-#ifdef saHpiSensorThdUpMajorTable_IDX2
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiSensorThdUpMajorTable_secondary:"
-                                                       "saHpiSensorThdUpMajorTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiSensorThdUpMajorTable_cmp;
-#endif
-#ifdef saHpiSensorThdUpMajorTable_SET_HANDLING
-    cb.can_set = 1;
-#ifdef saHpiSensorThdUpMajorTable_ROW_CREATION
-    cb.create_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_create_row;
-#endif
-    cb.duplicate_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorThdUpMajorTable_row_copy;
+        /***************************************************
+         * registering the table with the master agent
+         */
+        cb.get_value = saHpiSensorThdUpMajorTable_get_value;
+        cb.container = netsnmp_container_find("saHpiSensorThdUpMajorTable_primary:"
+                                              "saHpiSensorThdUpMajorTable:"
+                                              "table_container");
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_delete;
+        netsnmp_container_add_index(cb.container,
+                                    netsnmp_container_find("saHpiSensorThdUpMajorTable_secondary:"
+                                                           "saHpiSensorThdUpMajorTable:"
+                                                           "table_container"));
+        cb.container->next->compare = saHpiSensorThdUpMajorTable_cmp;
 
-    cb.set_reserve1 = saHpiSensorThdUpMajorTable_set_reserve1;
-    cb.set_reserve2 = saHpiSensorThdUpMajorTable_set_reserve2;
-    cb.set_action = saHpiSensorThdUpMajorTable_set_action;
-    cb.set_commit = saHpiSensorThdUpMajorTable_set_commit;
-    cb.set_free = saHpiSensorThdUpMajorTable_set_free;
-    cb.set_undo = saHpiSensorThdUpMajorTable_set_undo;
-#endif
-    DEBUGMSGTL(("initialize_table_saHpiSensorThdUpMajorTable",
-                "Registering table saHpiSensorThdUpMajorTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+
+        cb.can_set = 1;
+
+        cb.create_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_create_row;
+
+        cb.duplicate_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_duplicate_row;
+        cb.delete_row = (UserRowMethod*)saHpiSensorThdUpMajorTable_delete_row;
+        cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorThdUpMajorTable_row_copy;
+
+        cb.can_activate = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_activate;
+        cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_deactivate;
+        cb.can_delete = (Netsnmp_User_Row_Action *)saHpiSensorThdUpMajorTable_can_delete;
+
+        cb.set_reserve1 = saHpiSensorThdUpMajorTable_set_reserve1;
+        cb.set_reserve2 = saHpiSensorThdUpMajorTable_set_reserve2;
+        cb.set_action = saHpiSensorThdUpMajorTable_set_action;
+        cb.set_commit = saHpiSensorThdUpMajorTable_set_commit;
+        cb.set_free = saHpiSensorThdUpMajorTable_set_free;
+        cb.set_undo = saHpiSensorThdUpMajorTable_set_undo;
+
+        DEBUGMSGTL(("initialize_table_saHpiSensorThdUpMajorTable",
+                    "Registering table saHpiSensorThdUpMajorTable "
+                    "as a table array\n"));
+        netsnmp_table_container_register(my_handler, table_info, &cb,
+                                         cb.container, 1);
 }
 
 /************************************************************
@@ -919,56 +1044,58 @@ initialize_table_saHpiSensorThdUpMajorTable(void)
  * change in code in this fuction.
  */
 int saHpiSensorThdUpMajorTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+                                        netsnmp_request_info *request,
+                                        netsnmp_index *item,
+                                        netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiSensorThdUpMajorTable_context *context = (saHpiSensorThdUpMajorTable_context *)item;
+        netsnmp_variable_list *var = request->requestvb;
+        saHpiSensorThdUpMajorTable_context *context = (saHpiSensorThdUpMajorTable_context *)item;
 
-    switch(table_info->colnum) {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_get_value, called\n"));
 
+        switch (table_info->colnum) {
+        
         case COLUMN_SAHPISENSORTHDUPMAJORISREADABLE:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpMajorIsReadable,
-                         sizeof(context->saHpiSensorThdUpMajorIsReadable) );
-        break;
-    
+                /** TruthValue = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiSensorThdUpMajorIsReadable,
+                                         sizeof(context->saHpiSensorThdUpMajorIsReadable) );
+                break;
+
         case COLUMN_SAHPISENSORTHDUPMAJORISWRITABLE:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpMajorIsWritable,
-                         sizeof(context->saHpiSensorThdUpMajorIsWritable) );
-        break;
-    
+                /** TruthValue = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiSensorThdUpMajorIsWritable,
+                                         sizeof(context->saHpiSensorThdUpMajorIsWritable) );
+                break;
+
         case COLUMN_SAHPISENSORTHDUPMAJORTYPE:
-            /** SaHpiSensorReadingType = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpMajorType,
-                         sizeof(context->saHpiSensorThdUpMajorType) );
-        break;
-    
+                /** SaHpiSensorReadingType = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiSensorThdUpMajorType,
+                                         sizeof(context->saHpiSensorThdUpMajorType) );
+                break;
+
         case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorThdUpMajorValue,
-                         context->saHpiSensorThdUpMajorValue_len );
-        break;
-    
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                snmp_set_var_typed_value(var, ASN_OCTET_STR,
+                                         (char*)&context->saHpiSensorThdUpMajorValue,
+                                         context->saHpiSensorThdUpMajorValue_len );
+                break;
+
         case COLUMN_SAHPISENSORTHDUPMAJORNONLINEAR:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpMajorNonLinear,
-                         sizeof(context->saHpiSensorThdUpMajorNonLinear) );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiSensorThdUpMajorTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+                /** TruthValue = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiSensorThdUpMajorNonLinear,
+                                         sizeof(context->saHpiSensorThdUpMajorNonLinear) );
+                break;
+
+        default: /** We shouldn't get here */
+                snmp_log(LOG_ERR, "unknown column in "
+                         "saHpiSensorThdUpMajorTable_get_value\n");
+                return SNMP_ERR_GENERR;
+        }
+        return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -977,7 +1104,9 @@ int saHpiSensorThdUpMajorTable_get_value(
 const saHpiSensorThdUpMajorTable_context *
 saHpiSensorThdUpMajorTable_get_by_idx(netsnmp_index * hdr)
 {
-    return (const saHpiSensorThdUpMajorTable_context *)
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_get_by_idx, called\n"));
+
+        return(const saHpiSensorThdUpMajorTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
 
