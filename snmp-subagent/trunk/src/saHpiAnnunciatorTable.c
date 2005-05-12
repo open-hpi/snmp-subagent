@@ -66,8 +66,17 @@ int handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
                                       netsnmp_request_info         *requests);
 int initialize_table_saHpiAnnunciatorEntryCount(void);
 
-/*
- * SaErrorT populate_ctrl_text()
+/**
+ * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
  */
 SaErrorT populate_annunciator(SaHpiSessionIdT sessionid, 
                               SaHpiRdrT *rdr_entry,
@@ -79,12 +88,11 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
 
 	SaErrorT rv = SA_OK;	
-	SaHpiTextBufferT buffer;
-	SaHpiSensorThresholdsT sensor_thresholds;
+        SaHpiAnnunciatorModeT mode;
 
-	oid sensor_oid[ANNUNCIATOR_INDEX_NR];
-	netsnmp_index sensor_index;
-	saHpiAnnunciatorTable_context *sensor_context;
+	oid annunciator_oid[ANNUNCIATOR_INDEX_NR];
+	netsnmp_index annunciator_index;
+	saHpiAnnunciatorTable_context *annunciator_context;
 
 	oid column[2];
 	int column_len = 2;
@@ -105,142 +113,88 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
 
 	/* BUILD oid for new row */
 	/* assign the number of indices */
-	sensor_index.len = ANNUNCIATOR_INDEX_NR;
+	annunciator_index.len = ANNUNCIATOR_INDEX_NR;
 	/** Index saHpiDomainId is external */
-	sensor_oid[0] = get_domain_id(sessionid);
+	annunciator_oid[0] = get_domain_id(sessionid);
 	/** Index saHpiResourceId is external */
-	sensor_oid[1] = rpt_entry->ResourceId;
+	annunciator_oid[1] = rpt_entry->ResourceId;
 	/** Index saHpiResourceIsHistorical is external */
-	sensor_oid[2] = MIB_FALSE;
+	annunciator_oid[2] = MIB_FALSE;
 	/** Index saHpiSensorNum */
-	sensor_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	annunciator_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
 	/* assign the indices to the index */
-	sensor_index.oids = (oid *) & sensor_oid;
+	annunciator_index.oids = (oid *) & annunciator_oid;
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
-	column[1] = COLUMN_SAHPISENSORNUM;
+	column[1] = COLUMN_SAHPIANNUNCIATORTYPE;
 	memset(child_oid, 0, sizeof(child_oid_len));
-	build_full_oid(saHpiSensorTable_oid, saHpiSensorTable_oid_len,
+	build_full_oid(saHpiAnnunciatorTable_oid, saHpiAnnunciatorTable_oid_len,
 		       column, column_len,
-		       &sensor_index,
+		       &annunciator_index,
 		       child_oid, MAX_OID_LEN, child_oid_len);
 
 	/* See if Row exists. */
-	sensor_context = NULL;
-	sensor_context = CONTAINER_FIND(cb.container, &sensor_index);
+	annunciator_context = NULL;
+	annunciator_context = CONTAINER_FIND(cb.container, &annunciator_index);
 
-	if (!sensor_context) {
+	if (!annunciator_context) {
 		// New entry. Add it
-		sensor_context = 
-		saHpiSensorTable_create_row(&sensor_index);
+		annunciator_context = 
+		saHpiAnnunciatorTable_create_row(&annunciator_index);
 	}
-	if (!sensor_context) {
+	if (!annunciator_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
-	/** SaHpiInstrumentId = ASN_UNSIGNED */
-        sensor_context->saHpiSensorNum = 
-		rdr_entry->RdrTypeUnion.SensorRec.Num;
-
-        /** SaHpiSensorType = ASN_INTEGER */
-        sensor_context->saHpiSensorReadingType =
-		rdr_entry->RdrTypeUnion.SensorRec.Type + 1;
-
-        /** SaHpiEventCategory = ASN_INTEGER */
-        sensor_context->saHpiSensorCategory =
-		rdr_entry->RdrTypeUnion.SensorRec.Category + 1;
-
-        /** TruthValue = ASN_INTEGER */
-        sensor_context->saHpiSensorEnableCtrl = 
-		(rdr_entry->RdrTypeUnion.SensorRec.EnableCtrl == SAHPI_TRUE)
-		? MIB_TRUE : MIB_FALSE; 
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        annunciator_context->saHpiAnnunciatorNum =
+                rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
 
         /** INTEGER = ASN_INTEGER */
-        sensor_context->saHpiSensorEventCtrl =
-		rdr_entry->RdrTypeUnion.SensorRec.EventCtrl + 1;
-
-        /** SaHpiEventState = ASN_OCTET_STR */
-	memset(&buffer, 0, sizeof(buffer));
-        rv = oh_decode_eventstate(rdr_entry->RdrTypeUnion.SensorRec.Events, 
-			          rdr_entry->RdrTypeUnion.SensorRec.Category,
-			          &buffer); 
-	oh_decode_char(&buffer);
-	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
-		saHpiSensorTable_delete_row( sensor_context );
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
-	memset(sensor_context->saHpiSensorSupportedEventStates, 0, 
-	       sizeof(sensor_context->saHpiSensorSupportedEventStates));
-	memcpy(sensor_context->saHpiSensorSupportedEventStates,
-	       buffer.Data, buffer.DataLength);
-	sensor_context->saHpiSensorSupportedEventStates_len =
-		buffer.DataLength;
+        annunciator_context->saHpiAnnunciatorType =
+                rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorType + 1;
 
         /** TruthValue = ASN_INTEGER */
-        sensor_context->saHpiSensorIsSupported =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported;
-
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-        sensor_context->saHpiSensorReadingType =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
-
-        /** SaHpiSensorUnits = ASN_INTEGER */
-	sensor_context->saHpiSensorBaseUnits = 
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.BaseUnits + 1;
-
-        /** SaHpiSensorUnits = ASN_INTEGER */   
-	sensor_context->saHpiSensorBaseUnits =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUnits + 1;
-
-        /** INTEGER = ASN_INTEGER */
-	sensor_context->saHpiSensorModifierUse =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUse + 1;
-
-        /** TruthValue = ASN_INTEGER */
-	sensor_context->saHpiSensorPercentage =
-		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Percentage == SAHPI_TRUE)
-		? MIB_TRUE : MIB_FALSE;
-
-        /** OCTETSTR = ASN_OCTET_STR */
-	rv = decode_sensor_range_flags(&buffer, 
-	        rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Flags);
-	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
-		saHpiSensorTable_delete_row( sensor_context );
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
-	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
-	sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
-
-        /** Double = ASN_OCTET_STR */
-	memset(sensor_context->saHpiSensorAccuracyFactor, 
-	       0, sizeof(SaHpiFloat64T));
-	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
-	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
-	       sizeof(SaHpiFloat64T));
-	sensor_context->saHpiSensorAccuracyFactor_len = sizeof(SaHpiFloat64T);
+        annunciator_context->saHpiAnnunciatorModeReadOnly = 
+                (rdr_entry->RdrTypeUnion.AnnunciatorRec.ModeReadOnly == SAHPI_TRUE)
+		        ? MIB_TRUE : MIB_FALSE;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-	sensor_context->saHpiSensorOem =
-		rdr_entry->RdrTypeUnion.SensorRec.Oem;
+        annunciator_context->saHpiAnnunciatorMaxConditions =
+                rdr_entry->RdrTypeUnion.AnnunciatorRec.MaxConditions;
 
-	/** RowPointer = ASN_OBJECT_ID */
-	memset(sensor_context->saHpiSensorRDR, 
+        /** INTEGER = ASN_INTEGER */
+        rv = saHpiAnnunciatorModeGet(sessionid, rpt_entry->ResourceId,
+                                     rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
+                                     &mode);
+        if (rv == SA_OK) {
+                annunciator_context->saHpiAnnunciatorMode = mode + 1;
+        } else {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_annunciator() saHpiAnnunciatorModeGet() ERRORED out\n"));
+		saHpiAnnunciatorTable_delete_row( annunciator_context );
+		return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        annunciator_context->saHpiAnnunciatorOem =
+                rdr_entry->RdrTypeUnion.AnnunciatorRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+	memset(annunciator_context->saHpiAnnunciatorRDR, 
 	       0, 
-	       sizeof(sensor_context->saHpiSensorRDR));
-	sensor_context->saHpiSensorRDR_len = full_oid_len * sizeof(oid);
-	memcpy(sensor_context->saHpiSensorRDR, 
+	       sizeof(annunciator_context->saHpiAnnunciatorRDR));
+	annunciator_context->saHpiAnnunciatorRDR_len = 
+                full_oid_len * sizeof(oid);
+        memcpy(annunciator_context->saHpiAnnunciatorRDR, 
 	       full_oid, 
-	       sensor_context->saHpiSensorRDR_len);
+	       annunciator_context->saHpiAnnunciatorRDR_len);
 
-	CONTAINER_INSERT (cb.container, sensor_context);
+	CONTAINER_INSERT (cb.container, annunciator_context);
 
-	sensor_entry_count = CONTAINER_SIZE (cb.container);
+	annunciator_entry_count = CONTAINER_SIZE (cb.container);
 
 	return rv;
 } 
