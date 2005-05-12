@@ -122,7 +122,7 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	}
 
 	/** TruthValue = ASN_INTEGER */
-	if (SAHPI_STM_LOW_CRIT && 
+	if (SAHPI_STM_LOW_CRIT & 
 	    rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
 		sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalIsWritable =
 		MIB_TRUE;
