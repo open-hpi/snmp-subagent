@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorThdPosHysteresisTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +50,158 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiSensorThdPosHysteresisTable_oid[] = { saHpiSensorThdPosHysteresisTable_TABLE_OID };
 size_t saHpiSensorThdPosHysteresisTable_oid_len = OID_LENGTH(saHpiSensorThdPosHysteresisTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiSensorThdPosHysteresisTable_IDX2
+/*
+ * SaErrorT populate_sensor_max()
+ */
+SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid, 
+				  SaHpiRdrT *rdr_entry,
+				  SaHpiRptEntryT *rpt_entry,
+				  SaHpiSensorThresholdsT *sensor_thresholds)
+{
+
+	DEBUGMSGTL ((AGENT, "populate_sen_thd_pos_hys, called\n"));
+
+	SaErrorT rv = SA_OK;
+
+	oid sen_thd_pos_hys_oid[SEN_THD_POS_HYS_IDX_NR];
+	netsnmp_index sen_thd_pos_hys_idx;
+	saHpiSensorThdPosHysteresisTable_context *sen_thd_pos_hys_ctx;
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sen_thd_pos_hys() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_sen_thd_pos_hys() passed NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	sen_thd_pos_hys_idx.len = SEN_THD_POS_HYS_IDX_NR;
+	/** Index saHpiDomainId is external */
+	sen_thd_pos_hys_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	sen_thd_pos_hys_oid[1] = rpt_entry->ResourceId;
+	/** Index saHpiResourceIsHistorical is external */
+	sen_thd_pos_hys_oid[2] = MIB_FALSE;
+	/** Index saHpiSensorNum */
+	sen_thd_pos_hys_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
+	/* assign the indices to the index */
+	sen_thd_pos_hys_idx.oids = (oid *) & sen_thd_pos_hys_oid;
+
+	/* See if Row exists. */
+	sen_thd_pos_hys_ctx = NULL;
+	sen_thd_pos_hys_ctx = CONTAINER_FIND(cb.container, &sen_thd_pos_hys_idx);
+
+	if (!sen_thd_pos_hys_ctx) {
+		// New entry. Add it
+		sen_thd_pos_hys_ctx = 
+		saHpiSensorThdPosHysteresisTable_create_row(&sen_thd_pos_hys_idx);
+	}
+	if (!sen_thd_pos_hys_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a ThdPosHys row!");
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/** TruthValue = ASN_INTEGER */
+	if (SAHPI_STM_UP_HYSTERESIS & 
+		rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold) {
+		sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisIsReadable =
+			MIB_TRUE;
+	} else {
+		sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisIsReadable =
+			MIB_FALSE;
+	}
+
+        /** TruthValue = ASN_INTEGER */
+	if (SAHPI_STM_LOW_CRIT && 
+		rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.WriteThold) {
+		sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisIsWritable =
+			MIB_TRUE;
+	} else {
+		sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisIsWritable =
+			MIB_FALSE;
+	}
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+	sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisType = 
+		sensor_thresholds->PosThdHysteresis.Type + 1; 
+
+        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+	sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisValue_len =
+		set_sensor_reading_value(&sensor_thresholds->PosThdHysteresis,
+			sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisValue);
+
+        /** TruthValue = ASN_INTEGER */
+	    sen_thd_pos_hys_ctx->saHpiSensorThdPosHysteresisNonLinear = 
+		    (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
+		     == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+	CONTAINER_INSERT (cb.container, sen_thd_pos_hys_ctx);
+
+	return rv;
+}
+
+/*
+ * int set_table_ctrl_analog_mode()
+ */
+int set_table_sen_thds_pos_hys (saHpiSensorThdPosHysteresisTable_context *row_ctx)
+{
+
+ 	DEBUGMSGTL ((AGENT, "set_table_sen_thds_pos_hys, called\n"));
+
+	SaErrorT            	rc = SA_OK;
+	SaHpiSessionIdT     	session_id;
+	SaHpiResourceIdT    	resource_id;
+	SaHpiSensorNumT	    	sensor_num;	
+	SaHpiSensorThresholdsT 	sensor_thresholds;
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX];
+
+	memset(&sensor_thresholds, 0, sizeof(sensor_thresholds));
+
+	sensor_thresholds.PosThdHysteresis.IsSupported = SAHPI_TRUE;
+	sensor_thresholds.PosThdHysteresis.Type = row_ctx->saHpiSensorThdPosHysteresisType - 1;
+	set_sen_thd_value(&sensor_thresholds.PosThdHysteresis.Value,
+			  sensor_thresholds.PosThdHysteresis.Type,
+			  row_ctx->saHpiSensorThdPosHysteresisValue, 
+			  row_ctx->saHpiSensorThdPosHysteresisValue_len);
+
+	rc = saHpiSensorThresholdsSet(session_id, resource_id, 
+				      sensor_num, &sensor_thresholds);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_STM_UP_HYSTERESIS: Call to saHpiSensorThresholdsSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_STM_UP_HYSTERESIS: Call to saHpiSensorThresholdsSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -67,69 +223,55 @@ saHpiSensorThdPosHysteresisTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiSensorThdPosHysteresisTable_compare not implemented! Container order undefined\n" );
+    /* check for NULL pointers */
+    if (lhs == NULL || rhs == NULL ) {
+            DEBUGMSGTL((AGENT,"saHpiSensorThdPosHysteresisTable_cmp() NULL pointer ERROR\n" ));
+            return 0;
+    }
+    /* CHECK FIRST INDEX,  saHpiDomainId */
+    if ( context_l->index.oids[0] < context_r->index.oids[0])
+            return -1;
+
+    if ( context_l->index.oids[0] > context_r->index.oids[0])
+            return 1;
+
+    if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+            /* If saHpiDomainId index is equal sort by second index */
+            /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+            if ( context_l->index.oids[1] < context_r->index.oids[1])
+                    return -1;
+
+            if ( context_l->index.oids[1] > context_r->index.oids[1])
+                    return 1;
+
+            if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+                    /* If saHpiResourceEntryId index is equal sort by third index */
+                    /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                    if ( context_l->index.oids[2] < context_r->index.oids[2])
+                            return -1;
+
+                    if ( context_l->index.oids[2] > context_r->index.oids[2])
+                            return 1;
+
+                    if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+                            /* If saHpiResourceIsHistorical index is equal sort by forth index */
+                            /* CHECK FORTH INDEX,  saHpiSensorNum */
+                            if ( context_l->index.oids[3] < context_r->index.oids[3])
+                                    return -1;
+
+                            if ( context_l->index.oids[3] > context_r->index.oids[3])
+                                    return 1;
+
+                            if ( context_l->index.oids[3] == context_r->index.oids[3])
+                                    return 0;
+                    }
+            }
+    }
+
     return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiSensorThdPosHysteresisTable_context *
-saHpiSensorThdPosHysteresisTable_get( const char *name, int len )
-{
-    saHpiSensorThdPosHysteresisTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdPosHysteresisTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
 
 
 /************************************************************
@@ -138,15 +280,9 @@ saHpiSensorThdPosHysteresisTable_get( const char *name, int len )
 void
 init_saHpiSensorThdPosHysteresisTable(void)
 {
-    initialize_table_saHpiSensorThdPosHysteresisTable();
+ 	DEBUGMSGTL ((AGENT, "init_saHpiSensorThdPosHysteresisTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiSensorThdPosHysteresisTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiSensorThdPosHysteresisTable();
 }
 
 /************************************************************
@@ -155,6 +291,8 @@ init_saHpiSensorThdPosHysteresisTable(void)
 static int saHpiSensorThdPosHysteresisTable_row_copy(saHpiSensorThdPosHysteresisTable_context * dst,
                          saHpiSensorThdPosHysteresisTable_context * src)
 {
+ 	DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -189,8 +327,6 @@ static int saHpiSensorThdPosHysteresisTable_row_copy(saHpiSensorThdPosHysteresis
     return 0;
 }
 
-#ifdef saHpiSensorThdPosHysteresisTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -215,6 +351,8 @@ saHpiSensorThdPosHysteresisTable_extract_index( saHpiSensorThdPosHysteresisTable
     netsnmp_variable_list var_saHpiSensorNum;
     int err;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_extract_index, called\n"));
+
     /*
      * copy index, if provided
      */
@@ -236,42 +374,22 @@ saHpiSensorThdPosHysteresisTable_extract_index( saHpiSensorThdPosHysteresisTable
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdPosHysteresisTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdPosHysteresisTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdPosHysteresisTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiSensorNum;
 
        memset( &var_saHpiSensorNum, 0x00, sizeof(var_saHpiSensorNum) );
        var_saHpiSensorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorThdPosHysteresisTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiSensorNum.next_variable = &var_XX;
-#endif
+       var_saHpiSensorNum.next_variable = NULL;
 
 
     /*
@@ -291,34 +409,14 @@ saHpiSensorThdPosHysteresisTable_extract_index( saHpiSensorThdPosHysteresisTable
               /** skipping external index saHpiSensorNum */
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiSensorNum.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+		err = saHpiDomainId_check_index(
+				*var_saHpiDomainId.val.integer);
+		err = saHpiResourceEntryId_check_index(
+				*var_saHpiResourceId.val.integer);  
+		err = saHpiResourceIsHistorical_check_index(
+				*var_saHpiResourceIsHistorical.val.integer);
+		err = saHpiSensorNum_check_index(
+				*var_saHpiSensorNum.val.integer);
     }
 
     /*
@@ -342,6 +440,8 @@ int saHpiSensorThdPosHysteresisTable_can_activate(saHpiSensorThdPosHysteresisTab
                       saHpiSensorThdPosHysteresisTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -367,6 +467,7 @@ int saHpiSensorThdPosHysteresisTable_can_deactivate(saHpiSensorThdPosHysteresisT
                         saHpiSensorThdPosHysteresisTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -397,7 +498,6 @@ int saHpiSensorThdPosHysteresisTable_can_delete(saHpiSensorThdPosHysteresisTable
     return 1;
 }
 
-#ifdef saHpiSensorThdPosHysteresisTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -417,6 +517,8 @@ saHpiSensorThdPosHysteresisTable_create_row( netsnmp_index* hdr)
 {
     saHpiSensorThdPosHysteresisTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiSensorThdPosHysteresisTable_context);
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_create_row, called\n"));
     if(!ctx)
         return NULL;
         
@@ -444,7 +546,6 @@ saHpiSensorThdPosHysteresisTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -453,6 +554,8 @@ saHpiSensorThdPosHysteresisTable_context *
 saHpiSensorThdPosHysteresisTable_duplicate_row( saHpiSensorThdPosHysteresisTable_context * row_ctx)
 {
     saHpiSensorThdPosHysteresisTable_context * dup;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_duplicate_row, called\n"));
 
     if(!row_ctx)
         return NULL;
@@ -474,6 +577,8 @@ saHpiSensorThdPosHysteresisTable_duplicate_row( saHpiSensorThdPosHysteresisTable
  */
 netsnmp_index * saHpiSensorThdPosHysteresisTable_delete_row( saHpiSensorThdPosHysteresisTable_context * ctx )
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_delete_row, called\n"));
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -518,6 +623,8 @@ void saHpiSensorThdPosHysteresisTable_set_reserve1( netsnmp_request_group *rg )
     int rc;
 
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_reserve1, called\n"));
+
     /*
      * TODO: loop through columns, check syntax and lengths. For
      * columns which have no dependencies, you could also move
@@ -532,10 +639,19 @@ void saHpiSensorThdPosHysteresisTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISVALUE:
-            /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiSensorThdPosHysteresisValue));
-        break;
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+                if (rc == SNMP_ERR_NOERROR ) {
+                        rc = check_sensor_reading_value(
+                                var->val_len, 
+                                row_ctx->saHpiSensorThdPosHysteresisType);
+                        if (rc != SNMP_ERR_NOERROR) {
+                                DEBUGMSGTL ((AGENT, 
+                                "COLUMN_SAHPISENSORTHDPOSHYSTERESISVALUE ERROR: %d\n", 
+                                 rc));
+                        }
+                }
+                break;
 
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
@@ -561,6 +677,8 @@ void saHpiSensorThdPosHysteresisTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -623,6 +741,8 @@ void saHpiSensorThdPosHysteresisTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_action, called\n"));
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -637,6 +757,7 @@ void saHpiSensorThdPosHysteresisTable_set_action( netsnmp_request_group *rg )
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiSensorThdPosHysteresisValue,var->val.string,var->val_len);
             row_ctx->saHpiSensorThdPosHysteresisValue_len = var->val_len;
+            row_err = set_table_sen_thds_pos_hys (row_ctx);
         break;
 
         default: /** We shouldn't get here */
@@ -644,23 +765,6 @@ void saHpiSensorThdPosHysteresisTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiSensorThdPosHysteresisTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -697,6 +801,8 @@ void saHpiSensorThdPosHysteresisTable_set_commit( netsnmp_request_group *rg )
     saHpiSensorThdPosHysteresisTable_context *row_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->existing_row;
     saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_commit, called\n"));
 
     /*
      * loop through columns
@@ -737,6 +843,8 @@ void saHpiSensorThdPosHysteresisTable_set_free( netsnmp_request_group *rg )
     saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_free, called\n"));
+
     /*
      * loop through columns
      */
@@ -750,8 +858,10 @@ void saHpiSensorThdPosHysteresisTable_set_free( netsnmp_request_group *rg )
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -786,6 +896,8 @@ void saHpiSensorThdPosHysteresisTable_set_undo( netsnmp_request_group *rg )
     saHpiSensorThdPosHysteresisTable_context *undo_ctx = (saHpiSensorThdPosHysteresisTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -810,9 +922,6 @@ void saHpiSensorThdPosHysteresisTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiSensorThdPosHysteresisTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiSensorThdPosHysteresisTable table by defining its contents and how it's structured
@@ -821,6 +930,8 @@ void
 initialize_table_saHpiSensorThdPosHysteresisTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorThdPosHysteresisTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiSensorThdPosHysteresisTable_handler called again\n");
@@ -876,18 +987,18 @@ initialize_table_saHpiSensorThdPosHysteresisTable(void)
     cb.container = netsnmp_container_find("saHpiSensorThdPosHysteresisTable_primary:"
                                           "saHpiSensorThdPosHysteresisTable:"
                                           "table_container");
-#ifdef saHpiSensorThdPosHysteresisTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiSensorThdPosHysteresisTable_secondary:"
                                                        "saHpiSensorThdPosHysteresisTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiSensorThdPosHysteresisTable_cmp;
-#endif
-#ifdef saHpiSensorThdPosHysteresisTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiSensorThdPosHysteresisTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiSensorThdPosHysteresisTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiSensorThdPosHysteresisTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiSensorThdPosHysteresisTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorThdPosHysteresisTable_row_copy;
@@ -902,7 +1013,7 @@ initialize_table_saHpiSensorThdPosHysteresisTable(void)
     cb.set_commit = saHpiSensorThdPosHysteresisTable_set_commit;
     cb.set_free = saHpiSensorThdPosHysteresisTable_set_free;
     cb.set_undo = saHpiSensorThdPosHysteresisTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiSensorThdPosHysteresisTable",
                 "Registering table saHpiSensorThdPosHysteresisTable "
                 "as a table array\n"));
@@ -925,6 +1036,8 @@ int saHpiSensorThdPosHysteresisTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiSensorThdPosHysteresisTable_context *context = (saHpiSensorThdPosHysteresisTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -977,6 +1090,8 @@ int saHpiSensorThdPosHysteresisTable_get_value(
 const saHpiSensorThdPosHysteresisTable_context *
 saHpiSensorThdPosHysteresisTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiSensorThdPosHysteresisTable_get_by_idx, called\n"));
+
     return (const saHpiSensorThdPosHysteresisTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
