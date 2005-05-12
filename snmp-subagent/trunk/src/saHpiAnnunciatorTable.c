@@ -220,6 +220,8 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
     
+	DEBUGMSGTL ((AGENT, "handle_saHpiAnnunciatorEntryCount, called\n"));
+
     switch(reqinfo->mode) {
 
         case MODE_GET:
@@ -282,11 +284,11 @@ saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-	DEBUGMSGTL ((AGENT, "saHpiSensorTable_cmp, called\n"));
+	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
 
 	/* check for NULL pointers */
 	if (lhs == NULL || rhs == NULL ) {
-		DEBUGMSGTL((AGENT,"saHpiSensorTable_cmp() NULL pointer ERROR\n" ));
+		DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
 	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */
@@ -338,6 +340,9 @@ saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiAnnunciatorTable(void)
 {
+
+	DEBUGMSGTL ((AGENT, "init_saHpiAnnunciatorTable, called\n"));
+
     initialize_table_saHpiAnnunciatorTable();
 
     initialize_table_saHpiAnnunciatorEntryCount();
@@ -350,6 +355,8 @@ init_saHpiAnnunciatorTable(void)
 static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
                          saHpiAnnunciatorTable_context * src)
 {
+	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -382,7 +389,7 @@ static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
 
     dst->saHpiAnnunciatorOem = src->saHpiAnnunciatorOem;
 
-    memcpy( src->saHpiAnnunciatorRDR, dst->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR_len );
+    memcpy( dst->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR_len );
     dst->saHpiAnnunciatorRDR_len = src->saHpiAnnunciatorRDR_len;
 
     return 0;
@@ -411,6 +418,8 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
     netsnmp_variable_list var_saHpiResourceIsHistorical;
     netsnmp_variable_list var_saHpiAnnunciatorNum;
     int err;
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_extract_index, called\n"));
 
     /*
      * copy index, if provided
@@ -499,6 +508,8 @@ int saHpiAnnunciatorTable_can_activate(saHpiAnnunciatorTable_context *undo_ctx,
                       saHpiAnnunciatorTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -524,6 +535,7 @@ int saHpiAnnunciatorTable_can_deactivate(saHpiAnnunciatorTable_context *undo_ctx
                         saHpiAnnunciatorTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -541,6 +553,7 @@ int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
                     saHpiAnnunciatorTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -573,6 +586,9 @@ saHpiAnnunciatorTable_create_row( netsnmp_index* hdr)
 {
     saHpiAnnunciatorTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_create_row, called\n"));
+
     if(!ctx)
         return NULL;
         
@@ -609,6 +625,8 @@ saHpiAnnunciatorTable_duplicate_row( saHpiAnnunciatorTable_context * row_ctx)
 {
     saHpiAnnunciatorTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -630,6 +648,8 @@ saHpiAnnunciatorTable_duplicate_row( saHpiAnnunciatorTable_context * row_ctx)
 netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -672,6 +692,7 @@ void saHpiAnnunciatorTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -717,6 +738,7 @@ void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_variable_list *var;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve2, called\n"));
     rg->rg_void = rg->list->ri;
 
     /*
@@ -778,6 +800,7 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_action, called\n"));
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -835,6 +858,7 @@ void saHpiAnnunciatorTable_set_commit( netsnmp_request_group *rg )
     saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_commit, called\n"));
     /*
      * loop through columns
      */
@@ -874,6 +898,7 @@ void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
     saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_free, called\n"));
     /*
      * loop through columns
      */
@@ -925,6 +950,7 @@ void saHpiAnnunciatorTable_set_undo( netsnmp_request_group *rg )
     saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_undo, called\n"));
     /*
      * loop through columns
      */
@@ -959,6 +985,7 @@ initialize_table_saHpiAnnunciatorTable(void)
 {
     netsnmp_table_registration_info *table_info;
 
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnunciatorTable, called\n"));
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiAnnunciatorTable_handler called again\n");
         return;
@@ -1063,6 +1090,7 @@ int saHpiAnnunciatorTable_get_value(
     netsnmp_variable_list *var = request->requestvb;
     saHpiAnnunciatorTable_context *context = (saHpiAnnunciatorTable_context *)item;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_get_value, called\n"));
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIANNUNCIATORNUM:
@@ -1128,6 +1156,7 @@ int saHpiAnnunciatorTable_get_value(
 const saHpiAnnunciatorTable_context *
 saHpiAnnunciatorTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_get_by_idx, called\n"));
     return (const saHpiAnnunciatorTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
