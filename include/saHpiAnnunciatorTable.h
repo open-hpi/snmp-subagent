@@ -14,58 +14,58 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiAnnunciatorNum is internal */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiAnnunciatorNum is internal */
 
 typedef struct saHpiAnnunciatorTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+        netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
+        /*************************************************************
+         * You can store data internally in this structure.
+         *
+         * TODO: You will probably have to fix a few types here...
+         */
+        /** TODO: add storage for external index(s)! */
         /** SaHpiInstrumentId = ASN_UNSIGNED */
-            unsigned long saHpiAnnunciatorNum;
+        unsigned long saHpiAnnunciatorNum;
 
         /** INTEGER = ASN_INTEGER */
-            long saHpiAnnunciatorType;
+        long saHpiAnnunciatorType;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiAnnunciatorModeReadOnly;
+        long saHpiAnnunciatorModeReadOnly;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiAnnunciatorMaxConditions;
+        unsigned long saHpiAnnunciatorMaxConditions;
 
         /** INTEGER = ASN_INTEGER */
-            long saHpiAnnunciatorMode;
+        long saHpiAnnunciatorMode;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiAnnunciatorOem;
+        unsigned long saHpiAnnunciatorOem;
 
         /** RowPointer = ASN_OBJECT_ID */
-            oid saHpiAnnunciatorRDR[MAX_OID_LEN];
-            long saHpiAnnunciatorRDR_len;
+        oid saHpiAnnunciatorRDR[MAX_OID_LEN];
+        long saHpiAnnunciatorRDR_len;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+        /*
+         * OR
+         *
+         * Keep a pointer to your data
+         */
+        void * data;
 
-    /*
-     *add anything else you want here
-     */
+        /*
+         *add anything else you want here
+         */
 
 } saHpiAnnunciatorTable_context;
 
@@ -73,10 +73,11 @@ typedef struct saHpiAnnunciatorTable_context_s {
  * function declarations
  */
 SaErrorT populate_annunciator(SaHpiSessionIdT sessionid, 
-                              SaHpiRdrT *rdr_entry,
-                              SaHpiRptEntryT *rpt_entry,
-                              oid *full_oid, size_t full_oid_len,
-                              oid *child_oid, size_t *child_oid_len);
+                                      SaHpiRdrT *rdr_entry,
+                                      SaHpiRptEntryT *rpt_entry,
+                                      oid *full_oid, size_t full_oid_len,
+                                      oid *child_oid, size_t *child_oid_len);
+int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx);
 
 /*************************************************************
  * function declarations
@@ -85,7 +86,7 @@ void init_saHpiAnnunciatorTable(void);
 void initialize_table_saHpiAnnunciatorTable(void);
 const saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_get_by_idx(netsnmp_index *);
 const saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+                                                                          int row_status);
 int saHpiAnnunciatorTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -103,7 +104,7 @@ extern size_t saHpiAnnunciatorTable_oid_len;
 #define saHpiResourceEntryId_INDEX 1
 #define saHpiResourceIsHistorical_INDEX 2
 #define saHpiAnnunciatorNum_INDEX 3
-    
+
 /*************************************************************
  * column number definitions for table saHpiAnnunciatorTable
  */
@@ -131,16 +132,16 @@ saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_duplicate_row( saHpiAnnunc
 netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context* );
 
 int saHpiAnnunciatorTable_can_activate(saHpiAnnunciatorTable_context *undo_ctx,
-                      saHpiAnnunciatorTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+                                       saHpiAnnunciatorTable_context *row_ctx,
+                                       netsnmp_request_group * rg);
 int saHpiAnnunciatorTable_can_deactivate(saHpiAnnunciatorTable_context *undo_ctx,
-                        saHpiAnnunciatorTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+                                         saHpiAnnunciatorTable_context *row_ctx,
+                                         netsnmp_request_group * rg);
 int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
-                    saHpiAnnunciatorTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
+                                     saHpiAnnunciatorTable_context *row_ctx,
+                                     netsnmp_request_group * rg);
+
+
 saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_create_row( netsnmp_index* );
 
 saHpiAnnunciatorTable_context * saHpiAnnunciatorTable_get( const char *name, int len );

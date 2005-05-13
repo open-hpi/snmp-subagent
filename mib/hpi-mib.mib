@@ -9386,12 +9386,7 @@ saHpiInventoryEntry OBJECT-TYPE
 	in an inventory data repository (IDR) must be represented in the 
 	RDR repository as an RDR record."
         
-        INDEX   { 
-                saHpiDomainId, 
-                saHpiResourceId, 
-				saHpiResourceIsHistorical,
-                saHpiInventoryId
-        }
+        INDEX   {saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiInventoryId }
         ::= {saHpiInventoryTable 1}
 
 SaHpiInventoryEntry ::= SEQUENCE {

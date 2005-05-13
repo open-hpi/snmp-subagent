@@ -117,6 +117,14 @@ int saHpiAnnunciatorNum_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiInventoryTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
@@ -197,13 +205,6 @@ int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSw
 
 }
 
-/**************************/
-/* saHpiInventoryTable  */    
-/**************************/
-int saHpiInventoryId_check_index(long val)
-{
-	return 0;
-}
 
 /**************************/
 /* saHpiOEMEventTable  */    
