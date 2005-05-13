@@ -50,7 +50,7 @@ init_hpiB0101(void)
     static oid saHpiDomainEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
     static oid saHpiOEMEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
     static oid saHpiDiscover_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,4 };
-    static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
+//    static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
     static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
     static oid saHpiResourceEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
     static oid saHpiOEMEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
@@ -267,11 +267,11 @@ init_hpiB0101(void)
                                saHpiDiscover_oid, OID_LENGTH(saHpiDiscover_oid),
                                HANDLER_CAN_RWRITE
         ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiInventoryEntryCount", handle_saHpiInventoryEntryCount,
-                               saHpiInventoryEntryCount_oid, OID_LENGTH(saHpiInventoryEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiInventoryEntryCount", handle_saHpiInventoryEntryCount,
+//                               saHpiInventoryEntryCount_oid, OID_LENGTH(saHpiInventoryEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCountTotal", handle_saHpiWatchdogEventLogEntryCountTotal,
                                saHpiWatchdogEventLogEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
@@ -1514,6 +1514,7 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1542,6 +1543,7 @@ handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
