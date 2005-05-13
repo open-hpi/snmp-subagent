@@ -39,7 +39,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSensorThdUpMinorTable.c \
 			saHpiSensorThdPosHysteresisTable.c \
 			saHpiSensorThdNegHysteresisTable.c \
-			saHpiAnnunciatorTable.c 
+			saHpiAnnunciatorTable.c \
+			saHpiInventoryTable.c 
 
 
 hpiSubagent_LDADD	= 
@@ -63,7 +64,6 @@ clean:
 #			saHpiHotSwapEventLogTable.c \
 #			saHpiHotSwapEventTable.c \
 #			saHpiHotSwapTable.c \
-#			saHpiInventoryTable.c \
 #			saHpiOEMEventLogTable.c \
 #			saHpiOEMEventTable.c \
 #			saHpiResourceEventLogTable.c \
