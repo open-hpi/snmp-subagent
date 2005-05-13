@@ -47,7 +47,7 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiAnnunciatorTable_oid[] = { saHpiAnnunciatorTable_TABLE_OID };
+oid saHpiAnnunciatorTable_oid[] = { saHpiAnnunciatorTable_TABLE_OID};
 size_t saHpiAnnunciatorTable_oid_len = OID_LENGTH(saHpiAnnunciatorTable_oid);
 
 /************************************************************/
@@ -59,7 +59,7 @@ size_t saHpiAnnunciatorTable_oid_len = OID_LENGTH(saHpiAnnunciatorTable_oid);
  * oid and fucntion declarations scalars
  */
 static u_long annunciator_entry_count = 0;
-static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5 };
+static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5};
 int handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
                                       netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info   *reqinfo,
@@ -85,85 +85,85 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                               oid *child_oid, size_t *child_oid_len)
 {
 
-	DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
+        DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
 
-	SaErrorT rv = SA_OK;	
+        SaErrorT rv = SA_OK;    
         SaHpiAnnunciatorModeT mode;
 
-	oid annunciator_oid[ANNUNCIATOR_INDEX_NR];
-	netsnmp_index annunciator_index;
-	saHpiAnnunciatorTable_context *annunciator_context;
+        oid annunciator_oid[ANNUNCIATOR_INDEX_NR];
+        netsnmp_index annunciator_index;
+        saHpiAnnunciatorTable_context *annunciator_context;
 
-	oid column[2];
-	int column_len = 2;
+        oid column[2];
+        int column_len = 2;
 
-	DEBUGMSGTL ((AGENT, "SAHPI_ANNUNCIATOR_RDR populate_annunciator() called\n"));
+        DEBUGMSGTL ((AGENT, "SAHPI_ANNUNCIATOR_RDR populate_annunciator() called\n"));
 
-	/* check for NULL pointers */
-	if (!rdr_entry) {
-		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
-	if (!rpt_entry) {
-		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_annunciator() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
 
-	/* BUILD oid for new row */
-	/* assign the number of indices */
-	annunciator_index.len = ANNUNCIATOR_INDEX_NR;
-	/** Index saHpiDomainId is external */
-	annunciator_oid[0] = get_domain_id(sessionid);
-	/** Index saHpiResourceId is external */
-	annunciator_oid[1] = rpt_entry->ResourceId;
-	/** Index saHpiResourceIsHistorical is external */
-	annunciator_oid[2] = MIB_FALSE;
-	/** Index saHpiSensorNum */
-	annunciator_oid[3] = rdr_entry->RdrTypeUnion.SensorRec.Num;
-	/* assign the indices to the index */
-	annunciator_index.oids = (oid *) & annunciator_oid;
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        annunciator_index.len = ANNUNCIATOR_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        annunciator_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        annunciator_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        annunciator_oid[2] = MIB_FALSE;
+        /** Index saHpiSensorNum */
+        annunciator_oid[3] = rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
+        /* assign the indices to the index */
+        annunciator_index.oids = (oid *) & annunciator_oid;
 
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPIANNUNCIATORTYPE;
-	memset(child_oid, 0, sizeof(child_oid_len));
-	build_full_oid(saHpiAnnunciatorTable_oid, saHpiAnnunciatorTable_oid_len,
-		       column, column_len,
-		       &annunciator_index,
-		       child_oid, MAX_OID_LEN, child_oid_len);
+        /* create full oid on This row for parent RowPointer */
+        column[0] = 1;
+        column[1] = COLUMN_SAHPIANNUNCIATORTYPE;
+        memset(child_oid, 0, sizeof(child_oid_len));
+        build_full_oid(saHpiAnnunciatorTable_oid, saHpiAnnunciatorTable_oid_len,
+                       column, column_len,
+                       &annunciator_index,
+                       child_oid, MAX_OID_LEN, child_oid_len);
 
-	/* See if Row exists. */
-	annunciator_context = NULL;
-	annunciator_context = CONTAINER_FIND(cb.container, &annunciator_index);
+        /* See if Row exists. */
+        annunciator_context = NULL;
+        annunciator_context = CONTAINER_FIND(cb.container, &annunciator_index);
 
-	if (!annunciator_context) {
-		// New entry. Add it
-		annunciator_context = 
-		saHpiAnnunciatorTable_create_row(&annunciator_index);
-	}
-	if (!annunciator_context) {
-		snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
+        if (!annunciator_context) {
+                // New entry. Add it
+                annunciator_context = 
+                saHpiAnnunciatorTable_create_row(&annunciator_index);
+        }
+        if (!annunciator_context) {
+                snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
 
         /** SaHpiInstrumentId = ASN_UNSIGNED */
         annunciator_context->saHpiAnnunciatorNum =
-                rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
+        rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
 
         /** INTEGER = ASN_INTEGER */
         annunciator_context->saHpiAnnunciatorType =
-                rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorType + 1;
+        rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorType + 1;
 
         /** TruthValue = ASN_INTEGER */
         annunciator_context->saHpiAnnunciatorModeReadOnly = 
-                (rdr_entry->RdrTypeUnion.AnnunciatorRec.ModeReadOnly == SAHPI_TRUE)
-		        ? MIB_TRUE : MIB_FALSE;
+        (rdr_entry->RdrTypeUnion.AnnunciatorRec.ModeReadOnly == SAHPI_TRUE)
+        ? MIB_TRUE : MIB_FALSE;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         annunciator_context->saHpiAnnunciatorMaxConditions =
-                rdr_entry->RdrTypeUnion.AnnunciatorRec.MaxConditions;
+        rdr_entry->RdrTypeUnion.AnnunciatorRec.MaxConditions;
 
         /** INTEGER = ASN_INTEGER */
         rv = saHpiAnnunciatorModeGet(sessionid, rpt_entry->ResourceId,
@@ -172,48 +172,48 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         if (rv == SA_OK) {
                 annunciator_context->saHpiAnnunciatorMode = mode + 1;
         } else {
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_annunciator() saHpiAnnunciatorModeGet() ERRORED out\n"));
-		saHpiAnnunciatorTable_delete_row( annunciator_context );
-		return AGENT_ERR_INTERNAL_ERROR;
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_annunciator() saHpiAnnunciatorModeGet() ERRORED out\n"));
+                saHpiAnnunciatorTable_delete_row( annunciator_context );
+                return AGENT_ERR_INTERNAL_ERROR;
         }
 
         /** UNSIGNED32 = ASN_UNSIGNED */
         annunciator_context->saHpiAnnunciatorOem =
-                rdr_entry->RdrTypeUnion.AnnunciatorRec.Oem;
+        rdr_entry->RdrTypeUnion.AnnunciatorRec.Oem;
 
         /** RowPointer = ASN_OBJECT_ID */
-	memset(annunciator_context->saHpiAnnunciatorRDR, 
-	       0, 
-	       sizeof(annunciator_context->saHpiAnnunciatorRDR));
-	annunciator_context->saHpiAnnunciatorRDR_len = 
-                full_oid_len * sizeof(oid);
+        memset(annunciator_context->saHpiAnnunciatorRDR, 
+               0, 
+               sizeof(annunciator_context->saHpiAnnunciatorRDR));
+        annunciator_context->saHpiAnnunciatorRDR_len = 
+        full_oid_len * sizeof(oid);
         memcpy(annunciator_context->saHpiAnnunciatorRDR, 
-	       full_oid, 
-	       annunciator_context->saHpiAnnunciatorRDR_len);
+               full_oid, 
+               annunciator_context->saHpiAnnunciatorRDR_len);
 
-	CONTAINER_INSERT (cb.container, annunciator_context);
+        CONTAINER_INSERT (cb.container, annunciator_context);
 
-	annunciator_entry_count = CONTAINER_SIZE (cb.container);
+        annunciator_entry_count = CONTAINER_SIZE (cb.container);
 
-	return rv;
+        return rv;
 } 
 
 int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx)
 {
 
- 	DEBUGMSGTL ((AGENT, "set_table_annun_mode, called\n"));
+        DEBUGMSGTL ((AGENT, "set_table_annun_mode, called\n"));
 
-	SaErrorT                rc = SA_OK;
-	SaHpiSessionIdT         session_id;
-	SaHpiResourceIdT        resource_id;
-	SaHpiAnnunciatorModeT	mode;	
+        SaErrorT                rc = SA_OK;
+        SaHpiSessionIdT         session_id;
+        SaHpiResourceIdT        resource_id;
+        SaHpiAnnunciatorModeT   mode;   
 
-	if (!row_ctx)
-		return AGENT_ERR_NULL_DATA;
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
 
-	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+        session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+        resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
         mode =  row_ctx->saHpiAnnunciatorMode - 1;
 
         rc = saHpiAnnunciatorModeSet(session_id, 
@@ -221,17 +221,17 @@ int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx)
                                      row_ctx->saHpiAnnunciatorNum,
                                      mode);
 
-	if (rc != SA_OK) {
-		snmp_log (LOG_ERR,
-			  "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
-			  oh_lookup_error(rc));
-		DEBUGMSGTL ((AGENT,
-			     "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
-			     oh_lookup_error(rc)));
-		return get_snmp_error(rc);
-	} 
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                          "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
+                          oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                             "SAHPI_ANNUNCIATOR_RDR: Call to saHpiAnnunciatorModeSet failed to set Mode rc: %s.\n",
+                             oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        }
 
-	return SNMP_ERR_NOERROR; 
+        return SNMP_ERR_NOERROR; 
 }
 
 /**
@@ -249,46 +249,48 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
                                   netsnmp_agent_request_info   *reqinfo,
                                   netsnmp_request_info         *requests)
 {
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
 
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-	DEBUGMSGTL ((AGENT, "handle_saHpiAnnunciatorEntryCount, called\n"));
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
 
-    switch(reqinfo->mode) {
+        DEBUGMSGTL ((AGENT, "handle_saHpiAnnunciatorEntryCount, called\n"));
 
+        switch (reqinfo->mode) {
+        
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) &annunciator_entry_count,
-                                     sizeof(annunciator_entry_count));
-            break;
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                         (u_char *) &annunciator_entry_count,
+                                         sizeof(annunciator_entry_count));
+                break;
 
 
         default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
-/*
- * int initialize_table_saHpiSensorEntryCount()
+
+/**
+ * 
+ * @return: 
  */
 int initialize_table_saHpiAnnunciatorEntryCount(void)
 {
 
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
 
         netsnmp_register_scalar(
-                netsnmp_create_handler_registration(
-                        "saHpiAnnunciatorEntryCount", 
-                        handle_saHpiAnnunciatorEntryCount,
-                        saHpiAnnunciatorEntryCount_oid, 
-                        OID_LENGTH(saHpiAnnunciatorEntryCount_oid),
-                        HANDLER_CAN_RONLY ));
+                               netsnmp_create_handler_registration(
+                                                                  "saHpiAnnunciatorEntryCount", 
+                                                                  handle_saHpiAnnunciatorEntryCount,
+                                                                  saHpiAnnunciatorEntryCount_oid, 
+                                                                  OID_LENGTH(saHpiAnnunciatorEntryCount_oid),
+                                                                  HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
 }
@@ -310,63 +312,63 @@ static int saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiAnnunciatorTable_context *context_l =
+        saHpiAnnunciatorTable_context *context_l =
         (saHpiAnnunciatorTable_context *)lhs;
-    saHpiAnnunciatorTable_context *context_r =
+        saHpiAnnunciatorTable_context *context_r =
         (saHpiAnnunciatorTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+        /*
+         * check primary key, then secondary. Add your own code if
+         * there are more than 2 indexes
+         */
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
 
-	/* check for NULL pointers */
-	if (lhs == NULL || rhs == NULL ) {
-		DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
-		return 0;
-	}
-	/* CHECK FIRST INDEX,  saHpiDomainId */
-	if ( context_l->index.oids[0] < context_r->index.oids[0])
-		return -1;
+        /* check for NULL pointers */
+        if (lhs == NULL || rhs == NULL ) {
+                DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+                return 0;
+        }
+        /* CHECK FIRST INDEX,  saHpiDomainId */
+        if ( context_l->index.oids[0] < context_r->index.oids[0])
+                return -1;
 
-	if ( context_l->index.oids[0] > context_r->index.oids[0])
-		return 1;
+        if ( context_l->index.oids[0] > context_r->index.oids[0])
+                return 1;
 
-	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
-		/* If saHpiDomainId index is equal sort by second index */
-		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
-		if ( context_l->index.oids[1] < context_r->index.oids[1])
-			return -1;
+        if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+                /* If saHpiDomainId index is equal sort by second index */
+                /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+                if ( context_l->index.oids[1] < context_r->index.oids[1])
+                        return -1;
 
-		if ( context_l->index.oids[1] > context_r->index.oids[1])
-			return 1;
+                if ( context_l->index.oids[1] > context_r->index.oids[1])
+                        return 1;
 
-		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-			/* If saHpiResourceEntryId index is equal sort by third index */
-			/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
-			if ( context_l->index.oids[2] < context_r->index.oids[2])
-				return -1;
+                if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+                        /* If saHpiResourceEntryId index is equal sort by third index */
+                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        if ( context_l->index.oids[2] < context_r->index.oids[2])
+                                return -1;
 
-			if ( context_l->index.oids[2] > context_r->index.oids[2])
-				return 1;
+                        if ( context_l->index.oids[2] > context_r->index.oids[2])
+                                return 1;
 
-			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-				/* If saHpiResourceIsHistorical index is equal sort by forth index */
-				/* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
-				if ( context_l->index.oids[3] < context_r->index.oids[3])
-					return -1;
+                        if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                if ( context_l->index.oids[3] < context_r->index.oids[3])
+                                        return -1;
 
-				if ( context_l->index.oids[3] > context_r->index.oids[3])
-					return 1;
+                                if ( context_l->index.oids[3] > context_r->index.oids[3])
+                                        return 1;
 
-				if ( context_l->index.oids[3] == context_r->index.oids[3])
-					return 0;
-			}
-		}
-	}
+                                if ( context_l->index.oids[3] == context_r->index.oids[3])
+                                        return 0;
+                        }
+                }
+        }
 
-	return 0;
+        return 0;
 }
 
 /************************************************************
@@ -376,11 +378,11 @@ void
 init_saHpiAnnunciatorTable(void)
 {
 
-	DEBUGMSGTL ((AGENT, "init_saHpiAnnunciatorTable, called\n"));
+        DEBUGMSGTL ((AGENT, "init_saHpiAnnunciatorTable, called\n"));
 
-    initialize_table_saHpiAnnunciatorTable();
+        initialize_table_saHpiAnnunciatorTable();
 
-    initialize_table_saHpiAnnunciatorEntryCount();
+        initialize_table_saHpiAnnunciatorEntryCount();
 
 }
 
@@ -388,46 +390,46 @@ init_saHpiAnnunciatorTable(void)
  * the *_row_copy routine
  */
 static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
-                         saHpiAnnunciatorTable_context * src)
+                                          saHpiAnnunciatorTable_context * src)
 {
-	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_row_copy, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_row_copy, called\n"));
 
-    if(!dst||!src)
-        return 1;
-        
-    /*
-     * copy index, if provided
-     */
-    if(dst->index.oids)
-        free(dst->index.oids);
-    if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
-                           src->index.len * sizeof(oid) )) {
-        dst->index.oids = NULL;
-        return 1;
-    }
-    dst->index.len = src->index.len;
-    
+        if (!dst||!src)
+                return 1;
 
-    /*
-     * copy components into the context structure
-     */
-    /** TODO: add code for external index(s)! */
-    dst->saHpiAnnunciatorNum = src->saHpiAnnunciatorNum;
+        /*
+         * copy index, if provided
+         */
+        if (dst->index.oids)
+                free(dst->index.oids);
+        if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
+                            src->index.len * sizeof(oid) )) {
+                dst->index.oids = NULL;
+                return 1;
+        }
+        dst->index.len = src->index.len;
 
-    dst->saHpiAnnunciatorType = src->saHpiAnnunciatorType;
 
-    dst->saHpiAnnunciatorModeReadOnly = src->saHpiAnnunciatorModeReadOnly;
+        /*
+         * copy components into the context structure
+         */
+        /** TODO: add code for external index(s)! */
+        dst->saHpiAnnunciatorNum = src->saHpiAnnunciatorNum;
 
-    dst->saHpiAnnunciatorMaxConditions = src->saHpiAnnunciatorMaxConditions;
+        dst->saHpiAnnunciatorType = src->saHpiAnnunciatorType;
 
-    dst->saHpiAnnunciatorMode = src->saHpiAnnunciatorMode;
+        dst->saHpiAnnunciatorModeReadOnly = src->saHpiAnnunciatorModeReadOnly;
 
-    dst->saHpiAnnunciatorOem = src->saHpiAnnunciatorOem;
+        dst->saHpiAnnunciatorMaxConditions = src->saHpiAnnunciatorMaxConditions;
 
-    memcpy( dst->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR_len );
-    dst->saHpiAnnunciatorRDR_len = src->saHpiAnnunciatorRDR_len;
+        dst->saHpiAnnunciatorMode = src->saHpiAnnunciatorMode;
 
-    return 0;
+        dst->saHpiAnnunciatorOem = src->saHpiAnnunciatorOem;
+
+        memcpy( dst->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR_len );
+        dst->saHpiAnnunciatorRDR_len = src->saHpiAnnunciatorRDR_len;
+
+        return 0;
 }
 
 /**
@@ -441,93 +443,93 @@ static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
 int
 saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiResourceIsHistorical;
-    netsnmp_variable_list var_saHpiAnnunciatorNum;
-    int err;
+        /*
+         * temporary local storage for extracting oid index
+         *
+         * extract index uses varbinds (netsnmp_variable_list) to parse
+         * the index OID into the individual components for each index part.
+         */
+        /** TODO: add storage for external index(s)! */
+        netsnmp_variable_list var_saHpiDomainId;
+        netsnmp_variable_list var_saHpiResourceId;
+        netsnmp_variable_list var_saHpiResourceIsHistorical;
+        netsnmp_variable_list var_saHpiAnnunciatorNum;
+        int err;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_extract_index, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_extract_index, called\n"));
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
+        /*
+         * copy index, if provided
+         */
+        if (hdr) {
+                netsnmp_assert(ctx->index.oids == NULL);
+                if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+                                    hdr->len * sizeof(oid) )) {
+                        return -1;
+                }
+                ctx->index.len = hdr->len;
         }
-        ctx->index.len = hdr->len;
-    }
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
+        /*
+         * initialize variable that will hold each component of the index.
+         * If there are multiple indexes for the table, the variable_lists
+         * need to be linked together, in order.
+         */
+        /** TODO: add code for external index(s)! */
+        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
+        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
-       memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-       var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiResourceIsHistorical.next_variable = &var_saHpiAnnunciatorNum;
+        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
+        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiResourceIsHistorical.next_variable = &var_saHpiAnnunciatorNum;
 
-       memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
-       var_saHpiAnnunciatorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiAnnunciatorNum.next_variable = NULL;
+        memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
+        var_saHpiAnnunciatorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiAnnunciatorNum.next_variable = NULL;
 
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
-   
-              /** skipping external index saHpiResourceId */
-   
-              /** skipping external index saHpiResourceIsHistorical */
-   
+        /*
+         * parse the oid into the individual index components
+         */
+        err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+        if (err == SNMP_ERR_NOERROR) {
+                /*
+                 * copy index components into the context structure
+                 */
+                /** skipping external index saHpiDomainId */
+
+                /** skipping external index saHpiResourceId */
+
+                /** skipping external index saHpiResourceIsHistorical */
+
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
-   
-   
-		err = saHpiDomainId_check_index(
-			*var_saHpiDomainId.val.integer);
-		err = saHpiResourceEntryId_check_index(
-			*var_saHpiResourceId.val.integer);  
-		err = saHpiResourceIsHistorical_check_index(
-			*var_saHpiResourceIsHistorical.val.integer);
-		err = saHpiAnnunciatorNum_check_index(
-			*var_saHpiAnnunciatorNum.val.integer);    
-    }
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
 
-    return err;
+                err = saHpiDomainId_check_index(
+                                               *var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(
+                                                      *var_saHpiResourceId.val.integer);  
+                err = saHpiResourceIsHistorical_check_index(
+                                                           *var_saHpiResourceIsHistorical.val.integer);
+                err = saHpiAnnunciatorNum_check_index(
+                                                     *var_saHpiAnnunciatorNum.val.integer);    
+        }
+
+        /*
+         * parsing may have allocated memory. free it.
+         */
+        snmp_reset_var_buffers( &var_saHpiDomainId );
+
+        return err;
 }
 
 /************************************************************
@@ -540,20 +542,20 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
  * return 0 if the row is not ready for the ACTIVE state
  */
 int saHpiAnnunciatorTable_can_activate(saHpiAnnunciatorTable_context *undo_ctx,
-                      saHpiAnnunciatorTable_context *row_ctx,
-                      netsnmp_request_group * rg)
+                                       saHpiAnnunciatorTable_context *row_ctx,
+                                       netsnmp_request_group * rg)
 {
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_activate, called\n"));
 
-    /*
-     * TODO: check for activation requirements here
-     */
+        /*
+         * TODO: check for activation requirements here
+         */
 
 
-    /*
-     * be optimistic.
-     */
-    return 1;
+        /*
+         * be optimistic.
+         */
+        return 1;
 }
 
 /************************************************************
@@ -567,14 +569,14 @@ int saHpiAnnunciatorTable_can_activate(saHpiAnnunciatorTable_context *undo_ctx,
  * return 0 if the row must remain in the ACTIVE state
  */
 int saHpiAnnunciatorTable_can_deactivate(saHpiAnnunciatorTable_context *undo_ctx,
-                        saHpiAnnunciatorTable_context *row_ctx,
-                        netsnmp_request_group * rg)
+                                         saHpiAnnunciatorTable_context *row_ctx,
+                                         netsnmp_request_group * rg)
 {
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_deactivate, called\n"));
-    /*
-     * TODO: check for deactivation requirements here
-     */
-    return 1;
+        /*
+         * TODO: check for deactivation requirements here
+         */
+        return 1;
 }
 
 /************************************************************
@@ -585,21 +587,21 @@ int saHpiAnnunciatorTable_can_deactivate(saHpiAnnunciatorTable_context *undo_ctx
  * return 0 if the row cannot be deleted
  */
 int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
-                    saHpiAnnunciatorTable_context *row_ctx,
-                    netsnmp_request_group * rg)
+                                     saHpiAnnunciatorTable_context *row_ctx,
+                                     netsnmp_request_group * rg)
 {
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_can_delete, called\n"));
-    /*
-     * probably shouldn't delete a row that we can't
-     * deactivate.
-     */
-    if(saHpiAnnunciatorTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
-    
-    /*
-     * TODO: check for other deletion requirements here
-     */
-    return 1;
+        /*
+         * probably shouldn't delete a row that we can't
+         * deactivate.
+         */
+        if (saHpiAnnunciatorTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+                return 0;
+
+        /*
+         * TODO: check for other deletion requirements here
+         */
+        return 1;
 }
 
 /************************************************************
@@ -619,37 +621,37 @@ int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
 saHpiAnnunciatorTable_context *
 saHpiAnnunciatorTable_create_row( netsnmp_index* hdr)
 {
-    saHpiAnnunciatorTable_context * ctx =
+        saHpiAnnunciatorTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_create_row, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_create_row, called\n"));
 
-    if(!ctx)
-        return NULL;
-        
-    /*
-     * TODO: check indexes, if necessary.
-     */
-    if(saHpiAnnunciatorTable_extract_index( ctx, hdr )) {
-        free(ctx->index.oids);
-        free(ctx);
-        return NULL;
-    }
+        if (!ctx)
+                return NULL;
 
-    /* netsnmp_mutex_init(ctx->lock);
-       netsnmp_mutex_lock(ctx->lock); */
+        /*
+         * TODO: check indexes, if necessary.
+         */
+        if (saHpiAnnunciatorTable_extract_index( ctx, hdr )) {
+                free(ctx->index.oids);
+                free(ctx);
+                return NULL;
+        }
 
-    /*
-     * TODO: initialize any default values here. This is also
-     * first place you really should allocate any memory for
-     * yourself to use.  If you allocated memory earlier,
-     * make sure you free it for earlier error cases!
-     */
-    /**
-     ctx->saHpiAnnunciatorMode = 0;
-    */
+        /* netsnmp_mutex_init(ctx->lock);
+           netsnmp_mutex_lock(ctx->lock); */
 
-    return ctx;
+        /*
+         * TODO: initialize any default values here. This is also
+         * first place you really should allocate any memory for
+         * yourself to use.  If you allocated memory earlier,
+         * make sure you free it for earlier error cases!
+         */
+        /**
+         ctx->saHpiAnnunciatorMode = 0;
+        */
+
+        return ctx;
 }
 
 /************************************************************
@@ -658,23 +660,23 @@ saHpiAnnunciatorTable_create_row( netsnmp_index* hdr)
 saHpiAnnunciatorTable_context *
 saHpiAnnunciatorTable_duplicate_row( saHpiAnnunciatorTable_context * row_ctx)
 {
-    saHpiAnnunciatorTable_context * dup;
+        saHpiAnnunciatorTable_context * dup;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_duplicate_row, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_duplicate_row, called\n"));
 
-    if(!row_ctx)
-        return NULL;
+        if (!row_ctx)
+                return NULL;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
-    if(!dup)
-        return NULL;
-        
-    if(saHpiAnnunciatorTable_row_copy(dup,row_ctx)) {
-        free(dup);
-        dup = NULL;
-    }
+        dup = SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
+        if (!dup)
+                return NULL;
 
-    return dup;
+        if (saHpiAnnunciatorTable_row_copy(dup,row_ctx)) {
+                free(dup);
+                dup = NULL;
+        }
+
+        return dup;
 }
 
 /************************************************************
@@ -682,23 +684,23 @@ saHpiAnnunciatorTable_duplicate_row( saHpiAnnunciatorTable_context * row_ctx)
  */
 netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context * ctx )
 {
-  /* netsnmp_mutex_destroy(ctx->lock); */
+        /* netsnmp_mutex_destroy(ctx->lock); */
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_delete_row, called\n"));
 
-    if(ctx->index.oids)
-        free(ctx->index.oids);
+        if (ctx->index.oids)
+                free(ctx->index.oids);
 
-    /*
-     * TODO: release any memory you allocated here...
-     */
+        /*
+         * TODO: release any memory you allocated here...
+         */
 
-    /*
-     * release header
-     */
-    free( ctx );
+        /*
+         * release header
+         */
+        free( ctx );
 
-    return NULL;
+        return NULL;
 }
 
 
@@ -719,100 +721,100 @@ netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context 
  */
 void saHpiAnnunciatorTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiAnnunciatorTable_context *row_ctx =
-            (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx =
-            (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_variable_list *var;
-    netsnmp_request_group_item *current;
-    int rc;
+        saHpiAnnunciatorTable_context *row_ctx =
+        (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx =
+        (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_variable_list *var;
+        netsnmp_request_group_item *current;
+        int rc;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve1, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve1, called\n"));
 
-    /*
-     * TODO: loop through columns, check syntax and lengths. For
-     * columns which have no dependencies, you could also move
-     * the value/range checking here to attempt to catch error
-     * cases as early as possible.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        /*
+         * TODO: loop through columns, check syntax and lengths. For
+         * columns which have no dependencies, you could also move
+         * the value/range checking here to attempt to catch error
+         * cases as early as possible.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+                var = current->ri->requestvb;
+                rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                            sizeof(row_ctx->saHpiAnnunciatorMode));
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnunciatorMode));
-        break;
+                default: /** We shouldn't get here */
+                        rc = SNMP_ERR_GENERR;
+                        snmp_log(LOG_ERR, "unknown column in "
+                                 "saHpiAnnunciatorTable_set_reserve1\n");
+                }
 
-        default: /** We shouldn't get here */
-            rc = SNMP_ERR_GENERR;
-            snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiAnnunciatorTable_set_reserve1\n");
+                if (rc)
+                        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+                rg->status = SNMP_MAX( rg->status, current->ri->status );
         }
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
-        rg->status = SNMP_MAX( rg->status, current->ri->status );
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
-    netsnmp_variable_list *var;
-    int rc;
+        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        int rc;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve2, called\n"));
-    rg->rg_void = rg->list->ri;
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_reserve2, called\n"));
+        rg->rg_void = rg->list->ri;
 
-    /*
-     * TODO: loop through columns, check for valid
-     * values and any range constraints.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        /*
+         * TODO: loop through columns, check for valid
+         * values and any range constraints.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
-        rc = SNMP_ERR_NOERROR;
+                var = current->ri->requestvb;
+                rc = SNMP_ERR_NOERROR;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        /*
+                         * TODO: routine to check valid values
+                         *
+                         * EXAMPLE:
+                         *
+                        * if ( *var->val.integer != XXX ) {
+                    *    rc = SNMP_ERR_INCONSISTENTVALUE;
+                    *    rc = SNMP_ERR_BADVALUE;
+                    * }
+                    */
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
 
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                if (rc)
+                        netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
         }
 
-        if (rc)
-           netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
-    }
-
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -828,46 +830,46 @@ void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
  */
 void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+        int            row_err = 0;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_action, called\n"));
-    /*
-     * TODO: loop through columns, copy varbind values
-     * to context structure for the row.
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_action, called\n"));
+        /*
+         * TODO: loop through columns, copy varbind values
+         * to context structure for the row.
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+                var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        row_ctx->saHpiAnnunciatorMode = *var->val.integer;
+                        row_err = set_table_annun_mode (row_ctx);
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiAnnunciatorMode = *var->val.integer;
-            row_err = set_table_annun_mode (row_ctx);
-        break;
-
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    if(row_err) {
-        netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-                                       (netsnmp_request_info*)rg->rg_void,
-                                       row_err);
-        return;
-    }
+        if (row_err) {
+                netsnmp_set_mode_request_error(MODE_SET_BEGIN,
+                                               (netsnmp_request_info*)rg->rg_void,
+                                               row_err);
+                return;
+        }
 
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
+        /*
+         * TODO: if you have dependencies on other tables, this would be
+         * a good place to check those, too.
+         */
 }
 
 /************************************************************
@@ -889,34 +891,34 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
  */
 void saHpiAnnunciatorTable_set_commit( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_commit, called\n"));
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_commit, called\n"));
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+                var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-        break;
-
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -929,36 +931,36 @@ void saHpiAnnunciatorTable_set_commit( netsnmp_request_group *rg )
  */
 void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_free, called\n"));
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_free, called\n"));
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+                var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-        break;
-
-        default: 
-                break;
-                /** We shouldn't get here */
-                /** should have been logged in reserve1 */
+                default: 
+                        break;
+                        /** We shouldn't get here */
+                        /** should have been logged in reserve1 */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 /************************************************************
@@ -981,34 +983,34 @@ void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
  */
 void saHpiAnnunciatorTable_set_undo( netsnmp_request_group *rg )
 {
-    netsnmp_variable_list *var;
-    saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-    saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
-    netsnmp_request_group_item *current;
+        netsnmp_variable_list *var;
+        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+        netsnmp_request_group_item *current;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_undo, called\n"));
-    /*
-     * loop through columns
-     */
-    for( current = rg->list; current; current = current->next ) {
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_undo, called\n"));
+        /*
+         * loop through columns
+         */
+        for ( current = rg->list; current; current = current->next ) {
 
-        var = current->ri->requestvb;
+                var = current->ri->requestvb;
 
-        switch(current->tri->colnum) {
+                switch (current->tri->colnum) {
+                
+                case COLUMN_SAHPIANNUNCIATORMODE:
+                        /** INTEGER = ASN_INTEGER */
+                        break;
 
-        case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-        break;
-
-        default: /** We shouldn't get here */
-            netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                default: /** We shouldn't get here */
+                        netsnmp_assert(0); /** why wasn't this caught in reserve1? */
+                }
         }
-    }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
+        /*
+         * done with all the columns. Could check row related
+         * requirements here.
+         */
 }
 
 
@@ -1019,44 +1021,44 @@ void saHpiAnnunciatorTable_set_undo( netsnmp_request_group *rg )
 void
 initialize_table_saHpiAnnunciatorTable(void)
 {
-    netsnmp_table_registration_info *table_info;
+        netsnmp_table_registration_info *table_info;
 
-    DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnunciatorTable, called\n"));
-    if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiAnnunciatorTable_handler called again\n");
-        return;
-    }
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnunciatorTable, called\n"));
+        if (my_handler) {
+                snmp_log(LOG_ERR, "initialize_table_saHpiAnnunciatorTable_handler called again\n");
+                return;
+        }
 
-    memset(&cb, 0x00, sizeof(cb));
+        memset(&cb, 0x00, sizeof(cb));
 
-    /** create the table structure itself */
-    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+        /** create the table structure itself */
+        table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
 
-    /* if your table is read only, it's easiest to change the
-       HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiAnnunciatorTable",
-                                             netsnmp_table_array_helper_handler,
-                                             saHpiAnnunciatorTable_oid,
-                                             saHpiAnnunciatorTable_oid_len,
-                                             HANDLER_CAN_RWRITE);
-            
-    if (!my_handler || !table_info) {
-        snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiAnnunciatorTable_handler\n");
-        return; /** mallocs failed */
-    }
+        /* if your table is read only, it's easiest to change the
+           HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
+        my_handler = netsnmp_create_handler_registration("saHpiAnnunciatorTable",
+                                                         netsnmp_table_array_helper_handler,
+                                                         saHpiAnnunciatorTable_oid,
+                                                         saHpiAnnunciatorTable_oid_len,
+                                                         HANDLER_CAN_RWRITE);
 
-    /***************************************************
-     * Setting up the table's definition
-     */
-    /*
-     * TODO: add any external indexes here.
-     */
+        if (!my_handler || !table_info) {
+                snmp_log(LOG_ERR, "malloc failed in "
+                         "initialize_table_saHpiAnnunciatorTable_handler\n");
+                return; /** mallocs failed */
+        }
+
+        /***************************************************
+         * Setting up the table's definition
+         */
+        /*
+         * TODO: add any external indexes here.
+         */
         /** TODO: add code for external index(s)! */
 
-    /*
-     * internal indexes
-     */
+        /*
+         * internal indexes
+         */
         /** index: saHpiDomainId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiResourceId */
@@ -1066,48 +1068,48 @@ initialize_table_saHpiAnnunciatorTable(void)
         /** index: saHpiAnnunciatorNum */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    table_info->min_column = saHpiAnnunciatorTable_COL_MIN;
-    table_info->max_column = saHpiAnnunciatorTable_COL_MAX;
+        table_info->min_column = saHpiAnnunciatorTable_COL_MIN;
+        table_info->max_column = saHpiAnnunciatorTable_COL_MAX;
 
-    /***************************************************
-     * registering the table with the master agent
-     */
-    cb.get_value = saHpiAnnunciatorTable_get_value;
-    cb.container = netsnmp_container_find("saHpiAnnunciatorTable_primary:"
-                                          "saHpiAnnunciatorTable:"
-                                          "table_container");
+        /***************************************************
+         * registering the table with the master agent
+         */
+        cb.get_value = saHpiAnnunciatorTable_get_value;
+        cb.container = netsnmp_container_find("saHpiAnnunciatorTable_primary:"
+                                              "saHpiAnnunciatorTable:"
+                                              "table_container");
 
-    netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiAnnunciatorTable_secondary:"
-                                                       "saHpiAnnunciatorTable:"
-                                                       "table_container"));
-    cb.container->next->compare = saHpiAnnunciatorTable_cmp;
+        netsnmp_container_add_index(cb.container,
+                                    netsnmp_container_find("saHpiAnnunciatorTable_secondary:"
+                                                           "saHpiAnnunciatorTable:"
+                                                           "table_container"));
+        cb.container->next->compare = saHpiAnnunciatorTable_cmp;
 
 
-    cb.can_set = 1;
+        cb.can_set = 1;
 
-    cb.create_row = (UserRowMethod*)saHpiAnnunciatorTable_create_row;
+        cb.create_row = (UserRowMethod*)saHpiAnnunciatorTable_create_row;
 
-    cb.duplicate_row = (UserRowMethod*)saHpiAnnunciatorTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiAnnunciatorTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiAnnunciatorTable_row_copy;
+        cb.duplicate_row = (UserRowMethod*)saHpiAnnunciatorTable_duplicate_row;
+        cb.delete_row = (UserRowMethod*)saHpiAnnunciatorTable_delete_row;
+        cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiAnnunciatorTable_row_copy;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_delete;
+        cb.can_activate = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_activate;
+        cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_deactivate;
+        cb.can_delete = (Netsnmp_User_Row_Action *)saHpiAnnunciatorTable_can_delete;
 
-    cb.set_reserve1 = saHpiAnnunciatorTable_set_reserve1;
-    cb.set_reserve2 = saHpiAnnunciatorTable_set_reserve2;
-    cb.set_action = saHpiAnnunciatorTable_set_action;
-    cb.set_commit = saHpiAnnunciatorTable_set_commit;
-    cb.set_free = saHpiAnnunciatorTable_set_free;
-    cb.set_undo = saHpiAnnunciatorTable_set_undo;
+        cb.set_reserve1 = saHpiAnnunciatorTable_set_reserve1;
+        cb.set_reserve2 = saHpiAnnunciatorTable_set_reserve2;
+        cb.set_action = saHpiAnnunciatorTable_set_action;
+        cb.set_commit = saHpiAnnunciatorTable_set_commit;
+        cb.set_free = saHpiAnnunciatorTable_set_free;
+        cb.set_undo = saHpiAnnunciatorTable_set_undo;
 
-    DEBUGMSGTL(("initialize_table_saHpiAnnunciatorTable",
-                "Registering table saHpiAnnunciatorTable "
-                "as a table array\n"));
-    netsnmp_table_container_register(my_handler, table_info, &cb,
-                                     cb.container, 1);
+        DEBUGMSGTL(("initialize_table_saHpiAnnunciatorTable",
+                    "Registering table saHpiAnnunciatorTable "
+                    "as a table array\n"));
+        netsnmp_table_container_register(my_handler, table_info, &cb,
+                                         cb.container, 1);
 }
 
 /************************************************************
@@ -1119,71 +1121,71 @@ initialize_table_saHpiAnnunciatorTable(void)
  * change in code in this fuction.
  */
 int saHpiAnnunciatorTable_get_value(
-            netsnmp_request_info *request,
-            netsnmp_index *item,
-            netsnmp_table_request_info *table_info )
+                                   netsnmp_request_info *request,
+                                   netsnmp_index *item,
+                                   netsnmp_table_request_info *table_info )
 {
-    netsnmp_variable_list *var = request->requestvb;
-    saHpiAnnunciatorTable_context *context = (saHpiAnnunciatorTable_context *)item;
+        netsnmp_variable_list *var = request->requestvb;
+        saHpiAnnunciatorTable_context *context = (saHpiAnnunciatorTable_context *)item;
 
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_get_value, called\n"));
-    switch(table_info->colnum) {
-
+        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_get_value, called\n"));
+        switch (table_info->colnum) {
+        
         case COLUMN_SAHPIANNUNCIATORNUM:
-            /** SaHpiInstrumentId = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnunciatorNum,
-                         sizeof(context->saHpiAnnunciatorNum) );
-        break;
-    
+                /** SaHpiInstrumentId = ASN_UNSIGNED */
+                snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                         (char*)&context->saHpiAnnunciatorNum,
+                                         sizeof(context->saHpiAnnunciatorNum) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATORTYPE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnunciatorType,
-                         sizeof(context->saHpiAnnunciatorType) );
-        break;
-    
+                /** INTEGER = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiAnnunciatorType,
+                                         sizeof(context->saHpiAnnunciatorType) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATORMODEREADONLY:
-            /** TruthValue = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnunciatorModeReadOnly,
-                         sizeof(context->saHpiAnnunciatorModeReadOnly) );
-        break;
-    
+                /** TruthValue = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiAnnunciatorModeReadOnly,
+                                         sizeof(context->saHpiAnnunciatorModeReadOnly) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATORMAXCONDITIONS:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnunciatorMaxConditions,
-                         sizeof(context->saHpiAnnunciatorMaxConditions) );
-        break;
-    
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                         (char*)&context->saHpiAnnunciatorMaxConditions,
+                                         sizeof(context->saHpiAnnunciatorMaxConditions) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATORMODE:
-            /** INTEGER = ASN_INTEGER */
-            snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnunciatorMode,
-                         sizeof(context->saHpiAnnunciatorMode) );
-        break;
-    
+                /** INTEGER = ASN_INTEGER */
+                snmp_set_var_typed_value(var, ASN_INTEGER,
+                                         (char*)&context->saHpiAnnunciatorMode,
+                                         sizeof(context->saHpiAnnunciatorMode) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATOROEM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnunciatorOem,
-                         sizeof(context->saHpiAnnunciatorOem) );
-        break;
-    
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                snmp_set_var_typed_value(var, ASN_UNSIGNED,
+                                         (char*)&context->saHpiAnnunciatorOem,
+                                         sizeof(context->saHpiAnnunciatorOem) );
+                break;
+
         case COLUMN_SAHPIANNUNCIATORRDR:
-            /** RowPointer = ASN_OBJECT_ID */
-            snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiAnnunciatorRDR,
-                         context->saHpiAnnunciatorRDR_len );
-        break;
-    
-    default: /** We shouldn't get here */
-        snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiAnnunciatorTable_get_value\n");
-        return SNMP_ERR_GENERR;
-    }
-    return SNMP_ERR_NOERROR;
+                /** RowPointer = ASN_OBJECT_ID */
+                snmp_set_var_typed_value(var, ASN_OBJECT_ID,
+                                         (char*)&context->saHpiAnnunciatorRDR,
+                                         context->saHpiAnnunciatorRDR_len );
+                break;
+
+        default: /** We shouldn't get here */
+                snmp_log(LOG_ERR, "unknown column in "
+                         "saHpiAnnunciatorTable_get_value\n");
+                return SNMP_ERR_GENERR;
+        }
+        return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
@@ -1193,7 +1195,7 @@ const saHpiAnnunciatorTable_context *
 saHpiAnnunciatorTable_get_by_idx(netsnmp_index * hdr)
 {
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_get_by_idx, called\n"));
-    return (const saHpiAnnunciatorTable_context *)
+        return(const saHpiAnnunciatorTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
 
