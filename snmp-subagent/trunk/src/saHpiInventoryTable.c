@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiInventoryTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +50,219 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiInventoryTable_oid[] = { saHpiInventoryTable_TABLE_OID };
 size_t saHpiInventoryTable_oid_len = OID_LENGTH(saHpiInventoryTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiInventoryTable_IDX2
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long inventory_entry_count = 0;
+static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
+int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
+                                    netsnmp_handler_registration *reginfo,
+                                    netsnmp_agent_request_info   *reqinfo,
+                                    netsnmp_request_info         *requests);
+int initialize_table_saHpiInventoryEntryCount(void);
+
+/**
+ * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
+ */
+SaErrorT populate_inventory (SaHpiSessionIdT sessionid, 
+                             SaHpiRdrT *rdr_entry,
+                             SaHpiRptEntryT *rpt_entry,
+                             oid *full_oid, size_t full_oid_len,
+                             oid *child_oid, size_t *child_oid_len)
+{
+
+        DEBUGMSGTL ((AGENT, "populate_inventory, called\n"));
+
+        SaErrorT rv = SA_OK;    
+        SaHpiIdrInfoT idr_info;
+
+        oid inventory_oid[INVENTORY_INDEX_NR];
+        netsnmp_index inventory_index;
+        saHpiInventoryTable_context *inventory_context;
+
+        oid column[2];
+        int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "SAHPI_INVENTORY_RDR populate_inventory() called\n"));
+
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_inventory() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_inventory() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        inventory_index.len = INVENTORY_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        inventory_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        inventory_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        inventory_oid[2] = MIB_FALSE;
+        /** Index saHpiSensorNum */
+        inventory_oid[3] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+        /* assign the indices to the index */
+        inventory_index.oids = (oid *) & inventory_oid;
+
+        /* create full oid on This row for parent RowPointer */
+        column[0] = 1;
+        column[1] = COLUMN_SAHPIINVENTORYPERSISTENT;
+        memset(child_oid, 0, sizeof(child_oid_len));
+        build_full_oid(saHpiInventoryTable_oid, saHpiInventoryTable_oid_len,
+                       column, column_len,
+                       &inventory_index,
+                       child_oid, MAX_OID_LEN, child_oid_len);
+
+        /* See if Row exists. */
+        inventory_context = NULL;
+        inventory_context = CONTAINER_FIND(cb.container, &inventory_index);
+
+        if (!inventory_context) {
+                // New entry. Add it
+                inventory_context = 
+                saHpiInventoryTable_create_row(&inventory_index);
+        }
+        if (!inventory_context) {
+                snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        inventory_context->saHpiInventoryId = 
+                rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+
+        /** TruthValue = ASN_INTEGER */
+        inventory_context->saHpiInventoryPersistent =
+                (rdr_entry->RdrTypeUnion.InventoryRec.Persistent == SAHPI_TRUE)
+                ? MIB_TRUE : MIB_FALSE;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        inventory_context->saHpiInventoryOEM =
+                rdr_entry->RdrTypeUnion.InventoryRec.Oem;
+
+        /*******************/
+        /* Idr Info Record */
+        /*******************/
+        rv = saHpiIdrInfoGet(sessionid, rpt_entry->ResourceId, 
+                             rdr_entry->RdrTypeUnion.InventoryRec.IdrId,
+                             &idr_info);
+        if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_inventory() saHpiIdrInfoGet() ERRORED out\n"));
+                saHpiAnnunciatorTable_delete_row( inventory_context );
+                return AGENT_ERR_INTERNAL_ERROR;
+        } 
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        inventory_context->saHpiInventoryUpdateCount =
+                idr_info.UpdateCount;
+
+        /** TruthValue = ASN_INTEGER */
+        inventory_context->saHpiInventoryIsReadOnly = 
+                (idr_info.ReadOnly == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        inventory_context->saHpiInventoryNumAreas =
+                idr_info.NumAreas;   
+
+        /** RowPointer = ASN_OBJECT_ID */
+        memset(inventory_context->saHpiInventoryRDR,
+               0, sizeof(inventory_context->saHpiInventoryRDR));
+        inventory_context->saHpiInventoryRDR_len =
+                full_oid_len * sizeof(oid);
+        memcpy(inventory_context->saHpiInventoryRDR, 
+               full_oid, 
+               inventory_context->saHpiInventoryRDR_len);
+
+        CONTAINER_INSERT (cb.container, inventory_context);
+
+        inventory_entry_count = CONTAINER_SIZE (cb.container);
+
+        return rv;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
+                                    netsnmp_handler_registration *reginfo,
+                                    netsnmp_agent_request_info   *reqinfo,
+                                    netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &inventory_entry_count,
+                                     sizeof(inventory_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiInventoryEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiInventoryEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiInventoryEntryCount", 
+                        handle_saHpiInventoryEntryCount,
+                        saHpiInventoryEntryCount_oid, 
+                        OID_LENGTH(saHpiInventoryEntryCount_oid),
+                        HANDLER_CAN_RONLY ));
+        return SNMP_ERR_NOERROR;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -67,70 +284,55 @@ saHpiInventoryTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiInventoryTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	/* check for NULL pointers */
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;
+
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;
+
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by third index */
+			/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+				return -1;
+
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 1;
+
+			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+				/* If saHpiResourceIsHistorical index is equal sort by forth index */
+				/* CHECK FORTH INDEX,  saHpiInventoryId */
+				if ( context_l->index.oids[3] < context_r->index.oids[3])
+					return -1;
+
+				if ( context_l->index.oids[3] > context_r->index.oids[3])
+					return 1;
+
+				if ( context_l->index.oids[3] == context_r->index.oids[3])
+					return 0;
+			}
+		}
+	}
+
+	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiInventoryTable_context *
-saHpiInventoryTable_get( const char *name, int len )
-{
-    saHpiInventoryTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiInventoryTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiInventoryTable module
@@ -138,6 +340,8 @@ saHpiInventoryTable_get( const char *name, int len )
 void
 init_saHpiInventoryTable(void)
 {
+	DEBUGMSGTL ((AGENT, "init_saHpiInventoryTable, called\n"));
+
     initialize_table_saHpiInventoryTable();
 
     /*
@@ -155,6 +359,8 @@ init_saHpiInventoryTable(void)
 static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
                          saHpiInventoryTable_context * src)
 {
+	DEBUGMSGTL ((AGENT, "saHpiInventoryTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -193,8 +399,6 @@ static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiInventoryTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -219,6 +423,8 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
     netsnmp_variable_list var_saHpiInventoryId;
     int err;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_extract_index, called\n"));
+
     /*
      * copy index, if provided
      */
@@ -240,42 +446,22 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiInventoryTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiInventoryTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiInventoryTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiInventoryId;
 
        memset( &var_saHpiInventoryId, 0x00, sizeof(var_saHpiInventoryId) );
        var_saHpiInventoryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiInventoryTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiInventoryId.next_variable = &var_XX;
-#endif
+       var_saHpiInventoryId.next_variable = NULL;
 
 
     /*
@@ -295,34 +481,14 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
                 ctx->saHpiInventoryId = *var_saHpiInventoryId.val.integer;
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiInventoryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+                err = saHpiDomainId_check_index(
+                                               *var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(
+                                                      *var_saHpiResourceId.val.integer);  
+                err = saHpiResourceIsHistorical_check_index(
+                                                           *var_saHpiResourceIsHistorical.val.integer);
+                err = saHpiInventoryId_check_index(
+                                                     *var_saHpiInventoryId.val.integer);
     }
 
     /*
@@ -346,6 +512,7 @@ int saHpiInventoryTable_can_activate(saHpiInventoryTable_context *undo_ctx,
                       saHpiInventoryTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_can_activate, called\n"));
     /*
      * TODO: check for activation requirements here
      */
@@ -371,6 +538,7 @@ int saHpiInventoryTable_can_deactivate(saHpiInventoryTable_context *undo_ctx,
                         saHpiInventoryTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -388,6 +556,7 @@ int saHpiInventoryTable_can_delete(saHpiInventoryTable_context *undo_ctx,
                     saHpiInventoryTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -401,7 +570,6 @@ int saHpiInventoryTable_can_delete(saHpiInventoryTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiInventoryTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -421,6 +589,9 @@ saHpiInventoryTable_create_row( netsnmp_index* hdr)
 {
     saHpiInventoryTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiInventoryTable_context);
+
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_create_row, called\n"));
+
     if(!ctx)
         return NULL;
         
@@ -447,7 +618,6 @@ saHpiInventoryTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -456,6 +626,8 @@ saHpiInventoryTable_context *
 saHpiInventoryTable_duplicate_row( saHpiInventoryTable_context * row_ctx)
 {
     saHpiInventoryTable_context * dup;
+
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_duplicate_row, called\n"));
 
     if(!row_ctx)
         return NULL;
@@ -478,6 +650,8 @@ saHpiInventoryTable_duplicate_row( saHpiInventoryTable_context * row_ctx)
 netsnmp_index * saHpiInventoryTable_delete_row( saHpiInventoryTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -520,6 +694,7 @@ void saHpiInventoryTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -558,6 +733,8 @@ void saHpiInventoryTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -606,6 +783,8 @@ void saHpiInventoryTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_action, called\n"));
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -621,23 +800,6 @@ void saHpiInventoryTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiInventoryTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -675,6 +837,8 @@ void saHpiInventoryTable_set_commit( netsnmp_request_group *rg )
     saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -710,6 +874,8 @@ void saHpiInventoryTable_set_free( netsnmp_request_group *rg )
     saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_free, called\n"));
+
     /*
      * loop through columns
      */
@@ -719,8 +885,10 @@ void saHpiInventoryTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -755,6 +923,8 @@ void saHpiInventoryTable_set_undo( netsnmp_request_group *rg )
     saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -775,9 +945,6 @@ void saHpiInventoryTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiInventoryTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiInventoryTable table by defining its contents and how it's structured
@@ -786,6 +953,8 @@ void
 initialize_table_saHpiInventoryTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiInventoryTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiInventoryTable_handler called again\n");
@@ -841,18 +1010,18 @@ initialize_table_saHpiInventoryTable(void)
     cb.container = netsnmp_container_find("saHpiInventoryTable_primary:"
                                           "saHpiInventoryTable:"
                                           "table_container");
-#ifdef saHpiInventoryTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiInventoryTable_secondary:"
                                                        "saHpiInventoryTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiInventoryTable_cmp;
-#endif
-#ifdef saHpiInventoryTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiInventoryTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiInventoryTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiInventoryTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiInventoryTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiInventoryTable_row_copy;
@@ -867,7 +1036,7 @@ initialize_table_saHpiInventoryTable(void)
     cb.set_commit = saHpiInventoryTable_set_commit;
     cb.set_free = saHpiInventoryTable_set_free;
     cb.set_undo = saHpiInventoryTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiInventoryTable",
                 "Registering table saHpiInventoryTable "
                 "as a table array\n"));
@@ -890,6 +1059,8 @@ int saHpiInventoryTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiInventoryTable_context *context = (saHpiInventoryTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiInventoryTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -956,6 +1127,8 @@ int saHpiInventoryTable_get_value(
 const saHpiInventoryTable_context *
 saHpiInventoryTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_get_by_idx, called\n"));
+
     return (const saHpiInventoryTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }

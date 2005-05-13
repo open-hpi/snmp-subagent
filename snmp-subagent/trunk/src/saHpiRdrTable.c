@@ -50,6 +50,7 @@
 #include <saHpiSensorTable.h>
 #include <saHpiCurrentSensorStateTable.h>
 #include <saHpiAnnunciatorTable.h>
+#include <saHpiInventoryTable.h>
 
 #include <session_info.h>
 
@@ -278,33 +279,33 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 			break;
 
-/*		case SAHPI_INVENTORY_RDR:
+		case SAHPI_INVENTORY_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.EirId: %d\n",
+				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.IdrId: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      rdr_entry.RdrTypeUnion.InventoryRec.EirId));
-			rv =
-			  populate_inventory (rdr_entry.RecordId,
-					      &rdr_entry.RdrTypeUnion.InventoryRec,
-					      rpt_entry, full_oid, full_oid_len,
-					      child_oid, &child_oid_len);
+				      rdr_entry.RdrTypeUnion.InventoryRec.IdrId));
+			rv = populate_inventory (sessionid,
+                                                 &rdr_entry,
+                                                 rpt_entry,
+                                                 full_oid, full_oid_len,
+                                                 child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_inventory(); rc: %d\n",
 				     rv));
 			break;
-
+/*
 		case SAHPI_WATCHDOG_RDR:
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum));
-			rv = populate_watchdog (rdr_entry.RecordId,
-						&rdr_entry.RdrTypeUnion.WatchdogRec,
-						rpt_entry,
-						full_oid, full_oid_len,
-						child_oid, &child_oid_len);
+			rv = populate_watchdog (sessionid,
+					        &rdr_entry,
+					        rpt_entry,
+					        full_oid, full_oid_len,
+					        child_oid, &child_oid_len);
 			DEBUGMSGTL ((AGENT,
 				     "Called populate_watchdog(); rc: %d\n",
 				     rv));
