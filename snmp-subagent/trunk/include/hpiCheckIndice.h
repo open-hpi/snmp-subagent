@@ -71,6 +71,10 @@ int saHpiSensorNum_check_index(long val);
 /**************************/
 int saHpiAnnunciatorNum_check_index(long val);
 
+/**************************/
+/* saHpiInventoryTable  */    
+/**************************/
+int saHpiInventoryId_check_index(long val);
 
 /**************************************/
 /**************************************/
@@ -110,11 +114,6 @@ int saHpiFieldId_check_index(long val);
 /* saHpiHotSwapEventTable  */    
 /***************************/
 int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSwapEventTimestamp);
-
-/**************************/
-/* saHpiInventoryTable  */    
-/**************************/
-int saHpiInventoryId_check_index(long val);
 
 /**************************/
 /* saHpiOEMEventTable  */    

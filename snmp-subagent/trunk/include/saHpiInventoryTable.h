@@ -72,6 +72,15 @@ typedef struct saHpiInventoryTable_context_s {
 /*************************************************************
  * function declarations
  */
+SaErrorT populate_inventory (SaHpiSessionIdT sessionid, 
+                             SaHpiRdrT *rdr_entry,
+                             SaHpiRptEntryT *rpt_entry,
+                             oid *full_oid, size_t full_oid_len,
+                             oid *child_oid, size_t *child_oid_len);
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiInventoryTable(void);
 void initialize_table_saHpiInventoryTable(void);
 const saHpiInventoryTable_context * saHpiInventoryTable_get_by_idx(netsnmp_index *);
@@ -87,6 +96,13 @@ extern oid saHpiInventoryTable_oid[];
 extern size_t saHpiInventoryTable_oid_len;
 
 #define saHpiInventoryTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,8,2
+
+/* Number of table Indexes */
+#define INVENTORY_INDEX_NR 4 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiInventoryId_INDEX 3
     
 /*************************************************************
  * column number definitions for table saHpiInventoryTable
@@ -100,21 +116,6 @@ extern size_t saHpiInventoryTable_oid_len;
 #define COLUMN_SAHPIINVENTORYRDR 7
 #define saHpiInventoryTable_COL_MIN 2
 #define saHpiInventoryTable_COL_MAX 7
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiInventoryTable */
-#define saHpiInventoryTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiInventoryTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiInventoryTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiInventoryTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiInventoryTable_SET_HANDLING
 
 int saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_index * hdr );
 
@@ -139,14 +140,9 @@ int saHpiInventoryTable_can_delete(saHpiInventoryTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiInventoryTable_ROW_CREATION
 saHpiInventoryTable_context * saHpiInventoryTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiInventoryTable_IDX2
 saHpiInventoryTable_context * saHpiInventoryTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
