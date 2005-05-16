@@ -719,8 +719,8 @@ void saHpiAnnunciatorTable_set_reserve1( netsnmp_request_group *rg )
 {
         saHpiAnnunciatorTable_context *row_ctx =
         (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx =
-        (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *undo_ctx =
+//        (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_variable_list *var;
         netsnmp_request_group_item *current;
         int rc;
@@ -765,8 +765,8 @@ void saHpiAnnunciatorTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
 {
-        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
         netsnmp_variable_list *var;
         int rc;
@@ -828,7 +828,7 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
         saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         int            row_err = 0;
@@ -888,8 +888,8 @@ void saHpiAnnunciatorTable_set_action( netsnmp_request_group *rg )
 void saHpiAnnunciatorTable_set_commit( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_commit, called\n"));
@@ -928,8 +928,8 @@ void saHpiAnnunciatorTable_set_commit( netsnmp_request_group *rg )
 void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_free, called\n"));
@@ -980,8 +980,8 @@ void saHpiAnnunciatorTable_set_free( netsnmp_request_group *rg )
 void saHpiAnnunciatorTable_set_undo( netsnmp_request_group *rg )
 {
         netsnmp_variable_list *var;
-        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_set_undo, called\n"));
