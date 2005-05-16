@@ -41,6 +41,7 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
+#include <saHpiAreaTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -194,6 +195,11 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         memcpy(inventory_context->saHpiInventoryRDR, 
                full_oid, 
                inventory_context->saHpiInventoryRDR_len);
+
+        /********************************************/
+        /* populate all Areas contained by this Idr */
+        /********************************************/
+        rv = populate_area (sessionid, rdr_entry, rpt_entry);
 
         CONTAINER_INSERT (cb.container, inventory_context);
 
