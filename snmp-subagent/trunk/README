@@ -6,6 +6,7 @@ Through this subagent one can includes support for multiple different
 types of hardware including: IPMI, IBM Blade Center (via SNMP), 
 Linux Watchdog devices, and Sysfs based systems.
 
+
 ---------------------------------------------------------
 PREREQUISITES
 ---------------------------------------------------------
@@ -13,9 +14,10 @@ The following software is required to build openhpi
 
 any HPI 1.0 implementation that is based on SAF specification 
 	SAI-HPI-A.01.01. Recommended: openhpi >= 0.4
-autoconf >= 2.50
+autoconf >= 2.57
 automake >= 1.5
-net-snmp >= 5.1.0
+gcc      >= 3.2.0
+uuid.h      (may be found in e2fsprogs-devel or uuid-dev)net-snmp >= 5.1.2
 	(Don't use earlier versions - the AgentX protocol had some
 	 serious issues).
 	(Don't use 5.0.7 - it has a bug in the CONTAINER operations that 
@@ -81,22 +83,21 @@ RUNNING
 
    After these step you should have no trouble browsing the HPI MIB:
 
-   $snmpwalk -v2c -c public localhost hpi
-   HPI-MIB::saHpiEntryCount.0 = Counter32: 3
-   HPI-MIB::saHpiEntryUpdateCount.0 = Gauge32: 3
-   HPI-MIB::saHpiEntryUpdateTimestamp.0 = Counter64: 1076082821603968000
-   HPI-MIB::saHpiDomainID.0.1.1 = Gauge32: 0
-   HPI-MIB::saHpiDomainID.0.2.2 = Gauge32: 0
-   HPI-MIB::saHpiDomainID.0.3.3 = Gauge32: 0
-   HPI-MIB::saHpiEntryID.0.1.1 = Gauge32: 1
-   HPI-MIB::saHpiEntryID.0.2.2 = Gauge32: 2
-   HPI-MIB::saHpiEntryID.0.3.3 = Gauge32: 3
-   HPI-MIB::saHpiResourceID.0.1.1 = Gauge32: 1
-   HPI-MIB::saHpiResourceID.0.2.2 = Gauge32: 2
-   HPI-MIB::saHpiResourceID.0.3.3 = Gauge32: 3
-   HPI-MIB::saHpiResourceEntityPath.0.1.1 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{SYSTEM_BOARD,1}"
-   HPI-MIB::saHpiResourceEntityPath.0.2.2 = STRING: "{ROOT,0}{SYSTEM_CHASSIS,1}{POWER_SUPPLY,1}"
-   ....
+   $snmpwalk -v2c -c public localhost HPI:MIB hpiB0101
+   HPI-MIB::saHpiRdrIsFru.1.2.false.131076 2
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.65541 HPI-MIB::saHpiCtrlDigitalNum.4294967295.1.false.0
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.65543 HPI-MIB::saHpiCtrlDigitalNum.4294967295.1.false.1
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.131073 HPI-MIB::saHpiSensorNum.4294967295.1.false.1
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.131075 HPI-MIB::saHpiSensorNum.4294967295.1.false.3
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.196614 HPI-MIB::saHpiInventoryPersistent.4294967295.1.false.6
+   HPI-MIB::saHpiRdrRowPointer.1.1.false.196616 HPI-MIB::saHpiInventoryPersistent.4294967295.1.false.8
+   HPI-MIB::saHpiRdrRowPointer.1.2.false.131074 HPI-MIB::saHpiSensorNum.4294967295.2.false.2
+   HPI-MIB::saHpiRdrRowPointer.1.2.false.131076 HPI-MIB::saHpiSensorNum.4294967295.2.false.4
+   HPI-MIB::saHpiRdrRPT.1.1.false.65541 HPI-MIB::saHpiResourceId.1.1.false
+   HPI-MIB::saHpiRdrRPT.1.1.false.65543 HPI-MIB::saHpiResourceId.1.1.false
+   HPI-MIB::saHpiRdrRPT.1.1.false.131073 HPI-MIB::saHpiResourceId.1.1.false
+   HPI-MIB::saHpiRdrRPT.1.1.false.131075 HPI-MIB::saHpiResourceId.1.1.false
+   .....
 
 6). If you want to receive traps make sure you are running a SNMP trap daemon
     (NetSNMP provides one - snmptrapd). 
@@ -122,61 +123,7 @@ make maintainer-clean
 GENERAL RELEASE NOTES and WHAT'S NEW
 ---------------------------------------------------------
 
-* Second release of the HPI SNMP sub-agent. 
-
-* Support for full implementation of the HPI-MIB v1.4
-  (included). This means HPI 1.0 instrumentation using 
-  HPI-MIB objects in twenty-three tables:
-	- Resource Presence Table entities,
-		- HotSwap capabilities,
-	- Resource Data Records,
-		- Sensors
-		    - Current sensor reading,
-		    - Reading values for 
-			 - Max,
-			 - Min, 
-			 - Nominal, 
-			 - Normal maximum, 
-			 - Normal minimum
-		    - Threshold values for:
-			- Upper Critical,
-			- Upper Major,
-			- Upper Minor,
-			- Lower Critical,
-			- Lower Major,
-			- Lower Minor,
-			- Positive Hysteresis,
-			- Negativie Hysteresis	
-		- Inventory,
-		- Control,
-		- Watchdog
-	- Events and System Event Log
-
-* SGML Guide for writing a sub-agent using NetSNMP API, titled:
-  "NetSNMP subagent development manual."
-
-* Support for notifications/TRAPS as defined in the MIB:
-	- For Events:
-		- Sensor,
-		- Hot Swap,
-		- Watchdog,
-		- OEM,
-		- User
-	- For Resource Data Records,
-	- For Resource Presence Table
-
-* Support for user configurable options:
-	 - update timer for new RPT/RDR/Events ,
-	 - maximum events held in eventw row before they are
-	   automatically removed,
-	 - sending of new found RPT/RDR/Events during startup.
-
-* Example code for retrieving instrumentation information
-  using SNMP.
-
-* Fix many bugs:
-
-Consult the ChangeLog for more details.
+* First release of openhpi-subagent SAI-HPI-B.01.01 release compliant. 
 
 ---------------------------------------------------------
 FOR MORE INFO
@@ -192,9 +139,6 @@ Also visit SAForum's website at http://www.saforum.org
 BUGS
 ---------------------------------------------------------
 
-If you have any bugs, issues, please visit the project
-website http://openhpi.sourceforge.net, or visit us
-in the #openhpi channel on FreeNode and OFTN network.
 
 
 ---------------------------------------------------------
