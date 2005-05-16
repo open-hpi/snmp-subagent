@@ -36,7 +36,15 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiAreaTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+#include <hash_utils.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +52,226 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiAreaTable_oid[] = { saHpiAreaTable_TABLE_OID };
 size_t saHpiAreaTable_oid_len = OID_LENGTH(saHpiAreaTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiAreaTable_IDX2
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dri_table;
+
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long area_entry_count = 0;
+static oid saHpiAreaEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,3 };
+int handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
+                               netsnmp_handler_registration *reginfo,
+                               netsnmp_agent_request_info   *reqinfo,
+                               netsnmp_request_info         *requests);
+int initialize_table_saHpiAreaEntryCount(void);
+
+/**
+ * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
+ */
+SaErrorT populate_area (SaHpiSessionIdT sessionid, 
+                        SaHpiRdrT *rdr_entry,
+                        SaHpiRptEntryT *rpt_entry)
+{
+
+        DEBUGMSGTL ((AGENT, "populate_area, called\n"));
+
+        SaErrorT rv = SA_OK;
+        SaHpiEntryIdT area_id;
+        SaHpiIdrAreaHeaderT header;
+
+	DRI_XREF *dri_entry;
+	SaHpiDomainIdResourceIdInventoryIdArrayT dri_tuple;
+
+        oid area_oid[AREA_INDEX_NR];
+        netsnmp_index area_index;
+        saHpiAreaTable_context *area_context;
+
+        DEBUGMSGTL ((AGENT, "SAHPI_ANNUNCIATOR_RDR populate_area() called\n"));
+
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_area() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_area() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+
+        area_id = SAHPI_FIRST_ENTRY;
+	do {                      
+                rv = saHpiIdrAreaHeaderGet(sessionid, 
+                                           rpt_entry->ResourceId, 
+                                           rdr_entry->RdrTypeUnion.InventoryRec.IdrId,
+                                           SAHPI_IDR_AREATYPE_UNSPECIFIED,
+                                           area_id,
+                                           &area_id,
+                                           &header);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, "saHpiIdrAreaHeaderGet Failed: rv = %d\n",rv));
+			rv =  AGENT_ERR_INTERNAL_ERROR;
+			break;
+		}
+
+                /* BUILD oid for new row */
+                /* assign the number of indices */
+                area_index.len = AREA_INDEX_NR;
+                /** Index saHpiDomainId is external */
+                area_oid[0] = get_domain_id(sessionid);
+                /** Index saHpiResourceId is external */
+                area_oid[1] = rpt_entry->ResourceId;
+                /** Index saHpiResourceIsHistorical is external */
+                area_oid[2] = MIB_FALSE;
+                /** Index saHpiInventoryId */
+                area_oid[3] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+                /** Index saHpiAreaId */
+                area_oid[4] = header.AreaId;
+                /* assign the indices to the index */
+                area_index.oids = (oid *) & area_oid;
+
+                /* See if Row exists. */
+                area_context = NULL;
+                area_context = CONTAINER_FIND(cb.container, &area_index);
+
+                if (!area_context) {
+                        // New entry. Add it
+                        area_context = 
+                                saHpiAreaTable_create_row(&area_index);
+                }
+                if (!area_context) {
+                        snmp_log (LOG_ERR, "Not enough memory for a Area row!");
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
+                /** SaHpiInstrumentId = ASN_UNSIGNED */
+                area_context->saHpiAreaId = header.AreaId;
+
+                /** SaHpiInstrumentId = ASN_UNSIGNED */
+                dri_tuple.domainId_resourceId_idr_arry[0] = get_domain_id(sessionid);
+                dri_tuple.domainId_resourceId_idr_arry[1] = rpt_entry->ResourceId;
+                dri_tuple.domainId_resourceId_idr_arry[2] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+
+                        /* domain_resource_idr_get() generates unique keys based on */
+                        /* domainid, resourceid, and IdrId tuples.                  */
+                dri_entry = domain_resource_idr_get(&dri_tuple, &dri_table); 
+
+                if (dri_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
+                        saHpiAreaTable_delete_row( area_context );
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+                area_context->saHpiAreaIdIndex = dri_entry->entry_id++;
+
+                /** INTEGER = ASN_INTEGER */
+                area_context->saHpiAreaType = header.Type + 1;
+
+                /** TruthValue = ASN_INTEGER */
+                area_context->saHpiAreaIsReadOnly =
+                        (header.ReadOnly == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+                /** RowStatus = ASN_INTEGER */
+                /* area_context->saHpiAreaRowStatus */
+
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                area_context->saHpiAreaNumDataFields = header.NumFields;
+
+                CONTAINER_INSERT (cb.container, area_context);
+
+	} while (area_id !=  SAHPI_LAST_ENTRY );
+	
+        area_entry_count = CONTAINER_SIZE (cb.container);
+
+        return rv;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
+                               netsnmp_handler_registration *reginfo,
+                               netsnmp_agent_request_info   *reqinfo,
+                               netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+        DEBUGMSGTL ((AGENT, "handle_saHpiAreaEntryCount, called\n"));
+
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &area_entry_count,
+                                     sizeof(area_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiAreaEntryCount(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAreaEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiAreaEntryCount", 
+                        handle_saHpiAreaEntryCount,
+                        saHpiAreaEntryCount_oid, 
+                        OID_LENGTH(saHpiAreaEntryCount_oid),
+                        HANDLER_CAN_RONLY ));
+
+        return 0;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -67,70 +293,66 @@ saHpiAreaTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiAreaTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+	/* check for NULL pointers */
+	if (lhs == NULL || rhs == NULL ) {
+		DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+		return 0;
+	}
+	/* CHECK FIRST INDEX,  saHpiDomainId */
+	if ( context_l->index.oids[0] < context_r->index.oids[0])
+		return -1;
+
+	if ( context_l->index.oids[0] > context_r->index.oids[0])
+		return 1;
+
+	if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+		/* If saHpiDomainId index is equal sort by second index */
+		/* CHECK SECOND INDEX,  saHpiResourceEntryId */
+		if ( context_l->index.oids[1] < context_r->index.oids[1])
+			return -1;
+
+		if ( context_l->index.oids[1] > context_r->index.oids[1])
+			return 1;
+
+		if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+			/* If saHpiResourceEntryId index is equal sort by third index */
+			/* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+			if ( context_l->index.oids[2] < context_r->index.oids[2])
+				return -1;
+
+			if ( context_l->index.oids[2] > context_r->index.oids[2])
+				return 1;
+
+			if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+				/* If saHpiResourceIsHistorical index is equal sort by forth index */
+				/* CHECK FORTH INDEX,  saHpiInventoryId */
+				if ( context_l->index.oids[3] < context_r->index.oids[3])
+					return -1;
+
+				if ( context_l->index.oids[3] > context_r->index.oids[3])
+					return 1;
+
+				if ( context_l->index.oids[3] == context_r->index.oids[3]) {
+                                        /* If saHpiInventoryId index is equal sort by forth index */
+                                        /* CHECK FORTH INDEX,  saHpiAreaId */
+                                        if ( context_l->index.oids[4] < context_r->index.oids[4])
+                                                return -1;
+
+                                        if ( context_l->index.oids[4] > context_r->index.oids[4])
+                                                return 1;
+
+                                        if ( context_l->index.oids[4] == context_r->index.oids[4])
+                                                return 0;
+
+                                }
+			}
+		}
+	}
+
+	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiAreaTable_context *
-saHpiAreaTable_get( const char *name, int len )
-{
-    saHpiAreaTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiAreaTable module
@@ -140,13 +362,10 @@ init_saHpiAreaTable(void)
 {
     initialize_table_saHpiAreaTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiAreaTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiAreaEntryCount();
+
+    domain_resource_idr_initialize(&initialized, &dri_table);
+
 }
 
 /************************************************************
@@ -189,8 +408,6 @@ static int saHpiAreaTable_row_copy(saHpiAreaTable_context * dst,
 
     return 0;
 }
-
-#ifdef saHpiAreaTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -238,52 +455,27 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+       var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+       var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
 
        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceIsHistorical.next_variable = &var_XX;
-#endif
+       var_saHpiResourceIsHistorical.next_variable = &var_saHpiInventoryId;
 
        memset( &var_saHpiInventoryId, 0x00, sizeof(var_saHpiInventoryId) );
        var_saHpiInventoryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiInventoryId.next_variable = &var_XX;
-#endif
+       var_saHpiInventoryId.next_variable = &var_saHpiAreaId;
 
        memset( &var_saHpiAreaId, 0x00, sizeof(var_saHpiAreaId) );
        var_saHpiAreaId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAreaTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiAreaId.next_variable = &var_XX;
-#endif
+       var_saHpiAreaId.next_variable = NULL;
 
 
     /*
@@ -305,41 +497,11 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
                 ctx->saHpiAreaId = *var_saHpiAreaId.val.integer;
    
    
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceIsHistorical.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiInventoryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiAreaId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
+                err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
+                err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
+                err = saHpiInventoryId_check_index(*var_saHpiInventoryId.val.integer);
+                err = saHpiAreaId_check_index(*var_saHpiAreaId.val.integer);
     }
 
     /*
@@ -418,7 +580,6 @@ int saHpiAreaTable_can_delete(saHpiAreaTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiAreaTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -466,7 +627,6 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -690,6 +850,7 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
         }
     }
 
+#if 0
     /*
      * done with all the columns. Could check row related
      * requirements here.
@@ -707,6 +868,8 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
+#endif
+
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -804,8 +967,10 @@ void saHpiAreaTable_set_free( netsnmp_request_group *rg )
             /** RowStatus = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -867,8 +1032,6 @@ void saHpiAreaTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiAreaTable_SET_HANDLING */
 
 
 /************************************************************
@@ -936,18 +1099,18 @@ initialize_table_saHpiAreaTable(void)
     cb.container = netsnmp_container_find("saHpiAreaTable_primary:"
                                           "saHpiAreaTable:"
                                           "table_container");
-#ifdef saHpiAreaTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiAreaTable_secondary:"
                                                        "saHpiAreaTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiAreaTable_cmp;
-#endif
-#ifdef saHpiAreaTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiAreaTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiAreaTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiAreaTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiAreaTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiAreaTable_row_copy;
@@ -962,7 +1125,7 @@ initialize_table_saHpiAreaTable(void)
     cb.set_commit = saHpiAreaTable_set_commit;
     cb.set_free = saHpiAreaTable_set_free;
     cb.set_undo = saHpiAreaTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiAreaTable",
                 "Registering table saHpiAreaTable "
                 "as a table array\n"));

@@ -514,14 +514,10 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
 
 
-                err = saHpiDomainId_check_index(
-                                               *var_saHpiDomainId.val.integer);
-                err = saHpiResourceEntryId_check_index(
-                                                      *var_saHpiResourceId.val.integer);  
-                err = saHpiResourceIsHistorical_check_index(
-                                                           *var_saHpiResourceIsHistorical.val.integer);
-                err = saHpiAnnunciatorNum_check_index(
-                                                     *var_saHpiAnnunciatorNum.val.integer);    
+                err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
+                err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
+                err = saHpiAnnunciatorNum_check_index(*var_saHpiAnnunciatorNum.val.integer);    
         }
 
         /*

@@ -409,10 +409,10 @@ main (int argc, char **argv)
 		init_saHpiSensorThdNegHysteresisTable();
 		init_saHpiAnnunciatorTable();
 		init_saHpiInventoryTable();
+		init_saHpiAreaTable();
 /*		
 		
 		init_saHpiFieldTable();
-		init_saHpiAreaTable();
 		
 		init_saHpiWatchdogTable();
 		init_saHpiHotSwapTable();
@@ -479,6 +479,7 @@ main (int argc, char **argv)
 		     *	       populate_saHpiCurrentSensorStateTable();		
 		     *	       populate_saHpiAnnunciatorTable();		
 		     *	       populate_saHpiInventoyTable();		
+		     *	       populate_saHpiAreaTable();		
 		     */
 
     		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
