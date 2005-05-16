@@ -13,6 +13,7 @@ hpiSubagent_SOURCES	= alarm.c \
 			hpiB0101.c \
 			hpiCheckIndice.c \
 			session_info.c \
+			hash_utils.c \
 			hpiSubagent.c \
 			saHpiDomainInfoTable.c \
 			saHpiDomainReferenceTable.c \
@@ -40,7 +41,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSensorThdPosHysteresisTable.c \
 			saHpiSensorThdNegHysteresisTable.c \
 			saHpiAnnunciatorTable.c \
-			saHpiInventoryTable.c 
+			saHpiInventoryTable.c \ 
+			saHpiAreaTable.c 
 
 
 hpiSubagent_LDADD	= 
