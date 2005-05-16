@@ -66,6 +66,14 @@ typedef struct saHpiAreaTable_context_s {
 
 } saHpiAreaTable_context;
 
+
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_area (SaHpiSessionIdT sessionid, 
+                        SaHpiRdrT *rdr_entry,
+                        SaHpiRptEntryT *rpt_entry);
+
 /*************************************************************
  * function declarations
  */
@@ -84,6 +92,15 @@ extern oid saHpiAreaTable_oid[];
 extern size_t saHpiAreaTable_oid_len;
 
 #define saHpiAreaTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,8,4
+
+/* Number of table Indexes */
+#define AREA_INDEX_NR 5 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiInventoryId_INDEX 3
+#define saHpiAreaId_INDEX 3
+
     
 /*************************************************************
  * column number definitions for table saHpiAreaTable
