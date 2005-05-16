@@ -171,7 +171,7 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         if (rv != SA_OK) {
                 DEBUGMSGTL ((AGENT, 
                              "ERROR: populate_inventory() saHpiIdrInfoGet() ERRORED out\n"));
-                saHpiAnnunciatorTable_delete_row( inventory_context );
+                saHpiInventoryTable_delete_row( inventory_context );
                 return AGENT_ERR_INTERNAL_ERROR;
         } 
 
@@ -692,10 +692,10 @@ netsnmp_index * saHpiInventoryTable_delete_row( saHpiInventoryTable_context * ct
  */
 void saHpiInventoryTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiInventoryTable_context *row_ctx =
-            (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx =
-            (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx =
+//            (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx =
+//            (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -734,8 +734,8 @@ void saHpiInventoryTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiInventoryTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -783,8 +783,8 @@ void saHpiInventoryTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiInventoryTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -839,8 +839,8 @@ void saHpiInventoryTable_set_action( netsnmp_request_group *rg )
 void saHpiInventoryTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_commit, called\n"));
@@ -876,8 +876,8 @@ void saHpiInventoryTable_set_commit( netsnmp_request_group *rg )
 void saHpiInventoryTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_free, called\n"));
@@ -925,8 +925,8 @@ void saHpiInventoryTable_set_free( netsnmp_request_group *rg )
 void saHpiInventoryTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
-    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
+//    saHpiInventoryTable_context *row_ctx = (saHpiInventoryTable_context *)rg->existing_row;
+//    saHpiInventoryTable_context *undo_ctx = (saHpiInventoryTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiInventoryTable_set_undo, called\n"));
