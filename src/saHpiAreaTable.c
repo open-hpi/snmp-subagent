@@ -193,7 +193,7 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                         (header.ReadOnly == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
                 /** RowStatus = ASN_INTEGER */
-                /* area_context->saHpiAreaRowStatus */
+                area_context->saHpiAreaRowStatus 
 
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 area_context->saHpiAreaNumDataFields = header.NumFields;
@@ -206,6 +206,52 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 
         return rv;
 } 
+
+
+
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int set_table_area_type (saHpiAreaTable_context *row_ctx)
+{
+
+ 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
+
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiCtrlStateT	    ctrl_state;	
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+
+	ctrl_state.StateUnion.Analog = row_ctx->saHpiCtrlAnalogState;
+	ctrl_state.Type = SAHPI_CTRL_TYPE_ANALOG;
+
+	rc = saHpiControlSet(session_id, resource_id, 
+			     row_ctx->saHpiCtrlAnalogNum, 
+			     row_ctx->saHpiCtrlAnalogMode - 1, 
+			     &ctrl_state);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
 
 /**
  * 
