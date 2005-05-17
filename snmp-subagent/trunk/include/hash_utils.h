@@ -1,0 +1,50 @@
+/*
+ * (C) Copyright IBM Corp. 2005
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  This
+ * file and program are licensed under a BSD style license.  See
+ * the Copying file included with the OpenHPI distribution for
+ * full licensing terms.
+ *
+ * Authors:
+ *   David Judkovics  <djudkovi@us.ibm.com>
+ *
+ *					  
+ */
+#ifndef _HASH_UTILS_H_
+#define _HASH_UTILS_H_
+
+#include <hash_utils.h>
+#include <SaHpi.h>
+
+
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/**************************************************/
+/**************************************************/
+typedef struct {
+	SaHpiEntryIdT domainId_resourceId_idr_arry[3];
+} SaHpiDomainIdResourceIdInventoryIdArrayT;
+
+
+typedef struct {
+        SaHpiEntryIdT entry_id;
+        SaHpiDomainIdResourceIdInventoryIdArrayT dri_pair;
+} DRI_XREF;
+
+/* hpi internal apis */
+SaErrorT domain_resource_idr_initialize(int *initialized, GHashTable **oh_ep_table); 
+DRI_XREF *domain_resource_idr_get(SaHpiDomainIdResourceIdInventoryIdArrayT *ep, GHashTable **oh_ep_table); 
+DRI_XREF *domain_resoruce_idr_lookup(SaHpiDomainIdResourceIdInventoryIdArrayT *ep, GHashTable **oh_ep_table);
+
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/**************************************************/
+
+#endif /* _HASH_UTILS_H_ */
