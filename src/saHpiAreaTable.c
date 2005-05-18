@@ -214,6 +214,45 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
         return rv;
 } 
 
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int set_table_area_delete (saHpiAreaTable_context *row_ctx)
+{
+
+ 	DEBUGMSGTL ((AGENT, "set_table_area_row_status, called\n"));
+
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+        SaHpiIdrIdT         idr_id;    
+        SaHpiEntryIdT       area_id;    
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+	idr_id = row_ctx->index.oids[saHpiInventoryId_INDEX];
+	area_id = row_ctx->saHpiAreaIdIndex;
+
+        rc = saHpiIdrAreaDelete(session_id, resource_id, idr_id, area_id);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+                "set_table_area_delete: Call to saHpiIdrAreaDelete failed %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+		"set_table_area_delete: Call to saHpiIdrAreaDelete failed %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
 
 
 /**
@@ -222,42 +261,44 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
  * 
  * @return: 
  */
-/*int set_table_area_type (saHpiAreaTable_context *row_ctx)
+int set_table_area_type (saHpiAreaTable_context *row_ctx)
 {
 
- 	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
+ 	DEBUGMSGTL ((AGENT, "set_table_area_type, called\n"));
 
 	SaErrorT            rc = SA_OK;
 	SaHpiSessionIdT     session_id;
 	SaHpiResourceIdT    resource_id;
-	SaHpiCtrlStateT	    ctrl_state;	
+        SaHpiIdrIdT         idr_id;    
+        SaHpiIdrAreaTypeT   area_type;    
+        SaHpiEntryIdT       area_id;
 
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+	idr_id = row_ctx->index.oids[saHpiInventoryId_INDEX];
+	area_id = row_ctx->saHpiAreaIdIndex;
+        area_type = row_ctx->saHpiAreaType - 1;
 
-	ctrl_state.StateUnion.Analog = row_ctx->saHpiCtrlAnalogState;
-	ctrl_state.Type = SAHPI_CTRL_TYPE_ANALOG;
+        rc = saHpiIdrAreaAdd(session_id, resource_id, idr_id, area_type, &area_id);
 
-	rc = saHpiControlSet(session_id, resource_id, 
-			     row_ctx->saHpiCtrlAnalogNum, 
-			     row_ctx->saHpiCtrlAnalogMode - 1, 
-			     &ctrl_state);
-
-	if (rc != SA_OK) {
+	if (rc == SA_OK) {
+                row_ctx->saHpiAreaIdIndex = area_id;
+                return SNMP_ERR_NOERROR; 
+        } else if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
-			  "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  "set_table_area_type: Call to saHpiControlSet failed to set Mode rc: %s.\n",
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
-			     "SAHPI_CTRL_TYPE_ANALOG: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     "set_table_area_type: Call to saHpiControlSet failed to set Mode rc: %s.\n",
 			     oh_lookup_error(rc)));
 		return get_snmp_error(rc);
 	} 
 
 	return SNMP_ERR_NOERROR; 
-}*/
+}
 
 
 /**
@@ -774,7 +815,7 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
                                                 sizeof(row_ctx->saHpiAreaType));
             /* check correct range for types */
             if (rc == SNMP_ERR_NOERROR) {
-                    if (!oh_lookup_idrareatype((SaHpiIdrAreaTypeT)(var->val.integer - 1))) {
+                    if (!oh_lookup_idrareatype(*var->val.integer - 1)) {
                             DEBUGMSGTL ((AGENT, "COLUMN_SA_HPI_AREA_TYPE, TYPE invalid\n"));
                             rc = SNMP_ERR_WRONGVALUE;
                     }
@@ -793,13 +834,9 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
                     "AREA_RS: COLUMN_SAHPIAREAROWSTATUS, should be SNMP_ROW_CREATEANDWAIT on new row\n"));
                     rc = SNMP_ERR_WRONGVALUE;
             } else if ((rc == SNMP_ERR_NOERROR ) && (!rg->row_created)) {
-                    if ((row_ctx->saHpiAreaRowStatus == SNMP_ROW_CREATEANDWAIT) &&
-                        (*var->val.integer == SNMP_ROW_ACTIVE)) {
-                            rc = SNMP_ERR_NOERROR;
-                    } else if ((row_ctx->saHpiAreaRowStatus != SNMP_ROW_DESTROY) &&
+                    if ((row_ctx->saHpiAreaRowStatus != SNMP_ROW_DESTROY) &&
                                (*var->val.integer == SNMP_ROW_DESTROY)) {
                             rc = SNMP_ERR_NOERROR;
-
                     } else {
                             DEBUGMSGTL ((AGENT, 
                             "COLUMN_SA_HPI_AREA_ROW_STATUS, SNMP_ERR_INCONSISTENTVALUE\n"));
@@ -954,12 +991,22 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIAREATYPE:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiAreaType = *var->val.integer;
+                if (row_ctx->saHpiAreaRowStatus == SNMP_ROW_CREATEANDWAIT) {
+                        row_ctx->saHpiAreaType = *var->val.integer;
+                        row_ctx->saHpiAreaRowStatus = SNMP_ROW_ACTIVE;
+                        row_err = set_table_area_type (row_ctx);
+                }
         break;
 
         case COLUMN_SAHPIAREAROWSTATUS:
             /** RowStatus = ASN_INTEGER */
-            row_ctx->saHpiAreaRowStatus = *var->val.integer;
+                if (*var->val.integer == SNMP_ROW_DESTROY) {
+                        if (row_ctx->saHpiAreaRowStatus == SNMP_ROW_ACTIVE) {
+                                row_err = set_table_area_delete (row_ctx);
+                        }
+                        rg->row_deleted = 1;
+                }
+                row_ctx->saHpiAreaRowStatus = *var->val.integer;
         break;
 
         default: /** We shouldn't get here */
