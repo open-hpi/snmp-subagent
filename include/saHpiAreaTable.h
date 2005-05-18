@@ -73,6 +73,8 @@ typedef struct saHpiAreaTable_context_s {
 SaErrorT populate_area (SaHpiSessionIdT sessionid, 
                         SaHpiRdrT *rdr_entry,
                         SaHpiRptEntryT *rpt_entry);
+int set_table_area_type (saHpiAreaTable_context *row_ctx);
+int set_table_area_delete (saHpiAreaTable_context *row_ctx);
 
 /*************************************************************
  * function declarations
