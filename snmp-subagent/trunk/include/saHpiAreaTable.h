@@ -99,7 +99,7 @@ extern size_t saHpiAreaTable_oid_len;
 #define saHpiResourceEntryId_INDEX 1
 #define saHpiResourceIsHistorical_INDEX 2
 #define saHpiInventoryId_INDEX 3
-#define saHpiAreaId_INDEX 3
+#define saHpiAreaId_INDEX 4
 
     
 /*************************************************************
