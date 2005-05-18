@@ -70,8 +70,8 @@ guint domain_resource_idr_hash(gconstpointer key)
 
 /**
  * 
- * @param a
- * @param b
+ * @a:
+ * @b:
  * 
  * @return 
  */
@@ -173,12 +173,13 @@ DRI_XREF *domain_resoruce_idr_lookup(SaHpiDomainIdResourceIdInventoryIdArrayT *d
 	/* check hash table for entry in oh_ep_table */
 	dri_xref = (DRI_XREF *)g_hash_table_lookup (*oh_ep_table, key);
 	if (!dri_xref) {
-		DEBUGMSGTL ((HASH_FILE, "error looking up DRI_XREF to get uid"));
+		DEBUGMSGTL ((HASH_FILE, "DRI_XREF index not found!"));
 		return NULL;
 	}
 
 	return dri_xref;
 }
+
 /**************************************************/
 /*** END: *****************************************/
 /*** Hash Table Used for generating and         ***/
