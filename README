@@ -10,10 +10,10 @@ Linux Watchdog devices, and Sysfs based systems.
 ---------------------------------------------------------
 PREREQUISITES
 ---------------------------------------------------------
-The following software is required to build openhpi
+The following software is required to build 'openhpi-subagent'
+Any implementation that is based on SAF specification SAI-HPI-B.01.01. 
 
-any HPI 1.0 implementation that is based on SAF specification 
-	SAI-HPI-A.01.01. Recommended: openhpi >= 0.4
+Recommended: 'openhpi' >= 2.0.4
 autoconf >= 2.57
 automake >= 1.5
 gcc      >= 3.2.0
