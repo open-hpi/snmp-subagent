@@ -223,6 +223,11 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 int set_table_area_delete (saHpiAreaTable_context *row_ctx)
 {
 
+
+ 	DEBUGMSGTL ((AGENT, "********************************************\n"));
+ 	DEBUGMSGTL ((AGENT, "*** NEED TO DELETE ALL ASSOCIATED FIELDS ***\n"));
+ 	DEBUGMSGTL ((AGENT, "********************************************\n"));
+
  	DEBUGMSGTL ((AGENT, "set_table_area_row_status, called\n"));
 
 	SaErrorT            rc = SA_OK;
@@ -289,10 +294,10 @@ int set_table_area_type (saHpiAreaTable_context *row_ctx)
                 return SNMP_ERR_NOERROR; 
         } else if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
-			  "set_table_area_type: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			  "set_table_area_type: Call to saHpiIdrAreaAdd() failed to set Mode rc: %s.\n",
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
-			     "set_table_area_type: Call to saHpiControlSet failed to set Mode rc: %s.\n",
+			     "set_table_area_type: Call to saHpiIdrAreaAdd() failed to set Mode rc: %s.\n",
 			     oh_lookup_error(rc)));
 		return get_snmp_error(rc);
 	} 
@@ -820,6 +825,13 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
                             rc = SNMP_ERR_WRONGVALUE;
                     }
             }
+
+            /* rowstatus state transition */
+            if (row_ctx->saHpiAreaRowStatus != SNMP_ROW_CREATEANDWAIT) {
+                    DEBUGMSGTL ((AGENT, "COLUMN_SA_HPI_AREA_TYPE, RowStatus invalid\n"));
+                    rc = SNMP_ERR_WRONGVALUE;
+            }
+
         break;
 
         case COLUMN_SAHPIAREAROWSTATUS:
@@ -995,14 +1007,14 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
                         row_ctx->saHpiAreaType = *var->val.integer;
                         row_ctx->saHpiAreaRowStatus = SNMP_ROW_ACTIVE;
                         row_err = set_table_area_type (row_ctx);
-                }
+                } 
         break;
 
         case COLUMN_SAHPIAREAROWSTATUS:
             /** RowStatus = ASN_INTEGER */
                 if (*var->val.integer == SNMP_ROW_DESTROY) {
                         if (row_ctx->saHpiAreaRowStatus == SNMP_ROW_ACTIVE) {
-                                row_err = set_table_area_delete (row_ctx);
+                            row_err = set_table_area_delete (row_ctx);
                         }
                         rg->row_deleted = 1;
                 }
@@ -1013,26 +1025,6 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
     }
-
-#if 0
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiAreaTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-#endif
 
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
