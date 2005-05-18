@@ -14,55 +14,55 @@
 extern "C" {
 #endif
 
-    
+
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
-        /** Index saHpiDomainId is external */
-        /** Index saHpiResourceId is external */
-        /** Index saHpiResourceIsHistorical is external */
-        /** Index saHpiInventoryId is external */
-        /** Index saHpiAreaId is internal */
+/** Index saHpiDomainId is external */
+/** Index saHpiResourceId is external */
+/** Index saHpiResourceIsHistorical is external */
+/** Index saHpiInventoryId is external */
+/** Index saHpiAreaId is internal */
 
 typedef struct saHpiAreaTable_context_s {
-    netsnmp_index index; /** THIS MUST BE FIRST!!! */
+        netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /*************************************************************
-     * You can store data internally in this structure.
-     *
-     * TODO: You will probably have to fix a few types here...
-     */
-    /** TODO: add storage for external index(s)! */
+        /*************************************************************
+         * You can store data internally in this structure.
+         *
+         * TODO: You will probably have to fix a few types here...
+         */
+        /** TODO: add storage for external index(s)! */
         /** SaHpiInstrumentId = ASN_UNSIGNED */
-            unsigned long saHpiAreaId;
+        unsigned long saHpiAreaId;
 
         /** SaHpiInstrumentId = ASN_UNSIGNED */
-            unsigned long saHpiAreaIdIndex;
+        unsigned long saHpiAreaIdIndex;
 
         /** INTEGER = ASN_INTEGER */
-            long saHpiAreaType;
+        long saHpiAreaType;
 
         /** TruthValue = ASN_INTEGER */
-            long saHpiAreaIsReadOnly;
+        long saHpiAreaIsReadOnly;
 
         /** RowStatus = ASN_INTEGER */
-            long saHpiAreaRowStatus;
+        long saHpiAreaRowStatus;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiAreaNumDataFields;
+        unsigned long saHpiAreaNumDataFields;
 
 
-    /*
-     * OR
-     *
-     * Keep a pointer to your data
-     */
-    void * data;
+        /*
+         * OR
+         *
+         * Keep a pointer to your data
+         */
+        void * data;
 
-    /*
-     *add anything else you want here
-     */
+        /*
+         *add anything else you want here
+         */
 
 } saHpiAreaTable_context;
 
@@ -71,8 +71,8 @@ typedef struct saHpiAreaTable_context_s {
  * function declarations
  */
 SaErrorT populate_area (SaHpiSessionIdT sessionid, 
-                        SaHpiRdrT *rdr_entry,
-                        SaHpiRptEntryT *rpt_entry);
+                                SaHpiRdrT *rdr_entry,
+                                SaHpiRptEntryT *rpt_entry);
 int set_table_area_type (saHpiAreaTable_context *row_ctx);
 int set_table_area_delete (saHpiAreaTable_context *row_ctx);
 
@@ -83,7 +83,7 @@ void init_saHpiAreaTable(void);
 void initialize_table_saHpiAreaTable(void);
 const saHpiAreaTable_context * saHpiAreaTable_get_by_idx(netsnmp_index *);
 const saHpiAreaTable_context * saHpiAreaTable_get_by_idx_rs(netsnmp_index *,
-                                        int row_status);
+                                                            int row_status);
 int saHpiAreaTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 
@@ -103,7 +103,7 @@ extern size_t saHpiAreaTable_oid_len;
 #define saHpiInventoryId_INDEX 3
 #define saHpiAreaId_INDEX 4
 
-    
+
 /*************************************************************
  * column number definitions for table saHpiAreaTable
  */
@@ -115,21 +115,6 @@ extern size_t saHpiAreaTable_oid_len;
 #define COLUMN_SAHPIAREANUMDATAFIELDS 6
 #define saHpiAreaTable_COL_MIN 3
 #define saHpiAreaTable_COL_MAX 6
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiAreaTable */
-#define saHpiAreaTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiAreaTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiAreaTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiAreaTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiAreaTable_SET_HANDLING
 
 int saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr );
 
@@ -144,24 +129,19 @@ saHpiAreaTable_context * saHpiAreaTable_duplicate_row( saHpiAreaTable_context* )
 netsnmp_index * saHpiAreaTable_delete_row( saHpiAreaTable_context* );
 
 int saHpiAreaTable_can_activate(saHpiAreaTable_context *undo_ctx,
-                      saHpiAreaTable_context *row_ctx,
-                      netsnmp_request_group * rg);
+                                saHpiAreaTable_context *row_ctx,
+                                netsnmp_request_group * rg);
 int saHpiAreaTable_can_deactivate(saHpiAreaTable_context *undo_ctx,
-                        saHpiAreaTable_context *row_ctx,
-                        netsnmp_request_group * rg);
+                                  saHpiAreaTable_context *row_ctx,
+                                  netsnmp_request_group * rg);
 int saHpiAreaTable_can_delete(saHpiAreaTable_context *undo_ctx,
-                    saHpiAreaTable_context *row_ctx,
-                    netsnmp_request_group * rg);
-    
-    
-#ifdef saHpiAreaTable_ROW_CREATION
-saHpiAreaTable_context * saHpiAreaTable_create_row( netsnmp_index* );
-#endif
-#endif
+                              saHpiAreaTable_context *row_ctx,
+                              netsnmp_request_group * rg);
 
-#ifdef saHpiAreaTable_IDX2
+
+saHpiAreaTable_context * saHpiAreaTable_create_row( netsnmp_index* );
+
 saHpiAreaTable_context * saHpiAreaTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
