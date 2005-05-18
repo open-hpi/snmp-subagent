@@ -105,6 +105,8 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
         netsnmp_index area_index;
         saHpiAreaTable_context *area_context;
 
+        SaHpiEntryIdT subagent_area_id;
+
         DEBUGMSGTL ((AGENT, "SAHPI_ANNUNCIATOR_RDR populate_area() called\n"));
 
         /* check for NULL pointers */
@@ -135,6 +137,24 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 			break;
 		}
 
+                /* Create MIB AreaId value                              */
+                /* this is not the same as the AreaId obtained from HPI */
+                /* it is maintained in the subagent                     */
+                dri_tuple.domainId_resourceId_idr_arry[0] = get_domain_id(sessionid);
+                dri_tuple.domainId_resourceId_idr_arry[1] = rpt_entry->ResourceId;
+                dri_tuple.domainId_resourceId_idr_arry[2] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+
+                        /* domain_resource_idr_get() generates unique keys based on */
+                        /* domainid, resourceid, and IdrId tuples.                  */
+                dri_entry = domain_resource_idr_get(&dri_tuple, &dri_table); 
+
+                if (dri_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+                subagent_area_id = dri_entry->entry_id++;
+
                 /* BUILD oid for new row */
                 /* assign the number of indices */
                 area_index.len = AREA_INDEX_NR;
@@ -147,7 +167,7 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                 /** Index saHpiInventoryId */
                 area_oid[3] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
                 /** Index saHpiAreaId */
-                area_oid[4] = header.AreaId;
+                area_oid[4] = subagent_area_id;
                 /* assign the indices to the index */
                 area_index.oids = (oid *) & area_oid;
 
@@ -166,34 +186,21 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                 }
 
                 /** SaHpiInstrumentId = ASN_UNSIGNED */
-                area_context->saHpiAreaId = header.AreaId;
+                area_context->saHpiAreaId = subagent_area_id;
 
                 /** SaHpiInstrumentId = ASN_UNSIGNED */
-                dri_tuple.domainId_resourceId_idr_arry[0] = get_domain_id(sessionid);
-                dri_tuple.domainId_resourceId_idr_arry[1] = rpt_entry->ResourceId;
-                dri_tuple.domainId_resourceId_idr_arry[2] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
-
-                        /* domain_resource_idr_get() generates unique keys based on */
-                        /* domainid, resourceid, and IdrId tuples.                  */
-                dri_entry = domain_resource_idr_get(&dri_tuple, &dri_table); 
-
-                if (dri_entry == NULL) {
-                        DEBUGMSGTL ((AGENT, 
-                                     "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
-                        saHpiAreaTable_delete_row( area_context );
-                        return AGENT_ERR_INTERNAL_ERROR;
-                }
-                area_context->saHpiAreaIdIndex = dri_entry->entry_id++;
+                area_context->saHpiAreaIdIndex = header.AreaId;
 
                 /** INTEGER = ASN_INTEGER */
                 area_context->saHpiAreaType = header.Type + 1;
 
                 /** TruthValue = ASN_INTEGER */
                 area_context->saHpiAreaIsReadOnly =
-                        (header.ReadOnly == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+                        (header.ReadOnly == SAHPI_TRUE) ? 
+                                MIB_TRUE : MIB_FALSE;
 
                 /** RowStatus = ASN_INTEGER */
-                area_context->saHpiAreaRowStatus 
+                area_context->saHpiAreaRowStatus = SNMP_ROW_ACTIVE;
 
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 area_context->saHpiAreaNumDataFields = header.NumFields;
@@ -215,7 +222,7 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
  * 
  * @return: 
  */
-int set_table_area_type (saHpiAreaTable_context *row_ctx)
+/*int set_table_area_type (saHpiAreaTable_context *row_ctx)
 {
 
  	DEBUGMSGTL ((AGENT, "set_table_ctrl_analog_mode, called\n"));
@@ -250,7 +257,7 @@ int set_table_area_type (saHpiAreaTable_context *row_ctx)
 	} 
 
 	return SNMP_ERR_NOERROR; 
-}
+}*/
 
 
 /**
@@ -745,6 +752,8 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DRI_XREF *dri_entry;
+    SaHpiDomainIdResourceIdInventoryIdArrayT dri_tuple;
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -763,12 +772,74 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiAreaType));
+            /* check correct range for types */
+            if (rc == SNMP_ERR_NOERROR) {
+                    if (!oh_lookup_idrareatype((SaHpiIdrAreaTypeT)(var->val.integer - 1))) {
+                            DEBUGMSGTL ((AGENT, "COLUMN_SA_HPI_AREA_TYPE, TYPE invalid\n"));
+                            rc = SNMP_ERR_WRONGVALUE;
+                    }
+            }
         break;
 
         case COLUMN_SAHPIAREAROWSTATUS:
             /** RowStatus = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiAreaRowStatus));
+            /* check for valid status and state transitions*/
+            if ((rc == SNMP_ERR_NOERROR ) && 
+                (rg->row_created) && 
+                (*var->val.integer != SNMP_ROW_CREATEANDWAIT)) {
+                    DEBUGMSGTL ((AGENT, 
+                    "AREA_RS: COLUMN_SAHPIAREAROWSTATUS, should be SNMP_ROW_CREATEANDWAIT on new row\n"));
+                    rc = SNMP_ERR_WRONGVALUE;
+            } else if ((rc == SNMP_ERR_NOERROR ) && (!rg->row_created)) {
+                    if ((row_ctx->saHpiAreaRowStatus == SNMP_ROW_CREATEANDWAIT) &&
+                        (*var->val.integer == SNMP_ROW_ACTIVE)) {
+                            rc = SNMP_ERR_NOERROR;
+                    } else if ((row_ctx->saHpiAreaRowStatus != SNMP_ROW_DESTROY) &&
+                               (*var->val.integer == SNMP_ROW_DESTROY)) {
+                            rc = SNMP_ERR_NOERROR;
+
+                    } else {
+                            DEBUGMSGTL ((AGENT, 
+                            "COLUMN_SA_HPI_AREA_ROW_STATUS, SNMP_ERR_INCONSISTENTVALUE\n"));
+                            rc = SNMP_ERR_INCONSISTENTVALUE;
+                    }
+            }
+
+            /* if this is a new row check the validity of the user specified AreaId */
+            if (((rg->row_created)) && (rc == SNMP_ERR_NOERROR)) {
+                    /* check for valid areaId specified */
+                    /* this is not the same as the AreaId obtained from HPI */
+                    /* it is maintained in the subagent                     */
+                    dri_tuple.domainId_resourceId_idr_arry[0] = 
+                            row_ctx->index.oids[saHpiDomainId_INDEX];
+                    dri_tuple.domainId_resourceId_idr_arry[1] = 
+                            row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+                    dri_tuple.domainId_resourceId_idr_arry[2] = 
+                            row_ctx->index.oids[saHpiInventoryId_INDEX];
+
+                        /* domain_resource_idr_get() generates unique keys based on */
+                        /* domainid, resourceid, and IdrId tuples.                  */
+                    dri_entry = domain_resource_idr_get(&dri_tuple, &dri_table); 
+                    
+                    if (dri_entry == NULL) {
+                            DEBUGMSGTL ((AGENT, 
+                                         "ERROR: saHpiAreaTable_set_reserve1() domain_resource_idr_get returned NULL\n"));
+                            rc = SNMP_ERR_GENERR;
+                    }
+                    
+                    if ( row_ctx->index.oids[saHpiAreaId_INDEX] >= dri_entry->entry_id ) {
+                            dri_entry->entry_id = row_ctx->index.oids[saHpiAreaId_INDEX];
+                            dri_entry->entry_id++;
+                    } else {
+                            DEBUGMSGTL ((AGENT,"dri_entry->entry_id [%d]\n", dri_entry->entry_id));
+                            DEBUGMSGTL ((AGENT,"row_ctx->index.oids[saHpiAreaId_INDEX] [%d]\n", row_ctx->index.oids[saHpiAreaId_INDEX]));
+                            DEBUGMSGTL ((AGENT, 
+                                         "ERROR: saHpiAreaTable_set_reserve1() User specified AreaId invalid!!!\n"));
+                            rc = SNMP_ERR_WRONGVALUE;
+                    }
+            }
         break;
 
         default: /** We shouldn't get here */
