@@ -138,8 +138,8 @@ Also visit SAForum's website at http://www.saforum.org
 ---------------------------------------------------------
 BUGS
 ---------------------------------------------------------
-
-
+Branch 2.0.x of openhpi does not completely discover all
+Inventory Area's.
 
 ---------------------------------------------------------
 DEFINES
