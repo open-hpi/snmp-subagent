@@ -31,7 +31,6 @@
 #include <oh_utils.h>
 
 #include <alarm.h>
-#include <oh_error.h>
 
 #include <hpiB0101_columns.h>
 #include <hpiB0101_enums.h>
@@ -482,7 +481,8 @@ main (int argc, char **argv)
 		     *	       populate_saHpiAreaTable();		
 		     */
 
-    		dbg("WARNING: populate_event: hpiSubagent.c: nolong implemented!");
+                DEBUGMSGTL ((AGENT,
+                "WARNING: populate_event: hpiSubagent.c: nolong implemented!")); 
 
 
   if (init_alarm () != AGENT_ERR_NOERROR)
@@ -521,8 +521,8 @@ main (int argc, char **argv)
       rc = agent_check_and_process (1);	/* 0 == don't block */
     }
 stop:
-
-  dbg("WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!");
+        DEBUGMSGTL ((AGENT,
+                "WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!"));
   //closeSaHpiSession();
   /* at shutdown time */
   snmp_log (LOG_INFO, "Stopping %s\n", version);
