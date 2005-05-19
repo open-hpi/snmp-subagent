@@ -451,7 +451,7 @@ saHpiAreaTable_cmp( const void *lhs, const void *rhs )
 
                                 if ( context_l->index.oids[3] == context_r->index.oids[3]) {
                                         /* If saHpiInventoryId index is equal sort by forth index */
-                                        /* CHECK FORTH INDEX,  saHpiAreaId */
+                                        /* CHECK FIFTH INDEX,  saHpiAreaId */
                                         if ( context_l->index.oids[4] < context_r->index.oids[4])
                                                 return -1;
 
