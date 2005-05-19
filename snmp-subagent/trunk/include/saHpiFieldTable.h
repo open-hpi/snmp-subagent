@@ -17,7 +17,9 @@ extern "C" {
     
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
-#include <net-snmp/agent/table_array.h>
+#include <net-snmp/agent/table_array.h>  
+
+#include <saHpiAreaTable.h>
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -83,6 +85,14 @@ typedef struct saHpiFieldTable_context_s {
 /*************************************************************
  * function declarations
  */
+SaErrorT populate_field (SaHpiSessionIdT session_id, 
+                         SaHpiRdrT *rdr_entry,
+                         SaHpiRptEntryT *rpt_entry,
+                         saHpiAreaTable_context *area_context);
+
+/*************************************************************
+ * function declarations
+ */
 void init_saHpiFieldTable(void);
 void initialize_table_saHpiFieldTable(void);
 const saHpiFieldTable_context * saHpiFieldTable_get_by_idx(netsnmp_index *);
@@ -100,7 +110,7 @@ extern size_t saHpiFieldTable_oid_len;
 #define saHpiFieldTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,8,6
 
 /* Number of table Indexes */
-#define AREA_INDEX_NR 6 
+#define FIELD_INDEX_NR 6 
 #define saHpiDomainId_INDEX 0
 #define saHpiResourceEntryId_INDEX 1
 #define saHpiResourceIsHistorical_INDEX 2
