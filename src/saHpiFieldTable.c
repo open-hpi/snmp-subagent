@@ -41,6 +41,7 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
+#include <saHpiAreaTable.h>
 #include <session_info.h>
 #include <hash_utils.h>
 #include <oh_utils.h>
@@ -51,6 +52,222 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiFieldTable_oid[] = { saHpiFieldTable_TABLE_OID };
 size_t saHpiFieldTable_oid_len = OID_LENGTH(saHpiFieldTable_oid);
 
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;               
+static GHashTable *dria_table;
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long field_entry_count = 0;
+static oid saHpiFieldEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
+int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests);
+int initialize_table_saHpiFieldEntryCount(void);
+
+SaErrorT populate_field (SaHpiSessionIdT session_id, 
+                         SaHpiRdrT *rdr_entry,
+                         SaHpiRptEntryT *rpt_entry,
+                         saHpiAreaTable_context *area_context)
+{
+
+        DEBUGMSGTL ((AGENT, "populate_field, called\n"));
+
+        SaErrorT rv = SA_OK;
+        SaHpiEntryIdT field_id;
+        SaHpiIdrFieldT field_entry;
+
+        DRIA_XREF *dria_entry;
+        SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
+        
+        oid field_oid[FIELD_INDEX_NR];
+        netsnmp_index field_index;
+        saHpiFieldTable_context *field_context;
+
+        SaHpiEntryIdT subagent_field_id;
+
+        DEBUGMSGTL ((AGENT, "populate_field() called\n"));
+
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_field() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_field() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        field_id = SAHPI_FIRST_ENTRY;
+        do {
+
+                rv = saHpiIdrFieldGet(session_id,
+                                      rpt_entry->ResourceId,
+                                      rdr_entry->RdrTypeUnion.InventoryRec.IdrId,
+                                      area_context->saHpiAreaIdIndex,
+                                      SAHPI_IDR_FIELDTYPE_UNSPECIFIED,
+                                      field_id,
+                                      &field_id,
+                                      &field_entry);
+
+                if (rv != SA_OK) {
+                        DEBUGMSGTL ((AGENT, "saHpiIdrFieldGet Failed: rv = %d\n",rv));
+                        rv =  AGENT_ERR_INTERNAL_ERROR;
+                        break;
+                }
+
+                /* Create MIB AreaId value                              */
+                /* this is not the same as the AreaId obtained from HPI */
+                /* it is maintained in the subagent                     */
+                dria_tuple.domainId_resourceId_idr_area_arry[0] = get_domain_id(session_id);
+                dria_tuple.domainId_resourceId_idr_area_arry[1] = rpt_entry->ResourceId;
+                dria_tuple.domainId_resourceId_idr_area_arry[2] = 
+                        rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+                dria_tuple.domainId_resourceId_idr_area_arry[4] = field_entry.FieldId;
+
+                /* domain_resource_idr_get() generates unique keys based on */
+                /* domainid, resourceid, and IdrId tuples.                  */
+                dria_entry = domain_resource_idr_area_get(&dria_tuple, &dria_table); 
+
+                if (dria_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+                subagent_field_id = dria_entry->entry_id++;
+
+                /* BUILD oid for new row */
+                /* assign the number of indices */
+                field_index.len = FIELD_INDEX_NR;
+                /** Index saHpiDomainId is external */
+                field_oid[0] = get_domain_id(session_id);
+                /** Index saHpiResourceId is external */
+                field_oid[1] = rpt_entry->ResourceId;
+                /** Index saHpiResourceIsHistorical is external */
+                field_oid[2] = MIB_FALSE;
+                /** Index saHpiInventoryId */
+                field_oid[3] = rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
+                /** Index saHpiAreaId */
+                field_oid[4] = area_context->saHpiAreaId;
+                /** Index saHpiAreaId */
+                field_oid[5] = subagent_field_id;
+                /* assign the indices to the index */
+                field_index.oids = (oid *) & field_oid;
+
+                /* See if Row exists. */
+                field_context = NULL;
+                field_context = CONTAINER_FIND(cb.container, &field_index);
+
+                if (!field_context) {
+                        // New entry. Add it
+                        field_context = 
+                        saHpiFieldTable_create_row(&field_index);
+                }
+                if (!field_context) {
+                        snmp_log (LOG_ERR, "Not enough memory for a Area row!");
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
+                /** SaHpiInstrumentId = ASN_UNSIGNED */
+                field_context->saHpiFieldId = subagent_field_id;
+
+                /** SaHpiInstrumentId = ASN_UNSIGNED */
+                field_context->saHpiFieldIdIndex = field_entry.FieldId;
+
+                /** INTEGER = ASN_INTEGER */
+                field_context->saHpiFieldTextType = field_entry.Type + 1;
+
+                /** TruthValue = ASN_INTEGER */
+                field_context->saHpiFieldIsReadOnly =
+                (field_entry.ReadOnly == SAHPI_TRUE) ? 
+                MIB_TRUE : MIB_FALSE;
+
+                /** RowStatus = ASN_INTEGER */
+                field_context->saHpiFieldStatus = SNMP_ROW_ACTIVE;
+
+                CONTAINER_INSERT (cb.container, field_context);
+
+        } while (field_id !=  SAHPI_LAST_ENTRY );
+
+        field_entry_count = CONTAINER_SIZE (cb.container);
+
+        return rv;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+        DEBUGMSGTL ((AGENT, "handle_saHpiFieldEntryCount, called\n"));
+
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &field_entry_count,
+                                     field_entry_count);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiFieldEntryCount(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiFieldEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiFieldEntryCount", 
+                        handle_saHpiFieldEntryCount,
+                        saHpiFieldEntryCount_oid, 
+                        OID_LENGTH(saHpiFieldEntryCount_oid),
+                        HANDLER_CAN_RONLY
+        ));
+        return 0;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 /************************************************************
  * keep binary tree to find context by name
@@ -73,11 +290,11 @@ saHpiFieldTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+    DEBUGMSGTL ((AGENT, "saHpiFieldTable_cmp, called\n"));
 
     /* check for NULL pointers */
     if (lhs == NULL || rhs == NULL ) {
-            DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+            DEBUGMSGTL((AGENT,"saHpiFieldTable_cmp() NULL pointer ERROR\n" ));
             return 0;
     }
     /* CHECK FIRST INDEX,  saHpiDomainId */
@@ -150,15 +367,13 @@ saHpiFieldTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiFieldTable(void)
 {
+        DEBUGMSGTL ((AGENT, "init_saHpiFieldTable, called\n"));
+
     initialize_table_saHpiFieldTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiFieldTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiFieldEntryCount();
+
+    domain_resource_idr_initialize(&initialized, &dria_table);
 }
 
 /************************************************************
@@ -736,23 +951,6 @@ void saHpiFieldTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiFieldTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -874,8 +1072,10 @@ void saHpiFieldTable_set_free( netsnmp_request_group *rg )
             /** RowStatus = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+        break;
+        /** We shouldn't get here */
+        /** should have been logged in reserve1 */
         }
     }
 
