@@ -9698,7 +9698,7 @@ saHpiFieldEntry OBJECT-TYPE
         INDEX   { 
                 saHpiDomainId, 
                 saHpiResourceId,
-				saHpiResourceIsHistorical,
+		saHpiResourceIsHistorical,
                 saHpiInventoryId,
                 saHpiAreaId,
                 saHpiFieldId
@@ -9707,6 +9707,7 @@ saHpiFieldEntry OBJECT-TYPE
 
 SaHpiInventoryFieldEntry ::= SEQUENCE {
 	saHpiFieldId		SaHpiInstrumentId,
+	saHpiFieldIdIndex	SaHpiInstrumentId,
         saHpiFieldType          INTEGER,
         saHpiFieldIsReadOnly    TruthValue,
 
@@ -9721,9 +9722,19 @@ saHpiFieldId       	OBJECT-TYPE
         MAX-ACCESS      not-accessible
         STATUS          current
         DESCRIPTION
-        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'"
+        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'.  SubAgent created and maintained 
+	Index value. Do not confuse this with saHpiFieldIdIndex that is created and
+	maintained by the underlying HPI library.  See next column."
         ::= {saHpiFieldEntry 1}
-      
+	
+saHpiFieldIdIndex      	OBJECT-TYPE
+        SYNTAX          SaHpiInstrumentId
+        MAX-ACCESS      not-accessible
+        STATUS          current
+        DESCRIPTION
+        "See TEXTUAL-CONVENTION 'SaHpiInstrumentId',  Used to store the HPI
+	generated AreaId, very important."
+        ::= {saHpiFieldEntry 2}
         
 saHpiFieldType OBJECT-TYPE
         SYNTAX          INTEGER {
@@ -9747,7 +9758,7 @@ saHpiFieldType OBJECT-TYPE
         
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B spec."
-        ::= {saHpiFieldEntry 2}
+        ::= {saHpiFieldEntry 3}
 
 saHpiFieldIsReadOnly OBJECT-TYPE 
         SYNTAX          TruthValue
@@ -9756,7 +9767,7 @@ saHpiFieldIsReadOnly OBJECT-TYPE
         DESCRIPTION     
         "Describes if an field is read-only.  All field headers in a 
         read-only IDR are flagged as read-only as well."
-        ::= {saHpiFieldEntry 3}
+        ::= {saHpiFieldEntry 4}
         
 saHpiFieldTextType OBJECT-TYPE 
         SYNTAX          SaHpiTextType
@@ -9764,7 +9775,7 @@ saHpiFieldTextType OBJECT-TYPE
         STATUS          current
         DESCRIPTION     "Field Data. 
         See Definition for SaHpiTextType for more details."
-        ::= {saHpiFieldEntry 4}
+        ::= {saHpiFieldEntry 5}
         
 saHpiFieldTextLanguage  OBJECT-TYPE
         SYNTAX          SaHpiTextLanguage
