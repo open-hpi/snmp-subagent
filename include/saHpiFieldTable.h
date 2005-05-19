@@ -29,6 +29,12 @@ extern "C" {
 typedef struct saHpiFieldTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
+    /* flags used to tract data needed to create field */
+     unsigned char field_type;
+     unsigned char text_type;
+     unsigned char text_language;
+     unsigned char text;
+
     /*************************************************************
      * You can store data internally in this structure.
      *
@@ -37,6 +43,9 @@ typedef struct saHpiFieldTable_context_s {
     /** TODO: add storage for external index(s)! */
         /** SaHpiInstrumentId = ASN_UNSIGNED */
             unsigned long saHpiFieldId;
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+            unsigned long saHpiFieldIdIndex;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiFieldType;
@@ -89,34 +98,29 @@ extern oid saHpiFieldTable_oid[];
 extern size_t saHpiFieldTable_oid_len;
 
 #define saHpiFieldTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,8,6
+
+/* Number of table Indexes */
+#define AREA_INDEX_NR 6 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceEntryId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiInventoryId_INDEX 3
+#define saHpiAreaId_INDEX 4
+#define saHpiFieldId_INDEX 5
     
 /*************************************************************
  * column number definitions for table saHpiFieldTable
  */
 #define COLUMN_SAHPIFIELDID 1
-#define COLUMN_SAHPIFIELDTYPE 2
-#define COLUMN_SAHPIFIELDISREADONLY 3
-#define COLUMN_SAHPIFIELDTEXTTYPE 4
+#define COLUMN_SAHPIFIELDIDINDEX 2
+#define COLUMN_SAHPIFIELDTYPE 3
+#define COLUMN_SAHPIFIELDISREADONLY 4
+#define COLUMN_SAHPIFIELDTEXTTYPE 5
 #define COLUMN_SAHPIFIELDTEXTLANGUAGE 6
 #define COLUMN_SAHPIFIELDTEXT 7
 #define COLUMN_SAHPIFIELDSTATUS 8
-#define saHpiFieldTable_COL_MIN 2
+#define saHpiFieldTable_COL_MIN 3
 #define saHpiFieldTable_COL_MAX 8
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiFieldTable */
-#define saHpiFieldTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiFieldTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiFieldTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiFieldTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiFieldTable_SET_HANDLING
 
 int saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hdr );
 
@@ -141,14 +145,9 @@ int saHpiFieldTable_can_delete(saHpiFieldTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiFieldTable_ROW_CREATION
 saHpiFieldTable_context * saHpiFieldTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiFieldTable_IDX2
 saHpiFieldTable_context * saHpiFieldTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };

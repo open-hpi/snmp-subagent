@@ -81,6 +81,11 @@ int saHpiInventoryId_check_index(long val);
 /**************************/
 int saHpiAreaId_check_index(long val);
 
+/**************************/
+/* saHpiFeildTable  */    
+/**************************/
+int saHpiFieldId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
@@ -104,11 +109,6 @@ int saHpiDomainEventTimestamp_check_index(netsnmp_variable_list *var_saHpiDomain
 int saHpiEvent_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
 int saHpiEventQueueStatus_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
 int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTime);
-
-/**************************/
-/* saHpiFeildTable  */    
-/**************************/
-int saHpiFieldId_check_index(long val);
 
 /***************************/
 /* saHpiHotSwapEventTable  */    

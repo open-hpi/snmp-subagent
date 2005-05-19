@@ -103,7 +103,6 @@ extern size_t saHpiAreaTable_oid_len;
 #define saHpiInventoryId_INDEX 3
 #define saHpiAreaId_INDEX 4
 
-
 /*************************************************************
  * column number definitions for table saHpiAreaTable
  */

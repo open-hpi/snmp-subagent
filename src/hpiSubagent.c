@@ -32,9 +32,9 @@
 
 #include <alarm.h>
 
-#include <hpiB0101_columns.h>
-#include <hpiB0101_enums.h>
-#include <hpiB0101.h>
+//#include <hpiB0101_columns.h>
+//#include <hpiB0101_enums.h>
+//#include <hpiB0101.h>
 
 #include <hpiCheckIndice.h>
 #include <session_info.h>
@@ -409,9 +409,9 @@ main (int argc, char **argv)
 		init_saHpiAnnunciatorTable();
 		init_saHpiInventoryTable();
 		init_saHpiAreaTable();
+		init_saHpiFieldTable();
 /*		
 		
-		init_saHpiFieldTable();
 		
 		init_saHpiWatchdogTable();
 		init_saHpiHotSwapTable();
@@ -479,6 +479,7 @@ main (int argc, char **argv)
 		     *	       populate_saHpiAnnunciatorTable();		
 		     *	       populate_saHpiInventoyTable();		
 		     *	       populate_saHpiAreaTable();		
+		     *	           populate_saHpiFieldTable();		
 		     */
 
                 DEBUGMSGTL ((AGENT,
