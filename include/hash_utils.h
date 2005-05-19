@@ -47,4 +47,33 @@ DRI_XREF *domain_resoruce_idr_lookup(SaHpiDomainIdResourceIdInventoryIdArrayT *e
 /*** tracking unique indices when required      ***/
 /**************************************************/
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/*** Domain, Resource, Idr, Area                ***/
+/**************************************************/
+/**************************************************/
+typedef struct {
+	SaHpiEntryIdT domainId_resourceId_idr_area_arry[4];
+} SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT;
+
+
+typedef struct {
+        SaHpiEntryIdT entry_id;
+        SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
+} DRIA_XREF;
+
+/* hpi internal apis */
+SaErrorT domain_resource_idr_area_initialize(int *initialized, GHashTable **oh_ep_table); 
+DRIA_XREF *domain_resource_idr_area_get(SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT *ep, 
+                                        GHashTable **oh_ep_table); 
+DRIA_XREF *domain_resoruce_idr_area_lookup(SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT *ep, 
+                                           GHashTable **oh_ep_table);
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Hash Table Used for generating and         ***/
+/*** tracking unique indices when required      ***/
+/**************************************************/
+
 #endif /* _HASH_UTILS_H_ */
