@@ -133,6 +133,14 @@ int saHpiAreaId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiFeildTable  */    
+/**************************/
+int saHpiFieldId_check_index(long val)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
@@ -189,13 +197,6 @@ int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTi
 }
 
 
-/**************************/
-/* saHpiFeildTable  */    
-/**************************/
-int saHpiFieldId_check_index(long val)
-{
-	return 0;
-}
 
 /***************************/
 /* saHpiHotSwapEventTable  */    

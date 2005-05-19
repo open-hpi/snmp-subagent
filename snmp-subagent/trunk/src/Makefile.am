@@ -10,7 +10,6 @@ SUBDIRS                 =
 
 
 hpiSubagent_SOURCES	= alarm.c \
-			hpiB0101.c \
 			hpiCheckIndice.c \
 			session_info.c \
 			hash_utils.c \
@@ -42,7 +41,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiSensorThdNegHysteresisTable.c \
 			saHpiAnnunciatorTable.c \
 			saHpiInventoryTable.c \
-			saHpiAreaTable.c
+			saHpiAreaTable.c \
+			saHpiFieldTable.c
 
 
 hpiSubagent_LDADD	= 
@@ -52,6 +52,7 @@ clean:
 	rm -f *~
 	rm -f *.o
 	
+#			hpiB0101.c \
 #			uid_utils.c \
 #			saHpiAnnouncementEventLogTable.c \
 #			saHpiAnnouncementTable.c \
@@ -62,7 +63,6 @@ clean:
 #			saHpiEventLogInfoTable.c \
 #			saHpiEventLogTable.c \
 #			saHpiEventTable.c \
-#			saHpiFieldTable.c \
 #			saHpiHotSwapEventLogTable.c \
 #			saHpiHotSwapEventTable.c \
 #			saHpiHotSwapTable.c \
