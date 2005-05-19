@@ -222,8 +222,6 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
  */
 int set_table_area_delete (saHpiAreaTable_context *row_ctx)
 {
-
-
         DEBUGMSGTL ((AGENT, "********************************************\n"));
         DEBUGMSGTL ((AGENT, "*** NEED TO DELETE ALL ASSOCIATED FIELDS ***\n"));
         DEBUGMSGTL ((AGENT, "********************************************\n"));
@@ -277,6 +275,7 @@ int set_table_area_type (saHpiAreaTable_context *row_ctx)
         SaHpiIdrIdT         idr_id;    
         SaHpiIdrAreaTypeT   area_type;    
         SaHpiEntryIdT       area_id;
+        SaHpiIdrInfoT       idr_info;    
 
         if (!row_ctx)
                 return AGENT_ERR_NULL_DATA;
@@ -291,7 +290,24 @@ int set_table_area_type (saHpiAreaTable_context *row_ctx)
 
         if (rc == SA_OK) {
                 row_ctx->saHpiAreaIdIndex = area_id;
-                return SNMP_ERR_NOERROR; 
+
+                /* Get Idr Info to set the AreaHeaderReadOnly Flag */
+                rc = saHpiIdrInfoGet(session_id, resource_id, idr_id, &idr_info);
+                if (rc == SA_OK) {
+                        row_ctx->saHpiAreaIsReadOnly = 
+                                (idr_info.ReadOnly == SAHPI_TRUE) ? 
+                                        MIB_TRUE : MIB_FALSE;
+                        return SNMP_ERR_NOERROR; 
+                } else if (rc != SA_OK) {
+                        snmp_log (LOG_ERR,
+                        "set_table_area_type: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
+                        oh_lookup_error(rc));
+                        DEBUGMSGTL ((AGENT,
+                        "set_table_area_type: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
+                        oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
+
         } else if (rc != SA_OK) {
                 snmp_log (LOG_ERR,
                           "set_table_area_type: Call to saHpiIdrAreaAdd() failed to set Mode rc: %s.\n",
@@ -459,6 +475,8 @@ saHpiAreaTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiAreaTable(void)
 {
+        DEBUGMSGTL ((AGENT, "init_saHpiAreaTable, called\n"));
+
         initialize_table_saHpiAreaTable();
 
         initialize_table_saHpiAreaEntryCount();
@@ -475,6 +493,8 @@ static int saHpiAreaTable_row_copy(saHpiAreaTable_context * dst,
 {
         if (!dst||!src)
                 return 1;
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_row_copy, called\n"));
 
         /*
          * copy index, if provided
@@ -532,6 +552,8 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
         netsnmp_variable_list var_saHpiInventoryId;
         netsnmp_variable_list var_saHpiAreaId;
         int err;
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_extract_index, called\n"));
 
         /*
          * copy index, if provided
@@ -624,6 +646,9 @@ int saHpiAreaTable_can_activate(saHpiAreaTable_context *undo_ctx,
                                 saHpiAreaTable_context *row_ctx,
                                 netsnmp_request_group * rg)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_can_activate, called\n"));
+
         /*
          * TODO: check for activation requirements here
          */
@@ -649,6 +674,8 @@ int saHpiAreaTable_can_deactivate(saHpiAreaTable_context *undo_ctx,
                                   saHpiAreaTable_context *row_ctx,
                                   netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_can_deactivate, called\n"));
+
         /*
          * TODO: check for deactivation requirements here
          */
@@ -666,6 +693,8 @@ int saHpiAreaTable_can_delete(saHpiAreaTable_context *undo_ctx,
                               saHpiAreaTable_context *row_ctx,
                               netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_can_delete, called\n"));
+
         /*
          * probably shouldn't delete a row that we can't
          * deactivate.
@@ -698,6 +727,9 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
 {
         saHpiAreaTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAreaTable_context);
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_create_row, called\n"));
+
         if (!ctx)
                 return NULL;
 
@@ -733,6 +765,8 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
 saHpiAreaTable_context *
 saHpiAreaTable_duplicate_row( saHpiAreaTable_context * row_ctx)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_duplicate_row, called\n"));
+
         saHpiAreaTable_context * dup;
 
         if (!row_ctx)
@@ -756,6 +790,8 @@ saHpiAreaTable_duplicate_row( saHpiAreaTable_context * row_ctx)
 netsnmp_index * saHpiAreaTable_delete_row( saHpiAreaTable_context * ctx )
 {
         /* netsnmp_mutex_destroy(ctx->lock); */
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_delete_row, called\n"));
 
         if (ctx->index.oids)
                 free(ctx->index.oids);
@@ -797,6 +833,8 @@ void saHpiAreaTable_set_reserve1( netsnmp_request_group *rg )
         netsnmp_variable_list *var;
         netsnmp_request_group_item *current;
         int rc;
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_reserve1, called\n"));
 
         DRI_XREF *dri_entry;
         SaHpiDomainIdResourceIdInventoryIdArrayT dri_tuple;
@@ -916,6 +954,8 @@ void saHpiAreaTable_set_reserve2( netsnmp_request_group *rg )
         netsnmp_variable_list *var;
         int rc;
 
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_reserve2, called\n"));
+
         rg->rg_void = rg->list->ri;
 
         /*
@@ -991,6 +1031,8 @@ void saHpiAreaTable_set_action( netsnmp_request_group *rg )
 
         int            row_err = 0;
 
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_action, called\n"));
+
         /*
          * TODO: loop through columns, copy varbind values
          * to context structure for the row.
@@ -1063,6 +1105,8 @@ void saHpiAreaTable_set_commit( netsnmp_request_group *rg )
 //    saHpiAreaTable_context *undo_ctx = (saHpiAreaTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_commit, called\n"));
+
         /*
          * loop through columns
          */
@@ -1105,6 +1149,8 @@ void saHpiAreaTable_set_free( netsnmp_request_group *rg )
 //    saHpiAreaTable_context *row_ctx = (saHpiAreaTable_context *)rg->existing_row;
 //    saHpiAreaTable_context *undo_ctx = (saHpiAreaTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
+
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_free, called\n"));
 
         /*
          * loop through columns
@@ -1161,6 +1207,8 @@ void saHpiAreaTable_set_undo( netsnmp_request_group *rg )
 //    saHpiAreaTable_context *undo_ctx = (saHpiAreaTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
 
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_set_undo, called\n"));
+
         /*
          * loop through columns
          */
@@ -1198,6 +1246,8 @@ void
 initialize_table_saHpiAreaTable(void)
 {
         netsnmp_table_registration_info *table_info;
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAreaTable, called\n"));
 
         if (my_handler) {
                 snmp_log(LOG_ERR, "initialize_table_saHpiAreaTable_handler called again\n");
@@ -1305,6 +1355,8 @@ int saHpiAreaTable_get_value(
         netsnmp_variable_list *var = request->requestvb;
         saHpiAreaTable_context *context = (saHpiAreaTable_context *)item;
 
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_get_value, called\n"));
+
         switch (table_info->colnum) {
         
         case COLUMN_SAHPIAREAID:
@@ -1363,6 +1415,8 @@ int saHpiAreaTable_get_value(
 const saHpiAreaTable_context *
 saHpiAreaTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_get_by_idx, called\n"));
+
         return(const saHpiAreaTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
