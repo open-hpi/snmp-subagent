@@ -41,6 +41,7 @@
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
+#include <saHpiFieldTable.h>
 #include <session_info.h>
 #include <hash_utils.h>
 #include <oh_utils.h>
@@ -204,6 +205,8 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 area_context->saHpiAreaNumDataFields = header.NumFields;
+
+                populate_field (sessionid, rdr_entry, rpt_entry, area_context);
 
                 CONTAINER_INSERT (cb.container, area_context);
 
@@ -408,11 +411,11 @@ saHpiAreaTable_cmp( const void *lhs, const void *rhs )
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiAreaTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiAreaTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
