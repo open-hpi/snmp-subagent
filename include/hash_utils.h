@@ -62,6 +62,7 @@ typedef struct {
 typedef struct {
         SaHpiEntryIdT entry_id;
         SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
+        SaHpiEntryIdT sa_hpi_area_id_index;
 } DRIA_XREF;
 
 /* hpi internal apis */
