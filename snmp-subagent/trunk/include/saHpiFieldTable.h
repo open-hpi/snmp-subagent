@@ -32,10 +32,10 @@ typedef struct saHpiFieldTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
     /* flags used to tract data needed to create field */
-     unsigned char field_type;
-     unsigned char text_type;
-     unsigned char text_language;
-     unsigned char text;
+     unsigned char field_type_set;
+     unsigned char text_type_set;
+     unsigned char text_language_set;
+     unsigned char text_set;
 
     /*************************************************************
      * You can store data internally in this structure.
@@ -62,7 +62,7 @@ typedef struct saHpiFieldTable_context_s {
             long saHpiFieldTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiFieldText[65535];
+            unsigned char saHpiFieldText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiFieldText_len;
 
         /** RowStatus = ASN_INTEGER */
