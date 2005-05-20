@@ -31,6 +31,7 @@
 /*** BEGIN: ***************************************/
 /*** Hash Table Used for generating and         ***/
 /*** tracking unique indices when required      ***/
+/*** Domain Resource Idr                        ***/
 /**************************************************/
 /**************************************************/
 #define HASH_FILE "hash_utils.c"
