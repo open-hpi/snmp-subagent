@@ -138,8 +138,14 @@ Also visit SAForum's website at http://www.saforum.org
 ---------------------------------------------------------
 BUGS
 ---------------------------------------------------------
-Branch 2.0.x of openhpi does not completely discover all
+Branch 2.0.4 of openhpi does not completely discover all
 Inventory Area's.
+
+Presently compilation results in 'warnings'.
+
+The conversion of some enumerations to string representations
+results in the truncation of the strings.  This is not the
+case when using openhpi 'HEAD'.
 
 ---------------------------------------------------------
 DEFINES
