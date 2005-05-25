@@ -111,12 +111,12 @@ extern size_t saHpiFieldTable_oid_len;
 
 /* Number of table Indexes */
 #define FIELD_INDEX_NR 6 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiInventoryId_INDEX 3
-#define saHpiAreaId_INDEX 4
-#define saHpiFieldId_INDEX 5
+#define saHpiDomainId_field_INDEX 0
+#define saHpiResourceEntryId_field_INDEX 1
+#define saHpiResourceIsHistorical_field_INDEX 2
+#define saHpiInventoryId_field_INDEX 3
+#define saHpiAreaId_field_INDEX 4
+#define saHpiFieldId_field_INDEX 5
     
 /*************************************************************
  * column number definitions for table saHpiFieldTable

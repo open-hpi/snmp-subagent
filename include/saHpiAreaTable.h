@@ -75,6 +75,7 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                                 SaHpiRptEntryT *rpt_entry);
 int set_table_area_type (saHpiAreaTable_context *row_ctx);
 int set_table_area_delete (saHpiAreaTable_context *row_ctx);
+int update_num_data_fields ( oid *field_oids,  SaHpiUint32T num_fields);
 
 /*************************************************************
  * function declarations
