@@ -219,6 +219,49 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 
 /**
  * 
+ * @field_oids:
+ * @num_fields:
+ * 
+ * @return:
+ */
+int update_num_data_fields ( oid *field_oids,  SaHpiUint32T num_fields)
+{
+        oid area_oid[AREA_INDEX_NR];
+        netsnmp_index area_index;
+        saHpiAreaTable_context *area_context;
+
+        DEBUGMSGTL ((AGENT, "update_num_data_fields, called\n"));
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        area_index.len = AREA_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        area_oid[0] = field_oids[saHpiDomainId_field_INDEX];
+        /** Index saHpiResourceId is external */
+        area_oid[1] = field_oids[saHpiResourceEntryId_field_INDEX];
+        /** Index saHpiResourceIsHistorical is external */
+        area_oid[2] = field_oids[saHpiResourceIsHistorical_field_INDEX];
+        /** Index saHpiInventoryId */                        
+        area_oid[3] = field_oids[saHpiInventoryId_field_INDEX];
+        /** Index saHpiAreaId */
+        area_oid[4] = field_oids[saHpiAreaId_field_INDEX];
+        /* assign the indices to the index */
+        area_index.oids = (oid *) & area_oid;
+
+        /* See if Row exists. */
+        area_context = NULL;
+        area_context = CONTAINER_FIND(cb.container, &area_index); 
+        if (!area_context) {
+                return SA_ERR_HPI_UNKNOWN;
+        }
+
+        area_context->saHpiAreaNumDataFields = num_fields;
+
+        return SNMP_ERR_NOERROR; 
+}
+
+/**
+ * 
  * @row_ctx:
  * 
  * @return: 
@@ -247,7 +290,12 @@ int set_table_area_delete (saHpiAreaTable_context *row_ctx)
 
         rc = saHpiIdrAreaDelete(session_id, resource_id, idr_id, area_id);
 
-        if (rc != SA_OK) {
+        if (rc == SA_OK) {
+
+// DMJ TODO                delete all fields!!!!!!!!!!!!!
+
+                return SNMP_ERR_NOERROR; 
+        } else {
                 snmp_log (LOG_ERR,
                           "set_table_area_delete: Call to saHpiIdrAreaDelete failed %s.\n",
                           oh_lookup_error(rc));
