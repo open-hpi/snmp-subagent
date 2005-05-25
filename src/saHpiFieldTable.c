@@ -248,8 +248,96 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
  */
 int set_table_field_update (saHpiFieldTable_context *row_ctx)
 {
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiResourceIdT    resource_id;
+        SaHpiIdrIdT         idr_id;    
+        SaHpiIdrFieldT      field_entry;
+
+        DRIA_XREF *dria_entry;
+        SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
+
+
         DEBUGMSGTL ((AGENT, "set_table_field_update() called\n"));
 
+        if ((row_ctx->field_type_set == MIB_TRUE) &&
+            (row_ctx->text_type_set == MIB_TRUE) &&
+            (row_ctx->text_language_set == MIB_TRUE) &&
+            (row_ctx->text_set == MIB_TRUE)) {
+
+                if (!row_ctx)
+                        return AGENT_ERR_NULL_DATA;
+
+                session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+                resource_id = row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
+                idr_id = row_ctx->index.oids[saHpiInventoryId_field_INDEX];
+#if 0
+printf("*** set_table_field_update *******************\n");
+printf("**********************************************\n");
+printf("session_id [%d]\n", session_id);
+printf("resource_id [%d]\n", resource_id);
+printf("idr_id [%d]\n", idr_id);
+printf("**********************************************\n");
+#endif
+                /* Get AreaIdIndex                                      */
+                /* this is the same as the AreaId obtained from HPI     */
+                /* it is maintained in the subagent                     */
+                dria_tuple.domainId_resourceId_idr_area_arry[0] = 
+                        row_ctx->index.oids[saHpiDomainId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[1] = 
+                        row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[2] = 
+                        row_ctx->index.oids[saHpiInventoryId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[4] = 
+                        row_ctx->index.oids[saHpiAreaId_field_INDEX];
+
+                dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
+                if (!dria_entry) {
+                        DEBUGMSGTL ((AGENT, "domain_resoruce_idr_area_lookup() FIALED!!!!!!!\n"));
+                        return SNMP_ERR_NOERROR; 
+                } 
+#if 0
+printf("**********************************************\n");
+printf("row_ctx->index.oids[saHpiDomainId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiResourceEntryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiResourceEntryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiInventoryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiInventoryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiAreaId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiAreaId_field_INDEX]);
+printf("dria_entry->sa_hpi_area_id_index [%d]\n", 
+       (int)dria_entry->sa_hpi_area_id_index);
+printf("**********************************************\n");
+#endif
+                field_entry.AreaId = dria_entry->sa_hpi_area_id_index;
+
+                memcpy(field_entry.Field.Data, 
+                       row_ctx->saHpiFieldText, 
+                       row_ctx->saHpiFieldText_len);
+                field_entry.Field.DataLength = row_ctx->saHpiFieldText_len;
+                field_entry.Field.DataType = row_ctx->saHpiFieldTextType - 1;
+                field_entry.Field.Language = row_ctx->saHpiFieldTextLanguage - 1;
+                /* field_entry.FieldId   not valid going in */
+                /* field_entry.ReadOnly  not valid going in */
+                field_entry.Type = row_ctx->saHpiFieldType - 1;
+
+                rc = saHpiIdrFieldSet (session_id, resource_id,
+                                      idr_id, &field_entry);
+
+                if (rc == SA_OK) {
+                        DEBUGMSGTL ((AGENT, "saHpiIdrFieldSet() SUCCEEDED!!!!!!!\n"));
+                        return SNMP_ERR_NOERROR; 
+                } else if (rc != SA_OK) {
+                        snmp_log (LOG_ERR,
+                                  "set_table_field_update: Call to saHpiIdrFieldSet() failed to set Mode rc: %s.\n",
+                                  oh_lookup_error(rc));
+                        DEBUGMSGTL ((AGENT,
+                                     "set_table_field_update: Call to saHpiIdrFieldSet() failed to set Mode rc: %s.\n",
+                                     oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
+        }
         return SNMP_ERR_NOERROR; 
 }
 
@@ -265,13 +353,11 @@ int set_table_field_add (saHpiFieldTable_context *row_ctx)
         SaHpiSessionIdT     session_id;
         SaHpiResourceIdT    resource_id;
         SaHpiIdrIdT         idr_id;    
-        SaHpiIdrAreaTypeT   area_type;    
         SaHpiIdrInfoT       idr_info; 
         SaHpiIdrFieldT      field_entry;
 
         DRIA_XREF *dria_entry;
         SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
-
 
         DEBUGMSGTL ((AGENT, "set_table_field_add() called\n"));
 
@@ -285,42 +371,48 @@ int set_table_field_add (saHpiFieldTable_context *row_ctx)
                         return AGENT_ERR_NULL_DATA;
 
 
-                session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-                resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
-                idr_id = row_ctx->index.oids[saHpiInventoryId_INDEX];
-
+                session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+                resource_id = row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
+                idr_id = row_ctx->index.oids[saHpiInventoryId_field_INDEX];
+#if 0
+printf("*** set_table_field_add *******************\n");
 printf("**********************************************\n");
 printf("session_id [%d]\n", session_id);
 printf("resource_id [%d]\n", resource_id);
 printf("idr_id [%d]\n", idr_id);
 printf("**********************************************\n");
-
+#endif
                 /* Get AreaIdIndex                                      */
                 /* this is the same as the AreaId obtained from HPI     */
                 /* it is maintained in the subagent                     */
                 dria_tuple.domainId_resourceId_idr_area_arry[0] = 
-                        row_ctx->index.oids[saHpiDomainId_INDEX];
+                        row_ctx->index.oids[saHpiDomainId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[1] = 
-                        row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+                        row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[2] = 
-                        row_ctx->index.oids[saHpiInventoryId_INDEX];
+                        row_ctx->index.oids[saHpiInventoryId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[4] = 
-                        row_ctx->index.oids[saHpiAreaId_INDEX];
+                        row_ctx->index.oids[saHpiAreaId_field_INDEX];
 
                 dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
                 if (!dria_entry) {
                         DEBUGMSGTL ((AGENT, "domain_resoruce_idr_area_lookup() FIALED!!!!!!!\n"));
                         return SNMP_ERR_NOERROR; 
                 } 
-
+#if 0
 printf("**********************************************\n");
-printf("row_ctx->index.oids[saHpiDomainId_INDEX] [%d]\n", row_ctx->index.oids[saHpiDomainId_INDEX]);
-printf("row_ctx->index.oids[saHpiResourceEntryId_INDEX] [%d]\n", row_ctx->index.oids[saHpiResourceEntryId_INDEX]);
-printf("row_ctx->index.oids[saHpiInventoryId_INDEX] [%d]\n", row_ctx->index.oids[saHpiInventoryId_INDEX]);
-printf("row_ctx->index.oids[saHpiAreaId_INDEX] [%d]\n", row_ctx->index.oids[saHpiAreaId_INDEX]);
-printf("dria_entry->sa_hpi_area_id_index [%d]\n", dria_entry->sa_hpi_area_id_index);
+printf("row_ctx->index.oids[saHpiDomainId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiResourceEntryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiResourceEntryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiInventoryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiInventoryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiAreaId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiAreaId_field_INDEX]);
+printf("dria_entry->sa_hpi_area_id_index [%d]\n", 
+       (int)dria_entry->sa_hpi_area_id_index);
 printf("**********************************************\n");
-
+#endif
                 field_entry.AreaId = dria_entry->sa_hpi_area_id_index;
 
                 memcpy(field_entry.Field.Data, 
@@ -333,30 +425,9 @@ printf("**********************************************\n");
                 /* field_entry.ReadOnly  not valid going in */
                 field_entry.Type = row_ctx->saHpiFieldType - 1;
 
-                rc = saHpiIdrFieldAdd(session_id, resource_id,
+                rc = saHpiIdrFieldAdd(session_id, resource_id, 
                                       idr_id, &field_entry);
-
-                if (rc == SA_OK) {
-                        row_ctx->saHpiFieldIdIndex = field_entry.FieldId;
-
-                        /* Get Idr Info to set the AreaHeaderReadOnly Flag */
-                        rc = saHpiIdrInfoGet(session_id, resource_id, idr_id, &idr_info);
-                        if (rc == SA_OK) {
-                                row_ctx->saHpiFieldIsReadOnly = 
-                                        (idr_info.ReadOnly == SAHPI_TRUE) ? 
-                                                MIB_TRUE : MIB_FALSE;
-                                return SNMP_ERR_NOERROR; 
-                        } else if (rc != SA_OK) {
-                                snmp_log (LOG_ERR,
-                                "set_table_field_add: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
-                                oh_lookup_error(rc));
-                                DEBUGMSGTL ((AGENT,
-                                "set_table_field_add: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
-                                oh_lookup_error(rc)));
-                                return get_snmp_error(rc);
-                        }
-
-                } else if (rc != SA_OK) {
+                if (rc != SA_OK) {
                         snmp_log (LOG_ERR,
                                   "set_table_field_add: Call to saHpiIdrFieldAdd() failed to set Mode rc: %s.\n",
                                   oh_lookup_error(rc));
@@ -365,7 +436,53 @@ printf("**********************************************\n");
                                      oh_lookup_error(rc)));
                         return get_snmp_error(rc);
                 }
-        }
+
+                rc = saHpiIdrInfoGet(session_id, resource_id, idr_id, &idr_info);
+                if (rc != SA_OK) {
+                                snmp_log (LOG_ERR,
+                                "set_table_field_add: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc));
+                                DEBUGMSGTL ((AGENT,
+                                "set_table_field_add: Call to saHpiIdrInfoGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc)));
+                                return get_snmp_error(rc);
+                }
+
+                SaHpiEntryIdT area_area_id;
+                SaHpiIdrAreaHeaderT header;
+                area_area_id = dria_entry->sa_hpi_area_id_index;
+                rc = saHpiIdrAreaHeaderGet(session_id, resource_id, idr_id, 
+                                           SAHPI_IDR_AREATYPE_UNSPECIFIED,
+                                           area_area_id, &area_area_id, 
+                                           &header);
+                if (rc != SA_OK) {
+                                snmp_log (LOG_ERR,
+                                "set_table_field_add: Call to saHpiIdrAreaHeaderGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc));
+                                DEBUGMSGTL ((AGENT,
+                                "set_table_field_add: Call to saHpiIdrAreaHeaderGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc)));
+                                return get_snmp_error(rc);
+                }
+
+                rc = update_num_data_fields (row_ctx->index.oids, header.NumFields);
+                if (rc != SA_OK) {
+                                snmp_log (LOG_ERR,
+                                "set_table_field_add: Call to update_num_data_fields() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc));
+                                DEBUGMSGTL ((AGENT,
+                                "set_table_field_add: Call to update_num_data_fields() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc)));
+                                return get_snmp_error(rc);
+                }
+
+                row_ctx->saHpiFieldIdIndex = field_entry.FieldId;  /* from saHpiIdrFieldAdd() */
+                row_ctx->saHpiFieldIsReadOnly =                    /* from saHpiIdrInfoGet()  */
+                        (idr_info.ReadOnly == SAHPI_TRUE) ? 
+                                MIB_TRUE : MIB_FALSE;
+                row_ctx->saHpiFieldStatus = SNMP_ROW_ACTIVE;      
+                DEBUGMSGTL ((AGENT, "saHpiIdrFieldAdd() + saHpiIdrInfoGet() + saHpiIdrAreaHeaderGet() SUCCEEDED!!!!!!!\n"));
+        } 
 
         return SNMP_ERR_NOERROR; 
 }
@@ -378,7 +495,114 @@ printf("**********************************************\n");
  */
 int set_table_field_delete (saHpiFieldTable_context *row_ctx)
 {
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiResourceIdT    resource_id;
+        SaHpiIdrIdT         idr_id;    
+        SaHpiEntryIdT       area_id;
+        SaHpiEntryIdT       field_id;
+
+        SaHpiEntryIdT       next_area_id;
+        SaHpiIdrAreaHeaderT header;
+
+        DRIA_XREF *dria_entry;
+        SaHpiDomainIdResourceIdInventoryIdAreaIdArrayT dria_tuple;
+
         DEBUGMSGTL ((AGENT, "set_table_field_delete() called\n"));
+
+        if ((row_ctx->field_type_set == MIB_TRUE) &&
+            (row_ctx->text_type_set == MIB_TRUE) &&
+            (row_ctx->text_language_set == MIB_TRUE) &&
+            (row_ctx->text_set == MIB_TRUE)) {
+
+                if (!row_ctx)
+                        return AGENT_ERR_NULL_DATA;
+
+                session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+                resource_id = row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
+                idr_id = row_ctx->index.oids[saHpiInventoryId_field_INDEX];
+#if 0
+printf("*** set_table_field_delete *******************\n");
+printf("**********************************************\n");
+printf("session_id [%d]\n", session_id);
+printf("resource_id [%d]\n", resource_id);
+printf("idr_id [%d]\n", idr_id);
+printf("**********************************************\n");
+#endif
+                /* Get AreaIdIndex                                      */
+                /* this is the same as the AreaId obtained from HPI     */
+                /* it is maintained in the subagent                     */
+                dria_tuple.domainId_resourceId_idr_area_arry[0] = 
+                        row_ctx->index.oids[saHpiDomainId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[1] = 
+                        row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[2] = 
+                        row_ctx->index.oids[saHpiInventoryId_field_INDEX];
+                dria_tuple.domainId_resourceId_idr_area_arry[4] = 
+                        row_ctx->index.oids[saHpiAreaId_field_INDEX];
+
+                dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
+                if (!dria_entry) {
+                        DEBUGMSGTL ((AGENT, "set_table_field_delete: domain_resoruce_idr_area_lookup() FIALED!!!!!!!\n"));
+                        return SNMP_ERR_NOERROR; 
+                } 
+#if 0
+printf("**********************************************\n");
+printf("row_ctx->index.oids[saHpiDomainId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiDomainId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiResourceEntryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiResourceEntryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiInventoryId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiInventoryId_field_INDEX]);
+printf("row_ctx->index.oids[saHpiAreaId_INDEX] [%d]\n", 
+       (int)row_ctx->index.oids[saHpiAreaId_field_INDEX]);
+printf("dria_entry->sa_hpi_area_id_index [%d]\n", 
+       (int)dria_entry->sa_hpi_area_id_index);
+printf("**********************************************\n");
+#endif
+                area_id = dria_entry->sa_hpi_area_id_index;
+                field_id = row_ctx->saHpiFieldIdIndex;
+
+                rc = saHpiIdrFieldDelete(session_id, resource_id,
+                                         idr_id, area_id, field_id); 
+                if (rc != SA_OK) {
+                        snmp_log (LOG_ERR,
+                                  "set_table_field_delete: Call to saHpiIdrFieldDelete() failed to set Mode rc: %s.\n",
+                                  oh_lookup_error(rc));
+                        DEBUGMSGTL ((AGENT,
+                                     "set_table_field_delete: Call to saHpiIdrFieldDelete() failed to set Mode rc: %s.\n",
+                                     oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
+
+                rc = saHpiIdrAreaHeaderGet(session_id, resource_id, idr_id, 
+                                           SAHPI_IDR_AREATYPE_UNSPECIFIED,
+                                           area_id, &next_area_id, 
+                                           &header);
+                if (rc != SA_OK) {
+                                snmp_log (LOG_ERR,
+                                "set_table_field_add: Call to saHpiIdrAreaHeaderGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc));
+                                DEBUGMSGTL ((AGENT,
+                                "set_table_field_add: Call to saHpiIdrAreaHeaderGet() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc)));
+                                return get_snmp_error(rc);
+                }
+
+                rc = update_num_data_fields (row_ctx->index.oids, header.NumFields);
+                if (rc != SA_OK) {
+                                snmp_log (LOG_ERR,
+                                "set_table_field_add: Call to update_num_data_fields() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc));
+                                DEBUGMSGTL ((AGENT,
+                                "set_table_field_add: Call to update_num_data_fields() failed to set Mode rc: %s.\n",
+                                oh_lookup_error(rc)));
+                                return get_snmp_error(rc);
+                }
+
+                DEBUGMSGTL ((AGENT, 
+                "saHpiIdrFieldDelete() + saHpiIdrAreaHeaderGet() + update_num_data_fields() SUCCEEDED!!!!!!!\n"));
+        } 
 
         return SNMP_ERR_NOERROR; 
 }
@@ -909,8 +1133,8 @@ void saHpiFieldTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiFieldTable_context *row_ctx =
             (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx =
-            (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *undo_ctx =
+//            (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -988,13 +1212,13 @@ void saHpiFieldTable_set_reserve1( netsnmp_request_group *rg )
                     /* this is not the same as the AreaId obtained from HPI */
                     /* it is maintained in the subagent                     */
                     dria_tuple.domainId_resourceId_idr_area_arry[0] = 
-                            row_ctx->index.oids[saHpiDomainId_INDEX];
+                            row_ctx->index.oids[saHpiDomainId_field_INDEX];
                     dria_tuple.domainId_resourceId_idr_area_arry[1] = 
-                            row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+                            row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
                     dria_tuple.domainId_resourceId_idr_area_arry[2] = 
-                            row_ctx->index.oids[saHpiInventoryId_INDEX];
+                            row_ctx->index.oids[saHpiInventoryId_field_INDEX];
                     dria_tuple.domainId_resourceId_idr_area_arry[3] = 
-                            row_ctx->index.oids[saHpiAreaId_INDEX];
+                            row_ctx->index.oids[saHpiAreaId_field_INDEX];
 
                     /* domain_resource_idr_area_get() generates unique keys based on */
                     /* domainid, resourceid, and IdrId tuples.                  */
@@ -1006,14 +1230,14 @@ void saHpiFieldTable_set_reserve1( netsnmp_request_group *rg )
                             rc = SNMP_ERR_GENERR;
                     }
 
-                    if ( row_ctx->index.oids[saHpiFieldId_INDEX] >= dria_entry->entry_id ) {
-                            dria_entry->entry_id = row_ctx->index.oids[saHpiFieldId_INDEX];
+                    if ( row_ctx->index.oids[saHpiFieldId_field_INDEX] >= dria_entry->entry_id ) {
+                            dria_entry->entry_id = row_ctx->index.oids[saHpiFieldId_field_INDEX];
                             dria_entry->entry_id++;
                     } else {
                             DEBUGMSGTL ((AGENT,"***********************************************\n"));
                             DEBUGMSGTL ((AGENT,"dria_entry->entry_id [%d]\n", dria_entry->entry_id));
                             DEBUGMSGTL ((AGENT,"row_ctx->index.oids[saHpiFieldId_INDEX] [%d]\n", 
-                                         row_ctx->index.oids[saHpiFieldId_INDEX]));
+                                         row_ctx->index.oids[saHpiFieldId_field_INDEX]));
                             DEBUGMSGTL ((AGENT, 
                                          "ERROR: saHpiFieldTable_set_reserve1() User specified FieldId invalid!!!\n"));
                             DEBUGMSGTL ((AGENT,"***********************************************\n"));
@@ -1041,8 +1265,8 @@ void saHpiFieldTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiFieldTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
+//    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -1162,7 +1386,7 @@ void saHpiFieldTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -1273,8 +1497,8 @@ void saHpiFieldTable_set_action( netsnmp_request_group *rg )
 void saHpiFieldTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
+//    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_set_commit, called\n"));
@@ -1330,8 +1554,8 @@ void saHpiFieldTable_set_commit( netsnmp_request_group *rg )
 void saHpiFieldTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
+//    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_set_free, called\n"));
@@ -1399,8 +1623,8 @@ void saHpiFieldTable_set_free( netsnmp_request_group *rg )
 void saHpiFieldTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
-    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
+//    saHpiFieldTable_context *row_ctx = (saHpiFieldTable_context *)rg->existing_row;
+//    saHpiFieldTable_context *undo_ctx = (saHpiFieldTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_set_undo, called\n"));
