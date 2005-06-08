@@ -277,8 +277,10 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 			resource_context->saHpiResourceTag_len = 
 			RptEntry.ResourceTag.DataLength;   
 
-		DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", RptEntry.ResourceTag.DataLength));
-		DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", strlen(RptEntry.ResourceTag.Data))); 
+		DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", 
+                             RptEntry.ResourceTag.DataLength));
+		DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", 
+                             strlen(RptEntry.ResourceTag.Data))); 
 
 
 		/** INTEGER = ASN_INTEGER */
