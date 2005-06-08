@@ -251,7 +251,6 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
 {
         /* We are never called for a GETNEXT if it's registered as a
            "instance", as it's "magically" handled for us.  */
-saHpiAnnunciatorTable_context_s
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
@@ -351,7 +350,7 @@ saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
                                 return -1;
 
                         if ( context_l->index.oids[2] > context_r->index.oids[2])
-                              saHpiAnnunciatorTable_context_s  return 1;
+                                return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiResourceIsHistorical index is equal sort by forth index */
