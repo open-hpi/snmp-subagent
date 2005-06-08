@@ -58,42 +58,63 @@ static int saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiAnnouncementTable_context *context_l =
-        (saHpiAnnouncementTable_context *)lhs;
-    saHpiAnnouncementTable_context *context_r =
-        (saHpiAnnouncementTable_context *)rhs;
+        saHpiAnnunciatorTable_context *context_l =
+        (saHpiAnnunciatorTable_context *)lhs;
+        saHpiAnnunciatorTable_context *context_r =
+        (saHpiAnnunciatorTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+        /*
+         * check primary key, then secondary. Add your own code if
+         * there are more than 2 indexes
+         */
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiAnnouncementTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+        /* check for NULL pointers */
+        if (lhs == NULL || rhs == NULL ) {
+                DEBUGMSGTL((AGENT,"saHpiAnnouncementTable_cmp() NULL pointer ERROR\n" ));
+                return 0;
+        }
+        /* CHECK FIRST INDEX,  saHpiDomainId */
+        if ( context_l->index.oids[0] < context_r->index.oids[0])
+                return -1;
+
+        if ( context_l->index.oids[0] > context_r->index.oids[0])
+                return 1;
+
+        if ( context_l->index.oids[0] == context_r->index.oids[0]) {
+                /* If saHpiDomainId index is equal sort by second index */
+                /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+                if ( context_l->index.oids[1] < context_r->index.oids[1])
+                        return -1;
+
+                if ( context_l->index.oids[1] > context_r->index.oids[1])
+                        return 1;
+
+                if ( context_l->index.oids[1] == context_r->index.oids[1]) {
+                        /* If saHpiResourceEntryId index is equal sort by third index */
+                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        if ( context_l->index.oids[2] < context_r->index.oids[2])
+                                return -1;
+
+                        if ( context_l->index.oids[2] > context_r->index.oids[2])
+                                return 1;
+
+                        if ( context_l->index.oids[2] == context_r->index.oids[2]) {
+                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                if ( context_l->index.oids[3] < context_r->index.oids[3])
+                                        return -1;
+
+                                if ( context_l->index.oids[3] > context_r->index.oids[3])
+                                        return 1;
+
+                                if ( context_l->index.oids[3] == context_r->index.oids[3])
+                                        return 0;
+                        }
+                }
+        }
+
+        return 0;
 }
 
 /************************************************************
@@ -212,7 +233,6 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiAnnouncementTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -225,131 +245,89 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
 int
 saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    netsnmp_variable_list var_saHpiResourceId;
-    netsnmp_variable_list var_saHpiDomainAlarmId;
-    netsnmp_variable_list var_saHpiAnnouncementEntryId;
-    int err;
+        /*
+         * temporary local storage for extracting oid index
+         *
+         * extract index uses varbinds (netsnmp_variable_list) to parse
+         * the index OID into the individual components for each index part.
+         */
+        /** TODO: add storage for external index(s)! */
+        netsnmp_variable_list var_saHpiDomainId;
+        netsnmp_variable_list var_saHpiResourceId;
+        netsnmp_variable_list var_saHpiDomainAlarmId;
+        netsnmp_variable_list var_saHpiAnnouncementEntryId;
+        int err;
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_extract_index, called\n"));
+
+        /*
+         * copy index, if provided
+         */
+        if (hdr) {
+                netsnmp_assert(ctx->index.oids == NULL);
+                if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+                                    hdr->len * sizeof(oid) )) {
+                        return -1;
+                }
+                ctx->index.len = hdr->len;
         }
-        ctx->index.len = hdr->len;
-    }
 
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
+        /*
+         * initialize variable that will hold each component of the index.
+         * If there are multiple indexes for the table, the variable_lists
+         * need to be linked together, in order.
+         */
+        /** TODO: add code for external index(s)! */
+        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiDomainId.next_variable = &var_saHpiResourceId;
 
-       memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
-       var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiResourceId.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
+        var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiResourceId.next_variable = &var_saHpiDomainAlarmId;
 
-       memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
-       var_saHpiDomainAlarmId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainAlarmId.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
+        var_saHpiDomainAlarmId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiDomainAlarmId.next_variable = &var_saHpiAnnouncementEntryId;
 
-       memset( &var_saHpiAnnouncementEntryId, 0x00, sizeof(var_saHpiAnnouncementEntryId) );
-       var_saHpiAnnouncementEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAnnouncementTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiAnnouncementEntryId.next_variable = &var_XX;
-#endif
+        memset( &var_saHpiAnnouncementEntryId, 0x00, sizeof(var_saHpiAnnouncementEntryId) );
+        var_saHpiAnnouncementEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiAnnouncementEntryId.next_variable = NULL;
 
 
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-              /** skipping external index saHpiDomainId */
+        /*
+         * parse the oid into the individual index components
+         */
+        err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+        if (err == SNMP_ERR_NOERROR) {
+                /*
+                 * copy index components into the context structure
+                 */
+                /** skipping external index saHpiDomainId */
    
-              /** skipping external index saHpiResourceId */
+                /** skipping external index saHpiResourceId */
    
-              /** skipping external index saHpiDomainAlarmId */
+                /** skipping external index saHpiDomainAlarmId */
    
                 ctx->saHpiAnnouncementEntryId = *var_saHpiAnnouncementEntryId.val.integer;
+                
+                err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+                err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
+		err = saHpiDomainAlarmId_check_index(*var_saHpiDomainAlarmId.val.integer);
+		err = saHpiAnnouncementEntryId_check_index(*var_saHpiAnnouncementEntryId.val.integer);
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiResourceId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainAlarmId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiAnnouncementEntryId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
+        }
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+        /*
+         * parsing may have allocated memory. free it.
+         */
+        snmp_reset_var_buffers( &var_saHpiDomainId );
 
-    return err;
+        return err;
 }
 
 /************************************************************
