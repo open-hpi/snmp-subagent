@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <SaHpi.h>
+
         /** Index saHpiEventRowPointer is internal */
 
 typedef struct saHpiEventTable_context_s {
@@ -67,6 +69,10 @@ const saHpiEventTable_context * saHpiEventTable_get_by_idx_rs(netsnmp_index *,
                                         int row_status);
 int saHpiEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * oid declarations
@@ -85,21 +91,6 @@ extern size_t saHpiEventTable_oid_len;
 #define COLUMN_SAHPIEVENTTYPE 5
 #define saHpiEventTable_COL_MIN 3
 #define saHpiEventTable_COL_MAX 5
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiEventTable */
-#define saHpiEventTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiEventTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiEventTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiEventTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiEventTable_SET_HANDLING
 
 int saHpiEventTable_extract_index( saHpiEventTable_context * ctx, netsnmp_index * hdr );
 
@@ -124,14 +115,9 @@ int saHpiEventTable_can_delete(saHpiEventTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiEventTable_ROW_CREATION
 saHpiEventTable_context * saHpiEventTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiEventTable_IDX2
 saHpiEventTable_context * saHpiEventTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };

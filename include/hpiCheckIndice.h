@@ -13,6 +13,7 @@
  *
  *
  */
+#include <saHpiEventTable.h>
 
 /**************************/
 /* saHpiAnnouncementTable */    
@@ -85,6 +86,11 @@ int saHpiAreaId_check_index(long val);
 /* saHpiFeildTable  */    
 /**************************/
 int saHpiFieldId_check_index(long val);
+
+/**************************/
+/* saHpiEeventTable  */    
+/**************************/
+int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx);
 
 /**************************************/
 /**************************************/

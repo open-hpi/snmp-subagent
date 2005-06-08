@@ -35,14 +35,17 @@
 
 /**************************************************/
 /*** BEGIN: ***************************************/
-/*** Session Domian mappings                    ***/
-/**************************************************/
+/*** Manages All existing sessions and domains  ***/
 /**************************************************/
 void store_session_info(SaHpiSessionIdT session_id, SaHpiDomainIdT domain_id);
-
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT domain_id);
-
 SaHpiDomainIdT get_domain_id(SaHpiSessionIdT session_id);
+int subcsribe_all_sessions(void);
+/**************************************************/
+/*** END: *****************************************/
+/*** Manages All existing sessions and domains  ***/
+/**************************************************/
+
 
 /**************************************************/
 /*** BEGIN: ***************************************/
