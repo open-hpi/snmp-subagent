@@ -40,21 +40,68 @@
 static SaHpiSessionIdT stored_session_id;
 static SaHpiDomainIdT stored_domain_id;
 
+/**************************************************/
+/*** BEGIN: ***************************************/
+/*** Manages All existing sessions and domains  ***/
+/**************************************************/
+/**
+ * 
+ * @session_id:
+ * @domain_id:
+ */
 void store_session_info(SaHpiSessionIdT session_id, SaHpiDomainIdT domain_id)
 {
 	stored_session_id = session_id;
 	stored_domain_id = domain_id;
 }
 
+/**
+ * 
+ * @domain_id:
+ * 
+ * @return:
+ */
 SaHpiSessionIdT get_session_id(SaHpiDomainIdT domain_id)
 {
 	return( stored_session_id );
 }
 
+/**
+ * 
+ * @session_id:
+ * 
+ * @return: 
+ */
 SaHpiDomainIdT get_domain_id(SaHpiSessionIdT session_id)
 {
 	return( stored_domain_id );
 }
+
+int subcsribe_all_sessions(void)
+{
+        SaErrorT rc = SA_OK;
+
+        rc = saHpiSubscribe(stored_session_id);
+
+        if (rc == SA_OK) {
+                DEBUGMSGTL ((AGENT, "subcsribe_all_sessions() SUCCEEDED!!!!!!!\n"));
+                return SNMP_ERR_NOERROR; 
+        } else if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                          "subcsribe_all_sessions: Call to saHpiSubscribe() failed to set Mode rc: %s.\n",
+                          oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                             "subcsribe_all_sessions: Call to saHpiSubscribe() failed to set Mode rc: %s.\n",
+                             oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        }
+
+        return SA_ERR_HPI_ERROR;
+}
+/**************************************************/
+/*** END: *****************************************/
+/*** Manages All existing sessions and domains  ***/
+/**************************************************/
 
 
 
