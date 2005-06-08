@@ -270,7 +270,7 @@ main (int argc, char **argv)
 	  		  	
 	  	/* change this if you want to be a SNMP master agent */
 	  	
-	  	debug_register_tokens (AGENT);
+	  	debug_register_tokens ("all");
         snmp_enable_stderrlog ();
         snmp_set_do_debugging (1);
 
@@ -363,13 +363,14 @@ main (int argc, char **argv)
 	}
    	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
    		sessionid));  
-   		
+
+        /* store session numbers */
    	store_session_info(sessionid, SAHPI_UNSPECIFIED_DOMAIN_ID);	
    				
-		
-	/*
-	 * Resource discovery
-	 */	
+	/* subscribe all sessions/events */
+        subcsribe_all_sessions();
+
+	/* Resource discovery */
 	rv = saHpiDiscover(sessionid);
 	
 	if (rv != SA_OK) {
@@ -410,14 +411,14 @@ main (int argc, char **argv)
 		init_saHpiInventoryTable();
 		init_saHpiAreaTable();
 		init_saHpiFieldTable();
+
+		init_saHpiEventTable();
 /*		
-		
 		
 		init_saHpiWatchdogTable();
 		init_saHpiHotSwapTable();
 		init_saHpiAutoInsertTimeoutTable();
 		
-		init_saHpiEventTable();
 		init_saHpiResourceEventTable();
 		init_saHpiDomainEventTable();
 		init_saHpiSensorEventTable();
@@ -481,6 +482,8 @@ main (int argc, char **argv)
 		     *	       populate_saHpiAreaTable();		
 		     *	           populate_saHpiFieldTable();		
 		     */
+
+		populate_saHpiEventTable(sessionid);
 
                 DEBUGMSGTL ((AGENT,
                 "WARNING: populate_event: hpiSubagent.c: nolong implemented!")); 
