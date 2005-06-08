@@ -36,7 +36,14 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -44,8 +51,204 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiEventTable_oid[] = { saHpiEventTable_TABLE_OID };
 size_t saHpiEventTable_oid_len = OID_LENGTH(saHpiEventTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+static u_long event_entry_count_total = 0;
+static u_long event_entry_count = 0;
+static oid saHpiEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
+static oid saHpiEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
+int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                     netsnmp_handler_registration *reginfo,
+                                     netsnmp_agent_request_info   *reqinfo,
+                                     netsnmp_request_info         *requests);
+int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests);
+int initialize_table_saHpiEventEntryCountTotal(void);
+int initialize_table_saHpiEventEntryCount(void);
 
-#ifdef saHpiEventTable_IDX2
+
+
+SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
+{
+        SaErrorT rv = SA_OK;
+
+        SaHpiEventT          event;         
+        SaHpiRdrT            rdr;            
+        SaHpiRptEntryT       rpt_entry;       
+        SaHpiEvtQueueStatusT event_queue_status;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiEventTable, called\n"));
+
+        rv = saHpiEventGet (sessionid, 
+                            SAHPI_TIMEOUT_IMMEDIATE, 
+                            &event, 
+                            &rdr, 
+                            &rpt_entry, 
+                            &event_queue_status);
+
+        while (rv == SA_OK) {
+
+                switch (event.EventType) {
+                case SAHPI_ET_RESOURCE:
+                        printf("SAHPI_ET_RESOURCE: rv [%d]\n", rv);
+                        printf("        Event Type: rv [%s]\n", 
+                        oh_lookup_resourceeventtype(event.EventDataUnion.ResourceEvent.ResourceEventType));
+                        //populate_saHpiResourceEventTable();
+                        break;
+                case SAHPI_ET_DOMAIN:
+                        printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
+                        printf("        Event Type: rv [%s]\n", 
+                        oh_lookup_domaineventtype(event.EventDataUnion.DomainEvent.Type));
+                        //populate_saHpiDomainEventTable();
+                        break;
+                case SAHPI_ET_SENSOR:
+                        printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
+                        printf("        Sensor Type: rv [%s]\n",
+                        oh_lookup_sensortype(event.EventDataUnion.SensorEvent.SensorType));
+                        //populate_saHpiSensorEventTable();
+                        break;
+                case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                        printf("SAHPI_ET_SENSOR_ENABLE_CHANGE: rv [%d]\n", rv);
+                        //populate_saHpiSensorEnableChangeEventTable();
+                        break;
+                case SAHPI_ET_HOTSWAP:
+                        printf("SAHPI_ET_HOTSWAP: rv [%d]\n", rv);
+                        //populate_saHpiHotSwapEventTable();
+                        break;
+                case SAHPI_ET_WATCHDOG:
+                        printf("SAHPI_ET_WATCHDOG: rv [%d]\n", rv);
+                        //populate_saHpiWatchdogEventTable();
+                        break;
+                case SAHPI_ET_HPI_SW:
+                        printf("SAHPI_ET_HPI_SW: rv [%d]\n", rv);
+                        //populate_saHpiSoftwareEventTable();
+                        break;
+                case SAHPI_ET_OEM:
+                        printf("SAHPI_ET_OEM: rv [%d]\n", rv);
+                        //populate_saHpiOemEventTable();
+                        break;
+                case SAHPI_ET_USER:
+                        printf("SAHPI_ET_USER: rv [%d]\n", rv);
+                        //populate_saHpiUserEventEventTable();
+                        break;
+                default:
+                        printf("********* unknown event type *********\n");
+                        break;        
+                }
+                
+                rv = saHpiEventGet (sessionid, 
+                                    SAHPI_TIMEOUT_IMMEDIATE, 
+                                    &event, 
+                                    &rdr, 
+                                    &rpt_entry, 
+                                    &event_queue_status);
+
+        }
+
+        return rv;
+}
+
+
+
+int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                     netsnmp_handler_registration *reginfo,
+                                     netsnmp_agent_request_info   *reqinfo,
+                                     netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiEventEntryCountTotal, called\n"));
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &event_entry_count_total,
+                                     sizeof(event_entry_count_total));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+int initialize_table_saHpiEventEntryCountTotal(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiEventEntryCountTotal", 
+                        handle_saHpiEventEntryCountTotal,
+                        saHpiEventEntryCountTotal_oid, 
+                        OID_LENGTH(saHpiEventEntryCountTotal_oid),
+                        HANDLER_CAN_RONLY ));
+
+    return 0;
+}
+
+int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiEventEntryCount, called\n"));
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                     (u_char *) &event_entry_count,
+                                     sizeof(event_entry_count));
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+
+int initialize_table_saHpiEventEntryCount(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                netsnmp_create_handler_registration(
+                        "saHpiEventEntryCount", 
+                        handle_saHpiEventEntryCount,
+                        saHpiEventEntryCount_oid, 
+                        OID_LENGTH(saHpiEventEntryCount_oid),
+                        HANDLER_CAN_RONLY ));
+
+        return 0;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -67,70 +270,25 @@ saHpiEventTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-    int rc;
+    DEBUGMSGTL ((AGENT, "saHpiEventTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiEventTable_compare not implemented! Container order undefined\n" );
+    /* check for NULL pointers */
+    if (lhs == NULL || rhs == NULL ) {
+            DEBUGMSGTL((AGENT,"saHpiEventTable_cmp() NULL pointer ERROR\n" ));
+            return 0;
+    }
+    /* CHECK FIRST INDEX,  saHpiEventRowPointer */
+    if ( context_l->index.oids[0] < context_r->index.oids[0])
+            return -1;
+
+    if ( context_l->index.oids[0] > context_r->index.oids[0])
+            return 1;
+
+    if ( context_l->index.oids[0] == context_r->index.oids[0])
+            return 0;
+
     return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiEventTable_context *
-saHpiEventTable_get( const char *name, int len )
-{
-    saHpiEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiEventTable module
@@ -138,15 +296,13 @@ saHpiEventTable_get( const char *name, int len )
 void
 init_saHpiEventTable(void)
 {
+        DEBUGMSGTL ((AGENT, "init_saHpiEventTable, called\n"));
+
     initialize_table_saHpiEventTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiEventTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+    initialize_table_saHpiEventEntryCountTotal();
+
+    initialize_table_saHpiEventEntryCount();
 }
 
 /************************************************************
@@ -186,8 +342,6 @@ static int saHpiEventTable_row_copy(saHpiEventTable_context * dst,
 
     return 0;
 }
-
-#ifdef saHpiEventTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -231,12 +385,7 @@ saHpiEventTable_extract_index( saHpiEventTable_context * ctx, netsnmp_index * hd
        memset( &var_saHpiEventRowPointer, 0x00, sizeof(var_saHpiEventRowPointer) );
        var_saHpiEventRowPointer.type = ASN_OBJECT_ID; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiEventTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiEventRowPointer.next_variable = &var_XX;
-#endif
+       var_saHpiEventRowPointer.next_variable = NULL;
 
 
     /*
@@ -247,18 +396,12 @@ saHpiEventTable_extract_index( saHpiEventTable_context * ctx, netsnmp_index * hd
        /*
         * copy index components into the context structure
         */
-                memcpy( ctx->saHpiEventRowPointer, var_saHpiEventRowPointer.val.string, var_saHpiEventRowPointer.val_len );
+                memcpy( ctx->saHpiEventRowPointer, 
+                        var_saHpiEventRowPointer.val.string, 
+                        var_saHpiEventRowPointer.val_len );
                 ctx->saHpiEventRowPointer_len = var_saHpiEventRowPointer.val_len;
    
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( XXX_check_oid( var_saHpiEventRowPointer.val.objid, var_saHpiEventRowPointer.val_len /
-                                    sizeof(oid) ) ) {
-          *    err = -1;
-          * }
-          */
+                err = saHpiEventRowPointer_check_index(ctx);
     }
 
     /*
@@ -337,7 +480,6 @@ int saHpiEventTable_can_delete(saHpiEventTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -384,7 +526,6 @@ saHpiEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -583,6 +724,7 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
         }
     }
 
+#if 0
     /*
      * done with all the columns. Could check row related
      * requirements here.
@@ -600,6 +742,8 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
+#endif
+
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -689,8 +833,10 @@ void saHpiEventTable_set_free( netsnmp_request_group *rg )
             /** SaHpiSeverity = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -748,8 +894,6 @@ void saHpiEventTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiEventTable_SET_HANDLING */
 
 
 /************************************************************
@@ -809,18 +953,18 @@ initialize_table_saHpiEventTable(void)
     cb.container = netsnmp_container_find("saHpiEventTable_primary:"
                                           "saHpiEventTable:"
                                           "table_container");
-#ifdef saHpiEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiEventTable_secondary:"
                                                        "saHpiEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiEventTable_cmp;
-#endif
-#ifdef saHpiEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiEventTable_row_copy;
@@ -835,7 +979,7 @@ initialize_table_saHpiEventTable(void)
     cb.set_commit = saHpiEventTable_set_commit;
     cb.set_free = saHpiEventTable_set_free;
     cb.set_undo = saHpiEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiEventTable",
                 "Registering table saHpiEventTable "
                 "as a table array\n"));
