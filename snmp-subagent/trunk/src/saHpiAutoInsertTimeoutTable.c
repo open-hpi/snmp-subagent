@@ -180,8 +180,6 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
     return 0;
 }
 
-#ifdef saHpiAutoInsertTimeoutTable_SET_HANDLING
-
 /**
  * the *_extract_index routine
  *
@@ -193,71 +191,63 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
 int
 saHpiAutoInsertTimeoutTable_extract_index( saHpiAutoInsertTimeoutTable_context * ctx, netsnmp_index * hdr )
 {
-    /*
-     * temporary local storage for extracting oid index
-     *
-     * extract index uses varbinds (netsnmp_variable_list) to parse
-     * the index OID into the individual components for each index part.
-     */
-    /** TODO: add storage for external index(s)! */
-    netsnmp_variable_list var_saHpiDomainId;
-    int err;
+        /*
+         * temporary local storage for extracting oid index
+         *
+         * extract index uses varbinds (netsnmp_variable_list) to parse
+         * the index OID into the individual components for each index part.
+         */
+        /** TODO: add storage for external index(s)! */
+        netsnmp_variable_list var_saHpiDomainId;
+        int err;
 
-    /*
-     * copy index, if provided
-     */
-    if(hdr) {
-        netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
-                           hdr->len * sizeof(oid) )) {
-            return -1;
-        }
-        ctx->index.len = hdr->len;
-    }
-
-    /*
-     * initialize variable that will hold each component of the index.
-     * If there are multiple indexes for the table, the variable_lists
-     * need to be linked together, in order.
-     */
-       /** TODO: add code for external index(s)! */
-       memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
-       var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-       /** TODO: link this index to the next, or NULL for the last one */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAutoInsertTimeoutTable_extract_index index list not implemented!\n" );
-    return 0;
-#else
-       var_saHpiDomainId.next_variable = &var_XX;
-#endif
-
-
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
+        /*
+        * copy index, if provided
         */
-              /** skipping external index saHpiDomainId */
-   
-   
-           /*
-            * TODO: check index for valid values. For EXAMPLE:
-            *
-              * if ( *var_saHpiDomainId.val.integer != XXX ) {
-          *    err = -1;
-          * }
-          */
-    }
+        if(hdr) {
+                netsnmp_assert(ctx->index.oids == NULL);
+                if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
+                                  hdr->len * sizeof(oid) )) {
+                        return -1;
+                }
+                ctx->index.len = hdr->len;
+        }
 
-    /*
-     * parsing may have allocated memory. free it.
-     */
-    snmp_reset_var_buffers( &var_saHpiDomainId );
+        /*
+         * initialize variable that will hold each component of the index.
+         * If there are multiple indexes for the table, the variable_lists
+         * need to be linked together, in order.
+         */
+        /** TODO: add code for external index(s)! */
+        memset( &var_saHpiDomainId, 0x00, sizeof(var_saHpiDomainId) );
+        var_saHpiDomainId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+        /** TODO: link this index to the next, or NULL for the last one */
+        var_saHpiDomainId.next_variable = NULL;
 
-    return err;
+        /*
+         * parse the oid into the individual index components
+         */
+        err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiDomainId );
+        if (err == SNMP_ERR_NOERROR) {
+                /*
+                 * copy index components into the context structure
+                 */
+                /** skipping external index saHpiDomainId */
+
+                /** skipping external index saHpiResourceId */
+
+                /** skipping external index saHpiResourceIsHistorical */
+
+                err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
+        }
+
+        /*
+         * parsing may have allocated memory. free it.
+         */
+        snmp_reset_var_buffers( &var_saHpiDomainId );
+
+        return err;
+}
 }
 
 /************************************************************
