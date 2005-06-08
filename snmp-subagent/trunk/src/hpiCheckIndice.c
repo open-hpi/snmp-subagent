@@ -141,6 +141,14 @@ int saHpiFieldId_check_index(long val)
 	return 0;
 }
 
+/**************************/
+/* saHpiEeventTable  */    
+/**************************/
+int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx)
+{
+	return 0;
+}
+
 /*******************************************/
 /*******************************************/
 /*******************************************/
