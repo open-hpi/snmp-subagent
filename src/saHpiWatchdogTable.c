@@ -45,7 +45,6 @@ oid saHpiWatchdogTable_oid[] = { saHpiWatchdogTable_TABLE_OID };
 size_t saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
 
 
-#ifdef saHpiWatchdogTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -101,7 +100,7 @@ saHpiWatchdogTable_cmp( const void *lhs, const void *rhs )
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* CHECK FORTH INDEX,  saHpiWatchdogNum */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
@@ -226,8 +225,6 @@ static int saHpiWatchdogTable_row_copy(saHpiWatchdogTable_context * dst,
 
     return 0;
 }
-
-#ifdef saHpiWatchdogTable_SET_HANDLING
 
 /**
  * the *_extract_index routine

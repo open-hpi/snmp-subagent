@@ -58,10 +58,10 @@ static int saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiAnnouncementTable_context *context_l =
+        (saHpiAnnouncementTable_context *)lhs;
+        saHpiAnnouncementTable_context *context_r =
+        (saHpiAnnouncementTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
@@ -83,7 +83,7 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
 
         if ( context_l->index.oids[0] == context_r->index.oids[0]) {
                 /* If saHpiDomainId index is equal sort by second index */
-                /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+                /* CHECK SECOND INDEX,  saHpiResourceId */
                 if ( context_l->index.oids[1] < context_r->index.oids[1])
                         return -1;
 
@@ -91,8 +91,8 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
                         return 1;
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-                        /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* If saHpiResourceId index is equal sort by third index */
+                        /* CHECK THIRD INDEX,  saHpiDomainAlarmId */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -100,8 +100,8 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* If saHpiDomainAlarmId index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiAnnouncementEntryId */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 

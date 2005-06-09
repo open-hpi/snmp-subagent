@@ -45,7 +45,6 @@ oid saHpiAutoInsertTimeoutTable_oid[] = { saHpiAutoInsertTimeoutTable_TABLE_OID 
 size_t saHpiAutoInsertTimeoutTable_oid_len = OID_LENGTH(saHpiAutoInsertTimeoutTable_oid);
 
 
-#ifdef saHpiAutoInsertTimeoutTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,42 +57,33 @@ static int saHpiAutoInsertTimeoutTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiAutoInsertTimeoutTable_cmp( const void *lhs, const void *rhs )
 {
-    saHpiAutoInsertTimeoutTable_context *context_l =
+        saHpiAutoInsertTimeoutTable_context *context_l =
         (saHpiAutoInsertTimeoutTable_context *)lhs;
-    saHpiAutoInsertTimeoutTable_context *context_r =
+        saHpiAutoInsertTimeoutTable_context *context_r =
         (saHpiAutoInsertTimeoutTable_context *)rhs;
 
-    /*
-     * check primary key, then secondary. Add your own code if
-     * there are more than 2 indexes
-     */
-    int rc;
+        /*
+         * check primary key, then secondary. Add your own code if
+         * there are more than 2 indexes
+         */
+        DEBUGMSGTL ((AGENT, "saHpiAutoInsertTimeoutTable_cmp, called\n"));
 
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR,
-             "saHpiAutoInsertTimeoutTable_compare not implemented! Container order undefined\n" );
-    return 0;
-#endif
-    
-    /*
-     * EXAMPLE (assuming you want to sort on a name):
-     *   
-     * rc = strcmp( context_l->xxName, context_r->xxName );
-     *
-     * if(rc)
-     *   return rc;
-     *
-     * TODO: fix secondary keys (or delete if there are none)
-     *
-     * if(context_l->yy < context_r->yy) 
-     *   return -1;
-     *
-     * return (context_l->yy == context_r->yy) ? 0 : 1;
-     */
+        /* check for NULL pointers */
+        if (lhs == NULL || rhs == NULL ) {
+                DEBUGMSGTL((AGENT,"saHpiAutoInsertTimeoutTable_cmp() NULL pointer ERROR\n" ));
+                return 0;
+        }
+        /* CHECK FIRST INDEX,  saHpiDomainId */
+        if ( context_l->index.oids[0] < context_r->index.oids[0])
+                return -1;
+
+        if ( context_l->index.oids[0] > context_r->index.oids[0])
+                return 1;
+
+        if ( context_l->index.oids[0] == context_r->index.oids[0])
+	        return 0;
+		
+	return 0;	
 }
 
 /************************************************************

@@ -58,20 +58,20 @@ static int saHpiWatchdogEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiWatchdogEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiWatchdogEventTable_context *context_l =
+        (saHpiWatchdogEventTable_context *)lhs;
+        saHpiWatchdogEventTable_context *context_r =
+        (saHpiWatchdogEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiWatchdogEventTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiWatchdogEventTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
@@ -92,7 +92,7 @@ saHpiWatchdogEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiWatchdogNum */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -100,16 +100,26 @@ saHpiWatchdogEventTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* If saHpiWatchdogNum index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiEventSeverity */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
                                 if ( context_l->index.oids[3] > context_r->index.oids[3])
                                         return 1;
 
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
+                                if ( context_l->index.oids[3] == context_r->index.oids[3]) {
+				        /* If saHpiEventSeverity index is equal sort by forth index */
+                                        /* CHECK FORTH INDEX,  saHpiWatchdogEventEntryId */
+                                        if ( context_l->index.oids[4] < context_r->index.oids[4])
+                                                return -1;
+
+                                        if ( context_l->index.oids[4] > context_r->index.oids[4])
+                                                return 1;
+
+                                        if ( context_l->index.oids[4] == context_r->index.oids[4])
+					        return 0;
+				}	
                         }
                 }
         }

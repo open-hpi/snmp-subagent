@@ -44,8 +44,6 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiSensorEnableChangeEventTable_oid[] = { saHpiSensorEnableChangeEventTable_TABLE_OID };
 size_t saHpiSensorEnableChangeEventTable_oid_len = OID_LENGTH(saHpiSensorEnableChangeEventTable_oid);
 
-
-#ifdef saHpiSensorEnableChangeEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,10 +56,10 @@ static int saHpiSensorEnableChangeEventTable_cmp( const void *lhs, const void *r
 static int
 saHpiSensorEnableChangeEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiSensorEnableChangeEventTable_context *context_l =
+        (saHpiSensorEnableChangeEventTable_context *)lhs;
+        saHpiSensorEnableChangeEventTable_context *context_r =
+        (saHpiSensorEnableChangeEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
@@ -92,7 +90,7 @@ saHpiSensorEnableChangeEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiSensorNum */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -101,15 +99,25 @@ saHpiSensorEnableChangeEventTable_cmp( const void *lhs, const void *rhs )
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* CHECK FORTH INDEX,  saHpiEventSeverity */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
                                 if ( context_l->index.oids[3] > context_r->index.oids[3])
                                         return 1;
 
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
+                                if ( context_l->index.oids[3] == context_r->index.oids[3]) {
+				        /* If saHpiEventSeverity index is equal sort by forth index */
+                                        /* CHECK FORTH INDEX,  saHpiSensorEnableChangeEventEntryId */
+                                        if ( context_l->index.oids[4] < context_r->index.oids[4])
+                                                return -1;
+
+                                        if ( context_l->index.oids[4] > context_r->index.oids[4])
+                                                return 1;
+
+                                        if ( context_l->index.oids[4] == context_r->index.oids[4])
+					        return 0;
+				}	
                         }
                 }
         }
