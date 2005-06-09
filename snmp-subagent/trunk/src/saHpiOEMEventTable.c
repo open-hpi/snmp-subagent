@@ -58,10 +58,10 @@ static int saHpiOEMEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiOEMEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiOEMEventTable_context *context_l =
+        (saHpiOEMEventTable_context *)lhs;
+        saHpiOEMEventTable_context *context_r =
+        (saHpiOEMEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
@@ -92,7 +92,7 @@ saHpiOEMEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiEventSeverity */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -100,8 +100,8 @@ saHpiOEMEventTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* If saHpiEventSeverity index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiOEMEventEntryId */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
@@ -296,7 +296,7 @@ saHpiOEMEventTable_extract_index( saHpiOEMEventTable_context * ctx, netsnmp_inde
                 err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
                 err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
 		err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
-		err = saHpiOEMEventTimestamp_check_index(*var_saHpiOEMEventEntryId.val.integer);
+		err = saHpiOEMEventEntryId_check_index(*var_saHpiOEMEventEntryId.val.integer);
 
         }
 

@@ -45,7 +45,6 @@ oid saHpiResourceEventTable_oid[] = { saHpiResourceEventTable_TABLE_OID };
 size_t saHpiResourceEventTable_oid_len = OID_LENGTH(saHpiResourceEventTable_oid);
 
 
-#ifdef saHpiResourceEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,20 +57,19 @@ static int saHpiResourceEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiResourceEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
-
+        saHpiResourceEventTable_context *context_l =
+        (saHpiResourceEventTable_context *)lhs;
+        saHpiResourceEventTable_context *context_r =
+        (saHpiResourceEventTable_context *)rhs;
         /*
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiResourceEventTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
@@ -92,7 +90,7 @@ saHpiResourceEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiEventSeverity */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -101,7 +99,7 @@ saHpiResourceEventTable_cmp( const void *lhs, const void *rhs )
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* CHECK FORTH INDEX,  saHpiResourceEventEntryId */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 

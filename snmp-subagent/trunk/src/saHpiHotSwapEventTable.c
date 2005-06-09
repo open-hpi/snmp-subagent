@@ -58,10 +58,10 @@ static int saHpiHotSwapEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiHotSwapEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiHotSwapEventTable_context *context_l =
+        (saHpiHotSwapEventTable_context *)lhs;
+        saHpiHotSwapEventTable_context *context_r =
+        (saHpiHotSwapEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
@@ -92,7 +92,7 @@ saHpiHotSwapEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiEventSeverity */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -100,8 +100,8 @@ saHpiHotSwapEventTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* If saHpiEventSeverity index is equal sort by forth index */
+                                /* CHECK FORTH INDEX,  saHpiHotSwapEventEntryId */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 

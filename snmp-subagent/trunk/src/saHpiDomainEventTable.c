@@ -45,7 +45,6 @@ oid saHpiDomainEventTable_oid[] = { saHpiDomainEventTable_TABLE_OID };
 size_t saHpiDomainEventTable_oid_len = OID_LENGTH(saHpiDomainEventTable_oid);
 
 
-#ifdef saHpiDomainEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,10 +57,10 @@ static int saHpiDomainEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiDomainEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiDomainEventTable_context *context_l =
+        (saHpiDomainEventTable_context *)lhs;
+        saHpiDomainEventTable_context *context_r =
+        (saHpiDomainEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
@@ -83,7 +82,7 @@ saHpiDomainEventTable_cmp( const void *lhs, const void *rhs )
 
         if ( context_l->index.oids[0] == context_r->index.oids[0]) {
                 /* If saHpiDomainId index is equal sort by second index */
-                /* CHECK SECOND INDEX,  saHpiResourceEntryId */
+                /* CHECK SECOND INDEX,  saHpiDomainEventEntryId */
                 if ( context_l->index.oids[1] < context_r->index.oids[1])
                         return -1;
 
@@ -91,26 +90,16 @@ saHpiDomainEventTable_cmp( const void *lhs, const void *rhs )
                         return 1;
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-                        /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* If saHpiDomainEventEntryId index is equal sort by third index */
+                        /* CHECK THIRD INDEX,  saHpiEventSeverity */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
                         if ( context_l->index.oids[2] > context_r->index.oids[2])
                                 return 1;
 
-                        if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
-                                if ( context_l->index.oids[3] < context_r->index.oids[3])
-                                        return -1;
-
-                                if ( context_l->index.oids[3] > context_r->index.oids[3])
-                                        return 1;
-
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
-                        }
+                        if ( context_l->index.oids[2] == context_r->index.oids[2])
+                                return 0;
                 }
         }
 
@@ -205,7 +194,6 @@ static int saHpiDomainEventTable_row_copy(saHpiDomainEventTable_context * dst,
     return 0;
 }
 
-#ifdef saHpiDomainEventTable_SET_HANDLING
 
 /**
  * the *_extract_index routine

@@ -45,7 +45,6 @@ oid saHpiSensorEventTable_oid[] = { saHpiSensorEventTable_TABLE_OID };
 size_t saHpiSensorEventTable_oid_len = OID_LENGTH(saHpiSensorEventTable_oid);
 
 
-#ifdef saHpiSensorEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,20 +57,20 @@ static int saHpiSensorEventTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiSensorEventTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
+        saHpiSensorEventTable_context *context_l =
+        (saHpiSensorEventTable_context *)lhs;
+        saHpiSensorEventTable_context *context_r =
+        (saHpiSensorEventTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiSensorEventTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiSensorEventTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
@@ -92,7 +91,7 @@ saHpiSensorEventTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiSensorNum */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -101,15 +100,25 @@ saHpiSensorEventTable_cmp( const void *lhs, const void *rhs )
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
+                                /* CHECK FORTH INDEX,  saHpiEventSeverity */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
                                 if ( context_l->index.oids[3] > context_r->index.oids[3])
                                         return 1;
 
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
+                                if ( context_l->index.oids[3] == context_r->index.oids[3]) {
+				        /* If saHpiEventSeverity index is equal sort by forth index */
+                                        /* CHECK FIFTH INDEX,  saHpiSensorEventEntryId */
+                                        if ( context_l->index.oids[4] < context_r->index.oids[4])
+                                                return -1;
+
+                                        if ( context_l->index.oids[4] > context_r->index.oids[4])
+                                                return 1;
+
+                                        if ( context_l->index.oids[4] == context_r->index.oids[4])
+					        return 0;
+				}	
                         }
                 }
         }

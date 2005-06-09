@@ -45,7 +45,6 @@ oid saHpiHotSwapTable_oid[] = { saHpiHotSwapTable_TABLE_OID };
 size_t saHpiHotSwapTable_oid_len = OID_LENGTH(saHpiHotSwapTable_oid);
 
 
-#ifdef saHpiHotSwapTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -58,11 +57,10 @@ static int saHpiHotSwapTable_cmp( const void *lhs, const void *rhs );
 static int
 saHpiHotSwapTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiAnnunciatorTable_context *context_l =
-        (saHpiAnnunciatorTable_context *)lhs;
-        saHpiAnnunciatorTable_context *context_r =
-        (saHpiAnnunciatorTable_context *)rhs;
-
+        saHpiHotSwapTable_context *context_l =
+        (saHpiHotSwapTable_context *)lhs;
+        saHpiHotSwapTable_context *context_r =
+        (saHpiHotSwapTable_context *)rhs;
         /*
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
@@ -99,18 +97,8 @@ saHpiHotSwapTable_cmp( const void *lhs, const void *rhs )
                         if ( context_l->index.oids[2] > context_r->index.oids[2])
                                 return 1;
 
-                        if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
-                                if ( context_l->index.oids[3] < context_r->index.oids[3])
-                                        return -1;
-
-                                if ( context_l->index.oids[3] > context_r->index.oids[3])
-                                        return 1;
-
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
-                        }
+                        if ( context_l->index.oids[2] == context_r->index.oids[2]) 
+                                 return 0;
                 }
         }
 
