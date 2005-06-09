@@ -92,6 +92,71 @@ int saHpiFieldId_check_index(long val);
 /**************************/
 int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx);
 
+/**************************/
+/* saHpiResourceEventTable */    
+/**************************/
+int saHpiResourceEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiDomainEventTable */    
+/**************************/
+int saHpiDomainEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiSensorEventTable */    
+/**************************/
+int saHpiSensorEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiHotSwapEventTable */    
+/**************************/
+int saHpiHotSwapEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiWatchdogEventTable */    
+/**************************/
+int saHpiWatchdogEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiSoftwareEventTable */    
+/**************************/
+int saHpiSoftwareEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiUserEventTable */
+/**************************/
+int saHpiUserEventEntryId_check_index(long val);
+
+/**************************/
+/* saHpiAnnouncementTable */
+/**************************/
+int saHpiAnnouncementEntryId_check_index(long val);
+
+/**************************/
+/* saHpiEventLogTable */
+/**************************/
+int saHpiEventLogIndex_check_index(long val);
+
+/*******************************/
+/* saHpiResourceEventLogTable */
+/******************************/
+int saHpiResourceEventLogEntryId_check_index(long val);
+
+/*******************************/
+/* saHpiSensorEnableChangeEventLogTable */
+/******************************/
+int saHpiSensorEnableChangeEventEntryId_check_index(long val);
+
+/*******************************/
+/* saHpiDomainAlarmTable */
+/******************************/
+int saHpiDomainAlarmSeverity_check_index(long val);
+
+/*******************************/
+/* saHpiOEMEventTable */
+/******************************/
+int saHpiOEMEventEntryId_check_index(long val);
+
 /**************************************/
 /**************************************/
 /**************************************/
