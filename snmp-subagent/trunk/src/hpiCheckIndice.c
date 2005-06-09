@@ -144,11 +144,122 @@ int saHpiFieldId_check_index(long val)
 /**************************/
 /* saHpiEeventTable  */    
 /**************************/
-int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx)
+/*int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx)
+{
+	return 0;
+}
+*/
+/**************************/
+/* saHpiResourceEventTable */    
+/**************************/
+int saHpiResourceEventEntryId_check_index(long val)
 {
 	return 0;
 }
 
+/**************************/
+/* saHpiDomainEventTable */    
+/**************************/
+int saHpiDomainEventEntryId_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpiSensorEventTable */    
+/**************************/
+int saHpiSensorEventEntryId_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpiHotSwapEventTable */    
+/**************************/
+int saHpiHotSwapEventEntryId_check_index(long val)
+{
+	return 0;
+}
+
+/**************************/
+/* saHpiWatchdogEventTable */    
+/**************************/
+int saHpiWatchdogEventEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/**************************/
+/* saHpiSoftwareEventTable */    
+/**************************/
+int saHpiSoftwareEventEntryId_check_index(long val)	
+{
+        return 0;
+}
+
+/**************************/
+/* saHpiUserEventTable */
+/**************************/
+int saHpiUserEventEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/**************************/
+/* saHpiAnnouncementTable */
+/**************************/
+int saHpiAnnouncementEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/**************************/
+/* saHpiEventLogTable */
+/**************************/
+int saHpiEventLogIndex_check_index(long val)
+{
+        return 0;
+}
+
+/*******************************/
+/* saHpiResourceEventLogTable */
+/******************************/
+int saHpiResourceEventLogEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/*******************************/
+/* saHpiSensorEnableChangeEventLogTable */
+/******************************/
+int saHpiSensorEnableChangeEventEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/*******************************/
+/* saHpiDomainAlarmTable */
+/******************************/
+int saHpiDomainAlarmSeverity_check_index(long val)
+{
+        return 0;
+}
+
+/*******************************/
+/* saHpiOEMEventTable */
+/******************************/
+int saHpiOEMEventEntryId_check_index(long val)
+{
+        return 0;
+}
+
+/**************************/
+/* saHpiEeventTable  */    
+/**************************/
+int saHpiEventRowPointer_check_index(saHpiEventTable_context * ctx)
+{
+	return 0;
+}
 /*******************************************/
 /*******************************************/
 /*******************************************/
