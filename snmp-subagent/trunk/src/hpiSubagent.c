@@ -270,7 +270,7 @@ main (int argc, char **argv)
 	  		  	
 	  	/* change this if you want to be a SNMP master agent */
 	  	
-	  	debug_register_tokens ("all");
+	  	debug_register_tokens (AGENT);
         snmp_enable_stderrlog ();
         snmp_set_do_debugging (1);
 
