@@ -2882,7 +2882,7 @@ saHpiEventSeverity OBJECT-TYPE
         DESCRIPTION     "Severity of event. 
 	Note: Enumerated values are increased by one value compared to
 	SAI-HPI-B.01.01 spec."
-        ::= {saHpiEventEntry 3}
+        ::= {saHpiEventEntry 2}
     
 saHpiEventSaHpiTime     OBJECT-TYPE
     SYNTAX      SaHpiTime
@@ -2893,7 +2893,7 @@ saHpiEventSaHpiTime     OBJECT-TYPE
         The value is Equal to TIME_UNSPECIFIED if time is not available; 
         Absolute time if greater than TIME_MAX_RELATIVE, Relative time 
         if less than or equal to TIME_MAX_RELATIVE."
-    ::= { saHpiEventEntry 4 }
+    ::= { saHpiEventEntry 3 }
 
 saHpiEventType          OBJECT-TYPE
         SYNTAX          INTEGER{
@@ -2913,7 +2913,7 @@ saHpiEventType          OBJECT-TYPE
         DESCRIPTION     "Event type. 
         Note: The enumerated named have +1 added as opposed to the 
         SAI-HPI-B.01.01 spec for the same constants.  "
-        ::= { saHpiEventEntry 5 }
+        ::= { saHpiEventEntry 4 }
 
 -- *********************************
 -- **
