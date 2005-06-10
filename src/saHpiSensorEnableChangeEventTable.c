@@ -44,6 +44,157 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiSensorEnableChangeEventTable_oid[] = { saHpiSensorEnableChangeEventTable_TABLE_OID };
 size_t saHpiSensorEnableChangeEventTable_oid_len = OID_LENGTH(saHpiSensorEnableChangeEventTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+ 
+static u_long sensor_enable_change_event_entry_count_total = 0; 
+static u_long sensor_enable_change_event_entry_count = 0; 
+
+static oid saHpiSensorEnableChangeEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
+static oid saHpiSensorEnableChangeEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,14 };
+
+
+int handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                                       netsnmp_handler_registration *reginfo,
+                                                       netsnmp_agent_request_info   *reqinfo,
+                                                       netsnmp_request_info         *requests);
+
+int handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
+                                                  netsnmp_handler_registration *reginfo,
+                                                  netsnmp_agent_request_info   *reqinfo,
+                                                  netsnmp_request_info         *requests);
+						  
+int initialize_table_saHpiSensorEnableChangeEventEntryCountTotal(void);
+int initialize_table_saHpiSensorEnableChangeEventEntryCount(void);
+
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                                   netsnmp_handler_registration *reginfo,
+                                                   netsnmp_agent_request_info   *reqinfo,
+                                                   netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventEntryCountTotal, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            			        (u_char *) &sensor_enable_change_event_entry_count_total,
+            			        sizeof(sensor_enable_change_event_entry_count_total));
+                break;
+
+
+        default:
+        	/* we should never get here, so this is a really bad error */
+        	return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
+                                              netsnmp_handler_registration *reginfo,
+                                              netsnmp_agent_request_info   *reqinfo,
+                                              netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventEntryCount, called\n"));
+
+    
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &sensor_enable_change_event_entry_count,
+        			        sizeof(sensor_enable_change_event_entry_count));
+                break; 
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiSensorEnableChangeEventEntryCountTotal(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			                "saHpiSensorEnableChangeEventEntryCountTotal", 
+				        handle_saHpiSensorEnableChangeEventEntryCountTotal,
+                                        saHpiSensorEnableChangeEventEntryCountTotal_oid, 
+				        OID_LENGTH(saHpiSensorEnableChangeEventEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+
+}
+ /**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiSensorEnableChangeEventEntryCount(void);
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			                "saHpiSensorEnableChangeEventEntryCount", 
+			                 handle_saHpiSensorEnableChangeEventEntryCount,
+                                         saHpiSensorEnableChangeEventEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventEntryCount_oid),
+                                         HANDLER_CAN_RONLY ));
+        return SNMP_ERR_NOERROR;
+
+}
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -167,15 +318,13 @@ saHpiSensorEnableChangeEventTable_get( const char *name, int len )
 void
 init_saHpiSensorEnableChangeEventTable(void)
 {
-    initialize_table_saHpiSensorEnableChangeEventTable();
+        DEBUGMSGTL ((AGENT, "init_saHpiSensorEnableChangeEventTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiSensorEnableChangeEventTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiSensorEnableChangeEventTable();
+
+        initialize_table_saHpiSensorEnableChangeEventEntryCountTotal();
+        
+        initialize_table_saHpiSensorEnableChangeEventEntryCount();
 }
 
 /************************************************************

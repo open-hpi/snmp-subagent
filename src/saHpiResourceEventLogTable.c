@@ -44,6 +44,157 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiResourceEventLogTable_oid[] = { saHpiResourceEventLogTable_TABLE_OID };
 size_t saHpiResourceEventLogTable_oid_len = OID_LENGTH(saHpiResourceEventLogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long resource_event_log_entry_count_total = 0;
+static u_long resource_event_log_entry_count = 0;
+
+static oid saHpiResourceEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
+static oid saHpiResourceEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,4 }; 
+
+int handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+
+int handle_saHpiResourceEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int initialize_table_saHpiResourceEventLogEntryCountTotal(void);
+int initialize_table_saHpiResourceEventLogEntryCount(void);					
+					
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+ 
+        DEBUGMSGTL ((AGENT, "handle_saHpiResourceEventLogEntryCountTotal, called\n"));
+       
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			(u_char *) &resource_event_log_entry_count_total,
+        	                sizeof(resource_event_log_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiResourceEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiResourceEventLogEntryCount, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+        	snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			(u_char *) &resource_event_log_entry_count,
+        			sizeof(resource_event_log_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiResourceEventLogEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEventLogEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiResourceEventLogEntryCountTotal", 
+				        handle_saHpiResourceEventLogEntryCountTotal,
+                                        saHpiResourceEventLogEntryCountTotal_oid,
+					OID_LENGTH(saHpiResourceEventLogEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiResourceEventLogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEventLogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiResourceEventLogEntryCount",
+					 handle_saHpiResourceEventLogEntryCount,
+                                         saHpiResourceEventLogEntryCount_oid, 
+					 OID_LENGTH(saHpiResourceEventLogEntryCount_oid),
+                                         HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiResourceEventLogTable_IDX2
 /************************************************************
@@ -159,15 +310,13 @@ saHpiResourceEventLogTable_get( const char *name, int len )
 void
 init_saHpiResourceEventLogTable(void)
 {
-    initialize_table_saHpiResourceEventLogTable();
+        
+	DEBUGMSGTL ((AGENT, "init_saHpiResourceEventLogTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiResourceEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiResourceEventLogTable();
+
+        initialize_table_saHpiResourceEventLogEntryCountTotal();
+        initialize_table_saHpiResourceEventLogEntryCount();     
 }
 
 /************************************************************

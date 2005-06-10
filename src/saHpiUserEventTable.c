@@ -44,6 +44,153 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiUserEventTable_oid[] = { saHpiUserEventTable_TABLE_OID };
 size_t saHpiUserEventTable_oid_len = OID_LENGTH(saHpiUserEventTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long user_event_entry_count_total = 0;
+static u_long user_event_entry_count = 0;
+
+static oid saHpiUserEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,28 };
+static oid saHpiUserEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,29 };
+
+int handle_saHpiUserEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                          netsnmp_handler_registration *reginfo,
+                                          netsnmp_agent_request_info   *reqinfo,
+                                          netsnmp_request_info         *requests);
+					  
+int handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
+                                    netsnmp_handler_registration *reginfo,
+                                    netsnmp_agent_request_info   *reqinfo,
+                                    netsnmp_request_info         *requests);
+
+int initialize_table_saHpiUserEventEntryCountTotal(void);
+int initialize_table_saHpiUserEventEntryCount(void);
+				    					  
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */					  
+int
+handle_saHpiUserEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                     netsnmp_handler_registration *reginfo,
+                                     netsnmp_agent_request_info   *reqinfo,
+                                     netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+        we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiUserEventEntryCountTotal, called\n"));
+
+
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                                         (u_char *) &user_event_entry_count_total,
+                                         sizeof(user_event_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiUserEventEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &user_event_entry_count,
+        			        sizeof(user_event_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiUserEventEntryCountTotal(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEventEntryCountTotal, called\n"));
+	
+	netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			               "saHpiUserEventEntryCountTotal", 
+				       handle_saHpiUserEventEntryCountTotal,
+                                       saHpiUserEventEntryCountTotal_oid, 
+				       OID_LENGTH(saHpiUserEventEntryCountTotal_oid),
+                                       HANDLER_CAN_RONLY));
+				       
+        return SNMP_ERR_NOERROR;				       
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiUserEventEntryCount(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEventEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			               "saHpiUserEventEntryCount", 
+				       handle_saHpiUserEventEntryCount,
+                                       saHpiUserEventEntryCount_oid, 
+				       OID_LENGTH(saHpiUserEventEntryCount_oid),
+                                       HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;				       
+}
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
 #ifdef saHpiUserEventTable_IDX2
 /************************************************************
@@ -149,15 +296,13 @@ saHpiUserEventTable_get( const char *name, int len )
 void
 init_saHpiUserEventTable(void)
 {
-    initialize_table_saHpiUserEventTable();
+        DEBUGMSGTL ((AGENT, "init_saHpiUserEventTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiUserEventTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiUserEventTable();
+
+        initialize_table_saHpiUserEventEntryCountTotal();
+        
+        initialize_table_saHpiUserEventEntryCount();
 }
 
 /************************************************************

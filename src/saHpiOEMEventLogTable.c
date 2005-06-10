@@ -45,6 +45,158 @@ oid saHpiOEMEventLogTable_oid[] = { saHpiOEMEventLogTable_TABLE_OID };
 size_t saHpiOEMEventLogTable_oid_len = OID_LENGTH(saHpiOEMEventLogTable_oid);
 
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long oem_event_log_entry_count_total = 0;
+static u_long oem_event_log_entry_count = 0;
+
+static oid saHpiOEMEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
+static oid saHpiOEMEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,25 };
+
+int handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+			  
+int handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int intialize_table_saHpiOEMEventLogEntryCountTotal(void);
+int intialize_table_saHpiOEMEventLogEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+        
+        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventLogEntryCountTotal, called\n"));
+
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &oem_event_log_entry_count_total,
+        			        sizeof(oem_event_log_entry_count_total));
+            break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+ 
+ /**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */ 
+int
+handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventLogEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *)&oem_event_log_entry_count,
+        			        sizeof(oem_event_log_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @return: 
+ */
+int intialize_table_saHpiOEMEventLogEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOEMEventLogEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiOEMEventLogEntryCountTotal", 
+				         handle_saHpiOEMEventLogEntryCountTotal,
+                                         saHpiOEMEventLogEntryCountTotal_oid, 
+					 OID_LENGTH(saHpiOEMEventLogEntryCountTotal_oid),
+                                         HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @return: 
+ */ 
+int intialize_table_saHpiOEMEventLogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOEMEventLogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+                                        "saHpiOEMEventLogEntryCount", 
+                                         handle_saHpiOEMEventLogEntryCount,
+                                         saHpiOEMEventLogEntryCount_oid, 
+					 OID_LENGTH(saHpiOEMEventLogEntryCount_oid),
+                                         HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+ 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
 #ifdef saHpiOEMEventLogTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
@@ -159,15 +311,12 @@ saHpiOEMEventLogTable_get( const char *name, int len )
 void
 init_saHpiOEMEventLogTable(void)
 {
-    initialize_table_saHpiOEMEventLogTable();
+        DEBUGMSGTL ((AGENT, "init_saHpiOEMEventLogTable, called\n"));
+	
+	initialize_table_saHpiOEMEventLogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiOEMEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        intialize_table_saHpiOEMEventLogEntryCountTotal();
+        intialize_table_saHpiOEMEventLogEntryCount();        
 }
 
 /************************************************************

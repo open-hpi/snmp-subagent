@@ -44,6 +44,90 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiWatchdogTable_oid[] = { saHpiWatchdogTable_TABLE_OID };
 size_t saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+
+static u_long watchdog_entry_count = 0; 
+static oid saHpiWatchdogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
+
+int handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
+                                   netsnmp_handler_registration *reginfo,
+                                   netsnmp_agent_request_info   *reqinfo,
+                                   netsnmp_request_info         *requests);
+
+int initialize_table_saHpiWatchdogEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &watchdog_entry_count,
+        			        sizeof(watchdog_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiWatchdogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			                "saHpiWatchdogEntryCount", 
+			                handle_saHpiWatchdogEntryCount,
+                                        saHpiWatchdogEntryCount_oid, 
+			                OID_LENGTH(saHpiWatchdogEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+			       
+	return SNMP_ERR_NOERROR;
+
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 /************************************************************
  * keep binary tree to find context by name
@@ -158,15 +242,12 @@ saHpiWatchdogTable_get( const char *name, int len )
 void
 init_saHpiWatchdogTable(void)
 {
-    initialize_table_saHpiWatchdogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiWatchdogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        DEBUGMSGTL ((AGENT, "init_saHpiWatchdogTable, called\n"));
+     
+        initialize_table_saHpiWatchdogTable();
+
+        initialize_table_saHpiWatchdogEntryCount();
 }
 
 /************************************************************
