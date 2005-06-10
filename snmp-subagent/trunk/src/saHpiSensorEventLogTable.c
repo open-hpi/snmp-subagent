@@ -44,6 +44,150 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiSensorEventLogTable_oid[] = { saHpiSensorEventLogTable_TABLE_OID };
 size_t saHpiSensorEventLogTable_oid_len = OID_LENGTH(saHpiSensorEventLogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and function declarations scalars
+ */
+
+static u_long sensor_event_entry_log_count_total = 0;
+static u_long sensor_event_log_entry_count = 0; 
+static oid saHpiSensorEventEntryLogCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 }; 
+static oid saHpiSensorEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
+
+int handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests);
+			  
+int handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
+                                         netsnmp_handler_registration *reginfo,
+                                         netsnmp_agent_request_info   *reqinfo,
+                                         netsnmp_request_info         *requests);
+					 
+int initialize_table_saHpiSensorEventEntryLogCountTotal(void);
+int initialize_table_saHpiSensorEventLogEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+           
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventEntryLogCountTotal, called\n"));
+            
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &sensor_event_entry_log_count_total,
+        			        sizeof(sensor_event_entry_log_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
+                                     netsnmp_handler_registration *reginfo,
+                                     netsnmp_agent_request_info   *reqinfo,
+                                     netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+           
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventLogEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+        	snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        				(u_char *) &sensor_event_log_entry_count,
+        				sizeof(sensor_event_log_entry_count));
+        	break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiSensorEventEntryLogCountTotal(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventEntryLogCountTotal, called\n"));   
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			               "saHpiSensorEventEntryLogCountTotal", 
+				       handle_saHpiSensorEventEntryLogCountTotal,
+                                       saHpiSensorEventEntryLogCountTotal_oid, 
+				       OID_LENGTH(saHpiSensorEventEntryLogCountTotal_oid),
+                                       HANDLER_CAN_RONLY ));
+				       
+        return SNMP_ERR_NOERROR;
+}
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiSensorEventLogEntryCount(void)
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventLogEntryCount, called\n"));   
+
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			               "saHpiSensorEventLogEntryCount", 
+				        handle_saHpiSensorEventLogEntryCount,
+                                        saHpiSensorEventLogEntryCount_oid, 
+					OID_LENGTH(saHpiSensorEventLogEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+        return SNMP_ERR_NOERROR;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+	
 
 #ifdef saHpiSensorEventLogTable_IDX2
 /************************************************************
@@ -169,15 +313,14 @@ saHpiSensorEventLogTable_get( const char *name, int len )
 void
 init_saHpiSensorEventLogTable(void)
 {
-    initialize_table_saHpiSensorEventLogTable();
-
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiSensorEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        DEBUGMSGTL ((AGENT, "init_saHpiSensorEventLogTable, called\n"));
+        
+        initialize_table_saHpiSensorEventLogTable();
+        
+        initialize_table_saHpiSensorEventEntryLogCountTotal();
+        
+        initialize_table_saHpiSensorEventLogEntryCount();
+     
 }
 
 /************************************************************

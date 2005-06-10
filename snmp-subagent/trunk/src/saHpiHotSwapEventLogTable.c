@@ -44,6 +44,157 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiHotSwapEventLogTable_oid[] = { saHpiHotSwapEventLogTable_TABLE_OID };
 size_t saHpiHotSwapEventLogTable_oid_len = OID_LENGTH(saHpiHotSwapEventLogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+ 
+static u_long hot_swap_event_log_entry_count_total = 0;
+static u_long hot_swap_event_log_entry_count = 0;
+
+static oid saHpiHotSwapEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,15 };
+static oid saHpiHotSwapEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 }; 
+
+int handle_saHpiHotSwapEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);					
+
+int initialize_table_saHpiHotSwapEventLogEntryCountTotal(void);
+int initialize_table_saHpiHotSwapEventLogEntryCount(void);
+
+
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiHotSwapEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLogEntryCountTotal, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        		       (u_char *) &hot_swap_event_log_entry_count_total,
+        			sizeof(hot_swap_event_log_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
+                                      netsnmp_handler_registration *reginfo,
+                                      netsnmp_agent_request_info   *reqinfo,
+                                      netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLogEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+        	snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        	                        (u_char *) &hot_swap_event_log_entry_count,
+        		                sizeof(hot_swap_event_log_entry_count));
+        	break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiHotSwapEventLogEntryCountTotal(void);
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventLogEntryCountTotal, called\n"));
+        
+	netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			                "saHpiHotSwapEventLogEntryCountTotal", 
+					handle_saHpiHotSwapEventLogEntryCountTotal,
+                                        saHpiHotSwapEventLogEntryCountTotal_oid, 
+					OID_LENGTH(saHpiHotSwapEventLogEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));	
+        return SNMP_ERR_NOERROR;
+
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiHotSwapEventLogEntryCount(void);
+{
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventLogEntryCount, called\n"));
+	
+        netsnmp_register_scalar(
+                               netsnmp_create_handler_registration(
+			                "saHpiHotSwapEventLogEntryCount", 
+			                handle_saHpiHotSwapEventLogEntryCount,
+                                        saHpiHotSwapEventLogEntryCount_oid,
+			                OID_LENGTH(saHpiHotSwapEventLogEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));	
+        return SNMP_ERR_NOERROR;
+
+}  
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiHotSwapEventLogTable_IDX2
 /************************************************************
@@ -159,15 +310,12 @@ saHpiHotSwapEventLogTable_get( const char *name, int len )
 void
 init_saHpiHotSwapEventLogTable(void)
 {
-    initialize_table_saHpiHotSwapEventLogTable();
+        DEBUGMSGTL ((AGENT, "init_saHpiHotSwapEventLogTable, called\n"));
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiHotSwapEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiHotSwapEventLogTable();
+
+        initialize_table_saHpiHotSwapEventLogEntryCountTotal();
+        initialize_table_saHpiHotSwapEventLogEntryCount();
 }
 
 /************************************************************
