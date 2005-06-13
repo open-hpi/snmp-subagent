@@ -45,6 +45,163 @@ oid saHpiDomainEventLogTable_oid[] = { saHpiDomainEventLogTable_TABLE_OID };
 size_t saHpiDomainEventLogTable_oid_len = OID_LENGTH(saHpiDomainEventLogTable_oid);
 
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long domain_event_log_entry_count_total = 0;
+static u_long domain_event_log_entry_count = 0;
+
+static oid saHpiDomainEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
+static oid saHpiDomainEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
+
+int handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+			  
+int handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);			  
+
+int initialize_table_saHpiDomainEventLogEntryCountTotal(void);
+int initialize_table_saHpiDomainEventLogEntryCount(void); 
+
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiDomainEventLogEntryCountTotal, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &domain_event_log_entry_count_total,
+        			        sizeof(domain_event_log_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+ /**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+ 
+        DEBUGMSGTL ((AGENT, "handle_saHpiDomainEventLogEntryCount, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &domain_event_log_entry_count,
+        			        sizeof(domain_event_log_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+ 
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiDomainEventLogEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainEventLogEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiDomainEventLogEntryCountTotal", 
+					handle_saHpiDomainEventLogEntryCountTotal,
+                                        saHpiDomainEventLogEntryCountTotal_oid, 
+					OID_LENGTH(saHpiDomainEventLogEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+        return SNMP_ERR_NOERROR;
+}
+
+
+ 
+/**
+ * 
+ * @return: 
+ */  
+int initialize_table_saHpiDomainEventLogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainEventLogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+	                        netsnmp_create_handler_registration(
+				        "saHpiDomainEventLogEntryCount", 
+					handle_saHpiDomainEventLogEntryCount,
+			                saHpiDomainEventLogEntryCount_oid, 
+					OID_LENGTH(saHpiDomainEventLogEntryCount_oid),
+			                HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+
 #ifdef saHpiDomainEventLogTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
@@ -149,15 +306,13 @@ saHpiDomainEventLogTable_get( const char *name, int len )
 void
 init_saHpiDomainEventLogTable(void)
 {
-    initialize_table_saHpiDomainEventLogTable();
+        
+        DEBUGMSGTL ((AGENT, "init_saHpiDomainEventLogTable, called\n"));
+		
+	initialize_table_saHpiDomainEventLogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiDomainEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiDomainEventLogEntryCountTotal();
+        initialize_table_saHpiDomainEventLogEntryCount();
 }
 
 /************************************************************

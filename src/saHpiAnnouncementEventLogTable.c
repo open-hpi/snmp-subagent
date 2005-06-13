@@ -44,6 +44,91 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiAnnouncementEventLogTable_oid[] = { saHpiAnnouncementEventLogTable_TABLE_OID };
 size_t saHpiAnnouncementEventLogTable_oid_len = OID_LENGTH(saHpiAnnouncementEventLogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long announcement_event_log_entry_count = 0;
+
+static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
+
+int handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+
+int initialize_table_saHpiAnnouncementEventLogEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiAnnouncementEventLogEntryCount, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			(u_char *) &announcement_event_log_entry_count
+        			sizeof(announcement_event_log_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiAnnouncementEventLogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnouncementEventLogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiAnnouncementEventLogEntryCount", 
+					handle_saHpiAnnouncementEventLogEntryCount,
+                                        saHpiAnnouncementEventLogEntryCount_oid, 
+			                OID_LENGTH(saHpiAnnouncementEventLogEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+ 
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiAnnouncementEventLogTable_IDX2
 /************************************************************
@@ -159,15 +244,12 @@ saHpiAnnouncementEventLogTable_get( const char *name, int len )
 void
 init_saHpiAnnouncementEventLogTable(void)
 {
-    initialize_table_saHpiAnnouncementEventLogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiAnnouncementEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        DEBUGMSGTL ((AGENT, "init_saHpiAnnouncementEventLogTable, called\n"));        
+	
+	initialize_table_saHpiAnnouncementEventLogTable();
+     
+        initialize_table_saHpiAnnouncementEventLogEntryCount();
 }
 
 /************************************************************
