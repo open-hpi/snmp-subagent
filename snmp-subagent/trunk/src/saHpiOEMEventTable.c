@@ -44,6 +44,163 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiOEMEventTable_oid[] = { saHpiOEMEventTable_TABLE_OID };
 size_t saHpiOEMEventTable_oid_len = OID_LENGTH(saHpiOEMEventTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+
+static u_long oem_event_entry_count_total = 0;
+static u_long oem_event_entry_count = 0;
+
+static oid saHpiOEMEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
+static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
+
+int handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+
+
+int handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests);
+
+int initialize_table_saHpiOEMEventEntryCountTotal(void);
+int initialize_table_saHpiOEMEventEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventEntryCountTotal, called\n"));
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &oem_event_entry_count_total,
+        			        sizeof(oem_event_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventEntryCount, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &oem_event_entry_count,
+        			        sizeof(oem_event_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiOEMEventEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiOEMEventEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiOEMEventEntryCountTotal", 
+					handle_saHpiOEMEventEntryCountTotal,
+                                        saHpiOEMEventEntryCountTotal_oid, 
+					OID_LENGTH(saHpiOEMEventEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+ 
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiOEMEventEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiOEMEventEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiOEMEventEntryCount", 
+					handle_saHpiOEMEventEntryCount,
+                                        saHpiOEMEventEntryCount_oid, 
+					OID_LENGTH(saHpiOEMEventEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiOEMEventTable_IDX2
 /************************************************************
@@ -159,15 +316,13 @@ saHpiOEMEventTable_get( const char *name, int len )
 void
 init_saHpiOEMEventTable(void)
 {
-    initialize_table_saHpiOEMEventTable();
+        
+        DEBUGMSGTL ((AGENT, "init_saHpiOEMEventTable, called\n"));
+	
+	initialize_table_saHpiOEMEventTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiOEMEventTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiOEMEventEntryCountTotal();
+        initialize_table_saHpiOEMEventEntryCount();
 }
 
 /************************************************************

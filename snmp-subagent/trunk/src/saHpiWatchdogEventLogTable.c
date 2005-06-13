@@ -44,6 +44,163 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiWatchdogEventLogTable_oid[] = { saHpiWatchdogEventLogTable_TABLE_OID };
 size_t saHpiWatchdogEventLogTable_oid_len = OID_LENGTH(saHpiWatchdogEventLogTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+
+static u_long watchdog_event_log_entry_count_total = 0;
+static u_long watchdog_event_log_entry_count = 0;
+
+static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
+static oid saHpiWatchdogEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 }; 
+
+
+int handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+
+int handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int initialize_table_saHpiWatchdogEventLogEntryCountTotal(void);
+int initialize_table_saHpiWatchdogEventLogEntryCount(void); 
+
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogEntryCountTotal, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &watchdog_event_log_entry_count_total,
+        			        sizeof(watchdog_event_log_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */ 
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogEntryCount, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &watchdog_event_log_entry_count,
+        			        sizeof(watchdog_event_log_entry_count));
+                break;
+ 
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiWatchdogEventLogEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiWatchdogEventLogEntryCountTotal", 
+					handle_saHpiWatchdogEventLogEntryCountTotal,
+                                        saHpiWatchdogEventLogEntryCountTotal_oid, 
+					OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+  
+/**
+ * 
+ * @return: 
+ */
+{
+int initialize_table_saHpiWatchdogEventLogEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiWatchdogEventLogEntryCount", 
+					handle_saHpiWatchdogEventLogEntryCount,
+                                        saHpiWatchdogEventLogEntryCount_oid, 
+					OID_LENGTH(saHpiWatchdogEventLogEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiWatchdogEventLogTable_IDX2
 /************************************************************
@@ -169,15 +326,13 @@ saHpiWatchdogEventLogTable_get( const char *name, int len )
 void
 init_saHpiWatchdogEventLogTable(void)
 {
-    initialize_table_saHpiWatchdogEventLogTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiWatchdogEventLogTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        DEBUGMSGTL ((AGENT, "init_saHpiWatchdogEventLogTable, called\n"));
+
+        initialize_table_saHpiWatchdogEventLogTable();
+
+        initialize_table_saHpiWatchdogEventLogEntryCountTotal();
+        initialize_table_saHpiWatchdogEventLogEntryCount();
 }
 
 /************************************************************

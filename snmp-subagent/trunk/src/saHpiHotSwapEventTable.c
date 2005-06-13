@@ -44,6 +44,161 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiHotSwapEventTable_oid[] = { saHpiHotSwapEventTable_TABLE_OID };
 size_t saHpiHotSwapEventTable_oid_len = OID_LENGTH(saHpiHotSwapEventTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+static u_long hotswap_event_entry_count_total = 0;
+static u_long hotswap_event_entry_count = 0;
+
+static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
+static oid saHpiHotSwapEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
+
+int handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+
+int initialize_table_saHpiHotSwapEventEntryCountTotal(void);
+int initialize_table_saHpiHotSwapEventEntryCount(void);
+
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int
+handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventEntryCountTotal, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            			        (u_char *) &hotswap_event_entry_count_total,
+            			        sizeof(hotswap_event_entry_count_total));
+                break;
+
+
+        default:
+        	/* we should never get here, so this is a really bad error */
+        	return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+ 
+ 
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */ 
+int
+handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+        
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventEntryCount, called\n"));
+
+
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &hotswap_event_entry_count,
+        			        sizeof(hotswap_event_entry_count_total));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiHotSwapEventEntryCountTotal(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventEntryCountTotal, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiHotSwapEventEntryCountTotal", 
+					handle_saHpiHotSwapEventEntryCountTotal,
+                                        saHpiHotSwapEventEntryCountTotal_oid, 
+					OID_LENGTH(saHpiHotSwapEventEntryCountTotal_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+} 
+ 
+/**
+ * 
+ * @return: 
+ */ 
+int initialize_table_saHpiHotSwapEventEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiHotSwapEventEntryCount", 
+				        handle_saHpiHotSwapEventEntryCount,
+                                        saHpiHotSwapEventEntryCount_oid, 
+					OID_LENGTH(saHpiHotSwapEventEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 
 #ifdef saHpiHotSwapEventTable_IDX2
 /************************************************************
@@ -159,15 +314,13 @@ saHpiHotSwapEventTable_get( const char *name, int len )
 void
 init_saHpiHotSwapEventTable(void)
 {
-    initialize_table_saHpiHotSwapEventTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiHotSwapEventTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        DEBUGMSGTL ((AGENT, "init_saHpiHotSwapEventTable, called\n"));
+
+        initialize_table_saHpiHotSwapEventTable();
+
+        initialize_table_saHpiHotSwapEventEntryCountTotal();
+        initialize_table_saHpiHotSwapEventEntryCount();
 }
 
 /************************************************************

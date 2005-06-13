@@ -44,6 +44,93 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiDomainAlarmTable_oid[] = { saHpiDomainAlarmTable_TABLE_OID };
 size_t saHpiDomainAlarmTable_oid_len = OID_LENGTH(saHpiDomainAlarmTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
+/*************************************************************
+ * oid and fucntion declarations scalars
+ */
+
+static u_long domain_alarm_entry_count = 0;
+
+static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
+
+int  handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
+                                        netsnmp_handler_registration *reginfo,
+                                        netsnmp_agent_request_info   *reqinfo,
+                                        netsnmp_request_info         *requests);
+					
+int initialize_table_saHpiDomainAlarmEntryCount(void);
+
+/**
+ * 
+ * @handler:
+ * @reginfo:
+ * @reqinfo:
+ * @requests:
+ * 
+ * @return:
+ */
+int 
+handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
+                                netsnmp_handler_registration *reginfo,
+                                netsnmp_agent_request_info   *reqinfo,
+                                netsnmp_request_info         *requests)
+{
+        /* We are never called for a GETNEXT if it's registered as a
+           "instance", as it's "magically" handled for us.  */
+        /* a instance handler also only hands us one request at a time, so
+           we don't need to loop over a list of requests; we'll only get one. */
+
+        DEBUGMSGTL ((AGENT, "handle_saHpiDomainAlarmEntryCount, called\n"));
+
+        
+        switch(reqinfo->mode) {
+
+        case MODE_GET:
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+        			        (u_char *) &domain_alarm_entry_count,
+        			        sizeof(domain_alarm_entry_count));
+                break;
+
+
+        default:
+                /* we should never get here, so this is a really bad error */
+                return SNMP_ERR_GENERR;
+        }
+
+        return SNMP_ERR_NOERROR;
+}
+
+ 
+/**
+ * 
+ * @return: 
+ */
+int initialize_table_saHpiDomainAlarmEntryCount(void)
+{
+
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainAlarmEntryCount, called\n"));
+
+        netsnmp_register_scalar(
+                                netsnmp_create_handler_registration(
+				        "saHpiDomainAlarmEntryCount", 
+					handle_saHpiDomainAlarmEntryCount,
+                                        saHpiDomainAlarmEntryCount_oid, 
+					OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
+                                        HANDLER_CAN_RONLY ));
+
+        return SNMP_ERR_NOERROR;
+} 
+
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 void populate_saHpiDomainAlarmTable()
 {
 	dbg("WARNING: populate_saHpiDomainAlarmTable: not implemented!");
@@ -152,15 +239,12 @@ saHpiDomainAlarmTable_get( const char *name, int len )
 void
 init_saHpiDomainAlarmTable(void)
 {
-    initialize_table_saHpiDomainAlarmTable();
+        
+        DEBUGMSGTL ((AGENT, "init_saHpiDomainAlarmTable, called\n"));
+	
+        initialize_table_saHpiDomainAlarmTable();
 
-    /*
-     * TODO: perform any startup stuff here, such as
-     * populating the table with initial data.
-     *
-     * saHpiDomainAlarmTable_context * new_row = create_row(index);
-     * CONTAINER_INSERT(cb.container,new_row);
-     */
+        initialize_table_saHpiDomainAlarmEntryCount();
 }
 
 /************************************************************
