@@ -32,48 +32,48 @@ init_hpiB0101(void)
     static oid saHpiAgentVersion_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,2 };
     static oid saHpiSNMPResourceId_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,3 };
 //    static oid saHpiDomainEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,8 };
-    static oid saHpiSoftwareEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,21 };
-    static oid saHpiWatchdogEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 };
-    static oid saHpiHotSwapEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
-    static oid saHpiAnnouncementEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,31 };
+//    static oid saHpiSoftwareEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,21 };
+//    static oid saHpiWatchdogEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 };
+//    static oid saHpiHotSwapEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
+//    static oid saHpiAnnouncementEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,31 };
 //    static oid saHpiFieldEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
 //    static oid saHpiSensorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,9,1 };
-    static oid saHpiSensorEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
+//    static oid saHpiSensorEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
 //    static oid saHpiSoftwareEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,22 };
 //    static oid saHpiHotSwapEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 };
 //    static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
 //    static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
-    static oid saHpiDomainEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
-    static oid saHpiWatchdogEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,20 };
+//    static oid saHpiDomainEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
+//    static oid saHpiWatchdogEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,20 };
 //    static oid saHpiResourceEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,4 };
 //    static oid saHpiAreaEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,3 };
-    static oid saHpiDomainEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
+//    static oid saHpiDomainEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
 //    static oid saHpiOEMEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
     static oid saHpiDiscover_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,4 };
 //    static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
-    static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
+//    static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
 //    static oid saHpiResourceEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
-    static oid saHpiOEMEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
+//    static oid saHpiOEMEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
 //    static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
 //    static oid saHpiEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
-    static oid saHpiSensorEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 };
+//    static oid saHpiSensorEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 };
 //    static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
-    static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
-    static oid saHpiWatchdogEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,19 };
-    static oid saHpiSensorEnableChangeEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
+//    static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
+//    static oid saHpiWatchdogEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,19 };
+//    static oid saHpiSensorEnableChangeEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
 //    static oid saHpiSensorEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
 //    static oid saHpiSensorEnableChangeEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
-    static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
+//    static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
 //    static oid saHpiUserEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,29 };
 //    static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
-    static oid saHpiUserEvenLogtEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
-    static oid saHpiUserEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
-    static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
-    static oid saHpiSoftwareEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,22 };
-    static oid saHpiSensorEnableChangeEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
+//    static oid saHpiUserEvenLogtEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
+//    static oid saHpiUserEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
+//    static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
+//    static oid saHpiSoftwareEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,22 };
+//    static oid saHpiSensorEnableChangeEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
 //    static oid saHpiCtrlStreamEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,8 };
 //    static oid saHpiEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
-    static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
+//    static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
 
   DEBUGMSGTL(("hpiB0101", "Initializing\n"));
 
@@ -177,26 +177,26 @@ init_hpiB0101(void)
 //                               saHpiDomainEventEntryCount_oid, OID_LENGTH(saHpiDomainEventEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCountTotal", handle_saHpiSoftwareEventLogEntryCountTotal,
-                               saHpiSoftwareEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCount", handle_saHpiWatchdogEventLogEntryCount,
-                               saHpiWatchdogEventLogEntryCount_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCount", handle_saHpiHotSwapEventEntryCount,
-                               saHpiHotSwapEventEntryCount_oid, OID_LENGTH(saHpiHotSwapEventEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiAnnouncementEntryCount", handle_saHpiAnnouncementEntryCount,
-                               saHpiAnnouncementEntryCount_oid, OID_LENGTH(saHpiAnnouncementEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCountTotal", handle_saHpiSoftwareEventLogEntryCountTotal,
+//                               saHpiSoftwareEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCount", handle_saHpiWatchdogEventLogEntryCount,
+//                               saHpiWatchdogEventLogEntryCount_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCount", handle_saHpiHotSwapEventEntryCount,
+//                               saHpiHotSwapEventEntryCount_oid, OID_LENGTH(saHpiHotSwapEventEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiAnnouncementEntryCount", handle_saHpiAnnouncementEntryCount,
+//                               saHpiAnnouncementEntryCount_oid, OID_LENGTH(saHpiAnnouncementEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiFieldEntryCount", handle_saHpiFieldEntryCount,
 //                               saHpiFieldEntryCount_oid, OID_LENGTH(saHpiFieldEntryCount_oid),
@@ -207,11 +207,11 @@ init_hpiB0101(void)
 //                               saHpiSensorEntryCount_oid, OID_LENGTH(saHpiSensorEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSensorEventEntryCount", handle_saHpiSensorEventEntryCount,
-                               saHpiSensorEventEntryCount_oid, OID_LENGTH(saHpiSensorEventEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSensorEventEntryCount", handle_saHpiSensorEventEntryCount,
+//                               saHpiSensorEventEntryCount_oid, OID_LENGTH(saHpiSensorEventEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiSoftwareEventEntryCountTotal", handle_saHpiSoftwareEventEntryCountTotal,
 //                               saHpiSoftwareEventEntryCountTotal_oid, OID_LENGTH(saHpiSoftwareEventEntryCountTotal_oid),
@@ -227,21 +227,21 @@ init_hpiB0101(void)
 //                               saHpiRdrEntryCount_oid, OID_LENGTH(saHpiRdrEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiDomainInfoEntryCount", handle_saHpiDomainInfoEntryCount,
-                               saHpiDomainInfoEntryCount_oid, OID_LENGTH(saHpiDomainInfoEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiDomainEventLogEntryCountTotal", handle_saHpiDomainEventLogEntryCountTotal,
-                               saHpiDomainEventLogEntryCountTotal_oid, OID_LENGTH(saHpiDomainEventLogEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCount", handle_saHpiWatchdogEventEntryCount,
-                               saHpiWatchdogEventEntryCount_oid, OID_LENGTH(saHpiWatchdogEventEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiDomainInfoEntryCount", handle_saHpiDomainInfoEntryCount,
+//                               saHpiDomainInfoEntryCount_oid, OID_LENGTH(saHpiDomainInfoEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiDomainEventLogEntryCountTotal", handle_saHpiDomainEventLogEntryCountTotal,
+//                               saHpiDomainEventLogEntryCountTotal_oid, OID_LENGTH(saHpiDomainEventLogEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCount", handle_saHpiWatchdogEventEntryCount,
+//                               saHpiWatchdogEventEntryCount_oid, OID_LENGTH(saHpiWatchdogEventEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiResourceEventEntryCountTotal", handle_saHpiResourceEventEntryCountTotal,
 //                               saHpiResourceEventEntryCountTotal_oid, OID_LENGTH(saHpiResourceEventEntryCountTotal_oid),
@@ -272,56 +272,56 @@ init_hpiB0101(void)
 //                               saHpiInventoryEntryCount_oid, OID_LENGTH(saHpiInventoryEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCountTotal", handle_saHpiWatchdogEventLogEntryCountTotal,
-                               saHpiWatchdogEventLogEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCountTotal", handle_saHpiWatchdogEventLogEntryCountTotal,
+//                               saHpiWatchdogEventLogEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiResourceEventLogEntryCountTotal", handle_saHpiResourceEventLogEntryCountTotal,
 //                               saHpiResourceEventLogEntryCountTotal_oid, OID_LENGTH(saHpiResourceEventLogEntryCountTotal_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiOEMEventEntryCountTotal", handle_saHpiOEMEventEntryCountTotal,
-                               saHpiOEMEventEntryCountTotal_oid, OID_LENGTH(saHpiOEMEventEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiResourceEntryCount", handle_saHpiResourceEntryCount,
-                               saHpiResourceEntryCount_oid, OID_LENGTH(saHpiResourceEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//   netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiOEMEventEntryCountTotal", handle_saHpiOEMEventEntryCountTotal,
+//                               saHpiOEMEventEntryCountTotal_oid, OID_LENGTH(saHpiOEMEventEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiResourceEntryCount", handle_saHpiResourceEntryCount,
+//                               saHpiResourceEntryCount_oid, OID_LENGTH(saHpiResourceEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiEventEntryCount", handle_saHpiEventEntryCount,
 //                               saHpiEventEntryCount_oid, OID_LENGTH(saHpiEventEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSensorEventEntryCountTotal", handle_saHpiSensorEventEntryCountTotal,
-                               saHpiSensorEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSensorEventEntryCountTotal", handle_saHpiSensorEventEntryCountTotal,
+//                               saHpiSensorEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiCtrlDiscreteEntryCount", handle_saHpiCtrlDiscreteEntryCount,
 //                               saHpiCtrlDiscreteEntryCount_oid, OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiDomainAlarmEntryCount", handle_saHpiDomainAlarmEntryCount,
-                               saHpiDomainAlarmEntryCount_oid, OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCountTotal", handle_saHpiWatchdogEventEntryCountTotal,
-                               saHpiWatchdogEventEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCountTotal", handle_saHpiSensorEnableChangeEventLogEntryCountTotal,
-                               saHpiSensorEnableChangeEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiDomainAlarmEntryCount", handle_saHpiDomainAlarmEntryCount,
+//                               saHpiDomainAlarmEntryCount_oid, OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCountTotal", handle_saHpiWatchdogEventEntryCountTotal,
+//                               saHpiWatchdogEventEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCountTotal", handle_saHpiSensorEnableChangeEventLogEntryCountTotal,
+//                               saHpiSensorEnableChangeEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiSensorEventLogEntryCount", handle_saHpiSensorEventLogEntryCount,
 //                               saHpiSensorEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEventLogEntryCount_oid),
@@ -332,11 +332,11 @@ init_hpiB0101(void)
 //                               saHpiSensorEnableChangeEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEnableChangeEventEntryCountTotal_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiOEMEventEntryCount", handle_saHpiOEMEventEntryCount,
-                               saHpiOEMEventEntryCount_oid, OID_LENGTH(saHpiOEMEventEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiOEMEventEntryCount", handle_saHpiOEMEventEntryCount,
+//                               saHpiOEMEventEntryCount_oid, OID_LENGTH(saHpiOEMEventEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiUserEventEntryCount", handle_saHpiUserEventEntryCount,
 //                               saHpiUserEventEntryCount_oid, OID_LENGTH(saHpiUserEventEntryCount_oid),
@@ -347,31 +347,31 @@ init_hpiB0101(void)
 //                               saHpiCtrlAnalogEntryCount_oid, OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiUserEvenLogtEntryCountTotal", handle_saHpiUserEvenLogtEntryCountTotal,
-                               saHpiUserEvenLogtEntryCountTotal_oid, OID_LENGTH(saHpiUserEvenLogtEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiUserEventLogEntryCount", handle_saHpiUserEventLogEntryCount,
-                               saHpiUserEventLogEntryCount_oid, OID_LENGTH(saHpiUserEventLogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiAnnouncementEventLogEntryCount", handle_saHpiAnnouncementEventLogEntryCount,
-                               saHpiAnnouncementEventLogEntryCount_oid, OID_LENGTH(saHpiAnnouncementEventLogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCount", handle_saHpiSoftwareEventLogEntryCount,
-                               saHpiSoftwareEventLogEntryCount_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCount", handle_saHpiSensorEnableChangeEventLogEntryCount,
-                               saHpiSensorEnableChangeEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCount_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiUserEvenLogtEntryCountTotal", handle_saHpiUserEvenLogtEntryCountTotal,
+//                               saHpiUserEvenLogtEntryCountTotal_oid, OID_LENGTH(saHpiUserEvenLogtEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiUserEventLogEntryCount", handle_saHpiUserEventLogEntryCount,
+//                               saHpiUserEventLogEntryCount_oid, OID_LENGTH(saHpiUserEventLogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiAnnouncementEventLogEntryCount", handle_saHpiAnnouncementEventLogEntryCount,
+//                               saHpiAnnouncementEventLogEntryCount_oid, OID_LENGTH(saHpiAnnouncementEventLogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCount", handle_saHpiSoftwareEventLogEntryCount,
+//                               saHpiSoftwareEventLogEntryCount_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCount", handle_saHpiSensorEnableChangeEventLogEntryCount,
+//                               saHpiSensorEnableChangeEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCount_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiCtrlStreamEntryCount", handle_saHpiCtrlStreamEntryCount,
 //                               saHpiCtrlStreamEntryCount_oid, OID_LENGTH(saHpiCtrlStreamEntryCount_oid),
@@ -382,11 +382,11 @@ init_hpiB0101(void)
 //                               saHpiEventEntryCountTotal_oid, OID_LENGTH(saHpiEventEntryCountTotal_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
-    netsnmp_register_scalar(
-        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCountTotal", handle_saHpiHotSwapEventEntryCountTotal,
-                               saHpiHotSwapEventEntryCountTotal_oid, OID_LENGTH(saHpiHotSwapEventEntryCountTotal_oid),
-                               HANDLER_CAN_RONLY
-        ));
+//    netsnmp_register_scalar(
+//        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCountTotal", handle_saHpiHotSwapEventEntryCountTotal,
+//                               saHpiHotSwapEventEntryCountTotal_oid, OID_LENGTH(saHpiHotSwapEventEntryCountTotal_oid),
+//                               HANDLER_CAN_RONLY
+//        ));
 }
 #if 0
 int
@@ -980,6 +980,7 @@ handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiSoftwareEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1008,6 +1009,8 @@ handle_saHpiSoftwareEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1036,6 +1039,8 @@ handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1064,6 +1069,8 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1092,6 +1099,7 @@ handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
@@ -1151,6 +1159,7 @@ handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1179,6 +1188,7 @@ handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiSoftwareEventEntryCountTotal(netsnmp_mib_handler *handler,
@@ -1297,6 +1307,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1325,6 +1336,8 @@ handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiWatchdogEventEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1353,6 +1366,7 @@ handle_saHpiWatchdogEventEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiResourceEventEntryCountTotal(netsnmp_mib_handler *handler,
@@ -1413,6 +1427,7 @@ handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1441,6 +1456,7 @@ handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
@@ -1576,6 +1592,7 @@ handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1604,6 +1621,7 @@ handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
@@ -1634,6 +1652,7 @@ handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1662,6 +1681,7 @@ handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
@@ -1720,6 +1740,7 @@ handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1748,6 +1769,7 @@ handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
@@ -1778,6 +1800,7 @@ handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1806,6 +1829,8 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiWatchdogEventEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1834,6 +1859,8 @@ handle_saHpiWatchdogEventEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1862,6 +1889,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handl
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
@@ -1922,6 +1950,7 @@ handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -1950,6 +1979,7 @@ handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
@@ -2010,6 +2040,7 @@ handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2038,6 +2069,8 @@ handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2066,6 +2099,7 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 int
 handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2094,6 +2128,7 @@ handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#if 0
 int
 handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2122,6 +2157,8 @@ handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
+#if 0
 int
 handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2150,6 +2187,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
 #if 0
 int
 handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
@@ -2208,6 +2246,7 @@ handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 #endif
+#if 0
 int
 handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -2236,3 +2275,4 @@ handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
 
     return SNMP_ERR_NOERROR;
 }
+#endif
