@@ -413,13 +413,13 @@ main (int argc, char **argv)
 		init_saHpiFieldTable();
 
 		init_saHpiEventTable();
+		init_saHpiResourceEventTable();
 /*		
 		
 		init_saHpiWatchdogTable();
 		init_saHpiHotSwapTable();
 		init_saHpiAutoInsertTimeoutTable();
 		
-		init_saHpiResourceEventTable();
 		init_saHpiDomainEventTable();
 		init_saHpiSensorEventTable();
 		init_saHpiSensorEnableChangeEventTable();
@@ -445,7 +445,6 @@ main (int argc, char **argv)
 */
 		if (send_traps_on_startup == AGENT_TRUE)
 			send_traps = AGENT_TRUE;
-
 		/* after initialization populate tables */
 		populate_saHpiDomainInfoTable(sessionid);
 
@@ -482,8 +481,9 @@ main (int argc, char **argv)
 		     *	       populate_saHpiAreaTable();		
 		     *	           populate_saHpiFieldTable();		
 		     */
-
 		populate_saHpiEventTable(sessionid);
+                    /* populate_saHpiResourceEventTable();
+                     */
 
                 DEBUGMSGTL ((AGENT,
                 "WARNING: populate_event: hpiSubagent.c: nolong implemented!")); 
