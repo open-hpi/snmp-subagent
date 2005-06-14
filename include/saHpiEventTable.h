@@ -85,12 +85,13 @@ extern size_t saHpiEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiEventTable
  */
+//#define EVENT_INDEX_NR 1
 #define COLUMN_SAHPIEVENTROWPOINTER 1
-#define COLUMN_SAHPIEVENTSEVERITY 3
-#define COLUMN_SAHPIEVENTSAHPITIME 4
-#define COLUMN_SAHPIEVENTTYPE 5
-#define saHpiEventTable_COL_MIN 3
-#define saHpiEventTable_COL_MAX 5
+#define COLUMN_SAHPIEVENTSEVERITY 2
+#define COLUMN_SAHPIEVENTSAHPITIME 3
+#define COLUMN_SAHPIEVENTTYPE 4
+#define saHpiEventTable_COL_MIN 2
+#define saHpiEventTable_COL_MAX 4
 
 int saHpiEventTable_extract_index( saHpiEventTable_context * ctx, netsnmp_index * hdr );
 
