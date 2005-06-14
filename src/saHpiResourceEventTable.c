@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiResourceEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -50,9 +56,14 @@ size_t saHpiResourceEventTable_oid_len = OID_LENGTH(saHpiResourceEventTable_oid)
 /************************************************************/
 
 /*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
+
+/*************************************************************
  * oid and fucntion declarations scalars
  */
-
 static u_long resource_event_entry_count_total = 0;
 static u_long resource_event_entry_count = 0;
 static oid saHpiResourceEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,4 }; 
@@ -71,6 +82,101 @@ int handle_saHpiResourceEventEntryCount(netsnmp_mib_handler *handler,
 
 int initialize_table_saHpiResourceEventEntryCountTotal(void);
 int initialize_table_saHpiResourceEventEntryCount(void);
+
+
+
+
+SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid, 
+                                          SaHpiEventT *event,
+                                          oid * this_child_oid, 
+                                          size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+
+	oid res_evt_oid[RESOURCE_EVENT_INDEX_NR];
+	netsnmp_index res_evt_idx;
+	saHpiResourceEventTable_context *res_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiResourceEventTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiResourceEventTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	res_evt_idx.len = RESOURCE_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	res_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	res_evt_oid[1] = event->Source;
+		/** Index saHpiEventSeverity is external */
+	res_evt_oid[2] = event->Severity + 1;
+                /** Index saHpiResourceEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiResourceEventTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	res_evt_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	res_evt_idx.oids = (oid *) & res_evt_oid;
+
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIRESOURCEEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiResourceEventTable_oid, saHpiResourceEventTable_oid_len,
+			column, column_len,
+			&res_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
+
+	/* See if Row exists. */
+	res_evt_ctx = NULL;
+	res_evt_ctx = CONTAINER_FIND(cb.container, &res_evt_idx);
+
+	if (!res_evt_ctx) { 
+		// New entry. Add it
+		res_evt_ctx = 
+			saHpiResourceEventTable_create_row(&res_evt_idx);
+	}
+	if (!res_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Resource Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        res_evt_ctx->saHpiResourceEventTimestamp = event->Timestamp;
+
+        /** INTEGER = ASN_INTEGER */
+        res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
+
+	CONTAINER_INSERT (cb.container, res_evt_ctx);
+		
+	resource_event_entry_count = CONTAINER_SIZE (cb.container);
+        resource_event_entry_count_total++;
+
+        return SA_OK;
+}
+
 
 /**
  * 
@@ -261,42 +367,6 @@ saHpiResourceEventTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiResourceEventTable_context *
-saHpiResourceEventTable_get( const char *name, int len )
-{
-    saHpiResourceEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiResourceEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
-
-/************************************************************
  * Initializes the saHpiResourceEventTable module
  */
 void
@@ -309,6 +379,8 @@ init_saHpiResourceEventTable(void)
         initialize_table_saHpiResourceEventEntryCountTotal();
     
         initialize_table_saHpiResourceEventEntryCount();
+
+        domain_resource_pair_initialize(&initialized, &dr_table);
 
 }
 
@@ -511,7 +583,6 @@ int saHpiResourceEventTable_can_delete(saHpiResourceEventTable_context *undo_ctx
     return 1;
 }
 
-#ifdef saHpiResourceEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -557,7 +628,6 @@ saHpiResourceEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -731,6 +801,7 @@ void saHpiResourceEventTable_set_action( netsnmp_request_group *rg )
         }
     }
 
+#if 0
     /*
      * done with all the columns. Could check row related
      * requirements here.
@@ -748,6 +819,8 @@ void saHpiResourceEventTable_set_action( netsnmp_request_group *rg )
     row_err = netsnmp_table_array_check_row_status(&cb, rg,
                                   row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
                                   undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
+#endif
+
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -829,8 +902,10 @@ void saHpiResourceEventTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -884,9 +959,6 @@ void saHpiResourceEventTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiResourceEventTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -951,18 +1023,18 @@ initialize_table_saHpiResourceEventTable(void)
     cb.container = netsnmp_container_find("saHpiResourceEventTable_primary:"
                                           "saHpiResourceEventTable:"
                                           "table_container");
-#ifdef saHpiResourceEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiResourceEventTable_secondary:"
                                                        "saHpiResourceEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiResourceEventTable_cmp;
-#endif
-#ifdef saHpiResourceEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiResourceEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiResourceEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiResourceEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiResourceEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiResourceEventTable_row_copy;
@@ -977,7 +1049,7 @@ initialize_table_saHpiResourceEventTable(void)
     cb.set_commit = saHpiResourceEventTable_set_commit;
     cb.set_free = saHpiResourceEventTable_set_free;
     cb.set_undo = saHpiResourceEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiResourceEventTable",
                 "Registering table saHpiResourceEventTable "
                 "as a table array\n"));
