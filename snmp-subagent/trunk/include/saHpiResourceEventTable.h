@@ -67,6 +67,13 @@ const saHpiResourceEventTable_context * saHpiResourceEventTable_get_by_idx_rs(ne
                                         int row_status);
 int saHpiResourceEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid, 
+                                          SaHpiEventT *event,
+                                          oid * event_oid, 
+                                          size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -79,6 +86,7 @@ extern size_t saHpiResourceEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiResourceEventTable
  */
+#define RESOURCE_EVENT_INDEX_NR 4
 #define COLUMN_SAHPIRESOURCEEVENTENTRYID 1
 #define COLUMN_SAHPIRESOURCEEVENTTIMESTAMP 2
 #define COLUMN_SAHPIRESOURCEEVENTTYPE 3
