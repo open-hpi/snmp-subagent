@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiDomainEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+//#include <saHpiEventTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -50,11 +56,17 @@ size_t saHpiDomainEventTable_oid_len = OID_LENGTH(saHpiDomainEventTable_oid);
 /************************************************************/
 
 /*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
+
+/*************************************************************
  * oid and fucntion declarations scalars
  */
  
 static u_long domain_event_entry_count_total = 0;
-static u_long doamin_event_entry_count = 0; 
+static u_long domain_event_entry_count = 0; 
  
 static oid saHpiDomainEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,7 };
 static oid saHpiDomainEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,8 };
@@ -71,6 +83,96 @@ int handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
 
 int initialize_table_saHpiDomainEventEntryCountTotal(void);
 int initialize_table_saHpiDomainEventEntryCount(void);	      
+
+
+SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * this_child_oid, 
+                                        size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+
+	oid domain_evt_oid[DOMAIN_EVENT_INDEX_NR];
+	netsnmp_index domain_evt_idx;
+	saHpiDomainEventTable_context *domain_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiDomainAlarmTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiDomainAlarmTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	} 
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	domain_evt_idx.len = DOMAIN_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	domain_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiEventSeverity is external */
+	domain_evt_oid[1] = event->Severity + 1;
+                /** Index saHpiDomainEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiDomainEventTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	domain_evt_oid[2] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	domain_evt_idx.oids = (oid *) & domain_evt_oid;
+	   
+	/* See if Row exists. */
+	domain_evt_ctx = NULL;
+	domain_evt_ctx = CONTAINER_FIND(cb.container, &domain_evt_idx);
+
+	if (!domain_evt_ctx) { 
+		// New entry. Add it
+		domain_evt_ctx = 
+			saHpiDomainEventTable_create_row(&domain_evt_idx);
+	}
+	if (!domain_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Domain Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        domain_evt_ctx->saHpiDomainEventEntryId = domain_evt_oid[2];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        domain_evt_ctx->saHpiDomainEventTimestamp = event->Timestamp;
+
+        /** INTEGER = ASN_INTEGER */
+        domain_evt_ctx->saHpiDomainEventType = event->EventType + 1;
+
+	CONTAINER_INSERT (cb.container, domain_evt_ctx);
+		
+	domain_event_entry_count = CONTAINER_SIZE (cb.container);
+        domain_event_entry_count_total++;
+
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIDOMAINEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiDomainEventTable_oid, saHpiDomainEventTable_oid_len,
+			column, column_len,
+			&domain_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
+
+        return SA_OK;   					
+
+}
 
 /**
  * 
@@ -139,7 +241,7 @@ handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
         			        (u_char *) &domain_event_entry_count,
-        			        sizeof(domain_event_entry_countl));
+        			        sizeof(domain_event_entry_count));
                 break;
 
 
@@ -292,7 +394,6 @@ saHpiDomainEventTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
@@ -302,12 +403,17 @@ void
 init_saHpiDomainEventTable(void)
 {
       
-        DEBUGMSGTL ((AGENT, "init_saHpiDomainEventTable, called\n"));
+        
+	DEBUGMSGTL ((AGENT, "init_saHpiDomainEventTable, called\n"));
       
         initialize_table_saHpiDomainEventTable();
 
-        initialize_table_saHpiDomainEventEntryCountTotal(void);
-        initialize_table_saHpiDomainEventEntryCount(void);     
+        initialize_table_saHpiDomainEventEntryCountTotal();
+        initialize_table_saHpiDomainEventEntryCount();  
+	  
+        domain_resource_pair_initialize(&initialized, &dr_table);
+	
+	 
 }
 
 /************************************************************
@@ -876,7 +982,6 @@ void saHpiDomainEventTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiDomainEventTable_SET_HANDLING */
 
 
 /************************************************************
