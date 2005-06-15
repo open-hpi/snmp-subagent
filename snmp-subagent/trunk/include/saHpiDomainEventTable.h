@@ -57,11 +57,6 @@ typedef struct saHpiDomainEventTable_context_s {
 } saHpiDomainEventTable_context;
 
 /*************************************************************
- * function declarations: OpenHpi
- */
-void populate_saHpiDomainAlarmTable(void);
-
-/*************************************************************
  * function declarations
  */
 void init_saHpiDomainEventTable(void);
@@ -71,6 +66,13 @@ const saHpiDomainEventTable_context * saHpiDomainEventTable_get_by_idx_rs(netsnm
                                         int row_status);
 int saHpiDomainEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -83,6 +85,7 @@ extern size_t saHpiDomainEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiDomainEventTable
  */
+#define DOMAIN_EVENT_INDEX_NR 3 
 #define COLUMN_SAHPIDOMAINEVENTENTRYID 1
 #define COLUMN_SAHPIDOMAINEVENTTIMESTAMP 2
 #define COLUMN_SAHPIDOMAINEVENTTYPE 3
