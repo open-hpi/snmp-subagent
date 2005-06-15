@@ -158,6 +158,8 @@ handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
 	DEBUGMSGTL ((AGENT, 
 				"handle_saHpiDomainReferenceEntryCount: Entry Count is %d\n", 
 				domain_reference_entry_count));
+
+    domain_reference_entry_count = CONTAINER_SIZE (cb.container);
 						
     switch(reqinfo->mode) {
 

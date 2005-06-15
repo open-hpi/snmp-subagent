@@ -86,8 +86,9 @@ handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
 
         DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEntryCount, called\n"));
 
+        hotswap_entry_count = CONTAINER_SIZE (cb.container);       
         
-        switch(reqinfo->mode) {
+	switch(reqinfo->mode) {
 
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,

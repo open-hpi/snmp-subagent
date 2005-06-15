@@ -84,6 +84,8 @@ handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEntryCount, called\n"));
+
+        watchdog_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 

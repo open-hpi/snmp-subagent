@@ -84,6 +84,8 @@ handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiAnnouncementEventLogEntryCount, called\n"));
+
+        announcement_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 

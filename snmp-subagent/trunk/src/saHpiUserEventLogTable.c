@@ -132,6 +132,8 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiUserEventLogEntryCount, called\n"));
+
+        user_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -527,6 +529,8 @@ saHpiUserEventLogTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiUserEventLogTable_context);
     if(!ctx)
         return NULL;
+
+    user_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.

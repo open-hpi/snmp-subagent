@@ -135,6 +135,8 @@ handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventLogEntryCount, called\n"));
+
+        sensor_enable_change_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -583,6 +585,8 @@ saHpiSensorEnableChangeEventLogTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiSensorEnableChangeEventLogTable_context);
     if(!ctx)
         return NULL;
+
+    sensor_enable_change_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.

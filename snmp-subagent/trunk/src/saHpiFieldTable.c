@@ -629,6 +629,8 @@ int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
     
         DEBUGMSGTL ((AGENT, "handle_saHpiFieldEntryCount, called\n"));
 
+    field_entry_count = CONTAINER_SIZE (cb.container);
+
     switch(reqinfo->mode) {
 
         case MODE_GET:
