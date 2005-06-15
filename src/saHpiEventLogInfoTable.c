@@ -44,8 +44,23 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiEventLogInfoTable_oid[] = { saHpiEventLogInfoTable_TABLE_OID };
 size_t saHpiEventLogInfoTable_oid_len = OID_LENGTH(saHpiEventLogInfoTable_oid);
 
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
 
-#ifdef saHpiEventLogInfoTable_IDX2
+SaErrorT populate_area (SaHpiSessionIdT sessionid)
+{
+
+        return SA_OK;
+
+}
+
+/************************************************************/
+/************************************************************/
+/************************************************************/
+/************************************************************/
+
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -95,42 +110,6 @@ saHpiEventLogInfoTable_cmp( const void *lhs, const void *rhs )
 	
 	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiEventLogInfoTable_context *
-saHpiEventLogInfoTable_get( const char *name, int len )
-{
-    saHpiEventLogInfoTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiEventLogInfoTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiEventLogInfoTable module
@@ -348,7 +327,6 @@ int saHpiEventLogInfoTable_can_delete(saHpiEventLogInfoTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiEventLogInfoTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -400,7 +378,6 @@ saHpiEventLogInfoTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -697,23 +674,6 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiEventLogInfoTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -923,9 +883,6 @@ void saHpiEventLogInfoTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiEventLogInfoTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiEventLogInfoTable table by defining its contents and how it's structured
@@ -985,18 +942,18 @@ initialize_table_saHpiEventLogInfoTable(void)
     cb.container = netsnmp_container_find("saHpiEventLogInfoTable_primary:"
                                           "saHpiEventLogInfoTable:"
                                           "table_container");
-#ifdef saHpiEventLogInfoTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiEventLogInfoTable_secondary:"
                                                        "saHpiEventLogInfoTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiEventLogInfoTable_cmp;
-#endif
-#ifdef saHpiEventLogInfoTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiEventLogInfoTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiEventLogInfoTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiEventLogInfoTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiEventLogInfoTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiEventLogInfoTable_row_copy;
@@ -1011,7 +968,7 @@ initialize_table_saHpiEventLogInfoTable(void)
     cb.set_commit = saHpiEventLogInfoTable_set_commit;
     cb.set_free = saHpiEventLogInfoTable_set_free;
     cb.set_undo = saHpiEventLogInfoTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiEventLogInfoTable",
                 "Registering table saHpiEventLogInfoTable "
                 "as a table array\n"));
