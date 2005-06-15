@@ -202,7 +202,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 CONTAINER_INSERT (cb.container, event_context);
 
                 event_entry_count = CONTAINER_SIZE (cb.container);
-                event_entry_count_total++;
+                event_entry_count_total = CONTAINER_SIZE (cb.container);
 
                 /* get next event if available */
                 memset(&event, 0, sizeof(event));
@@ -280,6 +280,8 @@ int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
        we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiEventEntryCount, called\n"));
+
+        event_entry_count = CONTAINER_SIZE (cb.container);
     
     switch(reqinfo->mode) {
 
@@ -575,6 +577,8 @@ saHpiEventTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiEventTable_context);
     if(!ctx)
         return NULL;
+
+    event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
