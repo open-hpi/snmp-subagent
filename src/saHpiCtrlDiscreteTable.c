@@ -312,7 +312,9 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 	/* a instance handler also only hands us one request at a time, so
 	we don't need to loop over a list of requests; we'll only get one. */
     
-    switch(reqinfo->mode) {
+        ctrl_discrete_entry_count = CONTAINER_SIZE (cb.container);
+     
+        switch(reqinfo->mode) {
 
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
@@ -324,9 +326,9 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
         default:
             /* we should never get here, so this is a really bad error */
             return SNMP_ERR_GENERR;
-    }
+        }
 
-    return SNMP_ERR_NOERROR;
+        return SNMP_ERR_NOERROR;
 }
 
 /*

@@ -315,6 +315,8 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
        we don't need to loop over a list of requests; we'll only get one. */
 
 	DEBUGMSGTL ((AGENT, "handle_saHpiSensorEntryCount, called\n"));
+
+    sensor_entry_count = CONTAINER_SIZE (cb.container);
     
     switch(reqinfo->mode) {
 

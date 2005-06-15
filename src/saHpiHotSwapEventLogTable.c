@@ -135,6 +135,8 @@ handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLogEntryCount, called\n"));
+
+        hot_swap_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -540,6 +542,8 @@ saHpiHotSwapEventLogTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiHotSwapEventLogTable_context);
     if(!ctx)
         return NULL;
+
+    hot_swap_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.

@@ -87,6 +87,7 @@ handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
 
         DEBUGMSGTL ((AGENT, "handle_saHpiAnnouncementEntryCount, called\n"));
 
+        announcement_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 

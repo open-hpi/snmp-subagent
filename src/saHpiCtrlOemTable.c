@@ -307,6 +307,8 @@ int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
 
 	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlOemEntryCount, called\n"));
 
+        ctrl_oem_entry_count = CONTAINER_SIZE (cb.container);
+
 	switch(reqinfo->mode) {
 	
 	    case MODE_GET:

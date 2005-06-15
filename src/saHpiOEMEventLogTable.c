@@ -133,6 +133,8 @@ handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
 
 
         DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventLogEntryCount, called\n"));
+
+        oem_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -545,6 +547,8 @@ saHpiOEMEventLogTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiOEMEventLogTable_context);
     if(!ctx)
         return NULL;
+
+    oem_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.

@@ -86,7 +86,8 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
 
         DEBUGMSGTL ((AGENT, "handle_saHpiDomainAlarmEntryCount, called\n"));
 
-        
+        domain_alarm_entry_count = CONTAINER_SIZE (cb.container);
+	       
         switch(reqinfo->mode) {
 
         case MODE_GET:

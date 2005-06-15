@@ -321,6 +321,8 @@ int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 	/* a instance handler also only hands us one request at a time, so
 	   we don't need to loop over a list of requests; we'll only get one. */
 
+      ctrl_text_entry_count = CONTAINER_SIZE (cb.container);
+
 	switch (reqinfo->mode) {
 	
 	case MODE_GET:

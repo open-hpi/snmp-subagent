@@ -44,7 +44,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiAreaTable.c \
 			saHpiFieldTable.c \
 			saHpiEventTable.c \
-			saHpiResourceEventTable.c
+			saHpiResourceEventTable.c \
+			saHpiDomainEventTable.c
 
 
 hpiSubagent_LDADD	= 

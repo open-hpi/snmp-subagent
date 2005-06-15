@@ -322,6 +322,8 @@ int handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
 
  	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlAnalogEntryCount, called\n"));
 
+        ctrl_analog_entry_count = CONTAINER_SIZE (cb.container);
+
 	switch(reqinfo->mode) {
 	
 	    case MODE_GET:

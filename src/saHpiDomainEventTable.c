@@ -85,7 +85,7 @@ int initialize_table_saHpiDomainEventEntryCountTotal(void);
 int initialize_table_saHpiDomainEventEntryCount(void);	      
 
 
-SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
+SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
                                         SaHpiEventT *event,
                                         oid * this_child_oid, 
                                         size_t *this_child_oid_len)
@@ -102,12 +102,12 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
 
-        DEBUGMSGTL ((AGENT, "populate_saHpiDomainAlarmTable, called\n"));
+        DEBUGMSGTL ((AGENT, "populate_saHpiDomainEventTable, called\n"));
 
 	/* check for NULL pointers */
 	if (!event) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_saHpiDomainAlarmTable() passed NULL event pointer\n"));
+		"ERROR: populate_saHpiDomainEventTable() passed NULL event pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	} 
 	
@@ -157,8 +157,7 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, domain_evt_ctx);
 		
 	domain_event_entry_count = CONTAINER_SIZE (cb.container);
-        domain_event_entry_count_total++;
-
+        domain_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -168,7 +167,6 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
 			column, column_len,
 			&domain_evt_idx,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
 
         return SA_OK;   					
 
@@ -177,7 +175,8 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
 /**
  * 
  * @handler:
- * @reginfo:
+ * @reginfo:	domain_event_entry_count = CONTAINER_SIZE (cb.container);
+
  * @reqinfo:
  * @requests:
  * 
@@ -235,6 +234,8 @@ handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
         DEBUGMSGTL ((AGENT, "handle_saHpiDomainEventEntryCount, called\n"));
+
+	domain_event_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -630,6 +631,8 @@ saHpiDomainEventTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiDomainEventTable_context);
     if(!ctx)
         return NULL;
+
+    domain_event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -832,19 +835,11 @@ void saHpiDomainEventTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiDomainEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
 
     /*
      * check activation/deactivation
      */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
+
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -927,7 +922,7 @@ void saHpiDomainEventTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+            break; /** should have been logged in reserve1 */
         }
     }
 

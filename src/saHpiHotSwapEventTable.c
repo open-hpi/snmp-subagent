@@ -136,8 +136,9 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
         
         DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventEntryCount, called\n"));
 
-
-        switch(reqinfo->mode) {
+        hotswap_event_entry_count = CONTAINER_SIZE (cb.container);
+        
+	switch(reqinfo->mode) {
 
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
@@ -546,6 +547,8 @@ saHpiHotSwapEventTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiHotSwapEventTable_context);
     if(!ctx)
         return NULL;
+
+    hotswap_event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.

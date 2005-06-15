@@ -134,6 +134,8 @@ handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
 
 
         DEBUGMSGTL ((AGENT, "handle_saHpiSoftwareEventLogEntryCount, called\n"));
+
+        software_event_log_entry = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
@@ -529,6 +531,8 @@ saHpiSoftwareEventLogTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiSoftwareEventLogTable_context);
     if(!ctx)
         return NULL;
+
+    software_event_log_entry_total++;
         
     /*
      * TODO: check indexes, if necessary.
