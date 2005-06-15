@@ -172,7 +172,7 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, res_evt_ctx);
 		
 	resource_event_entry_count = CONTAINER_SIZE (cb.container);
-        resource_event_entry_count_total++;
+        resource_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
         return SA_OK;
 }
@@ -239,7 +239,8 @@ handle_saHpiResourceEventEntryCount(netsnmp_mib_handler *handler,
           
 	DEBUGMSGTL ((AGENT, "handle_saHpiResourceEventEntryCount, called\n"));
 
-        
+        resource_event_entry_count = CONTAINER_SIZE (cb.container);        
+
         switch(reqinfo->mode) {
 
         case MODE_GET:
@@ -390,6 +391,8 @@ init_saHpiResourceEventTable(void)
 static int saHpiResourceEventTable_row_copy(saHpiResourceEventTable_context * dst,
                          saHpiResourceEventTable_context * src)
 {
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -430,6 +433,9 @@ static int saHpiResourceEventTable_row_copy(saHpiResourceEventTable_context * ds
 int
 saHpiResourceEventTable_extract_index( saHpiResourceEventTable_context * ctx, netsnmp_index * hdr )
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_extract_index, called\n"));
+
         /*
          * temporary local storage for extracting oid index
          *
@@ -528,6 +534,8 @@ int saHpiResourceEventTable_can_activate(saHpiResourceEventTable_context *undo_c
                       saHpiResourceEventTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -553,6 +561,9 @@ int saHpiResourceEventTable_can_deactivate(saHpiResourceEventTable_context *undo
                         saHpiResourceEventTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_can_deactivate, called\n"));
+
     /*
      * TODO: check for deactivation requirements here
      */
@@ -570,6 +581,8 @@ int saHpiResourceEventTable_can_delete(saHpiResourceEventTable_context *undo_ctx
                     saHpiResourceEventTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_can_delete, called\n"));
+
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -602,8 +615,13 @@ saHpiResourceEventTable_create_row( netsnmp_index* hdr)
 {
     saHpiResourceEventTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiResourceEventTable_context);
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_create_row, called\n"));
+
     if(!ctx)
         return NULL;
+
+    resource_event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -637,6 +655,8 @@ saHpiResourceEventTable_duplicate_row( saHpiResourceEventTable_context * row_ctx
 {
     saHpiResourceEventTable_context * dup;
 
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_duplicate_row, called\n"));
+
     if(!row_ctx)
         return NULL;
 
@@ -658,6 +678,8 @@ saHpiResourceEventTable_duplicate_row( saHpiResourceEventTable_context * row_ctx
 netsnmp_index * saHpiResourceEventTable_delete_row( saHpiResourceEventTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -692,14 +714,15 @@ netsnmp_index * saHpiResourceEventTable_delete_row( saHpiResourceEventTable_cont
  */
 void saHpiResourceEventTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiResourceEventTable_context *row_ctx =
-            (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx =
-            (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx =
+//            (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx =
+//            (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -733,11 +756,13 @@ void saHpiResourceEventTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiResourceEventTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -780,11 +805,13 @@ void saHpiResourceEventTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiResourceEventTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_action, called\n"));
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -800,26 +827,6 @@ void saHpiResourceEventTable_set_action( netsnmp_request_group *rg )
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
     }
-
-#if 0
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiResourceEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-#endif
 
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
@@ -854,9 +861,11 @@ void saHpiResourceEventTable_set_action( netsnmp_request_group *rg )
 void saHpiResourceEventTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_commit, called\n"));
 
     /*
      * loop through columns
@@ -889,9 +898,11 @@ void saHpiResourceEventTable_set_commit( netsnmp_request_group *rg )
 void saHpiResourceEventTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -936,9 +947,11 @@ void saHpiResourceEventTable_set_free( netsnmp_request_group *rg )
 void saHpiResourceEventTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
-    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
+//    saHpiResourceEventTable_context *row_ctx = (saHpiResourceEventTable_context *)rg->existing_row;
+//    saHpiResourceEventTable_context *undo_ctx = (saHpiResourceEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_set_undo, called\n"));
 
     /*
      * loop through columns
@@ -968,6 +981,8 @@ void
 initialize_table_saHpiResourceEventTable(void)
 {
     netsnmp_table_registration_info *table_info;
+
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEventTable, called\n"));
 
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiResourceEventTable_handler called again\n");
@@ -1073,6 +1088,8 @@ int saHpiResourceEventTable_get_value(
     netsnmp_variable_list *var = request->requestvb;
     saHpiResourceEventTable_context *context = (saHpiResourceEventTable_context *)item;
 
+    DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_get_value, called\n"));
+
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIRESOURCEEVENTENTRYID:
@@ -1110,6 +1127,8 @@ int saHpiResourceEventTable_get_value(
 const saHpiResourceEventTable_context *
 saHpiResourceEventTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_get_by_idx, called\n"));
+
     return (const saHpiResourceEventTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
