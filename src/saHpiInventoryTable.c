@@ -352,6 +352,8 @@ init_saHpiInventoryTable(void)
 
     initialize_table_saHpiInventoryTable();
 
+    initialize_table_saHpiInventoryEntryCount();
+
     /*
      * TODO: perform any startup stuff here, such as
      * populating the table with initial data.
