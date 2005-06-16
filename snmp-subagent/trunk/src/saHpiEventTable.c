@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
 #include <saHpiResourceEventTable.h>
+#include <saHpiDomainEventTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -117,8 +118,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
                         printf("        Event Type: [%s]\n\n", 
                         oh_lookup_domaineventtype(event.EventDataUnion.DomainEvent.Type));
-                        //populate_saHpiDomainEventTable();
-                        goto end;
+                        populate_saHpiDomainEventTable();
                         break;
                 case SAHPI_ET_SENSOR:
                         printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
@@ -690,12 +690,6 @@ void saHpiEventTable_set_reserve1( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiEventSeverity));
-        break;
-
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -733,20 +727,6 @@ void saHpiEventTable_set_reserve2( netsnmp_request_group *rg )
         rc = SNMP_ERR_NOERROR;
 
         switch(current->tri->colnum) {
-
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
 
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
@@ -791,11 +771,6 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
         var = current->ri->requestvb;
 
         switch(current->tri->colnum) {
-
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-            row_ctx->saHpiEventSeverity = *var->val.integer;
-        break;
 
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
@@ -868,10 +843,6 @@ void saHpiEventTable_set_commit( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
-
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
@@ -906,10 +877,6 @@ void saHpiEventTable_set_free( netsnmp_request_group *rg )
         var = current->ri->requestvb;
 
         switch(current->tri->colnum) {
-
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
 
         default: 
                 break;
@@ -957,10 +924,6 @@ void saHpiEventTable_set_undo( netsnmp_request_group *rg )
         var = current->ri->requestvb;
 
         switch(current->tri->colnum) {
-
-        case COLUMN_SAHPIEVENTSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-        break;
 
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
