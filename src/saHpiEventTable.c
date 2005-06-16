@@ -118,7 +118,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
                         printf("        Event Type: [%s]\n\n", 
                         oh_lookup_domaineventtype(event.EventDataUnion.DomainEvent.Type));
-                        populate_saHpiDomainEventTable();
+                        populate_saHpiDomainEventTable(sessionid, &event,                                           
+                                                       child_oid, 
+                                                       &child_oid_len);
                         break;
                 case SAHPI_ET_SENSOR:
                         printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
