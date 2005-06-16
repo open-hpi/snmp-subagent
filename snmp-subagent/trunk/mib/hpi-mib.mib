@@ -2877,7 +2877,7 @@ saHpiEventRowPointer OBJECT-TYPE
 
 saHpiEventSeverity OBJECT-TYPE
         SYNTAX          SaHpiSeverity
-        MAX-ACCESS      read-write
+        MAX-ACCESS      read-only
         STATUS          current
         DESCRIPTION     "Severity of event. 
 	Note: Enumerated values are increased by one value compared to
