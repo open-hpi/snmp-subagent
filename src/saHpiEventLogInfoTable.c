@@ -36,7 +36,16 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiEventLogInfoTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <saHpiResourceTable.h>
+#include <saHpiResourceEventTable.h>
+#include <saHpiDomainEventTable.h>
+#include <session_info.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -49,10 +58,220 @@ size_t saHpiEventLogInfoTable_oid_len = OID_LENGTH(saHpiEventLogInfoTable_oid);
 /************************************************************/
 /************************************************************/
 
-SaErrorT populate_area (SaHpiSessionIdT sessionid)
+SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 {
 
-        return SA_OK;
+	SaErrorT rv;
+	SaHpiEventLogInfoT event_log_info;
+
+        SaHpiEntryIdT EntryId;
+	SaHpiRptEntryT rpt_entry;
+
+        SaHpiBoolT event_log_state;
+	
+	oid evt_log_info_oid[EVENT_LOG_INFO_INDEX_NR];
+	netsnmp_index evt_log_info_index;
+	saHpiEventLogInfoTable_context *evt_log_info_context;
+
+	DEBUGMSGTL ((AGENT, "populate_saHpiEventLogInfo\n"));
+
+        EntryId = SAHPI_FIRST_ENTRY;
+        do {
+                rv = saHpiRptEntryGet(sessionid, EntryId, &EntryId, &rpt_entry);
+
+                if (rv != SA_OK) {
+                        DEBUGMSGTL ((AGENT, 
+                        "populate_saHpiEventLogInfo, saHpiRptEntryGet Failed: rv = %d\n",rv));
+                        rv =  AGENT_ERR_INTERNAL_ERROR;
+                        break;
+                }
+                rv = saHpiEventLogInfoGet (sessionid, 
+                                           rpt_entry.ResourceId,
+                                           &event_log_info);
+                if (rv == SA_ERR_HPI_CAPABILITY) {
+                        DEBUGMSGTL ((AGENT, "SA_ERR_HPI_CAPABILITY: populate_saHpiEventLogInfo Failed: rv = %d\n",rv));
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                        continue;
+                } else if ( (rv != SA_OK) && (rv != SA_ERR_HPI_CAPABILITY) ) {
+                        DEBUGMSGTL ((AGENT, "populate_saHpiEventLogInfo Failed: rv = %d\n",rv));
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                        break;
+                }
+	
+                evt_log_info_index.len = EVENT_LOG_INFO_INDEX_NR;
+                evt_log_info_oid[0] = get_domain_id(sessionid);
+                evt_log_info_oid[1] = rpt_entry.ResourceId;
+                evt_log_info_index.oids = (oid *) & evt_log_info_oid;
+	
+                /* See if it exists. */
+                evt_log_info_context = NULL;
+                evt_log_info_context = CONTAINER_FIND (cb.container, &evt_log_info_index);
+		
+                if (!evt_log_info_context) { 
+                        // New entry. Add it
+                        evt_log_info_context = 
+                                saHpiEventLogInfoTable_create_row ( &evt_log_info_index);
+                }
+                if (!evt_log_info_context) {
+                        snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                        break;
+                }	
+
+
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
+
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                evt_log_info_context->saHpiEventLogInfoSize = event_log_info.Size;
+
+                /** UNSIGNED32 = ASN_UNSIGNED */
+                evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
+                        event_log_info.UserEventMaxSize;
+
+                /** SaHpiTime = ASN_COUNTER64 */
+                evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
+                        event_log_info.UpdateTimestamp;
+
+                /** SaHpiTime = ASN_COUNTER64 */
+                evt_log_info_context->saHpiEventLogInfoTime = 
+                        event_log_info.CurrentTime;
+
+                /** TruthValue = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogInfoIsEnabled =
+                        (event_log_info.Enabled == SAHPI_TRUE) ? 
+                                MIB_TRUE : MIB_FALSE;
+
+                /** TruthValue = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogInfoOverflowFlag =
+                        (event_log_info.OverflowFlag == SAHPI_TRUE) ? 
+                                MIB_TRUE : MIB_FALSE;
+
+                /** TruthValue = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogInfoOverflowResetable =
+                        (event_log_info.OverflowResetable == SAHPI_TRUE) ? 
+                                MIB_TRUE : MIB_FALSE; 
+
+                /** INTEGER = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogInfoOverflowAction = 
+                        event_log_info.OverflowAction + 1;
+
+                /** INTEGER = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogInfoOverflowReset = 0;
+
+                /** TruthValue = ASN_INTEGER */
+                evt_log_info_context->saHpiEventLogClear = MIB_FALSE;
+
+                /** TruthValue = ASN_INTEGER */
+                rv = saHpiEventLogStateGet (sessionid, rpt_entry.ResourceId,
+                                            &event_log_state);
+                if (rv != SA_OK) {
+                        DEBUGMSGTL ((AGENT, 
+                        "populate_saHpiEventLogInfo, saHpiEventLogStateGet Failed: rv = %d\n",rv));
+                        rv =  AGENT_ERR_INTERNAL_ERROR;
+                        break;
+                }
+                evt_log_info_context->saHpiEventLogState = event_log_state;
+
+                CONTAINER_INSERT (cb.container, evt_log_info_context);
+
+	} while (EntryId != SAHPI_LAST_ENTRY);
+
+
+        /******************************************************/
+        /* now get the Domain Event Log Info for this session */
+        /* this is accomplished by using                      */
+        /* in saHpiEventLogInfoGet()                          */
+        /* SAHPI_UNSPECIFIED_RESOURCE_ID                      */
+        /******************************************************/
+       sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
+        rv = saHpiEventLogInfoGet (sessionid, 
+                                   SAHPI_UNSPECIFIED_RESOURCE_ID,
+                                   &event_log_info);
+        if (rv == SA_ERR_HPI_CAPABILITY) {
+                DEBUGMSGTL ((AGENT, "SA_ERR_HPI_CAPABILITY while getting Domain Event Log Info: rv = %d\n",rv));
+                return AGENT_ERR_INTERNAL_ERROR;
+        } else if ( (rv != SA_OK) && (rv != SA_ERR_HPI_CAPABILITY) ) {
+                DEBUGMSGTL ((AGENT, "getting Domain Event Log Info Failed: rv = %d\n",rv));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        evt_log_info_index.len = EVENT_LOG_INFO_INDEX_NR;
+        evt_log_info_oid[0] = get_domain_id(sessionid);
+        evt_log_info_oid[1] = SAHPI_UNSPECIFIED_RESOURCE_ID;
+        evt_log_info_index.oids = (oid *) & evt_log_info_oid;
+
+        /* See if it exists. */
+        evt_log_info_context = NULL;
+        evt_log_info_context = CONTAINER_FIND (cb.container, &evt_log_info_index);
+
+        if (!evt_log_info_context) { 
+                // New entry. Add it
+                evt_log_info_context = 
+                        saHpiEventLogInfoTable_create_row ( &evt_log_info_index);
+        }
+        if (!evt_log_info_context) {
+                DEBUGMSGTL ((AGENT, "Not enough memory for a EventLogInfo row!"));
+                snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        } 
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        evt_log_info_context->saHpiEventLogInfoSize = event_log_info.Size;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
+                event_log_info.UserEventMaxSize;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
+                event_log_info.UpdateTimestamp;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        evt_log_info_context->saHpiEventLogInfoTime = 
+                event_log_info.CurrentTime;
+
+        /** TruthValue = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogInfoIsEnabled =
+                (event_log_info.Enabled == SAHPI_TRUE) ? 
+                        MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogInfoOverflowFlag =
+                (event_log_info.OverflowFlag == SAHPI_TRUE) ? 
+                        MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogInfoOverflowResetable =
+                (event_log_info.OverflowResetable == SAHPI_TRUE) ? 
+                        MIB_TRUE : MIB_FALSE; 
+
+        /** INTEGER = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogInfoOverflowAction = 
+                event_log_info.OverflowAction + 1;
+
+        /** INTEGER = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogInfoOverflowReset = 0;
+
+        /** TruthValue = ASN_INTEGER */
+        evt_log_info_context->saHpiEventLogClear = MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        rv = saHpiEventLogStateGet (sessionid, rpt_entry.ResourceId,
+                                    &event_log_state);
+        if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, 
+                "populate_saHpiEventLogInfo, saHpiEventLogStateGet Failed: rv = %d\n",rv));
+                return  AGENT_ERR_INTERNAL_ERROR;
+        }
+        evt_log_info_context->saHpiEventLogState = event_log_state;
+        
+	CONTAINER_INSERT (cb.container, evt_log_info_context);
+	
+	return rv;
 
 }
 
@@ -803,8 +1022,10 @@ void saHpiEventLogInfoTable_set_free( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
         break;
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 

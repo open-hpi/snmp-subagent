@@ -92,6 +92,10 @@ const saHpiEventLogInfoTable_context * saHpiEventLogInfoTable_get_by_idx(netsnmp
 const saHpiEventLogInfoTable_context * saHpiEventLogInfoTable_get_by_idx_rs(netsnmp_index *,
                                         int row_status);
 int saHpiEventLogInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid);
 
 
 /*************************************************************
@@ -105,6 +109,7 @@ extern size_t saHpiEventLogInfoTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiEventLogInfoTable
  */
+#define EVENT_LOG_INFO_INDEX_NR 2
 #define COLUMN_SAHPIEVENTLOGINFOENTRIES 1
 #define COLUMN_SAHPIEVENTLOGINFOSIZE 2
 #define COLUMN_SAHPIEVENTLOGINFOUSEREVENTMAXSIZE 3
