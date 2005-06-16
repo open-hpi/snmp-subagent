@@ -116,8 +116,6 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
 	domain_evt_idx.len = DOMAIN_EVENT_INDEX_NR;
 		/** Index saHpiDomainId is external */
 	domain_evt_oid[0] = get_domain_id(sessionid);
-		/** Index saHpiEventSeverity is external */
-	domain_evt_oid[1] = event->Severity + 1;
                 /** Index saHpiDomainEventEntryId is internal */
 	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
 	dr_pair.domainId_resourceId_arry[1] = event->Source;
@@ -127,7 +125,9 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
 		"ERROR: populate_saHpiDomainEventTable() domain_resource_pair_get returned NULL\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
-	domain_evt_oid[2] = dr_entry->entry_id++;
+	domain_evt_oid[1] = dr_entry->entry_id++;	
+	        /** Index saHpiEventSeverity is external */
+	domain_evt_oid[2] = event->Severity + 1;
 		/* assign the indices to the index */
 	domain_evt_idx.oids = (oid *) & domain_evt_oid;
 	   
