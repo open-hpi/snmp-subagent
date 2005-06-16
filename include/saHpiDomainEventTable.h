@@ -69,7 +69,7 @@ int saHpiDomainEventTable_get_value(netsnmp_request_info *, netsnmp_index *, net
 /*************************************************************
  * function declarations: OpenHpi
  */
-SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid,
+SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
                                         SaHpiEventT *event,
                                         oid * event_oid, 
                                         size_t *event_oid_len);
