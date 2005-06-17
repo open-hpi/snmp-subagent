@@ -187,11 +187,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
         rv = saHpiEventLogInfoGet (sessionid, 
                                    SAHPI_UNSPECIFIED_RESOURCE_ID,
                                    &event_log_info);
-        if (rv == SA_ERR_HPI_CAPABILITY) {
-                DEBUGMSGTL ((AGENT, "SA_ERR_HPI_CAPABILITY while getting Domain Event Log Info: rv = %d\n",rv));
-                return AGENT_ERR_INTERNAL_ERROR;
-        } else if ( (rv != SA_OK) && (rv != SA_ERR_HPI_CAPABILITY) ) {
-                DEBUGMSGTL ((AGENT, "getting Domain Event Log Info Failed: rv = %d\n",rv));
+        if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, "getting Domain EventLogInfo Failed: rv = %d\n",rv));
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
