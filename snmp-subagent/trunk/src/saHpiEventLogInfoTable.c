@@ -184,7 +184,6 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
         /* in saHpiEventLogInfoGet()                          */
         /* SAHPI_UNSPECIFIED_RESOURCE_ID                      */
         /******************************************************/
-       sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
         rv = saHpiEventLogInfoGet (sessionid, 
                                    SAHPI_UNSPECIFIED_RESOURCE_ID,
                                    &event_log_info);
