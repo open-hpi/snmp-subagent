@@ -125,21 +125,6 @@ extern size_t saHpiEventLogInfoTable_oid_len;
 #define saHpiEventLogInfoTable_COL_MIN 1
 #define saHpiEventLogInfoTable_COL_MAX 12
 
-/* comment out the following line if you don't handle SET-REQUEST for saHpiEventLogInfoTable */
-#define saHpiEventLogInfoTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiEventLogInfoTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiEventLogInfoTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiEventLogInfoTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiEventLogInfoTable_SET_HANDLING
-
 int saHpiEventLogInfoTable_extract_index( saHpiEventLogInfoTable_context * ctx, netsnmp_index * hdr );
 
 void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group * );
@@ -163,14 +148,9 @@ int saHpiEventLogInfoTable_can_delete(saHpiEventLogInfoTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiEventLogInfoTable_ROW_CREATION
 saHpiEventLogInfoTable_context * saHpiEventLogInfoTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiEventLogInfoTable_IDX2
 saHpiEventLogInfoTable_context * saHpiEventLogInfoTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
