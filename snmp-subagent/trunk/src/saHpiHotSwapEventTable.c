@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiHotSwapEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -49,8 +54,15 @@ size_t saHpiHotSwapEventTable_oid_len = OID_LENGTH(saHpiHotSwapEventTable_oid);
 /************************************************************/
 /************************************************************/
 
+
 /*************************************************************
- * oid and fucntion declarations scalars
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
+
+/*************************************************************
+ * oid and function declarations scalars
  */
 static u_long hotswap_event_entry_count_total = 0;
 static u_long hotswap_event_entry_count = 0;
@@ -70,6 +82,100 @@ int handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
 
 int initialize_table_saHpiHotSwapEventEntryCountTotal(void);
 int initialize_table_saHpiHotSwapEventEntryCount(void);
+
+
+SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * this_child_oid, 
+                                        size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+
+	oid hotswap_evt_oid[HOTSWAP_EVENT_INDEX_NR];
+	netsnmp_index hotswap_evt_idx;
+	saHpiHotSwapEventTable_context *hotswap_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiHotSwapEventTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiHotSwapEventTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	} 
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	hotswap_evt_idx.len = HOTSWAP_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	hotswap_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	hotswap_evt_oid[1] = event->Source;
+	        /** Index saHpiEventSeverity is external */
+	hotswap_evt_oid[2] = event->Severity + 1;
+                /** Index saHpiHotSwapEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiHotSwapEventTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	hotswap_evt_oid[3] = dr_entry->entry_id++;	
+	hotswap_evt_idx.oids = (oid *) & hotswap_evt_oid;
+	   
+	/* See if Row exists. */
+	hotswap_evt_ctx = NULL;
+	hotswap_evt_ctx = CONTAINER_FIND(cb.container, &hotswap_evt_idx);
+
+	if (!hotswap_evt_ctx) { 
+		// New entry. Add it
+		hotswap_evt_ctx = 
+			saHpiHotSwapEventTable_create_row(&hotswap_evt_idx);
+	}
+	if (!hotswap_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a HotSwap Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        hotswap_evt_ctx->saHpiHotSwapEventEntryId = hotswap_evt_oid[3];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        hotswap_evt_ctx->saHpiHotSwapEventTimestamp = event->Timestamp;		
+
+        /** SaHpiHotSwapState = ASN_INTEGER */
+        hotswap_evt_ctx->saHpiHotSwapEventState = 
+                        event->EventDataUnion.HotSwapEvent.HotSwapState + 1;
+			
+        /** SaHpiHotSwapState = ASN_INTEGER */
+        hotswap_evt_ctx->saHpiHotSwapEventPreviousState = 
+                        event->EventDataUnion.HotSwapEvent.PreviousHotSwapState + 1;			
+
+	CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
+		
+	hotswap_event_entry_count = CONTAINER_SIZE (cb.container);
+        hotswap_event_entry_count_total = CONTAINER_SIZE (cb.container);
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIHOTSWAPEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiHotSwapEventTable_oid, saHpiHotSwapEventTable_oid_len,
+			column, column_len,
+			&hotswap_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+        return SA_OK;   					
+
+}
 
 
 /**
@@ -322,6 +428,8 @@ init_saHpiHotSwapEventTable(void)
 
         initialize_table_saHpiHotSwapEventEntryCountTotal();
         initialize_table_saHpiHotSwapEventEntryCount();
+	
+        domain_resource_pair_initialize(&initialized, &dr_table);
 }
 
 /************************************************************
@@ -751,19 +859,6 @@ void saHpiHotSwapEventTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiHotSwapEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -846,6 +941,7 @@ void saHpiHotSwapEventTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }

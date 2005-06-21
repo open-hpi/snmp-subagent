@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorEnableChangeEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -48,6 +53,12 @@ size_t saHpiSensorEnableChangeEventTable_oid_len = OID_LENGTH(saHpiSensorEnableC
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -72,6 +83,12 @@ int handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
 						  
 int initialize_table_saHpiSensorEnableChangeEventEntryCountTotal(void);
 int initialize_table_saHpiSensorEnableChangeEventEntryCount(void);
+
+
+SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * this_child_oid, 
+                                        size_t *this_child_oid_len)
 
 
 /**
