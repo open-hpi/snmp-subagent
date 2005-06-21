@@ -70,6 +70,10 @@ const saHpiEventLogTable_context * saHpiEventLogTable_get_by_idx_rs(netsnmp_inde
                                         int row_status);
 int saHpiEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid);
 
 /*************************************************************
  * oid declarations
@@ -82,27 +86,13 @@ extern size_t saHpiEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiEventLogTable
  */
+#define EVENT_LOG_INDEX_NR 3
 #define COLUMN_SAHPIEVENTLOGINDEX 1
 #define COLUMN_SAHPIEVENTLOGTYPE 2
 #define COLUMN_SAHPIEVENTLOGADDEDTIMESTAMP 3
 #define COLUMN_SAHPIEVENTLOGROWPOINTER 4
 #define saHpiEventLogTable_COL_MIN 2
 #define saHpiEventLogTable_COL_MAX 4
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiEventLogTable */
-#define saHpiEventLogTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiEventLogTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiEventLogTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiEventLogTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiEventLogTable_SET_HANDLING
 
 int saHpiEventLogTable_extract_index( saHpiEventLogTable_context * ctx, netsnmp_index * hdr );
 
@@ -127,14 +117,9 @@ int saHpiEventLogTable_can_delete(saHpiEventLogTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiEventLogTable_ROW_CREATION
 saHpiEventLogTable_context * saHpiEventLogTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiEventLogTable_IDX2
 saHpiEventLogTable_context * saHpiEventLogTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
