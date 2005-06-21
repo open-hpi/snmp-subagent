@@ -12,7 +12,7 @@
 void
 init_hpiB0101(void)
 {
-//    static oid saHpiSensorEventEntryLogCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
+//    static oid saHpiSensorEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
 //    static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
 //    static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
 //    static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
@@ -79,7 +79,7 @@ init_hpiB0101(void)
 
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiSensorEventEntryLogCountTotal", handle_saHpiSensorEventEntryLogCountTotal,
-//                               saHpiSensorEventEntryLogCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryLogCountTotal_oid),
+//                               saHpiSensorEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventLogEntryCountTotal_oid),
 //                               HANDLER_CAN_RONLY
 //       ));
 //    netsnmp_register_scalar(
