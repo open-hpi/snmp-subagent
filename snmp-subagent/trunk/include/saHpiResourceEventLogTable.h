@@ -67,6 +67,14 @@ const saHpiResourceEventLogTable_context * saHpiResourceEventLogTable_get_by_idx
                                         int row_status);
 int saHpiResourceEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid, 
+                                             SaHpiEventLogEntryT *event,
+                                             oid * this_child_oid, 
+                                             size_t *this_child_oid_len);
+
 
 /*************************************************************
  * oid declarations
@@ -79,26 +87,12 @@ extern size_t saHpiResourceEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiResourceEventLogTable
  */
+#define RESOURCE_EVENT_LOG_INDEX_NR 4
 #define COLUMN_SAHPIRESOURCEEVENTLOGENTRYID 1
 #define COLUMN_SAHPIRESOURCEEVENTLOGTIMESTAMP 2
 #define COLUMN_SAHPIRESOURCEEVENTLOGTYPE 3
 #define saHpiResourceEventLogTable_COL_MIN 2
 #define saHpiResourceEventLogTable_COL_MAX 3
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiResourceEventLogTable */
-#define saHpiResourceEventLogTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiResourceEventLogTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiResourceEventLogTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiResourceEventLogTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiResourceEventLogTable_SET_HANDLING
 
 int saHpiResourceEventLogTable_extract_index( saHpiResourceEventLogTable_context * ctx, netsnmp_index * hdr );
 
@@ -123,14 +117,9 @@ int saHpiResourceEventLogTable_can_delete(saHpiResourceEventLogTable_context *un
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiResourceEventLogTable_ROW_CREATION
 saHpiResourceEventLogTable_context * saHpiResourceEventLogTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiResourceEventLogTable_IDX2
 saHpiResourceEventLogTable_context * saHpiResourceEventLogTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
