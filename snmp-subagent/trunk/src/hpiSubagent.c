@@ -417,6 +417,9 @@ main (int argc, char **argv)
 		init_saHpiDomainEventTable();
 
 		init_saHpiEventLogInfoTable();
+		init_saHpiEventLogTable();
+		init_saHpiResourceEventLogTable();
+		init_saHpiSensorEventLogTable();
 /*		
 		
 		init_saHpiWatchdogTable();
@@ -432,10 +435,7 @@ main (int argc, char **argv)
 		init_saHpiUserEventTable();
 		init_saHpiAnnouncementTable();
 		
-		init_saHpiEventLogTable();
-		init_saHpiResourceEventLogTable();
 		init_saHpiDomainEventLogTable();
-		init_saHpiSensorEventLogTable();
 		init_saHpiSensorEnableChangeEventLogTable();
 		init_saHpiHotSwapEventLogTable();
 		init_saHpiWatchdogEventLogTable();
@@ -483,10 +483,17 @@ main (int argc, char **argv)
 		     *	           populate_saHpiFieldTable();		
 		     */
 		populate_saHpiEventTable(sessionid);
-                    /* populate_saHpiResourceEventTable();
+                    /*
+                     * populate_saHpiResourceEventTable();
+                     * populate_saHpiDomainEventTable();
+                     * populate_saHpiSensorEventTable();
                      */
-
                 populate_saHpiEventLogInfo(sessionid);
+                populate_saHpiEventLog (sessionid);
+                    /*
+                     * populate_saHpiResourceEventLogTable();
+                     * populate_saHpiSensorEventLogTable();
+                     */
 
                 DEBUGMSGTL ((AGENT,
                 "WARNING: populate_event: hpiSubagent.c: nolong implemented!")); 
