@@ -404,7 +404,9 @@ static int saHpiEventTable_row_copy(saHpiEventTable_context * dst,
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    memcpy( src->saHpiEventRowPointer, dst->saHpiEventRowPointer, src->saHpiEventRowPointer_len );
+    memcpy( dst->saHpiEventRowPointer, 
+            src->saHpiEventRowPointer,  
+            src->saHpiEventRowPointer_len );
     dst->saHpiEventRowPointer_len = src->saHpiEventRowPointer_len;
 
     dst->saHpiEventSeverity = src->saHpiEventSeverity;
@@ -460,27 +462,9 @@ saHpiEventTable_extract_index( saHpiEventTable_context * ctx, netsnmp_index * hd
        /** TODO: link this index to the next, or NULL for the last one */
        var_saHpiEventRowPointer.next_variable = NULL;
 
-#if 0
-    /*
-     * parse the oid into the individual index components
-     */
-    err = parse_oid_indexes( hdr->oids, hdr->len, &var_saHpiEventRowPointer );
-    if (err == SNMP_ERR_NOERROR) {
-       /*
-        * copy index components into the context structure
-        */
-                memcpy( ctx->saHpiEventRowPointer, 
-                        var_saHpiEventRowPointer.val.string, 
-                        var_saHpiEventRowPointer.val_len );
-                ctx->saHpiEventRowPointer_len = var_saHpiEventRowPointer.val_len;
-   
-                err = saHpiEventRowPointer_check_index(ctx);
-    }
-#endif
-
-    memcpy(hdr->oids, ctx->saHpiEventRowPointer, hdr->len);
-    ctx->saHpiEventRowPointer_len = hdr->len;
-    err = SNMP_ERR_NOERROR;
+       memcpy(ctx->saHpiEventRowPointer, hdr->oids, hdr->len * sizeof(oid));
+       ctx->saHpiEventRowPointer_len = hdr->len;
+       err = SNMP_ERR_NOERROR;
     
     /*
      * parsing may have allocated memory. free it.
