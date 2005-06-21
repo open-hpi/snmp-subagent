@@ -36,7 +36,13 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorEventLogTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -48,14 +54,18 @@ size_t saHpiSensorEventLogTable_oid_len = OID_LENGTH(saHpiSensorEventLogTable_oi
 /************************************************************/
 /************************************************************/
 /************************************************************/
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
 
 /*************************************************************
  * oid and function declarations scalars
  */
-
-static u_long sensor_event_entry_log_count_total = 0;
+static u_long sensor_event_log_entry_count_total = 0;
 static u_long sensor_event_log_entry_count = 0; 
-static oid saHpiSensorEventEntryLogCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 }; 
+static oid saHpiSensorEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 }; 
 static oid saHpiSensorEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
 
 int handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
@@ -70,6 +80,217 @@ int handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
 					 
 int initialize_table_saHpiSensorEventEntryLogCountTotal(void);
 int initialize_table_saHpiSensorEventLogEntryCount(void);
+
+
+/**
+ * 
+ * @sessionid:
+ * @event:
+ * @this_child_oid:
+ * @this_child_oid_len:
+ * 
+ * @return:
+ */
+SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid, 
+                                             SaHpiEventLogEntryT *event,
+                                             oid * this_child_oid, 
+                                             size_t *this_child_oid_len,
+                                             SaHpiRdrT *event_rdr_entry)
+{
+	SaErrorT rv = SA_OK;
+
+	oid sen_evt_oid[SENSOR_EVENT_LOG_INDEX_NR];
+	netsnmp_index sen_evt_idx;
+	saHpiSensorEventLogTable_context *sen_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        SaHpiTextBufferT buff;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiSesnorEventLogTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEventLogTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	sen_evt_idx.len = SENSOR_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	sen_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	sen_evt_oid[1] = event->Event.Source;
+		/** Index saHpiSensorNum is external */
+	sen_evt_oid[2] = event->Event.EventDataUnion.SensorEvent.SensorNum;
+		/** Index saHpiEventSeverity is external */
+	sen_evt_oid[3] = event->Event.Severity + 1;
+
+                /** Index saHpiSensorEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Event.Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEventLogTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	sen_evt_oid[4] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	sen_evt_idx.oids = (oid *) & sen_evt_oid;
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSOREVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiSensorEventLogTable_oid, saHpiSensorEventLogTable_oid_len,
+			column, column_len,
+			&sen_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+	/* See if Row exists. */
+	sen_evt_ctx = NULL;
+	sen_evt_ctx = CONTAINER_FIND(cb.container, &sen_evt_idx);
+
+	if (!sen_evt_ctx) { 
+		// New entry. Add it
+		sen_evt_ctx = 
+			saHpiSensorEventLogTable_create_row(&sen_evt_idx);
+	}
+	if (!sen_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Sensor Event Log row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        sen_evt_ctx->saHpiSensorEventLogTimestamp = event->Timestamp;
+
+        /** SaHpiSensorType = ASN_INTEGER */
+        sen_evt_ctx->saHpiSensorEventLogType = event->Event.EventType + 1;
+
+        /** SaHpiEventCategory = ASN_INTEGER */
+        sen_evt_ctx->saHpiSensorEventLogCategory = 
+                event->Event.EventDataUnion.SensorEvent.EventCategory;
+
+        /** TruthValue = ASN_INTEGER */
+        sen_evt_ctx->saHpiSensorEventLogAssertion = 
+            (event->Event.EventDataUnion.SensorEvent.Assertion == SAHPI_TRUE)
+		? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+        rv = oh_decode_eventstate(event->Event.EventDataUnion.SensorEvent.EventState,
+			      event->Event.EventDataUnion.SensorEvent.EventCategory,
+			      &buff);
+	if (rv != SA_OK) {
+		snmp_log (LOG_ERR, 
+                "populate_saHpiResourceEventLogTable: oh_decode_eventstate error!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+        memcpy(sen_evt_ctx->saHpiSensorEventLogState,
+               buff.Data, buff.DataLength);
+        sen_evt_ctx->saHpiSensorEventLogState_len = buff.DataLength;
+
+        /** SaHpiOptionalData = ASN_OCTET_STR */
+        rv = oh_decode_sensoroptionaldata(
+                event->Event.EventDataUnion.SensorEvent.OptionalDataPresent,
+		&buff);
+	if (rv != SA_OK) {
+		snmp_log (LOG_ERR, 
+                "populate_saHpiResourceEventLogTable: oh_decode_sensoroptionaldata error!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+        memcpy(sen_evt_ctx->saHpiSensorEventLogOptionalData, buff.Data,
+               buff.DataLength);
+        sen_evt_ctx->saHpiSensorEventLogOptionalData_len = buff.DataLength;
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sen_evt_ctx->saHpiSensorEventLogTriggerReadingType =
+                event->Event.EventDataUnion.SensorEvent.TriggerReading.Type + 1;
+
+        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+        if (event_rdr_entry) {
+                rv =  oh_decode_sensorreading(
+                        event->Event.EventDataUnion.SensorEvent.TriggerReading,
+                        event_rdr_entry->RdrTypeUnion.SensorRec.DataFormat,
+                        &buff);
+                if (rv != SA_OK) {
+                        snmp_log (LOG_ERR, 
+                                  "populate_saHpiResourceEventLogTable: oh_decode_sensorreading, TriggerReading error!");
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                }
+                memcpy(sen_evt_ctx->saHpiSensorEventLogTriggerReading, buff.Data, buff.DataLength);
+                sen_evt_ctx->saHpiSensorEventLogTriggerReading_len = buff.DataLength;
+        }
+
+        /** SaHpiSensorReadingType = ASN_INTEGER */
+        sen_evt_ctx->saHpiSensorEventLogTriggerThresholdType =
+                event->Event.EventDataUnion.SensorEvent.TriggerThreshold.Type + 1;
+
+        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+        if (event_rdr_entry) {
+                rv =  oh_decode_sensorreading(
+                        event->Event.EventDataUnion.SensorEvent.TriggerThreshold,
+                        event_rdr_entry->RdrTypeUnion.SensorRec.DataFormat,
+                        &buff);
+                if (rv != SA_OK) {
+                        snmp_log (LOG_ERR, 
+                                  "populate_saHpiResourceEventLogTable: oh_decode_sensorreading TriggerReading error!");
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                }
+                memcpy(sen_evt_ctx->saHpiSensorEventLogTriggerThreshold, buff.Data, buff.DataLength);
+                sen_evt_ctx->saHpiSensorEventLogTriggerThreshold_len = buff.DataLength;
+        }
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+        rv = oh_decode_eventstate(event->Event.EventDataUnion.SensorEvent.PreviousState,
+                                  event->Event.EventDataUnion.SensorEvent.EventCategory,
+                                  &buff);
+	if (rv != SA_OK) {
+		snmp_log (LOG_ERR, 
+                "populate_saHpiResourceEventLogTable: oh_decode_eventstate PreviousState error!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+        memcpy(sen_evt_ctx->saHpiSensorEventLogPreviousState,
+               buff.Data, buff.DataLength);
+        sen_evt_ctx->saHpiSensorEventLogPreviousState_len = buff.DataLength;
+
+        /** SaHpiEventState = ASN_OCTET_STR */
+        rv = oh_decode_eventstate(event->Event.EventDataUnion.SensorEvent.CurrentState,
+                                  event->Event.EventDataUnion.SensorEvent.EventCategory,
+                                  &buff);
+	if (rv != SA_OK) {
+		snmp_log (LOG_ERR, 
+                "populate_saHpiResourceEventLogTable: oh_decode_eventstate CurrentState error!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+        memcpy(sen_evt_ctx->saHpiSensorEventLogCurrentState,
+               buff.Data, buff.DataLength);
+        sen_evt_ctx->saHpiSensorEventLogCurrentState_len = buff.DataLength;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        sen_evt_ctx->saHpiSensorEventLogOem = 
+                event->Event.EventDataUnion.SensorEvent.Oem;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        sen_evt_ctx->saHpiSensorEventLogSpecific = 
+                event->Event.EventDataUnion.SensorEvent.SensorSpecific;
+
+
+	CONTAINER_INSERT (cb.container, sen_evt_ctx);
+		
+	sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
+        sensor_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
+
+        return SA_OK;
+}
+
 
 /**
  * 
@@ -96,8 +317,8 @@ int handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
 
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-        			        (u_char *) &sensor_event_entry_log_count_total,
-        			        sizeof(sensor_event_entry_log_count_total));
+        			        (u_char *) &sensor_event_log_entry_count_total,
+        			        sizeof(sensor_event_log_entry_count_total));
                 break;
 
 
@@ -161,8 +382,8 @@ int initialize_table_saHpiSensorEventEntryLogCountTotal(void)
                                netsnmp_create_handler_registration(
 			               "saHpiSensorEventEntryLogCountTotal", 
 				       handle_saHpiSensorEventEntryLogCountTotal,
-                                       saHpiSensorEventEntryLogCountTotal_oid, 
-				       OID_LENGTH(saHpiSensorEventEntryLogCountTotal_oid),
+                                       saHpiSensorEventLogEntryCountTotal_oid, 
+				       OID_LENGTH(saHpiSensorEventLogEntryCountTotal_oid),
                                        HANDLER_CAN_RONLY ));
 				       
         return SNMP_ERR_NOERROR;
@@ -191,7 +412,6 @@ int initialize_table_saHpiSensorEventLogEntryCount(void)
 /************************************************************/
 	
 
-#ifdef saHpiSensorEventLogTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -274,42 +494,6 @@ saHpiSensorEventLogTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiSensorEventLogTable_context *
-saHpiSensorEventLogTable_get( const char *name, int len )
-{
-    saHpiSensorEventLogTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorEventLogTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
-
-/************************************************************
  * Initializes the saHpiSensorEventLogTable module
  */
 void
@@ -322,6 +506,8 @@ init_saHpiSensorEventLogTable(void)
         initialize_table_saHpiSensorEventEntryLogCountTotal();
         
         initialize_table_saHpiSensorEventLogEntryCount();
+
+        domain_resource_pair_initialize(&initialized, &dr_table);
      
 }
 
@@ -561,7 +747,6 @@ int saHpiSensorEventLogTable_can_delete(saHpiSensorEventLogTable_context *undo_c
     return 1;
 }
 
-#ifdef saHpiSensorEventLogTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -584,7 +769,7 @@ saHpiSensorEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-   sensor_event_entry_log_count_total++;
+   sensor_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -609,7 +794,6 @@ saHpiSensorEventLogTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -783,23 +967,6 @@ void saHpiSensorEventLogTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiSensorEventLogTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -881,8 +1048,10 @@ void saHpiSensorEventLogTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        default: /** We shouldn't get here */
-            /** should have been logged in reserve1 */
+        default: 
+                break;
+                /** We shouldn't get here */
+                /** should have been logged in reserve1 */
         }
     }
 
@@ -936,9 +1105,6 @@ void saHpiSensorEventLogTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiSensorEventLogTable_SET_HANDLING */
-
 
 /************************************************************
  *
@@ -1005,18 +1171,18 @@ initialize_table_saHpiSensorEventLogTable(void)
     cb.container = netsnmp_container_find("saHpiSensorEventLogTable_primary:"
                                           "saHpiSensorEventLogTable:"
                                           "table_container");
-#ifdef saHpiSensorEventLogTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiSensorEventLogTable_secondary:"
                                                        "saHpiSensorEventLogTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiSensorEventLogTable_cmp;
-#endif
-#ifdef saHpiSensorEventLogTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiSensorEventLogTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiSensorEventLogTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiSensorEventLogTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiSensorEventLogTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorEventLogTable_row_copy;
@@ -1031,7 +1197,7 @@ initialize_table_saHpiSensorEventLogTable(void)
     cb.set_commit = saHpiSensorEventLogTable_set_commit;
     cb.set_free = saHpiSensorEventLogTable_set_free;
     cb.set_undo = saHpiSensorEventLogTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiSensorEventLogTable",
                 "Registering table saHpiSensorEventLogTable "
                 "as a table array\n"));
