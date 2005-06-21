@@ -415,15 +415,18 @@ main (int argc, char **argv)
 		init_saHpiEventTable();
 		init_saHpiResourceEventTable();
 		init_saHpiDomainEventTable();
-		init_saHpiEventLogTable();
 		init_saHpiResourceEventLogTable();
 		init_saHpiSensorEventLogTable();
-		init_saHpiEventLogInfoTable();
 		init_saHpiSensorEventTable();
 		init_saHpiOEMEventTable();
 		init_saHpiHotSwapEventTable();
 		init_saHpiWatchdogEventTable();		
 
+
+		init_saHpiEventLogInfoTable();
+		init_saHpiEventLogTable();
+		init_saHpiResourceEventLogTable();
+		init_saHpiSensorEventLogTable();
 /*		
 		
 		init_saHpiWatchdogTable();
@@ -680,303 +683,6 @@ build_notification (const netsnmp_index * index,
 
 }
 
-#define STATESTRING_VALUE_DELIMITER ", "
-#define STATESTRING_VALUE_DELIMITER_LENGTH 2
-#define STATESTRING_MAX_LENGTH 1000
-#define STATESTRING_MAX_ENTRIES 63
-
-int
-build_state_string (SaHpiEventCategoryT category,
-		    SaHpiEventStateT state,
-		    unsigned char *str, size_t * len, size_t max_len)
-{
-
-  char *temp;
-  size_t idx = 0;
-  size_t temp_len;
-  int i;
-
-  int rc = AGENT_ERR_NOERROR;
-  *len = 0;
-  idx = 0;
-  temp = (char *) malloc (STATESTRING_MAX_LENGTH);
-  if (temp == NULL)
-    return AGENT_ERR_MEMORY_FAULT;
-
-  if (category == SAHPI_EC_USER)
-    category = SAHPI_EC_GENERIC;
-  for (i = 0; i < STATESTRING_MAX_ENTRIES; i++)
-    {
-      /* snmp_log (LOG_INFO, "How about this one? : %d %d\n", state_string[i].category,
-         category); */
-      if (state_string[i].category == category)
-	{
-	  /*
-	     snmp_log (LOG_INFO, "Matched : %d %d\n", state_string[i].category,
-	     category);
-	   */
-	  /* Found category, time to match states. */
-	  /* Match the right states */
-	  if ((state_string[i].state & state) == state_string[i].state)
-	    {
-	      /* Found it 
-	         snmp_log (LOG_INFO, "Matched state: %d %d\n", state_string[i].state,state);
-	       */
-	      temp_len = strlen (state_string[i].str);
-	      if (idx + temp_len + STATESTRING_VALUE_DELIMITER_LENGTH >
-		  max_len)
-		{
-		  rc = AGENT_ERR_MEMORY_FAULT;
-		  break;
-		}
-	      memcpy (temp + idx, state_string[i].str, temp_len);
-	      idx = idx + temp_len;
-	      memcpy (temp + idx, STATESTRING_VALUE_DELIMITER,
-		      STATESTRING_VALUE_DELIMITER_LENGTH);
-	      idx = idx + STATESTRING_VALUE_DELIMITER_LENGTH;
-	    }
-	}
-    }
-
-  if (idx > 0)
-    idx = idx - STATESTRING_VALUE_DELIMITER_LENGTH;
-
-  if (idx < max_len)
-    temp[idx] = 0x00;
-  else
-    temp[max_len] = 0x00;
-
-
-  memcpy (str, temp, idx);
-  *len = idx;
-
-  free (temp);
-  temp = NULL;
-  return rc;
-}
-
-int
-build_state_value (unsigned char *str, size_t len, SaHpiEventStateT * state)
-{
-
-  int rc = AGENT_ERR_NOERROR;
-  char *s = NULL;
-  char *delim = NULL;
-  char *tok = NULL;
-  int i = 0;
-
-  s = (char *) malloc (len);
-  if (s == NULL)
-    return AGENT_ERR_MEMORY_FAULT;
-
-  delim = (char *) malloc (STATESTRING_VALUE_DELIMITER_LENGTH);
-  if (delim == NULL)
-    {
-      free (s);
-      return AGENT_ERR_MEMORY_FAULT;
-    }
-
-  memcpy (s, str, len);
-  s[len] = 0x00;
-  memcpy (delim, STATESTRING_VALUE_DELIMITER,
-	  STATESTRING_VALUE_DELIMITER_LENGTH);
-  delim[STATESTRING_VALUE_DELIMITER_LENGTH] = 0x00; 
-  tok = strtok (s, delim);
-  while (tok != NULL)
-    {
-
-      /*  snmp_log(LOG_INFO,"Tok: [%s]\n", tok); */
-      for (i = 0; i < STATESTRING_MAX_ENTRIES; i++)
-	{
-	  if (strncasecmp
-	      (tok, state_string[i].str, strlen (state_string[i].str)) == 0)
-	    {
-	      /*
-	         snmp_log(LOG_INFO,"Matched: %X [%s] = [%s]\n", 
-	         state_string[i].state,
-	         state_string[i].str,
-	         tok);
-	       */
-	      *state = *state + state_string[i].state;
-	    }
-	}
-      tok = strtok (NULL, delim);
-    }
-
-  free (s);
-  free (delim);
-  return rc;
-}
-
-
-int
-build_reading_strings (SaHpiSensorReadingT * reading,
-		       SaHpiEventCategoryT sensor_category,
-		       long *values_present,
-		       long *raw_reading,
-		       unsigned char *interpreted_reading,
-		       size_t * interpreted_reading_len,
-		       size_t interpreted_reading_max,
-		       long *sensor_status,
-		       unsigned char *event_status,
-		       size_t * event_status_len, size_t event_status_max)
-{
-
-  char format[SENSOR_READING_MAX_LEN];
-  size_t len;
-
-  if (values_present) {
-    *values_present = reading->ValuesPresent + 1;
-    if (*values_present == 1) 
-	*values_present = 0;
-  }
-  if (raw_reading) {
-    if (reading->ValuesPresent & SAHPI_SRF_RAW)
-      *raw_reading = reading->Raw;
-    else
-      *raw_reading = 0;
-  }
-  if (interpreted_reading_len) 
-    *interpreted_reading_len = 0;
-
-  if (event_status_len)
-    *event_status_len = 0;
-  if (event_status)
-    *event_status = 0;
-  
-
-  /* 
-   *       SaHpiSensorInterpretedT     Interpreted;
-   * is always converted to a string buffer.
-   */
-
-  if (reading->ValuesPresent & SAHPI_SRF_INTERPRETED)
-    {
-
-      if (reading->Interpreted.Type == SAHPI_SENSOR_INTERPRETED_TYPE_BUFFER)
-	{
-	  if (interpreted_reading) {
-	    memcpy (interpreted_reading,
-		    &reading->Interpreted.Value.SensorBuffer,
-		    SAHPI_SENSOR_BUFFER_LENGTH);
-	    /*
-	     * Old code: 
-	    *interpreted_reading_len = SAHPI_SENSOR_BUFFER_LENGTH;
-	     * Check to see how much of the string is actually 0x00 and 
-	     * do not count those
-	     */
-	    len = strlen(reading->Interpreted.Value.SensorBuffer);
-	    *interpreted_reading_len = ( len < SAHPI_SENSOR_BUFFER_LENGTH ) ? len : SAHPI_SENSOR_BUFFER_LENGTH;
-	  }
-	}
-
-      else
-	{
-	  memset (&format, 0x00, SENSOR_READING_MAX_LEN);
-	  /* Setting up the format  - %d or %u or %f .. etc */
-	  switch (reading->Interpreted.Type)
-	    {
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-	      strncpy (format,
-		       SENSOR_READING_SIGNED_INT,
-		       SENSOR_READING_SIGNED_INT_LEN);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-	      strncpy (format,
-		       SENSOR_READING_UNSIGNED_INT,
-		       SENSOR_READING_UNSIGNED_INT_LEN);
-
-	      break;
-
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
-	      strncpy (format,
-		       SENSOR_READING_FLOAT, SENSOR_READING_FLOAT_LEN);
-	      break;
-
-	    default:
-	      break;
-	    }
-	  /* Done with setting up the format. Parsing the value.
-	   * This could be done using a void pointer, but where 
-	   * would I put the type information? Cast it back to its type?
-	   *
-	   * Any ideas?
-	   */
-	  if (interpreted_reading) {
-	    switch (reading->Interpreted.Type)
-	      {
-	      case SAHPI_SENSOR_INTERPRETED_TYPE_INT8:
-		*interpreted_reading_len =
-		  snprintf (interpreted_reading,
-			    interpreted_reading_max,
-			    format, reading->Interpreted.Value.SensorInt8);
-		break;
-	      case SAHPI_SENSOR_INTERPRETED_TYPE_INT16:
-		*interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorInt16);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_INT32:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorInt32);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT8:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorUint8);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT16:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorUint16);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_UINT32:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorUint32);
-	      break;
-	    case SAHPI_SENSOR_INTERPRETED_TYPE_FLOAT32:
-	      *interpreted_reading_len =
-		snprintf (interpreted_reading,
-			  interpreted_reading_max,
-			  format, reading->Interpreted.Value.SensorFloat32);
-	      break;
-
-	    default:
-	      break;
-	    }
-
-	  *interpreted_reading_len =
-	    (*interpreted_reading_len >
-	     interpreted_reading_max) ? interpreted_reading_max :
-	    *interpreted_reading_len;
-
-	  }
-	}
-    }
-  if (reading->ValuesPresent & SAHPI_SRF_EVENT_STATE)
-    {
-      if (sensor_status)
-	*sensor_status = reading->EventStatus.SensorStatus + 1;
-      if (event_status || event_status_len) 
-	build_state_string (sensor_category,
-			    reading->EventStatus.EventStatus,
-			    event_status, event_status_len, event_status_max);
-    }
-  return AGENT_ERR_NOERROR;
-}
-
-
 long
 calculate_hash_value (void *data, int len)
 {
@@ -996,147 +702,6 @@ calculate_hash_value (void *data, int len)
   return hash;
 }
 
-
-const char *
-get_error_string (SaErrorT error)
-{
-  switch (error)
-    {
-    case SA_ERR_HPI_ERROR:
-      return "SA_ERR_HPI_ERROR";
-    case SA_ERR_HPI_UNSUPPORTED_API:
-      return "SA_ERR_UNSUPPORTED_API";
-    case SA_ERR_HPI_BUSY:
-      return "SA_ERR_HPI_BUSY";
-    case SA_ERR_HPI_INVALID:
-      return "SA_ERR_HPI_INVALID";
-    case SA_ERR_HPI_INVALID_CMD:
-      return "SA_ERR_HPI_INVALID_CMD";
-    case SA_ERR_HPI_TIMEOUT:
-      return "SA_ERR_HPI_TIMEOUT";
-    case SA_ERR_HPI_OUT_OF_SPACE:
-      return "SA_ERR_HPI_OUT_OF_SPACE";
-    case SA_ERR_HPI_DATA_TRUNCATED:
-      return "SA_ERR_HPI_DATA_TRUNCATED";
-    case SA_ERR_HPI_DATA_LEN_INVALID:
-      return "SA_ERR_HPI_DATA_LEN_INVALID";
-    case SA_ERR_HPI_DATA_EX_LIMITS:
-      return "SA_ERR_HPI_DATA_EX_LIMITS";
-    case SA_ERR_HPI_INVALID_PARAMS:
-      return "SA_ERR_HPI_INVALID_PARAMS";
-    case SA_ERR_HPI_INVALID_DATA:
-      return "SA_ERR_HPI_INVALID_DATA";
-    case SA_ERR_HPI_NOT_PRESENT:
-      return "SA_ERR_HPI_NOT_PRESENT";
-    case SA_ERR_HPI_INVALID_DATA_FIELD:
-      return "SA_ERR_HPI_INVALID_DATA_FIELD";
-    case SA_ERR_HPI_INVALID_SENSOR_CMD:
-      return "SA_ERR_HPI_INVALID_SENSOR_CMD";
-    case SA_ERR_HPI_NO_RESPONSE:
-      return "SA_ERR_HPI_NO_RESPONSE";
-    case SA_ERR_HPI_DUPLICATE:
-      return "SA_ERR_HPI_DUPLICATE";
-    case SA_ERR_HPI_UPDATING:
-      return "SA_ERR_HPI_UPDATING";
-    case SA_ERR_HPI_INITIALIZING:
-      return "SA_ERR_HPI_INITIALIZING";
-    case SA_ERR_HPI_UNKNOWN:
-      return "SA_ERR_HPI_UNKNOWN";
-    case SA_ERR_HPI_INVALID_SESSION:
-      return "SA_ERR_HPI_INVALID_SESSION";
-    case SA_ERR_HPI_INVALID_DOMAIN:
-      return "SA_ERR_HPI_INVALID_DOMAIN";
-    case SA_ERR_HPI_INVALID_RESOURCE:
-      return "SA_ERR_HPI_INVALID_RESOURCE";
-    case SA_ERR_HPI_INVALID_REQUEST:
-      return "SA_ERR_HPI_INVALID_REQUEST";
-    case SA_ERR_HPI_ENTITY_NOT_PRESENT:
-      return "SA_ERR_HPI_ENTITY_NOT_PRESENT";
-    case SA_ERR_HPI_UNINITIALIZED:
-      return "SA_ERR_HPI_UNINITIALIZED";
-    default:
-      DEBUGMSGTL ((AGENT, "Invalid error code=%d\n", error));
-      return "(Invalid error code)";
-    }
-}
-
-
-static gchar *eshort_names[] = {
-  "UNSPECIFIED",
-  "OTHER",
-  "UNKNOWN",
-  "PROCESSOR",
-  "DISK_BAY",
-  "PERIPHERAL_BAY",
-  "SYS_MGMNT_MODULE",
-  "SYSTEM_BOARD",
-  "MEMORY_MODULE",
-  "PROCESSOR_MODULE",
-  "POWER_SUPPLY",
-  "ADD_IN_CARD",
-  "FRONT_PANEL_BOARD",
-  "BACK_PANEL_BOARD",
-  "POWER_SYSTEM_BOARD",
-  "DRIVE_BACKPLANE",
-  "SYS_EXPANSION_BOARD",
-  "OTHER_SYSTEM_BOARD",
-  "PROCESSOR_BOARD",
-  "POWER_UNIT",
-  "POWER_MODULE",
-  "POWER_MGMNT",
-  "CHASSIS_BACK_PANEL_BOARD",
-  "SYSTEM_CHASSIS",
-  "SUB_CHASSIS",
-  "OTHER_CHASSIS_BOARD",
-  "DISK_DRIVE_BAY",
-  "PERIPHERAL_BAY_2",
-  "DEVICE_BAY",
-  "COOLING_DEVICE",
-  "COOLING_UNIT",
-  "INTERCONNECT",
-  "MEMORY_DEVICE",
-  "SYS_MGMNT_SOFTWARE",
-  "BIOS",
-  "OPERATING_SYSTEM",
-  "SYSTEM_BUS",
-  "GROUP",
-  "REMOTE",
-  "EXTERNAL_ENVIRONMENT",
-  "BATTERY",
-  "CHASSIS_SPECIFIC",		/* Jumps to 144 */
-  "BOARD_SET_SPECIFIC",		/* Jumps to 176 */
-  "OEM_SYSINT_SPECIFIC",	/* Jumps to 208 */
-  "ROOT",			/* Jumps to 65535 and continues from there... */
-  "RACK",
-  "SUBRACK",
-  "COMPACTPCI_CHASSIS",
-  "ADVANCEDTCA_CHASSIS",
-  "SYSTEM_SLOT",
-  "SBC_BLADE",
-  "IO_BLADE",
-  "DISK_BLADE",
-  "DISK_DRIVE",
-  "FAN",
-  "POWER_DISTRIBUTION_UNIT",
-  "SPEC_PROC_BLADE",
-  "IO_SUBBOARD",
-  "SBC_SUBBOARD",
-  "ALARM_MANAGER",
-  "ALARM_MANAGER_BLADE",
-  "SUBBOARD_CARRIER_BLADE",
-};
-
-#define EPATHSTRING_START_DELIMITER "{"
-#define EPATHSTRING_END_DELIMITER "}"
-#define EPATHSTRING_VALUE_DELIMITER ","
-#define ESHORTNAMES_BEFORE_JUMP 40
-#define ESHORTNAMES_FIRST_JUMP 41
-#define ESHORTNAMES_SECOND_JUMP 42
-#define ESHORTNAMES_THIRD_JUMP 43
-#define ESHORTNAMES_LAST_JUMP 44
-
-static unsigned int eshort_num_names = sizeof( eshort_names ) / sizeof(gchar * );
-
 SaErrorT
 rcSaHpi ()
 {
@@ -1154,14 +719,14 @@ closeSaHpiSession ()
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiUnsubscirbe error: %s.\n",
-		    get_error_string (err));
+                    oh_lookup_error(err));
 	  return AGENT_ERR_SESSION_CLOSE;
 	}
       err = saHpiFinalize ();
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiFinalize error: %s\n",
-		    get_error_string (err));
+		    oh_lookup_error(err));
 	  return AGENT_ERR_SESSION_CLOSE;
 	}
       session_avail = AGENT_FALSE;
@@ -1185,14 +750,14 @@ getSaHpiSession (SaHpiSessionIdT * out)
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiInitialize error: %s\n",
-		    get_error_string (err));
+		    oh_lookup_error(err));
 	  return AGENT_ERR_INIT;
 	}
       err = saHpiSessionOpen (SAHPI_DEFAULT_DOMAIN_ID, &session_id, NULL);
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiSessionOpen error: %s\n",
-		    get_error_string (err));
+		    oh_lookup_error(err));
 	  return AGENT_ERR_SESSION_OPEN;
 	}
 
@@ -1200,7 +765,7 @@ getSaHpiSession (SaHpiSessionIdT * out)
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiSubscribe failed. error: %s\n",
-		    get_error_string (err));
+		    oh_lookup_error(err));
 	  return AGENT_ERR_SUBSCRIBE;
 	}
       session_avail = AGENT_TRUE;
@@ -1218,7 +783,7 @@ getSaHpiSession (SaHpiSessionIdT * out)
       if (SA_OK != err)
 	{
 	  snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
-		    get_error_string (err));
+		    oh_lookup_error(err));
 	  return AGENT_ERR_DISCOVER;
 	}
     }
@@ -1253,7 +818,7 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
      if (SA_OK != err)
      {
      snmp_log (LOG_ERR, "saHpiResourcesDiscover error: %s\n",
-     get_error_string (err));
+     oh_lookup_error(err));
      return AGENT_ERR_DISCOVER;
      }
    */
@@ -1261,7 +826,7 @@ didSaHpiChanged (int *answer, SaHpiRptInfoT * info)
   if (SA_OK != err)
     {
       snmp_log (LOG_ERR, "saHpiRptInfoGet error: %s\n",
-		get_error_string (err));
+		oh_lookup_error(err));
       return AGENT_ERR_RPTGET;
     }
 
