@@ -74,6 +74,13 @@ const saHpiWatchdogEventTable_context * saHpiWatchdogEventTable_get_by_idx_rs(ne
                                         int row_status);
 int saHpiWatchdogEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -86,6 +93,8 @@ extern size_t saHpiWatchdogEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiWatchdogEventTable
  */
+ 
+#define WATCHDOG_EVENT_INDEX_NR 5
 #define COLUMN_SAHPIWATCHDOGEVENTENTRYID 1
 #define COLUMN_SAHPIWATCHDOGEVENTTIMESTAMP 2
 #define COLUMN_SAHPIWATCHDOGEVENTACTION 3

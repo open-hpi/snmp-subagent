@@ -70,6 +70,13 @@ const saHpiHotSwapEventTable_context * saHpiHotSwapEventTable_get_by_idx_rs(nets
                                         int row_status);
 int saHpiHotSwapEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -82,6 +89,8 @@ extern size_t saHpiHotSwapEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiHotSwapEventTable
  */
+ 
+#define HOTSWAP_EVENT_INDEX_NR 4
 #define COLUMN_SAHPIHOTSWAPEVENTENTRYID 1
 #define COLUMN_SAHPIHOTSWAPEVENTTIMESTAMP 2
 #define COLUMN_SAHPIHOTSWAPEVENTSTATE 3

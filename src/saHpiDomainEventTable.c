@@ -40,7 +40,6 @@
 #include "saHpiDomainEventTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
-//#include <saHpiEventTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 

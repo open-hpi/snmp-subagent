@@ -93,6 +93,14 @@ const saHpiSensorEnableChangeEventTable_context * saHpiSensorEnableChangeEventTa
                                         int row_status);
 int saHpiSensorEnableChangeEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
+
 
 /*************************************************************
  * oid declarations

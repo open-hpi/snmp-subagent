@@ -43,6 +43,9 @@
 #include <saHpiResourceTable.h>
 #include <saHpiResourceEventTable.h>
 #include <saHpiDomainEventTable.h>
+#include <saHpiOEMEventTable.h>
+#include <saHpiHotSwapEventTable.h>
+#include <saHpiWatchdogEventTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -126,8 +129,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
                         printf("        Sensor Type: [%s]\n\n",
                         oh_lookup_sensortype(event.EventDataUnion.SensorEvent.SensorType));
-                        //populate_saHpiSensorEventTable();
-                        goto end;
+                        populate_saHpiSensorEventTable(sessionid, &event,                                           
+                                                       child_oid, 
+                                                       &child_oid_len);
                         break;
                 case SAHPI_ET_SENSOR_ENABLE_CHANGE:
                         printf("SAHPI_ET_SENSOR_ENABLE_CHANGE: rv [%d]\n\n", rv);
@@ -136,13 +140,15 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         break;
                 case SAHPI_ET_HOTSWAP:
                         printf("SAHPI_ET_HOTSWAP: rv [%d]\n\n", rv);
-                        //populate_saHpiHotSwapEventTable();
-                        goto end;
+                        populate_saHpiHotSwapEventTable(sessionid, &event,
+                                                        child_oid, 
+                                                        &child_oid_len);
                         break;
                 case SAHPI_ET_WATCHDOG:
                         printf("SAHPI_ET_WATCHDOG: rv [%d]\n\n", rv);
-                        //populate_saHpiWatchdogEventTable();
-                        goto end;
+                        populate_saHpiWatchdogEventTable(sessionid, &event,
+                                                         child_oid, 
+                                                         &child_oid_len);
                         break;
                 case SAHPI_ET_HPI_SW:
                         printf("SAHPI_ET_HPI_SW: rv [%d]\n\n", rv);
@@ -151,8 +157,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         break;
                 case SAHPI_ET_OEM:
                         printf("SAHPI_ET_OEM: rv [%d]\n\n", rv);
-                        //populate_saHpiOemEventTable();
-                        goto end;
+                        populate_saHpiOemEventTable(sessionid, &event,                                           
+                                                    child_oid, 
+                                                    &child_oid_len);
                         break;
                 case SAHPI_ET_USER:
                         printf("SAHPI_ET_USER: rv [%d]\n\n", rv);

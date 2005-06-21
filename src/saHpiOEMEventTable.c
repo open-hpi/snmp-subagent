@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiOEMEventTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -48,6 +53,12 @@ size_t saHpiOEMEventTable_oid_len = OID_LENGTH(saHpiOEMEventTable_oid);
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -62,7 +73,7 @@ static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
 int handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
-                                        netsnmp_request_info         *requests)
+                                        netsnmp_request_info         *requests);
 
 
 int handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
@@ -72,6 +83,113 @@ int handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
 
 int initialize_table_saHpiOEMEventEntryCountTotal(void);
 int initialize_table_saHpiOEMEventEntryCount(void);
+
+
+SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * this_child_oid, 
+                                        size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+
+	oid oem_evt_oid[OEM_EVENT_INDEX_NR];
+	netsnmp_index oem_evt_idx;
+	saHpiOEMEventTable_context *oem_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiOEMEventTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiOEMEventTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	} 
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	oem_evt_idx.len = OEM_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	oem_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	oem_evt_oid[1] = event->Source;
+	        /** Index saHpiEventSeverity is external */
+	oem_evt_oid[2] = event->Severity + 1;
+                /** Index saHpiSensorEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiOEMEventTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	oem_evt_oid[3] = dr_entry->entry_id++;	
+	oem_evt_idx.oids = (oid *) & oem_evt_oid;
+	   
+	/* See if Row exists. */
+	oem_evt_ctx = NULL;
+	oem_evt_ctx = CONTAINER_FIND(cb.container, &oem_evt_idx);
+
+	if (!oem_evt_ctx) { 
+		// New entry. Add it
+		oem_evt_ctx = 
+			saHpiOEMEventTable_create_row(&oem_evt_idx);
+	}
+	if (!oem_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a OEM Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        oem_evt_ctx->saHpiOEMEventEntryId = oem_evt_oid[3];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        oem_evt_ctx->saHpiOEMEventTimestamp = event->Timestamp;
+	
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+        oem_evt_ctx->saHpiOEMEventManufacturerIdT = 
+	                        event->EventDataUnion.OemEvent.MId;
+
+        /** SaHpiTextType = ASN_INTEGER */				
+	oem_evt_ctx->saHpiOEMEventTextType = 
+                event->EventDataUnion.OemEvent.OemEventData.DataType + 1;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+        oem_evt_ctx->saHpiOEMEventTextLanguage = 
+	        event->EventDataUnion.OemEvent.OemEventData.Language + 1;
+
+        /** SaHpiText = ASN_OCTET_STR */
+        memcpy(oem_evt_ctx->saHpiOEMEventText, 
+	        event->EventDataUnion.OemEvent.OemEventData.Data,
+		event->EventDataUnion.OemEvent.OemEventData.DataLength);
+		
+        oem_evt_ctx->saHpiOEMEventText_len = 
+	        event->EventDataUnion.OemEvent.OemEventData.DataLength;		
+
+	CONTAINER_INSERT (cb.container, oem_evt_ctx);
+		
+	oem_event_entry_count = CONTAINER_SIZE (cb.container);
+        oem_event_entry_count_total = CONTAINER_SIZE (cb.container);
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIOEMEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiOEMEventTable_oid, saHpiOEMEventTable_oid_len,
+			column, column_len,
+			&oem_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+        return SA_OK;   					
+
+}
+
 
 /**
  * 
@@ -324,6 +442,9 @@ init_saHpiOEMEventTable(void)
 
         initialize_table_saHpiOEMEventEntryCountTotal();
         initialize_table_saHpiOEMEventEntryCount();
+	
+        domain_resource_pair_initialize(&initialized, &dr_table);
+	
 }
 
 /************************************************************
@@ -758,19 +879,6 @@ void saHpiOEMEventTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiOEMEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -853,6 +961,7 @@ void saHpiOEMEventTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }
@@ -908,7 +1017,6 @@ void saHpiOEMEventTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiOEMEventTable_SET_HANDLING */
 
 
 /************************************************************

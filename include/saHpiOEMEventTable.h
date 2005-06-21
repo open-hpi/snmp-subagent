@@ -50,7 +50,7 @@ typedef struct saHpiOEMEventTable_context_s {
             long saHpiOEMEventTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiOEMEventText[65535];
+            unsigned char saHpiOEMEventText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiOEMEventText_len;
 
 
@@ -77,6 +77,13 @@ const saHpiOEMEventTable_context * saHpiOEMEventTable_get_by_idx_rs(netsnmp_inde
                                         int row_status);
 int saHpiOEMEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -89,6 +96,8 @@ extern size_t saHpiOEMEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiOEMEventTable
  */
+ 
+#define OEM_EVENT_INDEX_NR 4
 #define COLUMN_SAHPIOEMEVENTENTRYID 1
 #define COLUMN_SAHPIOEMEVENTTIMESTAMP 2
 #define COLUMN_SAHPIOEMEVENTMANUFACTURERIDT 3

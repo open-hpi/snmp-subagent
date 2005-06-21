@@ -51,33 +51,33 @@ typedef struct saHpiSensorEventTable_context_s {
             long saHpiSensorEventAssertion;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventState[65535];
+            unsigned char saHpiSensorEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventState_len;
 
         /** SaHpiOptionalData = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventOptionalData[65535];
+            unsigned char saHpiSensorEventOptionalData[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventOptionalData_len;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
             long saHpiSensorEventTriggerReadingType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventTriggerReading[65535];
+            unsigned char saHpiSensorEventTriggerReading[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventTriggerReading_len;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
             long saHpiSensorEventTriggerThresholdType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventTriggerThreshold[65535];
+            unsigned char saHpiSensorEventTriggerThreshold[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventTriggerThreshold_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventPreviousState[65535];
+            unsigned char saHpiSensorEventPreviousState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventPreviousState_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventCurrentState[65535];
+            unsigned char saHpiSensorEventCurrentState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventCurrentState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -110,6 +110,13 @@ const saHpiSensorEventTable_context * saHpiSensorEventTable_get_by_idx_rs(netsnm
                                         int row_status);
 int saHpiSensorEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event,
+                                        oid * event_oid, 
+                                        size_t *event_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -122,6 +129,7 @@ extern size_t saHpiSensorEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiSensorEventTable
  */
+#define SENSOR_EVENT_INDEX_NR 5
 #define COLUMN_SAHPISENSOREVENTENTRYID 1
 #define COLUMN_SAHPISENSOREVENTTIMESTAMP 2
 #define COLUMN_SAHPISENSOREVENTTYPE 3
