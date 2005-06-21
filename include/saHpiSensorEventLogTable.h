@@ -48,33 +48,33 @@ typedef struct saHpiSensorEventLogTable_context_s {
             long saHpiSensorEventLogAssertion;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogState[65535];
+            unsigned char saHpiSensorEventLogState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogState_len;
 
         /** SaHpiOptionalData = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogOptionalData[65535];
+            unsigned char saHpiSensorEventLogOptionalData[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogOptionalData_len;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
             long saHpiSensorEventLogTriggerReadingType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogTriggerReading[65535];
+            unsigned char saHpiSensorEventLogTriggerReading[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogTriggerReading_len;
 
         /** SaHpiSensorReadingType = ASN_INTEGER */
             long saHpiSensorEventLogTriggerThresholdType;
 
         /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogTriggerThreshold[65535];
+            unsigned char saHpiSensorEventLogTriggerThreshold[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogTriggerThreshold_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogPreviousState[65535];
+            unsigned char saHpiSensorEventLogPreviousState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogPreviousState_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEventLogCurrentState[65535];
+            unsigned char saHpiSensorEventLogCurrentState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEventLogCurrentState_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -107,6 +107,14 @@ const saHpiSensorEventLogTable_context * saHpiSensorEventLogTable_get_by_idx_rs(
                                         int row_status);
 int saHpiSensorEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid, 
+                                           SaHpiEventLogEntryT *event,
+                                           oid * this_child_oid, 
+                                           size_t *this_child_oid_len,
+                                           SaHpiRdrT *event_rdr_entry);
 
 /*************************************************************
  * oid declarations
@@ -119,6 +127,8 @@ extern size_t saHpiSensorEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiSensorEventLogTable
  */
+
+#define SENSOR_EVENT_LOG_INDEX_NR 5
 #define COLUMN_SAHPISENSOREVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPISENSOREVENTLOGTYPE 2
 #define COLUMN_SAHPISENSOREVENTLOGCATEGORY 3
@@ -135,21 +145,6 @@ extern size_t saHpiSensorEventLogTable_oid_len;
 #define COLUMN_SAHPISENSOREVENTLOGSPECIFIC 14
 #define saHpiSensorEventLogTable_COL_MIN 1
 #define saHpiSensorEventLogTable_COL_MAX 14
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiSensorEventLogTable */
-#define saHpiSensorEventLogTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiSensorEventLogTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiSensorEventLogTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiSensorEventLogTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiSensorEventLogTable_SET_HANDLING
 
 int saHpiSensorEventLogTable_extract_index( saHpiSensorEventLogTable_context * ctx, netsnmp_index * hdr );
 
@@ -174,14 +169,9 @@ int saHpiSensorEventLogTable_can_delete(saHpiSensorEventLogTable_context *undo_c
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiSensorEventLogTable_ROW_CREATION
 saHpiSensorEventLogTable_context * saHpiSensorEventLogTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiSensorEventLogTable_IDX2
 saHpiSensorEventLogTable_context * saHpiSensorEventLogTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
