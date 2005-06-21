@@ -4873,7 +4873,7 @@ saHpiDomainEventLogType OBJECT-TYPE
 -- **     Sensor  Event Log
 -- **
 -- *********************************
-saHpiSensorEventEntryLogCountTotal OBJECT-TYPE
+saHpiSensorEventLogEntryCountTotal OBJECT-TYPE
         SYNTAX          Counter32
         MAX-ACCESS      read-only
         STATUS          current
@@ -10824,7 +10824,7 @@ saHpiDomainEventLogGroup OBJECT-GROUP
 
 saHpiSensorEventLogGroup OBJECT-GROUP
 	OBJECTS {
-		saHpiSensorEventEntryLogCountTotal,
+		saHpiSensorEventLogEntryCountTotal,
 		saHpiSensorEventLogEntryCount,
 		saHpiSensorEventLogTimestamp,
 		saHpiSensorEventLogType,
