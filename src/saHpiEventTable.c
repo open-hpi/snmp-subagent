@@ -135,8 +135,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         break;
                 case SAHPI_ET_SENSOR_ENABLE_CHANGE:
                         printf("SAHPI_ET_SENSOR_ENABLE_CHANGE: rv [%d]\n\n", rv);
-                        //populate_saHpiSensorEnableChangeEventTable();
-                        goto end;
+                        populate_saHpiSensorEnableChangeEventTable(sessionid, &event,                                           
+                                                       child_oid, 
+                                                       &child_oid_len);
                         break;
                 case SAHPI_ET_HOTSWAP:
                         printf("SAHPI_ET_HOTSWAP: rv [%d]\n\n", rv);
@@ -152,8 +153,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         break;
                 case SAHPI_ET_HPI_SW:
                         printf("SAHPI_ET_HPI_SW: rv [%d]\n\n", rv);
-                        //populate_saHpiSoftwareEventTable();
-                        goto end;
+                        populate_saHpiSoftwareEventTable(sessionid, &event,
+                                                         child_oid, 
+                                                         &child_oid_len);
                         break;
                 case SAHPI_ET_OEM:
                         printf("SAHPI_ET_OEM: rv [%d]\n\n", rv);
@@ -163,7 +165,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         break;
                 case SAHPI_ET_USER:
                         printf("SAHPI_ET_USER: rv [%d]\n\n", rv);
-                        //populate_saHpiUserEventEventTable();
+                        populate_saHpiUserEventTable(sessionid, &event,                                           
+                                                    child_oid, 
+                                                    &child_oid_len);
                         goto end;
                         break;
                 default:
