@@ -89,7 +89,221 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
                                         SaHpiEventT *event,
                                         oid * this_child_oid, 
                                         size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
 
+	oid sensor_enable_change_evt_oid[SENSOR_ENABLE_CHANGE_EVENT_INDEX_NR];
+	netsnmp_index sensor_enable_change_evt_idx;
+	saHpiSensorEnableChangeEventTable_context *sensor_enable_change_evt_ctx;
+	SaHpiTextBufferT sensor_enable_change_text_buf;
+	SaErrorT err = 0;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEnableChangeEventTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	} 
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	sensor_enable_change_evt_idx.len = SENSOR_ENABLE_CHANGE_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	sensor_enable_change_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	sensor_enable_change_evt_oid[1] = event->Source;
+                /** Index saHpiSensorNum is external */
+	sensor_enable_change_evt_oid[2] = event->EventDataUnion.SensorEnableChangeEvent.SensorNum;
+	        /** Index saHpiEventSeverity is external */
+	sensor_enable_change_evt_oid[3] = event->Severity + 1;
+                /** Index saHpiSensorEnableChangeEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEnableChangeEventTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	sensor_enable_change_evt_oid[4] = dr_entry->entry_id++;	
+	sensor_enable_change_evt_idx.oids = (oid *) & sensor_enable_change_evt_oid;
+	   
+	/* See if Row exists. */
+	sensor_enable_change_evt_ctx = NULL;
+	sensor_enable_change_evt_ctx = CONTAINER_FIND(cb.container, &sensor_enable_change_evt_idx);
+
+	if (!sensor_enable_change_evt_ctx) { 
+		// New entry. Add it
+		sensor_enable_change_evt_ctx = 
+			saHpiSensorEnableChangeEventTable_create_row(&sensor_enable_change_evt_idx);
+	}
+	if (!sensor_enable_change_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Sensor Enable Change Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventEntryId = 
+	                                        sensor_enable_change_evt_oid[4];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp = 
+	                                        event->Timestamp;
+
+        /** SaHpiSensorType = ASN_INTEGER */
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventType = 
+	                                        event->EventType + 1;
+        
+        /** SaHpiEventCategory = ASN_INTEGER */
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventCategory = 
+	                        event->EventDataUnion.SensorEnableChangeEvent.EventCategory;
+
+        /** TruthValue = ASN_INTEGER */			     
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventEnabled = 
+	                        event->EventDataUnion.SensorEnableChangeEvent.SensorEnable;
+			     
+        /** TruthValue = ASN_INTEGER */			     
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventEventsEnabled = 
+	                        event->EventDataUnion.SensorEnableChangeEvent.SensorEventEnable;			     
+       
+        /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->EventDataUnion.SensorEnableChangeEvent.AssertEventMask,
+	                           sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventCategory,
+				   &sensor_enable_change_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Invalid parameter for AssertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Buffer is too small for AssertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Unknown error");
+		}
+	}	
+
+	sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventAssertEvents_len = 
+	                                        sensor_enable_change_text_buf.DataLength;	
+	memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventAssertEvents, 
+	                                sensor_enable_change_text_buf.Data,
+					        sensor_enable_change_text_buf.DataLength);
+
+        /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->EventDataUnion.SensorEnableChangeEvent.DeassertEventMask,
+	                           sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventCategory,
+				   &sensor_enable_change_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Invalid parameter for DeassertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Buffer is too small for DeassertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Unknown error");
+		}
+	}	
+
+	sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventDeassertEvents_len = 
+	                                        sensor_enable_change_text_buf.DataLength;	
+	memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventDeassertEvents, 
+	                                sensor_enable_change_text_buf.Data,
+					        sensor_enable_change_text_buf.DataLength);  
+						
+	
+	/** SaHpiOptionalData = ASN_OCTET_STR */						
+	err = oh_decode_sensorenableoptdata(
+	                        event->EventDataUnion.SensorEnableChangeEvent.OptionalDataPresent,	                           
+				&sensor_enable_change_text_buf);
+				
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Invalid parameter for OptionalData\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Unknown error");
+		}
+	}
+						
+	sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventOptionalData_len 
+	                                        = sensor_enable_change_text_buf.DataLength;
+	memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventOptionalData, 
+	                                sensor_enable_change_text_buf.Data,
+					sensor_enable_change_text_buf.DataLength);								
+
+
+        /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->EventDataUnion.SensorEnableChangeEvent.CurrentState,
+	                           sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventCategory,
+				   &sensor_enable_change_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Invalid parameter for CurrentState\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Buffer is too small for CurrentState\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventTable: Unknown error");
+		}
+	}	
+
+	sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState_len = 
+	                                        sensor_enable_change_text_buf.DataLength;	
+	memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState, 
+	                                sensor_enable_change_text_buf.Data,
+					        sensor_enable_change_text_buf.DataLength);  
+
+	CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
+		
+	sensor_enable_change_event_entry_count = CONTAINER_SIZE (cb.container);
+        sensor_enable_change_event_entry_count_total = CONTAINER_SIZE (cb.container);
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSORENABLECHANGEEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiSensorEnableChangeEventTable_oid, saHpiSensorEnableChangeEventTable_oid_len,
+			column, column_len,
+			&sensor_enable_change_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+        return SA_OK;   					
+}
 
 /**
  * 
@@ -195,7 +409,7 @@ int initialize_table_saHpiSensorEnableChangeEventEntryCountTotal(void)
  * 
  * @return: 
  */
-int initialize_table_saHpiSensorEnableChangeEventEntryCount(void);
+int initialize_table_saHpiSensorEnableChangeEventEntryCount(void)
 {
         DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventEntryCount, called\n"));
 
@@ -327,7 +541,6 @@ saHpiSensorEnableChangeEventTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
@@ -343,6 +556,9 @@ init_saHpiSensorEnableChangeEventTable(void)
         initialize_table_saHpiSensorEnableChangeEventEntryCountTotal();
         
         initialize_table_saHpiSensorEnableChangeEventEntryCount();
+	
+        domain_resource_pair_initialize(&initialized, &dr_table);
+	
 }
 
 /************************************************************
@@ -797,19 +1013,6 @@ void saHpiSensorEnableChangeEventTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiSensorEnableChangeEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -892,6 +1095,7 @@ void saHpiSensorEnableChangeEventTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }

@@ -46,7 +46,7 @@ typedef struct saHpiUserEventTable_context_s {
             long saHpiUserEventTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiUserEventText[65535];
+            unsigned char saHpiUserEventText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiUserEventText_len;
 
         /** RowStatus = ASN_INTEGER */
@@ -78,6 +78,14 @@ int saHpiUserEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsn
 
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
+                                           SaHpiEventT *event,
+                                           oid * event_oid, 
+                                           size_t *event_oid_len);
+
+/*************************************************************
  * oid declarations
  */
 extern oid saHpiUserEventTable_oid[];
@@ -88,6 +96,8 @@ extern size_t saHpiUserEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiUserEventTable
  */
+
+#define USER_EVENT_INDEX_NR 3
 #define COLUMN_SAHPIUSEREVENTENTRYID 1
 #define COLUMN_SAHPIUSEREVENTTIMESTAMP 2
 #define COLUMN_SAHPIUSEREVENTTEXTTYPE 3

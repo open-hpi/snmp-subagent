@@ -427,16 +427,15 @@ main (int argc, char **argv)
 		init_saHpiEventLogTable();
 		init_saHpiResourceEventLogTable();
 		init_saHpiSensorEventLogTable();
+		init_saHpiSoftwareEventTable();
+		init_saHpiSensorEnableChangeEventTable();
+		init_saHpiUserEventTable();				
 /*		
 		
 		init_saHpiWatchdogTable();
 		init_saHpiHotSwapTable();
 		init_saHpiAutoInsertTimeoutTable();
 		
-		init_saHpiSensorEnableChangeEventTable();
-
-		init_saHpiSoftwareEventTable();
-		init_saHpiUserEventTable();
 		init_saHpiAnnouncementTable();
 		
 		init_saHpiDomainEventLogTable();
@@ -493,6 +492,8 @@ main (int argc, char **argv)
 		     * populate_saHpiOemEventTable();
 		     * populate_saHpiHotSwapEventTable();
 		     * populate_saHpiWatchdogEventTable();
+		     * populate_saHpiSoftwareEventTable();
+		     * populate_saHpiSensorEnableChangeEventTable();
 		     */
                 populate_saHpiEventLogInfo(sessionid);
                 populate_saHpiEventLog (sessionid);

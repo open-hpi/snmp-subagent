@@ -54,19 +54,19 @@ typedef struct saHpiSensorEnableChangeEventTable_context_s {
             long saHpiSensorEnableChangeEventEventsEnabled;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventAssertEvents[65535];
+            unsigned char saHpiSensorEnableChangeEventAssertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventAssertEvents_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventDeassertEvents[65535];
+            unsigned char saHpiSensorEnableChangeEventDeassertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventDeassertEvents_len;
 
         /** SaHpiOptionalData = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventOptionalData[65535];
+            unsigned char saHpiSensorEnableChangeEventOptionalData[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventOptionalData_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventState[65535];
+            unsigned char saHpiSensorEnableChangeEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventState_len;
 
 
@@ -113,6 +113,7 @@ extern size_t saHpiSensorEnableChangeEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiSensorEnableChangeEventTable
  */
+#define SENSOR_ENABLE_CHANGE_EVENT_INDEX_NR 5
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTENTRYID 1
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTTIMESTAMP 2
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTTYPE 3
