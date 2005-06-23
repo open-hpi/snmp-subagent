@@ -26,15 +26,10 @@
 #include <unistd.h>
 
 #include <hpiSubagent.h>
+#include <hpiEventThread.h>
 
 #include <SaHpi.h> 
 #include <oh_utils.h>
-
-#include <alarm.h>
-
-//#include <hpiB0101_columns.h>
-//#include <hpiB0101_enums.h>
-//#include <hpiB0101.h>
 
 #include <hpiCheckIndice.h>
 #include <session_info.h>
@@ -152,8 +147,6 @@ static const char *version =
 int send_traps = AGENT_FALSE;
 static int send_traps_on_startup = AGENT_FALSE;
 
-int alarm_interval = 10; // Check for information every x seconds. 
-
 static int rediscover_count = 0;
 int MAX_EVENT_ENTRIES = 512; // Max EVENT rows. 
 
@@ -170,7 +163,9 @@ static RETSIGTYPE stop_server (int a);
 
 static RETSIGTYPE stop_server (int a)
 {
-  keep_running = 0;
+        //DMJ TODO  Really need to signal event thread to break out first
+        set_run_threaded(FALSE);
+        keep_running = 0;
 }
 
 void hpiSubagent_parse_config_traps (const char *token, char *cptr)
@@ -203,24 +198,6 @@ void hpiSubagent_parse_config_traps (const char *token, char *cptr)
     }
 }
 
-void hpiSubagent_parse_config_interval (const char *token, char *cptr)
-{
-  int x = atoi (cptr);
-  char buf[BUFSIZ];
-
-  if (x < -1)
-    {
-
-	  snprintf(buf, 3, "hpiSubagent: hpiSubagent_parse_config_interval, '%s' unrecognized", cptr);
-      config_perror (buf);
-    }
-  else
-    {
-      snmp_log (LOG_INFO, "Checking HPI infrastructure every %d seconds.\n",
-		x);
-      alarm_interval = x;
-    }
-}
 void hpiSubagent_parse_config_max_event (const char *token, char *cptr)
 {
   int x = atoi (cptr);
@@ -337,11 +314,6 @@ main (int argc, char **argv)
 					 NULL,
 					 "hpiSubagent on/off switch for sending events upon startup");
 	
-	  snmpd_register_config_handler (INTERVAL_TOKEN,
-					 hpiSubagent_parse_config_interval,
-					 NULL,
-					 "hpiSubagent time in seconds before HPI API is queried for information.");
-	
 	  snmpd_register_config_handler (MAX_EVENT_TOKEN,
 					 hpiSubagent_parse_config_max_event,
 					 NULL,
@@ -379,175 +351,170 @@ main (int argc, char **argv)
 	}
 	DEBUGMSGTL ((AGENT, "saHpiDiscover Success!\n"));	
 
-		/* Initialize subagent tables */		
-		init_saHpiDomainInfoTable(); 
-/*		init_saHpiDomainAlarmTable(); */
-		init_saHpiDomainReferenceTable();
-		
-		init_saHpiResourceTable();
-		init_saHpiRdrTable();
-		init_saHpiCtrlDigitalTable();
-		init_saHpiCtrlDiscreteTable();
-		init_saHpiCtrlAnalogTable();
-		init_saHpiCtrlStreamTable();
-		init_saHpiCtrlTextTable();
-		init_saHpiCtrlOemTable();
-		init_saHpiSensorTable();
-		init_saHpiCurrentSensorStateTable();
-		init_saHpiSensorReadingMaxTable();
-		init_saHpiSensorReadingMinTable();
-		init_saHpiSensorReadingNominalTable();
-		init_saHpiSensorReadingNormalMaxTable();
-		init_saHpiSensorReadingNormalMinTable();
-		init_saHpiSensorThdLowCriticalTable();
-		init_saHpiSensorThdLowMajorTable();
-		init_saHpiSensorThdLowMinorTable();
-		init_saHpiSensorThdUpCriticalTable();
-		init_saHpiSensorThdUpMajorTable();
-		init_saHpiSensorThdUpMinorTable();
-		init_saHpiSensorThdPosHysteresisTable();
-		init_saHpiSensorThdNegHysteresisTable();
-		init_saHpiAnnunciatorTable();
-		init_saHpiInventoryTable();
-		init_saHpiAreaTable();
-		init_saHpiFieldTable();
+<<<<<<< hpiSubagent.c
+	/* Initialize subagent tables */		
+	init_saHpiDomainInfoTable(); 
+/*	init_saHpiDomainAlarmTable(); */
+	init_saHpiDomainReferenceTable();
+	
+	init_saHpiResourceTable();
+	init_saHpiRdrTable();
+	init_saHpiCtrlDigitalTable();
+	init_saHpiCtrlDiscreteTable();
+	init_saHpiCtrlAnalogTable();
+	init_saHpiCtrlStreamTable();
+	init_saHpiCtrlTextTable();
+	init_saHpiCtrlOemTable();
+	init_saHpiSensorTable();
+	init_saHpiCurrentSensorStateTable();
+	init_saHpiSensorReadingMaxTable();
+	init_saHpiSensorReadingMinTable();
+	init_saHpiSensorReadingNominalTable();
+	init_saHpiSensorReadingNormalMaxTable();
+	init_saHpiSensorReadingNormalMinTable();
+	init_saHpiSensorThdLowCriticalTable();
+	init_saHpiSensorThdLowMajorTable();
+	init_saHpiSensorThdLowMinorTable();
+	init_saHpiSensorThdUpCriticalTable();
+	init_saHpiSensorThdUpMajorTable();
+	init_saHpiSensorThdUpMinorTable();
+	init_saHpiSensorThdPosHysteresisTable();
+	init_saHpiSensorThdNegHysteresisTable();
+	init_saHpiAnnunciatorTable();
+	init_saHpiInventoryTable();
+	init_saHpiAreaTable();
+	init_saHpiFieldTable();
 
-		init_saHpiEventTable();
-		init_saHpiResourceEventTable();
-		init_saHpiDomainEventTable();
-		init_saHpiResourceEventLogTable();
-		init_saHpiSensorEventLogTable();
-		init_saHpiSensorEventTable();
-		init_saHpiOEMEventTable();
-		init_saHpiHotSwapEventTable();
-		init_saHpiWatchdogEventTable();		
+	init_saHpiEventTable();
+	init_saHpiResourceEventTable();
+	init_saHpiDomainEventTable();
+	init_saHpiSensorEventTable();
+	init_saHpiOEMEventTable();
+	init_saHpiHotSwapEventTable();
+	init_saHpiWatchdogEventTable();		
+	init_saHpiSoftwareEventTable();
+	init_saHpiSensorEnableChangeEventTable();
+	init_saHpiUserEventTable();
 
+	init_saHpiEventLogInfoTable();
+	init_saHpiEventLogTable();
+	init_saHpiResourceEventLogTable();
+	init_saHpiSensorEventLogTable();
+/*	
+	
+	init_saHpiWatchdogTable();
+	init_saHpiHotSwapTable();
+	init_saHpiAutoInsertTimeoutTable();
 
-		init_saHpiEventLogInfoTable();
-		init_saHpiEventLogTable();
-		init_saHpiResourceEventLogTable();
-		init_saHpiSensorEventLogTable();
-		init_saHpiSoftwareEventTable();
-		init_saHpiSensorEnableChangeEventTable();
-		init_saHpiUserEventTable();				
-/*		
-		
-		init_saHpiWatchdogTable();
-		init_saHpiHotSwapTable();
-		init_saHpiAutoInsertTimeoutTable();
-		
-		init_saHpiAnnouncementTable();
-		
-		init_saHpiDomainEventLogTable();
-		init_saHpiSensorEnableChangeEventLogTable();
-		init_saHpiHotSwapEventLogTable();
-		init_saHpiWatchdogEventLogTable();
-		init_saHpiSoftwareEventLogTable();
-		init_saHpiOEMEventLogTable();
-		init_saHpiUserEventLogTable();
-		init_saHpiAnnouncementEventLogTable();	
+	init_saHpiAnnouncementTable();
+	
+	init_saHpiDomainEventLogTable();
+	init_saHpiSensorEnableChangeEventLogTable();
+	init_saHpiHotSwapEventLogTable();
+	init_saHpiWatchdogEventLogTable();
+	init_saHpiSoftwareEventLogTable();
+	init_saHpiOEMEventLogTable();
+	init_saHpiUserEventLogTable();
+	init_saHpiAnnouncementEventLogTable();	
 */
-		if (send_traps_on_startup == AGENT_TRUE)
-			send_traps = AGENT_TRUE;
-		/* after initialization populate tables */
-		populate_saHpiDomainInfoTable(sessionid);
 
-/*		populate_saHpiDomainAlarmTable(); */
+	if (send_traps_on_startup == AGENT_TRUE)
+		send_traps = AGENT_TRUE;
+	/* after initialization populate tables */
+	populate_saHpiDomainInfoTable(sessionid);
 
-		poplulate_saHpiDomainReferenceTable(sessionid);	
+/*	populate_saHpiDomainAlarmTable(); */
 
-		populate_saHpiResourceTable(sessionid);
-		    /* populate_saHpiResourceTable() calls:
-		     *     populate_saHpiRdrTable(); calls:
-		     *         populate_saHpiCtrlDigitalTable();		
-		     *	       populate_saHpiCtrlDiscreteTable();		
-		     *	       populate_saHpiCtrlAnalogTable();		
-		     *	       populate_saHpiCtrlStreamTable();		
-		     *	       populate_saHpiCtrlTextTable();		
-		     *	       populate_saHpiCtrlOemTable();		
-		     *	       populate_saHpiSensorTable();		
-		     *	           populate_saHpiSesnorReadingMaxTable();		
-		     *	           populate_saHpiSesnorReadingMinTable();		
-		     *	           populate_saHpiSesnorReadingNominalTable();		
-		     *	           populate_saHpiSesnorReadingNormalMaxTable();		
-		     *	           populate_saHpiSesnorReadingNormalMinTable();		
-		     *	           populate_saHpiSensorThdLowCriticalTable();		
-		     *	           populate_saHpiSensorThdLowMajorTable();		
-		     *	           populate_saHpiSensorThdLowMinorTable();		
-		     *	           populate_saHpiSensorThdUpCriticalTable();		
-		     *	           populate_saHpiSensorThdUpMajorTable();		
-		     *	           populate_saHpiSensorThdUpMinorTable();		
-		     *	           populate_saHpiSensorThdPosHysteresisTable();		
-		     *	           populate_saHpiSensorThdNegHysteresisTable();		
-		     *	       populate_saHpiCurrentSensorStateTable();		
-		     *	       populate_saHpiAnnunciatorTable();		
-		     *	       populate_saHpiInventoyTable();		
-		     *	       populate_saHpiAreaTable();		
-		     *	           populate_saHpiFieldTable();		
-		     */
-		populate_saHpiEventTable(sessionid);
-                    /* populate_saHpiResourceEventTable();
-		     * populate_saHpiDomainEventTable();
-		     * populate_saHpiSensorEventTable();
-		     * populate_saHpiOemEventTable();
-		     * populate_saHpiHotSwapEventTable();
-		     * populate_saHpiWatchdogEventTable();
-		     * populate_saHpiSoftwareEventTable();
-		     * populate_saHpiSensorEnableChangeEventTable();
-		     */
-                populate_saHpiEventLogInfo(sessionid);
-                populate_saHpiEventLog (sessionid);
-                    /*
-                     * populate_saHpiResourceEventLogTable();
-                     * populate_saHpiSensorEventLogTable();
-                     */
+	poplulate_saHpiDomainReferenceTable(sessionid);	
 
-                DEBUGMSGTL ((AGENT,
-                "WARNING: populate_event: hpiSubagent.c: nolong implemented!")); 
+	populate_saHpiResourceTable(sessionid);
+	    /* populate_saHpiResourceTable() calls:
+	     *     populate_saHpiRdrTable(); calls:
+	     *         populate_saHpiCtrlDigitalTable();		
+	     *	       populate_saHpiCtrlDiscreteTable();		
+	     *	       populate_saHpiCtrlAnalogTable();		
+	     *	       populate_saHpiCtrlStreamTable();		
+	     *	       populate_saHpiCtrlTextTable();		
+	     *	       populate_saHpiCtrlOemTable();		
+	     *	       populate_saHpiSensorTable();		
+	     *	           populate_saHpiSesnorReadingMaxTable();		
+	     *	           populate_saHpiSesnorReadingMinTable();		
+	     *	           populate_saHpiSesnorReadingNominalTable();		
+	     *	           populate_saHpiSesnorReadingNormalMaxTable();		
+	     *	           populate_saHpiSesnorReadingNormalMinTable();		
+	     *	           populate_saHpiSensorThdLowCriticalTable();		
+	     *	           populate_saHpiSensorThdLowMajorTable();		
+	     *	           populate_saHpiSensorThdLowMinorTable();		
+	     *	           populate_saHpiSensorThdUpCriticalTable();		
+	     *	           populate_saHpiSensorThdUpMajorTable();		
+	     *	           populate_saHpiSensorThdUpMinorTable();		
+	     *	           populate_saHpiSensorThdPosHysteresisTable();		
+	     *	           populate_saHpiSensorThdNegHysteresisTable();		
+	     *	       populate_saHpiCurrentSensorStateTable();		
+	     *	       populate_saHpiAnnunciatorTable();		
+	     *	       populate_saHpiInventoyTable();		
+	     *	       populate_saHpiAreaTable();		
+	     *	           populate_saHpiFieldTable();		
+	     */
+	populate_saHpiEventTable(sessionid);
+            /* populate_saHpiResourceEventTable();
+	     * populate_saHpiDomainEventTable();
+	     * populate_saHpiSensorEventTable();
+	     * populate_saHpiOemEventTable();
+	     * populate_saHpiHotSwapEventTable();
+	     * populate_saHpiWatchdogEventTable();
+	     * populate_saHpiSoftwareEventTable();
+	     * populate_saHpiSensorEnableChangeEventTable();
+	     * populate_saHpiUserEventTable();
+	     */
+        populate_saHpiEventLogInfo(sessionid);
+        populate_saHpiEventLog (sessionid);
+            /*
+             * populate_saHpiResourceEventLogTable();
+             * populate_saHpiSensorEventLogTable();
+             */
 
+        /* start event thread */
+        set_run_threaded(TRUE);
+        if (start_event_thread() != AGENT_ERR_NOERROR) {
+                snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
+                rc = -1;
+                goto stop;
+        }
 
-  if (init_alarm () != AGENT_ERR_NOERROR)
-    {
-      snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
-      rc = -1;
-      goto stop;
-    }
+        send_traps = AGENT_TRUE;
+        /* If we're going to be a snmp master agent, initial the ports */
 
-  send_traps = AGENT_TRUE;
-  /* If we're going to be a snmp master agent, initial the ports */
+        if (!agentx_subagent)
+                init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
+                
+        if (do_fork == AGENT_TRUE) {
+                if ((child = fork ()) < 0) {
+                        snmp_log (LOG_ERR, "Could not fork!\n");
+                        exit (-1);
+                }
+                if (child != 0)
+                        exit (0);
+        }
 
-  if (!agentx_subagent)
-    init_master_agent ();	/* open the port to listen on (defaults to udp:161) */
+        /* In case we recevie a request to stop (kill -TERM or kill -INT) */
+        keep_running = 1;
+        signal (SIGTERM, stop_server);
+        signal (SIGINT, stop_server);
 
-  if (do_fork == AGENT_TRUE)
-    {
-      if ((child = fork ()) < 0)
-	{
-	  snmp_log (LOG_ERR, "Could not fork!\n");
-	  exit (-1);
-	}
-      if (child != 0)
-	exit (0);
-    }
-  /* In case we recevie a request to stop (kill -TERM or kill -INT) */
-  keep_running = 1;
-  signal (SIGTERM, stop_server);
-  signal (SIGINT, stop_server);
-
-  /* you're main loop here... */
-  while (keep_running)
-    {
-      /* if you use select(), see snmp_select_info() in snmp_api(3) */
-      /*     --- OR ---  */
-      rc = agent_check_and_process (1);	/* 0 == don't block */
-    }
+                /* you're main loop here... */
+        while (keep_running) {
+                /* if you use select(), see snmp_select_info() in snmp_api(3) */
+                /*     --- OR ---  */
+                rc = agent_check_and_process (1);	/* 0 == don't block */
+        }
 stop:
         DEBUGMSGTL ((AGENT,
-                "WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!"));
-  //closeSaHpiSession();
-  /* at shutdown time */
-  snmp_log (LOG_INFO, "Stopping %s\n", version);
-  snmp_shutdown (AGENT);
+        "WARNING: closeSaHpiSession: hpiSubagent.c: nolong implemented!"));
+        //closeSaHpiSession();
+        /* at shutdown time */
+        snmp_log (LOG_INFO, "Stopping %s\n", version);
+        snmp_shutdown (AGENT);
   
   return rc;
 }
