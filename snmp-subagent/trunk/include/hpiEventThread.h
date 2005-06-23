@@ -1,5 +1,5 @@
 /*
-* (C) Copyright IBM Corp. 2003
+ * (C) Copyright IBM Corp. 2005
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,8 +9,18 @@
  * full licensing terms.
  *
  * Authors:
- *   Konrad Rzeszutek <konradr@us.ibm.com>
+ *   David Judkovics  <djudkovi@us.ibm.com>
  *
- * $Id$
-*/
+ *					  
+ */
+
+
+#ifndef _HPI_EVENT_THREAD_
+#define _HPI_EVENT_THREAD_
+
+int start_event_thread(void);
+gboolean get_run_threaded(void);
+void set_run_threaded(gboolean val);
+
+#endif /*_HPI_EVENT_THREAD_*/
 
