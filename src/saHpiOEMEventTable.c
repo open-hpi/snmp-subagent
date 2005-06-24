@@ -321,7 +321,6 @@ int initialize_table_saHpiOEMEventEntryCount(void)
 /************************************************************/
 
 
-#ifdef saHpiOEMEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -392,42 +391,6 @@ saHpiOEMEventTable_cmp( const void *lhs, const void *rhs )
 
         return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiOEMEventTable_context *
-saHpiOEMEventTable_get( const char *name, int len )
-{
-    saHpiOEMEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiOEMEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiOEMEventTable module
@@ -653,7 +616,6 @@ int saHpiOEMEventTable_can_delete(saHpiOEMEventTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiOEMEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -701,7 +663,6 @@ saHpiOEMEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1082,18 +1043,18 @@ initialize_table_saHpiOEMEventTable(void)
     cb.container = netsnmp_container_find("saHpiOEMEventTable_primary:"
                                           "saHpiOEMEventTable:"
                                           "table_container");
-#ifdef saHpiOEMEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiOEMEventTable_secondary:"
                                                        "saHpiOEMEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiOEMEventTable_cmp;
-#endif
-#ifdef saHpiOEMEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiOEMEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiOEMEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiOEMEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiOEMEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiOEMEventTable_row_copy;
@@ -1108,7 +1069,7 @@ initialize_table_saHpiOEMEventTable(void)
     cb.set_commit = saHpiOEMEventTable_set_commit;
     cb.set_free = saHpiOEMEventTable_set_free;
     cb.set_undo = saHpiOEMEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiOEMEventTable",
                 "Registering table saHpiOEMEventTable "
                 "as a table array\n"));

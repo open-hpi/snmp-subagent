@@ -676,7 +676,7 @@ void saHpiDomainInfoTable_set_reserve1( netsnmp_request_group *rg )
 			if(rc == SNMP_ERR_NOERROR ) {
 				if (var->val_len > SAHPI_MAX_TEXT_BUFFER_LENGTH) {
         			rc = SNMP_ERR_WRONGLENGTH;
-    			}	
+                                }	
 			}
 			if (rc == SNMP_ERR_NOERROR)		              
 	     		DEBUGMSGTL ((AGENT, 
