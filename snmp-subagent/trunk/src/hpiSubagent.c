@@ -351,7 +351,6 @@ main (int argc, char **argv)
 	}
 	DEBUGMSGTL ((AGENT, "saHpiDiscover Success!\n"));	
 
-<<<<<<< hpiSubagent.c
 	/* Initialize subagent tables */		
 	init_saHpiDomainInfoTable(); 
 /*	init_saHpiDomainAlarmTable(); */
