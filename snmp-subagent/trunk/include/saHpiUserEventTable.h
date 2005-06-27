@@ -26,6 +26,12 @@ extern "C" {
 typedef struct saHpiUserEventTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
+    /* flags used to tract data needed to create OEM Event */
+     unsigned char timestamp_set;
+     unsigned char text_type_set;
+     unsigned char text_language_set;
+     unsigned char text_set;
+
     /*************************************************************
      * You can store data internally in this structure.
      *
@@ -96,8 +102,11 @@ extern size_t saHpiUserEventTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiUserEventTable
  */
-
 #define USER_EVENT_INDEX_NR 3
+#define saHpiDomainId_event_INDEX 0
+#define saHpiEventSeverity_event_INDEX 1
+#define saHpiUserEventEntryId_event_INDEX 2
+
 #define COLUMN_SAHPIUSEREVENTENTRYID 1
 #define COLUMN_SAHPIUSEREVENTTIMESTAMP 2
 #define COLUMN_SAHPIUSEREVENTTEXTTYPE 3
@@ -106,21 +115,6 @@ extern size_t saHpiUserEventTable_oid_len;
 #define COLUMN_SAHPIUSEREVENTROWSTATUS 6
 #define saHpiUserEventTable_COL_MIN 2
 #define saHpiUserEventTable_COL_MAX 6
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiUserEventTable */
-#define saHpiUserEventTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiUserEventTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiUserEventTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiUserEventTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiUserEventTable_SET_HANDLING
 
 int saHpiUserEventTable_extract_index( saHpiUserEventTable_context * ctx, netsnmp_index * hdr );
 
@@ -145,14 +139,9 @@ int saHpiUserEventTable_can_delete(saHpiUserEventTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiUserEventTable_ROW_CREATION
 saHpiUserEventTable_context * saHpiUserEventTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiUserEventTable_IDX2
 saHpiUserEventTable_context * saHpiUserEventTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
