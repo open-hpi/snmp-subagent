@@ -70,8 +70,9 @@ static gpointer event_thread_loop(gpointer data)
 
                 snmp_log (LOG_INFO, "rv [%s]\n", oh_lookup_error(rv));
                 snmp_log (LOG_INFO, "returned from saHpiEventGet\n");
+                DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
+                             oh_lookup_eventtype(event.EventType)));
                 oh_print_event(&event, 0);
-                sleep(5);
         }
 	g_mutex_unlock(thread_mutex);
         g_thread_exit(0);
