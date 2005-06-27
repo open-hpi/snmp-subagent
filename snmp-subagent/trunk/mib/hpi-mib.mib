@@ -3334,7 +3334,7 @@ saHpiSensorEventSpecific OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+    " "
     REFERENCE
     "SAI-HPI-B.01.01 section 8.14."
     ::= {saHpiSensorEventEntry 15}
@@ -4064,7 +4064,7 @@ saHpiUserEventText OBJECT-TYPE
 
 saHpiUserEventRowStatus OBJECT-TYPE
     SYNTAX      RowStatus
-    MAX-ACCESS  read-write
+    MAX-ACCESS  read-create
     STATUS      current
     DESCRIPTION 
         "This columnar node contains the status of the row and also
@@ -5088,7 +5088,7 @@ saHpiSensorEventLogSpecific OBJECT-TYPE
     MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
-    ""
+    " "
     REFERENCE
     "SAI-HPI-B.01.01 section 8.14."
     ::= {saHpiSensorEventLogEntry 14}
@@ -9418,7 +9418,7 @@ saHpiInventoryPersistent OBJECT-TYPE
         but optionally may be persisted via saHpiParmControl function, as
         defined in implementation documentation."
         REFERENCE
-                ""
+        " "
         ::= {saHpiInventoryEntry 2}
 
 saHpiInventoryOEM OBJECT-TYPE
