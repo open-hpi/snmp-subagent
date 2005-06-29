@@ -46,6 +46,10 @@
 #include <saHpiOEMEventTable.h>
 #include <saHpiHotSwapEventTable.h>
 #include <saHpiWatchdogEventTable.h>
+#include <saHpiSoftwareEventTable.h>
+#include <saHpiSensorEnableChangeEventTable.h>
+#include <saHpiUserEventTable.h>
+#include <saHpiSensorEventTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
