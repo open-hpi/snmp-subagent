@@ -31,9 +31,10 @@ typedef struct saHpiUserEventTable_context_s {
      unsigned char text_type_set;
      unsigned char text_language_set;
      unsigned char text_set;
+     unsigned char saHpiEventAdd_called;
 
     /*************************************************************
-     * You can store data internally in this structure.
+     * You can store data internally in this structure.saHpiEventSeverity
      *
      * TODO: You will probably have to fix a few types here...
      */
@@ -43,7 +44,7 @@ typedef struct saHpiUserEventTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiUserEventTimestamp;
+            SaHpiTimeT saHpiUserEventTimestamp;
 
         /** SaHpiTextType = ASN_INTEGER */
             long saHpiUserEventTextType;
@@ -90,6 +91,7 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
                                            SaHpiEventT *event,
                                            oid * event_oid, 
                                            size_t *event_oid_len);
+SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event);
 
 /*************************************************************
  * oid declarations

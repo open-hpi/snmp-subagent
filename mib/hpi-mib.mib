@@ -4028,7 +4028,7 @@ saHpiUserEventEntryId OBJECT-TYPE
 
 saHpiUserEventTimestamp OBJECT-TYPE
     SYNTAX      SaHpiTime
-    MAX-ACCESS  read-create
+    MAX-ACCESS  read-only
     STATUS      current
     DESCRIPTION
         "Refer to textual convention for SaHpiTime for more details.

@@ -475,7 +475,7 @@ main (int argc, char **argv)
 
         /* start event thread */
         set_run_threaded(TRUE);
-        if (start_event_thread() != AGENT_ERR_NOERROR) {
+        if (start_event_thread(sessionid) != AGENT_ERR_NOERROR) {
                 snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
                 rc = -1;
                 goto stop;

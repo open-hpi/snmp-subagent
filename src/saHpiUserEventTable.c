@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiEventThread.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -193,8 +194,228 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;   					
-
 }
+
+SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
+{					
+	SaErrorT rv = SA_OK;
+
+	oid user_evt_oid[USER_EVENT_INDEX_NR];
+	netsnmp_index user_evt_idx;
+	netsnmp_index *row_idx;
+	saHpiUserEventTable_context *user_evt_ctx;
+        
+        DR_XREF *dr_entry;
+        SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "async_event_add, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_event_add() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+                    
+        row_idx = CONTAINER_FIRST(cb.container);
+        do {
+
+                user_evt_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+
+                printf(" event        TimeStamp [%d]\n", event->Timestamp);
+                printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
+
+                event->EventDataUnion.UserEvent.UserEventData.Data[event->EventDataUnion.UserEvent.UserEventData.DataLength] = 0x00;
+                printf(" event        Data [%s]\n", 
+                       event->EventDataUnion.UserEvent.UserEventData.Data);
+                user_evt_ctx->saHpiUserEventText[user_evt_ctx->saHpiUserEventText_len] = 
+                        0x00;
+                printf(" user_evt_ctx Data [%s]\n", 
+                       user_evt_ctx->saHpiUserEventText);
+
+                printf(" event        DataLen [%d]\n", event->EventDataUnion.UserEvent.UserEventData.DataLength);
+                printf(" user_evt_ctx DataLen [%d]\n", user_evt_ctx->saHpiUserEventText_len);
+
+                printf(" event        TextLanguage [%d]\n", 
+                       event->EventDataUnion.UserEvent.UserEventData.Language);
+                printf(" user_evt_ctx TextLanguage [%d]\n", 
+                       user_evt_ctx->saHpiUserEventTextLanguage - 1);
+
+                printf(" event        TextType [%d]\n", 
+                       event->EventDataUnion.UserEvent.UserEventData.DataType);
+                printf(" user_evt_ctx TextType [%d]\n", 
+                       user_evt_ctx->saHpiUserEventTextType - 1);
+
+                printf(" event        Severity [%d]\n", 
+                       event->Severity);
+                printf(" user_evt_ctx Severity [%d]\n", 
+                       user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1);
+
+
+                if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
+                       event->EventDataUnion.UserEvent.UserEventData.Data,
+                       event->EventDataUnion.UserEvent.UserEventData.DataLength) ) {
+                        printf("Text ==\n");
+                } else {
+                        printf("Text !=\n");
+                }
+
+                if (user_evt_ctx->saHpiUserEventText_len == 
+                      event->EventDataUnion.UserEvent.UserEventData.DataLength) {
+                        printf("data ==\n");
+                } else {
+                        printf("data !=\n");
+
+                }
+
+                if ( (user_evt_ctx->saHpiUserEventTextLanguage - 1) ==
+                      event->EventDataUnion.UserEvent.UserEventData.Language) {
+                        printf("lang ==\n");
+                } else {
+                        printf("lang !=\n");
+
+                }
+
+
+                if ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
+                      event->EventDataUnion.UserEvent.UserEventData.DataType) {
+                        printf("type ==\n");
+                } else {
+                        printf("type !=\n");
+
+                }
+
+
+                SaHpiTimeT tmp_ts;
+                tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
+
+                if (!memcmp(&tmp_ts, &event->Timestamp, sizeof(SaHpiTimeT)) ) {
+                        printf("Timestamp ==\n");
+                        printf(" event        TimeStamp [%d]\n", event->Timestamp);
+                        printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
+                } else {
+                        printf("Timestamp !=\n");
+                        printf(" event        TimeStamp [%d]\n", event->Timestamp);
+                        printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
+                }
+
+                if ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
+                      event->Severity) {
+                        printf("Severity ==\n");
+                } else {
+                        printf("Severity !=\n");
+                }
+
+
+
+
+                if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
+                       event->EventDataUnion.UserEvent.UserEventData.Data,
+                       event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
+
+                     (user_evt_ctx->saHpiUserEventText_len == 
+                      event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
+
+                     ( (user_evt_ctx->saHpiUserEventTextLanguage - 1) ==
+                      event->EventDataUnion.UserEvent.UserEventData.Language) &&
+
+                     ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
+                      event->EventDataUnion.UserEvent.UserEventData.DataType) &&
+
+                     (user_evt_ctx->saHpiUserEventTimestamp == 
+                      event->Timestamp) &&
+
+                     ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
+                      event->Severity) ) {
+
+                        printf("!!!!!!!!!!! WaHoe We Found the event !!!!\n");
+                        printf("!!!!!!!!!!! saHpiDomainId_event_INDEX [%p] !!!!\n",
+                               row_idx->oids[saHpiDomainId_event_INDEX]);
+                        printf("!!!!!!!!!!! saHpiEventSeverity_event_INDEX [%p] !!!!\n",
+                               row_idx->oids[saHpiEventSeverity_event_INDEX]);
+                        printf("!!!!!!!!!!! saHpiUserEventEntryId_event_INDEX [%p] !!!!\n",
+                               row_idx->oids[saHpiUserEventEntryId_event_INDEX]);
+
+
+                }
+                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+        } while (row_idx);
+
+#if 0
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	user_evt_idx.len = USER_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	user_evt_oid[0] = get_domain_id(sessionid);
+	        /** Index saHpiEventSeverity is external */
+	user_evt_oid[1] = event->Severity + 1;
+                /** Index saHpiUserEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_event_add() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	user_evt_oid[2] = dr_entry->entry_id++;	
+	user_evt_idx.oids = (oid *) & user_evt_oid;
+	   
+	/* See if Row exists. */
+	user_evt_ctx = NULL;
+	user_evt_ctx = CONTAINER_FIND(cb.container, &user_evt_idx);
+
+	if (!user_evt_ctx) { 
+		// New entry. Add it
+		user_evt_ctx = 
+			saHpiUserEventTable_create_row(&user_evt_idx);
+                if (!user_evt_ctx) {
+                        snmp_log (LOG_ERR, "async_event_add: Not enough memory for a User Event row!");
+                        rv = AGENT_ERR_INTERNAL_ERROR;
+                }
+
+               /* new row fill in everything */
+                       /** SaHpiEntryId = ASN_UNSIGNED */
+                user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
+
+                /** SaHpiTime = ASN_COUNTER64 */
+                user_evt_ctx->saHpiUserEventTimestamp = event->Timestamp;
+
+                /** SaHpiTextType = ASN_INTEGER */
+                user_evt_ctx->saHpiUserEventTextType = 
+	                event->EventDataUnion.UserEvent.UserEventData.DataType + 1;
+        
+                /** SaHpiTextLanguage = ASN_INTEGER */
+                user_evt_ctx->saHpiUserEventTextLanguage = 
+	                event->EventDataUnion.UserEvent.UserEventData.Language + 1;
+
+                user_evt_ctx->saHpiUserEventText_len = 
+	                event->EventDataUnion.UserEvent.UserEventData.DataLength;
+
+                /** SaHpiText = ASN_OCTET_STR */			
+                memcpy(user_evt_ctx->saHpiUserEventText, 
+	        event->EventDataUnion.UserEvent.UserEventData.Data,
+	                event->EventDataUnion.UserEvent.UserEventData.DataLength);
+
+                /** RowStatus = ASN_INTEGER */
+                user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
+
+                CONTAINER_INSERT (cb.container, user_evt_ctx);
+
+                user_event_entry_count = CONTAINER_SIZE (cb.container);
+                user_event_entry_count_total++;
+
+
+        } else { /* existing row, set RowStatus active */
+                /** RowStatus = ASN_INTEGER */
+                user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
+        }
+#endif
+        return SA_OK;   					
+}
+
 
 /**
  * 
@@ -209,6 +430,8 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
         SaHpiEventT     event;
 
         DEBUGMSGTL ((AGENT, "user_event_add() called\n"));
+
+        g_mutex_lock(thread_mutex);
 
 //        if ((row_ctx->timestamp_set     == MIB_TRUE) &&
           if ((row_ctx->text_type_set     == MIB_TRUE) &&
@@ -249,7 +472,12 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
                                      oh_lookup_error(rc)));
                         return get_snmp_error(rc);
                 }
-        }
+
+                row_ctx->saHpiUserEventTimestamp = event.Timestamp;
+                row_ctx->saHpiEventAdd_called = MIB_TRUE;
+        }  
+
+        g_mutex_unlock(thread_mutex);
 
         return SNMP_ERR_NOERROR; 
 }

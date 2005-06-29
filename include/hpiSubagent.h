@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2003
+ * (C) Copyright IBM Corp. 2005
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,8 +9,8 @@
  * full licensing terms.
  *
  * Authors:
- *   Konrad Rzeszutek <konradr@us.ibm.com>
  *   David Judkovics  <djudkovi@us.ibm.com> 
+ *   Konrad Rzeszutek <konradr@us.ibm.com>
  *
  * $Id:
  *
@@ -21,6 +21,14 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
 #include <glib.h>
+
+#ifndef _HPI_SUBAGENT_
+#define _HPI_SUBAGENT_
+
+/*
+ * global mutex used mainly for event servicing"
+ */
+//GMutex *thread_mutex = NULL;
 
 /*
  * Our Net-SNMP "call-sign"
@@ -283,3 +291,6 @@ typedef struct state_category_string_
     unsigned char *str;
 } state_category_string;
 #endif
+
+
+#endif /* _HPI_SUBAGENT_ */

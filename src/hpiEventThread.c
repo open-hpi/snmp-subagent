@@ -30,6 +30,7 @@
 #include <session_info.h>
 #include <hpiSubagent.h>
 #include <hpiEventThread.h>
+#include <saHpiUserEventTable.h>
 
 GThread *event_thread = NULL;
 GMutex *thread_mutex = NULL;
@@ -56,7 +57,8 @@ static gpointer event_thread_loop(gpointer data)
         SaHpiRptEntryT       rpt_entry;
         SaHpiEvtQueueStatusT event_queue_status;
 
-	g_mutex_lock(thread_mutex);
+        SaHpiSessionIdT sessionid = *(SaHpiSessionIdT *)data;
+
         while(get_run_threaded()) {
                 DEBUGMSGTL ((AGENT, "sessionid [%d]\n", get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID)));
                 DEBUGMSGTL ((AGENT, "event_thread_loop started\n"));
@@ -73,14 +75,44 @@ static gpointer event_thread_loop(gpointer data)
                 DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
                              oh_lookup_eventtype(event.EventType)));
                 oh_print_event(&event, 0);
+
+                /* serialize access */
+                g_mutex_lock(thread_mutex);
+
+                switch (event.EventType) {
+                case SAHPI_ET_RESOURCE:
+                        break;
+                case SAHPI_ET_DOMAIN:
+                        break;
+                case SAHPI_ET_SENSOR:              
+                        break;
+                case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                        break;
+                case SAHPI_ET_HOTSWAP:
+                        break;
+                case SAHPI_ET_WATCHDOG:            
+                        break;
+                case SAHPI_ET_HPI_SW:            
+                        break;
+                case SAHPI_ET_OEM:              
+                        break;
+                case SAHPI_ET_USER: 
+                        rv = async_event_add(sessionid, &event);
+                        break;
+                default:
+                        break;
+                }
+
+                /* serialize access */
+                g_mutex_unlock(thread_mutex);
+
         }
-	g_mutex_unlock(thread_mutex);
         g_thread_exit(0);
         return data;
 }
 
 
-int start_event_thread(void)
+int start_event_thread(SaHpiSessionIdT sessionid)
 {
         DEBUGMSGTL ((AGENT, "Attempting to init event"));
         if (!g_thread_supported()) {
@@ -92,7 +124,7 @@ int start_event_thread(void)
 
         thread_mutex = g_mutex_new();
         event_thread = g_thread_create(event_thread_loop,
-                                       NULL, 
+                                       (gpointer)&sessionid, 
                                        FALSE, 
                                        &event_thread_error);
         if (event_thread == NULL) {
