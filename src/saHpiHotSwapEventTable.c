@@ -306,8 +306,6 @@ int initialize_table_saHpiHotSwapEventEntryCount(void)
 /************************************************************/
 /************************************************************/
 
-
-#ifdef saHpiHotSwapEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -412,7 +410,6 @@ saHpiHotSwapEventTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
