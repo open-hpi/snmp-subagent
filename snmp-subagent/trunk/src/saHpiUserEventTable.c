@@ -223,93 +223,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
 
                 user_evt_ctx = CONTAINER_FIND(cb.container, row_idx);
 
-
-                printf(" event        TimeStamp [%d]\n", event->Timestamp);
-                printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
-
-                event->EventDataUnion.UserEvent.UserEventData.Data[event->EventDataUnion.UserEvent.UserEventData.DataLength] = 0x00;
-                printf(" event        Data [%s]\n", 
-                       event->EventDataUnion.UserEvent.UserEventData.Data);
-                user_evt_ctx->saHpiUserEventText[user_evt_ctx->saHpiUserEventText_len] = 
-                        0x00;
-                printf(" user_evt_ctx Data [%s]\n", 
-                       user_evt_ctx->saHpiUserEventText);
-
-                printf(" event        DataLen [%d]\n", event->EventDataUnion.UserEvent.UserEventData.DataLength);
-                printf(" user_evt_ctx DataLen [%d]\n", user_evt_ctx->saHpiUserEventText_len);
-
-                printf(" event        TextLanguage [%d]\n", 
-                       event->EventDataUnion.UserEvent.UserEventData.Language);
-                printf(" user_evt_ctx TextLanguage [%d]\n", 
-                       user_evt_ctx->saHpiUserEventTextLanguage - 1);
-
-                printf(" event        TextType [%d]\n", 
-                       event->EventDataUnion.UserEvent.UserEventData.DataType);
-                printf(" user_evt_ctx TextType [%d]\n", 
-                       user_evt_ctx->saHpiUserEventTextType - 1);
-
-                printf(" event        Severity [%d]\n", 
-                       event->Severity);
-                printf(" user_evt_ctx Severity [%d]\n", 
-                       user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1);
-
-
-                if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
-                       event->EventDataUnion.UserEvent.UserEventData.Data,
-                       event->EventDataUnion.UserEvent.UserEventData.DataLength) ) {
-                        printf("Text ==\n");
-                } else {
-                        printf("Text !=\n");
-                }
-
-                if (user_evt_ctx->saHpiUserEventText_len == 
-                      event->EventDataUnion.UserEvent.UserEventData.DataLength) {
-                        printf("data ==\n");
-                } else {
-                        printf("data !=\n");
-
-                }
-
-                if ( (user_evt_ctx->saHpiUserEventTextLanguage - 1) ==
-                      event->EventDataUnion.UserEvent.UserEventData.Language) {
-                        printf("lang ==\n");
-                } else {
-                        printf("lang !=\n");
-
-                }
-
-
-                if ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
-                      event->EventDataUnion.UserEvent.UserEventData.DataType) {
-                        printf("type ==\n");
-                } else {
-                        printf("type !=\n");
-
-                }
-
-
                 SaHpiTimeT tmp_ts;
                 tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
-
-                if (!memcmp(&tmp_ts, &event->Timestamp, sizeof(SaHpiTimeT)) ) {
-                        printf("Timestamp ==\n");
-                        printf(" event        TimeStamp [%d]\n", event->Timestamp);
-                        printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
-                } else {
-                        printf("Timestamp !=\n");
-                        printf(" event        TimeStamp [%d]\n", event->Timestamp);
-                        printf(" user_evt_ctx TimeStamp [%d]\n", user_evt_ctx->saHpiUserEventTimestamp);
-                }
-
-                if ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
-                      event->Severity) {
-                        printf("Severity ==\n");
-                } else {
-                        printf("Severity !=\n");
-                }
-
-
-
 
                 if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
                        event->EventDataUnion.UserEvent.UserEventData.Data,
@@ -331,12 +246,12 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
                       event->Severity) ) {
 
                         printf("!!!!!!!!!!! WaHoe We Found the event !!!!\n");
-                        printf("!!!!!!!!!!! saHpiDomainId_event_INDEX [%p] !!!!\n",
-                               row_idx->oids[saHpiDomainId_event_INDEX]);
-                        printf("!!!!!!!!!!! saHpiEventSeverity_event_INDEX [%p] !!!!\n",
-                               row_idx->oids[saHpiEventSeverity_event_INDEX]);
-                        printf("!!!!!!!!!!! saHpiUserEventEntryId_event_INDEX [%p] !!!!\n",
-                               row_idx->oids[saHpiUserEventEntryId_event_INDEX]);
+                        printf("!!!!!!!!!!! saHpiDomainId_event_INDEX [%d] !!!!\n",
+                               (int)row_idx->oids[saHpiDomainId_event_INDEX]);
+                        printf("!!!!!!!!!!! saHpiEventSeverity_event_INDEX [%d] !!!!\n",
+                               (int)row_idx->oids[saHpiEventSeverity_event_INDEX]);
+                        printf("!!!!!!!!!!! saHpiUserEventEntryId_event_INDEX [%d] !!!!\n",
+                               (int)row_idx->oids[saHpiUserEventEntryId_event_INDEX]);
 
 
                 }
