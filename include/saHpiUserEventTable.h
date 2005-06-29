@@ -98,6 +98,16 @@ extern oid saHpiUserEventTable_oid[];
 extern size_t saHpiUserEventTable_oid_len;
 
 #define saHpiUserEventTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,3,1,30
+
+/*************************************************************
+ * defines included from hpiB0101_enums.h
+ */
+#define SAHPIUSEREVENTROWSTATUS_ACTIVE  	     1
+#define SAHPIUSEREVENTROWSTATUS_NOTINSERVICE	     2
+#define SAHPIUSEREVENTROWSTATUS_NOTREADY	     3
+#define SAHPIUSEREVENTROWSTATUS_CREATEANDGO	     4
+#define SAHPIUSEREVENTROWSTATUS_CREATEANDWAIT        5
+#define SAHPIUSEREVENTROWSTATUS_DESTROY 	     6
     
 /*************************************************************
  * column number definitions for table saHpiUserEventTable
