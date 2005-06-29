@@ -243,16 +243,20 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
                       event->Timestamp) &&
 
                      ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
-                      event->Severity) ) {
+                      event->Severity) &&
 
-                        printf("!!!!!!!!!!! WaHoe We Found the event !!!!\n");
-                        printf("!!!!!!!!!!! saHpiDomainId_event_INDEX [%d] !!!!\n",
-                               (int)row_idx->oids[saHpiDomainId_event_INDEX]);
-                        printf("!!!!!!!!!!! saHpiEventSeverity_event_INDEX [%d] !!!!\n",
-                               (int)row_idx->oids[saHpiEventSeverity_event_INDEX]);
-                        printf("!!!!!!!!!!! saHpiUserEventEntryId_event_INDEX [%d] !!!!\n",
-                               (int)row_idx->oids[saHpiUserEventEntryId_event_INDEX]);
+                     (user_evt_ctx->saHpiEventAdd_called == SAHPI_TRUE) && 
 
+                     (user_evt_ctx->saHpiUserEventRowStatus == 
+                      SAHPIUSEREVENTROWSTATUS_CREATEANDWAIT) ) {
+                        
+                        DEBUGMSGTL ((AGENT, 
+                        "Setting saHpiUserEventRowStatus to SAHPIUSEREVENTROWSTATUS_ACTIVE\n"));
+
+                        user_evt_ctx->saHpiUserEventRowStatus = 
+                                SAHPIUSEREVENTROWSTATUS_ACTIVE;
+
+                        return SA_OK;
 
                 }
                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
