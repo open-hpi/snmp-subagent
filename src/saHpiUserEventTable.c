@@ -262,7 +262,9 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
         } while (row_idx);
 
-#if 0
+        /* Existing Entry wasn't found for user events. This should not happen */
+        /* For now add new row.  This may not be the best solution.            */
+
 	/* BUILD oid for new row */
 		/* assign the number of indices */
 	user_evt_idx.len = USER_EVENT_INDEX_NR;
@@ -331,7 +333,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
                 /** RowStatus = ASN_INTEGER */
                 user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
         }
-#endif
+
         return SA_OK;   					
 }
 
