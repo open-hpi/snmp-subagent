@@ -172,7 +172,6 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiUserEventTable(sessionid, &event,                                           
                                                     child_oid, 
                                                     &child_oid_len);
-                        goto end;
                         break;
                 default:
                         printf("********* unknown event type *********\n");
@@ -226,7 +225,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 memset(&rdr, 0, sizeof(rdr));
                 memset(&rpt_entry, 0, sizeof(rpt_entry));
                 memset(&event_queue_status, 0, sizeof(event_queue_status));
-end:            
+            
                 rv = saHpiEventGet (sessionid, 
                                     SAHPI_TIMEOUT_IMMEDIATE, 
                                     &event, 
@@ -234,6 +233,122 @@ end:
                                     &rpt_entry, 
                                     &event_queue_status);
         }
+
+        return rv;
+}
+
+
+SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
+{
+
+        SaErrorT rv = SA_OK;
+
+	oid event_oid[MAX_OID_LEN];
+	netsnmp_index event_index;
+	saHpiEventTable_context *event_context;
+
+        oid child_oid[MAX_OID_LEN];
+        size_t child_oid_len;
+
+        int i;
+
+        DEBUGMSGTL ((AGENT, "async_event_add, called\n"));
+
+        switch (event->EventType) {
+        case SAHPI_ET_RESOURCE:
+                rv = async_resource_event_add(sessionid, event,                                           
+                                              child_oid, 
+                                              &child_oid_len);
+                break;
+        case SAHPI_ET_DOMAIN:
+                rv = async_domain_event_add(sessionid, event,                                           
+                                            child_oid, 
+                                            &child_oid_len);
+                break;
+        case SAHPI_ET_SENSOR:
+                rv = async_sensor_event_add(sessionid, event,                                           
+                                            child_oid, 
+                                            &child_oid_len);
+                break;
+        case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                rv = async_sensor_enable_change_event_add(sessionid, event,                                           
+                                                          child_oid, 
+                                                          &child_oid_len);
+                break;
+        case SAHPI_ET_HOTSWAP:
+                rv = async_hotswap_event_add(sessionid, event,
+                                             child_oid, 
+                                             &child_oid_len);
+                break;
+        case SAHPI_ET_WATCHDOG:
+                rv = async_watchdog_event_add(sessionid, event,
+                                              child_oid, 
+                                              &child_oid_len);
+                break;
+        case SAHPI_ET_HPI_SW:
+                rv = async_software_event_add(sessionid, event,
+                                              child_oid, 
+                                              &child_oid_len);
+                break;
+        case SAHPI_ET_OEM:
+                rv = async_oem_event_add(sessionid, event,                                           
+                                         child_oid, 
+                                         &child_oid_len);
+                break;
+        case SAHPI_ET_USER:
+                rv = async_user_event_add(sessionid, event,                                           
+                                          child_oid, 
+                                          &child_oid_len);
+                break;
+        default:
+                printf("********* unknown event type *********\n");
+                return rv;
+                break;        
+        }
+
+        if (rv != SA_OK )
+                return rv;
+
+        event_index.len = child_oid_len;
+        for (i=0; i < child_oid_len; i++) 
+                event_oid[i] = child_oid[i];
+        event_index.oids = (oid *) & event_oid;
+
+        /* See if it exists. */
+        event_context = NULL;
+        event_context = CONTAINER_FIND (cb.container, &event_index);
+	
+        if (!event_context) { 
+                // New entry. Add it
+                event_context = 
+                        saHpiEventTable_create_row (&event_index);
+        }
+        if (!event_context) {
+                snmp_log (LOG_ERR, "Not enough memory for a Event row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+
+        /** RowPointer = ASN_OBJECT_ID */
+	event_context->saHpiEventRowPointer_len = 
+                child_oid_len * sizeof (oid);
+	memcpy (event_context->saHpiEventRowPointer, 
+		child_oid, 
+		event_context->saHpiEventRowPointer_len);
+
+        /** SaHpiSeverity = ASN_INTEGER */
+        event_context->saHpiEventSeverity = event->Severity + 1;
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        event_context->saHpiEventSaHpiTime = event->Timestamp;
+
+        /** INTEGER = ASN_INTEGER */
+        event_context->saHpiEventType = event->EventType + 1;
+
+        CONTAINER_INSERT (cb.container, event_context);
+
+        event_entry_count = CONTAINER_SIZE (cb.container);
+        event_entry_count_total++;
 
         return rv;
 }
