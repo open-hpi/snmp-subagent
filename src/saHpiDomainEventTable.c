@@ -171,6 +171,16 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
 
 }
 
+SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid, 
+                                SaHpiEventT *event,
+                                oid * this_child_oid, 
+                                size_t *this_child_oid_len)
+{
+        DEBUGMSGTL ((AGENT, "async_domain_event_add, NOT implemented\n"));
+        return SA_ERR_HPI_UNSUPPORTED_API;
+}
+
+
 /**
  * 
  * @handler:

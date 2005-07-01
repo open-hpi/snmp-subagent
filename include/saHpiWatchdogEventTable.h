@@ -81,6 +81,12 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
                                         SaHpiEventT *event,
                                         oid * event_oid, 
                                         size_t *event_oid_len);
+SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid, 
+                                  SaHpiEventT *event,
+                                  oid * this_child_oid, 
+                                  size_t *this_child_oid_len);
+
+
 
 /*************************************************************
  * oid declarations

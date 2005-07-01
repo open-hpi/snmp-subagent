@@ -86,9 +86,9 @@ int initialize_table_saHpiSensorEnableChangeEventEntryCount(void);
 
 
 SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
-                                        SaHpiEventT *event,
-                                        oid * this_child_oid, 
-                                        size_t *this_child_oid_len)
+                                                    SaHpiEventT *event,
+                                                    oid * this_child_oid, 
+                                                    size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
 
@@ -304,6 +304,16 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
 
         return SA_OK;   					
 }
+
+SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid, 
+                                              SaHpiEventT *event,
+                                              oid * this_child_oid, 
+                                              size_t *this_child_oid_len)
+{
+        DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add, NOT implemented\n"));
+        return SA_ERR_HPI_UNSUPPORTED_API;
+}
+
 
 /**
  * 
