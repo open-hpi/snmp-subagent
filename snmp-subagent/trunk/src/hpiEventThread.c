@@ -30,7 +30,7 @@
 #include <session_info.h>
 #include <hpiSubagent.h>
 #include <hpiEventThread.h>
-#include <saHpiUserEventTable.h>
+#include <saHpiEventTable.h>
 
 GThread *event_thread = NULL;
 GMutex *thread_mutex = NULL;
@@ -81,20 +81,28 @@ static gpointer event_thread_loop(gpointer data)
 
                 switch (event.EventType) {
                 case SAHPI_ET_RESOURCE:
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_DOMAIN:
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_SENSOR:              
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_HOTSWAP:
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_WATCHDOG:            
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_HPI_SW:            
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_OEM:              
+                        rv = async_event_add(sessionid, &event);
                         break;
                 case SAHPI_ET_USER: 
                         rv = async_event_add(sessionid, &event);
