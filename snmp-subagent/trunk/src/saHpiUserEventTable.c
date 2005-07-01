@@ -96,9 +96,9 @@ static int user_event_delete (saHpiUserEventTable_context *row_ctx);
  * @return:
  */
 SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
-                                        SaHpiEventT *event,
-                                        oid * this_child_oid, 
-                                        size_t *this_child_oid_len)
+                                      SaHpiEventT *event,
+                                      oid * this_child_oid, 
+                                      size_t *this_child_oid_len)
 {					
 	SaErrorT rv = SA_OK;
 
@@ -196,7 +196,10 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
         return SA_OK;   					
 }
 
-SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
+SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
+                              SaHpiEventT *event,
+                              oid * this_child_oid, 
+                              size_t *this_child_oid_len)
 {					
 	SaErrorT rv = SA_OK;
 
@@ -204,16 +207,21 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
 	netsnmp_index user_evt_idx;
 	netsnmp_index *row_idx;
 	saHpiUserEventTable_context *user_evt_ctx;
+
+        oid column[2];
+        int column_len = 2;
         
         DR_XREF *dr_entry;
         SaHpiDomainIdResourceIdArrayT dr_pair;
 
-        DEBUGMSGTL ((AGENT, "async_event_add, called\n"));
+        SaHpiBoolT entry_found = SAHPI_FALSE;
+
+        DEBUGMSGTL ((AGENT, "async_user_event_add, called\n"));
 
 	/* check for NULL pointers */
 	if (!event) {
 		DEBUGMSGTL ((AGENT, 
-		"ERROR: async_event_add() passed NULL event pointer\n"));
+		"ERROR: async_user_event_add() passed NULL event pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -249,90 +257,111 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
 
                      (user_evt_ctx->saHpiUserEventRowStatus == 
                       SAHPIUSEREVENTROWSTATUS_CREATEANDWAIT) ) {
-                        
+
+                        /* existing event found, set the row_status to active   */
+                        /* now need to add event to saHpiEventTabel             */ 
                         DEBUGMSGTL ((AGENT, 
                         "Setting saHpiUserEventRowStatus to SAHPIUSEREVENTROWSTATUS_ACTIVE\n"));
 
+                        /* the whole point of looking for it */
                         user_evt_ctx->saHpiUserEventRowStatus = 
                                 SAHPIUSEREVENTROWSTATUS_ACTIVE;
 
-                        return SA_OK;
+                        /* flag its found so we don't create a new row */
+                        entry_found = SAHPI_TRUE;
 
+                        /* place row_idx values into structure used by build full oid */
+                        user_evt_idx.len = row_idx->len;
+                        user_evt_idx.oids = row_idx->oids;
+
+                        /* increment to show activity, maybe correct DMJ TODO */
+                        /* ask someone                               DMJ TODO */
+                        user_event_entry_count_total++;
+
+                        break;
                 }
                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
         } while (row_idx);
 
-        /* Existing Entry wasn't found for user events. This should not happen */
-        /* For now add new row.  This may not be the best solution.            */
+        /* check if exsiting row was found. If not found which should not happen */
+        /* For now add new row.  This may not be the best solution.              */
 
-	/* BUILD oid for new row */
-		/* assign the number of indices */
-	user_evt_idx.len = USER_EVENT_INDEX_NR;
-		/** Index saHpiDomainId is external */
-	user_evt_oid[0] = get_domain_id(sessionid);
-	        /** Index saHpiEventSeverity is external */
-	user_evt_oid[1] = event->Severity + 1;
-                /** Index saHpiUserEventEntryId is internal */
-	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
-	dr_pair.domainId_resourceId_arry[1] = event->Source;
-	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
-	if (dr_entry == NULL) {
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: async_event_add() domain_resource_pair_get returned NULL\n"));
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
-	user_evt_oid[2] = dr_entry->entry_id++;	
-	user_evt_idx.oids = (oid *) & user_evt_oid;
-	   
-	/* See if Row exists. */
-	user_evt_ctx = NULL;
-	user_evt_ctx = CONTAINER_FIND(cb.container, &user_evt_idx);
+        if (!entry_found) {
 
-	if (!user_evt_ctx) { 
-		// New entry. Add it
-		user_evt_ctx = 
-			saHpiUserEventTable_create_row(&user_evt_idx);
-                if (!user_evt_ctx) {
-                        snmp_log (LOG_ERR, "async_event_add: Not enough memory for a User Event row!");
-                        rv = AGENT_ERR_INTERNAL_ERROR;
-                }
-
-               /* new row fill in everything */
-                       /** SaHpiEntryId = ASN_UNSIGNED */
-                user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
-
-                /** SaHpiTime = ASN_COUNTER64 */
-                user_evt_ctx->saHpiUserEventTimestamp = event->Timestamp;
-
-                /** SaHpiTextType = ASN_INTEGER */
-                user_evt_ctx->saHpiUserEventTextType = 
-	                event->EventDataUnion.UserEvent.UserEventData.DataType + 1;
+        	/* BUILD oid for new row */
+        		/* assign the number of indices */
+        	user_evt_idx.len = USER_EVENT_INDEX_NR;
+        		/** Index saHpiDomainId is external */
+        	user_evt_oid[0] = get_domain_id(sessionid);
+        	        /** Index saHpiEventSeverity is external */
+        	user_evt_oid[1] = event->Severity + 1;
+                        /** Index saHpiUserEventEntryId is internal */
+        	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+        	dr_pair.domainId_resourceId_arry[1] = event->Source;
+        	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+        	if (dr_entry == NULL) {
+        		DEBUGMSGTL ((AGENT, 
+        		"ERROR: async_user_event_add() domain_resource_pair_get returned NULL\n"));
+        		return AGENT_ERR_INTERNAL_ERROR;
+        	}
+        	user_evt_oid[2] = dr_entry->entry_id++;	
+        	user_evt_idx.oids = (oid *) & user_evt_oid;
+        	   
+        	/* See if Row exists. */
+        	user_evt_ctx = NULL;
+        	user_evt_ctx = CONTAINER_FIND(cb.container, &user_evt_idx);
         
-                /** SaHpiTextLanguage = ASN_INTEGER */
-                user_evt_ctx->saHpiUserEventTextLanguage = 
-	                event->EventDataUnion.UserEvent.UserEventData.Language + 1;
-
-                user_evt_ctx->saHpiUserEventText_len = 
-	                event->EventDataUnion.UserEvent.UserEventData.DataLength;
-
-                /** SaHpiText = ASN_OCTET_STR */			
-                memcpy(user_evt_ctx->saHpiUserEventText, 
-	        event->EventDataUnion.UserEvent.UserEventData.Data,
-	                event->EventDataUnion.UserEvent.UserEventData.DataLength);
-
-                /** RowStatus = ASN_INTEGER */
-                user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
-
-                CONTAINER_INSERT (cb.container, user_evt_ctx);
-
-                user_event_entry_count = CONTAINER_SIZE (cb.container);
-                user_event_entry_count_total++;
-
-
-        } else { /* existing row, set RowStatus active */
-                /** RowStatus = ASN_INTEGER */
-                user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
+        	if (!user_evt_ctx) { 
+        		// New entry. Add it
+        		user_evt_ctx = 
+        			saHpiUserEventTable_create_row(&user_evt_idx);
+                        if (!user_evt_ctx) {
+                                snmp_log (LOG_ERR, 
+                                "async_user_event_add: Not enough memory for a User Event row!");
+                                rv = AGENT_ERR_INTERNAL_ERROR;
+                        }
+        
+                       /* new row fill in everything */
+                               /** SaHpiEntryId = ASN_UNSIGNED */
+                        user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
+        
+                        /** SaHpiTime = ASN_COUNTER64 */
+                        user_evt_ctx->saHpiUserEventTimestamp = event->Timestamp;
+        
+                        /** SaHpiTextType = ASN_INTEGER */
+                        user_evt_ctx->saHpiUserEventTextType = 
+        	                event->EventDataUnion.UserEvent.UserEventData.DataType + 1;
+                
+                        /** SaHpiTextLanguage = ASN_INTEGER */
+                        user_evt_ctx->saHpiUserEventTextLanguage = 
+        	                event->EventDataUnion.UserEvent.UserEventData.Language + 1;
+        
+                        user_evt_ctx->saHpiUserEventText_len = 
+        	                event->EventDataUnion.UserEvent.UserEventData.DataLength;
+        
+                        /** SaHpiText = ASN_OCTET_STR */			
+                        memcpy(user_evt_ctx->saHpiUserEventText, 
+        	        event->EventDataUnion.UserEvent.UserEventData.Data,
+        	                event->EventDataUnion.UserEvent.UserEventData.DataLength);
+        
+                        /** RowStatus = ASN_INTEGER */
+                        user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
+        
+                        CONTAINER_INSERT (cb.container, user_evt_ctx);
+        
+                        user_event_entry_count = CONTAINER_SIZE (cb.container);
+                        user_event_entry_count_total++;
+                }
         }
+
+        /* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIUSEREVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiUserEventTable_oid, saHpiUserEventTable_oid_len,
+			column, column_len,
+			&user_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;   					
 }
@@ -354,7 +383,7 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
 
         g_mutex_lock(thread_mutex);
 
-//        if ((row_ctx->timestamp_set     == MIB_TRUE) &&
+//        if ((row_ctx->timestamp_set     == MIB_TRUE) && decide this will be read-only
           if ((row_ctx->text_type_set     == MIB_TRUE) &&
               (row_ctx->text_language_set == MIB_TRUE) &&
               (row_ctx->text_set          == MIB_TRUE)) {
