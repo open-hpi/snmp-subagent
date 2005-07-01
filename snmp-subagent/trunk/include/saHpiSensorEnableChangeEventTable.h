@@ -100,6 +100,11 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
                                         SaHpiEventT *event,
                                         oid * event_oid, 
                                         size_t *event_oid_len);
+SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid, 
+                                              SaHpiEventT *event,
+                                              oid * this_child_oid, 
+                                              size_t *this_child_oid_len);
+
 
 
 /*************************************************************

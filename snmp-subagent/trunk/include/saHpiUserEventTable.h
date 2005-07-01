@@ -88,10 +88,13 @@ int saHpiUserEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsn
  * function declarations: OpenHpi
  */
 SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
-                                           SaHpiEventT *event,
-                                           oid * event_oid, 
-                                           size_t *event_oid_len);
-SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event);
+                                      SaHpiEventT *event,
+                                      oid * event_oid, 
+                                      size_t *event_oid_len);
+SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
+                              SaHpiEventT *event,
+                              oid * this_child_oid, 
+                              size_t *this_child_oid_len);
 
 /*************************************************************
  * oid declarations

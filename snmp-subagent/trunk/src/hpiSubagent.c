@@ -248,8 +248,8 @@ main (int argc, char **argv)
 	  	/* change this if you want to be a SNMP master agent */
 	  	
 	  	debug_register_tokens (AGENT);
-        snmp_enable_stderrlog ();
-        snmp_set_do_debugging (1);
+                snmp_enable_stderrlog ();
+                snmp_set_do_debugging (1);
 
 	  	while ((c = getopt (argc, argv, "fdsCx:h?")) != EOF) {
 	    switch (c) {
