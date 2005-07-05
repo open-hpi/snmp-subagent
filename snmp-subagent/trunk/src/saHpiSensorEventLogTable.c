@@ -111,7 +111,7 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 
         SaHpiTextBufferT buff;
 
-        DEBUGMSGTL ((AGENT, "populate_saHpiSesnorEventLogTable, called\n"));
+        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventLogTable, called\n"));
 
 	/* check for NULL pointers */
 	if (!event) {

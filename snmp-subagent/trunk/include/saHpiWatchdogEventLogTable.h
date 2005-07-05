@@ -71,6 +71,13 @@ const saHpiWatchdogEventLogTable_context * saHpiWatchdogEventLogTable_get_by_idx
                                         int row_status);
 int saHpiWatchdogEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid, 
+                                            SaHpiEventLogEntryT *event,
+                                            oid * this_child_oid, 
+                                            size_t *this_child_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -83,6 +90,8 @@ extern size_t saHpiWatchdogEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiWatchdogEventLogTable
  */
+ 
+#define WATCHDOG_EVENT_LOG_INDEX_NR 5
 #define COLUMN_SAHPIWATCHDOGEVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPIWATCHDOGEVENTLOGACTION 2
 #define COLUMN_SAHPIWATCHDOGEVENTLOGPRETIMERACTION 3

@@ -43,7 +43,7 @@ typedef struct saHpiUserEventLogTable_context_s {
             long saHpiUserEventLogTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiUserEventLogText[65535];
+            unsigned char saHpiUserEventLogText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiUserEventLogText_len;
 
         /** RowStatus = ASN_INTEGER */
@@ -75,16 +75,35 @@ int saHpiUserEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, ne
 
 
 /*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiEventLogEntryT *event,
+                                         oid * this_child_oid, 
+                                         size_t *this_child_oid_len);
+
+/*************************************************************
  * oid declarations
  */
 extern oid saHpiUserEventLogTable_oid[];
 extern size_t saHpiUserEventLogTable_oid_len;
 
 #define saHpiUserEventLogTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,3,2,29
+
+/*************************************************************
+ * defines included from hpiB0101_enums.h
+ */
+#define SAHPIUSEREVENTLOGROWSTATUS_ACTIVE	     1
+#define SAHPIUSEREVENTLOGROWSTATUS_NOTINSERVICE      2
+#define SAHPIUSEREVENTLOGROWSTATUS_NOTREADY	     3
+#define SAHPIUSEREVENTLOGROWSTATUS_CREATEANDGO       4
+#define SAHPIUSEREVENTLOGROWSTATUS_CREATEANDWAIT     5
+#define SAHPIUSEREVENTLOGROWSTATUS_DESTROY	     6
     
 /*************************************************************
  * column number definitions for table saHpiUserEventLogTable
  */
+#define USER_EVENT_LOG_INDEX_NR 3 
 #define COLUMN_SAHPIUSEREVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPIUSEREVENTLOGTEXTTYPE 2
 #define COLUMN_SAHPIUSEREVENTLOGTEXTLANGUAGE 3
