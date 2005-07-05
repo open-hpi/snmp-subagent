@@ -51,19 +51,19 @@ typedef struct saHpiSensorEnableChangeEventLogTable_context_s {
             long saHpiSensorEnableChangeEventLogEventsEnabled;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventLogAssertEvents[65535];
+            unsigned char saHpiSensorEnableChangeEventLogAssertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventLogAssertEvents_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventLogDeassertEvents[65535];
+            unsigned char saHpiSensorEnableChangeEventLogDeassertEvents[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventLogDeassertEvents_len;
 
         /** SaHpiOptionalData = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventLogOptionalData[65535];
+            unsigned char saHpiSensorEnableChangeEventLogOptionalData[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventLogOptionalData_len;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiSensorEnableChangeEventLogState[65535];
+            unsigned char saHpiSensorEnableChangeEventLogState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiSensorEnableChangeEventLogState_len;
 
 
@@ -90,6 +90,14 @@ const saHpiSensorEnableChangeEventLogTable_context * saHpiSensorEnableChangeEven
                                         int row_status);
 int saHpiSensorEnableChangeEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiEventLogEntryT *event,
+                                         oid * this_child_oid, 
+                                         size_t *this_child_oid_len);
+
 
 /*************************************************************
  * oid declarations
@@ -102,6 +110,8 @@ extern size_t saHpiSensorEnableChangeEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiSensorEnableChangeEventLogTable
  */
+
+#define SENSOR_ENABLE_CHANGE_EVENT_LOG_INDEX_NR 5 
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTYPE 2
 #define COLUMN_SAHPISENSORENABLECHANGEEVENTLOGCATEGORY 3

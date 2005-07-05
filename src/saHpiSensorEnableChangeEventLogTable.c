@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiSensorEnableChangeEventLogTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -48,6 +53,12 @@ size_t saHpiSensorEnableChangeEventLogTable_oid_len = OID_LENGTH(saHpiSensorEnab
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;		      
+static GHashTable *dr_table;
 
 /*************************************************************
  * oid and function declarations scalars
@@ -63,7 +74,7 @@ static oid saHpiSensorEnableChangeEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568
 int handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
-                                        netsnmp_request_info         *requests)
+                                        netsnmp_request_info         *requests);
 
 int handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
@@ -73,6 +84,226 @@ int handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handle
 int initialize_table_saHpiSensorEnableChangeEventLogEntryCountTotal(void);
 int initialize_table_saHpiSensorEnableChangeEventLogEntryCount(void);
 
+
+SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid, 
+                                             SaHpiEventLogEntryT *event,
+                                             oid * this_child_oid, 
+                                             size_t *this_child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+
+	oid sec_evt_oid[SENSOR_ENABLE_CHANGE_EVENT_LOG_INDEX_NR];
+	netsnmp_index sec_evt_idx;
+	saHpiSensorEnableChangeEventLogTable_context *sec_evt_ctx;
+	SaHpiTextBufferT sec_text_buf;
+	SaErrorT err = 0;	
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEnableChangeEventLogTable() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	sec_evt_idx.len = SENSOR_ENABLE_CHANGE_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	sec_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	sec_evt_oid[1] = event->Event.Source;		
+                /** Index saHpiSensorNum is external */
+	sec_evt_oid[2] = event->Event.EventDataUnion.SensorEnableChangeEvent.SensorNum;
+		/** Index saHpiEventSeverity is external */
+	sec_evt_oid[3] = event->Event.Severity + 1;		
+                /** Index saHpiSensorEnableChangeEventEntryId is external */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Event.Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: populate_saHpiSensorEnableChangeEventLogTable() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	sec_evt_oid[4] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	sec_evt_idx.oids = (oid *) & sec_evt_oid;
+
+	/* See if Row exists. */
+	sec_evt_ctx = NULL;
+	sec_evt_ctx = CONTAINER_FIND(cb.container, &sec_evt_idx);
+
+	if (!sec_evt_ctx) { 
+		// New entry. Add it
+		sec_evt_ctx = 
+			saHpiSensorEnableChangeEventLogTable_create_row(&sec_evt_idx);
+	}
+	if (!sec_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Sensor Enable Change Event Log row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        sec_evt_ctx->saHpiSensorEnableChangeEventLogTimestamp = event->Timestamp;
+
+        /** SaHpiSensorType = ASN_INTEGER */	
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogType = 
+	        event->Event.EventDataUnion.SensorEnableChangeEvent.SensorType + 1;
+	
+        /** SaHpiEventCategory = ASN_INTEGER */
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogCategory =
+	        event->Event.EventDataUnion.SensorEnableChangeEvent.EventCategory;
+		
+        /** TruthValue = ASN_INTEGER */
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogEnabled = 
+	        event->Event.EventDataUnion.SensorEnableChangeEvent.SensorEnable;
+	
+        /** TruthValue = ASN_INTEGER */
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogEventsEnabled =
+	        event->Event.EventDataUnion.SensorEnableChangeEvent.SensorEventEnable;
+	
+       /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->Event.EventDataUnion.SensorEnableChangeEvent.AssertEventMask,
+	                           sec_evt_ctx->saHpiSensorEnableChangeEventLogCategory,
+				   &sec_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Invalid parameter for AssertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is too small for AssertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error");
+		}
+	}	
+
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogAssertEvents_len = 
+	                                        sec_text_buf.DataLength;	
+	memcpy(sec_evt_ctx->saHpiSensorEnableChangeEventLogAssertEvents, 
+	                                        sec_text_buf.Data,
+					        sec_text_buf.DataLength);
+
+        /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->Event.EventDataUnion.SensorEnableChangeEvent.DeassertEventMask,
+	                           sec_evt_ctx->saHpiSensorEnableChangeEventLogCategory,
+				   &sec_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Invalid parameter for DeassertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is too small for DeassertEventMask\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error");
+		}
+	}	
+
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogDeassertEvents_len = 
+	                                        sec_text_buf.DataLength;	
+	memcpy(sec_evt_ctx->saHpiSensorEnableChangeEventLogDeassertEvents, 
+	                                        sec_text_buf.Data,
+					        sec_text_buf.DataLength);  
+						
+	
+	/** SaHpiOptionalData = ASN_OCTET_STR */						
+	err = oh_decode_sensorenableoptdata(
+	                        event->Event.EventDataUnion.SensorEnableChangeEvent.OptionalDataPresent,	                           
+				&sec_text_buf);
+				
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Invalid parameter for OptionalData\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error");
+		}
+	}
+						
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogOptionalData_len 
+	                                        = sec_text_buf.DataLength;
+	memcpy(sec_evt_ctx->saHpiSensorEnableChangeEventLogOptionalData, 
+	                                        sec_text_buf.Data,
+					        sec_text_buf.DataLength);								
+
+
+        /** SaHpiEventState = ASN_OCTET_STR */	
+	err = oh_decode_eventstate(event->Event.EventDataUnion.SensorEnableChangeEvent.CurrentState,
+	                           sec_evt_ctx->saHpiSensorEnableChangeEventLogCategory,
+				   &sec_text_buf);
+	if (err != SA_OK)
+	{
+	        if (err == SA_ERR_HPI_INVALID_PARAMS)
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Invalid parameter for CurrentState\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is NULL; Invalid event_state or event_cat");
+		}
+		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		{
+		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Buffer is too small for CurrentState\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Buffer too small");
+                }
+		else
+		{
+			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error\n"));
+			snmp_log (LOG_ERR, "populate_saHpiSensorEnableChangeEventLogTable: Unknown error");
+		}
+	}	
+
+	sec_evt_ctx->saHpiSensorEnableChangeEventLogState_len = 
+	                                        sec_text_buf.DataLength;	
+	memcpy(sec_evt_ctx->saHpiSensorEnableChangeEventLogState, 
+	                                        sec_text_buf.Data,
+					        sec_text_buf.DataLength);
+
+
+
+	CONTAINER_INSERT (cb.container, sec_evt_ctx);
+		
+	sensor_enable_change_event_log_entry_count = CONTAINER_SIZE (cb.container);
+        sensor_enable_change_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiSensorEnableChangeEventLogTable_oid, saHpiSensorEnableChangeEventLogTable_oid_len,
+			column, column_len,
+			&sec_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+        return SA_OK;
+}
 
 
 /**
@@ -202,8 +433,6 @@ int initialize_table_saHpiSensorEnableChangeEventLogEntryCount(void)
 /************************************************************/
  
 
-
-#ifdef saHpiSensorEnableChangeEventLogTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -318,7 +547,6 @@ saHpiSensorEnableChangeEventLogTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
@@ -333,7 +561,10 @@ init_saHpiSensorEnableChangeEventLogTable(void)
 	initialize_table_saHpiSensorEnableChangeEventLogTable();
 
         initialize_table_saHpiSensorEnableChangeEventLogEntryCountTotal();
-        initialize_table_saHpiSensorEnableChangeEventLogEntryCount()
+        initialize_table_saHpiSensorEnableChangeEventLogEntryCount();
+	
+        domain_resource_pair_initialize(&initialized, &dr_table);
+	
 }
 
 /************************************************************
@@ -789,19 +1020,6 @@ void saHpiSensorEnableChangeEventLogTable_set_action( netsnmp_request_group *rg 
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiSensorEnableChangeEventLogTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -884,6 +1102,7 @@ void saHpiSensorEnableChangeEventLogTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }

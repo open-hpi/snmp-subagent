@@ -69,6 +69,14 @@ int saHpiHotSwapEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *,
 
 
 /*************************************************************
+ * function declarations
+ */
+SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid, 
+                                            SaHpiEventLogEntryT *event,
+                                            oid * this_child_oid, 
+                                            size_t *this_child_oid_len);
+
+/*************************************************************
  * oid declarations
  */
 extern oid saHpiHotSwapEventLogTable_oid[];
@@ -79,6 +87,8 @@ extern size_t saHpiHotSwapEventLogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiHotSwapEventLogTable
  */
+ 
+#define HOTSWAP_EVENT_LOG_INDEX_NR 4 
 #define COLUMN_SAHPIHOTSWAPEVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPIHOTSWAPEVENTLOGSTATE 2
 #define COLUMN_SAHPIHOTSWAPEVENTLOGPREVIOUSSTATE 3
