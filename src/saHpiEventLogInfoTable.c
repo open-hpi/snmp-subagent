@@ -188,7 +188,7 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                                    SAHPI_UNSPECIFIED_RESOURCE_ID,
                                    &event_log_info);
         if (rv != SA_OK) {
-                DEBUGMSGTL ((AGENT, "getting Domain EventLogInfo Failed: rv = %d\n",rv));
+                DEBUGMSGTL ((AGENT, "getting Domain Event Log Failed: rv = %d\n",rv));
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 

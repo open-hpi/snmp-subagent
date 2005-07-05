@@ -47,6 +47,8 @@
 #include <saHpiSoftwareEventLogTable.h>
 #include <saHpiOEMEventLogTable.h>
 #include <saHpiSensorEnableChangeEventLogTable.h>
+#include <saHpiDomainEventLogTable.h>
+#include <saHpiUserEventLogTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -156,16 +158,6 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
                                 populate_saHpiResourceEventLogTable(sessionid, &event_log_entry,                                           
                                                                     child_oid, 
                                                                     &child_oid_len);
-                                continue;
-                                break;
-                        case SAHPI_ET_DOMAIN:
-                                printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
-                                printf("        Event Type: [%s]\n\n", 
-                                       oh_lookup_domaineventtype(event_log_entry.Event.EventDataUnion.DomainEvent.Type));
-                                //populate_saHpiDomainEventTable(sessionid, &event,                                           
-                                //                               child_oid, 
-                                //                               &child_oid_len);
-                                continue;
                                 break;
                         case SAHPI_ET_SENSOR:
                                 printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
@@ -247,7 +239,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
                                         saHpiEventLogTable_create_row ( &evt_log_index);
                         }
                         if (!evt_log_context) {
-                                snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
+                                snmp_log (LOG_ERR, "Not enough memory for a EventLog row!");
                                 rv = AGENT_ERR_INTERNAL_ERROR;
                                 break;
                         }
@@ -276,102 +268,90 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
 
 	} while (rpt_entry_id != SAHPI_LAST_ENTRY);
 
-#if 0
         /******************************************************/
         /* now get the Domain Event Log Info for this session */
         /* this is accomplished by using                      */
         /* in saHpiEventLogInfoGet()                          */
         /* SAHPI_UNSPECIFIED_RESOURCE_ID                      */
         /******************************************************/
-       sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
         rv = saHpiEventLogEntryGet (sessionid, 
-                                   SAHPI_UNSPECIFIED_RESOURCE_ID,
-                                   &event_log_info);
-        SA_ERR_HPI_NOT_PRESENT
+                                    SAHPI_UNSPECIFIED_RESOURCE_ID,
+                                    event_entry_id,
+                                    &pre_event_entry_id,
+                                    &event_entry_id,
+                                    &event_log_entry,
+                                    &event_rdr_entry,
+                                    &event_rpt_entry);
+
         if (rv == SA_ERR_HPI_NOT_PRESENT) {
-                DEBUGMSGTL ((AGENT, "Domain EventLog Empty\n"));
+                DEBUGMSGTL ((AGENT, "Domain Event Log Empty\n"));
                 return AGENT_ERR_NOERROR;
         }
         if (rv != SA_OK) {
-                DEBUGMSGTL ((AGENT, "getting Domain Event Log Info Failed: rv = %d\n",rv));
+                DEBUGMSGTL ((AGENT, "getting Domain Event Log Failed: rv = %d\n",rv));
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
-        evt_log_index.len = EVENT_LOG_INDEX_NR;
-        evt_log_oid[0] = get_domain_id(sessionid);
-        evt_log_oid[1] = SAHPI_UNSPECIFIED_RESOURCE_ID;
-        evt_log_index.oids = (oid *) & evt_log_oid;
+        printf("SAHPI_ET_DOMAIN: rv [%d]\n\n", rv);
+        populate_saHpiWatchdogEventLogTable(sessionid, 
+	                                    &event_log_entry,					    
+                                            child_oid, 
+                                            &child_oid_len);
 
+        /* BUILD oid for new row */
+                /* assign the number of indices */
+        evt_log_index.len = EVENT_LOG_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        evt_log_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        evt_log_oid[1] = SAHPI_UNSPECIFIED_RESOURCE_ID;
+        /** Index saHpiEventLogIndex is internal */
+        dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+        dr_pair.domainId_resourceId_arry[1] = rpt_entry.ResourceId;
+        dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+        if (dr_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                "ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        evt_log_oid[2] = dr_entry->entry_id++;
+        /* assign the indices to the index */
+        evt_log_index.oids = (oid *) & evt_log_oid;
+	
         /* See if it exists. */
         evt_log_context = NULL;
         evt_log_context = CONTAINER_FIND (cb.container, &evt_log_index);
-
+	
         if (!evt_log_context) { 
                 // New entry. Add it
                 evt_log_context = 
-                        _create_row ( &evt_log_index);
+                        saHpiEventLogTable_create_row ( &evt_log_index);
         }
         if (!evt_log_context) {
-                DEBUGMSGTL ((AGENT, "Not enough memory for a EventLogInfo row!"));
-                snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
-                return AGENT_ERR_INTERNAL_ERROR;
-        } 
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        evt_log_context->saHpiEventLogInfoEntries = event_log_info.Entries;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        evt_log_context->saHpiEventLogInfoSize = event_log_info.Size;
-
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        evt_log_context->saHpiEventLogInfoUserEventMaxSize = 
-                event_log_info.UserEventMaxSize;
-
-        /** SaHpiTime = ASN_COUNTER64 */
-        evt_log_context->saHpiEventLogInfoUpdateTimestamp = 
-                event_log_info.UpdateTimestamp;
-
-        /** SaHpiTime = ASN_COUNTER64 */
-        evt_log_context->saHpiEventLogInfoTime = 
-                event_log_info.CurrentTime;
-
-        /** TruthValue = ASN_INTEGER */
-        evt_log_context->saHpiEventLogInfoIsEnabled =
-                (event_log_info.Enabled == SAHPI_TRUE) ? 
-                        MIB_TRUE : MIB_FALSE;
-
-        /** TruthValue = ASN_INTEGER */
-        evt_log_context->saHpiEventLogInfoOverflowFlag =
-                (event_log_info.OverflowFlag == SAHPI_TRUE) ? 
-                        MIB_TRUE : MIB_FALSE;
-
-        /** TruthValue = ASN_INTEGER */
-        evt_log_context->saHpiEventLogInfoOverflowResetable =
-                (event_log_info.OverflowResetable == SAHPI_TRUE) ? 
-                        MIB_TRUE : MIB_FALSE; 
-
-        /** INTEGER = ASN_INTEGER */
-        evt_log_context->saHpiEventLogInfoOverflowAction = 
-                event_log_info.OverflowAction + 1;
-
-        /** INTEGER = ASN_INTEGER */
-        evt_log_context->saHpiEventLogInfoOverflowReset = 0;
-
-        /** TruthValue = ASN_INTEGER */
-        evt_log_context->saHpiEventLogClear = MIB_FALSE;
-
-        /** TruthValue = ASN_INTEGER */
-        rv = saHpiEventLogStateGet (sessionid, rpt_entry.ResourceId,
-                                    &event_log_state);
-        if (rv != SA_OK) {
-                DEBUGMSGTL ((AGENT, 
-                "populate_saHpiEventLogInfo, saHpiEventLogStateGet Failed: rv = %d\n",rv));
-                return  AGENT_ERR_INTERNAL_ERROR;
+                snmp_log (LOG_ERR, "Not enough memory for a EventLog row!");
+                rv = AGENT_ERR_INTERNAL_ERROR;
         }
-        evt_log_context->saHpiEventLogState = event_log_state;
-        
-	CONTAINER_INSERT (cb.container, evt_log_context);
-#endif	
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        evt_log_context->saHpiEventLogIndex = evt_log_oid[2];
+
+        /** INTEGER = ASN_INTEGER */
+        evt_log_context->saHpiEventLogType = 
+                event_log_entry.Event.EventType; 
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        evt_log_context->saHpiEventLogAddedTimestamp = 
+                event_log_entry.Timestamp;
+
+        /** RowPointer = ASN_OBJECT_ID */
+        evt_log_context->saHpiEventLogRowPointer_len = 
+                child_oid_len * sizeof (oid);
+        memcpy (evt_log_context->saHpiEventLogRowPointer, 
+                child_oid, 
+                evt_log_context->saHpiEventLogRowPointer_len);
+
+        CONTAINER_INSERT (cb.container, evt_log_context);
+
 	return rv;
 
 }
