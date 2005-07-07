@@ -176,15 +176,18 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
                                 break;
                         case SAHPI_ET_HOTSWAP:
                                 printf("SAHPI_ET_HOTSWAP: rv [%d]\n\n", rv);
-                                populate_saHpiHotSwapEventLogTable(sessionid, &event_log_entry,                                           
-                                                                   child_oid, 
-                                                                   &child_oid_len);
+                                populate_saHpiHotSwapEventLogTable(sessionid, &event_log_entry,  					 
+                                				   child_oid, 
+                                				   &child_oid_len);
+								   
+
                                 break;
                         case SAHPI_ET_WATCHDOG:
                                 printf("SAHPI_ET_WATCHDOG: rv [%d]\n\n", rv);
-                                populate_saHpiWatchdogEventLogTable(sessionid, &event_log_entry,                                           
-                                                                 child_oid, 
-                                                                 &child_oid_len);
+                                populate_saHpiWatchdogEventLogTable(sessionid, &event_log_entry, 
+				                                  child_oid, 
+                                				  &child_oid_len);
+								 
                                 break;
                         case SAHPI_ET_HPI_SW:
                                 printf("SAHPI_ET_HPI_SW: rv [%d]\n\n", rv);
@@ -293,7 +296,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
         }
 
         printf("SAHPI_ET_DOMAIN: rv [%d]\n\n", rv);
-        populate_saHpiWatchdogEventLogTable(sessionid, 
+        populate_saHpiDomainEventLogTable(sessionid, 
 	                                    &event_log_entry,					    
                                             child_oid, 
                                             &child_oid_len);
