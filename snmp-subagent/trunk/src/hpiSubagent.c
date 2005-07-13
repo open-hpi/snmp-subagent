@@ -379,8 +379,9 @@ main (int argc, char **argv)
 	init_saHpiSensorThdUpMinorTable();
 	init_saHpiSensorThdPosHysteresisTable();
 	init_saHpiSensorThdNegHysteresisTable();
-	init_saHpiAnnunciatorTable();
 	init_saHpiInventoryTable();
+	init_saHpiWatchdogTable();
+	init_saHpiAnnunciatorTable();
 	init_saHpiAreaTable();
 	init_saHpiFieldTable();
 
@@ -407,17 +408,11 @@ main (int argc, char **argv)
 	init_saHpiUserEventLogTable();
 	init_saHpiSensorEnableChangeEventLogTable();
 	init_saHpiDomainEventLogTable();
-	
-			
 
 /*	
-	
-	init_saHpiWatchdogTable();
 	init_saHpiHotSwapTable();
 	init_saHpiAutoInsertTimeoutTable();
-
 	init_saHpiAnnouncementTable();
-	
 	init_saHpiAnnouncementEventLogTable();	
 */
 
@@ -454,11 +449,13 @@ main (int argc, char **argv)
 	     *	           populate_saHpiSensorThdPosHysteresisTable();		
 	     *	           populate_saHpiSensorThdNegHysteresisTable();		
 	     *	       populate_saHpiCurrentSensorStateTable();		
-	     *	       populate_saHpiAnnunciatorTable();		
 	     *	       populate_saHpiInventoyTable();		
+	     *	       populate_saHpiWatchdogTable();		
+	     *	       populate_saHpiAnnunciatorTable();		
 	     *	       populate_saHpiAreaTable();		
 	     *	           populate_saHpiFieldTable();		
 	     */
+
 	populate_saHpiEventTable(sessionid);
             /* populate_saHpiResourceEventTable();
 	     * populate_saHpiDomainEventTable();
