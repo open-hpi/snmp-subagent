@@ -274,23 +274,4 @@ netsnmp_variable_list *build_notification (const netsnmp_index * index,
 					   const size_t resource_id_oid_len);
 
 
-/*
- * Taken from OpenHPI epath_utils.h
- */
-#define MAX_INSTANCE_DIGITS 6
-
-/*
- * Structure used by build_state_string routine.
- */
-#ifndef STATE_CATEGORY_STRING_HAVE
-#define STATE_CATEGORY_STRING_HAVE
-typedef struct state_category_string_ 
-{
-    SaHpiEventCategoryT category;
-    SaHpiEventStateT state;
-    unsigned char *str;
-} state_category_string;
-#endif
-
-
 #endif /* _HPI_SUBAGENT_ */
