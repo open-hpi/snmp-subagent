@@ -49,8 +49,9 @@
 #include <saHpiCtrlOemTable.h>
 #include <saHpiSensorTable.h>
 #include <saHpiCurrentSensorStateTable.h>
-#include <saHpiAnnunciatorTable.h>
 #include <saHpiInventoryTable.h>
+#include <saHpiWatchdogTable.h>
+#include <saHpiAnnunciatorTable.h>
 
 #include <session_info.h>
 
@@ -294,7 +295,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				     "Called populate_inventory(); rc: %d\n",
 				     rv));
 			break;
-/*
+
 		case SAHPI_WATCHDOG_RDR:
 			DEBUGMSGTL ((AGENT,
 				      "Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
@@ -310,7 +311,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 				     "Called populate_watchdog(); rc: %d\n",
 				     rv));
 			break;
-*/
+
 		case SAHPI_ANNUNCIATOR_RDR:
 			DEBUGMSGTL ((AGENT,
 				      "SAHPI_ANNUNCIATOR_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
