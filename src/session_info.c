@@ -593,6 +593,59 @@ void oh_encode_char(SaHpiTextBufferT *buffer)
 	}
 }
 
+typedef struct {
+    SaHpiWatchdogExpFlagsT exp_flag;
+    unsigned char *str;
+} watchdog_exp_flags;
+
+static watchdog_exp_flags watchdog_string[] = {
+  {SAHPI_WATCHDOG_EXP_BIOS_FRB2, "BIOS_FRB2"},
+  {SAHPI_WATCHDOG_EXP_BIOS_POST, "BIOS_POST"},
+  {SAHPI_WATCHDOG_EXP_OS_LOAD,   "OS_LOAD"},
+  {SAHPI_WATCHDOG_EXP_SMS_OS,    "SMS_OS"},
+  {SAHPI_WATCHDOG_EXP_OEM,       "OEM"}
+};
+
+#define MAX_EXP_FLAGS_STRINGS 5
+
+SaErrorT oh_decode_exp_flags(SaHpiWatchdogExpFlagsT exp_flags,
+			     SaHpiTextBufferT *buffer)
+{
+	int i, found;
+	SaErrorT err;
+	SaHpiTextBufferT working;
+
+	err = oh_init_textbuffer(&working);
+	if (err != SA_OK) 
+                return(err);
+
+	found = 0;
+	/* Look for category's event states */
+	for (i=0; i < MAX_EXP_FLAGS_STRINGS; i++) {
+                if ((watchdog_string[i].exp_flag & exp_flags) == watchdog_string[i].exp_flag) {
+				found++;
+				err = oh_append_textbuffer(&working, (char *)watchdog_string[i].str);
+				if (err != SA_OK) 
+                                        return(err);
+				err = oh_append_textbuffer(&working, " , ");
+				if (err != SA_OK) 
+                                        return(err);
+                }
+	}
+
+	/* Remove last delimiter */
+	if (found) {
+		for (i=0; i < OH_ENCODE_DELIMITER_LENGTH + 1; i++) {
+			working.Data[working.DataLength - i] = 0x00;
+		}
+		working.DataLength = working.DataLength - OH_ENCODE_DELIMITER_LENGTH;
+	}
+
+	err = oh_copy_textbuffer(buffer, &working);
+
+	return(SA_OK);
+}
+
 
 
 
