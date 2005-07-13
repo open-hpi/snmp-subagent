@@ -43,7 +43,7 @@ typedef struct saHpiWatchdogTable_context_s {
             long saHpiWatchdogRunning;
 
         /** SaHpiWatchdogTimerUse = ASN_INTEGER */
-            long saHpiWatchdogTimerUse;
+            long saHpiWatchdogTimerUseState;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiWatchdogTimerAction;
@@ -55,7 +55,7 @@ typedef struct saHpiWatchdogTable_context_s {
             unsigned long saHpiWatchdogPreTimeoutInterval;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiWatchdogTimerUseExpFlags[65535];
+            unsigned char saHpiWatchdogTimerUseExpFlags[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiWatchdogTimerUseExpFlags_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -98,6 +98,14 @@ const saHpiWatchdogTable_context * saHpiWatchdogTable_get_by_idx_rs(netsnmp_inde
                                         int row_status);
 int saHpiWatchdogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_watchdog(SaHpiSessionIdT sessionid, 
+                           SaHpiRdrT *rdr_entry,
+                           SaHpiRptEntryT *rpt_entry,
+                           oid *full_oid, size_t full_oid_len,
+                           oid *child_oid, size_t *child_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -110,6 +118,8 @@ extern size_t saHpiWatchdogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiWatchdogTable
  */
+#define WATCHDOG_INDEX_NR 4
+
 #define COLUMN_SAHPIWATCHDOGNUM 1
 #define COLUMN_SAHPIWATCHDOGLOG 2
 #define COLUMN_SAHPIWATCHDOGRUNNING 3
