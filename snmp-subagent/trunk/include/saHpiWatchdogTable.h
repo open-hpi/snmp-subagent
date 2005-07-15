@@ -118,7 +118,14 @@ extern size_t saHpiWatchdogTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiWatchdogTable
  */
+
+/* Number of table Indexes */
 #define WATCHDOG_INDEX_NR 4
+#define watchdog_saHpiDomainId_INDEX 0
+#define watchdog_saHpiResourceEntryId_INDEX 1
+#define watchdog_saHpiResourceIsHistorical_INDEX 2
+#define watchdog_saHpiWatchdogNum_INDEX 3
+
 
 #define COLUMN_SAHPIWATCHDOGNUM 1
 #define COLUMN_SAHPIWATCHDOGLOG 2
