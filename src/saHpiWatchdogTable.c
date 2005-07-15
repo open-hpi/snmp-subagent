@@ -58,6 +58,8 @@ size_t saHpiWatchdogTable_oid_len = OID_LENGTH(saHpiWatchdogTable_oid);
 /*************************************************************
  * oid and fucntion declarations scalars
  */
+static int set_table_watchdog_set (saHpiWatchdogTable_context *row_ctx); 
+static int set_table_watchdog_reset (saHpiWatchdogTable_context *row_ctx); 
 
 static u_long watchdog_entry_count = 0; 
 static oid saHpiWatchdogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
@@ -226,6 +228,124 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
         watchdog_entry_count = CONTAINER_SIZE (cb.container);
 
         return rv;
+}
+
+static int set_table_watchdog_set (saHpiWatchdogTable_context *row_ctx) 
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+        SaHpiWatchdogNumT   watchdog_num;
+	SaHpiWatchdogT      watchdog; 
+
+        SaHpiTextBufferT buffer;
+
+	DEBUGMSGTL ((AGENT, "set_table_watchdog_set, called\n"));  
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+        /* set the session */
+        session_id = get_session_id(row_ctx->index.oids[watchdog_saHpiDomainId_INDEX]);
+
+        /* set the session */
+        resource_id = row_ctx->index.oids[watchdog_saHpiResourceEntryId_INDEX];
+
+        /* set the WatchdogNum */
+        watchdog_num = row_ctx->saHpiWatchdogNum;
+
+        /* set the InitialCount */
+        watchdog.InitialCount = row_ctx->saHpiWatchdogTimerInitialCount;
+
+        /* set the Log */
+        watchdog.Log = row_ctx->saHpiWatchdogLog;
+
+        /* set the PresentCount */
+        watchdog.PresentCount = row_ctx->saHpiWatchdogTimerPresentCount;
+
+        /* set the PreTimeoutInterval */
+        watchdog.PreTimeoutInterval = row_ctx->saHpiWatchdogPreTimeoutInterval;
+
+        /* set the PretimerInterrupt */
+        watchdog.PretimerInterrupt = row_ctx->saHpiWatchdogPretimerInterrupt - 1;
+
+        /* set the Running */
+        watchdog.Running = row_ctx->saHpiWatchdogRunning;
+
+        /* set the TimerAction */
+        watchdog.TimerAction = row_ctx->saHpiWatchdogTimerAction - 1;
+
+        /* set the TimerUse */
+        watchdog.TimerUse = row_ctx->saHpiWatchdogTimerUseState - 1;
+
+        /* set the exp flags */
+        buffer.DataLength = row_ctx->saHpiWatchdogTimerUseExpFlags_len;
+        memcpy(buffer.Data, row_ctx->saHpiWatchdogTimerUseExpFlags, row_ctx->saHpiWatchdogTimerUseExpFlags_len);
+        watchdog.TimerUseExpFlags = 0;
+//        row_err = oh_encode_exp_flags(&buffer, &watchdog.TimerUseExpFlags);
+        if (oh_encode_exp_flags(&buffer, &watchdog.TimerUseExpFlags) != SNMP_ERR_NOERROR) {
+                return SNMP_ERR_GENERR;
+        }
+
+	rc = saHpiWatchdogTimerSet (session_id, resource_id, 
+                                    watchdog_num, &watchdog);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "set_table_watchdog_set: Call to saHpiWatchdogTimerSet failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "set_table_watchdog_set: Call to saHpiWatchdogTimerSet failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	}  else {
+                DEBUGMSGTL ((AGENT, "set_table_watchdog_set: Success!!!\n"));
+
+        }
+
+	return SNMP_ERR_NOERROR;
+}
+
+
+static int set_table_watchdog_reset (saHpiWatchdogTable_context *row_ctx) 
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+        SaHpiWatchdogNumT   watchdog_num;
+
+        SaHpiTextBufferT buffer;
+
+	DEBUGMSGTL ((AGENT, "set_table_watchdog_set, called\n"));  
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+        /* set the session */
+        session_id = get_session_id(row_ctx->index.oids[watchdog_saHpiDomainId_INDEX]);
+
+        /* set the session */
+        resource_id = row_ctx->index.oids[watchdog_saHpiResourceEntryId_INDEX];
+
+        /* set the WatchdogNum */
+        watchdog_num = row_ctx->saHpiWatchdogNum;
+
+	rc = saHpiWatchdogTimerReset (session_id, resource_id, watchdog_num);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "set_table_watchdog_reset: Call to saHpiWatchdogTimerReset failed to set Mode rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "set_table_watchdog_reset: Call to saHpiWatchdogTimerReset failed to set Mode rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	}  else {
+                DEBUGMSGTL ((AGENT, "set_table_watchdog_reset: Success!!!\n"));
+
+        }
+
+	return SNMP_ERR_NOERROR;
 }
 
 
@@ -729,6 +849,8 @@ void saHpiWatchdogTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    SaHpiTextBufferT buffer;
+    SaHpiWatchdogExpFlagsT exp_flags = 0;
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -759,18 +881,30 @@ void saHpiWatchdogTable_set_reserve1( netsnmp_request_group *rg )
             /** SaHpiWatchdogTimerUse = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiWatchdogTimerUseState));
+            if (rc == SNMP_ERR_NOERROR) {
+                    if(!oh_lookup_watchdogtimeruse(row_ctx->saHpiWatchdogTimerUseState - 1))
+                            rc = SNMP_ERR_BADVALUE;
+            }
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERACTION:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiWatchdogTimerAction));
+            if (rc == SNMP_ERR_NOERROR) {
+                    if (!oh_lookup_watchdogactionevent(row_ctx->saHpiWatchdogTimerAction - 1))
+                            rc = SNMP_ERR_BADVALUE;
+            }
         break;
 
         case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
             /** SaHpiWatchdogPreTimerAction = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiWatchdogPretimerInterrupt));
+            if (rc == SNMP_ERR_NOERROR) {
+                    if (!oh_lookup_watchdogpretimerinterrupt(row_ctx->saHpiWatchdogPretimerInterrupt - 1))
+                            rc = SNMP_ERR_BADVALUE;
+            }
         break;
 
         case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
@@ -781,8 +915,19 @@ void saHpiWatchdogTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
             /** OCTETSTR = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiWatchdogTimerUseExpFlags));
+            rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+                if (rc == SNMP_ERR_NOERROR ) {
+                        if (var->val_len > sizeof(row_ctx->saHpiWatchdogTimerUseExpFlags)) {
+                                rc = SNMP_ERR_WRONGLENGTH;
+			}
+		}
+
+            if (rc == SNMP_ERR_NOERROR) {
+                    buffer.DataLength = var->val_len;
+                    memcpy(buffer.Data, var->val.string, var->val_len);
+                    rc = oh_encode_exp_flags(&buffer, &exp_flags);
+            }
+
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
@@ -986,7 +1131,7 @@ void saHpiWatchdogTable_set_action( netsnmp_request_group *rg )
     saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-    int            row_err = 0;
+    int row_err = 0;
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -1001,52 +1146,63 @@ void saHpiWatchdogTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIWATCHDOGLOG:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiWatchdogLog = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGRUNNING:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiWatchdogRunning = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERUSESTATE:
             /** SaHpiWatchdogTimerUse = ASN_INTEGER */
             row_ctx->saHpiWatchdogTimerUseState = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERACTION:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiWatchdogTimerAction = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
             /** SaHpiWatchdogPreTimerAction = ASN_INTEGER */
             row_ctx->saHpiWatchdogPretimerInterrupt = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiWatchdogPreTimeoutInterval = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiWatchdogTimerUseExpFlags,var->val.string,var->val_len);
             row_ctx->saHpiWatchdogTimerUseExpFlags_len = var->val_len;
+            row_err = set_table_watchdog_set (row_ctx); 
+
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiWatchdogTimerInitialCount = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiWatchdogTimerPresentCount = *var->val.integer;
+            row_err = set_table_watchdog_set (row_ctx); 
         break;
 
         case COLUMN_SAHPIWATCHDOGTIMERRESET:
             /** TruthValue = ASN_INTEGER */
-            row_ctx->saHpiWatchdogTimerReset = *var->val.integer;
+            //row_ctx->saHpiWatchdogTimerReset = *var->val.integer;
+            row_err = set_table_watchdog_reset (row_ctx); 
         break;
 
         default: /** We shouldn't get here */
@@ -1376,18 +1532,18 @@ initialize_table_saHpiWatchdogTable(void)
     cb.container = netsnmp_container_find("saHpiWatchdogTable_primary:"
                                           "saHpiWatchdogTable:"
                                           "table_container");
-#ifdef saHpiWatchdogTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiWatchdogTable_secondary:"
                                                        "saHpiWatchdogTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiWatchdogTable_cmp;
-#endif
-#ifdef saHpiWatchdogTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiWatchdogTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiWatchdogTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiWatchdogTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiWatchdogTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiWatchdogTable_row_copy;
@@ -1402,7 +1558,7 @@ initialize_table_saHpiWatchdogTable(void)
     cb.set_commit = saHpiWatchdogTable_set_commit;
     cb.set_free = saHpiWatchdogTable_set_free;
     cb.set_undo = saHpiWatchdogTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiWatchdogTable",
                 "Registering table saHpiWatchdogTable "
                 "as a table array\n"));
