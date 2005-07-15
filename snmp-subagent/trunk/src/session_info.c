@@ -627,7 +627,7 @@ SaErrorT oh_decode_exp_flags(SaHpiWatchdogExpFlagsT exp_flags,
 				err = oh_append_textbuffer(&working, (char *)watchdog_string[i].str);
 				if (err != SA_OK) 
                                         return(err);
-				err = oh_append_textbuffer(&working, " , ");
+				err = oh_append_textbuffer(&working, OH_ENCODE_DELIMITER);
 				if (err != SA_OK) 
                                         return(err);
                 }
@@ -643,11 +643,57 @@ SaErrorT oh_decode_exp_flags(SaHpiWatchdogExpFlagsT exp_flags,
 
 	err = oh_copy_textbuffer(buffer, &working);
 
+        oh_decode_char(buffer);
+
 	return(SA_OK);
 }
 
+int oh_encode_exp_flags(SaHpiTextBufferT *buffer, SaHpiWatchdogExpFlagsT *exp_flags)
+{
+        int i,j;
 
+        int rv = SNMP_ERR_BADVALUE;
 
+        gchar *gstr = NULL;
+	gchar **eventdefs = NULL;
 
+	if (!buffer || !exp_flags || 
+            buffer->Data == NULL || buffer->Data[0] == '\0') {
+                DEBUGMSGTL ((AGENT, "oh_encode_exp_flags: SA_ERR_HPI_INVALID_PARAMS"));
+		return SA_ERR_HPI_INVALID_PARAMS;
+	}
 
+        oh_encode_char(buffer);
 
+	/* Split out event definitions */
+	if (buffer->DataLength < SAHPI_MAX_TEXT_BUFFER_LENGTH) {
+		buffer->Data[buffer->DataLength] = '\0';
+	}
+	gstr = g_strstrip(g_strndup((gchar *)buffer->Data, SAHPI_MAX_TEXT_BUFFER_LENGTH));
+	if (gstr == NULL || gstr[0] == '\0') {
+                DEBUGMSGTL ((AGENT, "g_strstrip failed"));
+		return SA_ERR_HPI_INTERNAL_ERROR;
+	}
+
+	eventdefs = g_strsplit(gstr, OH_ENCODE_DELIMITER_CHAR, -1);
+	if (eventdefs == NULL) {
+                DEBUGMSGTL ((AGENT, "No event definitions"));
+		return SA_ERR_HPI_INVALID_PARAMS;
+	}
+
+	for (i=0; eventdefs[i] != NULL && eventdefs[i][0] != '\0'; i++) {
+		eventdefs[i] = g_strstrip(eventdefs[i]);
+
+		for (j=0; j < MAX_EXP_FLAGS_STRINGS; j++) {
+			if (strcasecmp(eventdefs[i], (char *)watchdog_string[j].str) == 0) {
+                                *exp_flags += watchdog_string[j].exp_flag;
+                                rv = SNMP_ERR_NOERROR;
+			}
+		}
+	}
+	
+        g_free(gstr);
+        g_strfreev(eventdefs);
+
+        return rv;
+}
