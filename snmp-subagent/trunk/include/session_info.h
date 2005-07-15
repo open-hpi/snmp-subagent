@@ -113,4 +113,7 @@ void oh_encode_char(SaHpiTextBufferT *buffer);
 SaErrorT oh_decode_exp_flags(SaHpiWatchdogExpFlagsT exp_flags,
 			     SaHpiTextBufferT *buffer);
 
+int oh_encode_exp_flags(SaHpiTextBufferT *buffer, 
+                             SaHpiWatchdogExpFlagsT *exp_flags);
+
 #endif //_SESSION_INFO_H_
