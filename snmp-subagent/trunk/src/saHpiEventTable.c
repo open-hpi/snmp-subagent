@@ -238,7 +238,8 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
 }
 
 
-SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
+SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                         SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry)
 {
 
         SaErrorT rv = SA_OK;
@@ -282,6 +283,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
                 break;
         case SAHPI_ET_WATCHDOG:
                 rv = async_watchdog_event_add(sessionid, event,
+		                              rdr, rpt_entry,
                                               child_oid, 
                                               &child_oid_len);
                 break;
@@ -348,7 +350,6 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event)
         CONTAINER_INSERT (cb.container, event_context);
 
         event_entry_count = CONTAINER_SIZE (cb.container);
-        event_entry_count_total++;
 
         return rv;
 }
@@ -694,7 +695,7 @@ saHpiEventTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    event_entry_count_total++;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -718,6 +719,7 @@ saHpiEventTable_create_row( netsnmp_index* hdr)
      ctx->saHpiEventSeverity = 0;
     */
 
+    event_entry_count_total++;
     return ctx;
 }
 

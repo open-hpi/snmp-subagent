@@ -73,7 +73,8 @@ int saHpiEventTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_t
  * function declarations
  */
 SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid);
-SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event);
+SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                         SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * oid declarations

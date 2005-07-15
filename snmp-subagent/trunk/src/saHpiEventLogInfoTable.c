@@ -37,7 +37,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include <SaHpi.h>
-#include "saHpiEventLogInfoTable.h"
+#include <saHpiEventLogInfoTable.h>
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
