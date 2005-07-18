@@ -175,7 +175,6 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, oem_evt_ctx);
 		
 	oem_event_entry_count = CONTAINER_SIZE (cb.container);
-        oem_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -192,11 +191,119 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
 
 SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid, 
                              SaHpiEventT *event,
+		             SaHpiRdrT *rdr,
+		             SaHpiRptEntryT *rpt_entry,			     
                              oid * this_child_oid, 
                              size_t *this_child_oid_len)
 {
-        DEBUGMSGTL ((AGENT, "async_oem_event_add, NOT implemented\n"));
-        return SA_ERR_HPI_UNSUPPORTED_API;
+	SaErrorT rv = SA_OK;
+
+	oid oem_evt_oid[OEM_EVENT_INDEX_NR];
+	netsnmp_index oem_evt_idx;
+	saHpiOEMEventTable_context *oem_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "async_oem_event_add, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_oem_event_add() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	} 
+	
+	if (!rdr) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_oem_event_add() passed NULL rdr pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_oem_event_add() passed NULL rpt_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}	
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	oem_evt_idx.len = OEM_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	oem_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	oem_evt_oid[1] = event->Source;
+	        /** Index saHpiEventSeverity is external */
+	oem_evt_oid[2] = event->Severity + 1;
+                /** Index saHpiSensorEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_oem_event_add() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	oem_evt_oid[3] = dr_entry->entry_id++;	
+	oem_evt_idx.oids = (oid *) & oem_evt_oid;
+	   
+	/* See if Row exists. */
+	oem_evt_ctx = NULL;
+	oem_evt_ctx = CONTAINER_FIND(cb.container, &oem_evt_idx);
+
+	if (!oem_evt_ctx) { 
+		// New entry. Add it
+		oem_evt_ctx = 
+			saHpiOEMEventTable_create_row(&oem_evt_idx);
+	}
+	if (!oem_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a OEM Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        oem_evt_ctx->saHpiOEMEventEntryId = oem_evt_oid[3];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        oem_evt_ctx->saHpiOEMEventTimestamp = event->Timestamp;
+	
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+        oem_evt_ctx->saHpiOEMEventManufacturerIdT = 
+	                        event->EventDataUnion.OemEvent.MId;
+
+        /** SaHpiTextType = ASN_INTEGER */				
+	oem_evt_ctx->saHpiOEMEventTextType = 
+                event->EventDataUnion.OemEvent.OemEventData.DataType + 1;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+        oem_evt_ctx->saHpiOEMEventTextLanguage = 
+	        event->EventDataUnion.OemEvent.OemEventData.Language + 1;
+
+        /** SaHpiText = ASN_OCTET_STR */
+        memcpy(oem_evt_ctx->saHpiOEMEventText, 
+	        event->EventDataUnion.OemEvent.OemEventData.Data,
+		event->EventDataUnion.OemEvent.OemEventData.DataLength);
+		
+        oem_evt_ctx->saHpiOEMEventText_len = 
+	        event->EventDataUnion.OemEvent.OemEventData.DataLength;		
+
+	CONTAINER_INSERT (cb.container, oem_evt_ctx);
+		
+	oem_event_entry_count = CONTAINER_SIZE (cb.container);
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIOEMEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiOEMEventTable_oid, saHpiOEMEventTable_oid_len,
+			column, column_len,
+			&oem_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+
+        return SA_OK; 
 }
 
 
@@ -647,7 +754,7 @@ saHpiOEMEventTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    oem_event_entry_count_total++;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -670,6 +777,8 @@ saHpiOEMEventTable_create_row( netsnmp_index* hdr)
     /**
     */
 
+    oem_event_entry_count_total++;
+    
     return ctx;
 }
 
