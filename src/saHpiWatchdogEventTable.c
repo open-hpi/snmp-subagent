@@ -283,8 +283,7 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
 		
 	CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
 		
-	watchdog_event_entry_count = CONTAINER_SIZE (cb.container);
-        watchdog_event_entry_count_total = CONTAINER_SIZE (cb.container);
+	watchdog_event_entry_count = CONTAINER_SIZE (cb.container);        
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;

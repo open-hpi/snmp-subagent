@@ -278,6 +278,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                 break;
         case SAHPI_ET_HOTSWAP:
                 rv = async_hotswap_event_add(sessionid, event,
+                                             rdr, rpt_entry,
                                              child_oid, 
                                              &child_oid_len);
                 break;

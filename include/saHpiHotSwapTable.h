@@ -75,6 +75,13 @@ const saHpiHotSwapTable_context * saHpiHotSwapTable_get_by_idx_rs(netsnmp_index 
                                         int row_status);
 int saHpiHotSwapTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations
+ */
+SaErrorT populate_hotswap(SaHpiSessionIdT sessionid, 
+                           SaHpiRptEntryT *rpt_entry,
+                           oid *child_oid, size_t child_oid_len); 
+
 
 /*************************************************************
  * oid declarations
@@ -87,6 +94,9 @@ extern size_t saHpiHotSwapTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiHotSwapTable
  */
+ 
+#define HOTSWAP_INDEX_NR 3
+ 
 #define COLUMN_SAHPIHOTSWAPINDICATOR 1
 #define COLUMN_SAHPIHOTSWAPSTATE 2
 #define COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT 3
