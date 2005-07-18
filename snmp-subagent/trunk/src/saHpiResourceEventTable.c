@@ -172,18 +172,100 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, res_evt_ctx);
 		
 	resource_event_entry_count = CONTAINER_SIZE (cb.container);
-        resource_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
         return SA_OK;
 }
 
 SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
                                   SaHpiEventT *event,
+		                  SaHpiRdrT *rdr,
+		                  SaHpiRptEntryT *rpt_entry,				  
                                   oid * this_child_oid, 
                                   size_t *this_child_oid_len)
 {
-        DEBUGMSGTL ((AGENT, "async_resource_event_add, NOT implemented\n"));
-        return SA_ERR_HPI_UNSUPPORTED_API;
+	SaErrorT rv = SA_OK;
+
+	oid res_evt_oid[RESOURCE_EVENT_INDEX_NR];
+	netsnmp_index res_evt_idx;
+	saHpiResourceEventTable_context *res_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "async_resource_event_add, called\n"));
+
+	/* check for NULL pointers */
+	if (!event) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_resource_event_add() passed NULL event pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}    
+
+
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	res_evt_idx.len = RESOURCE_EVENT_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	res_evt_oid[0] = get_domain_id(sessionid);
+		/** Index saHpiResourceId is external */
+	res_evt_oid[1] = event->Source;
+		/** Index saHpiEventSeverity is external */
+	res_evt_oid[2] = event->Severity + 1;
+                /** Index saHpiResourceEventEntryId is internal */
+	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
+	dr_pair.domainId_resourceId_arry[1] = event->Source;
+	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+	if (dr_entry == NULL) {
+		DEBUGMSGTL ((AGENT, 
+		"ERROR: async_resource_event_add() domain_resource_pair_get returned NULL\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	res_evt_oid[3] = dr_entry->entry_id++;
+		/* assign the indices to the index */
+	res_evt_idx.oids = (oid *) & res_evt_oid;
+
+
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIRESOURCEEVENTTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiResourceEventTable_oid, saHpiResourceEventTable_oid_len,
+			column, column_len,
+			&res_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);
+        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
+
+	/* See if Row exists. */
+	res_evt_ctx = NULL;
+	res_evt_ctx = CONTAINER_FIND(cb.container, &res_evt_idx);
+
+	if (!res_evt_ctx) { 
+		// New entry. Add it
+		res_evt_ctx = 
+			saHpiResourceEventTable_create_row(&res_evt_idx);
+	}
+	if (!res_evt_ctx) {
+		snmp_log (LOG_ERR, "Not enough memory for a Resource Event row!");
+		rv = AGENT_ERR_INTERNAL_ERROR;
+	}
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        res_evt_ctx->saHpiResourceEventTimestamp = event->Timestamp;
+
+        /** INTEGER = ASN_INTEGER */
+        res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
+
+	CONTAINER_INSERT (cb.container, res_evt_ctx);
+		
+	resource_event_entry_count = CONTAINER_SIZE (cb.container);
+
+        return SA_OK;
 }
 
 
@@ -630,7 +712,6 @@ saHpiResourceEventTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    resource_event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -652,6 +733,7 @@ saHpiResourceEventTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+    resource_event_entry_count_total++;
 
     return ctx;
 }

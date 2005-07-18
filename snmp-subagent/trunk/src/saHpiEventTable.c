@@ -257,7 +257,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 
         switch (event->EventType) {
         case SAHPI_ET_RESOURCE:
-                rv = async_resource_event_add(sessionid, event,                                           
+                rv = async_resource_event_add(sessionid, event,
+		                              rdr, rpt_entry,                                           
                                               child_oid, 
                                               &child_oid_len);
                 break;
