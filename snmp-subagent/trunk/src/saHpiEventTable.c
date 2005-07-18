@@ -267,7 +267,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                             &child_oid_len);
                 break;
         case SAHPI_ET_SENSOR:
-                rv = async_sensor_event_add(sessionid, event,                                           
+                rv = async_sensor_event_add(sessionid, event,
+		                            rdr, rpt_entry,                                              
                                             child_oid, 
                                             &child_oid_len);
                 break;
