@@ -290,7 +290,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                 break;
         case SAHPI_ET_HPI_SW:
                 rv = async_software_event_add(sessionid, event,
-                                              child_oid, 
+                                              rdr, rpt_entry,
+					      child_oid, 
                                               &child_oid_len);
                 break;
         case SAHPI_ET_OEM:
