@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <saHpiRdrTable.h>
+#include <saHpiHotSwapTable.h>
 
 #include <oh_utils.h>
 
@@ -329,18 +330,17 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 
 		CONTAINER_INSERT (cb.container, resource_context);
 
-/*	       DMJ TODO:  Maybe from A spec agent maybe same here
-		if (rpt_entry.
+		if (RptEntry.
 			 ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP)
 		       {
 
-			 rc = populate_hotswap (&rpt_entry,
-						DomainID_oid, DomainID_oid_len);
-						ResourceID_oid, ResourceID_oid_len);
+			 rv = populate_hotswap (sessionid,
+			 	                &RptEntry,
+						resource_index.oids, 
+						resource_index.len);
 
 
-
-*/
+                }
 		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
 			rv = populate_saHpiRdrTable(sessionid, 
 						    &RptEntry,

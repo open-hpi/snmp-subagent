@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiHotSwapTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -62,6 +67,121 @@ int handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
                                 netsnmp_request_info         *requests);
 				
 int initialize_table_saHpiHotSwapEntryCount(void);
+
+
+/**
+ * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
+ */
+SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
+                           SaHpiRptEntryT *rpt_entry,
+                           oid *child_oid, size_t child_oid_len)
+{
+
+        DEBUGMSGTL ((AGENT, "populate_hotswap, called\n"));
+
+        SaErrorT rv = SA_OK;
+
+        oid hotswap_oid[HOTSWAP_INDEX_NR];
+        netsnmp_index hotswap_idx;
+        saHpiHotSwapTable_context *hotswap_ctx;
+	
+	SaHpiHsIndicatorStateT indicator_state;
+	SaHpiHsStateT hs_state;
+	SaHpiTimeoutT extract_timeout;
+
+        oid column[2];
+        int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "SAHPI_HOTSWAP_RDR populate_watchdog() called\n"));
+
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_hotswap() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        hotswap_idx.len = HOTSWAP_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        hotswap_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        hotswap_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        hotswap_oid[2] = MIB_FALSE;
+        /* assign the indices to the index */
+        hotswap_idx.oids = (oid *) & hotswap_oid;
+
+        /* create full oid on This row for parent RowPointer */
+        column[0] = 1;
+        column[1] = COLUMN_SAHPIHOTSWAPINDICATOR;
+        memset(child_oid, 0, sizeof(child_oid_len));
+        build_full_oid(saHpiHotSwapTable_oid, saHpiHotSwapTable_oid_len,
+                       column, column_len,
+                       &hotswap_idx,
+                       child_oid, MAX_OID_LEN, &child_oid_len);
+
+        /* See if Row exists. */
+        hotswap_ctx = NULL;
+        hotswap_ctx = CONTAINER_FIND(cb.container, &hotswap_idx);
+
+        if (!hotswap_ctx) {
+                // New entry. Add it
+                hotswap_ctx = 
+                saHpiHotSwapTable_create_row(&hotswap_idx);
+        }
+        if (!hotswap_ctx) {
+                snmp_log (LOG_ERR, "Not enough memory for a HotSwap row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /** INTEGER = ASN_INTEGER */	
+	if (SA_OK == saHpiHotSwapIndicatorStateGet (sessionid, 
+				        rpt_entry->ResourceId, 
+					&indicator_state) ) {
+		hotswap_ctx->saHpiHotSwapIndicator = indicator_state + 1;
+			
+	}
+	
+        /** SaHpiHotSwapState = ASN_INTEGER */
+	if (SA_OK == saHpiHotSwapStateGet(sessionid,
+					rpt_entry->ResourceId,
+					&hs_state
+					  ) ){
+		hotswap_ctx->saHpiHotSwapState = hs_state + 1; 
+	}
+	
+        /** SaHpiTime = ASN_COUNTER64 */                     
+	if ( SA_OK == saHpiAutoExtractTimeoutGet(sessionid,
+			                rpt_entry->ResourceId,
+					&extract_timeout) ) {
+		hotswap_ctx->saHpiHotSwapExtractTimeout = extract_timeout;
+	}
+
+        /** INTEGER = ASN_INTEGER */
+        //hotswap_ctx->saHpiHotSwapActionRequest write only                
+
+        /** INTEGER = ASN_INTEGER */
+        //hotswap_ctx->saHpiHotSwapPolicyCancel write only
+
+        /** INTEGER = ASN_INTEGER */
+        //hotswap_ctx->saHpiHotSwapResourceRequest write only
+
+        CONTAINER_INSERT (cb.container, hotswap_ctx);
+
+        hotswap_entry_count = CONTAINER_SIZE (cb.container);
+
+        return rv;	
+}
 
 
 /**
@@ -224,8 +344,6 @@ saHpiHotSwapTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
-
 
 /************************************************************
  * Initializes the saHpiHotSwapTable module
@@ -815,19 +933,10 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiHotSwapTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
 
     /*
      * check activation/deactivation
      */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -958,6 +1067,7 @@ void saHpiHotSwapTable_set_free( netsnmp_request_group *rg )
         break;
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }
@@ -1036,8 +1146,6 @@ void saHpiHotSwapTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiHotSwapTable_SET_HANDLING */
 
 
 /************************************************************

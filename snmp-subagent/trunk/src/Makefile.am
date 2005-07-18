@@ -65,7 +65,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiOEMEventLogTable.c \
 			saHpiUserEventLogTable.c \
 			saHpiSensorEnableChangeEventLogTable.c \
-			saHpiDomainEventLogTable.c
+			saHpiDomainEventLogTable.c \
+			saHpiHotSwapTable.c			
 
 
 hpiSubagent_LDADD	= 
@@ -80,5 +81,5 @@ clean:
 #			saHpiAnnouncementEventLogTable.c \
 #			saHpiAnnouncementTable.c \
 #			saHpiAutoInsertTimeoutTable.c \
-#			saHpiDomainAlarmTable.c \
-#			saHpiHotSwapTable.c
+#			saHpiDomainAlarmTable.c
+
