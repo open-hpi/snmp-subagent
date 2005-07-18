@@ -86,6 +86,8 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
                                         size_t *event_oid_len);
 SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid, 
                        SaHpiEventT *event,
+		       SaHpiRdrT *rdr,
+		       SaHpiRptEntryT *rpt_entry,
                        oid * this_child_oid, 
                        size_t *this_child_oid_len);
 

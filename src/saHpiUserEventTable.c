@@ -182,7 +182,6 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, user_evt_ctx);
 		
 	user_event_entry_count = CONTAINER_SIZE (cb.container);
-        user_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -276,7 +275,7 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
 
                         /* increment to show activity, maybe correct DMJ TODO */
                         /* ask someone                               DMJ TODO */
-                        user_event_entry_count_total++;
+                        //user_event_entry_count_total++;
 
                         break;
                 }
@@ -350,7 +349,6 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                         CONTAINER_INSERT (cb.container, user_evt_ctx);
         
                         user_event_entry_count = CONTAINER_SIZE (cb.container);
-                        user_event_entry_count_total++;
                 }
         }
 
@@ -877,7 +875,7 @@ saHpiUserEventTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    user_event_entry_count_total++;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -904,7 +902,7 @@ saHpiUserEventTable_create_row( netsnmp_index* hdr)
      ctx->saHpiUserEventText = 0;
      ctx->saHpiUserEventRowStatus = 0;
     */
-
+    user_event_entry_count_total++;
     return ctx;
 }
 
