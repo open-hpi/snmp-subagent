@@ -157,7 +157,6 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, domain_evt_ctx);
 		
 	domain_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        domain_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -627,7 +626,7 @@ saHpiDomainEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    domain_event_log_entry_count_total++;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -649,7 +648,8 @@ saHpiDomainEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
-
+    
+    domain_event_log_entry_count_total++;
     return ctx;
 }
 #endif

@@ -161,7 +161,6 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
 		
 	hotswap_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        hotswap_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -645,7 +644,7 @@ saHpiHotSwapEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    hotswap_event_log_entry_count_total++;
+
         
     /*
      * TODO: check indexes, if necessary.
@@ -667,7 +666,7 @@ saHpiHotSwapEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
-
+    hotswap_event_log_entry_count_total++;
     return ctx;
 }
 #endif

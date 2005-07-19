@@ -286,7 +286,6 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, sen_evt_ctx);
 		
 	sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        sensor_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 
         return SA_OK;
 }
@@ -769,7 +768,6 @@ saHpiSensorEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-   sensor_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -791,6 +789,7 @@ saHpiSensorEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+    sensor_event_log_entry_count_total++;
 
     return ctx;
 }

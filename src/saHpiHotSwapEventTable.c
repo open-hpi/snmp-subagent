@@ -356,7 +356,7 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
         			        (u_char *) &hotswap_event_entry_count,
-        			        sizeof(hotswap_event_entry_count_total));
+        			        sizeof(hotswap_event_entry_count));
                 break;
 
 

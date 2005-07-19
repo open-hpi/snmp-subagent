@@ -218,8 +218,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 CONTAINER_INSERT (cb.container, event_context);
 
                 event_entry_count = CONTAINER_SIZE (cb.container);
-                event_entry_count_total = CONTAINER_SIZE (cb.container);
-
+		
                 /* get next event if available */
                 memset(&event, 0, sizeof(event));
                 memset(&rdr, 0, sizeof(rdr));

@@ -177,8 +177,7 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, software_evt_ctx);
 		
 	software_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        software_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
-	
+		
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPISOFTWAREEVENTLOGTIMESTAMP;
@@ -672,7 +671,6 @@ saHpiSoftwareEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    software_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -694,6 +692,7 @@ saHpiSoftwareEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+    software_event_log_entry_count_total++;
 
     return ctx;
 }

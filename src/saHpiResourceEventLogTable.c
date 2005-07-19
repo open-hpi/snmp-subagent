@@ -178,7 +178,6 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, res_evt_ctx);
 		
 	resource_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        resource_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 
         return SA_OK;
 }
@@ -627,7 +626,6 @@ saHpiResourceEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    resource_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -649,6 +647,7 @@ saHpiResourceEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+    resource_event_log_entry_count_total++;
 
     return ctx;
 }
