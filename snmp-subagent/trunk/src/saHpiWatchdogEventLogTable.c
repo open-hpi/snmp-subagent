@@ -167,7 +167,6 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
 		
 	watchdog_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        watchdog_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -678,7 +677,6 @@ saHpiWatchdogEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    watchdog_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -700,6 +698,7 @@ saHpiWatchdogEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+    watchdog_event_log_entry_count_total++;
 
     return ctx;
 }

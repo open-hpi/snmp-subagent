@@ -169,7 +169,6 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
 		
 	watchdog_event_entry_count = CONTAINER_SIZE (cb.container);
-        watchdog_event_entry_count_total = CONTAINER_SIZE (cb.container);
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -800,8 +799,6 @@ saHpiWatchdogEventTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiWatchdogEventTable_context);
     if(!ctx)
         return NULL;
-
-    watchdog_event_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -823,6 +820,8 @@ saHpiWatchdogEventTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+
+    watchdog_event_entry_count_total++;
 
     return ctx;
 }

@@ -170,7 +170,6 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 	CONTAINER_INSERT (cb.container, user_evt_ctx);
 		
 	user_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        user_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -253,7 +252,7 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
         			        (u_char *) &user_event_log_entry_count,
-        			        sizeof(user_event_log_entry_count_total));
+        			        sizeof(user_event_log_entry_count));
                 break;
 
 
@@ -644,7 +643,6 @@ saHpiUserEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    user_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -671,6 +669,7 @@ saHpiUserEventLogTable_create_row( netsnmp_index* hdr)
      ctx->saHpiUserEventLogText = 0;
      ctx->saHpiUserEventLogRowStatus = 0;
     */
+    user_event_log_entry_count_total++;
 
     return ctx;
 }

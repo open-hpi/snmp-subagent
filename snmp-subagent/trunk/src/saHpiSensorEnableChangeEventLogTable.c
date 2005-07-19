@@ -291,7 +291,6 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 	CONTAINER_INSERT (cb.container, sec_evt_ctx);
 		
 	sensor_enable_change_event_log_entry_count = CONTAINER_SIZE (cb.container);
-        sensor_enable_change_event_log_entry_count_total = CONTAINER_SIZE (cb.container);
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
@@ -817,7 +816,6 @@ saHpiSensorEnableChangeEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
-    sensor_enable_change_event_log_entry_count_total++;
         
     /*
      * TODO: check indexes, if necessary.
@@ -839,6 +837,8 @@ saHpiSensorEnableChangeEventLogTable_create_row( netsnmp_index* hdr)
      */
     /**
     */
+
+    sensor_enable_change_event_log_entry_count_total++;
 
     return ctx;
 }
