@@ -218,90 +218,104 @@ SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
 	                                sensor_text_buf.Data,
 					        SAHPI_MAX_TEXT_BUFFER_LENGTH);
 						
-        /** SaHpiSensorReadingType = ASN_INTEGER */						 										     
-	sensor_evt_ctx->saHpiSensorEventTriggerReadingType = 
+        if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_TRIGGER_READING) {
+	
+	         /** SaHpiSensorReadingType = ASN_INTEGER */						 										     
+	         sensor_evt_ctx->saHpiSensorEventTriggerReadingType = 
 	                event->EventDataUnion.SensorEvent.TriggerReading.Type + 1;
-        
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        sensor_evt_ctx->saHpiSensorEventTriggerReading_len = 
+                
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                sensor_evt_ctx->saHpiSensorEventTriggerReading_len = 
 	        set_sensor_reading_value(
 	                &(event->EventDataUnion.SensorEvent.TriggerReading),
 	                sensor_evt_ctx->saHpiSensorEventTriggerReading);
 
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-        sensor_evt_ctx->saHpiSensorEventTriggerThresholdType = 
+                /** SaHpiSensorReadingType = ASN_INTEGER */
+                sensor_evt_ctx->saHpiSensorEventTriggerThresholdType = 
 	                event->EventDataUnion.SensorEvent.TriggerThreshold.Type + 1;
 
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        sensor_evt_ctx->saHpiSensorEventTriggerThreshold_len = 
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                sensor_evt_ctx->saHpiSensorEventTriggerThreshold_len = 
 	        set_sensor_reading_value(
 	                &(event->EventDataUnion.SensorEvent.TriggerThreshold),
 	                sensor_evt_ctx->saHpiSensorEventTriggerThreshold);
-		
-	/** SaHpiEventState = ASN_OCTET_STR */
-	err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.PreviousState,
-	                           sensor_evt_ctx->saHpiSensorEventCategory,
-				   &sensor_text_buf);
-	if (err != SA_OK)
-	{
-	        if (err == SA_ERR_HPI_INVALID_PARAMS)
-		{
-		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Invalid parameter for PreviousState\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer is NULL; Invalid event_state or event_cat");
-		}
-		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
-		{
-		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Buffer is too small for PreviousState\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer too small");
-                }
-		else
-		{
-			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Unknown error\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Unknown error");
-		}
-	}
-
-	sensor_evt_ctx->saHpiSensorEventPreviousState_len = sensor_text_buf.DataLength;
-	memcpy(sensor_evt_ctx->saHpiSensorEventPreviousState, 
-	                                sensor_text_buf.Data,
-					        sensor_text_buf.DataLength);
-        /** SaHpiEventState = ASN_OCTET_STR */	
-	err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.CurrentState,
-	                           sensor_evt_ctx->saHpiSensorEventCategory,
-				   &sensor_text_buf);
-	if (err != SA_OK)
-	{
-	        if (err == SA_ERR_HPI_INVALID_PARAMS)
-		{
-		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Invalid parameter for CurrentState\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer is NULL; Invalid event_state or event_cat");
-		}
-		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
-		{
-		        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Buffer is too small for PreviousState\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer too small");
-                }
-		else
-		{
-			DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Unknown error\n"));
-			snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Unknown error");
-		}
 	}	
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_TRIGGER_THRESHOLD) {
+	        /** SaHpiEventState = ASN_OCTET_STR */
+	        err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.PreviousState,
+	                                   sensor_evt_ctx->saHpiSensorEventCategory,
+				           &sensor_text_buf);
+	        if (err != SA_OK)
+	        {
+	                if (err == SA_ERR_HPI_INVALID_PARAMS)
+		        {
+		                DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Invalid parameter for PreviousState\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		        }
+		        else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		        {
+		                DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Buffer is too small for PreviousState\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer too small");
+                        }
+		        else
+		        {
+			        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Unknown error\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Unknown error");
+		        }
+	        }
 
-	sensor_evt_ctx->saHpiSensorEventCurrentState_len = sensor_text_buf.DataLength;	
-	memcpy(sensor_evt_ctx->saHpiSensorEventCurrentState, 
+	        sensor_evt_ctx->saHpiSensorEventPreviousState_len = sensor_text_buf.DataLength;
+	        memcpy(sensor_evt_ctx->saHpiSensorEventPreviousState, 
+	                                sensor_text_buf.Data,
+					        sensor_text_buf.DataLength);
+        }
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_CURRENT_STATE) {
+                /** SaHpiEventState = ASN_OCTET_STR */	
+	        err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.CurrentState,
+	                           sensor_evt_ctx->saHpiSensorEventCategory,
+				   &sensor_text_buf);
+	        if (err != SA_OK)
+	        {
+	                if (err == SA_ERR_HPI_INVALID_PARAMS)
+		        {
+		                DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Invalid parameter for CurrentState\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer is NULL; Invalid event_state or event_cat");
+		        }
+		        else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		        {
+		                DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Buffer is too small for PreviousState\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Buffer too small");
+                        }
+		        else
+		        {
+			        DEBUGMSGTL ((AGENT, "populate_saHpiSensorEventTable: Unknown error\n"));
+			        snmp_log (LOG_ERR, "populate_saHpiSensorEventTable: Unknown error");
+		        }
+	        }	
+
+	        sensor_evt_ctx->saHpiSensorEventCurrentState_len = sensor_text_buf.DataLength;	
+	        memcpy(sensor_evt_ctx->saHpiSensorEventCurrentState, 
 	                                sensor_text_buf.Data,
 					        sensor_text_buf.DataLength);
 
-        
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        sensor_evt_ctx->saHpiSensorEventOem = 
-	                event->EventDataUnion.SensorEvent.Oem;
+        }
 	
-	/** UNSIGNED32 = ASN_UNSIGNED */
-        sensor_evt_ctx->saHpiSensorEventSpecific = 
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_OEM) {
+                
+		/** UNSIGNED32 = ASN_UNSIGNED */
+                sensor_evt_ctx->saHpiSensorEventOem = 
+	                event->EventDataUnion.SensorEvent.Oem;
+	}
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_SENSOR_SPECIFIC) {
+	        
+		/** UNSIGNED32 = ASN_UNSIGNED */
+                sensor_evt_ctx->saHpiSensorEventSpecific = 
 	                event->EventDataUnion.SensorEvent.SensorSpecific;
-
+        }
+	
 	CONTAINER_INSERT (cb.container, sensor_evt_ctx);
 		
 	sensor_event_entry_count = CONTAINER_SIZE (cb.container);
@@ -455,90 +469,104 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
 	                                sensor_text_buf.Data,
 					        SAHPI_MAX_TEXT_BUFFER_LENGTH);
 						
-        /** SaHpiSensorReadingType = ASN_INTEGER */						 										     
-	sensor_evt_ctx->saHpiSensorEventTriggerReadingType = 
+        if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_TRIGGER_READING) {
+	
+	         /** SaHpiSensorReadingType = ASN_INTEGER */						 										     
+	         sensor_evt_ctx->saHpiSensorEventTriggerReadingType = 
 	                event->EventDataUnion.SensorEvent.TriggerReading.Type + 1;
-        
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        sensor_evt_ctx->saHpiSensorEventTriggerReading_len = 
+                
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                sensor_evt_ctx->saHpiSensorEventTriggerReading_len = 
 	        set_sensor_reading_value(
 	                &(event->EventDataUnion.SensorEvent.TriggerReading),
 	                sensor_evt_ctx->saHpiSensorEventTriggerReading);
 
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-        sensor_evt_ctx->saHpiSensorEventTriggerThresholdType = 
+                /** SaHpiSensorReadingType = ASN_INTEGER */
+                sensor_evt_ctx->saHpiSensorEventTriggerThresholdType = 
 	                event->EventDataUnion.SensorEvent.TriggerThreshold.Type + 1;
 
-        /** SaHpiSensorReadingValue = ASN_OCTET_STR */
-        sensor_evt_ctx->saHpiSensorEventTriggerThreshold_len = 
+                /** SaHpiSensorReadingValue = ASN_OCTET_STR */
+                sensor_evt_ctx->saHpiSensorEventTriggerThreshold_len = 
 	        set_sensor_reading_value(
 	                &(event->EventDataUnion.SensorEvent.TriggerThreshold),
 	                sensor_evt_ctx->saHpiSensorEventTriggerThreshold);
-		
-	/** SaHpiEventState = ASN_OCTET_STR */
-	err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.PreviousState,
-	                           sensor_evt_ctx->saHpiSensorEventCategory,
-				   &sensor_text_buf);
-	if (err != SA_OK)
-	{
-	        if (err == SA_ERR_HPI_INVALID_PARAMS)
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Invalid parameter for PreviousState\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Buffer is NULL; Invalid event_state or event_cat");
-		}
-		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Buffer is too small for PreviousState\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Buffer too small");
-                }
-		else
-		{
-			DEBUGMSGTL ((AGENT, "async_sensor_event_add: Unknown error\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Unknown error");
-		}
-	}
-
-	sensor_evt_ctx->saHpiSensorEventPreviousState_len = sensor_text_buf.DataLength;
-	memcpy(sensor_evt_ctx->saHpiSensorEventPreviousState, 
-	                                sensor_text_buf.Data,
-					        sensor_text_buf.DataLength);
-        /** SaHpiEventState = ASN_OCTET_STR */	
-	err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.CurrentState,
-	                           sensor_evt_ctx->saHpiSensorEventCategory,
-				   &sensor_text_buf);
-	if (err != SA_OK)
-	{
-	        if (err == SA_ERR_HPI_INVALID_PARAMS)
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Invalid parameter for CurrentState\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Buffer is NULL; Invalid event_state or event_cat");
-		}
-		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Buffer is too small for PreviousState\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Buffer too small");
-                }
-		else
-		{
-			DEBUGMSGTL ((AGENT, "async_sensor_event_add: Unknown error\n"));
-			snmp_log (LOG_ERR, "async_sensor_event_add: Unknown error");
-		}
 	}	
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_TRIGGER_THRESHOLD) {
+	        /** SaHpiEventState = ASN_OCTET_STR */
+	        err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.PreviousState,
+	                                   sensor_evt_ctx->saHpiSensorEventCategory,
+				           &sensor_text_buf);
+	        if (err != SA_OK)
+	        {
+	                if (err == SA_ERR_HPI_INVALID_PARAMS)
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_event_add: Invalid parameter for PreviousState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Buffer is NULL; Invalid event_state or event_cat");
+		        }
+		        else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_event_add: Buffer is too small for PreviousState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Buffer too small");
+                        }
+		        else
+		        {
+			        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Unknown error\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Unknown error");
+		        }
+	        }
 
-	sensor_evt_ctx->saHpiSensorEventCurrentState_len = sensor_text_buf.DataLength;	
-	memcpy(sensor_evt_ctx->saHpiSensorEventCurrentState, 
+	        sensor_evt_ctx->saHpiSensorEventPreviousState_len = sensor_text_buf.DataLength;
+	        memcpy(sensor_evt_ctx->saHpiSensorEventPreviousState, 
+	                                sensor_text_buf.Data,
+					        sensor_text_buf.DataLength);
+        }
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_CURRENT_STATE) {
+                /** SaHpiEventState = ASN_OCTET_STR */	
+	        err = oh_decode_eventstate(event->EventDataUnion.SensorEvent.CurrentState,
+	                           sensor_evt_ctx->saHpiSensorEventCategory,
+				   &sensor_text_buf);
+	        if (err != SA_OK)
+	        {
+	                if (err == SA_ERR_HPI_INVALID_PARAMS)
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_event_add: Invalid parameter for CurrentState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Buffer is NULL; Invalid event_state or event_cat");
+		        }
+		        else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_event_add: Buffer is too small for PreviousState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Buffer too small");
+                        }
+		        else
+		        {
+			        DEBUGMSGTL ((AGENT, "async_sensor_event_add: Unknown error\n"));
+			        snmp_log (LOG_ERR, "async_sensor_event_add: Unknown error");
+		        }
+	        }	
+
+	        sensor_evt_ctx->saHpiSensorEventCurrentState_len = sensor_text_buf.DataLength;	
+	        memcpy(sensor_evt_ctx->saHpiSensorEventCurrentState, 
 	                                sensor_text_buf.Data,
 					        sensor_text_buf.DataLength);
 
-        
-        /** UNSIGNED32 = ASN_UNSIGNED */
-        sensor_evt_ctx->saHpiSensorEventOem = 
-	                event->EventDataUnion.SensorEvent.Oem;
+        }
 	
-	/** UNSIGNED32 = ASN_UNSIGNED */
-        sensor_evt_ctx->saHpiSensorEventSpecific = 
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_OEM) {
+                
+		/** UNSIGNED32 = ASN_UNSIGNED */
+                sensor_evt_ctx->saHpiSensorEventOem = 
+	                event->EventDataUnion.SensorEvent.Oem;
+	}
+	
+	if (event->EventDataUnion.SensorEvent.OptionalDataPresent & SAHPI_SOD_SENSOR_SPECIFIC) {
+	        
+		/** UNSIGNED32 = ASN_UNSIGNED */
+                sensor_evt_ctx->saHpiSensorEventSpecific = 
 	                event->EventDataUnion.SensorEvent.SensorSpecific;
-
+        }
+	
 	CONTAINER_INSERT (cb.container, sensor_evt_ctx);
 		
 	sensor_event_entry_count = CONTAINER_SIZE (cb.container);
