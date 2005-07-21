@@ -494,35 +494,38 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
 					sensor_enable_change_text_buf.DataLength);								
 
 
-        /** SaHpiEventState = ASN_OCTET_STR */	
-	err = oh_decode_eventstate(event->EventDataUnion.SensorEnableChangeEvent.CurrentState,
+        if ( event->EventDataUnion.SensorEnableChangeEvent.OptionalDataPresent & SAHPI_SEOD_CURRENT_STATE)
+	{
+                /** SaHpiEventState = ASN_OCTET_STR */	
+	        err = oh_decode_eventstate(event->EventDataUnion.SensorEnableChangeEvent.CurrentState,
 	                           sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventCategory,
 				   &sensor_enable_change_text_buf);
-	if (err != SA_OK)
-	{
-	        if (err == SA_ERR_HPI_INVALID_PARAMS)
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Invalid parameter for CurrentState\n"));
-			snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Buffer is NULL; Invalid event_state or event_cat");
-		}
-		else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
-		{
-		        DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Buffer is too small for CurrentState\n"));
-			snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Buffer too small");
-                }
-		else
-		{
-			DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Unknown error\n"));
-			snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Unknown error");
-		}
-	}	
+	        if (err != SA_OK)
+	        {
+	                if (err == SA_ERR_HPI_INVALID_PARAMS)
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Invalid parameter for CurrentState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Buffer is NULL; Invalid event_state or event_cat");
+		        }
+		        else if (err == SA_ERR_HPI_OUT_OF_SPACE) 
+		        {
+		                DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Buffer is too small for CurrentState\n"));
+			        snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Buffer too small");
+                        }
+		        else
+		        {
+			        DEBUGMSGTL ((AGENT, "async_sensor_enable_change_event_add: Unknown error\n"));
+			        snmp_log (LOG_ERR, "async_sensor_enable_change_event_add: Unknown error");
+		        }
+	        }    	
 
-	sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState_len = 
+	        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState_len = 
 	                                        sensor_enable_change_text_buf.DataLength;	
-	memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState, 
+	        memcpy(sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventState, 
 	                                sensor_enable_change_text_buf.Data,
 					        sensor_enable_change_text_buf.DataLength);  
-
+        }
+	
 	CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
 		
 	sensor_enable_change_event_entry_count = CONTAINER_SIZE (cb.container);
