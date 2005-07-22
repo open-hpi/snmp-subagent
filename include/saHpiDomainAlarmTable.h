@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <oh_utils.h> /* For OH_MAX_TEXT_BUFFER_LENGTH */
+
         /** Index saHpiDomainId is external */
         /** Index saHpiDomainAlarmId is internal */
         /** Index saHpiDomainAlarmSeverity is internal */
@@ -49,18 +51,18 @@ typedef struct saHpiDomainAlarmTable_context_s {
             long saHpiDomainAlarmCondStatusCondType;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondEntityPath[65535];
+            unsigned char saHpiDomainAlarmCondEntityPath[OH_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondEntityPath_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainAlarmCondSensorNum;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondEventState[65535];
+            unsigned char saHpiDomainAlarmCondEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondEventState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondNameValue[65535];
+            unsigned char saHpiDomainAlarmCondNameValue[SA_HPI_MAX_NAME_LENGTH];
             long saHpiDomainAlarmCondNameValue_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
@@ -73,7 +75,7 @@ typedef struct saHpiDomainAlarmTable_context_s {
             long saHpiDomainAlarmCondTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiDomainAlarmCondText[65535];
+            unsigned char saHpiDomainAlarmCondText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiDomainAlarmCondText_len;
 
         /** RowStatus = ASN_INTEGER */
@@ -103,7 +105,11 @@ const saHpiDomainAlarmTable_context * saHpiDomainAlarmTable_get_by_idx_rs(netsnm
                                         int row_status);
 int saHpiDomainAlarmTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
-
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid);
+				      
 /*************************************************************
  * oid declarations
  */
@@ -111,10 +117,23 @@ extern oid saHpiDomainAlarmTable_oid[];
 extern size_t saHpiDomainAlarmTable_oid_len;
 
 #define saHpiDomainAlarmTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,2,6
-    
+ 
+ 
+/*************************************************************
+ * defines included from hpiB0101_enums.h
+ */
+#define SAHPIDOMAINALARMROWSTATUS_ACTIVE	     1
+#define SAHPIDOMAINALARMROWSTATUS_NOTINSERVICE       2
+#define SAHPIDOMAINALARMROWSTATUS_NOTREADY	     3
+#define SAHPIDOMAINALARMROWSTATUS_CREATEANDGO	     4
+#define SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT      5
+#define SAHPIDOMAINALARMROWSTATUS_DESTROY	     6
+	       
 /*************************************************************
  * column number definitions for table saHpiDomainAlarmTable
  */
+ 
+#define DOMAIN_ALARM_INDEX_NR 3
 #define COLUMN_SAHPIDOMAINALARMID 1
 #define COLUMN_SAHPIDOMAINALARMTIMESTAMP 2
 #define COLUMN_SAHPIDOMAINALARMSEVERITY 3
