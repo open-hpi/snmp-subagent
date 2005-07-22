@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiDomainAlarmTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -63,6 +68,167 @@ int  handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
                                         netsnmp_request_info         *requests);
 					
 int initialize_table_saHpiDomainAlarmEntryCount(void);
+
+/**
+ * 
+ * @sessionid:
+ * @event:
+ * @this_child_oid:
+ * @this_child_oid_len:
+ * 
+ * @return:
+ */
+SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
+{
+	SaErrorT rv = SA_OK;
+        SaErrorT rc = SA_OK;
+
+	oid domain_alarm_oid[DOMAIN_ALARM_INDEX_NR];
+	netsnmp_index domain_alarm_idx;
+	saHpiDomainAlarmTable_context *domain_alarm_ctx;
+	
+	/* Used for saHpiDomainAlarmGetNext call */
+        SaHpiSeverityT Severity;
+	SaHpiAlarmT Alarm;
+	
+	/* Used for decoding */
+	oh_big_textbuffer bigbuf;
+	SaHpiTextBufferT buf;
+	
+        DEBUGMSGTL ((AGENT, "populate_saHpiDomainAlarmTable, called\n"));		
+		
+       	/* Get the first DAT Entry for this Session */	
+	Alarm.AlarmId = SAHPI_FIRST_ENTRY;
+	/* Get all the severities */
+	Severity = SAHPI_ALL_SEVERITIES;
+	
+	rv = saHpiAlarmGetNext( sessionid,
+		                Severity,
+                                SAHPI_TRUE, //Get Unacknowledged Alarms
+				&Alarm);
+	
+	if ((rv != SA_OK) && (rv != SA_ERR_HPI_NOT_PRESENT)) {
+		DEBUGMSGTL ((AGENT, 
+		"populate_saHpiDomainAlarmTable: saHpiDomainAlarmGetNext Failed: rv = %d\n",
+		rv));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	else if (rv == SA_ERR_HPI_NOT_PRESENT) {
+	        return SA_OK; //first call returned nothing
+	}
+	
+	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
+	        
+		/* assign the number of indices */
+	        domain_alarm_idx.len = DOMAIN_ALARM_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	        domain_alarm_oid[0] = Alarm.AlarmCond.DomainId; //Is this Right??
+	        /** Index saHpiDomainAlarmId is internal */
+                domain_alarm_oid[1] = Alarm.AlarmId;
+	        /** Index saHpiDomainAlarmSeverity is internal */
+	        domain_alarm_oid[2] = Alarm.Severity;
+		
+	        domain_alarm_idx.oids = (oid *) & domain_alarm_oid;
+	   
+	        /* See if Row exists. */
+	        domain_alarm_ctx = NULL;
+	        domain_alarm_ctx = CONTAINER_FIND(cb.container, &domain_alarm_idx);
+
+	        if (!domain_alarm_ctx) { 
+		        // New entry. Add it
+		        domain_alarm_ctx = 
+			        saHpiDomainAlarmTable_create_row(&domain_alarm_idx);
+	        }
+	        if (!domain_alarm_ctx) {
+		        snmp_log (LOG_ERR, "Not enough memory for a Domain Alarm row!");
+		        return AGENT_ERR_INTERNAL_ERROR;
+	        }
+
+                /** SaHpiEntryId = ASN_UNSIGNED */
+                domain_alarm_ctx->saHpiDomainAlarmId = Alarm.AlarmId;
+	
+                /** SaHpiTime = ASN_COUNTER64 */
+	        domain_alarm_ctx->saHpiDomainAlarmTimestamp = Alarm.Timestamp;
+	
+                /** TruthValue = ASN_INTEGER */
+	        domain_alarm_ctx->saHpiDomainAlarmAcknowledged = Alarm.Acknowledged;
+	
+	        /** INTEGER = ASN_INTEGER */
+        	domain_alarm_ctx->saHpiDomainAlarmCondStatusCondType = Alarm.AlarmCond.Type + 1;
+		
+		/** SaHpiEntityPath = ASN_OCTET_STR */
+                rc = oh_decode_entitypath(&Alarm.AlarmCond.Entity, &bigbuf);
+		
+		if (rc != SA_OK) {
+		        DEBUGMSGTL ((AGENT, 
+		          "populate_saHpiDomainAlarmTable: oh_decode_entitypath Failed: rc = %d\n",
+		           rc));
+		}
+		else {
+		       memcpy(domain_alarm_ctx->saHpiDomainAlarmCondEntityPath,
+		              bigbuf.Data, bigbuf.DataLength);
+	               domain_alarm_ctx->saHpiDomainAlarmCondEntityPath_len = bigbuf.DataLength;
+		}
+	
+		
+		if (Alarm.AlarmCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+		
+		        /** UNSIGNED32 = ASN_UNSIGNED */
+			domain_alarm_ctx->saHpiDomainAlarmCondSensorNum = Alarm.AlarmCond.SensorNum;
+			
+		        /** SaHpiEventState = ASN_OCTET_STR */
+		        rc = oh_decode_eventstate(Alarm.AlarmCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
+			
+			if (rc != SA_OK) {
+		                DEBUGMSGTL ((AGENT, 
+		                "populate_saHpiDomainAlarmTable: oh_decode_eventstate Failed: rc = %d\n",
+		                 rc));
+			}	 
+			else {	 		        
+		                memcpy(domain_alarm_ctx->saHpiDomainAlarmCondEventState, 
+				                                buf.Data, buf.DataLength); 
+								
+				domain_alarm_ctx->saHpiDomainAlarmCondEventState_len = buf.DataLength;
+			}					
+		}
+
+	        /** OCTETSTR = ASN_OCTET_STR */
+		memcpy(domain_alarm_ctx->saHpiDomainAlarmCondNameValue, 
+		                Alarm.AlarmCond.Name.Value, Alarm.AlarmCond.Name.Length);
+		
+	        domain_alarm_ctx->saHpiDomainAlarmCondNameValue_len = Alarm.AlarmCond.Name.Length;
+		
+		/** SaHpiManufacturerId = ASN_UNSIGNED */
+		domain_alarm_ctx->saHpiDomainAlarmCondMid = Alarm.AlarmCond.Mid;
+		
+	        /** SaHpiTextType = ASN_INTEGER */
+                domain_alarm_ctx->saHpiDomainAlarmCondTextType = Alarm.AlarmCond.Data.DataType + 1;
+	        
+		/** SaHpiTextLanguage = ASN_INTEGER */
+		domain_alarm_ctx->saHpiDomainAlarmCondTextLanguage = Alarm.AlarmCond.Data.Language + 1;
+        
+	        /** SaHpiText = ASN_OCTET_STR */
+                domain_alarm_ctx->saHpiDomainAlarmCondText_len = Alarm.AlarmCond.Data.DataLength;
+		
+		memcpy(domain_alarm_ctx->saHpiDomainAlarmCondText, 
+		                        Alarm.AlarmCond.Data.Data, Alarm.AlarmCond.Data.DataLength);
+					
+		domain_alarm_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
+		
+	        CONTAINER_INSERT (cb.container, domain_alarm_ctx);
+	
+	        //Get the next Alarm
+        	rv = saHpiAlarmGetNext( sessionid,
+		                        Severity,
+                                        SAHPI_TRUE, //Get Unacknowledged Alarms
+				        &Alarm);
+		
+        }	
+	
+	domain_alarm_entry_count = CONTAINER_SIZE (cb.container);
+
+        return SA_OK;   								    
+}
 
 /**
  * 
@@ -131,11 +297,6 @@ int initialize_table_saHpiDomainAlarmEntryCount(void)
 /************************************************************/
 /************************************************************/
 /************************************************************/
-
-void populate_saHpiDomainAlarmTable()
-{
-	dbg("WARNING: populate_saHpiDomainAlarmTable: not implemented!");
-}
 
 /************************************************************
  * keep binary tree to find context by name
@@ -231,7 +392,6 @@ saHpiDomainAlarmTable_get( const char *name, int len )
      * return CONTAINER_FIND(cb.container->next, &tmp);
      */
 }
-#endif
 
 
 /************************************************************
@@ -1215,6 +1375,7 @@ void saHpiDomainAlarmTable_set_free( netsnmp_request_group *rg )
         break;
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }
@@ -1321,8 +1482,6 @@ void saHpiDomainAlarmTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiDomainAlarmTable_SET_HANDLING */
 
 
 /************************************************************
