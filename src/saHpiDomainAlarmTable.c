@@ -72,9 +72,6 @@ int initialize_table_saHpiDomainAlarmEntryCount(void);
 /**
  * 
  * @sessionid:
- * @event:
- * @this_child_oid:
- * @this_child_oid_len:
  * 
  * @return:
  */

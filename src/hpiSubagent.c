@@ -408,11 +408,10 @@ main (int argc, char **argv)
 	init_saHpiUserEventLogTable();
 	init_saHpiSensorEnableChangeEventLogTable();
 	init_saHpiDomainEventLogTable();
-
-/*	
+	
 	init_saHpiHotSwapTable();
 	init_saHpiAutoInsertTimeoutTable();
-	init_saHpiAnnouncementTable();
+/*	init_saHpiAnnouncementTable();
 	init_saHpiAnnouncementEventLogTable();	
 */
 

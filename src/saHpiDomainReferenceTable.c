@@ -261,6 +261,9 @@ saHpiDomainReferenceTable_cmp( const void *lhs, const void *rhs )
 void
 init_saHpiDomainReferenceTable(void)
 {
+
+    DEBUGMSGTL ((AGENT, "init_saHpiDomainReferenceTable, called\n"));
+
     initialize_table_saHpiDomainReferenceTable();
     
     initialize_table_saHpiDomainReferenceEntryCount();
