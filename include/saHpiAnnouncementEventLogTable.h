@@ -21,7 +21,6 @@ extern "C" {
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
-        /** Index saHpiDomainAlarmId is external */
         /** Index saHpiAnnouncementEntryId is external */
 
 typedef struct saHpiAnnouncementEventLogTable_context_s {
