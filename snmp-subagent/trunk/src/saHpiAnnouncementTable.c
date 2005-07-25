@@ -180,7 +180,7 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiDomainAlarmId */
+                        /* CHECK THIRD INDEX,  saHpiAnnouncementEntryId */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -188,16 +188,7 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiDomainAlarmId index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnouncementEntryId */
-                                if ( context_l->index.oids[3] < context_r->index.oids[3])
-                                        return -1;
-
-                                if ( context_l->index.oids[3] > context_r->index.oids[3])
-                                        return 1;
-
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
+                                return 0;
                         }
                 }
         }
@@ -339,7 +330,6 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
         /** TODO: add storage for external index(s)! */
         netsnmp_variable_list var_saHpiDomainId;
         netsnmp_variable_list var_saHpiResourceId;
-        netsnmp_variable_list var_saHpiDomainAlarmId;
         netsnmp_variable_list var_saHpiAnnouncementEntryId;
         int err;
 
@@ -371,12 +361,7 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
         memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
         var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
         /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiResourceId.next_variable = &var_saHpiDomainAlarmId;
-
-        memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
-        var_saHpiDomainAlarmId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
-        /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiDomainAlarmId.next_variable = &var_saHpiAnnouncementEntryId;
+        var_saHpiResourceId.next_variable = &var_saHpiAnnouncementEntryId;
 
         memset( &var_saHpiAnnouncementEntryId, 0x00, sizeof(var_saHpiAnnouncementEntryId) );
         var_saHpiAnnouncementEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
@@ -396,13 +381,10 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
    
                 /** skipping external index saHpiResourceId */
    
-                /** skipping external index saHpiDomainAlarmId */
-   
                 ctx->saHpiAnnouncementEntryId = *var_saHpiAnnouncementEntryId.val.integer;
                 
                 err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
                 err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
-		err = saHpiDomainAlarmId_check_index(*var_saHpiDomainAlarmId.val.integer);
 		err = saHpiAnnouncementEntryId_check_index(*var_saHpiAnnouncementEntryId.val.integer);
    
         }
@@ -1358,8 +1340,6 @@ initialize_table_saHpiAnnouncementTable(void)
         /** index: saHpiDomainId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiResourceId */
-        netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiDomainAlarmId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiAnnouncementEntryId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
