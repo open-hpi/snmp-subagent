@@ -4172,7 +4172,6 @@ saHpiAnnouncementEntry OBJECT-TYPE
 	"
         INDEX   {       saHpiDomainId, 
                         saHpiResourceId, 
-                        saHpiDomainAlarmId, 
                         saHpiAnnouncementEntryId 
 		}
         ::= {saHpiAnnouncementTable 1}
@@ -5868,7 +5867,6 @@ saHpiAnnouncementEventLogEntry OBJECT-TYPE
 	"
         INDEX   {       saHpiDomainId, 
                         saHpiResourceId, 
-                        saHpiDomainAlarmId, 
                         saHpiAnnouncementEntryId 
 		}
         ::= {saHpiAnnouncementEventLogTable 1}
