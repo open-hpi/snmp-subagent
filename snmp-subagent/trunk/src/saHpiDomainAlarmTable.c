@@ -101,7 +101,7 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	
 	rv = saHpiAlarmGetNext( sessionid,
 		                Severity,
-                                SAHPI_TRUE, //Get Unacknowledged Alarms
+                                SAHPI_FALSE, //Get ALL Alarms
 				&Alarm);
 	
 	if ((rv != SA_OK) && (rv != SA_ERR_HPI_NOT_PRESENT)) {

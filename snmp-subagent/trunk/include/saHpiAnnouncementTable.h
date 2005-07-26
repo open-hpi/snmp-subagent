@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <oh_utils.h> /* For OH_MAX_TEXT_BUFFER_LENGTH */
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiAnnouncementEntryId is internal */
@@ -52,18 +54,18 @@ typedef struct saHpiAnnouncementTable_context_s {
             long saHpiAnnouncementStatusCondType;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEntityPath[65535];
+            unsigned char saHpiAnnouncementEntityPath[OH_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEntityPath_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiAnnouncementSensorNum;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventState[65535];
+            unsigned char saHpiAnnouncementEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEventState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementName[65535];
+            unsigned char saHpiAnnouncementName[SA_HPI_MAX_NAME_LENGTH];
             long saHpiAnnouncementName_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
@@ -76,7 +78,7 @@ typedef struct saHpiAnnouncementTable_context_s {
             long saHpiAnnouncementTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementText[65535];
+            unsigned char saHpiAnnouncementText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementText_len;
 
         /** RowStatus = ASN_INTEGER */
@@ -106,6 +108,14 @@ const saHpiAnnouncementTable_context * saHpiAnnouncementTable_get_by_idx_rs(nets
                                         int row_status);
 int saHpiAnnouncementTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+/*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiRdrT *rdr_entry,
+                                         SaHpiRptEntryT *rpt_entry,
+                                         oid *full_oid, size_t full_oid_len,
+                                         oid *child_oid, size_t *child_oid_len);
 
 /*************************************************************
  * oid declarations
@@ -114,10 +124,23 @@ extern oid saHpiAnnouncementTable_oid[];
 extern size_t saHpiAnnouncementTable_oid_len;
 
 #define saHpiAnnouncementTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,3,1,32
+
+
+/*************************************************************
+ * defines included from hpiB0101_enums.h
+ */
+#define SAHPIANNOUNCEMENTDELETE_ACTIVE  	     1
+#define SAHPIANNOUNCEMENTDELETE_NOTINSERVICE	     2
+#define SAHPIANNOUNCEMENTDELETE_NOTREADY	     3
+#define SAHPIANNOUNCEMENTDELETE_CREATEANDGO	     4
+#define SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT        5
+#define SAHPIANNOUNCEMENTDELETE_DESTROY 	     6
     
 /*************************************************************
  * column number definitions for table saHpiAnnouncementTable
  */
+
+#define ANNOUNCEMENT_INDEX_NR 3 
 #define COLUMN_SAHPIANNOUNCEMENTENTRYID 1
 #define COLUMN_SAHPIANNOUNCEMENTTIMESTAMP 2
 #define COLUMN_SAHPIANNOUNCEMENTADDEDBYUSER 3
