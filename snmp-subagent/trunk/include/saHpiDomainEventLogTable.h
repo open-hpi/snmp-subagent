@@ -119,6 +119,14 @@ netsnmp_index * saHpiDomainEventLogTable_delete_row( saHpiDomainEventLogTable_co
 int saHpiDomainEventLogTable_can_delete(saHpiDomainEventLogTable_context *undo_ctx,
                     saHpiDomainEventLogTable_context *row_ctx,
                     netsnmp_request_group * rg);
+		    
+int saHpiDomainEventLogTable_can_activate(saHpiDomainEventLogTable_context *undo_ctx,
+                      saHpiDomainEventLogTable_context *row_ctx,
+                      netsnmp_request_group * rg);
+		      
+int saHpiDomainEventLogTable_can_deactivate(saHpiDomainEventLogTable_context *undo_ctx,
+                        saHpiDomainEventLogTable_context *row_ctx,
+                        netsnmp_request_group * rg);		      		    
     
     
 #ifdef saHpiDomainEventLogTable_ROW_CREATION
