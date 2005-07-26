@@ -541,16 +541,10 @@ printf("!!!!!!!!!! NEW ROW !!!!!!!!!!!\n");
 
 	if (rpt_entry->ResourceCapabilities & 
             SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
-		 rv = populate_hotswap (sessionid,
-		 	                rpt_entry,
-					resource_index.oids, 
-					resource_index.len);
+//		 rv = populate_hotswap (sessionid,rpt_entry,resource_index.oids, resource_index.len);
         }
 	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-		rv = populate_saHpiRdrTable(sessionid, 
-					    rpt_entry,
-					    resource_index.oids, 
-					    resource_index.len);
+//		rv = populate_saHpiRdrTable(sessionid, rpt_entry,resource_index.oids, resource_index.len);
 	}
 
         if (new_row == MIB_TRUE) {
