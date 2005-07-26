@@ -420,8 +420,8 @@ main (int argc, char **argv)
 	
 	init_saHpiHotSwapTable();
 	init_saHpiAutoInsertTimeoutTable();
-/*	init_saHpiAnnouncementTable();
-	init_saHpiAnnouncementEventLogTable();	
+	init_saHpiAnnouncementTable();
+/*	init_saHpiAnnouncementEventLogTable();	
 */
 
 	if (send_traps_on_startup == AGENT_TRUE)
@@ -461,7 +461,9 @@ main (int argc, char **argv)
 	     *	       populate_saHpiWatchdogTable();		
 	     *	       populate_saHpiAnnunciatorTable();		
 	     *	       populate_saHpiAreaTable();		
-	     *	           populate_saHpiFieldTable();		
+	     *	           populate_saHpiFieldTable(); 
+             *         populate_saHpiHotSwapTable();
+  	     *         populate_saHpiAnnouncementTable();
 	     */
 
 	populate_saHpiEventTable(sessionid);
