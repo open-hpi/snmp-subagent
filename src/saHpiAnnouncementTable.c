@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiAnnouncementTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+#include <oh_utils.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -64,6 +69,184 @@ int handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
                                         netsnmp_request_info         *requests);
 
 int initialize_table_saHpiAnnouncementEntryCount(void);
+
+
+/**
+ * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
+ */
+SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiRdrT *rdr_entry,
+                                         SaHpiRptEntryT *rpt_entry,
+                                         oid *full_oid, size_t full_oid_len,
+                                         oid *child_oid, size_t *child_oid_len)
+{
+	SaErrorT rv = SA_OK;
+        SaErrorT rc = SA_OK;
+
+	oid announcement_oid[ANNOUNCEMENT_INDEX_NR];
+	netsnmp_index announcement_index;
+	saHpiAnnouncementTable_context *announcement_ctx;
+	
+	oid column[2];
+	int column_len = 2;
+	
+	SaHpiAnnouncementT announcement;
+	
+	/* Used for decoding */
+	oh_big_textbuffer bigbuf;
+	SaHpiTextBufferT buf;
+		
+        DEBUGMSGTL ((AGENT, "populate_saHpiAnnouncementTable, called\n"));		
+	
+	
+	if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementTable() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementTable() passed NULL rpt_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+		
+        rv = saHpiAnnunciatorGet(sessionid, 
+	                         rpt_entry->ResourceId,
+				 rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
+				 rdr_entry->RecordId,
+				 &announcement);
+
+        if (rv != SA_OK ) {
+	        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorGet Failed: rv = %d\n",rv));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	
+        /* BUILD oid for new row */
+        /* assign the number of indices */	
+	announcement_index.len = ANNOUNCEMENT_INDEX_NR;
+        /** Index saHpiDomainId is external */	
+        announcement_oid[0] = announcement.StatusCond.DomainId;
+        /** Index saHpiResourceId is external */	
+        announcement_oid[1] = announcement.StatusCond.ResourceId;
+        /** Index saHpiAnnouncementEntryId is internal */	
+	announcement_oid[2] = announcement.EntryId;
+        /* assign the indices to the index */	
+	announcement_index.oids = (oid *) & announcement_oid;
+
+        /* See if Row exists. */
+        announcement_ctx = NULL;
+        announcement_ctx = CONTAINER_FIND(cb.container, &announcement_index);
+
+        if (!announcement_ctx) {
+                // New entry. Add it
+                announcement_ctx = 
+                      saHpiAnnouncementTable_create_row(&announcement_index);
+        }
+        if (!announcement_ctx) {
+                snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+	
+	/** SaHpiEntryId = ASN_UNSIGNED */
+        announcement_ctx->saHpiAnnouncementEntryId = announcement.EntryId;
+		
+        /** SaHpiTime = ASN_COUNTER64 */
+        announcement_ctx->saHpiAnnouncementTimestamp = announcement.Timestamp;
+
+        /** TruthValue = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementAddedByUser = announcement.AddedByUser;
+
+        /** SaHpiSeverity = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementSeverity = announcement.Severity + 1;
+
+        /** TruthValue = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementAcknowledged = announcement.Acknowledged;
+
+        /** INTEGER = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementStatusCondType = announcement.StatusCond.Type + 1;
+
+        /** SaHpiEntityPath = ASN_OCTET_STR */
+	rc = oh_decode_entitypath(&announcement.StatusCond.Entity, &bigbuf);
+		
+	if (rc != SA_OK) {
+		DEBUGMSGTL ((AGENT, 
+		          "populate_saHpiAnnouncementTable: oh_decode_entitypath Failed: rc = %d\n",
+		           rc));
+	}
+	else {
+		memcpy(announcement_ctx->saHpiAnnouncementEntityPath,
+		                                       bigbuf.Data, bigbuf.DataLength);
+	        announcement_ctx->saHpiAnnouncementEntityPath_len = bigbuf.DataLength;
+	}
+
+        
+	
+	if (announcement.StatusCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+		/** UNSIGNED32 = ASN_UNSIGNED */
+        	announcement_ctx->saHpiAnnouncementSensorNum = announcement.StatusCond.SensorNum;
+
+	        /** SaHpiEventState = ASN_OCTET_STR */
+	        rc = oh_decode_eventstate(announcement.StatusCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
+			
+		if (rc != SA_OK) {
+	                DEBUGMSGTL ((AGENT, 
+  		                "populate_saHpiAnnouncementTable: oh_decode_eventstate Failed: rc = %d\n",
+		                 rc));
+		}	         	
+		else {
+		        memcpy(announcement_ctx->saHpiAnnouncementEventState, buf.Data, buf.DataLength); 
+        	        announcement_ctx->saHpiAnnouncementEventState_len = buf.DataLength;
+		}	
+        }
+	
+        /** OCTETSTR = ASN_OCTET_STR */
+        memcpy(announcement_ctx->saHpiAnnouncementName, announcement.StatusCond.Name.Value, 
+	                                                announcement.StatusCond.Name.Length);
+        announcement_ctx->saHpiAnnouncementName_len = announcement.StatusCond.Name.Length;
+
+        /** SaHpiManufacturerId = ASN_UNSIGNED */
+        announcement_ctx->saHpiAnnouncementMid = announcement.StatusCond.Mid;
+
+        /** SaHpiTextType = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementTextType = announcement.StatusCond.Data.DataType + 1;
+
+        /** SaHpiTextLanguage = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementTextLanguage = announcement.StatusCond.Data.Language + 1;
+
+        /** SaHpiText = ASN_OCTET_STR */
+        memcpy(announcement_ctx->saHpiAnnouncementText, announcement.StatusCond.Data.Data, 
+	                                                announcement.StatusCond.Data.DataLength);
+        announcement_ctx->saHpiAnnouncementText_len = announcement.StatusCond.Data.DataLength;
+
+        /** RowStatus = ASN_INTEGER */
+        announcement_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_ACTIVE;
+
+
+	CONTAINER_INSERT (cb.container, announcement_ctx);
+		
+	announcement_entry_count = CONTAINER_SIZE (cb.container);
+	
+        /* create full oid on This row for parent RowPointer */
+        column[0] = 1;
+        column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
+        memset(child_oid, 0, sizeof(child_oid_len));
+        build_full_oid(saHpiAnnouncementTable_oid, saHpiAnnouncementTable_oid_len,
+                       column, column_len,
+                       &announcement_index,
+                       child_oid, MAX_OID_LEN, child_oid_len);	
+		       
+        return SA_OK; 		       
+
+}
 
 /**
  * 
@@ -243,7 +426,7 @@ init_saHpiAnnouncementTable(void)
 	
 	initialize_table_saHpiAnnouncementTable();
 
-        initialize_table_saHpiAnnouncementEntryCount
+        initialize_table_saHpiAnnouncementEntryCount();
 }
 
 /************************************************************
@@ -996,19 +1179,7 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiAnnouncementTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
 
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_set_mode_request_error(MODE_SET_BEGIN,
                                        (netsnmp_request_info*)rg->rg_void,
@@ -1187,6 +1358,7 @@ void saHpiAnnouncementTable_set_free( netsnmp_request_group *rg )
         break;
 
         default: /** We shouldn't get here */
+	        break;
             /** should have been logged in reserve1 */
         }
     }
@@ -1289,8 +1461,6 @@ void saHpiAnnouncementTable_set_undo( netsnmp_request_group *rg )
      * requirements here.
      */
 }
-
-#endif /** saHpiAnnouncementTable_SET_HANDLING */
 
 
 /************************************************************

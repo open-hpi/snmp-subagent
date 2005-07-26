@@ -411,9 +411,9 @@ main (int argc, char **argv)
 	
 	init_saHpiHotSwapTable();
 	init_saHpiAutoInsertTimeoutTable();
-/*	init_saHpiAnnouncementTable();
-	init_saHpiAnnouncementEventLogTable();	
-*/
+	init_saHpiAnnouncementTable();
+/*	init_saHpiAnnouncementEventLogTable();	*/
+
 
 	if (send_traps_on_startup == AGENT_TRUE)
 		send_traps = AGENT_TRUE;
