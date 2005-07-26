@@ -239,9 +239,10 @@ main (int argc, char **argv)
 	  	int c;
 	  	int rc = 0;
         	  
-	  	SaErrorT 	rv = SA_OK;
-		SaHpiVersionT	hpiVer;
-		SaHpiSessionIdT sessionid;
+	  	SaErrorT 	        rv = SA_OK;
+		SaHpiVersionT	        hpiVer;
+		SaHpiSessionIdT         sessionid;
+                SaHpiDomainInfoT        domain_info;    
 		
 	  	pid_t child;
 	  		  	
@@ -334,10 +335,18 @@ main (int argc, char **argv)
 		exit(-1);
 	}
    	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
-   		sessionid));  
+   		sessionid)); 
+
+        /* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);
+	if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, "saHpiSessionOpen Error: returns %s\n",
+                        oh_lookup_error(rv)));
+                exit(-1);
+	}
 
         /* store session numbers */
-   	store_session_info(sessionid, SAHPI_UNSPECIFIED_DOMAIN_ID);	
+   	store_session_info(sessionid, domain_info.DomainId);	
    				
 	/* subscribe all sessions/events */
         subcsribe_all_sessions();
@@ -411,9 +420,9 @@ main (int argc, char **argv)
 	
 	init_saHpiHotSwapTable();
 	init_saHpiAutoInsertTimeoutTable();
-	init_saHpiAnnouncementTable();
-/*	init_saHpiAnnouncementEventLogTable();	*/
-
+/*	init_saHpiAnnouncementTable();
+	init_saHpiAnnouncementEventLogTable();	
+*/
 
 	if (send_traps_on_startup == AGENT_TRUE)
 		send_traps = AGENT_TRUE;
@@ -452,9 +461,7 @@ main (int argc, char **argv)
 	     *	       populate_saHpiWatchdogTable();		
 	     *	       populate_saHpiAnnunciatorTable();		
 	     *	       populate_saHpiAreaTable();		
-	     *	           populate_saHpiFieldTable();
-	     *         populate_saHpiHotSwapTable();
-	     *         populate_saHpiAnnouncementTable();		
+	     *	           populate_saHpiFieldTable();		
 	     */
 
 	populate_saHpiEventTable(sessionid);
