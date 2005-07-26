@@ -370,15 +370,6 @@ int saHpiEntryId_check_index(long val)
 }
   
 /********************************/
-/* saHpiEnableChangeEventTable  */    
-/********************************/
-int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiTimeString_check_index)
-{
-	snmp_log(LOG_ERR, "saHpiSensorEnableChangeEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
-	return 0;
-
-}
-/********************************/
 /* saHpiWatchdogTable  */    
 /********************************/
 int saHpiWatchdogNum_check_index(long val)

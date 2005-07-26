@@ -150,7 +150,8 @@ int handle_saHpiResourceEntryCount( netsnmp_mib_handler 	*handler,
 				    netsnmp_agent_request_info   *reqinfo,
 				    netsnmp_request_info         *requests);
 int initialize_table_saHpiResourceEntryCount(void);
-
+int async_event_resource(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                         SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * oid declarations

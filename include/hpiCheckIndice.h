@@ -208,11 +208,6 @@ int saHpiResourceId_check_index(long val);
 int saHpiEntryId_check_index(long val);
 
 /********************************/
-/* saHpiEnableChangeEventTable  */    
-/********************************/
-int saHpiTimeString_check_index( netsnmp_variable_list *var_saHpiSensorEnableChangeEventTimestamp);
-
-/********************************/
 /* saHpiWatchdogTable  		*/    
 /********************************/
 int saHpiWatchdogNum_check_index(long val);
