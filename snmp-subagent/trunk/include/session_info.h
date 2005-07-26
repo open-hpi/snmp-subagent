@@ -116,4 +116,7 @@ SaErrorT oh_decode_exp_flags(SaHpiWatchdogExpFlagsT exp_flags,
 int oh_encode_exp_flags(SaHpiTextBufferT *buffer, 
                              SaHpiWatchdogExpFlagsT *exp_flags);
 
+void res_cap_map(SaHpiUint16T *rs_cap, SaHpiRptEntryT *rpt_entry);
+void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry);
+
 #endif //_SESSION_INFO_H_

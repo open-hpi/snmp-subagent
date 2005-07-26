@@ -697,3 +697,54 @@ int oh_encode_exp_flags(SaHpiTextBufferT *buffer, SaHpiWatchdogExpFlagsT *exp_fl
 
         return rv;
 }
+
+void res_cap_map(SaHpiUint16T *rs_cap, SaHpiRptEntryT *rpt_entry)
+{
+        *rs_cap = 0x0000;                
+
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_SENSOR)
+		*rs_cap = 0x4000;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_RDR)
+		*rs_cap |= 0x2000;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_EVENT_LOG)
+		*rs_cap |= 0x1000;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_INVENTORY_DATA)
+		*rs_cap |= 0x0800;
+
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_RESET)
+		*rs_cap |= 0x0400;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_POWER)
+		*rs_cap |= 0x0200;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_ANNUNCIATOR)
+		*rs_cap |= 0x0100;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_FRU)
+		*rs_cap |= 0x0080;
+
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_CONTROL)
+		*rs_cap |= 0x0040;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_WATCHDOG)
+		*rs_cap |= 0x0020;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP)
+		*rs_cap |= 0x0010;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_CONFIGURATION)
+		*rs_cap |= 0x0008;
+
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_AGGREGATE_STATUS)
+		*rs_cap |= 0x0004;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_EVT_DEASSERTS)
+		*rs_cap |= 0x0002;
+	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_RESOURCE)
+		*rs_cap |= 0x0001;
+}
+
+void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry)
+{
+        *hs_cap = 0x00;          
+	if (rpt_entry->HotSwapCapabilities & 
+            SAHPI_HS_CAPABILITY_AUTOEXTRACT_READ_ONLY)
+		*hs_cap = 0x40;
+        if (rpt_entry->HotSwapCapabilities & 
+	    SAHPI_HS_CAPABILITY_INDICATOR_SUPPORTED)
+		*hs_cap |= 0x20;
+}
+

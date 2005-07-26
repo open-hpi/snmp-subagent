@@ -945,7 +945,8 @@ saHpiSensorEnableChangeEventTable_extract_index( saHpiSensorEnableChangeEventTab
                 err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);     
                 err = saHpiSensorNum_check_index(*var_saHpiSensorNum.val.integer);
 		err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
-		err = saHpiTimeString_check_index(*var_saHpiSensorEnableChangeEventEntryId.val.integer);
+		err = saHpiSensorEnableChangeEventEntryId_check_index(
+                        *var_saHpiSensorEnableChangeEventEntryId.val.integer);
         }
 
         /*

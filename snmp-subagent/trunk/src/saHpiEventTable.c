@@ -120,6 +120,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiResourceEventTable(sessionid, &event,                                           
                                                          child_oid, 
                                                          &child_oid_len);
+                        async_event_resource(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_DOMAIN:
                         printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
@@ -260,6 +261,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		                              rdr, rpt_entry,                                           
                                               child_oid, 
                                               &child_oid_len);
+                async_event_resource(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_DOMAIN:
                 rv = async_domain_event_add(sessionid, event,
