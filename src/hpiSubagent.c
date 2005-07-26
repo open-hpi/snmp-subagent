@@ -452,7 +452,9 @@ main (int argc, char **argv)
 	     *	       populate_saHpiWatchdogTable();		
 	     *	       populate_saHpiAnnunciatorTable();		
 	     *	       populate_saHpiAreaTable();		
-	     *	           populate_saHpiFieldTable();		
+	     *	           populate_saHpiFieldTable();
+	     *         populate_saHpiHotSwapTable();
+	     *         populate_saHpiAnnouncementTable();		
 	     */
 
 	populate_saHpiEventTable(sessionid);
