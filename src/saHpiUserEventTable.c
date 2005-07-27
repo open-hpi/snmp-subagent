@@ -228,62 +228,62 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
 
                     
         row_idx = CONTAINER_FIRST(cb.container);
-        do {
+        
+	if (row_idx) //At least one entry was found.
+	{
+	        do {
 
-                user_evt_ctx = CONTAINER_FIND(cb.container, row_idx);
+                        user_evt_ctx = CONTAINER_FIND(cb.container, row_idx);
 
-                SaHpiTimeT tmp_ts;
-                tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
+                        SaHpiTimeT tmp_ts;
+                        tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
 
-                if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
-                       event->EventDataUnion.UserEvent.UserEventData.Data,
-                       event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
+                        if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
+                             event->EventDataUnion.UserEvent.UserEventData.Data,
+                             event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
 
-                     (user_evt_ctx->saHpiUserEventText_len == 
-                      event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
+                           (user_evt_ctx->saHpiUserEventText_len == 
+                           event->EventDataUnion.UserEvent.UserEventData.DataLength) &&
 
-                     ( (user_evt_ctx->saHpiUserEventTextLanguage - 1) ==
-                      event->EventDataUnion.UserEvent.UserEventData.Language) &&
+                           ( (user_evt_ctx->saHpiUserEventTextLanguage - 1) ==
+                              event->EventDataUnion.UserEvent.UserEventData.Language) &&
 
-                     ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
-                      event->EventDataUnion.UserEvent.UserEventData.DataType) &&
+                           ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
+                              event->EventDataUnion.UserEvent.UserEventData.DataType) &&
 
-                     (user_evt_ctx->saHpiUserEventTimestamp == 
-                      event->Timestamp) &&
+                           (user_evt_ctx->saHpiUserEventTimestamp == 
+                            event->Timestamp) &&
 
-                     ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
-                      event->Severity) &&
+                           ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
+                             event->Severity) &&
 
-                     (user_evt_ctx->saHpiEventAdd_called == SAHPI_TRUE) && 
+                           (user_evt_ctx->saHpiEventAdd_called == SAHPI_TRUE) && 
 
-                     (user_evt_ctx->saHpiUserEventRowStatus == 
-                      SAHPIUSEREVENTROWSTATUS_CREATEANDWAIT) ) {
+                           (user_evt_ctx->saHpiUserEventRowStatus == 
+                                     SAHPIUSEREVENTROWSTATUS_CREATEANDWAIT) ) {
 
-                        /* existing event found, set the row_status to active   */
-                        /* now need to add event to saHpiEventTabel             */ 
-                        DEBUGMSGTL ((AGENT, 
-                        "Setting saHpiUserEventRowStatus to SAHPIUSEREVENTROWSTATUS_ACTIVE\n"));
+                                /* existing event found, set the row_status to active   */
+                                /* now need to add event to saHpiEventTabel             */ 
+                                DEBUGMSGTL ((AGENT, 
+                                "Setting saHpiUserEventRowStatus to SAHPIUSEREVENTROWSTATUS_ACTIVE\n"));
 
-                        /* the whole point of looking for it */
-                        user_evt_ctx->saHpiUserEventRowStatus = 
-                                SAHPIUSEREVENTROWSTATUS_ACTIVE;
+                                /* the whole point of looking for it */
+                                user_evt_ctx->saHpiUserEventRowStatus = 
+                                              SAHPIUSEREVENTROWSTATUS_ACTIVE;
 
-                        /* flag its found so we don't create a new row */
-                        entry_found = SAHPI_TRUE;
+                               /* flag its found so we don't create a new row */
+                               entry_found = SAHPI_TRUE;
 
-                        /* place row_idx values into structure used by build full oid */
-                        user_evt_idx.len = row_idx->len;
-                        user_evt_idx.oids = row_idx->oids;
+                               /* place row_idx values into structure used by build full oid */
+                               user_evt_idx.len = row_idx->len;
+                               user_evt_idx.oids = row_idx->oids;
 
-                        /* increment to show activity, maybe correct DMJ TODO */
-                        /* ask someone                               DMJ TODO */
-                        //user_event_entry_count_total++;
-
-                        break;
-                }
+                               break;
+                        }
                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
-        } while (row_idx);
-
+                
+		} while (row_idx);
+        }
         /* check if exsiting row was found. If not found which should not happen */
         /* For now add new row.  This may not be the best solution.              */
 
