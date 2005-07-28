@@ -69,7 +69,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiHotSwapTable.c \
 			saHpiDomainAlarmTable.c \
 			saHpiAutoInsertTimeoutTable.c \
-			saHpiAnnouncementTable.c					
+			saHpiAnnouncementTable.c \
+			saHpiAnnouncementEventLogTable.c								
 				
 
 
@@ -81,7 +82,6 @@ clean:
 	rm -f *.o
 	
 #			hpiB0101.c \
-#			uid_utils.c \
-#			saHpiAnnouncementEventLogTable.c
+#			uid_utils.c
 
 
