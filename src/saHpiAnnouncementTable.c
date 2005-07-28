@@ -101,6 +101,8 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	
 	SaHpiAnnouncementT announcement;
 	
+	announcement.EntryId = SAHPI_FIRST_ENTRY;
+		
 	/* Used for decoding */
 	oh_big_textbuffer bigbuf;
 	SaHpiTextBufferT buf;
@@ -119,130 +121,147 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 		
-        rv = saHpiAnnunciatorGet(sessionid, 
+        rv = saHpiAnnunciatorGetNext(sessionid, 
 	                         rpt_entry->ResourceId,
 				 rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
-				 rdr_entry->RecordId,
+				 SAHPI_ALL_SEVERITIES,
+				 SAHPI_FALSE,         //Get all announcements.
 				 &announcement);
 
-        if (rv != SA_OK ) {
-	        DEBUGMSGTL ((AGENT, "saHpiAnnunciatorGet Failed: rv = %d\n",rv));
+	if ((rv != SA_OK) && (rv != SA_ERR_HPI_NOT_PRESENT)) {
+		DEBUGMSGTL ((AGENT, 
+		"populate_saHpiAnnouncementTable: saHpiAnnunciatorGetNext Failed: rv = %d\n",
+		rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
-	
-        /* BUILD oid for new row */
-        /* assign the number of indices */	
-	announcement_index.len = ANNOUNCEMENT_INDEX_NR;
-        /** Index saHpiDomainId is external */	
-        announcement_oid[0] = announcement.StatusCond.DomainId;
-        /** Index saHpiResourceId is external */	
-        announcement_oid[1] = announcement.StatusCond.ResourceId;
-        /** Index saHpiAnnouncementEntryId is internal */	
-	announcement_oid[2] = announcement.EntryId;
-        /* assign the indices to the index */	
-	announcement_index.oids = (oid *) & announcement_oid;
-
-        /* See if Row exists. */
-        announcement_ctx = NULL;
-        announcement_ctx = CONTAINER_FIND(cb.container, &announcement_index);
-
-        if (!announcement_ctx) {
-                // New entry. Add it
-                announcement_ctx = 
-                      saHpiAnnouncementTable_create_row(&announcement_index);
-        }
-        if (!announcement_ctx) {
-                snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
-                return AGENT_ERR_INTERNAL_ERROR;
-        }
-	
-	/** SaHpiEntryId = ASN_UNSIGNED */
-        announcement_ctx->saHpiAnnouncementEntryId = announcement.EntryId;
-		
-        /** SaHpiTime = ASN_COUNTER64 */
-        announcement_ctx->saHpiAnnouncementTimestamp = announcement.Timestamp;
-
-        /** TruthValue = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementAddedByUser = announcement.AddedByUser;
-
-        /** SaHpiSeverity = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementSeverity = announcement.Severity + 1;
-
-        /** TruthValue = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementAcknowledged = announcement.Acknowledged;
-
-        /** INTEGER = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementStatusCondType = announcement.StatusCond.Type + 1;
-
-        /** SaHpiEntityPath = ASN_OCTET_STR */
-	rc = oh_decode_entitypath(&announcement.StatusCond.Entity, &bigbuf);
-		
-	if (rc != SA_OK) {
-		DEBUGMSGTL ((AGENT, 
-		          "populate_saHpiAnnouncementTable: oh_decode_entitypath Failed: rc = %d\n",
-		           rc));
+	else if (rv == SA_ERR_HPI_NOT_PRESENT) {
+	        return SA_OK; //first call returned nothing
 	}
-	else {
-		memcpy(announcement_ctx->saHpiAnnouncementEntityPath,
+	
+	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
+                /* BUILD oid for new row */
+                /* assign the number of indices */	
+	        announcement_index.len = ANNOUNCEMENT_INDEX_NR;
+                /** Index saHpiDomainId is external */	
+                announcement_oid[0] = announcement.StatusCond.DomainId;
+                /** Index saHpiResourceId is external */	
+                announcement_oid[1] = announcement.StatusCond.ResourceId;
+                /** Index saHpiAnnouncementEntryId is internal */	
+	        announcement_oid[2] = announcement.EntryId;
+                /* assign the indices to the index */	
+	        announcement_index.oids = (oid *) & announcement_oid;
+ 
+                /* See if Row exists. */
+                announcement_ctx = NULL;
+                announcement_ctx = CONTAINER_FIND(cb.container, &announcement_index);
+
+                if (!announcement_ctx) {
+                       // New entry. Add it
+                        announcement_ctx = 
+                             saHpiAnnouncementTable_create_row(&announcement_index);
+                }
+                if (!announcement_ctx) {
+                        snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+	 
+	        /** SaHpiEntryId = ASN_UNSIGNED */
+                announcement_ctx->saHpiAnnouncementEntryId = announcement.EntryId;
+	 	
+                /** SaHpiTime = ASN_COUNTER64 */
+                announcement_ctx->saHpiAnnouncementTimestamp = announcement.Timestamp;
+ 
+                /** TruthValue = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementAddedByUser = announcement.AddedByUser;
+ 
+                /** SaHpiSeverity = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementSeverity = announcement.Severity + 1;
+ 
+                /** TruthValue = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementAcknowledged = announcement.Acknowledged;
+ 
+                /** INTEGER = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementStatusCondType = announcement.StatusCond.Type + 1;
+
+                /** SaHpiEntityPath = ASN_OCTET_STR */
+	        rc = oh_decode_entitypath(&announcement.StatusCond.Entity, &bigbuf);
+		
+	        if (rc != SA_OK) {
+		        DEBUGMSGTL ((AGENT, 
+		                "populate_saHpiAnnouncementTable: oh_decode_entitypath Failed: rc = %d\n",
+		                 rc));
+	        }
+	        else {
+		        memcpy(announcement_ctx->saHpiAnnouncementEntityPath,
 		                                       bigbuf.Data, bigbuf.DataLength);
-	        announcement_ctx->saHpiAnnouncementEntityPath_len = bigbuf.DataLength;
-	}
+	                announcement_ctx->saHpiAnnouncementEntityPath_len = bigbuf.DataLength;
+	        }
 
-        
+               
 	
-	if (announcement.StatusCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
-		/** UNSIGNED32 = ASN_UNSIGNED */
-        	announcement_ctx->saHpiAnnouncementSensorNum = announcement.StatusCond.SensorNum;
+	        if (announcement.StatusCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+		        /** UNSIGNED32 = ASN_UNSIGNED */
+               	        announcement_ctx->saHpiAnnouncementSensorNum = announcement.StatusCond.SensorNum;
 
-	        /** SaHpiEventState = ASN_OCTET_STR */
-	        rc = oh_decode_eventstate(announcement.StatusCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
+	                /** SaHpiEventState = ASN_OCTET_STR */
+	                rc = oh_decode_eventstate(announcement.StatusCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
 			
-		if (rc != SA_OK) {
-	                DEBUGMSGTL ((AGENT, 
+		        if (rc != SA_OK) {
+	                        DEBUGMSGTL ((AGENT, 
   		                "populate_saHpiAnnouncementTable: oh_decode_eventstate Failed: rc = %d\n",
 		                 rc));
-		}	         	
-		else {
-		        memcpy(announcement_ctx->saHpiAnnouncementEventState, buf.Data, buf.DataLength); 
-        	        announcement_ctx->saHpiAnnouncementEventState_len = buf.DataLength;
-		}	
-        }
+		        }	         	
+		        else {
+		               memcpy(announcement_ctx->saHpiAnnouncementEventState, buf.Data, buf.DataLength); 
+               	               announcement_ctx->saHpiAnnouncementEventState_len = buf.DataLength;
+		        }	
+                }
 	
-        /** OCTETSTR = ASN_OCTET_STR */
-        memcpy(announcement_ctx->saHpiAnnouncementName, announcement.StatusCond.Name.Value, 
+                /** OCTETSTR = ASN_OCTET_STR */
+                memcpy(announcement_ctx->saHpiAnnouncementName, announcement.StatusCond.Name.Value, 
 	                                                announcement.StatusCond.Name.Length);
-        announcement_ctx->saHpiAnnouncementName_len = announcement.StatusCond.Name.Length;
+                announcement_ctx->saHpiAnnouncementName_len = announcement.StatusCond.Name.Length;
+ 
+                /** SaHpiManufacturerId = ASN_UNSIGNED */
+                announcement_ctx->saHpiAnnouncementMid = announcement.StatusCond.Mid;
+ 
+                /** SaHpiTextType = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementTextType = announcement.StatusCond.Data.DataType + 1;
+ 
+                /** SaHpiTextLanguage = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementTextLanguage = announcement.StatusCond.Data.Language + 1;
+ 
+                /** SaHpiText = ASN_OCTET_STR */
+                memcpy(announcement_ctx->saHpiAnnouncementText, announcement.StatusCond.Data.Data, 
+	                                                 announcement.StatusCond.Data.DataLength);
+                announcement_ctx->saHpiAnnouncementText_len = announcement.StatusCond.Data.DataLength;
+ 
+                /** RowStatus = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_ACTIVE;
 
-        /** SaHpiManufacturerId = ASN_UNSIGNED */
-        announcement_ctx->saHpiAnnouncementMid = announcement.StatusCond.Mid;
-
-        /** SaHpiTextType = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementTextType = announcement.StatusCond.Data.DataType + 1;
-
-        /** SaHpiTextLanguage = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementTextLanguage = announcement.StatusCond.Data.Language + 1;
-
-        /** SaHpiText = ASN_OCTET_STR */
-        memcpy(announcement_ctx->saHpiAnnouncementText, announcement.StatusCond.Data.Data, 
-	                                                announcement.StatusCond.Data.DataLength);
-        announcement_ctx->saHpiAnnouncementText_len = announcement.StatusCond.Data.DataLength;
-
-        /** RowStatus = ASN_INTEGER */
-        announcement_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_ACTIVE;
-
-
-	CONTAINER_INSERT (cb.container, announcement_ctx);
-		
+	        CONTAINER_INSERT (cb.container, announcement_ctx);
+			
+                /* create full oid on This row for parent RowPointer */
+                column[0] = 1;
+                column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
+                memset(child_oid, 0, sizeof(child_oid_len));
+                build_full_oid(saHpiAnnouncementTable_oid, saHpiAnnouncementTable_oid_len,
+                              column, column_len,
+                              &announcement_index,
+                              child_oid, MAX_OID_LEN, child_oid_len);
+			      
+                rv = saHpiAnnunciatorGetNext(sessionid, 
+	                         rpt_entry->ResourceId,
+				 rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
+				 SAHPI_ALL_SEVERITIES,
+				 SAHPI_FALSE,         //Get all announcements.
+				 &announcement);			      	
+	
+	}
+	
+	
 	announcement_entry_count = CONTAINER_SIZE (cb.container);
 	
-        /* create full oid on This row for parent RowPointer */
-        column[0] = 1;
-        column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
-        memset(child_oid, 0, sizeof(child_oid_len));
-        build_full_oid(saHpiAnnouncementTable_oid, saHpiAnnouncementTable_oid_len,
-                       column, column_len,
-                       &announcement_index,
-                       child_oid, MAX_OID_LEN, child_oid_len);	
 		       
         return SA_OK; 		       
 
