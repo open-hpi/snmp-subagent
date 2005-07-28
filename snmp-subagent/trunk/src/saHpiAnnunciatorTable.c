@@ -43,6 +43,7 @@
 #include <saHpiResourceTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <saHpiAnnouncementTable.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -87,7 +88,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
 
         DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
 
-        SaErrorT rv = SA_OK;    
+        SaErrorT rv = SA_OK; 
+	SaErrorT rc = SA_OK;   
         SaHpiAnnunciatorModeT mode;
 
         oid annunciator_oid[ANNUNCIATOR_INDEX_NR];
@@ -195,6 +197,12 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         CONTAINER_INSERT (cb.container, annunciator_context);
 
         annunciator_entry_count = CONTAINER_SIZE (cb.container);
+	
+	rc = populate_saHpiAnnouncementTable(sessionid, rdr_entry, rpt_entry,
+                                             full_oid, full_oid_len,
+                                             child_oid, child_oid_len);
+			      
+        DEBUGMSGTL ((AGENT, "populate_annunciator: populate_saHpiAnnouncementTable returned %d\n", rc));			      
 
         return rv;
 } 
