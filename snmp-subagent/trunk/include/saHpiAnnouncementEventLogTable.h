@@ -19,6 +19,7 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <oh_utils.h>
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiAnnouncementEntryId is external */
@@ -52,18 +53,18 @@ typedef struct saHpiAnnouncementEventLogTable_context_s {
             long saHpiAnnouncementEventLogStatusCondType;
 
         /** SaHpiEntityPath = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventLogEntityPath[65535];
+            unsigned char saHpiAnnouncementEventLogEntityPath[OH_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEventLogEntityPath_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiAnnouncementEventLogSensorNum;
 
         /** SaHpiEventState = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventLogEventState[65535];
+            unsigned char saHpiAnnouncementEventLogEventState[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEventLogEventState_len;
 
         /** OCTETSTR = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventLogName[65535];
+            unsigned char saHpiAnnouncementEventLogName[SA_HPI_MAX_NAME_LENGTH];
             long saHpiAnnouncementEventLogName_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
@@ -76,7 +77,7 @@ typedef struct saHpiAnnouncementEventLogTable_context_s {
             long saHpiAnnouncementEventLogTextLanguage;
 
         /** SaHpiText = ASN_OCTET_STR */
-            unsigned char saHpiAnnouncementEventLogText[65535];
+            unsigned char saHpiAnnouncementEventLogText[SAHPI_MAX_TEXT_BUFFER_LENGTH];
             long saHpiAnnouncementEventLogText_len;
 
         /** RowStatus = ASN_INTEGER */
@@ -108,16 +109,37 @@ int saHpiAnnouncementEventLogTable_get_value(netsnmp_request_info *, netsnmp_ind
 
 
 /*************************************************************
+ * function declarations: OpenHpi
+ */
+SaErrorT populate_saHpiAnnouncementEventLogTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiRdrT *rdr_entry,
+                                         SaHpiRptEntryT *rpt_entry,
+                                         oid *full_oid, size_t full_oid_len,
+                                         oid *child_oid, size_t *child_oid_len);
+
+/*************************************************************
  * oid declarations
  */
 extern oid saHpiAnnouncementEventLogTable_oid[];
 extern size_t saHpiAnnouncementEventLogTable_oid_len;
 
 #define saHpiAnnouncementEventLogTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,3,2,31
-    
+
+/*************************************************************
+ * defines included from hpiB0101_enums.h
+ */
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_ACTIVE  	     1
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_NOTINSERVICE	     2
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_NOTREADY	     3
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_CREATEANDGO	     4
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_CREATEANDWAIT	     5
+#define SAHPIANNOUNCEMENTEVENTLOGDELETE_DESTROY 	     6
+
 /*************************************************************
  * column number definitions for table saHpiAnnouncementEventLogTable
  */
+
+#define ANNOUNCEMENT_EVENT_INDEX_NR 3 
 #define COLUMN_SAHPIANNOUNCEMENTEVENTLOGENTRYID 1
 #define COLUMN_SAHPIANNOUNCEMENTEVENTLOGTIMESTAMP 2
 #define COLUMN_SAHPIANNOUNCEMENTEVENTLOGADDEDBYUSER 3
