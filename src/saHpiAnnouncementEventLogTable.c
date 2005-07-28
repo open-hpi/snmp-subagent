@@ -36,7 +36,12 @@
 
 #include <net-snmp/library/snmp_assert.h>
 
+#include <SaHpi.h>
 #include "saHpiAnnouncementEventLogTable.h"
+#include <hpiSubagent.h>
+#include <hpiCheckIndice.h>
+#include <session_info.h>
+
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -65,6 +70,201 @@ int initialize_table_saHpiAnnouncementEventLogEntryCount(void);
 
 /**
  * 
+ * @sessionid:
+ * @rdr_entry:
+ * @rpt_entry:
+ * @full_oid:
+ * @full_oid_len:
+ * @child_oid:
+ * @child_oid_len:
+ * 
+ * @return 
+ */
+ 
+SaErrorT populate_saHpiAnnouncementEventLogTable(SaHpiSessionIdT sessionid, 
+                                         SaHpiRdrT *rdr_entry,
+                                         SaHpiRptEntryT *rpt_entry,
+                                         oid *full_oid, size_t full_oid_len,
+                                         oid *child_oid, size_t *child_oid_len)
+{					 
+	SaErrorT rv = SA_OK;
+        SaErrorT rc = SA_OK;
+
+	oid announcement_oid[ANNOUNCEMENT_EVENT_INDEX_NR];
+	netsnmp_index announcement_index;
+	saHpiAnnouncementEventLogTable_context *announcement_ctx;
+	
+	oid column[2];
+	int column_len = 2;
+	
+	SaHpiAnnouncementT announcement;
+	
+	announcement.EntryId = SAHPI_FIRST_ENTRY;
+		
+	/* Used for decoding */
+	oh_big_textbuffer bigbuf;
+	SaHpiTextBufferT buf;
+		
+        DEBUGMSGTL ((AGENT, "populate_saHpiAnnouncementEventLogTable, called\n"));		
+	
+	
+	if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementEventLogTable() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementEventLogTable() passed NULL rpt_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+		
+        rv = saHpiAnnunciatorGetNext(sessionid, 
+	                         rpt_entry->ResourceId,
+				 rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
+				 SAHPI_ALL_SEVERITIES,
+				 SAHPI_FALSE,         //Get all announcements.
+				 &announcement);
+
+	if ((rv != SA_OK) && (rv != SA_ERR_HPI_NOT_PRESENT)) {
+		DEBUGMSGTL ((AGENT, 
+		"populate_saHpiAnnouncementEventLogTable: saHpiAnnunciatorGetNext Failed: rv = %d\n",
+		rv));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	else if (rv == SA_ERR_HPI_NOT_PRESENT) {
+	        return SA_OK; //first call returned nothing
+	}
+	
+	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
+                /* BUILD oid for new row */
+                /* assign the number of indices */	
+	        announcement_index.len = ANNOUNCEMENT_EVENT_INDEX_NR;
+                /** Index saHpiDomainId is external */	
+                announcement_oid[0] = announcement.StatusCond.DomainId;
+                /** Index saHpiResourceId is external */	
+                announcement_oid[1] = announcement.StatusCond.ResourceId;
+                /** Index saHpiAnnouncementEntryId is internal */	
+	        announcement_oid[2] = announcement.EntryId;
+                /* assign the indices to the index */	
+	        announcement_index.oids = (oid *) & announcement_oid;
+ 
+                /* See if Row exists. */
+                announcement_ctx = NULL;
+                announcement_ctx = CONTAINER_FIND(cb.container, &announcement_index);
+
+                if (!announcement_ctx) {
+                       // New entry. Add it
+                        announcement_ctx = 
+                             saHpiAnnouncementEventLogTable_create_row(&announcement_index);
+                }
+                if (!announcement_ctx) {
+                        snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+	 
+	        /** SaHpiEntryId = ASN_UNSIGNED */
+                announcement_ctx->saHpiAnnouncementEventLogEntryId = announcement.EntryId;
+	 	
+                /** SaHpiTime = ASN_COUNTER64 */
+                announcement_ctx->saHpiAnnouncementEventLogTimestamp = announcement.Timestamp;
+ 
+                /** TruthValue = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogAddedByUser = announcement.AddedByUser;
+ 
+                /** SaHpiSeverity = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogSeverity = announcement.Severity + 1;
+ 
+                /** TruthValue = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogAcknowledged = announcement.Acknowledged;
+ 
+                /** INTEGER = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogStatusCondType = announcement.StatusCond.Type + 1;
+
+                /** SaHpiEntityPath = ASN_OCTET_STR */
+	        rc = oh_decode_entitypath(&announcement.StatusCond.Entity, &bigbuf);
+		
+	        if (rc != SA_OK) {
+		        DEBUGMSGTL ((AGENT, 
+		                "populate_saHpiAnnouncementEventLogTable: oh_decode_entitypath Failed: rc = %d\n",
+		                 rc));
+	        }
+	        else {
+		        memcpy(announcement_ctx->saHpiAnnouncementEventLogEntityPath,
+		                                       bigbuf.Data, bigbuf.DataLength);
+	                announcement_ctx->saHpiAnnouncementEventLogEntityPath_len = bigbuf.DataLength;
+	        }
+
+               
+	
+	        if (announcement.StatusCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+		        /** UNSIGNED32 = ASN_UNSIGNED */
+               	        announcement_ctx->saHpiAnnouncementEventLogSensorNum = announcement.StatusCond.SensorNum;
+
+	                /** SaHpiEventState = ASN_OCTET_STR */
+	                rc = oh_decode_eventstate(announcement.StatusCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
+			
+		        if (rc != SA_OK) {
+	                        DEBUGMSGTL ((AGENT, 
+  		                "populate_saHpiAnnouncementEventLogTable: oh_decode_eventstate Failed: rc = %d\n",
+		                 rc));
+		        }	         	
+		        else {
+		               memcpy(announcement_ctx->saHpiAnnouncementEventLogEventState, buf.Data, buf.DataLength); 
+               	               announcement_ctx->saHpiAnnouncementEventLogEventState_len = buf.DataLength;
+		        }	
+                }
+	
+                /** OCTETSTR = ASN_OCTET_STR */
+                memcpy(announcement_ctx->saHpiAnnouncementEventLogName, announcement.StatusCond.Name.Value, 
+	                                                announcement.StatusCond.Name.Length);
+                announcement_ctx->saHpiAnnouncementEventLogName_len = announcement.StatusCond.Name.Length;
+ 
+                /** SaHpiManufacturerId = ASN_UNSIGNED */
+                announcement_ctx->saHpiAnnouncementEventLogMid = announcement.StatusCond.Mid;
+ 
+                /** SaHpiTextType = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogTextType = announcement.StatusCond.Data.DataType + 1;
+ 
+                /** SaHpiTextLanguage = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogTextLanguage = announcement.StatusCond.Data.Language + 1;
+ 
+                /** SaHpiText = ASN_OCTET_STR */
+                memcpy(announcement_ctx->saHpiAnnouncementEventLogText, announcement.StatusCond.Data.Data, 
+	                                                 announcement.StatusCond.Data.DataLength);
+                announcement_ctx->saHpiAnnouncementEventLogText_len = announcement.StatusCond.Data.DataLength;
+ 
+                /** RowStatus = ASN_INTEGER */
+                announcement_ctx->saHpiAnnouncementEventLogDelete = SAHPIANNOUNCEMENTEVENTLOGDELETE_ACTIVE;
+
+	        CONTAINER_INSERT (cb.container, announcement_ctx);
+			
+                /* create full oid on This row for parent RowPointer */
+                column[0] = 1;
+                column[1] = COLUMN_SAHPIANNOUNCEMENTEVENTLOGTIMESTAMP;
+                memset(child_oid, 0, sizeof(child_oid_len));
+                build_full_oid(saHpiAnnouncementEventLogTable_oid, saHpiAnnouncementEventLogTable_oid_len,
+                              column, column_len,
+                              &announcement_index,
+                              child_oid, MAX_OID_LEN, child_oid_len);
+			      
+                rv = saHpiAnnunciatorGetNext(sessionid, 
+	                         rpt_entry->ResourceId,
+				 rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum,
+				 SAHPI_ALL_SEVERITIES,
+				 SAHPI_FALSE,         //Get all announcements.
+				 &announcement);			      	
+	
+	}
+	
+	
+	announcement_event_log_entry_count = CONTAINER_SIZE (cb.container);
+	
+		       
+        return SA_OK; 		       
+}
+/**
+ * 
  * @handler:
  * @reginfo:
  * @reqinfo:
@@ -91,7 +291,7 @@ handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
 
         case MODE_GET:
                 snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-        			(u_char *) &announcement_event_log_entry_count
+        			(u_char *) &announcement_event_log_entry_count,
         			sizeof(announcement_event_log_entry_count));
                 break;
 
@@ -1130,6 +1330,7 @@ void saHpiAnnouncementEventLogTable_set_free( netsnmp_request_group *rg )
         break;
 
         default: /** We shouldn't get here */
+		break;
             /** should have been logged in reserve1 */
         }
     }
