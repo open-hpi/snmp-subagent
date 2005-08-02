@@ -59,6 +59,8 @@ static gpointer event_thread_loop(gpointer data)
 
         SaHpiSessionIdT sessionid = *(SaHpiSessionIdT *)data;
 
+printf("event_thread_loop sessionid [%d]\n", sessionid);
+
         while(get_run_threaded()) {
                 DEBUGMSGTL ((AGENT, "sessionid [%d]\n", get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID)));
                 DEBUGMSGTL ((AGENT, "event_thread_loop started\n"));
@@ -120,7 +122,7 @@ static gpointer event_thread_loop(gpointer data)
 }
 
 
-int start_event_thread(SaHpiSessionIdT sessionid)
+int start_event_thread(SaHpiSessionIdT *sessionid)
 {
         DEBUGMSGTL ((AGENT, "Attempting to init event"));
         if (!g_thread_supported()) {
@@ -132,7 +134,7 @@ int start_event_thread(SaHpiSessionIdT sessionid)
 
         thread_mutex = g_mutex_new();
         event_thread = g_thread_create(event_thread_loop,
-                                       (gpointer)&sessionid, 
+                                       (gpointer)sessionid, 
                                        FALSE, 
                                        &event_thread_error);
         if (event_thread == NULL) {

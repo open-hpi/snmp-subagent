@@ -18,7 +18,7 @@
 #ifndef _HPI_EVENT_THREAD_
 #define _HPI_EVENT_THREAD_
 
-int start_event_thread(SaHpiSessionIdT sessionid);
+int start_event_thread(SaHpiSessionIdT *sessionid);
 gboolean get_run_threaded(void);
 void set_run_threaded(gboolean val);
 
