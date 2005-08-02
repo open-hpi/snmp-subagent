@@ -239,9 +239,10 @@ main (int argc, char **argv)
 	  	int c;
 	  	int rc = 0;
         	  
-	  	SaErrorT 	rv = SA_OK;
-		SaHpiVersionT	hpiVer;
-		SaHpiSessionIdT sessionid;
+	  	SaErrorT 	        rv = SA_OK;
+		SaHpiVersionT	        hpiVer;
+		SaHpiSessionIdT         sessionid;
+                SaHpiDomainInfoT        domain_info;    
 		
 	  	pid_t child;
 	  		  	
@@ -336,8 +337,16 @@ main (int argc, char **argv)
    	DEBUGMSGTL ((AGENT, "saHpiSessionOpen returns with SessionId %d\n", 
    		sessionid));  
 
+        /* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
+	rv = saHpiDomainInfoGet(sessionid, &domain_info);
+	if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, "saHpiSessionOpen Error: returns %s\n",
+                        oh_lookup_error(rv)));
+                exit(-1);
+	}
+
         /* store session numbers */
-   	store_session_info(sessionid, SAHPI_UNSPECIFIED_DOMAIN_ID);	
+   	store_session_info(sessionid, domain_info.DomainId);	
    				
 	/* subscribe all sessions/events */
         subcsribe_all_sessions();
@@ -484,7 +493,7 @@ main (int argc, char **argv)
 
         /* start event thread */
         set_run_threaded(TRUE);
-        if (start_event_thread(sessionid) != AGENT_ERR_NOERROR) {
+        if (start_event_thread(&sessionid) != AGENT_ERR_NOERROR) {
                 snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
                 rc = -1;
                 goto stop;
