@@ -547,12 +547,8 @@ main (int argc, char **argv)
         while (keep_running) {
                 /* if you use select(), see snmp_select_info() in snmp_api(3) */
                 /*     --- OR ---  */		
-		if (run_threaded) {
-                    rc = agent_check_and_process (1);
-		}
-		else {
-		    rc = agent_check_and_process (0);     	/* 0 == don't block */
-		}    
+                rc = agent_check_and_process (1);
+		
         }
 stop:
         DEBUGMSGTL ((AGENT,
