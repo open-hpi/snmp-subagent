@@ -120,10 +120,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         annunciator_oid[0] = get_domain_id(sessionid);
         /** Index saHpiResourceId is external */
         annunciator_oid[1] = rpt_entry->ResourceId;
-        /** Index saHpiResourceIsHistorical is external */
-        annunciator_oid[2] = MIB_FALSE;
         /** Index saHpiSensorNum */
-        annunciator_oid[3] = rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
+        annunciator_oid[2] = rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
         /* assign the indices to the index */
         annunciator_index.oids = (oid *) & annunciator_oid;
 
@@ -355,7 +353,7 @@ saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
 
                 if ( context_l->index.oids[1] == context_r->index.oids[1]) {
                         /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiResourceIsHistorical */
+                        /* CHECK THIRD INDEX,  saHpiAnnunciatorNum */
                         if ( context_l->index.oids[2] < context_r->index.oids[2])
                                 return -1;
 
@@ -363,16 +361,7 @@ saHpiAnnunciatorTable_cmp( const void *lhs, const void *rhs )
                                 return 1;
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
-                                /* If saHpiResourceIsHistorical index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiAnnunciatorNum */
-                                if ( context_l->index.oids[3] < context_r->index.oids[3])
-                                        return -1;
-
-                                if ( context_l->index.oids[3] > context_r->index.oids[3])
-                                        return 1;
-
-                                if ( context_l->index.oids[3] == context_r->index.oids[3])
-                                        return 0;
+                                return 0;
                         }
                 }
         }
@@ -461,7 +450,6 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
         /** TODO: add storage for external index(s)! */
         netsnmp_variable_list var_saHpiDomainId;
         netsnmp_variable_list var_saHpiResourceId;
-        netsnmp_variable_list var_saHpiResourceIsHistorical;
         netsnmp_variable_list var_saHpiAnnunciatorNum;
         int err;
 
@@ -493,12 +481,7 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
         memset( &var_saHpiResourceId, 0x00, sizeof(var_saHpiResourceId) );
         var_saHpiResourceId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
         /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiResourceId.next_variable = &var_saHpiResourceIsHistorical;
-
-        memset( &var_saHpiResourceIsHistorical, 0x00, sizeof(var_saHpiResourceIsHistorical) );
-        var_saHpiResourceIsHistorical.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
-        /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiResourceIsHistorical.next_variable = &var_saHpiAnnunciatorNum;
+        var_saHpiResourceId.next_variable = &var_saHpiAnnunciatorNum;
 
         memset( &var_saHpiAnnunciatorNum, 0x00, sizeof(var_saHpiAnnunciatorNum) );
         var_saHpiAnnunciatorNum.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
@@ -518,13 +501,11 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
 
                 /** skipping external index saHpiResourceId */
 
-                /** skipping external index saHpiResourceIsHistorical */
 
                 ctx->saHpiAnnunciatorNum = *var_saHpiAnnunciatorNum.val.integer;
 
                 err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
                 err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);  
-                err = saHpiResourceIsHistorical_check_index(*var_saHpiResourceIsHistorical.val.integer);
                 err = saHpiAnnunciatorNum_check_index(*var_saHpiAnnunciatorNum.val.integer);    
         }
 
@@ -1067,8 +1048,6 @@ initialize_table_saHpiAnnunciatorTable(void)
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiResourceId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
-        /** index: saHpiResourceIsHistorical */
-        netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
         /** index: saHpiAnnunciatorNum */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
