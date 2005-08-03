@@ -10190,7 +10190,7 @@ saHpiAnnunciatorEntry OBJECT-TYPE
 	automatically by the HPI implementation, it is implementation-specific 
 	which announcements are added or removed."
 	
-        INDEX   { saHpiDomainId, saHpiResourceId, saHpiResourceIsHistorical, saHpiAnnunciatorNum }
+        INDEX   { saHpiDomainId, saHpiResourceId, saHpiAnnunciatorNum }
         ::= {saHpiAnnunciatorTable 1}
 
 SaHpiAnnunciatorEntry ::= SEQUENCE {
