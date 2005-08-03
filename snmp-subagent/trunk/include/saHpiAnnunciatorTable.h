@@ -21,7 +21,6 @@ extern "C" {
 
 /** Index saHpiDomainId is external */
 /** Index saHpiResourceId is external */
-/** Index saHpiResourceIsHistorical is external */
 /** Index saHpiAnnunciatorNum is internal */
 
 typedef struct saHpiAnnunciatorTable_context_s {
@@ -99,11 +98,10 @@ extern size_t saHpiAnnunciatorTable_oid_len;
 #define saHpiAnnunciatorTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,6
 
 /* Number of table Indexes */
-#define ANNUNCIATOR_INDEX_NR 4 
+#define ANNUNCIATOR_INDEX_NR 3 
 #define saHpiDomainId_INDEX 0
 #define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiAnnunciatorNum_INDEX 3
+#define saHpiAnnunciatorNum_INDEX 2
 
 /*************************************************************
  * column number definitions for table saHpiAnnunciatorTable
