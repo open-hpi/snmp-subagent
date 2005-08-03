@@ -33,6 +33,7 @@
 
 #include <hpiCheckIndice.h>
 #include <session_info.h>
+#include <alarm.h>
 
 #include <saHpiDomainInfoTable.h>
 #include <saHpiDomainAlarmTable.h>
@@ -154,6 +155,12 @@ int MAX_EVENT_ENTRIES = 512; // Max EVENT rows.
 static int do_syslog = AGENT_TRUE;
 static int do_fork = AGENT_FALSE;
 
+/*
+ * For polling (non-threaded) option
+ */
+// Check for information every x seconds.
+int alarm_interval = 5;
+
 
 /*
  * Internal prototypes
@@ -238,13 +245,16 @@ main (int argc, char **argv)
 	  	int agentx_subagent = AGENT_TRUE;
 	  	int c;
 	  	int rc = 0;
-        	  
-	  	SaErrorT 	        rv = SA_OK;
-		SaHpiVersionT	        hpiVer;
-		SaHpiSessionIdT         sessionid;
-                SaHpiDomainInfoT        domain_info;    
+	  
+	  	SaErrorT 	rv = SA_OK;
+		SaHpiVersionT	hpiVer;
+		SaHpiSessionIdT sessionid;
+                SaHpiDomainInfoT        domain_info;  		
+		SaHpiBoolT      run_threaded = TRUE;
 		
 	  	pid_t child;
+		
+		char * env;
 	  		  	
 	  	/* change this if you want to be a SNMP master agent */
 	  	
@@ -491,13 +501,27 @@ main (int argc, char **argv)
 	     * populate_saHpiDomainEventLogTable();	     
              */
 
-        /* start event thread */
-        set_run_threaded(TRUE);
-        if (start_event_thread(&sessionid) != AGENT_ERR_NOERROR) {
-                snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
-                rc = -1;
-                goto stop;
-        }
+        /* Determine whether or not we're in threaded mode */
+	env = getenv("OPENHPI_THREADED");
+	if ((env == (char *)NULL) || (strcmp(env, "NO") == 0)) {
+                DEBUGMSGTL ((AGENT, "Running in nonthreaded mode.  Configuring polling mechanism\n"));  
+                run_threaded = SAHPI_FALSE;
+		if (init_alarm() != AGENT_ERR_NOERROR) {
+                    snmp_log (LOG_ERR, "Could not initialize polling mechanism. Exiting\n.");
+                    rc = -1;
+                    goto stop;
+                }
+	}	
+	else {
+                DEBUGMSGTL ((AGENT, "Running in threaded mode.  Spawing thread\n"));
+		/* start event thread */
+                set_run_threaded(TRUE);
+                if (start_event_thread(&sessionid) != AGENT_ERR_NOERROR) {
+                        snmp_log (LOG_ERR, "Could not start our internal loop . Exiting\n.");
+                        rc = -1;
+                        goto stop;
+                }
+	}	
 
         send_traps = AGENT_TRUE;
         /* If we're going to be a snmp master agent, initial the ports */
@@ -522,8 +546,13 @@ main (int argc, char **argv)
                 /* you're main loop here... */
         while (keep_running) {
                 /* if you use select(), see snmp_select_info() in snmp_api(3) */
-                /*     --- OR ---  */
-                rc = agent_check_and_process (1);	/* 0 == don't block */
+                /*     --- OR ---  */		
+		if (run_threaded) {
+                    rc = agent_check_and_process (1);
+		}
+		else {
+		    rc = agent_check_and_process (0);     	/* 0 == don't block */
+		}    
         }
 stop:
         DEBUGMSGTL ((AGENT,
