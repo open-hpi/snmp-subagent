@@ -14,3 +14,6 @@
  * $Id$
 */
 
+int init_alarm (void);
+
+void do_alarm (unsigned int clientreg, void *clientarg);
