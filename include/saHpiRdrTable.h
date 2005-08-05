@@ -114,6 +114,14 @@ int handle_saHpiRdrEntryCount( netsnmp_mib_handler *handler,
 			       netsnmp_handler_registration *reginfo,
 			       netsnmp_agent_request_info   *reqinfo, 
 			       netsnmp_request_info *requests);
+
+int async_rdr_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                  SaHpiRdrT *rdr_entry_event, SaHpiRptEntryT *rpt_entry_event,
+		  SaHpiRptEntryT *rpt_entry, 
+                  oid * resource_oid, size_t resource_oid_len);
+
+
+
 int initialize_table_saHpiRdrEntryCount(void);
 
 
