@@ -32,6 +32,7 @@
 #include <hpiEventThread.h>
 #include <saHpiEventTable.h>
 
+
 GThread *event_thread = NULL;
 GMutex *thread_mutex = NULL;
 GError *event_thread_error = NULL;
@@ -59,12 +60,8 @@ static gpointer event_thread_loop(gpointer data)
 
         SaHpiSessionIdT sessionid = *(SaHpiSessionIdT *)data;
 
-printf("event_thread_loop sessionid [%d]\n", sessionid);
-
         while(get_run_threaded()) {
-                DEBUGMSGTL ((AGENT, "sessionid [%d]\n", get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID)));
-                DEBUGMSGTL ((AGENT, "event_thread_loop started\n"));
-                snmp_log (LOG_INFO, "event_thread_loop started\n");
+                DEBUGMSGTL ((AGENT, "event_thread_loop started ---- sessionid [%d]\n", sessionid));
                 rv = saHpiEventGet (get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
                                     SAHPI_TIMEOUT_BLOCK,
                                     &event,
@@ -72,8 +69,7 @@ printf("event_thread_loop sessionid [%d]\n", sessionid);
                                     &rpt_entry,
                                     &event_queue_status);
 
-                snmp_log (LOG_INFO, "rv [%s]\n", oh_lookup_error(rv));
-                snmp_log (LOG_INFO, "returned from saHpiEventGet\n");
+                DEBUGMSGTL ((AGENT, "rv [%s]\n", oh_lookup_error(rv)));
                 DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
                              oh_lookup_eventtype(event.EventType)));
                 oh_print_event(&event, 0);
@@ -83,7 +79,20 @@ printf("event_thread_loop sessionid [%d]\n", sessionid);
 
                 switch (event.EventType) {
                 case SAHPI_ET_RESOURCE:
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+
+                        if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
+                            SAHPI_RESE_RESOURCE_ADDED) {
+                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_ADDED\n"));
+                        } else if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
+                                   SAHPI_RESE_RESOURCE_FAILURE) {
+                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_FAILURE\n"));
+                        } else if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
+                                   SAHPI_RESE_RESOURCE_RESTORED) {
+                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_RESTORED\n"));
+                        }
+
+                       rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+
                         break;
                 case SAHPI_ET_DOMAIN:
                         rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
