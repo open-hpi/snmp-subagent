@@ -132,7 +132,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		rv = oh_decode_entitypath(      &RptEntry.ResourceEntity, &bigbuf );
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, 
-				     "ERROR: RPT, oh_decode_entitypath() rv = %d\n",rv));
+				     "ERROR: populate_saHpiResourceTable RPT, oh_decode_entitypath() rv = %d\n",rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
 			break;
@@ -229,9 +229,9 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 			resource_context->saHpiResourceTag_len = 
 			RptEntry.ResourceTag.DataLength;   
 
-		DEBUGMSGTL ((AGENT, "RptEntry.ResourceTag.DataLength rv = %d\n", 
+		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable RptEntry.ResourceTag.DataLength rv = %d\n", 
                              RptEntry.ResourceTag.DataLength));
-		DEBUGMSGTL ((AGENT, "strlen(RptEntry.ResourceTag.Data) rv = %d\n", 
+		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable strlen(RptEntry.ResourceTag.Data) rv = %d\n", 
                              strlen(RptEntry.ResourceTag.Data))); 
 
 
@@ -245,7 +245,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 					       &ResetAction );
 		if (rv == SA_ERR_HPI_INVALID_CMD) {
 			DEBUGMSGTL ((AGENT, 
-				     "ERROR: saHpiResourceResetStateGet() rv = %d\n",
+				     "ERROR: populate_saHpiResourceTable saHpiResourceResetStateGet() rv = %d\n",
 				     rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
@@ -264,7 +264,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 					       &State);                
 		if ( rv == SA_ERR_HPI_INVALID_CMD ) {
 			DEBUGMSGTL ((AGENT, 
-				     "ERROR: saHpiResourcePowerStateGet() rv = %d\n",
+				     "ERROR: populate_saHpiResourceTable saHpiResourcePowerStateGet() rv = %d\n",
 				     rv));
 			rv =  AGENT_ERR_INTERNAL_ERROR;
 			saHpiResourceTable_delete_row( resource_context );
@@ -332,14 +332,15 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	return rv;              
 }
 
-int async_event_resource(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
-                         SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry)
+SaErrorT async_resource_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                            SaHpiRdrT *rdr_event, SaHpiRptEntryT *rpt_entry_event)
 {       
 	SaErrorT                rv;
 	SaHpiDomainInfoT        domain_info;    
 	oh_big_textbuffer       bigbuf;
 	SaHpiResetActionT       ResetAction;
 	SaHpiPowerStateT        State;
+        SaHpiRptEntryT          rpt_entry;
 
 	SaHpiUint16T    rs_cap;
 	SaHpiUint8T     hs_cap;
@@ -349,10 +350,13 @@ int async_event_resource(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 	saHpiResourceTable_context *resource_context;
 
         int new_row = MIB_FALSE;
+        int remove_rpt_entry = MIB_FALSE;
 
-	DEBUGMSGTL ((AGENT, "async_event_resource() Called\n"));
+DEBUGMSGTL ((AGENT, "*****************************\n"));
+DEBUGMSGTL ((AGENT, "async_resource_add() Called\n"));
+DEBUGMSGTL ((AGENT, "*****************************\n"));
 
-	/* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
+	/* Get the DomainInfo structure,  This is how we get theDomainId for this Session */
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
@@ -361,46 +365,89 @@ int async_event_resource(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
+        /* Get the RPT entry structure,  If the RPT entry does not exist we need to remove it */
+        /* from the container */
+        rv = saHpiRptEntryGetByResourceId (sessionid, event->Source, &rpt_entry);    
+        if (rv == SA_OK) {
+                remove_rpt_entry = MIB_FALSE;
+                DEBUGMSGTL ((AGENT, 
+                             "async_event_resource: saHpiRptEntryGetByResourceId Present\n"));
+        } else if (rv != SA_OK) {
+                remove_rpt_entry = MIB_TRUE;
+                DEBUGMSGTL ((AGENT, 
+                             "async_event_resource: saHpiRptEntryGetByResourceId NOT Present\n"));
+        }
+
+DEBUGMSGTL ((AGENT, "**** sessionid [%d]\n", sessionid));
+DEBUGMSGTL ((AGENT, "**** DomainId  [%d]\n", domain_info.DomainId));
+DEBUGMSGTL ((AGENT, "**** event->Source [%d]\n", event->Source));
+DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
+
+        /* build index */
 	resource_index.len = RESOURCE_INDEX_NR;
 	resource_oid[0] = domain_info.DomainId;
-	resource_oid[1] = rpt_entry->ResourceId;
+	resource_oid[1] = event->Source;
 	resource_oid[2] = MIB_FALSE;
 	resource_index.oids = (oid *) & resource_oid;
-
-printf("**** DomainId [%d]\n", domain_info.DomainId);
-printf("**** rpt_entry->ResourceId [%d]\n", rpt_entry->ResourceId);
-printf("**** MIB_FALSE [%d]\n", MIB_FALSE);
 
 	/* See if it exists. */
 	resource_context = NULL;
 	resource_context = CONTAINER_FIND (cb.container, &resource_index);
 
-	if (!resource_context) {
+
+        if ((!resource_context) && (remove_rpt_entry == MIB_FALSE)) {
+
 		// New entry. Add it
-		resource_context = 
-		saHpiResourceTable_create_row ( &resource_index);
+		resource_context = saHpiResourceTable_create_row ( &resource_index);
+	        if (!resource_context) {
+                        snmp_log (LOG_ERR, "async_event_resource: Not enough memory for a Resource row!");
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
                 new_row = MIB_TRUE;
-printf("!!!!!!!!!! NEW ROW !!!!!!!!!!!\n");
-	}
-	if (!resource_context) {
-		snmp_log (LOG_ERR, "async_event_resource: Not enough memory for a Resource row!");
-		return AGENT_ERR_INTERNAL_ERROR;
-	}
+                DEBUGMSGTL ((AGENT, "!!!!!!!!!! async_resource_add: NEW ROW !!!!!!!!!!!\n"));
+
+        } else if ((!resource_context) && (remove_rpt_entry == MIB_TRUE)) {
+
+                DEBUGMSGTL ((AGENT, "!!!!!!!!!! async_resource_add: NOT FOUND ROW !!!!!!!!!!!\n"));
+
+                return SA_OK; /* was present and we didn't want it present */
+
+        } else if ((resource_context) && (remove_rpt_entry == MIB_TRUE)) {
+
+                DEBUGMSGTL ((AGENT, "!!!!!!!!!! async_resource_add: FOUND ROW DELETING!!!!!!!!!!!\n"));
+
+                saHpiResourceTable_delete_row( resource_context );
+
+                return SA_OK;
+
+        } else if ((resource_context) && (remove_rpt_entry == MIB_FALSE)) {
+
+                DEBUGMSGTL ((AGENT, "!!!!!!!!!! async_resource_add: FOUND ROW UPDATING!!!!!!!!!!!\n"));
+
+        }
+
+        /* If you want to use more timely data use the rpt data returned */
+        /* by saHpiEventGet() */
+        if (rpt_entry_event->ResourceCapabilities != 0x00) {
+                memset(&rpt_entry, 0, sizeof(SaHpiRptEntryT));
+                memcpy(&rpt_entry, rpt_entry_event, sizeof(SaHpiRptEntryT));
+        }
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
-	resource_context->saHpiResourceId = rpt_entry->EntryId;
+	resource_context->saHpiResourceId = rpt_entry.EntryId;
 
 	/** SaHpiEntryId = ASN_UNSIGNED */
-	resource_context->saHpiResourceEntryId = rpt_entry->ResourceId;
+	resource_context->saHpiResourceEntryId = rpt_entry.ResourceId;
 
 	/** SaHpiEntityPath = ASN_OCTET_STR */
 	memset( resource_context->saHpiResourceEntityPath, 
 		0, sizeof(oh_big_textbuffer));
 	memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
-	rv = oh_decode_entitypath(      &rpt_entry->ResourceEntity, &bigbuf );
+	rv = oh_decode_entitypath(      &rpt_entry.ResourceEntity, &bigbuf );
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: async_event_resource: RPT, oh_decode_entitypath() rv = %d\n",rv));
+			     "ERROR: async_resource_add: RPT, oh_decode_entitypath() rv = %d\n",rv));
 		saHpiResourceTable_delete_row( resource_context );
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
@@ -416,96 +463,104 @@ printf("!!!!!!!!!! NEW ROW !!!!!!!!!!!\n");
 		bigbuf.DataLength;
 
 	/** BITS = ASN_OCTET_STR */
-        res_cap_map(&rs_cap, rpt_entry);
+        res_cap_map(&rs_cap, &rpt_entry);
 	memcpy( resource_context->saHpiResourceCapabilities, 
 		&rs_cap, sizeof(rs_cap) ); 
 	resource_context->saHpiResourceCapabilities_len = sizeof(rs_cap);
 
 	/** BITS = ASN_OCTET_STR */     
-        hotswap_cap_map(&hs_cap, rpt_entry);
+        hotswap_cap_map(&hs_cap, &rpt_entry);
 	*resource_context->saHpiResourceHotSwapCapabilities = hs_cap;                                   
 	resource_context->saHpiResourceHotSwapCapabilities_len = sizeof(hs_cap);    
 
 	/** SaHpiSeverity = ASN_INTEGER */
 	resource_context->saHpiResourceSeverity = 
-	rpt_entry->ResourceSeverity + 1;
+	rpt_entry.ResourceSeverity + 1;
 
 	/** TruthValue = ASN_INTEGER */
-	resource_context->saHpiResourceFailed = 
-	(rpt_entry->ResourceFailed == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+        switch (event->EventDataUnion.ResourceEvent.ResourceEventType) {
+        case SAHPI_RESE_RESOURCE_RESTORED:
+                resource_context->saHpiResourceFailed = MIB_FALSE;
+                break;
+        case SAHPI_RESE_RESOURCE_FAILURE:
+                resource_context->saHpiResourceFailed = MIB_TRUE;
+                break;
+        default:
+                break;
+        }
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoResourceRev = 
-	rpt_entry->ResourceInfo.ResourceRev;
+	rpt_entry.ResourceInfo.ResourceRev;
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoSpecificVer =
-	rpt_entry->ResourceInfo.SpecificVer;
+	rpt_entry.ResourceInfo.SpecificVer;
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoDeviceSupport =
-	rpt_entry->ResourceInfo.DeviceSupport;
+	rpt_entry.ResourceInfo.DeviceSupport;
 
 	/** SaHpiManufacturerId = ASN_UNSIGNED */
 	resource_context->saHpiResourceInfoManufacturerId =
-	rpt_entry->ResourceInfo.ManufacturerId;
+	rpt_entry.ResourceInfo.ManufacturerId;
 
 	/** Unsigned16 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoProductId =
-	rpt_entry->ResourceInfo.ProductId;            
+	rpt_entry.ResourceInfo.ProductId;            
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoFirmwareMajorRev =
-	rpt_entry->ResourceInfo.FirmwareMajorRev;
+	rpt_entry.ResourceInfo.FirmwareMajorRev;
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoFirmwareMinorRev =
-	rpt_entry->ResourceInfo.FirmwareMinorRev;
+	rpt_entry.ResourceInfo.FirmwareMinorRev;
 
 	/** Unsigned8 = ASN_INTEGER */
 	resource_context->saHpiResourceInfoAuxFirmwareRev =
-	rpt_entry->ResourceInfo.AuxFirmwareRev;
+	rpt_entry.ResourceInfo.AuxFirmwareRev;
 
 	/** SaHpiGuid = ASN_OCTET_STR */
 	memset(resource_context->saHpiResourceInfoGuid, 0, sizeof(SaHpiGuidT));
 	memcpy( resource_context->saHpiResourceInfoGuid, 
-		rpt_entry->ResourceInfo.Guid, 
+		rpt_entry.ResourceInfo.Guid, 
 		sizeof(SaHpiGuidT) );
 	resource_context->saHpiResourceInfoGuid_len = sizeof(SaHpiGuidT);
 
 	/** SaHpiTextType = ASN_INTEGER */
 	resource_context->saHpiResourceTagTextType = 
-	rpt_entry->ResourceTag.DataType + 1;
+	rpt_entry.ResourceTag.DataType + 1;
 
 	/** SaHpiTextLanguage = ASN_INTEGER */
 	resource_context->saHpiResourceTagTextLanguage = 
-	rpt_entry->ResourceTag.Language + 1;
+	rpt_entry.ResourceTag.Language + 1;
 
 	/** SaHpiText = ASN_OCTET_STR */
 	memset( resource_context->saHpiResourceTag, 
 		0, SAHPI_MAX_TEXT_BUFFER_LENGTH);
 	memcpy( resource_context->saHpiResourceTag, 
-		rpt_entry->ResourceTag.Data, 
-		rpt_entry->ResourceTag.DataLength );                      
+		rpt_entry.ResourceTag.Data, 
+		rpt_entry.ResourceTag.DataLength );                      
 
-	if ((rpt_entry->ResourceTag.Data[rpt_entry->ResourceTag.DataLength-1] == 0x00) 
-	    && (rpt_entry->ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))
+	if ((rpt_entry.ResourceTag.Data[rpt_entry.ResourceTag.DataLength-1] == 0x00) 
+	    && (rpt_entry.ResourceTag.DataType == SAHPI_TL_TYPE_TEXT))
 		resource_context->saHpiResourceTag_len = 
-		rpt_entry->ResourceTag.DataLength - 1;
+		rpt_entry.ResourceTag.DataLength - 1;
 	else
 		resource_context->saHpiResourceTag_len = 
-		rpt_entry->ResourceTag.DataLength;   
+		rpt_entry.ResourceTag.DataLength;   
 
 	/** INTEGER = ASN_INTEGER */
 	resource_context->saHpiResourceParmControl = 0;	/* undefined */
 
 	/** INTEGER = ASN_INTEGER */
 	rv = saHpiResourceResetStateGet(sessionid, 
-                                        rpt_entry->ResourceId,
+                                        rpt_entry.ResourceId,
                                         &ResetAction );
 	if (rv == SA_ERR_HPI_INVALID_CMD) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: async_event_resource:"
+			     "ERROR: async_resource_add:"
                              " saHpiResourceResetStateGet() rv = %d\n",
 			     rv));
 		saHpiResourceTable_delete_row( resource_context );
@@ -519,11 +574,11 @@ printf("!!!!!!!!!! NEW ROW !!!!!!!!!!!\n");
 
 	/** INTEGER = ASN_INTEGER */
 	rv = saHpiResourcePowerStateGet(sessionid, 
-                                        rpt_entry->ResourceId, 
+                                        rpt_entry.ResourceId, 
                                         &State);                
 	if ( rv == SA_ERR_HPI_INVALID_CMD ) {
 		DEBUGMSGTL ((AGENT, 
-                             "ERROR: async_event_resource: "
+                             "ERROR: async_resource_add: "
                              "saHpiResourcePowerStateGet() rv = %d\n",
 			     rv));
 		saHpiResourceTable_delete_row( resource_context );
@@ -538,18 +593,17 @@ printf("!!!!!!!!!! NEW ROW !!!!!!!!!!!\n");
 	/** TruthValue = ASN_INTEGER */
 	resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
 
-
-	if (rpt_entry->ResourceCapabilities & 
-            SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
-//		 rv = populate_hotswap (sessionid,rpt_entry,resource_index.oids, resource_index.len);
-        }
-	if (rpt_entry->ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-//		rv = populate_saHpiRdrTable(sessionid, rpt_entry,resource_index.oids, resource_index.len);
+	if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
+		rv = async_rdr_add(sessionid, event, rdr_event, 
+                                   rpt_entry_event, &rpt_entry, 
+                                   resource_index.oids, 
+                                   resource_index.len);
 	}
 
         if (new_row == MIB_TRUE) {
                 CONTAINER_INSERT (cb.container, resource_context);
         }
+
 	resource_entry_count = CONTAINER_SIZE (cb.container);
 
 	DEBUGMSGTL ((AGENT, "async_event_resource: resource_entry_count = %d\n", 
