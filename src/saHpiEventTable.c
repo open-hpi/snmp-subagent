@@ -99,7 +99,10 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
 
         int i;
 
-        DEBUGMSGTL ((AGENT, "populate_saHpiEventTable, called\n"));
+        printf( "populate_saHpiEventTable, called\n");
+        printf(" ***************************************\n");
+        printf(" ***************************************\n");
+        printf(" EVENT TABLES \n");
 
         rv = saHpiEventGet (sessionid, 
                             SAHPI_TIMEOUT_IMMEDIATE, 
@@ -109,6 +112,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                             &event_queue_status);
 
         while (rv == SA_OK) {
+
+                printf("rpt_entry.ResourceId [%d]\n", rpt_entry.ResourceId);
+                printf( "Event Type [%s]\n", oh_lookup_eventtype(event.EventType));
 
                 switch (event.EventType) {
                 case SAHPI_ET_RESOURCE:
@@ -120,7 +126,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiResourceEventTable(sessionid, &event,                                           
                                                          child_oid, 
                                                          &child_oid_len);
-                        async_event_resource(sessionid, &event, &rdr, &rpt_entry);
+                        rv = async_resource_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_DOMAIN:
                         printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
@@ -261,7 +267,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		                              rdr, rpt_entry,                                           
                                               child_oid, 
                                               &child_oid_len);
-                async_event_resource(sessionid, event, rdr, rpt_entry);
+                //rv = async_resource_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_DOMAIN:
                 rv = async_domain_event_add(sessionid, event,
