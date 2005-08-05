@@ -96,7 +96,11 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
         oid child_oid[MAX_OID_LEN];
         size_t child_oid_len;
 
-	DEBUGMSGTL ((AGENT, "populate_saHpiEventLog\n"));
+	printf( "populate_saHpiEventLog\n");
+        printf(" ***************************************\n");
+        printf(" ***************************************\n");
+        printf(" EVENT LOG TABLES \n");
+
 
         rpt_entry_id = SAHPI_FIRST_ENTRY;
         do {
@@ -108,11 +112,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
                         rv =  AGENT_ERR_INTERNAL_ERROR;
                         break;
                 }
-                printf(" ***************************************\n");
-                printf(" ***************************************\n");
-                printf(" EVENT LOG TABLES \n");
-                printf("        ResourceId [%d]\n", rpt_entry.ResourceId);
 
+                printf("ResourceId [%d]\n", rpt_entry.ResourceId);
 
                 event_entry_id = SAHPI_OLDEST_ENTRY;
                 do {
