@@ -441,6 +441,17 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 }
 
+
+int async_rdr_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                  SaHpiRdrT *rdr_entry_event, SaHpiRptEntryT *rpt_entry_event,
+		  SaHpiRptEntryT *rpt_entry, 
+                  oid * resource_oid, size_t resource_oid_len) 
+{
+	DEBUGMSGTL ((AGENT, "async_rdr_add\n"));
+
+        return SA_OK;
+}
+
 /*
  * int handle_saHpiRdrEntryCount()
  */
