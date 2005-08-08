@@ -76,6 +76,12 @@ const saHpiHotSwapTable_context * saHpiHotSwapTable_get_by_idx_rs(netsnmp_index 
 int saHpiHotSwapTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
 /*************************************************************
+ * set funtions
+ */
+int hot_swap_indicator_set (saHpiHotSwapTable_context *row_ctx);
+int hot_swap_state_set (saHpiHotSwapTable_context *row_ctx);
+
+/*************************************************************
  * function declarations
  */
 SaErrorT populate_hotswap(SaHpiSessionIdT sessionid, 
@@ -94,8 +100,12 @@ extern size_t saHpiHotSwapTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiHotSwapTable
  */
- 
+
+/* Number of table Indexes */
 #define HOTSWAP_INDEX_NR 3
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceId_INDEX 1
+#define saHpiResourceIsHistorical_INDEX 2
  
 #define COLUMN_SAHPIHOTSWAPINDICATOR 1
 #define COLUMN_SAHPIHOTSWAPSTATE 2
@@ -105,21 +115,6 @@ extern size_t saHpiHotSwapTable_oid_len;
 #define COLUMN_SAHPIHOTSWAPRESOURCEREQUEST 6
 #define saHpiHotSwapTable_COL_MIN 1
 #define saHpiHotSwapTable_COL_MAX 6
-
-/* comment out the following line if you don't handle SET-REQUEST for saHpiHotSwapTable */
-#define saHpiHotSwapTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiHotSwapTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiHotSwapTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiHotSwapTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiHotSwapTable_SET_HANDLING
 
 int saHpiHotSwapTable_extract_index( saHpiHotSwapTable_context * ctx, netsnmp_index * hdr );
 
@@ -144,14 +139,9 @@ int saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiHotSwapTable_ROW_CREATION
 saHpiHotSwapTable_context * saHpiHotSwapTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiHotSwapTable_IDX2
 saHpiHotSwapTable_context * saHpiHotSwapTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
