@@ -832,8 +832,12 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEntityPath));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEntityPath)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSENSORNUM:
@@ -844,14 +848,22 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEventState));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventState)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTNAME:
             /** OCTETSTR = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementName));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementName)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTMID:
@@ -874,8 +886,12 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementText));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementText)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }		    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTDELETE:

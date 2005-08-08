@@ -780,8 +780,12 @@ void saHpiUserEventLogTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIUSEREVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiUserEventLogText));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiUserEventLogText)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    	    
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGROWSTATUS:

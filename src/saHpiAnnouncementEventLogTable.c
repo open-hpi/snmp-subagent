@@ -789,9 +789,13 @@ void saHpiAnnouncementEventLogTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGENTITYPATH:
-            /** SaHpiEntityPath = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEventLogEntityPath));
+            /** SaHpiEntityPath = ASN_OCTET_STR */	
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventLogEntityPath)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGSENSORNUM:
@@ -801,15 +805,23 @@ void saHpiAnnouncementEventLogTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGEVENTSTATE:
-            /** SaHpiEventState = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEventLogEventState));
+            /** SaHpiEventState = ASN_OCTET_STR */	    
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventLogEventState)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }		    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGNAME:
             /** OCTETSTR = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEventLogName));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventLogName)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGMID:
@@ -832,8 +844,12 @@ void saHpiAnnouncementEventLogTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiAnnouncementEventLogText));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventLogText)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	    
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGDELETE:
