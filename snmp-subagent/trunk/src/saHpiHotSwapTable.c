@@ -168,19 +168,92 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 	}
 
         /** INTEGER = ASN_INTEGER */
-        //hotswap_ctx->saHpiHotSwapActionRequest write only                
+        hotswap_ctx->saHpiHotSwapActionRequest = 0;              
 
         /** INTEGER = ASN_INTEGER */
-        //hotswap_ctx->saHpiHotSwapPolicyCancel write only
+        hotswap_ctx->saHpiHotSwapPolicyCancel = 0;
 
         /** INTEGER = ASN_INTEGER */
-        //hotswap_ctx->saHpiHotSwapResourceRequest write only
+        hotswap_ctx->saHpiHotSwapResourceRequest = 0;
 
         CONTAINER_INSERT (cb.container, hotswap_ctx);
 
         hotswap_entry_count = CONTAINER_SIZE (cb.container);
 
         return rv;	
+}
+
+
+/*
+ * int hot_swap_indicator_set (saHpiHotSwapTable_context * ctx)
+ */
+int hot_swap_indicator_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+        SaHpiHsIndicatorStateT  state;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_indicator_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+        state = row_ctx->saHpiHotSwapIndicator - 1;
+
+        rc = saHpiHotSwapIndicatorStateSet(session_id, resource_id, state);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to saHpiHotSwapIndicatorStateSet failed to set IndicatorState rc: %s.\n",
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to saHpiHotSwapIndicatorStateSet failed to set IndicatorState rc: %s.\n",
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/*
+ * int hot_swap_state_set (saHpiHotSwapTable_context * ctx)
+ */
+int hot_swap_state_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_state_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+
+        if ( (row_ctx->saHpiHotSwapState - 1) == SAHPI_HS_STATE_ACTIVE ) {
+                rc = saHpiResourceActiveSet(session_id, resource_id);
+        } else if ( (row_ctx->saHpiHotSwapState - 1) == SAHPI_HS_STATE_INACTIVE ) {
+                rc = saHpiResourceInactiveSet(session_id, resource_id);
+        }
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to hot_swap_state_set failed to set ResourceState [%s] rc: %s.\n",
+                          oh_lookup_hsstate(row_ctx->saHpiHotSwapState - 1), 
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to hot_swap_state_set failed to set ResourceState [%s] rc: %s.\n",
+                           oh_lookup_hsstate(row_ctx->saHpiHotSwapState - 1), 
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
 }
 
 
@@ -312,40 +385,6 @@ saHpiHotSwapTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiHotSwapTable_context *
-saHpiHotSwapTable_get( const char *name, int len )
-{
-    saHpiHotSwapTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
-/************************************************************
  * Initializes the saHpiHotSwapTable module
  */
 void
@@ -364,6 +403,8 @@ init_saHpiHotSwapTable(void)
 static int saHpiHotSwapTable_row_copy(saHpiHotSwapTable_context * dst,
                          saHpiHotSwapTable_context * src)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_row_copy, called\n"));
+
     if(!dst||!src)
         return 1;
         
@@ -498,6 +539,8 @@ int saHpiHotSwapTable_can_activate(saHpiHotSwapTable_context *undo_ctx,
                       saHpiHotSwapTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -523,6 +566,7 @@ int saHpiHotSwapTable_can_deactivate(saHpiHotSwapTable_context *undo_ctx,
                         saHpiHotSwapTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_can_deactivate, called\n"));
     /*
      * TODO: check for deactivation requirements here
      */
@@ -540,6 +584,7 @@ int saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context *undo_ctx,
                     saHpiHotSwapTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_can_delete, called\n"));
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -553,7 +598,6 @@ int saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiHotSwapTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -571,6 +615,8 @@ int saHpiHotSwapTable_can_delete(saHpiHotSwapTable_context *undo_ctx,
 saHpiHotSwapTable_context *
 saHpiHotSwapTable_create_row( netsnmp_index* hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_create_row, called\n"));
+
     saHpiHotSwapTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiHotSwapTable_context);
     if(!ctx)
@@ -605,7 +651,6 @@ saHpiHotSwapTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -613,6 +658,8 @@ saHpiHotSwapTable_create_row( netsnmp_index* hdr)
 saHpiHotSwapTable_context *
 saHpiHotSwapTable_duplicate_row( saHpiHotSwapTable_context * row_ctx)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_duplicate_row, called\n"));
+
     saHpiHotSwapTable_context * dup;
 
     if(!row_ctx)
@@ -635,6 +682,8 @@ saHpiHotSwapTable_duplicate_row( saHpiHotSwapTable_context * row_ctx)
  */
 netsnmp_index * saHpiHotSwapTable_delete_row( saHpiHotSwapTable_context * ctx )
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_delete_row, called\n"));
+
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -678,6 +727,7 @@ void saHpiHotSwapTable_set_reserve1( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_reserve1, called\n"));
 
     /*
      * TODO: loop through columns, check syntax and lengths. For
@@ -753,6 +803,8 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_variable_list *var;
     int rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_reserve2, called\n"));
+
     rg->rg_void = rg->list->ri;
 
     /*
@@ -767,31 +819,19 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIHOTSWAPINDICATOR:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (!oh_lookup_hsindicatorstate(*var->val.integer - 1))
+                        rc = SNMP_ERR_WRONGVALUE;
         break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
-            /** SaHpiHotSwapState = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if ( ((*var->val.integer - 1) != SAHPI_HS_STATE_INACTIVE) ||
+                     ((*var->val.integer - 1) != SAHPI_HS_STATE_ACTIVE) )   {
+                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPSTATE"
+                                     " saHpiHotSwapTable_set_reserve2"
+                                     " Only transistions to INACTIVE or ACITVE"
+                                     " are allowes\n"));
+                        rc = SNMP_ERR_BADVALUE;
+                }
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
@@ -883,7 +923,9 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+    SaErrorT       rc;
 
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_action, called\n"));
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -897,11 +939,13 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIHOTSWAPINDICATOR:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapIndicator = *var->val.integer;
+            row_err = hot_swap_indicator_set(row_ctx);
         break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             row_ctx->saHpiHotSwapState = *var->val.integer;
+            row_err = hot_swap_state_set(row_ctx);
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
@@ -974,6 +1018,8 @@ void saHpiHotSwapTable_set_commit( netsnmp_request_group *rg )
     saHpiHotSwapTable_context *undo_ctx = (saHpiHotSwapTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -1032,6 +1078,8 @@ void saHpiHotSwapTable_set_free( netsnmp_request_group *rg )
     saHpiHotSwapTable_context *row_ctx = (saHpiHotSwapTable_context *)rg->existing_row;
     saHpiHotSwapTable_context *undo_ctx = (saHpiHotSwapTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -1103,6 +1151,8 @@ void saHpiHotSwapTable_set_undo( netsnmp_request_group *rg )
     saHpiHotSwapTable_context *undo_ctx = (saHpiHotSwapTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -1157,6 +1207,8 @@ initialize_table_saHpiHotSwapTable(void)
 {
     netsnmp_table_registration_info *table_info;
 
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapTable, called\n"));
+
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiHotSwapTable_handler called again\n");
         return;
@@ -1209,18 +1261,18 @@ initialize_table_saHpiHotSwapTable(void)
     cb.container = netsnmp_container_find("saHpiHotSwapTable_primary:"
                                           "saHpiHotSwapTable:"
                                           "table_container");
-#ifdef saHpiHotSwapTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiHotSwapTable_secondary:"
                                                        "saHpiHotSwapTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiHotSwapTable_cmp;
-#endif
-#ifdef saHpiHotSwapTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiHotSwapTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiHotSwapTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiHotSwapTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiHotSwapTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiHotSwapTable_row_copy;
@@ -1235,7 +1287,7 @@ initialize_table_saHpiHotSwapTable(void)
     cb.set_commit = saHpiHotSwapTable_set_commit;
     cb.set_free = saHpiHotSwapTable_set_free;
     cb.set_undo = saHpiHotSwapTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiHotSwapTable",
                 "Registering table saHpiHotSwapTable "
                 "as a table array\n"));
@@ -1258,6 +1310,8 @@ int saHpiHotSwapTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiHotSwapTable_context *context = (saHpiHotSwapTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -1317,6 +1371,8 @@ int saHpiHotSwapTable_get_value(
 const saHpiHotSwapTable_context *
 saHpiHotSwapTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiHotSwapTable_get_by_idx, called\n"));
+
     return (const saHpiHotSwapTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
