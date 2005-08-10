@@ -257,6 +257,81 @@ int hot_swap_state_set (saHpiHotSwapTable_context *row_ctx)
 }
 
 /*
+ * int hot_swap_request_action_set (saHpiHotSwapTable_context *row_ctx)
+ */
+int hot_swap_action_request_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+	SaHpiHsActionT          action;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_action_request_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+        action = row_ctx->saHpiHotSwapActionRequest - 1;
+
+        rc = saHpiHotSwapActionRequest(session_id, resource_id, action);
+
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to hot_swap_action_request_set failed to set action [%s] rc: %s.\n",
+                          oh_lookup_hsaction(row_ctx->saHpiHotSwapActionRequest - 1), 
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to hot_swap_action_request_set failed to set action [%s] rc: %s.\n",
+                           oh_lookup_hsaction(row_ctx->saHpiHotSwapActionRequest - 1), 
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+
+}    
+
+/*
+ * int hot_swap_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
+ */
+int hot_swap_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+	SaHpiTimeoutT           timeout;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_extract_timeout_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+        timeout = row_ctx->saHpiHotSwapExtractTimeout;
+
+        rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
+
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to hot_swap_extract_timeout_set failed to set timeout [%d] rc: %s.\n",
+                          row_ctx->saHpiHotSwapExtractTimeout, 
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to hot_swap_extract_timeout_set failed to set timeout [%d] rc: %s.\n",
+                           row_ctx->saHpiHotSwapExtractTimeout, 
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/*
  * int hot_swap_policy_set (saHpiHotSwapTable_context * ctx)
  */
 int hot_swap_policy_set (saHpiHotSwapTable_context *row_ctx)
@@ -324,7 +399,6 @@ int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
 
 	return SNMP_ERR_NOERROR; 
 }
-
 
 /**
  * 
@@ -892,6 +966,7 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
                         rc = SNMP_ERR_WRONGVALUE;
         break;
 
+
         case COLUMN_SAHPIHOTSWAPSTATE:
                 if ( ((*var->val.integer - 1) != SAHPI_HS_STATE_INACTIVE) &&
                      ((*var->val.integer - 1) != SAHPI_HS_STATE_ACTIVE) )   {
@@ -920,17 +995,16 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if ( ((*var->val.integer - 1) != SAHPI_HS_ACTION_INSERTION) ||
+                     ((*var->val.integer - 1) != SAHPI_HS_ACTION_EXTRACTION) )   {
+                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPACTIONREQUEST"
+                                     " saHpiHotSwapTable_set_reserve2"
+                                     " Only HotSwap action requests of"
+				     " SAHPI_HS_ACTION_INSERTION and" 
+				     " SAHPI_HS_ACTION_EXTRACTION"
+                                     " are allowed\n"));
+                        rc = SNMP_ERR_BADVALUE;
+                }            
         break;
 
         case COLUMN_SAHPIHOTSWAPPOLICYCANCEL:
@@ -948,17 +1022,14 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPRESOURCEREQUEST:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if ( ((*var->val.integer - 1) != SAHPI_HS_STATE_INACTIVE) ||
+                     ((*var->val.integer - 1) != SAHPI_HS_STATE_ACTIVE) )   {
+                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPRESOURCEREQUEST"
+                                     " saHpiHotSwapTable_set_reserve2"
+                                     " Only transistions to INACTIVE or ACITVE"
+                                     " are allowed\n"));
+                        rc = SNMP_ERR_BADVALUE;
+                }
         break;
 
         default: /** We shouldn't get here */
@@ -1028,6 +1099,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapActionRequest = *var->val.integer;
+	    row_err = hot_swap_action_request_set(row_ctx);
         break;
 
         case COLUMN_SAHPIHOTSWAPPOLICYCANCEL:
@@ -1039,6 +1111,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIHOTSWAPRESOURCEREQUEST:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapResourceRequest = *var->val.integer;
+	    row_err = hot_swap_state_set(row_ctx);
         break;
 
         default: /** We shouldn't get here */
