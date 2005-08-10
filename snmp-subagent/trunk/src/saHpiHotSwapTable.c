@@ -165,7 +165,11 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 	if ( SA_OK == saHpiAutoExtractTimeoutGet(sessionid,
 			                rpt_entry->ResourceId,
 					&extract_timeout) ) {
-		hotswap_ctx->saHpiHotSwapExtractTimeout = extract_timeout;
+                hotswap_ctx->saHpiHotSwapExtractTimeout_len = 
+                        sizeof(extract_timeout);
+                memcpy(hotswap_ctx->saHpiHotSwapExtractTimeout,
+                       &extract_timeout, 
+                       hotswap_ctx->saHpiHotSwapExtractTimeout_len);
 	}
 
         /** INTEGER = ASN_INTEGER */
@@ -317,9 +321,11 @@ int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
-        timeout = row_ctx->saHpiHotSwapExtractTimeout;
+        memcpy(&timeout, 
+               row_ctx->saHpiHotSwapExtractTimeout, 
+               sizeof(row_ctx->saHpiHotSwapExtractTimeout_len));
 
-        rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
+       rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
 
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
@@ -544,7 +550,10 @@ static int saHpiHotSwapTable_row_copy(saHpiHotSwapTable_context * dst,
 
     dst->saHpiHotSwapState = src->saHpiHotSwapState;
 
-    dst->saHpiHotSwapExtractTimeout = src->saHpiHotSwapExtractTimeout;
+    memcpy( dst->saHpiHotSwapExtractTimeout, 
+            src->saHpiHotSwapExtractTimeout, 
+            src->saHpiHotSwapExtractTimeout_len );
+    dst->saHpiHotSwapExtractTimeout_len = src->saHpiHotSwapExtractTimeout_len;
 
     dst->saHpiHotSwapActionRequest = src->saHpiHotSwapActionRequest;
 
@@ -870,10 +879,17 @@ void saHpiHotSwapTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
-                                                sizeof(row_ctx->saHpiHotSwapExtractTimeout));
-        break;
+            /** SafUnsigned64 = ASN_OPAQUE */
+            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            if (rc == SNMP_ERR_NOERROR ) {
+                    if (var->val_len > SAF_UNSIGNED_64_LEN) {
+                            rc = SNMP_ERR_WRONGLENGTH;
+                            DEBUGMSGTL ((AGENT, 
+                            "COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT"
+                            " SNMP_ERR_WRONGLENGTH\n", rc));
+                    }
+            }
+            break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
@@ -953,13 +969,13 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
                     /*
                      * TODO: routine to check valid values
                      *
                      * EXAMPLE:
                      *
-                    * if ( *var->val.integer != XXX ) {
+                    * if ( XXX_check_value( var->val.string, XXX ) ) {
                 *    rc = SNMP_ERR_INCONSISTENTVALUE;
                 *    rc = SNMP_ERR_BADVALUE;
                 * }
@@ -1063,9 +1079,10 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            row_ctx->saHpiHotSwapExtractTimeout = *var->val.integer;
-            row_err = hot_swap_auto_extract_timeout_set(row_ctx);
+            /** SafUnsigned64 = ASN_OPAQUE */
+            memcpy(row_ctx->saHpiHotSwapExtractTimeout,var->val.string,var->val_len);
+            row_ctx->saHpiHotSwapExtractTimeout_len = var->val_len;
+            row_err = hot_swap_auto_extract_timeout_set (row_ctx);
         break;
                                                        
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1156,7 +1173,7 @@ void saHpiHotSwapTable_set_commit( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1217,7 +1234,7 @@ void saHpiHotSwapTable_set_free( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1289,7 +1306,7 @@ void saHpiHotSwapTable_set_undo( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1448,10 +1465,10 @@ int saHpiHotSwapTable_get_value(
         break;
     
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SafUnsigned64 = ASN_OPAQUE */
+            snmp_set_var_typed_value(var, ASN_OPAQUE,
                          (char*)&context->saHpiHotSwapExtractTimeout,
-                         sizeof(context->saHpiHotSwapExtractTimeout) );
+                         context->saHpiHotSwapExtractTimeout_len );
         break;
     
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:

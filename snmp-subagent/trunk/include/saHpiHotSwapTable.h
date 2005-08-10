@@ -17,7 +17,9 @@ extern "C" {
     
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
-#include <net-snmp/agent/table_array.h>
+#include <net-snmp/agent/table_array.h> 
+
+#include <hpiSubagent.h>
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -38,9 +40,9 @@ typedef struct saHpiHotSwapTable_context_s {
         /** SaHpiHotSwapState = ASN_INTEGER */
             long saHpiHotSwapState;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            long saHpiHotSwapExtractTimeout;
+        /** SafUnsigned64 = ASN_OPAQUE */
+            unsigned char saHpiHotSwapExtractTimeout[SAF_UNSIGNED_64_LEN];
+            long saHpiHotSwapExtractTimeout_len;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiHotSwapActionRequest;
