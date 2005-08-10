@@ -479,8 +479,15 @@ void saHpiAutoInsertTimeoutTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
             /** SafUnsigned64 = ASN_OPAQUE */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OPAQUE,
-                                                sizeof(row_ctx->saHpiAutoInsertTimeoutForInsert));
+            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            if (rc == SNMP_ERR_NOERROR ) {
+                    if (var->val_len > SAF_UNSIGNED_64_LEN) {
+                            rc = SNMP_ERR_WRONGLENGTH;
+                            DEBUGMSGTL ((AGENT, 
+                            "COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT"
+                            " SNMP_ERR_WRONGLENGTH\n", rc));
+                    }
+            }
         break;
                              
         default: /** We shouldn't get here */
@@ -583,6 +590,9 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
             /** SafUnsigned64 = ASN_OPAQUE */
             memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert,var->val.string,var->val_len);
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
+
+            // Dan implement Me!
+
         break;
 
         default: /** We shouldn't get here */

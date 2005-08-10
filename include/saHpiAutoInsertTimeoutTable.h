@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <hpiSubagent.h>
+
         /** Index saHpiDomainId is external */
 
 typedef struct saHpiAutoInsertTimeoutTable_context_s {
@@ -31,7 +33,7 @@ typedef struct saHpiAutoInsertTimeoutTable_context_s {
      */
     /** TODO: add storage for external index(s)! */
         /** SafUnsigned64 = ASN_OPAQUE */
-            unsigned char saHpiAutoInsertTimeoutForInsert[12];
+            unsigned char saHpiAutoInsertTimeoutForInsert[SAF_UNSIGNED_64_LEN];
             long saHpiAutoInsertTimeoutForInsert_len;
 
 
