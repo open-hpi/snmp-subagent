@@ -30,9 +30,9 @@ typedef struct saHpiAutoInsertTimeoutTable_context_s {
      * TODO: You will probably have to fix a few types here...
      */
     /** TODO: add storage for external index(s)! */
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            long saHpiAutoInsertTimeoutForInsert;
+        /** SafUnsigned64 = ASN_OPAQUE */
+            unsigned char saHpiAutoInsertTimeoutForInsert[12];
+            long saHpiAutoInsertTimeoutForInsert_len;
 
 
     /*

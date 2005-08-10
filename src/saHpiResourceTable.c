@@ -394,7 +394,6 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	resource_context = NULL;
 	resource_context = CONTAINER_FIND (cb.container, &resource_index);
 
-
         if ((!resource_context) && (remove_rpt_entry == MIB_FALSE)) {
 
 		// New entry. Add it
