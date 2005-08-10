@@ -256,6 +256,75 @@ int hot_swap_state_set (saHpiHotSwapTable_context *row_ctx)
 	return SNMP_ERR_NOERROR; 
 }
 
+/*
+ * int hot_swap_policy_set (saHpiHotSwapTable_context * ctx)
+ */
+int hot_swap_policy_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_policy_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+
+        rc = saHpiHotSwapPolicyCancel(session_id, resource_id);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to hot_swap_policy_set "
+                          "saHpiHotSwapPolicyCancel() failed. rc: [%s].\n",
+			  oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+			  "Call to hot_swap_policy_set "
+                          "saHpiHotSwapPolicyCancel() failed. rc: [%s].\n",
+			  oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
+/*
+ * int hot_swap_extract_timeout_set (saHpiHotSwapTable_context * ctx)
+ */
+int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "hot_swap_extract_timeout_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+
+        rc = saHpiAutoExtractTimeoutSet (session_id, resource_id, 
+                                         row_ctx->saHpiHotSwapExtractTimeout);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to hot_swap_extract_timeout_set "
+                          "saHpiHotSwapAutoExtractTimeoutSet() failed. rc: [%s].\n",
+			  oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+			  "Call to hot_swap_extract_timeout_set "
+                          "saHpiHotSwapAutoExtractTimeoutSet() failed. rc: [%s].\n",
+			  oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
 
 /**
  * 
@@ -824,12 +893,14 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPSTATE:
-                if ( ((*var->val.integer - 1) != SAHPI_HS_STATE_INACTIVE) ||
+                if ( ((*var->val.integer - 1) != SAHPI_HS_STATE_INACTIVE) &&
                      ((*var->val.integer - 1) != SAHPI_HS_STATE_ACTIVE) )   {
-                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPSTATE"
+                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPSTATE [%s]"
                                      " saHpiHotSwapTable_set_reserve2"
-                                     " Only transistions to INACTIVE or ACITVE"
-                                     " are allowes\n"));
+                                     " Only transistions to ACTIVE or INACITVE"
+                                     " are allowed\n",
+                                     oh_lookup_hsstate(*var->val.integer - 1)
+                                     ));
                         rc = SNMP_ERR_BADVALUE;
                 }
         break;
@@ -951,8 +1022,9 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** SaHpiTime = ASN_COUNTER64 */
             row_ctx->saHpiHotSwapExtractTimeout = *var->val.integer;
+            row_err = hot_swap_auto_extract_timeout_set(row_ctx);
         break;
-
+                                                       
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapActionRequest = *var->val.integer;
@@ -961,6 +1033,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIHOTSWAPPOLICYCANCEL:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiHotSwapPolicyCancel = *var->val.integer;
+            row_err = hot_swap_policy_set(row_ctx);
         break;
 
         case COLUMN_SAHPIHOTSWAPRESOURCEREQUEST:
