@@ -80,6 +80,7 @@ int saHpiHotSwapTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp
  */
 int hot_swap_indicator_set (saHpiHotSwapTable_context *row_ctx);
 int hot_swap_state_set (saHpiHotSwapTable_context *row_ctx);
+int hot_swap_action_request_set (saHpiHotSwapTable_context *row_ctx);
 int hot_swap_policy_set (saHpiHotSwapTable_context *row_ctx);
 int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx);
 
