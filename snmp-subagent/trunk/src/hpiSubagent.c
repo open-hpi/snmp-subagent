@@ -401,6 +401,7 @@ main (int argc, char **argv)
 	init_saHpiDomainEventLogTable();
 	
 	init_saHpiHotSwapTable();
+        init_saHpiAutoInsertTimeoutTable();
 	init_saHpiAutoInsertTimeoutTable();
 	init_saHpiAnnouncementTable();
 	init_saHpiAnnouncementEventLogTable();
@@ -445,9 +446,10 @@ main (int argc, char **argv)
 	     *	       populate_saHpiAreaTable();		
 	     *	           populate_saHpiFieldTable(); 
              *         populate_saHpiHotSwapTable();
+             *             populate_saHpiAutoInsertTimeoutTable();             
   	     *         populate_saHpiAnnouncementTable();
 	     */
-
+            
 	populate_saHpiEventTable(sessionid);
             /* populate_saHpiResourceEventTable();
 	     * populate_saHpiDomainEventTable();

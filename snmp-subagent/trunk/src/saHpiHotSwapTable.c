@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <saHpiAutoInsertTimeoutTable.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -180,6 +181,8 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 
         hotswap_entry_count = CONTAINER_SIZE (cb.container);
 
+        populate_saHpiAutoInsertTimeoutTable(sessionid);
+
         return rv;	
 }
 
@@ -294,10 +297,13 @@ int hot_swap_action_request_set (saHpiHotSwapTable_context *row_ctx)
 
 }    
 
-/*
- * int hot_swap_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
  */
-int hot_swap_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
+int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
 {
 	SaErrorT                rc = SA_OK;
 	SaHpiSessionIdT         session_id;
@@ -315,15 +321,16 @@ int hot_swap_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
 
         rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
 
-
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
-			  "Call to hot_swap_extract_timeout_set failed to set timeout [%d] rc: %s.\n",
-                          row_ctx->saHpiHotSwapExtractTimeout, 
+			  "Call to hot_swap_extract_timeout_set"
+                          " failed to set timeout [%d] rc: %s.\n",
+                          timeout, 
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
-			   "Call to hot_swap_extract_timeout_set failed to set timeout [%d] rc: %s.\n",
-                           row_ctx->saHpiHotSwapExtractTimeout, 
+			   "Call to hot_swap_extract_timeout_set"
+                           " failed to set timeout [%d] rc: %s.\n",
+                           timeout, 
 			   oh_lookup_error(rc)));
 		return get_snmp_error(rc);
 	} 
@@ -358,41 +365,6 @@ int hot_swap_policy_set (saHpiHotSwapTable_context *row_ctx)
                 DEBUGMSGTL ((AGENT,
 			  "Call to hot_swap_policy_set "
                           "saHpiHotSwapPolicyCancel() failed. rc: [%s].\n",
-			  oh_lookup_error(rc)));
-		return get_snmp_error(rc);
-	} 
-
-	return SNMP_ERR_NOERROR; 
-}
-
-/*
- * int hot_swap_extract_timeout_set (saHpiHotSwapTable_context * ctx)
- */
-int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
-{
-	SaErrorT                rc = SA_OK;
-	SaHpiSessionIdT         session_id;
-	SaHpiResourceIdT        resource_id;
-
-        DEBUGMSGTL ((AGENT, "hot_swap_extract_timeout_set, called\n"));
-
-	if (!row_ctx)
-		return AGENT_ERR_NULL_DATA;
-
-	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
-
-        rc = saHpiAutoExtractTimeoutSet (session_id, resource_id, 
-                                         row_ctx->saHpiHotSwapExtractTimeout);
-
-	if (rc != SA_OK) {
-		snmp_log (LOG_ERR,
-			  "Call to hot_swap_extract_timeout_set "
-                          "saHpiHotSwapAutoExtractTimeoutSet() failed. rc: [%s].\n",
-			  oh_lookup_error(rc));
-                DEBUGMSGTL ((AGENT,
-			  "Call to hot_swap_extract_timeout_set "
-                          "saHpiHotSwapAutoExtractTimeoutSet() failed. rc: [%s].\n",
 			  oh_lookup_error(rc)));
 		return get_snmp_error(rc);
 	} 

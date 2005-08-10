@@ -108,8 +108,11 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 		rv));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
-	
-	auto_insert_context->saHpiAutoInsertTimeoutForInsert = timeout;		        
+
+        auto_insert_context->saHpiAutoInsertTimeoutForInsert_len = sizeof(SaHpiTimeoutT);
+        memcpy(auto_insert_context->saHpiAutoInsertTimeoutForInsert, 
+               &timeout, 
+               auto_insert_context->saHpiAutoInsertTimeoutForInsert_len);		        
 	  
 	CONTAINER_INSERT (cb.container, auto_insert_context);
 	
@@ -152,41 +155,6 @@ saHpiAutoInsertTimeoutTable_cmp( const void *lhs, const void *rhs )
 		
 	return 0;	
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiAutoInsertTimeoutTable_context *
-saHpiAutoInsertTimeoutTable_get( const char *name, int len )
-{
-    saHpiAutoInsertTimeoutTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAutoInsertTimeoutTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 
 /************************************************************
  * Initializes the saHpiAutoInsertTimeoutTable module
@@ -234,7 +202,8 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiAutoInsertTimeoutForInsert = src->saHpiAutoInsertTimeoutForInsert;
+    memcpy( dst->saHpiAutoInsertTimeoutForInsert, src->saHpiAutoInsertTimeoutForInsert, src->saHpiAutoInsertTimeoutForInsert_len );
+    dst->saHpiAutoInsertTimeoutForInsert_len = src->saHpiAutoInsertTimeoutForInsert_len;
 
     return 0;
 }
@@ -376,7 +345,6 @@ int saHpiAutoInsertTimeoutTable_can_delete(saHpiAutoInsertTimeoutTable_context *
     return 1;
 }
 
-#ifdef saHpiAutoInsertTimeoutTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -423,7 +391,6 @@ saHpiAutoInsertTimeoutTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -511,11 +478,11 @@ void saHpiAutoInsertTimeoutTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
+            /** SafUnsigned64 = ASN_OPAQUE */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_OPAQUE,
                                                 sizeof(row_ctx->saHpiAutoInsertTimeoutForInsert));
         break;
-
+                             
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
@@ -555,18 +522,18 @@ void saHpiAutoInsertTimeoutTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
                     /*
                      * TODO: routine to check valid values
                      *
                      * EXAMPLE:
                      *
-                    * if ( *var->val.integer != XXX ) {
+                    * if ( XXX_check_value( var->val.string, XXX ) ) {
                 *    rc = SNMP_ERR_INCONSISTENTVALUE;
                 *    rc = SNMP_ERR_BADVALUE;
                 * }
                 */
-        break;
+        break;                        
 
         default: /** We shouldn't get here */
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
@@ -613,8 +580,9 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            row_ctx->saHpiAutoInsertTimeoutForInsert = *var->val.integer;
+            /** SafUnsigned64 = ASN_OPAQUE */
+            memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert,var->val.string,var->val_len);
+            row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
         break;
 
         default: /** We shouldn't get here */
@@ -673,7 +641,7 @@ void saHpiAutoInsertTimeoutTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         default: /** We shouldn't get here */
@@ -712,7 +680,7 @@ void saHpiAutoInsertTimeoutTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         default: /** We shouldn't get here */
@@ -762,7 +730,7 @@ void saHpiAutoInsertTimeoutTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         default: /** We shouldn't get here */
@@ -834,18 +802,18 @@ initialize_table_saHpiAutoInsertTimeoutTable(void)
     cb.container = netsnmp_container_find("saHpiAutoInsertTimeoutTable_primary:"
                                           "saHpiAutoInsertTimeoutTable:"
                                           "table_container");
-#ifdef saHpiAutoInsertTimeoutTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiAutoInsertTimeoutTable_secondary:"
                                                        "saHpiAutoInsertTimeoutTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiAutoInsertTimeoutTable_cmp;
-#endif
-#ifdef saHpiAutoInsertTimeoutTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiAutoInsertTimeoutTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiAutoInsertTimeoutTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiAutoInsertTimeoutTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiAutoInsertTimeoutTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiAutoInsertTimeoutTable_row_copy;
@@ -860,7 +828,7 @@ initialize_table_saHpiAutoInsertTimeoutTable(void)
     cb.set_commit = saHpiAutoInsertTimeoutTable_set_commit;
     cb.set_free = saHpiAutoInsertTimeoutTable_set_free;
     cb.set_undo = saHpiAutoInsertTimeoutTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiAutoInsertTimeoutTable",
                 "Registering table saHpiAutoInsertTimeoutTable "
                 "as a table array\n"));
@@ -887,10 +855,10 @@ int saHpiAutoInsertTimeoutTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SafUnsigned64 = ASN_OPAQUE */
+            snmp_set_var_typed_value(var, ASN_OPAQUE,
                          (char*)&context->saHpiAutoInsertTimeoutForInsert,
-                         sizeof(context->saHpiAutoInsertTimeoutForInsert) );
+                         context->saHpiAutoInsertTimeoutForInsert_len );
         break;
     
     default: /** We shouldn't get here */
