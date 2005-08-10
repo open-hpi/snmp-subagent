@@ -1284,6 +1284,29 @@ SaHpiCtrlMode ::= TEXTUAL-CONVENTION
                         undefined(0),
                         auto(1),
                         manual(2) }
+			
+SafUnsigned64 ::= TEXTUAL-CONVENTION
+         STATUS current        
+     DESCRIPTION "The SafUnsigned64 type represents a non-negative
+                integer, which may increase or decrease, but shall never
+                exceed a maximum value, nor fall below a minimum value. The
+                maximum value can not be greater than 2^64-1
+                (18446744073709551615 decimal), and the minimum value can
+                not be smaller than 0.  The value of a SafUnsigned64
+                has its maximum value whenever the information being modeled
+                is greater than or equal to its maximum value, and has its
+                minimum value whenever the information being modeled is
+                smaller than or equal to its minimum value.  If the
+                information being modeled subsequently decreases below
+                (increases above) the maximum (minimum) value, the
+                SafUnsigned64 also decreases (increases).
+                
+                This textual convention represents a limited and short-term
+                solution, and may be deprecated as a long term solution is
+                defined and deployed to replace it."
+
+         REFERENCE " Understanding SNMP MIBS, Perkins and McGinnis, pg 51."
+     SYNTAX Opaque (SIZE(4..12))
 
 
 -- *************************************
@@ -2579,11 +2602,12 @@ saHpiAutoInsertTimeoutEntry OBJECT-TYPE
 
 
 SaHpiAutoInsertTimeoutEntry ::= SEQUENCE {
-        saHpiAutoInsertTimeoutForInsert SaHpiTime }
+		saHpiAutoInsertTimeoutForInsert SafUnsigned64 
+		}
 
 
 saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
-        SYNTAX SaHpiTime
+        SYNTAX SafUnsigned64
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
@@ -2657,7 +2681,7 @@ saHpiHotSwapEntry OBJECT-TYPE
 SaHpiHotSwapEntry ::= SEQUENCE {
         saHpiHotSwapIndicator       INTEGER,
         saHpiHotSwapState           SaHpiHotSwapState,
-        saHpiHotSwapExtractTimeout  SaHpiTime,
+        saHpiHotSwapExtractTimeout  SafUnsigned64,
         saHpiHotSwapActionRequest   INTEGER,
         saHpiHotSwapPolicyCancel    INTEGER,
         saHpiHotSwapResourceRequest INTEGER }
@@ -2712,7 +2736,7 @@ saHpiHotSwapState OBJECT-TYPE
 
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
-        SYNTAX SaHpiTime
+        SYNTAX SafUnsigned64
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
@@ -4525,7 +4549,7 @@ SaHpiEventLogInfoEntry ::= SEQUENCE {
         saHpiEventLogInfoSize              Unsigned32,
         saHpiEventLogInfoUserEventMaxSize  Unsigned32,
         saHpiEventLogInfoUpdateTimestamp   SaHpiTime,
-        saHpiEventLogInfoTime              SaHpiTime,
+        saHpiEventLogInfoTime              SafUnsigned64,
         saHpiEventLogInfoIsEnabled         TruthValue,
         saHpiEventLogInfoOverflowFlag      TruthValue,
         saHpiEventLogInfoOverflowResetable TruthValue,
@@ -4579,7 +4603,7 @@ saHpiEventLogInfoUpdateTimestamp OBJECT-TYPE
 
 
 saHpiEventLogInfoTime OBJECT-TYPE
-        SYNTAX SaHpiTime
+        SYNTAX SafUnsigned64
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
