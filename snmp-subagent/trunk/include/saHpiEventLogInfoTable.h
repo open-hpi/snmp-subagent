@@ -44,9 +44,9 @@ typedef struct saHpiEventLogInfoTable_context_s {
     /** TODO: Is this type correct? */
             long saHpiEventLogInfoUpdateTimestamp;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            long saHpiEventLogInfoTime;
+        /** SafUnsigned64 = ASN_OPAQUE */
+            unsigned char saHpiEventLogInfoTime[SAF_UNSIGNED_64_LEN];   
+            long saHpiEventLogInfoTime_len;
 
         /** TruthValue = ASN_INTEGER */
             long saHpiEventLogInfoIsEnabled;
