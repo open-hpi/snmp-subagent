@@ -120,6 +120,50 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 }	
 
 
+/**
+ * int auto_insert_timeout_set(saHpiAutoInsertTimeoutTable_context *row_ctx)
+ */
+
+int auto_insert_timeout_set(saHpiAutoInsertTimeoutTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+        SaHpiTimeoutT           timeout;
+
+        DEBUGMSGTL ((AGENT, "auto_insert_timeout_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+
+        if (row_ctx->saHpiAutoInsertTimeoutForInsert_len > sizeof(SaHpiTimeoutT)) 
+                return SNMP_ERR_TOOBIG;
+        
+        memcpy(&timeout, 
+               row_ctx->saHpiAutoInsertTimeoutForInsert, 
+               sizeof(SaHpiTimeoutT));
+
+        rc = saHpiAutoInsertTimeoutSet(session_id, timeout);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to auto_insert_timeout_set"
+                          " failed to set timeout [%d] rc: %s.\n",
+                          timeout, 
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to auto_insert_timeout_set"
+                           " failed to set timeout [%d] rc: %s.\n",
+                           timeout, 
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR;  
+}		
+
+
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
@@ -590,8 +634,7 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
             /** SafUnsigned64 = ASN_OPAQUE */
             memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert,var->val.string,var->val_len);
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
-
-            // Dan implement Me!
+  	    row_err = auto_insert_timeout_set(row_ctx);
 
         break;
 
