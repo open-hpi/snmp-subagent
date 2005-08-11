@@ -28,6 +28,18 @@ extern "C" {
 typedef struct saHpiAnnouncementTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
+    int sahpi_announcement_severity_set;
+    int sahpi_announcement_acknowledged_set;
+    int sahpi_announcement_status_cond_type_set;
+    int sahpi_announcement_entitypath_set;
+    int sahpi_announcement_sensornum_set;
+    int sahpi_announcement_event_state_set;
+    int sahpi_announcement_name_set;
+    int sahpi_announcement_mid;
+    int sahpi_announcement_text_type_set;
+    int sahpi_announcement_text_language_set;
+    int sahpi_announcement_text;
+
     /*************************************************************
      * You can store data internally in this structure.
      *
@@ -117,6 +129,10 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                                          oid *full_oid, size_t full_oid_len,
                                          oid *child_oid, size_t *child_oid_len);
 
+int announcement_add (saHpiAnnouncementTable_context *row_ctx);
+int announcement_ack (saHpiAnnouncementTable_context *row_ctx);
+int announcement_delete (saHpiAnnouncementTable_context *row_ctx);
+
 /*************************************************************
  * oid declarations
  */
@@ -159,21 +175,6 @@ extern size_t saHpiAnnouncementTable_oid_len;
 #define saHpiAnnouncementTable_COL_MIN 2
 #define saHpiAnnouncementTable_COL_MAX 15
 
-/* comment out the following line if you don't handle SET-REQUEST for saHpiAnnouncementTable */
-#define saHpiAnnouncementTable_SET_HANDLING
-
-/* comment out the following line if you can't create new rows */
-#define saHpiAnnouncementTable_ROW_CREATION
-
-/* comment out the following line if you don't want the secondary index */
-#define saHpiAnnouncementTable_IDX2
-
-/* uncommend the following line if you allow modifications to an
- * active row */
-/** define saHpiAnnouncementTable_CAN_MODIFY_ACTIVE_ROW */
-
-#ifdef saHpiAnnouncementTable_SET_HANDLING
-
 int saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, netsnmp_index * hdr );
 
 void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group * );
@@ -197,14 +198,9 @@ int saHpiAnnouncementTable_can_delete(saHpiAnnouncementTable_context *undo_ctx,
                     netsnmp_request_group * rg);
     
     
-#ifdef saHpiAnnouncementTable_ROW_CREATION
 saHpiAnnouncementTable_context * saHpiAnnouncementTable_create_row( netsnmp_index* );
-#endif
-#endif
 
-#ifdef saHpiAnnouncementTable_IDX2
 saHpiAnnouncementTable_context * saHpiAnnouncementTable_get( const char *name, int len );
-#endif
 
 #ifdef __cplusplus
 };
