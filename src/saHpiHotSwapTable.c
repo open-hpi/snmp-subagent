@@ -321,9 +321,13 @@ int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
 
 	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
 	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+
+        if (row_ctx->saHpiHotSwapExtractTimeout_len > sizeof(SaHpiTimeoutT)) 
+                return SNMP_ERR_TOOBIG;
+        
         memcpy(&timeout, 
                row_ctx->saHpiHotSwapExtractTimeout, 
-               sizeof(row_ctx->saHpiHotSwapExtractTimeout_len));
+               sizeof(SaHpiTimeoutT));
 
        rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
 
