@@ -19,6 +19,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <hpiSubagent.h>
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
 
@@ -96,6 +98,7 @@ int saHpiEventLogInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, ne
  * function declarations
  */
 SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid);
+int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx);
 
 
 /*************************************************************
@@ -109,7 +112,11 @@ extern size_t saHpiEventLogInfoTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiEventLogInfoTable
  */
+/* Number of table Indexes */
 #define EVENT_LOG_INFO_INDEX_NR 2
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceId_INDEX 1
+
 #define COLUMN_SAHPIEVENTLOGINFOENTRIES 1
 #define COLUMN_SAHPIEVENTLOGINFOSIZE 2
 #define COLUMN_SAHPIEVENTLOGINFOUSEREVENTMAXSIZE 3
