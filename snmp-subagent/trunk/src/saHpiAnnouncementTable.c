@@ -166,78 +166,102 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 }
 	 
 	        /** SaHpiEntryId = ASN_UNSIGNED */
-                announcement_ctx->saHpiAnnouncementEntryId = announcement.EntryId;
+                announcement_ctx->saHpiAnnouncementEntryId = 
+                        announcement.EntryId;
 	 	
                 /** SaHpiTime = ASN_COUNTER64 */
-                announcement_ctx->saHpiAnnouncementTimestamp = announcement.Timestamp;
+                announcement_ctx->saHpiAnnouncementTimestamp = 
+                        announcement.Timestamp;
  
                 /** TruthValue = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementAddedByUser = announcement.AddedByUser;
+                announcement_ctx->saHpiAnnouncementAddedByUser = 
+                        announcement.AddedByUser;
  
                 /** SaHpiSeverity = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementSeverity = announcement.Severity + 1;
+                announcement_ctx->saHpiAnnouncementSeverity = 
+                        announcement.Severity + 1;
  
                 /** TruthValue = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementAcknowledged = announcement.Acknowledged;
+                announcement_ctx->saHpiAnnouncementAcknowledged = 
+                        announcement.Acknowledged;
  
                 /** INTEGER = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementStatusCondType = announcement.StatusCond.Type + 1;
+                announcement_ctx->saHpiAnnouncementStatusCondType = 
+                        announcement.StatusCond.Type + 1;
 
                 /** SaHpiEntityPath = ASN_OCTET_STR */
-	        rc = oh_decode_entitypath(&announcement.StatusCond.Entity, &bigbuf);
+	        rc = oh_decode_entitypath(&announcement.StatusCond.Entity, 
+                                          &bigbuf);
 		
 	        if (rc != SA_OK) {
 		        DEBUGMSGTL ((AGENT, 
-		                "populate_saHpiAnnouncementTable: oh_decode_entitypath Failed: rc = %d\n",
+		                "populate_saHpiAnnouncementTable: "
+                                "oh_decode_entitypath Failed: rc = %d\n",
 		                 rc));
 	        }
 	        else {
 		        memcpy(announcement_ctx->saHpiAnnouncementEntityPath,
-		                                       bigbuf.Data, bigbuf.DataLength);
-	                announcement_ctx->saHpiAnnouncementEntityPath_len = bigbuf.DataLength;
+		               bigbuf.Data, bigbuf.DataLength);
+	                announcement_ctx->saHpiAnnouncementEntityPath_len = 
+                                bigbuf.DataLength;
 	        }
 
                
 	
-	        if (announcement.StatusCond.Type == SAHPI_STATUS_COND_TYPE_SENSOR) {
+	        if (announcement.StatusCond.Type == 
+                    SAHPI_STATUS_COND_TYPE_SENSOR) {
 		        /** UNSIGNED32 = ASN_UNSIGNED */
-               	        announcement_ctx->saHpiAnnouncementSensorNum = announcement.StatusCond.SensorNum;
+               	        announcement_ctx->saHpiAnnouncementSensorNum = 
+                                announcement.StatusCond.SensorNum;
 
 	                /** SaHpiEventState = ASN_OCTET_STR */
-	                rc = oh_decode_eventstate(announcement.StatusCond.EventState, SAHPI_EC_SENSOR_SPECIFIC, &buf);
+	                rc = oh_decode_eventstate(
+                                announcement.StatusCond.EventState, 
+                                SAHPI_EC_SENSOR_SPECIFIC, &buf);
 			
 		        if (rc != SA_OK) {
 	                        DEBUGMSGTL ((AGENT, 
-  		                "populate_saHpiAnnouncementTable: oh_decode_eventstate Failed: rc = %d\n",
+  		                "populate_saHpiAnnouncementTable: "
+                                "oh_decode_eventstate Failed: rc = %d\n",
 		                 rc));
 		        }	         	
 		        else {
-		               memcpy(announcement_ctx->saHpiAnnouncementEventState, buf.Data, buf.DataLength); 
-               	               announcement_ctx->saHpiAnnouncementEventState_len = buf.DataLength;
+		               memcpy(announcement_ctx->saHpiAnnouncementEventState, 
+                                      buf.Data, buf.DataLength); 
+               	               announcement_ctx->saHpiAnnouncementEventState_len = 
+                                       buf.DataLength;
 		        }	
                 }
 	
                 /** OCTETSTR = ASN_OCTET_STR */
-                memcpy(announcement_ctx->saHpiAnnouncementName, announcement.StatusCond.Name.Value, 
-	                                                announcement.StatusCond.Name.Length);
-                announcement_ctx->saHpiAnnouncementName_len = announcement.StatusCond.Name.Length;
+                memcpy(announcement_ctx->saHpiAnnouncementName, 
+                       announcement.StatusCond.Name.Value, 
+	               announcement.StatusCond.Name.Length);
+                announcement_ctx->saHpiAnnouncementName_len = 
+                        announcement.StatusCond.Name.Length;
  
                 /** SaHpiManufacturerId = ASN_UNSIGNED */
-                announcement_ctx->saHpiAnnouncementMid = announcement.StatusCond.Mid;
+                announcement_ctx->saHpiAnnouncementMid = 
+                        announcement.StatusCond.Mid;
  
                 /** SaHpiTextType = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementTextType = announcement.StatusCond.Data.DataType + 1;
+                announcement_ctx->saHpiAnnouncementTextType = 
+                        announcement.StatusCond.Data.DataType + 1;
  
                 /** SaHpiTextLanguage = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementTextLanguage = announcement.StatusCond.Data.Language + 1;
+                announcement_ctx->saHpiAnnouncementTextLanguage = 
+                        announcement.StatusCond.Data.Language + 1;
  
                 /** SaHpiText = ASN_OCTET_STR */
-                memcpy(announcement_ctx->saHpiAnnouncementText, announcement.StatusCond.Data.Data, 
-	                                                 announcement.StatusCond.Data.DataLength);
-                announcement_ctx->saHpiAnnouncementText_len = announcement.StatusCond.Data.DataLength;
+                memcpy(announcement_ctx->saHpiAnnouncementText, 
+                       announcement.StatusCond.Data.Data, 
+	               announcement.StatusCond.Data.DataLength);
+                announcement_ctx->saHpiAnnouncementText_len = 
+                        announcement.StatusCond.Data.DataLength;
  
                 /** RowStatus = ASN_INTEGER */
-                announcement_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_ACTIVE;
+                announcement_ctx->saHpiAnnouncementDelete = 
+                        SAHPIANNOUNCEMENTDELETE_ACTIVE;
 
 	        CONTAINER_INSERT (cb.container, announcement_ctx);
 			
@@ -245,7 +269,8 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 column[0] = 1;
                 column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
                 memset(child_oid, 0, sizeof(child_oid_len));
-                build_full_oid(saHpiAnnouncementTable_oid, saHpiAnnouncementTable_oid_len,
+                build_full_oid(saHpiAnnouncementTable_oid, 
+                               saHpiAnnouncementTable_oid_len,
                               column, column_len,
                               &announcement_index,
                               child_oid, MAX_OID_LEN, child_oid_len);
@@ -265,6 +290,87 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 		       
         return SA_OK; 		       
 
+}
+
+#if 0
+typedef struct {
+    SaHpiEntryIdT        EntryId;      /* Announcment Entry Id */
+    SaHpiTimeT           Timestamp;    /* Time when announcement added to set */
+    SaHpiBoolT           AddedByUser;  /* True if added to set by HPI User,
+                                          False if added automatically by 
+                                          HPI implementation */
+    SaHpiSeverityT       Severity;     /* Severity of announcement */
+    SaHpiBoolT           Acknowledged; /* Acknowledged flag */
+    SaHpiConditionT      StatusCond;   /* Detailed status condition */
+} SaHpiAnnouncementT;
+
+/* Condition structure definition */
+typedef struct {
+
+    SaHpiStatusCondTypeT Type;   yep      /* Status Condition Type */
+    SaHpiEntityPathT     Entity; yep      /* Entity assoc. with status condition */
+    SaHpiDomainIdT       DomainId; yep     /* Domain associated with status. 
+                                          May be SAHPI_UNSPECIFIED_DOMAIND_ID
+                                          meaning current domain, or domain
+                                          not meaningful for status condition*/
+    SaHpiResourceIdT     ResourceId; yep  /* Resource associated with status.
+                                          May be SAHPI_UNSPECIFIED_RESOURCE_ID
+                                          if Type is SAHPI_STATUS_COND_USER.
+                                          Must be set to valid ResourceId in
+                                          domain specified by DomainId,
+                                          or in current domain, if DomainId
+                                          is SAHPI_UNSPECIFIED_DOMAIN_ID */
+    SaHpiSensorNumT      SensorNum; yep   /* Sensor associated with status 
+                                          Only valid if Type is
+                                          SAHPI_STATUS_COND_TYPE_SENSOR */
+    SaHpiEventStateT     EventState; yep  /* Sensor event state. 
+                                          Only valid if Type is 
+                                          SAHPI_STATUS_COND_TYPE_SENSOR. */
+    SaHpiNameT           Name; yep         /* AIS compatible identifier associated
+                                          with Status condition */
+    SaHpiManufacturerIdT Mid;  yep        /* Manufacturer Id associated with
+                                          status condition, required when type
+                                          is SAHPI_STATUS_COND_TYPE_OEM. */
+    SaHpiTextBufferT     Data; yep        /* Optional Data associated with
+                                          Status condition */
+} SaHpiConditionT;
+#endif
+
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int announcement_add (saHpiAnnouncementTable_context *row_ctx)
+{
+
+        return SNMP_ERR_NOERROR; 
+}
+
+
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
+{
+
+        return SNMP_ERR_NOERROR; 
+}
+
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int announcement_delete (saHpiAnnouncementTable_context *row_ctx)
+{
+
+        return SNMP_ERR_NOERROR; 
 }
 
 /**
@@ -696,6 +802,19 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
      ctx->saHpiAnnouncementText = 0;
      ctx->saHpiAnnouncementDelete = 0;
     */
+
+    ctx->sahpi_announcement_severity_set =  MIB_FALSE;
+    ctx->sahpi_announcement_acknowledged_set =  MIB_FALSE;
+    ctx->sahpi_announcement_status_cond_type_set =  MIB_FALSE;
+    ctx->sahpi_announcement_entitypath_set =  MIB_FALSE;
+    ctx->sahpi_announcement_sensornum_set =  MIB_FALSE;
+    ctx->sahpi_announcement_event_state_set =  MIB_FALSE;
+    ctx->sahpi_announcement_name_set =  MIB_FALSE;
+    ctx->sahpi_announcement_mid =  MIB_FALSE;
+    ctx->sahpi_announcement_text_type_set =  MIB_FALSE;
+    ctx->sahpi_announcement_text_language_set =  MIB_FALSE;
+    ctx->sahpi_announcement_text =  MIB_FALSE;
+
 
     return ctx;
 }
@@ -1129,65 +1248,125 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             row_ctx->saHpiAnnouncementSeverity = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            } 
+            row_ctx->sahpi_announcement_severity_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiAnnouncementAcknowledged = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+
+            if (row_ctx->saHpiAnnouncementDelete = 5) 
+                    row_err = announcement_add(row_ctx); /* announcement being created */
+            else 
+                    row_err = announcement_ack(row_ctx); /* announcement existing */
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiAnnouncementStatusCondType = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_status_cond_type_set = MIB_TRUE; 
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiAnnouncementEntityPath,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementEntityPath_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_entitypath_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementSensorNum = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_sensornum_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiAnnouncementEventState,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementEventState_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_event_state_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTNAME:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiAnnouncementName,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementName_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_name_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementMid = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_mid = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             row_ctx->saHpiAnnouncementTextType = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_text_type_set = MIB_TRUE; 
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             row_ctx->saHpiAnnouncementTextLanguage = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_text_language_set = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiAnnouncementText,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementText_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            }
+            row_ctx->sahpi_announcement_text = MIB_TRUE;
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
             row_ctx->saHpiAnnouncementDelete = *var->val.integer;
+            row_err = announcement_delete(row_ctx);
         break;
 
         default: /** We shouldn't get here */

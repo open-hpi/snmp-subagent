@@ -281,7 +281,6 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 
 }
 
-
 /**
  * 
  * @row_ctx:
