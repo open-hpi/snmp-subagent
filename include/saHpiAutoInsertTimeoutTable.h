@@ -64,6 +64,7 @@ int saHpiAutoInsertTimeoutTable_get_value(netsnmp_request_info *, netsnmp_index 
  * function declarations: OpenHpi
  */
 SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid);
+int auto_insert_timeout_set(saHpiAutoInsertTimeoutTable_context *row_ctx);
 
 /*************************************************************
  * oid declarations
@@ -76,7 +77,10 @@ extern size_t saHpiAutoInsertTimeoutTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiAutoInsertTimeoutTable
  */
+/* Number of table Indexes */
 #define AUTO_INSERT_INDEX_NR 1 
+#define saHpiDomainId_INDEX 0
+
 #define COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT 1
 #define saHpiAutoInsertTimeoutTable_COL_MIN 1
 #define saHpiAutoInsertTimeoutTable_COL_MAX 1
