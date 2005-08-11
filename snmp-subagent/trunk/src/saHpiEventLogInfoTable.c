@@ -231,9 +231,14 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
         evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
                 event_log_info.UpdateTimestamp;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-        evt_log_info_context->saHpiEventLogInfoTime = 
-                event_log_info.CurrentTime;
+        /** SaHpiTime = ASN_OPAQUE */
+        evt_log_info_context->saHpiEventLogInfoTime_len = 
+               sizeof(SaHpiTimeT);
+        memset(evt_log_info_context->saHpiEventLogInfoTime, 
+               0, SAF_UNSIGNED_64_LEN);
+        memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
+               &event_log_info.CurrentTime,
+               sizeof(SaHpiTimeT));
 
         /** TruthValue = ASN_INTEGER */
         evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -275,6 +280,55 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 	return rv;
 
 }
+
+
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
+{
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+        SaHpiTimeoutT           timeout;
+
+        DEBUGMSGTL ((AGENT, "event_log_info_time_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+
+        if (row_ctx->saHpiEventLogInfoTime_len > sizeof(SaHpiTimeoutT)) 
+                return SNMP_ERR_TOOBIG;
+        
+        memcpy(&timeout, 
+               row_ctx->saHpiEventLogInfoTime, 
+               sizeof(SaHpiTimeoutT));
+
+       rc = saHpiEventLogTimeSet(session_id, resource_id, timeout);
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			  "Call to event_log_info_time_set"
+                          " failed to set timeout [%d] rc: %s.\n",
+                          timeout, 
+			  oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			   "Call to event_log_info_time_set"
+                           " failed to set timeout [%d] rc: %s.\n",
+                           timeout, 
+			   oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+	} 
+
+	return SNMP_ERR_NOERROR; 
+}
+
 
 /************************************************************/
 /************************************************************/
@@ -841,7 +895,7 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
             /** SafUnsigned64 = ASN_OPAQUE */
             memcpy(row_ctx->saHpiEventLogInfoTime,var->val.string,var->val_len);
             row_ctx->saHpiEventLogInfoTime_len = var->val_len;
-            //TODO Dan Fix Me !
+            row_err = event_log_info_time_set(row_ctx);
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
