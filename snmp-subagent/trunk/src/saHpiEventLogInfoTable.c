@@ -133,9 +133,14 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                 evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
                         event_log_info.UpdateTimestamp;
 
-                /** SaHpiTime = ASN_COUNTER64 */
-                evt_log_info_context->saHpiEventLogInfoTime = 
-                        event_log_info.CurrentTime;
+                /** SaHpiTime = ASN_OPAQUE */
+                evt_log_info_context->saHpiEventLogInfoTime_len = 
+                       sizeof(SaHpiTimeT);
+                memset(evt_log_info_context->saHpiEventLogInfoTime, 
+                       0, SAF_UNSIGNED_64_LEN);
+                memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
+                       &event_log_info.CurrentTime,
+                       sizeof(SaHpiTimeT));
 
                 /** TruthValue = ASN_INTEGER */
                 evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -377,7 +382,9 @@ static int saHpiEventLogInfoTable_row_copy(saHpiEventLogInfoTable_context * dst,
 
     dst->saHpiEventLogInfoUpdateTimestamp = src->saHpiEventLogInfoUpdateTimestamp;
 
-    dst->saHpiEventLogInfoTime = src->saHpiEventLogInfoTime;
+    memcpy( dst->saHpiEventLogInfoTime, src->saHpiEventLogInfoTime, 
+            src->saHpiEventLogInfoTime_len );
+    dst->saHpiEventLogInfoTime_len = src->saHpiEventLogInfoTime_len;
 
     dst->saHpiEventLogInfoIsEnabled = src->saHpiEventLogInfoIsEnabled;
 
@@ -680,21 +687,16 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
-                                                sizeof(row_ctx->saHpiEventLogInfoTime));
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiEventLogInfoOverflowResetable));
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiEventLogInfoOverflowAction));
+            /** SafUnsigned64 = ASN_OPAQUE */
+            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            if (rc == SNMP_ERR_NOERROR ) {
+                    if (var->val_len > SAF_UNSIGNED_64_LEN) {
+                            rc = SNMP_ERR_WRONGLENGTH;
+                            DEBUGMSGTL ((AGENT, 
+                            "COLUMN_SAHPIEVENTLOGINFOTIME"
+                            " SNMP_ERR_WRONGLENGTH\n", rc));
+                    }
+            }
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -754,32 +756,13 @@ void saHpiEventLogInfoTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SafUnsigned64 = ASN_OPAQUE */
                     /*
                      * TODO: routine to check valid values
                      *
                      * EXAMPLE:
                      *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-                rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
+                    * if ( XXX_check_value( var->val.string, XXX ) ) {
                 *    rc = SNMP_ERR_INCONSISTENTVALUE;
                 *    rc = SNMP_ERR_BADVALUE;
                 * }
@@ -855,33 +838,28 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-            row_ctx->saHpiEventLogInfoTime = *var->val.integer;
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-            row_ctx->saHpiEventLogInfoOverflowResetable = *var->val.integer;
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiEventLogInfoOverflowAction = *var->val.integer;
+            /** SafUnsigned64 = ASN_OPAQUE */
+            memcpy(row_ctx->saHpiEventLogInfoTime,var->val.string,var->val_len);
+            row_ctx->saHpiEventLogInfoTime_len = var->val_len;
+            //TODO Dan Fix Me !
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiEventLogInfoOverflowReset = *var->val.integer;
+            //TODO Dan Fix Me !
         break;
 
         case COLUMN_SAHPIEVENTLOGCLEAR:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogClear = *var->val.integer;
+            //TODO Dan Fix Me !
         break;
 
         case COLUMN_SAHPIEVENTLOGSTATE:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogState = *var->val.integer;
+            //TODO Dan Fix Me !
         break;
 
         default: /** We shouldn't get here */
@@ -936,15 +914,7 @@ void saHpiEventLogInfoTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -995,15 +965,7 @@ void saHpiEventLogInfoTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -1066,15 +1028,7 @@ void saHpiEventLogInfoTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
-            /** TruthValue = ASN_INTEGER */
-        break;
-
-        case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
-            /** INTEGER = ASN_INTEGER */
+            /** SafUnsigned64 = ASN_OPAQUE */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -1240,10 +1194,10 @@ int saHpiEventLogInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SafUnsigned64 = ASN_OPAQUE */
+            snmp_set_var_typed_value(var, ASN_OPAQUE,
                          (char*)&context->saHpiEventLogInfoTime,
-                         sizeof(context->saHpiEventLogInfoTime) );
+                         context->saHpiEventLogInfoTime_len );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOISENABLED:
