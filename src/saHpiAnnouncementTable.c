@@ -335,7 +335,6 @@ int initialize_table_saHpiAnnouncementEntryCount(void)
 /************************************************************/
  
 
-#ifdef saHpiAnnouncementTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -398,41 +397,6 @@ saHpiAnnouncementTable_cmp( const void *lhs, const void *rhs )
         return 0;
 }
 
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiAnnouncementTable_context *
-saHpiAnnouncementTable_get( const char *name, int len )
-{
-    saHpiAnnouncementTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiAnnouncementTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiAnnouncementTable module
@@ -456,7 +420,9 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
 {
     if(!dst||!src)
         return 1;
-        
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_row_copy, called\n"));
+
     /*
      * copy index, if provided
      */
@@ -612,6 +578,9 @@ int saHpiAnnouncementTable_can_activate(saHpiAnnouncementTable_context *undo_ctx
                       saHpiAnnouncementTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_can_activate, called\n"));
+
     /*
      * TODO: check for activation requirements here
      */
@@ -654,6 +623,9 @@ int saHpiAnnouncementTable_can_delete(saHpiAnnouncementTable_context *undo_ctx,
                     saHpiAnnouncementTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_can_delete, called\n"));
+
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
@@ -667,7 +639,6 @@ int saHpiAnnouncementTable_can_delete(saHpiAnnouncementTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiAnnouncementTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -685,6 +656,9 @@ int saHpiAnnouncementTable_can_delete(saHpiAnnouncementTable_context *undo_ctx,
 saHpiAnnouncementTable_context *
 saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_create_row, called\n"));
+
     saHpiAnnouncementTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAnnouncementTable_context);
     if(!ctx)
@@ -725,7 +699,6 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -733,6 +706,9 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
 saHpiAnnouncementTable_context *
 saHpiAnnouncementTable_duplicate_row( saHpiAnnouncementTable_context * row_ctx)
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_duplicate_row, called\n"));
+
     saHpiAnnouncementTable_context * dup;
 
     if(!row_ctx)
@@ -756,6 +732,8 @@ saHpiAnnouncementTable_duplicate_row( saHpiAnnouncementTable_context * row_ctx)
 netsnmp_index * saHpiAnnouncementTable_delete_row( saHpiAnnouncementTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_delete_row, called\n"));
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -790,6 +768,9 @@ netsnmp_index * saHpiAnnouncementTable_delete_row( saHpiAnnouncementTable_contex
  */
 void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
 {
+
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_reserve1, called\n"));
+
     saHpiAnnouncementTable_context *row_ctx =
             (saHpiAnnouncementTable_context *)rg->existing_row;
     saHpiAnnouncementTable_context *undo_ctx =
@@ -924,6 +905,8 @@ void saHpiAnnouncementTable_set_reserve2( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_reserve2, called\n"));
 
     rg->rg_void = rg->list->ri;
 
@@ -1131,6 +1114,8 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_action, called\n"));
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -1252,6 +1237,9 @@ void saHpiAnnouncementTable_set_commit( netsnmp_request_group *rg )
     saHpiAnnouncementTable_context *undo_ctx = (saHpiAnnouncementTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_commit, called\n"));
+
     /*
      * loop through columns
      */
@@ -1334,6 +1322,8 @@ void saHpiAnnouncementTable_set_free( netsnmp_request_group *rg )
     saHpiAnnouncementTable_context *row_ctx = (saHpiAnnouncementTable_context *)rg->existing_row;
     saHpiAnnouncementTable_context *undo_ctx = (saHpiAnnouncementTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_free, called\n"));
 
     /*
      * loop through columns
@@ -1429,6 +1419,8 @@ void saHpiAnnouncementTable_set_undo( netsnmp_request_group *rg )
     saHpiAnnouncementTable_context *undo_ctx = (saHpiAnnouncementTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_set_undo, called\n"));
+
     /*
      * loop through columns
      */
@@ -1507,6 +1499,8 @@ initialize_table_saHpiAnnouncementTable(void)
 {
     netsnmp_table_registration_info *table_info;
 
+    DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnouncementTable, called\n"));
+
     if(my_handler) {
         snmp_log(LOG_ERR, "initialize_table_saHpiAnnouncementTable_handler called again\n");
         return;
@@ -1559,18 +1553,18 @@ initialize_table_saHpiAnnouncementTable(void)
     cb.container = netsnmp_container_find("saHpiAnnouncementTable_primary:"
                                           "saHpiAnnouncementTable:"
                                           "table_container");
-#ifdef saHpiAnnouncementTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiAnnouncementTable_secondary:"
                                                        "saHpiAnnouncementTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiAnnouncementTable_cmp;
-#endif
-#ifdef saHpiAnnouncementTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiAnnouncementTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiAnnouncementTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiAnnouncementTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiAnnouncementTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiAnnouncementTable_row_copy;
@@ -1585,7 +1579,7 @@ initialize_table_saHpiAnnouncementTable(void)
     cb.set_commit = saHpiAnnouncementTable_set_commit;
     cb.set_free = saHpiAnnouncementTable_set_free;
     cb.set_undo = saHpiAnnouncementTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiAnnouncementTable",
                 "Registering table saHpiAnnouncementTable "
                 "as a table array\n"));
@@ -1608,6 +1602,8 @@ int saHpiAnnouncementTable_get_value(
 {
     netsnmp_variable_list *var = request->requestvb;
     saHpiAnnouncementTable_context *context = (saHpiAnnouncementTable_context *)item;
+
+    DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_get_value, called\n"));
 
     switch(table_info->colnum) {
 
@@ -1730,6 +1726,8 @@ int saHpiAnnouncementTable_get_value(
 const saHpiAnnouncementTable_context *
 saHpiAnnouncementTable_get_by_idx(netsnmp_index * hdr)
 {
+        DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_get_by_idx, called\n"));
+
     return (const saHpiAnnouncementTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
