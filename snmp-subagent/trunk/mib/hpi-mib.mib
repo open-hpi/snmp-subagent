@@ -4340,10 +4340,12 @@ saHpiAnnouncementEntry OBJECT-TYPE
 
 SaHpiAnnouncementEntry ::= SEQUENCE {
         saHpiAnnouncementEntryId        SaHpiEntryId,
+        saHpiAnnouncementAnnunciatorNum SaHpiInstrumentId,
         saHpiAnnouncementTimestamp      SaHpiTime,
         saHpiAnnouncementAddedByUser    TruthValue,
         saHpiAnnouncementSeverity       SaHpiSeverity,
         saHpiAnnouncementAcknowledged   TruthValue,
+        saHpiAnnouncementAckBySeverity  SaHpiSeverity,
         saHpiAnnouncementStatusCondType INTEGER,
         saHpiAnnouncementEntityPath     SaHpiEntityPath,
         saHpiAnnouncementSensorNum      Unsigned32,
@@ -4367,6 +4369,13 @@ saHpiAnnouncementEntryId OBJECT-TYPE
                 SAHPI_LAST_ENTRY  0xFFFFFFFF"
         ::= { saHpiAnnouncementEntry 1 }
 
+saHpiAnnouncementAnnunciatorNum OBJECT-TYPE
+        SYNTAX SaHpiInstrumentId
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+                "Annunciator number for the addressed Annunciator."
+        ::= { saHpiAnnouncementEntry 2 }
 
 saHpiAnnouncementTimestamp OBJECT-TYPE
         SYNTAX SaHpiTime
@@ -4374,7 +4383,7 @@ saHpiAnnouncementTimestamp OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Time when announcement added to set."
-        ::= { saHpiAnnouncementEntry 2 }
+        ::= { saHpiAnnouncementEntry 3 }
 
 
 saHpiAnnouncementAddedByUser OBJECT-TYPE
@@ -4384,7 +4393,7 @@ saHpiAnnouncementAddedByUser OBJECT-TYPE
         DESCRIPTION
                 "True if added to set by HPI SNMP Manager, False if added
                 automatically by HPI implementation."
-        ::= { saHpiAnnouncementEntry 3 }
+        ::= { saHpiAnnouncementEntry 4 }
 
 
 saHpiAnnouncementSeverity OBJECT-TYPE
@@ -4394,7 +4403,7 @@ saHpiAnnouncementSeverity OBJECT-TYPE
         DESCRIPTION
                 "Only used with DAT and Annunciator functions.
                 This is not a valid severity for events or alarms."
-        ::= { saHpiAnnouncementEntry 4 }
+        ::= { saHpiAnnouncementEntry 5 }
 
 
 saHpiAnnouncementAcknowledged OBJECT-TYPE
@@ -4402,9 +4411,18 @@ saHpiAnnouncementAcknowledged OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "Acknowledged flag."
-        ::= { saHpiAnnouncementEntry 5 }
-
+                "Acknowledged flag.Use this columnar node to 
+		acknowledge a specific Announcement."
+        ::= { saHpiAnnouncementEntry 6 }
+	
+saHpiAnnouncementAckBySeverity OBJECT-TYPE
+        SYNTAX SaHpiSeverity
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+                "Use this columnar node to acknowledge 
+		all Announcements of a particular severity."
+        ::= { saHpiAnnouncementEntry 7 }
 
 saHpiAnnouncementStatusCondType OBJECT-TYPE
         SYNTAX INTEGER {
@@ -4417,7 +4435,7 @@ saHpiAnnouncementStatusCondType OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Status Condition Type."
-        ::= { saHpiAnnouncementEntry 6 }
+        ::= { saHpiAnnouncementEntry 8 }
 
 
 saHpiAnnouncementEntityPath OBJECT-TYPE
@@ -4426,7 +4444,7 @@ saHpiAnnouncementEntityPath OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "See Textual-Convention for details."
-        ::= { saHpiAnnouncementEntry 7 }
+        ::= { saHpiAnnouncementEntry 9 }
 
 
 saHpiAnnouncementSensorNum OBJECT-TYPE
@@ -4436,7 +4454,7 @@ saHpiAnnouncementSensorNum OBJECT-TYPE
         DESCRIPTION
                 "Sensor associated with status Only valid
                 if Type is SAHPI_STATUS_COND_TYPE_SENSOR."
-        ::= { saHpiAnnouncementEntry 8 }
+        ::= { saHpiAnnouncementEntry 10 }
 
 
 saHpiAnnouncementEventState OBJECT-TYPE
@@ -4446,7 +4464,7 @@ saHpiAnnouncementEventState OBJECT-TYPE
         DESCRIPTION
                 "Sensor event state. Only valid if Type is
                 SAHPI_STATUS_COND_TYPE_SENSOR.."
-        ::= { saHpiAnnouncementEntry 9 }
+        ::= { saHpiAnnouncementEntry 11 }
 
 
 saHpiAnnouncementName OBJECT-TYPE
@@ -4455,7 +4473,7 @@ saHpiAnnouncementName OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "AIS compatible identifier associated with Status condition."
-        ::= { saHpiAnnouncementEntry 10 }
+        ::= { saHpiAnnouncementEntry 12 }
 
 
 saHpiAnnouncementMid OBJECT-TYPE
@@ -4465,7 +4483,7 @@ saHpiAnnouncementMid OBJECT-TYPE
         DESCRIPTION
                 "Manufacturer Id associated with status condition,
                 required when type is SAHPI_STATUS_COND_TYPE_OEM."
-        ::= { saHpiAnnouncementEntry 11 }
+        ::= { saHpiAnnouncementEntry 13 }
 
 
 saHpiAnnouncementTextType OBJECT-TYPE
@@ -4475,7 +4493,7 @@ saHpiAnnouncementTextType OBJECT-TYPE
         DESCRIPTION
                 "Field Data.
                 See Definition for SaHpiTextType for more details."
-        ::= { saHpiAnnouncementEntry 12 }
+        ::= { saHpiAnnouncementEntry 14 }
 
 
 saHpiAnnouncementTextLanguage OBJECT-TYPE
@@ -4485,7 +4503,7 @@ saHpiAnnouncementTextLanguage OBJECT-TYPE
         DESCRIPTION
                 "Field Data.
                 See Definition for SaHpiTextLanguage for more details."
-        ::= { saHpiAnnouncementEntry 13 }
+        ::= { saHpiAnnouncementEntry 15 }
 
 
 saHpiAnnouncementText OBJECT-TYPE
@@ -4496,7 +4514,7 @@ saHpiAnnouncementText OBJECT-TYPE
                 "Field Data.
                 The type of date is specified
                 by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-        ::= { saHpiAnnouncementEntry 14 }
+        ::= { saHpiAnnouncementEntry 16 }
 
 
 saHpiAnnouncementDelete OBJECT-TYPE
@@ -4507,7 +4525,7 @@ saHpiAnnouncementDelete OBJECT-TYPE
                 "This function allows the HPI SNMP Manager to delete a single
                 announcement. Announcements may be deleted individually by specifying 
                 a specific index and setting this columnar node to destroy(6)."
-        ::= { saHpiAnnouncementEntry 15 }
+        ::= { saHpiAnnouncementEntry 17 }
 
 
 --/*******************************************************************************
@@ -11356,10 +11374,12 @@ saHpiUserEventGroup OBJECT-GROUP
 saHpiAnnouncementGroup OBJECT-GROUP
         OBJECTS {
                 saHpiAnnouncementEntryCount,
+		saHpiAnnouncementAnnunciatorNum,
                 saHpiAnnouncementTimestamp,
                 saHpiAnnouncementAddedByUser,
                 saHpiAnnouncementSeverity,
                 saHpiAnnouncementAcknowledged,
+		saHpiAnnouncementAckBySeverity,
                 saHpiAnnouncementStatusCondType,
                 saHpiAnnouncementEntityPath,
                 saHpiAnnouncementSensorNum,
