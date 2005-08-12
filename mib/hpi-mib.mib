@@ -1775,6 +1775,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
         saHpiDomainAlarmTimestamp          SaHpiTime,
         saHpiDomainAlarmSeverity           SaHpiSeverity,
         saHpiDomainAlarmAcknowledged       TruthValue,
+        saHpiDomainAlarmAckBySeverity      SaHpiSeverity,
         saHpiDomainAlarmCondStatusCondType INTEGER,
         saHpiDomainAlarmCondEntityPath     SaHpiEntityPath,
         saHpiDomainAlarmCondSensorNum      Unsigned32,
@@ -1823,7 +1824,8 @@ saHpiDomainAlarmAcknowledged OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "An HPI SNMP Manager acknowledges an alarm to indicate that it is aware of the alarm 
+                "Use this columnar node to acknowledge a specific Alarm.
+		An HPI SNMP Manager acknowledges an alarm to indicate that it is aware of the alarm 
                 and to influence platform-specific alarm annunciation that may be provided  
                 by the implementation.  Typically, an implementation ignores acknowledged   
                 alarms when announcing an alarm on annunciation devices such as audible     
@@ -1864,6 +1866,56 @@ saHpiDomainAlarmAcknowledged OBJECT-TYPE
                 SAHPI_ENTRY_UNSPECIFIED should be used with this function for clarity.      
                 "
         ::= { saHpiDomainAlarmEntry 4 }
+	
+
+saHpiDomainAlarmAckBySeverity OBJECT-TYPE
+        SYNTAX SaHpiSeverity
+        MAX-ACCESS read-create
+        STATUS current
+        DESCRIPTION
+                "Use this columnar node to acknowledge Alarms based on severity.
+		An HPI SNMP Manager acknowledges an alarm to indicate that it is aware of the alarm 
+                and to influence platform-specific alarm annunciation that may be provided  
+                by the implementation.  Typically, an implementation ignores acknowledged   
+                alarms when announcing an alarm on annunciation devices such as audible     
+                sirens and dry contact closures.  However, alarm annunciation is            
+                implementation-specific.                                                    
+                                                                                            
+                An acknowledged alarm will have the Acknowledged field in the alarm entry   
+                set to True.                                                                
+                                                                                            
+                DomainAlarms are acknowledged by one of two ways: a single alarm entry by DomainAlarmId 
+                regardless of severity or as a group of alarm entries by Severity           
+                regardless of DomainAlarmId.                                                      
+                                                                                            
+                To acknowledge all alarms contained within the DAT, set the Severity        
+                parameter to allSeverities(256), and set the DomainAlarmId parameter to         
+                SAHPI_ENTRY_UNSPECIFIED.                                                    
+                                                                                            
+                To acknowledge all alarms of a specific severity contained within the DAT,  
+                set the Severity parameter to the appropriate value, and set the DomainAlarmId    
+                parameter to SAHPI_ENTRY_UNSPECIFIED.                                       
+                                                                                            
+                To acknowledge a single alarm entry, set the DomainAlarmId parameter to a value   
+                other than SAHPI_ENTRY_UNSPECIFIED.  The DomainAlarmId must be a valid identifier 
+                for an alarm entry present in the DAT at the time of the function call.     
+                                                                                            
+                If an alarm has been previously acknowledged, acknowledging it again has no 
+                effect.  However, this is not an error.                                     
+                                                                                            
+                If the DomainAlarmId parameter has a value other than SAHPI_ENTRY_UNSPECIFIED,    
+                the Severity parameter is ignored.                                          
+                                                                                            
+                If the DomainAlarmId parameter is passed as SAHPI_ENTRY_UNSPECIFIED, and no       
+                alarms are present that meet the requested Severity, this function will     
+                have no effect.  However, this is not an error.                             
+                                                                                            
+                SAHPI_ENTRY_UNSPECIFIED is defined as the same value as SAHPI_FIRST_ENTRY,  
+                so using either symbol will have the same effect.  However,                 
+                SAHPI_ENTRY_UNSPECIFIED should be used with this function for clarity.      
+                "
+        ::= { saHpiDomainAlarmEntry 5 }
+
 
 
 saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
@@ -1880,7 +1932,7 @@ saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
 
                 Note: Enumerated values are increased by one value compared to
                 SAI-HPI-B.01.01 spec."
-        ::= { saHpiDomainAlarmEntry 5 }
+        ::= { saHpiDomainAlarmEntry 6 }
 
 
 saHpiDomainAlarmCondEntityPath OBJECT-TYPE
@@ -1889,7 +1941,7 @@ saHpiDomainAlarmCondEntityPath OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "See Textual-Convention for details."
-        ::= { saHpiDomainAlarmEntry 6 }
+        ::= { saHpiDomainAlarmEntry 7 }
 
 
 saHpiDomainAlarmCondSensorNum OBJECT-TYPE
@@ -1899,7 +1951,7 @@ saHpiDomainAlarmCondSensorNum OBJECT-TYPE
         DESCRIPTION
                 "Sensor associated with status Only valid if
                 saHpiDomainAlarmCondStatusCondType is sensor(1)."
-        ::= { saHpiDomainAlarmEntry 7 }
+        ::= { saHpiDomainAlarmEntry 8 }
 
 
 saHpiDomainAlarmCondEventState OBJECT-TYPE
@@ -1909,7 +1961,7 @@ saHpiDomainAlarmCondEventState OBJECT-TYPE
         DESCRIPTION
                 "Sensor event state.  Only valid if
                 saHpiDomainAlarmCondStatusCondType is sensor(1)."
-        ::= { saHpiDomainAlarmEntry 8 }
+        ::= { saHpiDomainAlarmEntry 9 }
 
 
 saHpiDomainAlarmCondNameValue OBJECT-TYPE
@@ -1923,7 +1975,7 @@ saHpiDomainAlarmCondNameValue OBJECT-TYPE
                 Specification standardizes the interface between Service 
                 Availability(TM) Forum compliant High Availability (HA) 
                 middleware and service applications. http://www.saforum.org"
-        ::= { saHpiDomainAlarmEntry 9 }
+        ::= { saHpiDomainAlarmEntry 10 }
 
 
 saHpiDomainAlarmCondMid OBJECT-TYPE
@@ -1933,7 +1985,7 @@ saHpiDomainAlarmCondMid OBJECT-TYPE
         DESCRIPTION
                 "Manufacturer Id associated with status condition,
                 required when saHpiDomainAlarmCondStatusCondType is oem(3)."
-        ::= { saHpiDomainAlarmEntry 10 }
+        ::= { saHpiDomainAlarmEntry 11 }
 
 
 saHpiDomainAlarmCondTextType OBJECT-TYPE
@@ -1945,7 +1997,7 @@ saHpiDomainAlarmCondTextType OBJECT-TYPE
                 Domain. . For more details, see textual definition and 
                 saHpiDomainAlarmCondDomainTextType and 
                 saHpiDomainAlarmCondDomainTextLanguage"
-        ::= { saHpiDomainAlarmEntry 11 }
+        ::= { saHpiDomainAlarmEntry 12 }
 
 
 saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
@@ -1955,7 +2007,7 @@ saHpiDomainAlarmCondTextLanguage OBJECT-TYPE
         DESCRIPTION
                 "Optional data associated with status
                 condition. For more details, see textual definition"
-        ::= { saHpiDomainAlarmEntry 12 }
+        ::= { saHpiDomainAlarmEntry 13 }
 
 
 saHpiDomainAlarmCondText OBJECT-TYPE
@@ -1966,7 +2018,7 @@ saHpiDomainAlarmCondText OBJECT-TYPE
                 "Optional data associated with status condition.
                 The type of date is specified by saHpiDomainAlarmCondDomainAlarmaTextType and 
                 saHpiDomainAlarmCondDomainAlarmaTextLanguage."
-        ::= { saHpiDomainAlarmEntry 13 }
+        ::= { saHpiDomainAlarmEntry 14 }
 
 
 saHpiDomainAlarmRowStatus OBJECT-TYPE
@@ -2021,7 +2073,7 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
         REFERENCE
 
                 "SAI-HPI-B.01.01 section 6.6 and 6.6.5."
-        ::= { saHpiDomainAlarmEntry 14 }
+        ::= { saHpiDomainAlarmEntry 15 }
 
 
 --/*******************************************************************************
@@ -11162,6 +11214,7 @@ saHpiDomainAlarmGroup OBJECT-GROUP
                 saHpiDomainAlarmTimestamp,
                 saHpiDomainAlarmSeverity,
                 saHpiDomainAlarmAcknowledged,
+		saHpiDomainAlarmAckBySeverity,
                 saHpiDomainAlarmCondStatusCondType,
                 saHpiDomainAlarmCondEntityPath,
                 saHpiDomainAlarmCondSensorNum,
