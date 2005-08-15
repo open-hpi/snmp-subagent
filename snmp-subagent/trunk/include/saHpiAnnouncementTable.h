@@ -27,7 +27,8 @@ extern "C" {
 
 typedef struct saHpiAnnouncementTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
-
+                  
+    int sahpi_announcement_annunciator_num_set;
     int sahpi_announcement_severity_set;
     int sahpi_announcement_acknowledged_set;
     int sahpi_announcement_status_cond_type_set;
