@@ -148,7 +148,12 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	        domain_alarm_ctx->saHpiDomainAlarmTimestamp = Alarm.Timestamp;
 	
                 /** TruthValue = ASN_INTEGER */
-	        domain_alarm_ctx->saHpiDomainAlarmAcknowledged = Alarm.Acknowledged;
+	        domain_alarm_ctx->saHpiDomainAlarmAcknowledged = 
+                        (Alarm.Acknowledged == SAHPI_TRUE)
+                        ? MIB_TRUE : MIB_FALSE; 
+
+                /** TruthValue = ASN_INTEGER */
+	        domain_alarm_ctx->saHpiDomainAlarmAckBySeverity = 0;
 	
 	        /** INTEGER = ASN_INTEGER */
         	domain_alarm_ctx->saHpiDomainAlarmCondStatusCondType = Alarm.AlarmCond.Type + 1;
@@ -439,6 +444,8 @@ static int saHpiDomainAlarmTable_row_copy(saHpiDomainAlarmTable_context * dst,
 
     dst->saHpiDomainAlarmAcknowledged = src->saHpiDomainAlarmAcknowledged;
 
+    dst->saHpiDomainAlarmAckBySeverity = src->saHpiDomainAlarmAckBySeverity;
+
     dst->saHpiDomainAlarmCondStatusCondType = src->saHpiDomainAlarmCondStatusCondType;
 
     memcpy( dst->saHpiDomainAlarmCondEntityPath, src->saHpiDomainAlarmCondEntityPath, src->saHpiDomainAlarmCondEntityPath_len );
@@ -667,6 +674,7 @@ saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
      ctx->saHpiDomainAlarmTimestamp = 0;
      ctx->saHpiDomainAlarmSeverity = 0;
      ctx->saHpiDomainAlarmAcknowledged = 0;
+     ctx->saHpiDomainAlarmAckBySeverity = 0;
      ctx->saHpiDomainAlarmCondStatusCondType = 0;
      ctx->saHpiDomainAlarmCondEntityPath = 0;
      ctx->saHpiDomainAlarmCondSensorNum = 0;
@@ -784,6 +792,12 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiDomainAlarmAcknowledged));
+        break;
+
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
+                                                sizeof(row_ctx->saHpiDomainAlarmAckBySeverity));
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
@@ -915,6 +929,20 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
                 rc = netsnmp_check_vb_truthvalue(current->ri->requestvb);
+        break;
+
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
+                    /*
+                     * TODO: routine to check valid values
+                     *
+                     * EXAMPLE:
+                     *
+                    * if ( *var->val.integer != XXX ) {
+                *    rc = SNMP_ERR_INCONSISTENTVALUE;
+                *    rc = SNMP_ERR_BADVALUE;
+                * }
+                */
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
@@ -1110,6 +1138,11 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiDomainAlarmAcknowledged = *var->val.integer;
         break;
 
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
+            row_ctx->saHpiDomainAlarmAckBySeverity = *var->val.integer;
+        break;
+
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmCondStatusCondType = *var->val.integer;
@@ -1244,6 +1277,10 @@ void saHpiDomainAlarmTable_set_commit( netsnmp_request_group *rg )
             /** TruthValue = ASN_INTEGER */
         break;
 
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
+        break;
+
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
         break;
@@ -1329,6 +1366,10 @@ void saHpiDomainAlarmTable_set_free( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
+        break;
+
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
@@ -1427,6 +1468,10 @@ void saHpiDomainAlarmTable_set_undo( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
+        break;
+
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
@@ -1620,6 +1665,13 @@ int saHpiDomainAlarmTable_get_value(
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (char*)&context->saHpiDomainAlarmAcknowledged,
                          sizeof(context->saHpiDomainAlarmAcknowledged) );
+        break;
+    
+        case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
+            /** SaHpiSeverity = ASN_INTEGER */
+            snmp_set_var_typed_value(var, ASN_INTEGER,
+                         (char*)&context->saHpiDomainAlarmAckBySeverity,
+                         sizeof(context->saHpiDomainAlarmAckBySeverity) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
