@@ -819,6 +819,7 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
      ctx->saHpiAnnouncementDelete = 0;
     */
 
+    ctx->sahpi_announcement_annunciator_num_set = MIB_FALSE; 
     ctx->sahpi_announcement_severity_set =  MIB_FALSE;
     ctx->sahpi_announcement_acknowledged_set =  MIB_FALSE;
     ctx->sahpi_announcement_status_cond_type_set =  MIB_FALSE;
@@ -937,32 +938,33 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementSeverity));
+                      sizeof(row_ctx->saHpiAnnouncementSeverity));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementAcknowledged));
+                      sizeof(row_ctx->saHpiAnnouncementAcknowledged));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementAckBySeverity));
+                      sizeof(row_ctx->saHpiAnnouncementAckBySeverity));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementStatusCondType));
+                      sizeof(row_ctx->saHpiAnnouncementStatusCondType));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
 	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
             if (rc == SNMP_ERR_NOERROR ) {
-            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEntityPath)) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiAnnouncementEntityPath)) {
             		    rc = SNMP_ERR_WRONGLENGTH;
             	    }
             }	    
@@ -971,14 +973,15 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->saHpiAnnouncementSensorNum));
+                        sizeof(row_ctx->saHpiAnnouncementSensorNum));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
 	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
             if (rc == SNMP_ERR_NOERROR ) {
-            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementEventState)) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiAnnouncementEventState)) {
             		    rc = SNMP_ERR_WRONGLENGTH;
             	    }
             }	    
@@ -988,7 +991,8 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
             /** OCTETSTR = ASN_OCTET_STR */
 	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
             if (rc == SNMP_ERR_NOERROR ) {
-            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementName)) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiAnnouncementName)) {
             		    rc = SNMP_ERR_WRONGLENGTH;
             	    }
             }	    
@@ -997,26 +1001,27 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->saHpiAnnouncementMid));
+                        sizeof(row_ctx->saHpiAnnouncementMid));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementTextType));
+                        sizeof(row_ctx->saHpiAnnouncementTextType));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementTextLanguage));
+                        sizeof(row_ctx->saHpiAnnouncementTextLanguage));
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
 	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
             if (rc == SNMP_ERR_NOERROR ) {
-            	    if (var->val_len > sizeof(row_ctx->saHpiAnnouncementText)) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiAnnouncementText)) {
             		    rc = SNMP_ERR_WRONGLENGTH;
             	    }
             }		    
@@ -1025,7 +1030,7 @@ void saHpiAnnouncementTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
-                                                sizeof(row_ctx->saHpiAnnouncementDelete));
+                        sizeof(row_ctx->saHpiAnnouncementDelete));
         break;
 
         default: /** We shouldn't get here */
@@ -1086,10 +1091,6 @@ void saHpiAnnouncementTable_set_reserve2( netsnmp_request_group *rg )
             /** SaHpiSeverity = ASN_INTEGER */
                 if (oh_lookup_severity(*var->val.integer - 1) == NULL)
                         rc = SNMP_ERR_BADVALUE;
-                if ((row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
-                     SAHPI_ENTRY_UNSPECIFIED)) {
-                }
-
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED:
@@ -1099,16 +1100,8 @@ void saHpiAnnouncementTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_severity(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
@@ -1190,58 +1183,34 @@ void saHpiAnnouncementTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_texttype(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_language(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                /*
+                 * TODO: routine to check valid values
+                 *
+                 * EXAMPLE:
+                 *
+                * if ( XXX_check_value( var->val.string, XXX ) ) {
+            *    rc = SNMP_ERR_INCONSISTENTVALUE;
+            *    rc = SNMP_ERR_BADVALUE;
+            * }
+            */
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (*var->val.integer != SAHPIANNOUNCEMENTDELETE_DESTROY)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         default: /** We shouldn't get here */
@@ -1293,14 +1262,16 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTANNUNCIATORNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementAnnunciatorNum = *var->val.integer;
-            //TODO DMJ
+            row_ctx->sahpi_announcement_annunciator_num_set = MIB_TRUE; 
+            row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             row_ctx->saHpiAnnouncementSeverity = *var->val.integer;
-            if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+            if (rg->row_created == SAHPIANNOUNCEMENTDELETE_ACTIVE) {
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
             } 
             row_ctx->sahpi_announcement_severity_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
@@ -1311,14 +1282,19 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiAnnouncementAcknowledged = *var->val.integer;
       
             if (rg->row_created == 1) {                                 /* createAndWait */
-                    row_ctx->saHpiAnnouncementDelete = 5; 
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
                     row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+
             } else if ((rg->row_created != 1) &&                        /* createAndWait maybe time to add */
-                       (row_ctx->saHpiAnnouncementDelete == 5)){
+                       (row_ctx->saHpiAnnouncementDelete == 
+                        SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT)){
                     row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
                     row_err = announcement_add(row_ctx);               /* announcement being added      */
+
             } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
-                       (row_ctx->saHpiAnnouncementDelete == 1)){
+                       (row_ctx->saHpiAnnouncementDelete == 
+                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){
                     row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
             }
         break;
@@ -1326,16 +1302,33 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             row_ctx->saHpiAnnouncementAckBySeverity = *var->val.integer;
-            //TODO DMJ
+
+            if (rg->row_created == 1) {                                 /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
+                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+
+            } else if ((rg->row_created != 1) &&                        /* createAndWait maybe time to add */
+                       (row_ctx->saHpiAnnouncementDelete == 
+                        SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT)){
+                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+                    row_err = announcement_add(row_ctx);               /* announcement being added      */
+
+            } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
+                       (row_ctx->saHpiAnnouncementDelete == 
+                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){
+                    row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
+            }
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiAnnouncementStatusCondType = *var->val.integer;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_status_cond_type_set = MIB_TRUE; 
             }
-            row_ctx->sahpi_announcement_status_cond_type_set = MIB_TRUE; 
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1344,9 +1337,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiAnnouncementEntityPath,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementEntityPath_len = var->val_len;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_entitypath_set = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_entitypath_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1354,9 +1348,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementSensorNum = *var->val.integer;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_sensornum_set = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_sensornum_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1365,9 +1360,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiAnnouncementEventState,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementEventState_len = var->val_len;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_event_state_set = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_event_state_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1376,9 +1372,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiAnnouncementName,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementName_len = var->val_len;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_name_set = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_name_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1386,9 +1383,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementMid = *var->val.integer;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_mid = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_mid = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1396,9 +1394,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             /** SaHpiTextType = ASN_INTEGER */
             row_ctx->saHpiAnnouncementTextType = *var->val.integer;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_text_type_set = MIB_TRUE; 
             }
-            row_ctx->sahpi_announcement_text_type_set = MIB_TRUE; 
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1406,9 +1405,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             /** SaHpiTextLanguage = ASN_INTEGER */
             row_ctx->saHpiAnnouncementTextLanguage = *var->val.integer;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_text_language_set = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_text_language_set = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1417,16 +1417,20 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiAnnouncementText,var->val.string,var->val_len);
             row_ctx->saHpiAnnouncementText_len = var->val_len;
             if (rg->row_created == 1) {
-                    row_ctx->saHpiAnnouncementDelete = 5; /* createAndWait */
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_text = MIB_TRUE;
             }
-            row_ctx->sahpi_announcement_text = MIB_TRUE;
             row_err = announcement_add(row_ctx);
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
-            row_ctx->saHpiAnnouncementDelete = *var->val.integer;
-            row_err = announcement_delete(row_ctx);
+                if (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE) {
+                        row_ctx->saHpiAnnouncementDelete = *var->val.integer;
+                        row_err = announcement_delete(row_ctx);
+                } 
+                rg->row_deleted = 1;
         break;
 
         default: /** We shouldn't get here */
