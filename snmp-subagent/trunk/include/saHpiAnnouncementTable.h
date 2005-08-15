@@ -49,6 +49,9 @@ typedef struct saHpiAnnouncementTable_context_s {
         /** SaHpiEntryId = ASN_UNSIGNED */
             unsigned long saHpiAnnouncementEntryId;
 
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+            unsigned long saHpiAnnouncementAnnunciatorNum;
+
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
             long saHpiAnnouncementTimestamp;
@@ -61,6 +64,9 @@ typedef struct saHpiAnnouncementTable_context_s {
 
         /** TruthValue = ASN_INTEGER */
             long saHpiAnnouncementAcknowledged;
+
+        /** SaHpiSeverity = ASN_INTEGER */
+            long saHpiAnnouncementAckBySeverity;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiAnnouncementStatusCondType;
@@ -157,23 +163,29 @@ extern size_t saHpiAnnouncementTable_oid_len;
  */
 
 #define ANNOUNCEMENT_INDEX_NR 3 
+#define saHpiDomainId_INDEX 0
+#define saHpiResourceId_INDEX 1
+#define saHpiAnnouncementEntryId_INDEX 2
+
 #define COLUMN_SAHPIANNOUNCEMENTENTRYID 1
-#define COLUMN_SAHPIANNOUNCEMENTTIMESTAMP 2
-#define COLUMN_SAHPIANNOUNCEMENTADDEDBYUSER 3
-#define COLUMN_SAHPIANNOUNCEMENTSEVERITY 4
-#define COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED 5
-#define COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE 6
-#define COLUMN_SAHPIANNOUNCEMENTENTITYPATH 7
-#define COLUMN_SAHPIANNOUNCEMENTSENSORNUM 8
-#define COLUMN_SAHPIANNOUNCEMENTEVENTSTATE 9
-#define COLUMN_SAHPIANNOUNCEMENTNAME 10
-#define COLUMN_SAHPIANNOUNCEMENTMID 11
-#define COLUMN_SAHPIANNOUNCEMENTTEXTTYPE 12
-#define COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE 13
-#define COLUMN_SAHPIANNOUNCEMENTTEXT 14
-#define COLUMN_SAHPIANNOUNCEMENTDELETE 15
+#define COLUMN_SAHPIANNOUNCEMENTANNUNCIATORNUM 2
+#define COLUMN_SAHPIANNOUNCEMENTTIMESTAMP 3
+#define COLUMN_SAHPIANNOUNCEMENTADDEDBYUSER 4
+#define COLUMN_SAHPIANNOUNCEMENTSEVERITY 5
+#define COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED 6
+#define COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY 7
+#define COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE 8
+#define COLUMN_SAHPIANNOUNCEMENTENTITYPATH 9
+#define COLUMN_SAHPIANNOUNCEMENTSENSORNUM 10
+#define COLUMN_SAHPIANNOUNCEMENTEVENTSTATE 11
+#define COLUMN_SAHPIANNOUNCEMENTNAME 12
+#define COLUMN_SAHPIANNOUNCEMENTMID 13
+#define COLUMN_SAHPIANNOUNCEMENTTEXTTYPE 14
+#define COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE 15
+#define COLUMN_SAHPIANNOUNCEMENTTEXT 16
+#define COLUMN_SAHPIANNOUNCEMENTDELETE 17
 #define saHpiAnnouncementTable_COL_MIN 2
-#define saHpiAnnouncementTable_COL_MAX 15
+#define saHpiAnnouncementTable_COL_MAX 17
 
 int saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, netsnmp_index * hdr );
 
