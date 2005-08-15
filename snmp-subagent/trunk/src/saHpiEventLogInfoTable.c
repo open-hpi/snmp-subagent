@@ -281,6 +281,44 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 
 }
 
+/*
+ * @row_ctx - pointer to the row context
+ *
+ * return:
+ */
+int set_event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx)
+{
+
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "set_event_info_overflow_reset, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+	
+        rc = saHpiEventLogOverflowReset(session_id, resource_id);
+       
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+		  	"Call to saHpiEventLogOverflowReset failed to reset overflow flag rc: %s.\n",
+		 	 oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+		   	"Call to saHpiEventLogOverflowReset failed to reset overflow flag rc: %s.\n",
+		   	oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+ 
+	}	
+
+	return SNMP_ERR_NOERROR; 
+}	
+
+
+
 /**
  * 
  * @row_ctx:
@@ -327,7 +365,6 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
 
 	return SNMP_ERR_NOERROR; 
 }
-
 
 /************************************************************/
 /************************************************************/
@@ -739,6 +776,7 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
+
         case COLUMN_SAHPIEVENTLOGINFOTIME:
             /** SafUnsigned64 = ASN_OPAQUE */
             rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
@@ -750,6 +788,7 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
                             " SNMP_ERR_WRONGLENGTH\n", rc));
                     }
             }
+
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -758,13 +797,13 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
                                                 sizeof(row_ctx->saHpiEventLogInfoOverflowReset));
         break;
 
-        case COLUMN_SAHPIEVENTLOGCLEAR:
+        case COLUMN_SAHPIEVENTLOGCLEAR: // saHpiEventLogClear
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiEventLogClear));
         break;
 
-        case COLUMN_SAHPIEVENTLOGSTATE:
+        case COLUMN_SAHPIEVENTLOGSTATE: //saHpiEventLogStateSet
             /** TruthValue = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiEventLogState));
@@ -895,21 +934,22 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
             memcpy(row_ctx->saHpiEventLogInfoTime,var->val.string,var->val_len);
             row_ctx->saHpiEventLogInfoTime_len = var->val_len;
             row_err = event_log_info_time_set(row_ctx);
+
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
             /** INTEGER = ASN_INTEGER */
-            row_ctx->saHpiEventLogInfoOverflowReset = *var->val.integer;
-            //TODO Dan Fix Me !
+            //row_ctx->saHpiEventLogInfoOverflowReset = *var->val.integer;
+            row_err = set_event_info_overflow_reset(row_ctx);
         break;
 
-        case COLUMN_SAHPIEVENTLOGCLEAR:
+        case COLUMN_SAHPIEVENTLOGCLEAR: // saHpiEventLogClear
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogClear = *var->val.integer;
             //TODO Dan Fix Me !
         break;
 
-        case COLUMN_SAHPIEVENTLOGSTATE:
+        case COLUMN_SAHPIEVENTLOGSTATE: // saHpiEventLogStateSet
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogState = *var->val.integer;
             //TODO Dan Fix Me !

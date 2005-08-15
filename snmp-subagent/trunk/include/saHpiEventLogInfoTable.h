@@ -100,6 +100,10 @@ int saHpiEventLogInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, ne
 SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid);
 int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx);
 
+/*************************************************************
+ * set functions
+ */
+int set_event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx);
 
 /*************************************************************
  * oid declarations
@@ -112,6 +116,7 @@ extern size_t saHpiEventLogInfoTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiEventLogInfoTable
  */
+ 
 /* Number of table Indexes */
 #define EVENT_LOG_INFO_INDEX_NR 2
 #define saHpiDomainId_INDEX 0
