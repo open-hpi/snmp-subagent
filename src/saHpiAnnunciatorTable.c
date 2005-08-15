@@ -754,8 +754,8 @@ void saHpiAnnunciatorTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
 {
-//        saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
-//        saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
+//      saHpiAnnunciatorTable_context *row_ctx = (saHpiAnnunciatorTable_context *)rg->existing_row;
+//      saHpiAnnunciatorTable_context *undo_ctx = (saHpiAnnunciatorTable_context *)rg->undo_info;
         netsnmp_request_group_item *current;
         netsnmp_variable_list *var;
         int rc;
@@ -775,18 +775,20 @@ void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
                 switch (current->tri->colnum) {
                 
                 case COLUMN_SAHPIANNUNCIATORMODE:
-                        /** INTEGER = ASN_INTEGER */
-                        /*
-                         * TODO: routine to check valid values
-                         *
-                         * EXAMPLE:
-                         *
-                        * if ( *var->val.integer != XXX ) {
-                    *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                    *    rc = SNMP_ERR_BADVALUE;
-                    * }
-                    */
-                        break;
+                	if ( ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_AUTO) &&
+                     	     ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_USER) &&
+			     ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_SHARED) )   {
+                        	DEBUGMSGTL ((AGENT, "COLUMN_SAHPIANNUNCIATORMODE"
+                                             " saHpiAnnunciatorTable_set_reserve2"
+                                             " Only modes of "
+					     " SAHPI_ANNUNCIATOR_MODE_AUTO and"
+					     " SAHPI_ANNUNCIATOR_MODE_USER and"
+					     " SAHPI_ANNUNCIATOR_MODE_SHARED"
+                                             " are allowed\n"
+                                            ));
+                                rc = SNMP_ERR_BADVALUE;
+			}	
+                break;
 
                 default: /** We shouldn't get here */
                         netsnmp_assert(0); /** why wasn't this caught in reserve1? */
