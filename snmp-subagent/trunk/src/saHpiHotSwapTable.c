@@ -102,7 +102,7 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
         oid column[2];
         int column_len = 2;
 
-        DEBUGMSGTL ((AGENT, "SAHPI_HOTSWAP_RDR populate_watchdog() called\n"));
+        DEBUGMSGTL ((AGENT, "SAHPI_HOTSWAP_RDR populate_hotswap() called\n"));
 
         if (!rpt_entry) {
                 DEBUGMSGTL ((AGENT, 
