@@ -750,6 +750,49 @@ int set_table_resource_power_action (saHpiResourceTable_context *row_ctx)
 
 }
 
+
+/*
+ * int set_table_resource_tag (saHpiResourceTable_context *row_ctx)
+ */
+int set_table_resource_tag (saHpiResourceTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiTextBufferT    buffer;
+
+        DEBUGMSGTL ((AGENT, "saHpiResourceTable.c -> set_table_resource_tag_text_type called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	    
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->saHpiResourceEntryId; 
+	
+	// copy the data into a TextBufferT structure
+	buffer.DataType   = row_ctx->saHpiResourceTagTextType - 1;
+	buffer.Language   = row_ctx->saHpiResourceTagTextLanguage - 1;
+	buffer.DataLength = row_ctx->saHpiResourceTag_len;
+	memcpy(buffer.Data, row_ctx->saHpiResourceTag, row_ctx->saHpiResourceTag_len);
+
+	rc = saHpiResourceTagSet (session_id, resource_id, &buffer); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			    "Call to saHpiResourceTagSet failed with return code: %s.\n",
+			    oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiResourceTagSet failed with rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return AGENT_ERR_OPERATION;
+
+        }
+		
+	return AGENT_ERR_NOERROR; 
+}	
+
+
 /*
  *  int handle_saHpiResourceEntryCount()
  */
@@ -1483,18 +1526,21 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 
 		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
 			/** SaHpiTextType = ASN_INTEGER */
-			row_ctx->saHpiResourceTagTextType = *var->val.integer;
+			row_ctx->saHpiResourceTagTextType = *var->val.integer;			
+			set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
 			/** SaHpiTextLanguage = ASN_INTEGER */
 			row_ctx->saHpiResourceTagTextLanguage = *var->val.integer;
+			set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCETAG:
 			/** SaHpiText = ASN_OCTET_STR */
 			memcpy(row_ctx->saHpiResourceTag,var->val.string,var->val_len);
 			row_ctx->saHpiResourceTag_len = var->val_len;
+			set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCEPARMCONTROL:

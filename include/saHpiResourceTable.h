@@ -139,6 +139,7 @@ int set_table_severity (saHpiResourceTable_context *row_ctx);
 int set_table_resource_parm_control (saHpiResourceTable_context *row_ctx);
 int set_table_resource_reset_action (saHpiResourceTable_context *row_ctx);
 int set_table_resource_power_action (saHpiResourceTable_context *row_ctx);
+int set_table_resource_tag (saHpiResourceTable_context *row_ctx);
 
 
 /*************************************************************
