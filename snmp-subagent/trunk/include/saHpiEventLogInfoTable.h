@@ -98,12 +98,15 @@ int saHpiEventLogInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, ne
  * function declarations
  */
 SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid);
-int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx);
+
 
 /*************************************************************
  * set functions
  */
-int set_event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx);
+int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx);
+int event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx);
+int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx);
+int event_log_info_state_set (saHpiEventLogInfoTable_context *row_ctx);
 
 /*************************************************************
  * oid declarations

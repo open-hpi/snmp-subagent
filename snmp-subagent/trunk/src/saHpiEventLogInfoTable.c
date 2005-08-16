@@ -176,7 +176,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                         rv =  AGENT_ERR_INTERNAL_ERROR;
                         break;
                 }
-                evt_log_info_context->saHpiEventLogState = event_log_state;
+                evt_log_info_context->saHpiEventLogState =                         
+		        (event_log_state == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
 
                 CONTAINER_INSERT (cb.container, evt_log_info_context);
 
@@ -273,7 +274,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                 "populate_saHpiEventLogInfo, saHpiEventLogStateGet Failed: rv = %d\n",rv));
                 return  AGENT_ERR_INTERNAL_ERROR;
         }
-        evt_log_info_context->saHpiEventLogState = event_log_state;
+        evt_log_info_context->saHpiEventLogState = 		
+	          (event_log_state == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
         
 	CONTAINER_INSERT (cb.container, evt_log_info_context);
 	
@@ -286,14 +288,14 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
  *
  * return:
  */
-int set_event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx)
+int event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx)
 {
 
 	SaErrorT                rc = SA_OK;
 	SaHpiSessionIdT         session_id;
 	SaHpiResourceIdT        resource_id;
 
-        DEBUGMSGTL ((AGENT, "set_event_info_overflow_reset, called\n"));
+        DEBUGMSGTL ((AGENT, "event_info_overflow_reset, called\n"));
 
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
@@ -312,7 +314,7 @@ int set_event_info_overflow_reset (saHpiEventLogInfoTable_context *row_ctx)
 		   	oh_lookup_error(rc)));
 		return get_snmp_error(rc);
  
-	}	
+	}		
 
 	return SNMP_ERR_NOERROR; 
 }	
@@ -364,6 +366,90 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
 	} 
 
 	return SNMP_ERR_NOERROR; 
+}
+
+/*
+ * @row_ctx - pointer to the row context
+ *
+ * return:
+ */
+int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx)
+{
+
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "event_log_info_clear, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+	
+        rc = saHpiEventLogClear(session_id, resource_id);
+       
+	if (rc != SA_OK) {
+	
+	        // Since the command wasn't successful, we reset the saHpiEventLogClear node.
+	        row_ctx->saHpiEventLogClear = MIB_FALSE;
+	
+		snmp_log (LOG_ERR,
+		  	"Call to saHpiEventLogClear failed to clear event logs rc: %s.\n",
+		 	 oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+		   	"Call to saHpiEventLogClear failed to clear event logs rc: %s.\n",
+		   	oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+ 
+	}		
+
+	return SNMP_ERR_NOERROR; 
+	
+}
+
+/*
+ * @row_ctx - pointer to the row context
+ *
+ * return:
+ */
+int event_log_info_state_set (saHpiEventLogInfoTable_context *row_ctx)
+{
+
+	SaErrorT                rc = SA_OK;
+	SaHpiSessionIdT         session_id;
+	SaHpiResourceIdT        resource_id;
+
+        DEBUGMSGTL ((AGENT, "event_log_info_state_set, called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
+	
+	if (row_ctx->saHpiEventLogState == MIB_TRUE) {
+	    rc = saHpiEventLogStateSet(session_id, resource_id, SAHPI_TRUE);
+	}
+	else {
+	    rc = saHpiEventLogStateSet(session_id, resource_id, SAHPI_FALSE);    
+	}
+       
+	if (rc != SA_OK) {
+	
+		snmp_log (LOG_ERR,
+		  	"Call to saHpiEventLogStateSet failed to enable/disable event logs rc: %s.\n",
+		 	 oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+		   	"Call to saHpiEventLogStateSet failed to enable/disable event logs rc: %s.\n",
+		   	oh_lookup_error(rc)));
+		return get_snmp_error(rc);
+ 
+	}		
+
+	return SNMP_ERR_NOERROR; 
+	
 }
 
 /************************************************************/
@@ -756,8 +842,8 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiEventLogInfoTable_context *row_ctx =
             (saHpiEventLogInfoTable_context *)rg->existing_row;
-    saHpiEventLogInfoTable_context *undo_ctx =
-            (saHpiEventLogInfoTable_context *)rg->undo_info;
+    //saHpiEventLogInfoTable_context *undo_ctx =
+    //        (saHpiEventLogInfoTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -829,7 +915,7 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
 void saHpiEventLogInfoTable_set_reserve2( netsnmp_request_group *rg )
 {
     saHpiEventLogInfoTable_context *row_ctx = (saHpiEventLogInfoTable_context *)rg->existing_row;
-    saHpiEventLogInfoTable_context *undo_ctx = (saHpiEventLogInfoTable_context *)rg->undo_info;
+    //saHpiEventLogInfoTable_context *undo_ctx = (saHpiEventLogInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -940,19 +1026,26 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
             /** INTEGER = ASN_INTEGER */
             //row_ctx->saHpiEventLogInfoOverflowReset = *var->val.integer;
-            row_err = set_event_info_overflow_reset(row_ctx);
+            row_err = event_info_overflow_reset(row_ctx);
+            if (row_err == SNMP_ERR_NOERROR) //we were successful; reset the flag.
+	    	row_ctx->saHpiEventLogInfoOverflowFlag = MIB_FALSE;
         break;
 
-        case COLUMN_SAHPIEVENTLOGCLEAR: // saHpiEventLogClear
+        case COLUMN_SAHPIEVENTLOGCLEAR:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogClear = *var->val.integer;
-            //TODO Dan Fix Me !
+	    if (row_ctx->saHpiEventLogClear == MIB_TRUE)
+                event_log_info_clear(row_ctx);
+            if (row_err == SNMP_ERR_NOERROR) //we were successful; reset the flag.
+	    	row_ctx->saHpiEventLogInfoOverflowFlag = MIB_FALSE;
+ 		
         break;
 
-        case COLUMN_SAHPIEVENTLOGSTATE: // saHpiEventLogStateSet
+        case COLUMN_SAHPIEVENTLOGSTATE: 
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiEventLogState = *var->val.integer;
-            //TODO Dan Fix Me !
+            event_log_info_state_set(row_ctx);
+
         break;
 
         default: /** We shouldn't get here */
