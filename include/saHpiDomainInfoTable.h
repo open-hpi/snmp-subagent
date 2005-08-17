@@ -119,6 +119,8 @@ const saHpiDomainInfoTable_context * saHpiDomainInfoTable_get_by_idx_rs(netsnmp_
                                         int row_status);
 int saHpiDomainInfoTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx);
+
 /*************************************************************
  * oid declarations table
  */
@@ -130,6 +132,8 @@ extern size_t saHpiDomainInfoTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiDomainInfoTable
  */
+#define saHpiDomainId_INDEX 0 
+ 
 #define COLUMN_SAHPIDOMAINID 1
 #define COLUMN_SAHPIDOMAINCAPABILITIES 2
 #define COLUMN_SAHPIDOMAINISPEER 3
