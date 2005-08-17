@@ -204,6 +204,48 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 
 
 /*
+ * int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx)
+ */
+int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx)
+{
+	SaErrorT            rc = SA_OK;
+	SaHpiSessionIdT     session_id;
+	SaHpiResourceIdT    resource_id;
+	SaHpiTextBufferT    buffer;
+
+        DEBUGMSGTL ((AGENT, "saHpiDomainInfoTable.c -> set_table_domain_tag called\n"));
+
+	if (!row_ctx)
+		return AGENT_ERR_NULL_DATA;
+
+	    
+	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
+	
+	// copy the data into a TextBufferT structure
+	buffer.DataType   = row_ctx->saHpiDomainTagTextType - 1;
+	buffer.Language   = row_ctx->saHpiDomainTagTextLanguage - 1;
+	buffer.DataLength = row_ctx->saHpiDomainTag_len;
+	memcpy(buffer.Data, row_ctx->saHpiDomainTag, row_ctx->saHpiDomainTag_len);
+
+	rc = saHpiDomainTagSet (session_id, &buffer); 
+
+	if (rc != SA_OK) {
+		snmp_log (LOG_ERR,
+			    "Call to saHpiDomainTagSet failed with return code: %s.\n",
+			    oh_lookup_error(rc));
+		DEBUGMSGTL ((AGENT,
+			     "Call to saHpiDomainTagSet failed with rc: %s.\n",
+			     oh_lookup_error(rc)));
+		return AGENT_ERR_OPERATION;
+
+        }
+		
+	return AGENT_ERR_NOERROR; 
+}	
+
+
+
+/*
  * int handle_saHpiDomainInfoEntryCount()
  */
 int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
@@ -788,7 +830,7 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
 //    saHpiDomainInfoTable_context *undo_ctx = (saHpiDomainInfoTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-//    int            row_err = 0;
+    int            row_err = 0;
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -803,17 +845,20 @@ void saHpiDomainInfoTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             row_ctx->saHpiDomainTagTextType = *var->val.integer;
+	    row_err = set_table_domain_tag(row_ctx);
         break;
 
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             row_ctx->saHpiDomainTagTextLanguage = *var->val.integer;
+    	    row_err = set_table_domain_tag(row_ctx);
         break;
 
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainTag,var->val.string,var->val_len);
             row_ctx->saHpiDomainTag_len = var->val_len;
+	    row_err = set_table_domain_tag(row_ctx);	    
         break;
 
         default: /** We shouldn't get here */
