@@ -393,6 +393,23 @@ typedef struct {
  */
 int announcement_add (saHpiAnnouncementTable_context *row_ctx)
 {
+        /*
+        if ((sahpi_announcement_annunciator_num_set == MIB_TRUE) &&
+            (sahpi_announcement_severity_set == MIB_TRUE) &&
+            (sahpi_announcement_status_cond_type_set == MIB_TRUE) &&
+            (sahpi_announcement_entitypath_set == MIB_TRUE) &&      
+            (sahpi_announcement_sensornum_set == MIB_TRUE) &&       
+            (sahpi_announcement_event_state_set == MIB_TRUE) &&     
+            (sahpi_announcement_name_set == MIB_TRUE) &&            
+            (sahpi_announcement_mid == MIB_TRUE) &&                 
+            (sahpi_announcement_text_type_set == MIB_TRUE) &&   
+            (sahpi_announcement_text_language_set == MIB_TRUE) &&
+            (sahpi_announcement_text == MIB_TRUE)) {
+        }
+        */
+
+        //make sure this is not a special case UNSPECIFIED in whcih case never add this row nor set it to active;
+        //row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
 
         return SNMP_ERR_NOERROR; 
 }
@@ -407,12 +424,12 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
 int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
 {
 
-        DEBUGMSGTL ((AGENT, "announcement_delete, called\n"));
+        DEBUGMSGTL ((AGENT, "announcement_ack, called\n"));
 
         SaErrorT            rc = SA_OK;
         SaHpiSessionIdT     session_id;
         SaHpiResourceIdT    resource_id;
-        SaHpiAnnouncementT  announcement;
+        SaHpiEntryIdT       entry_id;
 
         DRE_XREF *dre_entry;
         key_tuple dre_tuple;
@@ -423,56 +440,57 @@ int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
         session_id = get_session_id(row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]);
         resource_id = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
 
-        dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
-        dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
-        dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
-
-        /* domain_resource_entry_get() generates unique keys based on */
-        /* domainid, resourceid, and entryid tuples.                  */
-        dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
-
-        if (dre_entry == NULL) {
-                DEBUGMSGTL ((AGENT, 
-                             "ERROR: populate_saHpiAnnouncementTable() "
-                             "domain_resource_entry_get returned NULL\n"));
-                return AGENT_ERR_INTERNAL_ERROR;
-        }
-
         /* see if this is an attempt to delete based on severtiy */
         if (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] == 0) {
                 /* we are deleting based on Severity */
-                announcement.EntryId = SAHPI_ENTRY_UNSPECIFIED;
+                entry_id = SAHPI_ENTRY_UNSPECIFIED;
         } else {
+
+                dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
+                dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+                dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
+
+                /* domain_resource_entry_get() generates unique keys based on */
+                /* domainid, resourceid, and entryid tuples.                  */
+                dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+
+                if (dre_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_saHpiAnnouncementTable() "
+                                     "domain_resource_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
                 /* we have retrieved the HPI Annunciator EntryId */
-                /* now we can call the delete function           */
-                announcement.EntryId = dre_entry->hpi_entry_id;
+                entry_id = dre_entry->hpi_entry_id;
         }
 
-        rc = saHpiAnnunciatorDelete(session_id, 
-                                    resource_id, 
-                                    row_ctx->saHpiAnnouncementAnnunciatorNum,
-                                    announcement.EntryId,
-                                    row_ctx->saHpiAnnouncementSeverity - 1);
+        rc = saHpiAnnunciatorAcknowledge(session_id, 
+                                         resource_id, 
+                                         row_ctx->saHpiAnnouncementAnnunciatorNum,
+                                         entry_id, 
+                                         row_ctx->saHpiAnnouncementSeverity);
+
         if (rc != SA_OK) {
                 snmp_log (LOG_ERR,
-                "announcement_delete: Call to "
-                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                "announcement_ack: Call to "
+                "saHpiAnnunciatorAcknowledge() failed rc: %s.\n",
                 oh_lookup_error(rc));
                 DEBUGMSGTL ((AGENT,
-                "announcement_delete: Call to "
-                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                "announcement_ack: Call to "
+                "saHpiAnnunciatorAcknowledge() failed rc: %s.\n",
                 oh_lookup_error(rc)));
                 return get_snmp_error(rc);
         } 
 
-        DEBUGMSGTL ((AGENT, "announcement_delete: Call to "
-                   "saHpiAnnouncementDelete() succeeded rc: %s.\n",
+        DEBUGMSGTL ((AGENT, "announcement_ack: Call to "
+                   "saHpiAnnunciatorAcknowledge() succeeded rc: %s.\n",
                    oh_lookup_error(rc)));
 
-        /* if we deleted based on severity then we need to remove      */
-        /* all rows for the given SessionId <==> DomainId, ResourceId, */
-        /* AnnunciatorNum and Severity                                 */
-        if (announcement.EntryId == SAHPI_ENTRY_UNSPECIFIED) {
+        /* if we ack'd based on severity then we need to set ack to true   */
+        /* for all rows for the given SessionId <==> DomainId, ResourceId, */
+        /* AnnunciatorNum and Severity                                     */
+        if (entry_id == SAHPI_ENTRY_UNSPECIFIED) {
 
                 netsnmp_index *row_idx;
                 saHpiAnnouncementTable_context *announcement_ctx;
@@ -488,18 +506,16 @@ int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
                                     (announcement_ctx->index.oids[saHpiAnnouncementResourceId_INDEX] ==
                                      row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX]) &&
                                     (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
-                                     row_ctx->saHpiAnnouncementAnnunciatorNum) &&
-                                    (announcement_ctx->saHpiAnnouncementSeverity == 
-                                     row_ctx->saHpiAnnouncementSeverity) &&
-                                    (announcement_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
-                                     row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX])) {
-                                        /* all conditions met remove row */
-                                        CONTAINER_REMOVE (cb.container, announcement_ctx);
-                                        saHpiAnnouncementTable_delete_row (announcement_ctx);
-                                        announcement_entry_count = CONTAINER_SIZE (cb.container);
-                                        DEBUGMSGTL ((AGENT, "announcement_delete: found row for "
-                                                     "deletion based on severity\n"));
-                                }
+                                     row_ctx->saHpiAnnouncementAnnunciatorNum))
+
+                                        if ((announcement_ctx->saHpiAnnouncementSeverity == 
+                                             row_ctx->saHpiAnnouncementSeverity) ||
+                                            (row_ctx->saHpiAnnouncementAckBySeverity == SAHPI_ALL_SEVERITIES)) {
+                                                row_ctx->saHpiAnnouncementAcknowledged = MIB_TRUE;
+                                                DEBUGMSGTL ((AGENT, "announcement_ack: found row for "
+                                                             "setting ack based on severity\n"));
+                                        }
+
                                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
                         } while (row_idx);
                 }
@@ -1057,7 +1073,6 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
 
     ctx->sahpi_announcement_annunciator_num_set = MIB_FALSE; 
     ctx->sahpi_announcement_severity_set =  MIB_FALSE;
-    ctx->sahpi_announcement_acknowledged_set =  MIB_FALSE;
     ctx->sahpi_announcement_status_cond_type_set =  MIB_FALSE;
     ctx->sahpi_announcement_entitypath_set =  MIB_FALSE;
     ctx->sahpi_announcement_sensornum_set =  MIB_FALSE;
@@ -1522,25 +1537,14 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiAnnouncementAcknowledged = *var->val.integer;
       
             if (rg->row_created == 1) {                                 /* createAndWait */
-                    row_ctx->saHpiAnnouncementDelete = 
-                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
-                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+                    row_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
 
-            } else if ((rg->row_created != 1) &&                        /* createAndWait maybe time to add */
-                       (row_ctx->saHpiAnnouncementDelete == 
-                        SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT)){
-                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
-                    row_err = announcement_add(row_ctx);               /* announcement being added      */
+            } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK */
+                       (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE)) {     
+                    row_err = announcement_ack(row_ctx);
+            } 
 
-            } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
-                       (row_ctx->saHpiAnnouncementDelete == 
-                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){
-
-//                    should check the row is active or (severity flag is set and index entry value is 0)
-//                    this isn't right, if its entryid is0 the row doesn't have to be active
-// 
-                    row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
-            }
+            row_ctx->saHpiAnnouncementAcknowledged = 0;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
@@ -1548,24 +1552,17 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiAnnouncementAckBySeverity = *var->val.integer;
 
             if (rg->row_created == 1) {                                 /* createAndWait */
-                    row_ctx->saHpiAnnouncementDelete = 
-                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
-                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
+                    row_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
 
-            } else if ((rg->row_created != 1) &&                        /* createAndWait maybe time to add */
-                       (row_ctx->saHpiAnnouncementDelete == 
-                        SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT)){
-                    row_ctx->sahpi_announcement_acknowledged_set = MIB_TRUE;
-                    row_err = announcement_add(row_ctx);               /* announcement being added      */
-
-            } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
-                       (row_ctx->saHpiAnnouncementDelete == 
-                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){  
-
-//                    this isn't right, if its entryid is0 the row doesn't have to be active
-
-                    row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
+            } else if ((rg->row_created != 1) &&                       /* severity set, time to ACK */
+                       (row_ctx->sahpi_announcement_severity_set == MIB_TRUE) &&
+                       (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT) &&
+                       (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
+                        SAHPI_ENTRY_UNSPECIFIED)) {     
+                    row_err = announcement_ack(row_ctx);
             }
+
+            row_ctx->saHpiAnnouncementAckBySeverity = 0;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
