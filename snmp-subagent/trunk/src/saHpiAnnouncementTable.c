@@ -43,6 +43,8 @@
 #include <session_info.h>
 #include <oh_utils.h>
 
+#include <hpiAnnunciatorMapping.h>
+
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
@@ -54,6 +56,13 @@ size_t saHpiAnnouncementTable_oid_len = OID_LENGTH(saHpiAnnouncementTable_oid);
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int initialized = FALSE;               
+static GHashTable *dre_table;
+
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -100,6 +109,10 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	int column_len = 2;
 	
 	SaHpiAnnouncementT announcement;
+
+        DRE_XREF *dre_entry;
+        key_tuple dre_tuple;
+
 	
 	announcement.EntryId = SAHPI_FIRST_ENTRY;
 		
@@ -139,6 +152,32 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	}
 	
 	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
+
+                /* Store sa value                                       */
+                /* this is the same as the EntryId obtained from HPI    */
+                /* BUT in the case of a user defined Announcement they  */
+                /* will be different                                    */
+                dre_tuple.key_tuple_array[0] = announcement.StatusCond.DomainId;
+                dre_tuple.key_tuple_array[1] = announcement.StatusCond.ResourceId;
+                dre_tuple.key_tuple_array[2] = announcement.EntryId;
+
+                /* domain_resource_entry_get() generates unique keys based on */
+                /* domainid, resourceid, and entryid tuples.                  */
+                dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+
+                if (dre_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_saHpiAnnouncementTable() "
+                                     "domain_resource_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+                /* here is where the mapped id is the same as the key value     */
+                /* remember when the user creates an announcement the user      */
+                /* specifies the entryId and will be different from the         */
+                /* entryId returned from the HPI API that generates the         */
+                /* new announcement                                             */    
+                dre_entry->hpi_entry_id = announcement.EntryId;
+
                 /* BUILD oid for new row */
                 /* assign the number of indices */	
 	        announcement_index.len = ANNOUNCEMENT_INDEX_NR;
@@ -368,6 +407,104 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
 int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
 {
 
+        DEBUGMSGTL ((AGENT, "announcement_delete, called\n"));
+
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiResourceIdT    resource_id;
+        SaHpiAnnouncementT  announcement;
+
+        DRE_XREF *dre_entry;
+        key_tuple dre_tuple;
+
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
+
+        session_id = get_session_id(row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]);
+        resource_id = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+
+        dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
+        dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+        dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
+
+        /* domain_resource_entry_get() generates unique keys based on */
+        /* domainid, resourceid, and entryid tuples.                  */
+        dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+
+        if (dre_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementTable() "
+                             "domain_resource_entry_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* see if this is an attempt to delete based on severtiy */
+        if (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] == 0) {
+                /* we are deleting based on Severity */
+                announcement.EntryId = SAHPI_ENTRY_UNSPECIFIED;
+        } else {
+                /* we have retrieved the HPI Annunciator EntryId */
+                /* now we can call the delete function           */
+                announcement.EntryId = dre_entry->hpi_entry_id;
+        }
+
+        rc = saHpiAnnunciatorDelete(session_id, 
+                                    resource_id, 
+                                    row_ctx->saHpiAnnouncementAnnunciatorNum,
+                                    announcement.EntryId,
+                                    row_ctx->saHpiAnnouncementSeverity - 1);
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                "announcement_delete: Call to "
+                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                "announcement_delete: Call to "
+                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        } 
+
+        DEBUGMSGTL ((AGENT, "announcement_delete: Call to "
+                   "saHpiAnnouncementDelete() succeeded rc: %s.\n",
+                   oh_lookup_error(rc)));
+
+        /* if we deleted based on severity then we need to remove      */
+        /* all rows for the given SessionId <==> DomainId, ResourceId, */
+        /* AnnunciatorNum and Severity                                 */
+        if (announcement.EntryId == SAHPI_ENTRY_UNSPECIFIED) {
+
+                netsnmp_index *row_idx;
+                saHpiAnnouncementTable_context *announcement_ctx;
+
+                row_idx = CONTAINER_FIRST(cb.container);
+                if (row_idx) //At least one entry was found.
+                {
+                        do {
+                                announcement_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                                if ((announcement_ctx->index.oids[saHpiAnnouncementDomainId_INDEX] ==
+                                     row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]) &&
+                                    (announcement_ctx->index.oids[saHpiAnnouncementResourceId_INDEX] ==
+                                     row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX]) &&
+                                    (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
+                                     row_ctx->saHpiAnnouncementAnnunciatorNum) &&
+                                    (announcement_ctx->saHpiAnnouncementSeverity == 
+                                     row_ctx->saHpiAnnouncementSeverity) &&
+                                    (announcement_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
+                                     row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX])) {
+                                        /* all conditions met remove row */
+                                        CONTAINER_REMOVE (cb.container, announcement_ctx);
+                                        saHpiAnnouncementTable_delete_row (announcement_ctx);
+                                        announcement_entry_count = CONTAINER_SIZE (cb.container);
+                                        DEBUGMSGTL ((AGENT, "announcement_delete: found row for "
+                                                     "deletion based on severity\n"));
+                                }
+                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                        } while (row_idx);
+                }
+        } /* end check for all rows deleted based on Severity */
+
         return SNMP_ERR_NOERROR; 
 }
 
@@ -379,6 +516,103 @@ int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
  */
 int announcement_delete (saHpiAnnouncementTable_context *row_ctx)
 {
+        DEBUGMSGTL ((AGENT, "announcement_delete, called\n"));
+
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiResourceIdT    resource_id;
+        SaHpiAnnouncementT  announcement;
+
+        DRE_XREF *dre_entry;
+        key_tuple dre_tuple;
+
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
+
+        session_id = get_session_id(row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]);
+        resource_id = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+
+        dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
+        dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+        dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
+
+        /* domain_resource_entry_get() generates unique keys based on */
+        /* domainid, resourceid, and entryid tuples.                  */
+        dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+
+        if (dre_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: populate_saHpiAnnouncementTable() "
+                             "domain_resource_entry_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* see if this is an attempt to delete based on severtiy */
+        if (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] == 0) {
+                /* we are deleting based on Severity */
+                announcement.EntryId = SAHPI_ENTRY_UNSPECIFIED;
+        } else {
+                /* we have retrieved the HPI Annunciator EntryId */
+                /* now we can call the delete function           */
+                announcement.EntryId = dre_entry->hpi_entry_id;
+        }
+
+        rc = saHpiAnnunciatorDelete(session_id, 
+                                    resource_id, 
+                                    row_ctx->saHpiAnnouncementAnnunciatorNum,
+                                    announcement.EntryId,
+                                    row_ctx->saHpiAnnouncementSeverity - 1);
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                "announcement_delete: Call to "
+                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                "announcement_delete: Call to "
+                "saHpiAnnouncementDelete() failed rc: %s.\n",
+                oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        } 
+
+        DEBUGMSGTL ((AGENT, "announcement_delete: Call to "
+                   "saHpiAnnouncementDelete() succeeded rc: %s.\n",
+                   oh_lookup_error(rc)));
+
+        /* if we deleted based on severity then we need to remove      */
+        /* all rows for the given SessionId <==> DomainId, ResourceId, */
+        /* AnnunciatorNum and Severity                                 */
+        if (announcement.EntryId == SAHPI_ENTRY_UNSPECIFIED) {
+
+                netsnmp_index *row_idx;
+                saHpiAnnouncementTable_context *announcement_ctx;
+
+                row_idx = CONTAINER_FIRST(cb.container);
+                if (row_idx) //At least one entry was found.
+                {
+                        do {
+                                announcement_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                                if ((announcement_ctx->index.oids[saHpiAnnouncementDomainId_INDEX] ==
+                                     row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]) &&
+                                    (announcement_ctx->index.oids[saHpiAnnouncementResourceId_INDEX] ==
+                                     row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX]) &&
+                                    (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
+                                     row_ctx->saHpiAnnouncementAnnunciatorNum) &&
+                                    (announcement_ctx->saHpiAnnouncementSeverity == 
+                                     row_ctx->saHpiAnnouncementSeverity) &&
+                                    (announcement_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
+                                     row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX])) {
+                                        /* all conditions met remove row */
+                                        CONTAINER_REMOVE (cb.container, announcement_ctx);
+                                        saHpiAnnouncementTable_delete_row (announcement_ctx);
+                                        announcement_entry_count = CONTAINER_SIZE (cb.container);
+                                        DEBUGMSGTL ((AGENT, "announcement_delete: found row for "
+                                                     "deletion based on severity\n"));
+                                }
+                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                        } while (row_idx);
+                }
+        } /* end check for all rows deleted based on Severity */
 
         return SNMP_ERR_NOERROR; 
 }
@@ -526,6 +760,8 @@ init_saHpiAnnouncementTable(void)
 	initialize_table_saHpiAnnouncementTable();
 
         initialize_table_saHpiAnnouncementEntryCount();
+
+        domain_resource_entry_initialize(&initialized, &dre_table);
 }
 
 /************************************************************
@@ -1262,7 +1498,11 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIANNOUNCEMENTANNUNCIATORNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             row_ctx->saHpiAnnouncementAnnunciatorNum = *var->val.integer;
-            row_ctx->sahpi_announcement_annunciator_num_set = MIB_TRUE; 
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiAnnouncementDelete = 
+                            SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_announcement_annunciator_num_set = MIB_TRUE; 
+            }
             row_err = announcement_add(row_ctx);
         break;
 
@@ -1295,6 +1535,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
             } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
                        (row_ctx->saHpiAnnouncementDelete == 
                         SAHPIANNOUNCEMENTDELETE_ACTIVE)){
+
+//                    should check the row is active or (severity flag is set and index entry value is 0)
+//                    this isn't right, if its entryid is0 the row doesn't have to be active
+// 
                     row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
             }
         break;
@@ -1316,7 +1560,10 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
 
             } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK    */ 
                        (row_ctx->saHpiAnnouncementDelete == 
-                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){
+                        SAHPIANNOUNCEMENTDELETE_ACTIVE)){  
+
+//                    this isn't right, if its entryid is0 the row doesn't have to be active
+
                     row_err = announcement_ack(row_ctx);               /* announcement existing, acking */
             }
         break;
@@ -1426,11 +1673,20 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
-                if (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE) {
+                if (((row_ctx->sahpi_announcement_severity_set == MIB_TRUE) && 
+                     (row_ctx->sahpi_announcement_annunciator_num_set == MIB_TRUE)) ||
+                    (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE)) {
+
                         row_ctx->saHpiAnnouncementDelete = *var->val.integer;
                         row_err = announcement_delete(row_ctx);
-                } 
-                rg->row_deleted = 1;
+                        /* delete succeeded remove row */
+                        if (row_err == SNMP_ERR_NOERROR) {
+                                rg->row_deleted = 1;
+                        }
+
+                } else {
+                        row_err = SNMP_ERR_COMMITFAILED;
+                }
         break;
 
         default: /** We shouldn't get here */
