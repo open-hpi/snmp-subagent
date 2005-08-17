@@ -393,7 +393,13 @@ typedef struct {
  */
 int announcement_add (saHpiAnnouncementTable_context *row_ctx)
 {
-        /*
+        DEBUGMSGTL ((AGENT, "announcement_add, called\n"));
+#if 0
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiResourceIdT    resource_id;
+        SaHpiAnnouncementT  announcement;
+        
         if ((sahpi_announcement_annunciator_num_set == MIB_TRUE) &&
             (sahpi_announcement_severity_set == MIB_TRUE) &&
             (sahpi_announcement_status_cond_type_set == MIB_TRUE) &&
@@ -405,12 +411,50 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
             (sahpi_announcement_text_type_set == MIB_TRUE) &&   
             (sahpi_announcement_text_language_set == MIB_TRUE) &&
             (sahpi_announcement_text == MIB_TRUE)) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
+            dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+            dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
+
+            /* domain_resource_entry_get() generates unique keys based on */
+            /* domainid, resourceid, and entryid tuples.                  */
+            dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+
+            if (dre_entry == NULL) {
+                    DEBUGMSGTL ((AGENT, 
+                                 "ERROR: populate_saHpiAnnouncementTable() "
+                                 "domain_resource_entry_get returned NULL\n"));
+                    return AGENT_ERR_INTERNAL_ERROR;
+            }
+
+            /* we have retrieved the HPI Annunciator EntryId */
+            dre_entry->hpi_entry_id = announcement.EntryId;
+
+
+
+        } else {
+                return SNMP_ERR_NOCREATION;
+
         }
-        */
+        
 
         //make sure this is not a special case UNSPECIFIED in whcih case never add this row nor set it to active;
         //row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
-
+#endif
         return SNMP_ERR_NOERROR; 
 }
 
@@ -1550,11 +1594,12 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
                     row_ctx->saHpiAnnouncementDelete = SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT; 
 
             } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK */
-                       (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE)) {     
-                    row_err = announcement_ack(row_ctx);
+                       (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_ACTIVE)) {  
+                    if (*var->val.integer == MIB_TRUE) {
+                            row_err = announcement_ack(row_ctx);
+                    }
             } 
 
-            row_ctx->saHpiAnnouncementAcknowledged = 0;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
@@ -1568,11 +1613,11 @@ void saHpiAnnouncementTable_set_action( netsnmp_request_group *rg )
                        (row_ctx->sahpi_announcement_severity_set == MIB_TRUE) &&
                        (row_ctx->saHpiAnnouncementDelete == SAHPIANNOUNCEMENTDELETE_CREATEANDWAIT) &&
                        (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
-                        SAHPI_ENTRY_UNSPECIFIED)) {     
-                    row_err = announcement_ack(row_ctx);
+                        SAHPI_ENTRY_UNSPECIFIED)) { 
+                    if (*var->val.integer == MIB_TRUE) {
+                            row_err = announcement_ack(row_ctx);
+                    }
             }
-
-            row_ctx->saHpiAnnouncementAckBySeverity = 0;
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
