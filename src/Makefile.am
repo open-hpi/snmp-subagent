@@ -14,6 +14,7 @@ hpiSubagent_SOURCES	= alarm.c \
 			session_info.c \
 			hash_utils.c \
 			hpiSubagent.c \
+			hpiAnnunciatorMapping.c \
 			hpiEventThread.c \
 			saHpiDomainInfoTable.c \
 			saHpiDomainReferenceTable.c \
