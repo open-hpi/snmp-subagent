@@ -1527,20 +1527,20 @@ void saHpiResourceTable_set_action( netsnmp_request_group *rg )
 		case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
 			/** SaHpiTextType = ASN_INTEGER */
 			row_ctx->saHpiResourceTagTextType = *var->val.integer;			
-			set_table_resource_tag (row_ctx);
+			row_err = set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
 			/** SaHpiTextLanguage = ASN_INTEGER */
 			row_ctx->saHpiResourceTagTextLanguage = *var->val.integer;
-			set_table_resource_tag (row_ctx);
+			row_err = set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCETAG:
 			/** SaHpiText = ASN_OCTET_STR */
 			memcpy(row_ctx->saHpiResourceTag,var->val.string,var->val_len);
 			row_ctx->saHpiResourceTag_len = var->val_len;
-			set_table_resource_tag (row_ctx);
+			row_err = set_table_resource_tag (row_ctx);
 			break;
 
 		case COLUMN_SAHPIRESOURCEPARMCONTROL:
