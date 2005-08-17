@@ -503,18 +503,21 @@ int announcement_ack (saHpiAnnouncementTable_context *row_ctx)
 
                                 if ((announcement_ctx->index.oids[saHpiAnnouncementDomainId_INDEX] ==
                                      row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]) &&
+
                                     (announcement_ctx->index.oids[saHpiAnnouncementResourceId_INDEX] ==
                                      row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX]) &&
-                                    (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
-                                     row_ctx->saHpiAnnouncementAnnunciatorNum))
 
-                                        if ((announcement_ctx->saHpiAnnouncementSeverity == 
-                                             row_ctx->saHpiAnnouncementSeverity) ||
-                                            (row_ctx->saHpiAnnouncementAckBySeverity == SAHPI_ALL_SEVERITIES)) {
-                                                row_ctx->saHpiAnnouncementAcknowledged = MIB_TRUE;
-                                                DEBUGMSGTL ((AGENT, "announcement_ack: found row for "
-                                                             "setting ack based on severity\n"));
-                                        }
+                                    (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
+                                     row_ctx->saHpiAnnouncementAnnunciatorNum) &&
+
+                                    ((announcement_ctx->saHpiAnnouncementSeverity == 
+                                      row_ctx->saHpiAnnouncementSeverity) ||
+                                    (row_ctx->saHpiAnnouncementAckBySeverity == 
+                                     SAHPI_ALL_SEVERITIES)))
+
+                                     row_ctx->saHpiAnnouncementAcknowledged = MIB_TRUE;
+                                     DEBUGMSGTL ((AGENT, "announcement_ack: found row for "
+                                                         "setting ack based on severity\n"));
 
                                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
                         } while (row_idx);
@@ -610,14 +613,21 @@ int announcement_delete (saHpiAnnouncementTable_context *row_ctx)
 
                                 if ((announcement_ctx->index.oids[saHpiAnnouncementDomainId_INDEX] ==
                                      row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]) &&
+
                                     (announcement_ctx->index.oids[saHpiAnnouncementResourceId_INDEX] ==
                                      row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX]) &&
+
                                     (announcement_ctx->saHpiAnnouncementAnnunciatorNum == 
                                      row_ctx->saHpiAnnouncementAnnunciatorNum) &&
-                                    (announcement_ctx->saHpiAnnouncementSeverity == 
-                                     row_ctx->saHpiAnnouncementSeverity) &&
+
+                                    ((announcement_ctx->saHpiAnnouncementSeverity == 
+                                      row_ctx->saHpiAnnouncementSeverity) ||
+                                    (row_ctx->saHpiAnnouncementAckBySeverity == 
+                                     SAHPI_ALL_SEVERITIES)) &&
+
                                     (announcement_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
                                      row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX])) {
+
                                         /* all conditions met remove row */
                                         CONTAINER_REMOVE (cb.container, announcement_ctx);
                                         saHpiAnnouncementTable_delete_row (announcement_ctx);
