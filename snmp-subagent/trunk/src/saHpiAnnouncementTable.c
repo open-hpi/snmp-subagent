@@ -60,7 +60,7 @@ size_t saHpiAnnouncementTable_oid_len = OID_LENGTH(saHpiAnnouncementTable_oid);
 /*************************************************************
  * objects for hash table
  */
-static int initialized = FALSE;               
+static int ann_initialized = FALSE;               
 static GHashTable *dre_table;
 
 
@@ -831,7 +831,7 @@ init_saHpiAnnouncementTable(void)
 
         initialize_table_saHpiAnnouncementEntryCount();
 
-        domain_resource_entry_initialize(&initialized, &dre_table);
+        domain_resource_entry_initialize(&ann_initialized, &dre_table);
 }
 
 /************************************************************
