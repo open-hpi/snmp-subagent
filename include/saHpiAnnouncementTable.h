@@ -164,8 +164,8 @@ extern size_t saHpiAnnouncementTable_oid_len;
  */
 
 #define ANNOUNCEMENT_INDEX_NR 3 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceId_INDEX 1
+#define saHpiAnnouncementDomainId_INDEX 0
+#define saHpiAnnouncementResourceId_INDEX 1
 #define saHpiAnnouncementEntryId_INDEX 2
 
 #define COLUMN_SAHPIANNOUNCEMENTENTRYID 1
