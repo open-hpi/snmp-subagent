@@ -43,6 +43,8 @@
 #include <session_info.h>
 #include <oh_utils.h>
 
+#include <hpiDomainAlarmMapping.h>
+
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
@@ -53,6 +55,13 @@ size_t saHpiDomainAlarmTable_oid_len = OID_LENGTH(saHpiDomainAlarmTable_oid);
 /************************************************************/
 /************************************************************/
 /************************************************************/
+
+/*************************************************************
+ * objects for hash table
+ */
+static int doma_initialized = FALSE;               
+static GHashTable *doma_de_table;
+
 
 /*************************************************************
  * oid and fucntion declarations scalars
@@ -232,6 +241,113 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
         return SA_OK;   								    
 }
 
+
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
+{
+        DEBUGMSGTL ((AGENT, "domain_alarm_delete, called\n"));
+
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiAlarmIdT       alarmId;
+
+        DE_XREF *de_entry;
+        doma_keys keys;
+
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
+
+        session_id = get_session_id(row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]);
+
+        keys.key_array[0] = row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX];
+        keys.key_array[1] = row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX];
+
+        /* domain_alarm_entry_get() generates unique keys based on */
+        /* domainid and entryid.                                   */
+        de_entry = domain_alarm_entry_get(&keys, &doma_de_table); 
+
+        if (de_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: domain_alarm_delete() "
+                             "domain_alarm_entry_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* see if this is an attempt to delete based on severtiy */
+        if (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] == 0) {
+                /* we are deleting based on Severity */
+                alarmId = SAHPI_ENTRY_UNSPECIFIED;
+        } else {
+                /* we have retrieved the HPI Alarm ID  */
+                /* now we can call the delete function */
+                alarmId = de_entry->hpi_entry_id;
+        }
+
+        rc = saHpiAlarmDelete(session_id, 
+                              alarmId,
+                              row_ctx->saHpiDomainAlarmSeverity - 1);
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                "domain_alarm_delete: Call to "
+                "saHpiAlarmDelete() failed rc: %s.\n",
+                oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                "domain_alarm_delete: Call to "
+                "saHpiAlarmDelete() failed rc: %s.\n",
+                oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        } 
+
+        DEBUGMSGTL ((AGENT, "domain_alarm_delete: Call to "
+                   "saHpiAlarmDelete() succeeded rc: %s.\n",
+                   oh_lookup_error(rc)));
+
+        /* if we deleted based on severity then we need to remove      */
+        /* all rows for the given SessionId <==> DomainId, ResourceId, */
+        /* AnnunciatorNum and Severity                                 */
+        if (alarmId == SAHPI_ENTRY_UNSPECIFIED) {
+
+                netsnmp_index *row_idx;
+                saHpiDomainAlarmTable_context *da_ctx;
+
+                row_idx = CONTAINER_FIRST(cb.container);
+                if (row_idx) //At least one entry was found.
+                {
+                        do {
+                                da_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                                if ((da_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX] ==
+                                     row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]) &&
+                                    
+				    ((da_ctx->saHpiDomainAlarmSeverity == 
+                                     row_ctx->saHpiDomainAlarmSeverity) || 
+				    (row_ctx->saHpiDomainAlarmSeverity == 
+                                     SAHPI_ALL_SEVERITIES)) &&
+                                    
+				    (da_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] !=
+                                     row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX])) {
+                                        /* all conditions met remove row */
+                                        CONTAINER_REMOVE (cb.container, da_ctx);
+                                        saHpiDomainAlarmTable_delete_row (da_ctx);
+                                        domain_alarm_entry_count = CONTAINER_SIZE (cb.container);
+                                        DEBUGMSGTL ((AGENT, "domain_alarm_delete: found row for "
+                                                     "deletion based on severity\n"));
+                                }
+                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                        } while (row_idx);
+                }
+        } /* end check for all rows deleted based on Severity */
+
+        return SNMP_ERR_NOERROR; 
+}
+
+
+
 /**
  * 
  * @handler:
@@ -408,6 +524,8 @@ init_saHpiDomainAlarmTable(void)
         initialize_table_saHpiDomainAlarmTable();
 
         initialize_table_saHpiDomainAlarmEntryCount();
+	
+        domain_alarm_entry_initialize(&doma_initialized, &doma_de_table);
 }
 
 /************************************************************
@@ -686,6 +804,18 @@ saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
      ctx->saHpiDomainAlarmCondText = 0;
      ctx->saHpiDomainAlarmRowStatus = 0;
     */
+
+    ctx->sahpi_domain_alarm_severity_set         = MIB_FALSE;
+    ctx->sahpi_domain_alarm_acknowledged_set     = MIB_FALSE;
+    ctx->sahpi_domain_alarm_status_cond_type_set = MIB_FALSE;
+    ctx->sahpi_domain_alarm_entitypath_set       = MIB_FALSE;
+    ctx->sahpi_domain_alarm_sensornum_set        = MIB_FALSE;
+    ctx->sahpi_domain_alarm_event_state_set      = MIB_FALSE;
+    ctx->sahpi_domain_alarm_name_set             = MIB_FALSE;
+    ctx->sahpi_domain_alarm_mid                  = MIB_FALSE;
+    ctx->sahpi_domain_alarm_text_type_set        = MIB_FALSE;
+    ctx->sahpi_domain_alarm_text_language_set    = MIB_FALSE;
+    ctx->sahpi_domain_alarm_text                 = MIB_FALSE;
 
     return ctx;
 }
@@ -1194,7 +1324,19 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMROWSTATUS:
             /** RowStatus = ASN_INTEGER */
-            row_ctx->saHpiDomainAlarmRowStatus = *var->val.integer;
+                if ((row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE) ||
+                    (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_ACTIVE)) {
+
+                        row_ctx->saHpiDomainAlarmRowStatus = *var->val.integer;
+                        row_err = domain_alarm_delete(row_ctx);
+                        /* delete succeeded remove row */
+                        if (row_err == SNMP_ERR_NOERROR) {
+                                rg->row_deleted = 1;
+                        }
+
+                } else {
+                        row_err = SNMP_ERR_COMMITFAILED;
+                }	 	    
         break;
 
         default: /** We shouldn't get here */

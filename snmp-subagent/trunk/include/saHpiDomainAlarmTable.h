@@ -28,6 +28,18 @@ extern "C" {
 typedef struct saHpiDomainAlarmTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
+    int sahpi_domain_alarm_severity_set;
+    int sahpi_domain_alarm_acknowledged_set;
+    int sahpi_domain_alarm_status_cond_type_set;
+    int sahpi_domain_alarm_entitypath_set;
+    int sahpi_domain_alarm_sensornum_set;
+    int sahpi_domain_alarm_event_state_set;
+    int sahpi_domain_alarm_name_set;
+    int sahpi_domain_alarm_mid;
+    int sahpi_domain_alarm_text_type_set;
+    int sahpi_domain_alarm_text_language_set;
+    int sahpi_domain_alarm_text;
+
     /*************************************************************
      * You can store data internally in this structure.
      *
@@ -112,6 +124,8 @@ int saHpiDomainAlarmTable_get_value(netsnmp_request_info *, netsnmp_index *, net
  * function declarations: OpenHpi
  */
 SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid);
+
+int domain_alarm_delete(saHpiDomainAlarmTable_context *row_ctx);
 				      
 /*************************************************************
  * oid declarations
@@ -135,6 +149,9 @@ extern size_t saHpiDomainAlarmTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiDomainAlarmTable
  */
+ 
+#define saHpiDomainAlarmDomainId_INDEX 0
+#define saHpiDomainAlarmEntryId_INDEX 1
  
 #define DOMAIN_ALARM_INDEX_NR 3
 #define COLUMN_SAHPIDOMAINALARMID 1
