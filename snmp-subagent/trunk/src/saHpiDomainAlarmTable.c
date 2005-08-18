@@ -346,6 +346,27 @@ int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
         return SNMP_ERR_NOERROR; 
 }
 
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
+{
+
+}
+
+/**
+ * 
+ * @param row_ctx
+ * 
+ * @return 
+ */
+int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
+{
+
+}
 
 
 /**
@@ -906,12 +927,6 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
-                                                sizeof(row_ctx->saHpiDomainAlarmTimestamp));
-        break;
-
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
@@ -938,8 +953,13 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMCONDENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondEntityPath));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiDomainAlarmCondEntityPath)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
@@ -949,15 +969,23 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
-            /** SaHpiEventState = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondEventState));
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiDomainAlarmCondEventState)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDNAMEVALUE:
             /** OCTETSTR = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondNameValue));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiDomainAlarmCondNameValue)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }	
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDMID:
@@ -980,8 +1008,13 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXT:
             /** SaHpiText = ASN_OCTET_STR */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondText));
+	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
+            if (rc == SNMP_ERR_NOERROR ) {
+            	    if (var->val_len > 
+                        sizeof(row_ctx->saHpiDomainAlarmCondText)) {
+            		    rc = SNMP_ERR_WRONGLENGTH;
+            	    }
+            }
         break;
 
         case COLUMN_SAHPIDOMAINALARMROWSTATUS:
@@ -1028,32 +1061,10 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
-
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
-            /** SaHpiSeverity = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+            /** SaHpiSeverity = ASN_INTEGER */	
+                if (oh_lookup_severity(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
@@ -1063,30 +1074,14 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_severity(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_statuscondtype(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDENTITYPATH:
@@ -1161,30 +1156,14 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_texttype(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_language(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXT:
@@ -1242,7 +1221,8 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
-
+    
+    DEBUGMSGTL ((AGENT, "saHpiDomainAlarmTable_set_action, called\n"));
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -1253,73 +1233,153 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            row_ctx->saHpiDomainAlarmTimestamp = *var->val.integer;
-        break;
-
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmSeverity = *var->val.integer;
+            if (rg->row_created == SAHPIDOMAINALARMROWSTATUS_ACTIVE) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+            } 
+            row_ctx->sahpi_domain_alarm_severity_set = MIB_TRUE;
+            row_err = domain_alarm_add(row_ctx);
         break;
 
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmAcknowledged = *var->val.integer;
+            if (rg->row_created == 1) {                                 /* createAndWait */
+                    row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; 
+                    row_ctx->sahpi_domain_alarm_acknowledged_set = MIB_TRUE;
+		    row_err = domain_alarm_add(row_ctx);
+            } else if ((rg->row_created != 1) &&                       /* active row, this is an ACK */
+                       (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_ACTIVE)) {  
+                    if (*var->val.integer == MIB_TRUE) {
+                            row_err = domain_alarm_ack(row_ctx);
+                    }
+            } 	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmAckBySeverity = *var->val.integer;
+
+            if (rg->row_created == 1) {                                 /* createAndWait */
+                    row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; 
+
+            } else if ((rg->row_created != 1) &&                       /* severity set, time to ACK */
+                       (row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE) &&
+                       (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT) &&
+                       (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] ==
+                        SAHPI_ENTRY_UNSPECIFIED)) { 
+                    if (*var->val.integer == MIB_TRUE) {
+                            row_err = domain_alarm_ack(row_ctx);
+                    }
+            }	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmCondStatusCondType = *var->val.integer;
+	    
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_TRUE; 
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainAlarmCondEntityPath,var->val.string,var->val_len);
             row_ctx->saHpiDomainAlarmCondEntityPath_len = var->val_len;
+	    
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_entitypath_set = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             row_ctx->saHpiDomainAlarmCondSensorNum = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_sensornum_set = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainAlarmCondEventState,var->val.string,var->val_len);
             row_ctx->saHpiDomainAlarmCondEventState_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_event_state_set = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDNAMEVALUE:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainAlarmCondNameValue,var->val.string,var->val_len);
             row_ctx->saHpiDomainAlarmCondNameValue_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_name_set = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             row_ctx->saHpiDomainAlarmCondMid = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_mid = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmCondTextType = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_text_type_set = MIB_TRUE; 
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             row_ctx->saHpiDomainAlarmCondTextLanguage = *var->val.integer;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_text_language_set = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainAlarmCondText,var->val.string,var->val_len);
             row_ctx->saHpiDomainAlarmCondText_len = var->val_len;
+            if (rg->row_created == 1) {
+                    row_ctx->saHpiDomainAlarmRowStatus = 
+                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
+                    row_ctx->sahpi_domain_alarm_text = MIB_TRUE;
+            }
+            row_err = domain_alarm_add(row_ctx);	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMROWSTATUS:
