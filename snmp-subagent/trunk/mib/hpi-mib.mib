@@ -11821,7 +11821,6 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                         saHpiSoftwareEventLogGroup,
                         saHpiOEMEventLogGroup,
                         saHpiUserEventLogGroup,
-                        saHpiAnnouncementEventLogGroup,
                         saHpiRdrGroup,
                         saHpiCtrlDigitalGroup,
                         saHpiCtrlDiscreteGroup,
