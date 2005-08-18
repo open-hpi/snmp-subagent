@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 
 #include <oh_utils.h>
+#include <session_info.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -210,7 +211,6 @@ int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx)
 {
 	SaErrorT            rc = SA_OK;
 	SaHpiSessionIdT     session_id;
-	SaHpiResourceIdT    resource_id;
 	SaHpiTextBufferT    buffer;
 
         DEBUGMSGTL ((AGENT, "saHpiDomainInfoTable.c -> set_table_domain_tag called\n"));
