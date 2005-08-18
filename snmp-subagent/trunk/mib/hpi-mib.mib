@@ -6101,260 +6101,6 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
         ::= { saHpiUserEventLogEntry 5 }
 
 
--- *********************************
--- **
--- **     Announcement Event Log Table
--- **
--- *********************************
-
-saHpiAnnouncementEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
-        MAX-ACCESS read-only
-        STATUS current
-        DESCRIPTION
-                "The number of announcements present on this system."
-        ::= { eventLog 30 }
-
-
-saHpiAnnouncementEventLogTable OBJECT-TYPE
-        SYNTAX SEQUENCE OF SaHpiAnnouncementEventLogEntry
-        MAX-ACCESS not-accessible
-        STATUS current
-        DESCRIPTION
-                "Table of Announcements."
-        ::= { eventLog 31 }
-
-
-saHpiAnnouncementEventLogEntry OBJECT-TYPE
-        SYNTAX SaHpiAnnouncementEventLogEntry
-        MAX-ACCESS not-accessible
-        STATUS current
-        DESCRIPTION
-                "The table of announcements is used to provide
-                a common interface to varied mechanisms for announcing conditions.
-
-                Each announcement in an Annunciator's current set contains a severity
-                level, details describing the specific condition that is being reported, 
-                an Acknowledged flag, a timestamp indicating when the announcement was 
-                added to the set, and an EntryId that uniquely identifies the particular 
-                status item within the set.
-
-                EntryIds are assigned to announcements as they are added to the set as 
-                well as a Timestamp.  After an announcement is deleted from the current 
-                set, its EntryId may be reused for a newly added announcement as long 
-                as the new announcement will have a different timestamp than any 
-                previously deleted announcement using the same EntryId.  Thus, the 
-                EntryId and Timestamp together will uniquely identify any announcement, 
-                which was ever present in the Annunciator's set.
-
-                The actual meaning of the Acknowledged flag is arbitrary, and the 
-                actions taken by the platform when announcements are flagged as 
-                'acknowledged' or 'unacknowledged' are implementation-specific.  
-                The intended use of the flag is to indicate whether a particular 
-                announcement in the current set has been recognized by whomever or 
-                whatever is inspecting the LEDs, displays, etc., that are being 
-                driven by the Annunciator management instrument.  Thus, when 
-                announcements are added to the current set, generally the flag 
-                should be set to indicate that the condition is 'unacknowledged'.  
-                Later, either as the result of an HPI SNMP Manager function call, or due 
-                to some implementation-dependent action (such as pressing an 
-                'acknowledge' button on a front-panel display), the flag can be 
-                changed to indicate that the announcement is now 'acknowledged.'
-
-                The ability to acknowledge announcements is not controlled 
-                by the Annunciator 'mode' setting (Auto, User, or Shared).  
-                Any announcement may be acknowledged by the HPI implementation, 
-                or via the saHpiAnnunciatorAcknowledge() function call, regardless 
-                of the current mode setting for the Annunciator.
-
-                Over time, announcements are added to and deleted from an 
-                Annunciator`s current set of announcements. This may be done 
-                automatically by the HPI implementation to reflect platform fault 
-                conditions, or by the HPI SNMP Manager via the HPI interface.  When 
-                announcements are added or deleted automatically by the HPI 
-                implementation, it is implementation-specific which announcements 
-                are added or removed.
-                "
-        INDEX {
-                saHpiDomainId,
-                saHpiResourceId,
-                saHpiAnnouncementEntryId }
-        ::= { saHpiAnnouncementEventLogTable 1 }
-
-
-SaHpiAnnouncementEventLogEntry ::= SEQUENCE {
-        saHpiAnnouncementEventLogEntryId        SaHpiEntryId,
-        saHpiAnnouncementEventLogTimestamp      SaHpiTime,
-        saHpiAnnouncementEventLogAddedByUser    TruthValue,
-        saHpiAnnouncementEventLogSeverity       SaHpiSeverity,
-        saHpiAnnouncementEventLogAcknowledged   TruthValue,
-        saHpiAnnouncementEventLogStatusCondType INTEGER,
-        saHpiAnnouncementEventLogEntityPath     SaHpiEntityPath,
-        saHpiAnnouncementEventLogSensorNum      Unsigned32,
-        saHpiAnnouncementEventLogEventState     SaHpiEventState,
-        saHpiAnnouncementEventLogName           OCTET STRING,
-        saHpiAnnouncementEventLogMid            SaHpiManufacturerId,
-        saHpiAnnouncementEventLogTextType       SaHpiTextType,
-        saHpiAnnouncementEventLogTextLanguage   SaHpiTextLanguage,
-        saHpiAnnouncementEventLogText           SaHpiText,
-        saHpiAnnouncementEventLogDelete         RowStatus }
-
-
-saHpiAnnouncementEventLogEntryId OBJECT-TYPE
-        SYNTAX SaHpiEntryId
-        MAX-ACCESS read-only --SMIv2 bug?
-        STATUS current
-        DESCRIPTION
-                "Entry ID for record
-                Table Related Type Definitions  
-                SAHPI_FIRST_ENTRY 0x00000000
-                SAHPI_LAST_ENTRY  0xFFFFFFFF"
-        ::= { saHpiAnnouncementEventLogEntry 1 }
-
-
-saHpiAnnouncementEventLogTimestamp OBJECT-TYPE
-        SYNTAX SaHpiTime
-        MAX-ACCESS read-only
-        STATUS current
-        DESCRIPTION
-                "Time when announcement added to set."
-        ::= { saHpiAnnouncementEventLogEntry 2 }
-
-
-saHpiAnnouncementEventLogAddedByUser OBJECT-TYPE
-        SYNTAX TruthValue
-        MAX-ACCESS read-only
-        STATUS current
-        DESCRIPTION
-                "True if added to set by HPI SNMP Manager, False if added
-                automatically by HPI implementation."
-        ::= { saHpiAnnouncementEventLogEntry 3 }
-
-
-saHpiAnnouncementEventLogSeverity OBJECT-TYPE
-        SYNTAX SaHpiSeverity
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Only used with DAT and Annunciator functions.
-                This is not a valid severity for events or alarms."
-        ::= { saHpiAnnouncementEventLogEntry 4 }
-
-
-saHpiAnnouncementEventLogAcknowledged OBJECT-TYPE
-        SYNTAX TruthValue
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Acknowledged flag."
-        ::= { saHpiAnnouncementEventLogEntry 5 }
-
-
-saHpiAnnouncementEventLogStatusCondType OBJECT-TYPE
-        SYNTAX INTEGER {
-                        undefined(0),
-                        sensor(1),
-                        resource(2),
-                        oem(3),
-                        user(4) }
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Status Condition Type."
-        ::= { saHpiAnnouncementEventLogEntry 6 }
-
-
-saHpiAnnouncementEventLogEntityPath OBJECT-TYPE
-        SYNTAX SaHpiEntityPath
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "See Textual-Convention for details."
-        ::= { saHpiAnnouncementEventLogEntry 7 }
-
-
-saHpiAnnouncementEventLogSensorNum OBJECT-TYPE
-        SYNTAX Unsigned32
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Sensor associated with status Only valid
-                if saHpiAnnouncementEventLogStatusCondType is sensor(1)."
-        ::= { saHpiAnnouncementEventLogEntry 8 }
-
-
-saHpiAnnouncementEventLogEventState OBJECT-TYPE
-        SYNTAX SaHpiEventState
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Sensor event state. Only valid if
-                saHpiAnnouncementEventLogStatusCondType is sensor(1)."
-        ::= { saHpiAnnouncementEventLogEntry 9 }
-
-
-saHpiAnnouncementEventLogName OBJECT-TYPE
-        SYNTAX OCTET STRING (SIZE (0..255))
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "AIS compatible identifier associated with Status condition."
-        ::= { saHpiAnnouncementEventLogEntry 10 }
-
-
-saHpiAnnouncementEventLogMid OBJECT-TYPE
-        SYNTAX SaHpiManufacturerId
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Manufacturer Id associated with status condition,
-                required when saHpiAnnouncementEventLogStatusCondType is oem(3)."
-        ::= { saHpiAnnouncementEventLogEntry 11 }
-
-
-saHpiAnnouncementEventLogTextType OBJECT-TYPE
-        SYNTAX SaHpiTextType
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Field Data.
-                See Definition for SaHpiTextType for more details."
-        ::= { saHpiAnnouncementEventLogEntry 12 }
-
-
-saHpiAnnouncementEventLogTextLanguage OBJECT-TYPE
-        SYNTAX SaHpiTextLanguage
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Field Data.
-                See Definition for SaHpiTextLanguage for more details."
-        ::= { saHpiAnnouncementEventLogEntry 13 }
-
-
-saHpiAnnouncementEventLogText OBJECT-TYPE
-        SYNTAX SaHpiText
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "Field Data.
-                The type of date is specified
-                by saHpiResourceTagTextType and saHpiResourceTagLanguage."
-        ::= { saHpiAnnouncementEventLogEntry 14 }
-
-
-saHpiAnnouncementEventLogDelete OBJECT-TYPE
-        SYNTAX RowStatus
-        MAX-ACCESS read-create
-        STATUS current
-        DESCRIPTION
-                "This function allows the HPI SNMP Manager to delete a single
-                announcement. Announcements may be deleted individually by specifying 
-                a specific index and setting this columnar node to destroy(6).
-                "
-        ::= { saHpiAnnouncementEventLogEntry 15 }
-
-
 --/*******************************************************************************
 -- * ********************************************************************************
 -- * ********** ********** ********** Resource Data Record ********** **********
@@ -11609,29 +11355,6 @@ saHpiUserEventLogGroup OBJECT-GROUP
                 "saHpiUserEventLog table."
         ::= { hpiMIBCompliances 28 }
 
-saHpiAnnouncementEventLogGroup OBJECT-GROUP
-        OBJECTS {
-		saHpiAnnouncementEventLogEntryId,
-                saHpiAnnouncementEventLogEntryCount,
-                saHpiAnnouncementEventLogTimestamp,
-                saHpiAnnouncementEventLogAddedByUser,
-                saHpiAnnouncementEventLogSeverity,
-                saHpiAnnouncementEventLogAcknowledged,
-                saHpiAnnouncementEventLogStatusCondType,
-                saHpiAnnouncementEventLogEntityPath,
-                saHpiAnnouncementEventLogSensorNum,
-                saHpiAnnouncementEventLogEventState,
-                saHpiAnnouncementEventLogName,
-                saHpiAnnouncementEventLogMid,
-                saHpiAnnouncementEventLogTextType,
-                saHpiAnnouncementEventLogTextLanguage,
-                saHpiAnnouncementEventLogText,
-                saHpiAnnouncementEventLogDelete }
-        STATUS current
-        DESCRIPTION
-                "saHpiAnnouncementEventLog table."
-        ::= { hpiMIBCompliances 29 }
-
 saHpiRdrGroup OBJECT-GROUP
         OBJECTS {
                 saHpiRdrEntryCount,
@@ -11648,7 +11371,7 @@ saHpiRdrGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiRdr table."
-        ::= { hpiMIBCompliances 30 }
+        ::= { hpiMIBCompliances 29 }
 
 saHpiCtrlDigitalGroup OBJECT-GROUP
         OBJECTS {
@@ -11666,7 +11389,7 @@ saHpiCtrlDigitalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlDigital table."
-        ::= { hpiMIBCompliances 31 }
+        ::= { hpiMIBCompliances 30 }
 
 saHpiCtrlDiscreteGroup OBJECT-GROUP
         OBJECTS {
@@ -11684,7 +11407,7 @@ saHpiCtrlDiscreteGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlDiscrete table."
-        ::= { hpiMIBCompliances 32 }
+        ::= { hpiMIBCompliances 31 }
 
 saHpiCtrlAnalogGroup OBJECT-GROUP
         OBJECTS {
@@ -11704,7 +11427,7 @@ saHpiCtrlAnalogGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlAnalog table."
-        ::= { hpiMIBCompliances 33 }
+        ::= { hpiMIBCompliances 32 }
 
 saHpiCtrlStreamGroup OBJECT-GROUP
         OBJECTS {
@@ -11724,7 +11447,7 @@ saHpiCtrlStreamGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlStream table."
-        ::= { hpiMIBCompliances 34 }
+        ::= { hpiMIBCompliances 33 }
 
 saHpiCtrlTextGroup OBJECT-GROUP
         OBJECTS {
@@ -11748,7 +11471,7 @@ saHpiCtrlTextGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlText table."
-        ::= { hpiMIBCompliances 35 }
+        ::= { hpiMIBCompliances 34 }
 
 saHpiCtrlOemGroup OBJECT-GROUP
         OBJECTS {
@@ -11769,7 +11492,7 @@ saHpiCtrlOemGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCtrlOem table."
-        ::= { hpiMIBCompliances 36 }
+        ::= { hpiMIBCompliances 35 }
 
 saHpiSensorGroup OBJECT-GROUP
         OBJECTS {
@@ -11792,7 +11515,7 @@ saHpiSensorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensor table."
-        ::= { hpiMIBCompliances 37 }
+        ::= { hpiMIBCompliances 36 }
 
 saHpiCurrentSensorStateGroup OBJECT-GROUP
         OBJECTS {
@@ -11809,7 +11532,7 @@ saHpiCurrentSensorStateGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiCurrentSensorState table."
-        ::= { hpiMIBCompliances 38 }
+        ::= { hpiMIBCompliances 37 }
 
 saHpiSensorReadingMaxGroup OBJECT-GROUP
         OBJECTS {
@@ -11819,7 +11542,7 @@ saHpiSensorReadingMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorReadingMax table."
-        ::= { hpiMIBCompliances 39 }
+        ::= { hpiMIBCompliances 38 }
 
 saHpiSensorReadingMinGroup OBJECT-GROUP
         OBJECTS {
@@ -11829,7 +11552,7 @@ saHpiSensorReadingMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorReadingMin table."
-        ::= { hpiMIBCompliances 40 }
+        ::= { hpiMIBCompliances 39 }
 
 saHpiSensorReadingNominalGroup OBJECT-GROUP
         OBJECTS {
@@ -11839,7 +11562,7 @@ saHpiSensorReadingNominalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorReadingNominal table."
-        ::= { hpiMIBCompliances 41 }
+        ::= { hpiMIBCompliances 40 }
 
 saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
         OBJECTS {
@@ -11849,7 +11572,7 @@ saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorReadingNormalMax table."
-        ::= { hpiMIBCompliances 42 }
+        ::= { hpiMIBCompliances 41 }
 
 saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         OBJECTS {
@@ -11859,7 +11582,7 @@ saHpiSensorReadingNormalMinGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorReadingNormalMin table."
-        ::= { hpiMIBCompliances 43 }
+        ::= { hpiMIBCompliances 42 }
 
 saHpiSensorThdLowCriticalGroup OBJECT-GROUP
         OBJECTS {
@@ -11871,7 +11594,7 @@ saHpiSensorThdLowCriticalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdLowCritical table."
-        ::= { hpiMIBCompliances 44 }
+        ::= { hpiMIBCompliances 43 }
 
 saHpiSensorThdLowMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -11883,7 +11606,7 @@ saHpiSensorThdLowMajorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdLowMajor table."
-        ::= { hpiMIBCompliances 45 }
+        ::= { hpiMIBCompliances 44 }
 
 saHpiSensorThdLowMinorGroup OBJECT-GROUP
         OBJECTS {
@@ -11895,7 +11618,7 @@ saHpiSensorThdLowMinorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdLowMinor table."
-        ::= { hpiMIBCompliances 46 }
+        ::= { hpiMIBCompliances 45 }
 
 saHpiSensorThdUpCriticalGroup OBJECT-GROUP
         OBJECTS {
@@ -11907,7 +11630,7 @@ saHpiSensorThdUpCriticalGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdUpCritical table."
-        ::= { hpiMIBCompliances 47 }
+        ::= { hpiMIBCompliances 46 }
 
 saHpiSensorThdUpMajorGroup OBJECT-GROUP
         OBJECTS {
@@ -11919,7 +11642,7 @@ saHpiSensorThdUpMajorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdUpMajor table."
-        ::= { hpiMIBCompliances 48 }
+        ::= { hpiMIBCompliances 47 }
 
 saHpiSensorThdUpMinorGroup OBJECT-GROUP
         OBJECTS {
@@ -11931,7 +11654,7 @@ saHpiSensorThdUpMinorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdUpMinor table."
-        ::= { hpiMIBCompliances 49 }
+        ::= { hpiMIBCompliances 48 }
 
 saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
         OBJECTS {
@@ -11943,7 +11666,7 @@ saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdPosHysteresis table."
-        ::= { hpiMIBCompliances 50 }
+        ::= { hpiMIBCompliances 49 }
 
 saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
         OBJECTS {
@@ -11955,7 +11678,7 @@ saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiSensorThdNegHysteresis table."
-        ::= { hpiMIBCompliances 51 }
+        ::= { hpiMIBCompliances 50 }
 
 saHpiInventoryGroup OBJECT-GROUP
         OBJECTS {
@@ -11969,7 +11692,7 @@ saHpiInventoryGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiInventory table."
-        ::= { hpiMIBCompliances 52 }
+        ::= { hpiMIBCompliances 51 }
 
 saHpiAreaGroup OBJECT-GROUP
         OBJECTS {
@@ -11983,7 +11706,7 @@ saHpiAreaGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiArea table."
-        ::= { hpiMIBCompliances 53 }
+        ::= { hpiMIBCompliances 52 }
 
 saHpiFieldGroup OBJECT-GROUP
         OBJECTS {
@@ -11999,7 +11722,7 @@ saHpiFieldGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiField table."
-        ::= { hpiMIBCompliances 54 }
+        ::= { hpiMIBCompliances 53 }
 
 saHpiWatchdogGroup OBJECT-GROUP
         OBJECTS {
@@ -12019,7 +11742,7 @@ saHpiWatchdogGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiWatchdog table."
-        ::= { hpiMIBCompliances 55 }
+        ::= { hpiMIBCompliances 54 }
 
 saHpiAnnunciatorGroup OBJECT-GROUP
         OBJECTS {
@@ -12033,7 +11756,7 @@ saHpiAnnunciatorGroup OBJECT-GROUP
         STATUS current
         DESCRIPTION
                 "saHpiAnnunciator table."
-        ::= { hpiMIBCompliances 56 }
+        ::= { hpiMIBCompliances 55 }
 
 saHpiNotificationGroup NOTIFICATION-GROUP
         NOTIFICATIONS {
@@ -12049,7 +11772,7 @@ saHpiNotificationGroup NOTIFICATION-GROUP
         STATUS current
         DESCRIPTION
                 "Notification group."
-        ::= { hpiMIBCompliances 57 }
+        ::= { hpiMIBCompliances 56 }
 
 saHpiAdministrationGroup NOTIFICATION-GROUP
         NOTIFICATIONS {
@@ -12060,7 +11783,7 @@ saHpiAdministrationGroup NOTIFICATION-GROUP
         STATUS current
         DESCRIPTION
                 "Administration group."
-        ::= { hpiMIBCompliances 58 }
+        ::= { hpiMIBCompliances 57 }
 
 
 saHpiMIBCompliance MODULE-COMPLIANCE
@@ -12127,6 +11850,6 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                         saHpiWatchdogGroup,
                         saHpiAnnunciatorGroup }
 
-        ::= { hpiMIBCompliances 59 }
+        ::= { hpiMIBCompliances 58 }
 
 END
