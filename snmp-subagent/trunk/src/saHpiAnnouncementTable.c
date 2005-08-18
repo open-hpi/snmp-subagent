@@ -341,50 +341,6 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 
 }
 
-#if 0
-typedef struct {
-    SaHpiEntryIdT        EntryId;      /* Announcment Entry Id */
-    SaHpiTimeT           Timestamp;    /* Time when announcement added to set */
-    SaHpiBoolT           AddedByUser;  /* True if added to set by HPI User,
-                                          False if added automatically by 
-                                          HPI implementation */
-    SaHpiSeverityT       Severity;     /* Severity of announcement */
-    SaHpiBoolT           Acknowledged; /* Acknowledged flag */
-    SaHpiConditionT      StatusCond;   /* Detailed status condition */
-} SaHpiAnnouncementT;
-
-/* Condition structure definition */
-typedef struct {
-
-    SaHpiStatusCondTypeT Type;   yep      /* Status Condition Type */
-    SaHpiEntityPathT     Entity; yep      /* Entity assoc. with status condition */
-    SaHpiDomainIdT       DomainId; yep     /* Domain associated with status. 
-                                          May be SAHPI_UNSPECIFIED_DOMAIND_ID
-                                          meaning current domain, or domain
-                                          not meaningful for status condition*/
-    SaHpiResourceIdT     ResourceId; yep  /* Resource associated with status.
-                                          May be SAHPI_UNSPECIFIED_RESOURCE_ID
-                                          if Type is SAHPI_STATUS_COND_USER.
-                                          Must be set to valid ResourceId in
-                                          domain specified by DomainId,
-                                          or in current domain, if DomainId
-                                          is SAHPI_UNSPECIFIED_DOMAIN_ID */
-    SaHpiSensorNumT      SensorNum; yep   /* Sensor associated with status 
-                                          Only valid if Type is
-                                          SAHPI_STATUS_COND_TYPE_SENSOR */
-    SaHpiEventStateT     EventState; yep  /* Sensor event state. 
-                                          Only valid if Type is 
-                                          SAHPI_STATUS_COND_TYPE_SENSOR. */
-    SaHpiNameT           Name; yep         /* AIS compatible identifier associated
-                                          with Status condition */
-    SaHpiManufacturerIdT Mid;  yep        /* Manufacturer Id associated with
-                                          status condition, required when type
-                                          is SAHPI_STATUS_COND_TYPE_OEM. */
-    SaHpiTextBufferT     Data; yep        /* Optional Data associated with
-                                          Status condition */
-} SaHpiConditionT;
-#endif
-
 /**
  * 
  * @param row_ctx
@@ -394,67 +350,153 @@ typedef struct {
 int announcement_add (saHpiAnnouncementTable_context *row_ctx)
 {
         DEBUGMSGTL ((AGENT, "announcement_add, called\n"));
-#if 0
+
         SaErrorT            rc = SA_OK;
         SaHpiSessionIdT     session_id;
         SaHpiResourceIdT    resource_id;
+        SaHpiAnnunciatorNumT annunciator_num;
         SaHpiAnnouncementT  announcement;
+
+        DRE_XREF *dre_entry;
+        key_tuple dre_tuple;
         
-        if ((sahpi_announcement_annunciator_num_set == MIB_TRUE) &&
-            (sahpi_announcement_severity_set == MIB_TRUE) &&
-            (sahpi_announcement_status_cond_type_set == MIB_TRUE) &&
-            (sahpi_announcement_entitypath_set == MIB_TRUE) &&      
-            (sahpi_announcement_sensornum_set == MIB_TRUE) &&       
-            (sahpi_announcement_event_state_set == MIB_TRUE) &&     
-            (sahpi_announcement_name_set == MIB_TRUE) &&            
-            (sahpi_announcement_mid == MIB_TRUE) &&                 
-            (sahpi_announcement_text_type_set == MIB_TRUE) &&   
-            (sahpi_announcement_text_language_set == MIB_TRUE) &&
-            (sahpi_announcement_text == MIB_TRUE)) {
+        if ((row_ctx->sahpi_announcement_annunciator_num_set == MIB_TRUE) &&
+            (row_ctx->sahpi_announcement_severity_set == MIB_TRUE) &&
+            (row_ctx->sahpi_announcement_status_cond_type_set == MIB_TRUE) &&
+            (row_ctx->sahpi_announcement_entitypath_set == MIB_TRUE) &&      
+            (row_ctx->sahpi_announcement_sensornum_set == MIB_TRUE) &&       
+            (row_ctx->sahpi_announcement_event_state_set == MIB_TRUE) &&     
+            (row_ctx->sahpi_announcement_name_set == MIB_TRUE) &&            
+            (row_ctx->sahpi_announcement_mid == MIB_TRUE) &&                 
+            (row_ctx->sahpi_announcement_text_type_set == MIB_TRUE) &&   
+            (row_ctx->sahpi_announcement_text_language_set == MIB_TRUE) &&
+            (row_ctx->sahpi_announcement_text == MIB_TRUE) &&
+            (row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
+             SAHPI_ENTRY_UNSPECIFIED)) {
 
+                /* Acknowledged */
+                announcement.Acknowledged = 
+                        (row_ctx->saHpiAnnouncementAcknowledged == MIB_TRUE) ? 
+                        SAHPI_TRUE : SAHPI_FALSE;
 
+                /* AddedByUser */
+                announcement.AddedByUser = 
+                        (row_ctx->saHpiAnnouncementAddedByUser == MIB_TRUE) ? 
+                        SAHPI_TRUE : SAHPI_FALSE;                        
 
+                /* EntryId */
+                announcement.EntryId = row_ctx->saHpiAnnouncementEntryId;
 
+                /*StatusCond */
+                announcement.StatusCond.Data.DataLength =
+                        row_ctx->saHpiAnnouncementText_len;
+                memcpy(announcement.StatusCond.Data.Data, 
+                       row_ctx->saHpiAnnouncementText, 
+                       row_ctx->saHpiAnnouncementText_len);
+                announcement.StatusCond.Type = 
+                        row_ctx->saHpiAnnouncementStatusCondType - 1;
+                announcement.StatusCond.Data.DataType = 
+                        row_ctx->saHpiAnnouncementTextType;
+                announcement.StatusCond.Data.Language =
+                        row_ctx->saHpiAnnouncementTextLanguage;
+                announcement.StatusCond.DomainId =
+                        row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
 
+                /* EP */
+                rc = oh_encode_entitypath(row_ctx->saHpiAnnouncementEntityPath, 
+                                          &announcement.StatusCond.Entity);
 
+                /* EventState */
+                SaHpiTextBufferT        buffer;
+                SaHpiEventCategoryT     event_cat;
+                memcpy(buffer.Data, 
+                       row_ctx->saHpiAnnouncementEventState, 
+                       row_ctx->saHpiAnnouncementEventState_len);
+                buffer.DataLength = row_ctx->saHpiAnnouncementEventState_len;
 
+                if ((row_ctx->saHpiAnnouncementStatusCondType - 1) == 
+                    SAHPI_STATUS_COND_TYPE_SENSOR) {
+                        rc = oh_encode_eventstate(&buffer,
+                                                  &announcement.StatusCond.EventState,
+                                                  &event_cat);
+                        if (rc != SA_OK) {
+                                DEBUGMSGTL ((AGENT, 
+                                "announcement_add: oh_encode_eventstate Failed:"
+                                " rc = %d\n",
+                                 oh_lookup_error(rc)));
+                        }	         	
+                }
 
+                /* Mid */
+                announcement.StatusCond.Mid = 
+                        row_ctx->saHpiAnnouncementMid;
 
+                /* Name */
+                announcement.StatusCond.Name.Length = 
+                        row_ctx->saHpiAnnouncementName_len;
+                memcpy(announcement.StatusCond.Name.Value,
+                       row_ctx->saHpiAnnouncementName,
+                       row_ctx->saHpiAnnouncementName_len);
 
+                /* ResourceId */
+                announcement.StatusCond.ResourceId =
+                        row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
 
+                /* SensorNum */
+                announcement.StatusCond.SensorNum =
+                        row_ctx->saHpiAnnouncementSensorNum;
 
+                /* Type */
+                announcement.StatusCond.Type = 
+                        row_ctx->saHpiAnnouncementStatusCondType - 1;
 
+                /* Timestamp */
+                announcement.Timestamp = 
+                        row_ctx->saHpiAnnouncementTimestamp;
 
+                session_id = get_session_id(row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]);
+                resource_id = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+                annunciator_num = row_ctx->saHpiAnnouncementAnnunciatorNum;
 
-            dre_tuple.key_tuple_array[0] = row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
-            dre_tuple.key_tuple_array[1] = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
-            dre_tuple.key_tuple_array[2] = row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
+                rc = saHpiAnnunciatorAdd(session_id, 
+                                         resource_id, 
+                                         annunciator_num, 
+                                         &announcement);
 
-            /* domain_resource_entry_get() generates unique keys based on */
-            /* domainid, resourceid, and entryid tuples.                  */
-            dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
+                if (rc != SA_OK) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: saHpiAnnunciatorAdd() "
+                                     "Failed to add Announcement rc: [%s]\n", 
+                                     oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
 
-            if (dre_entry == NULL) {
-                    DEBUGMSGTL ((AGENT, 
-                                 "ERROR: populate_saHpiAnnouncementTable() "
-                                 "domain_resource_entry_get returned NULL\n"));
-                    return AGENT_ERR_INTERNAL_ERROR;
-            }
+                dre_tuple.key_tuple_array[0] = 
+                        row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
+                dre_tuple.key_tuple_array[1] = 
+                        row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];
+                dre_tuple.key_tuple_array[2] = 
+                        row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX];
 
-            /* we have retrieved the HPI Annunciator EntryId */
-            dre_entry->hpi_entry_id = announcement.EntryId;
+                /* domain_resource_entry_get() generates unique keys based on */
+                /* domainid, resourceid, and entryid tuples.                  */
+                dre_entry = domain_resource_entry_get(&dre_tuple, &dre_table); 
 
+                if (dre_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_saHpiAnnouncementTable() "
+                                     "domain_resource_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
 
+                /* we have retrieved the HPI Annunciator EntryId */
+                dre_entry->hpi_entry_id = announcement.EntryId;
 
         } else {
                 return SNMP_ERR_NOCREATION;
 
         }
         
-
-        //make sure this is not a special case UNSPECIFIED in whcih case never add this row nor set it to active;
-        //row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] ==
-#endif
         return SNMP_ERR_NOERROR; 
 }
 
