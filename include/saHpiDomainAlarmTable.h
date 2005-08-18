@@ -126,6 +126,8 @@ int saHpiDomainAlarmTable_get_value(netsnmp_request_info *, netsnmp_index *, net
 SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid);
 
 int domain_alarm_delete(saHpiDomainAlarmTable_context *row_ctx);
+int domain_alarm_add(saHpiDomainAlarmTable_context *row_ctx);
+int domain_alarm_ack(saHpiDomainAlarmTable_context *row_ctx);
 				      
 /*************************************************************
  * oid declarations
