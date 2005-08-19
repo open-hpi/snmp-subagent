@@ -26,7 +26,7 @@ typedef struct {
 
 
 typedef struct {
-        SaHpiEntryIdT   hpi_entry_id;
+        SaHpiAlarmIdT   hpi_alarm_id;
         doma_keys       de_pair;
 } DE_XREF; //Domain-Entry Cross Reference.
 
