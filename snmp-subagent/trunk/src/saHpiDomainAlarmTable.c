@@ -285,7 +285,7 @@ int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
         } else {
                 /* we have retrieved the HPI Alarm ID  */
                 /* now we can call the delete function */
-                alarmId = de_entry->hpi_entry_id;
+                alarmId = de_entry->hpi_alarm_id;
         }
 
         rc = saHpiAlarmDelete(session_id, 
@@ -354,7 +354,126 @@ int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
  */
 int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
 {
+        DEBUGMSGTL ((AGENT, "domain_alarm_add, called\n"));
 
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiAlarmT         alarm;
+
+        DE_XREF *de_entry;
+        doma_keys keys;
+        
+        if ((row_ctx->sahpi_domain_alarm_severity_set         == MIB_TRUE) &&
+            (row_ctx->sahpi_domain_alarm_status_cond_type_set == MIB_TRUE) &&
+            (row_ctx->sahpi_domain_alarm_entitypath_set       == MIB_TRUE) &&                 
+            (row_ctx->sahpi_domain_alarm_name_set             == MIB_TRUE) &&                           
+            (row_ctx->sahpi_domain_alarm_text_type_set        == MIB_TRUE) &&   
+            (row_ctx->sahpi_domain_alarm_text_language_set    == MIB_TRUE) &&
+            (row_ctx->sahpi_domain_alarm_text                 == MIB_TRUE) &&
+            (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] !=
+             SAHPI_ENTRY_UNSPECIFIED)) {
+
+                /* EntryId */
+                alarm.AlarmId = row_ctx->saHpiDomainAlarmId;
+
+                /* Timestamp */
+                alarm.Timestamp = 
+                        row_ctx->saHpiDomainAlarmTimestamp;
+
+		/* Severity */
+		alarm.Severity =
+			row_ctx->saHpiDomainAlarmSeverity;
+			
+                /* Acknowledged */
+                alarm.Acknowledged = 
+                        (row_ctx->saHpiDomainAlarmAcknowledged == MIB_TRUE) ? 
+                        SAHPI_TRUE : SAHPI_FALSE;			
+                
+		/*StatusCond */		
+                alarm.AlarmCond.Type = 
+                        row_ctx->saHpiDomainAlarmCondStatusCondType - 1;	
+			
+                rc = oh_encode_entitypath(row_ctx->saHpiDomainAlarmCondEntityPath, 
+                                          &alarm.AlarmCond.Entity);
+		/* Domain */			  
+                alarm.AlarmCond.DomainId =
+                        row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX];					  
+
+                /* Resource ID */
+		//Must be SAHPI_UNSPECIFIED_RESOURCE_ID, since we can only add USER alarms.			  		
+		alarm.AlarmCond.ResourceId = SAHPI_UNSPECIFIED_RESOURCE_ID;												
+
+                /* SensorNum */
+		//Undefined since user cannot add Sensor Alarms. 
+                alarm.AlarmCond.SensorNum = 0;
+		
+		/* EventState */
+		//Undefined since user cannot add Sensor Alarms.
+		alarm.AlarmCond.EventState = 0;
+
+                /* Name */
+                alarm.AlarmCond.Name.Length = 
+                        row_ctx->saHpiDomainAlarmCondNameValue_len;
+                memcpy(alarm.AlarmCond.Name.Value,
+                       row_ctx->saHpiDomainAlarmCondNameValue,
+                       row_ctx->saHpiDomainAlarmCondNameValue_len);
+
+                /* Mid */
+		//Undefined since user cannot add OEM Alarms.
+                alarm.AlarmCond.Mid = 0;
+		       		       										  					  							
+                /* SaHpiTextBufferT Stuff */
+		alarm.AlarmCond.Data.DataType = 
+                        row_ctx->saHpiDomainAlarmCondTextType;
+
+                alarm.AlarmCond.Data.Language =
+                        row_ctx->saHpiDomainAlarmCondTextLanguage;
+		
+		alarm.AlarmCond.Data.DataLength =
+                        row_ctx->saHpiDomainAlarmCondText_len;
+			               
+		memcpy(alarm.AlarmCond.Data.Data, 
+                       row_ctx->saHpiDomainAlarmCondText, 
+                       row_ctx->saHpiDomainAlarmCondText_len);
+
+
+                session_id = get_session_id(row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]);
+
+                rc = saHpiAlarmAdd(session_id, &alarm);
+
+                if (rc != SA_OK) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: saHpiAlarmAdd() "
+                                     "Failed to add an Alarm rc: [%s]\n", 
+                                     oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
+
+                keys.key_array[0] = 
+                        row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX];
+                keys.key_array[1] = 
+                        row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX];
+
+                /* domain_alarm_entry_get() generates unique keys based on */
+                /* domainid, and entryid info.                             */
+                de_entry = domain_alarm_entry_get(&keys, &doma_de_table); 
+
+                if (de_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: domain_alarm_add() "
+                                     "domain_alarm_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
+                /* we have retrieved the HPI Annunciator EntryId */
+                de_entry->hpi_alarm_id = alarm.AlarmId;
+
+        } else {
+                return SNMP_ERR_NOCREATION;
+
+        }
+        
+        return SNMP_ERR_NOERROR; 
 }
 
 /**
@@ -365,7 +484,95 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
  */
 int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
 {
+        DEBUGMSGTL ((AGENT, "domain_alarm_ack, called\n"));
 
+        SaErrorT            rc = SA_OK;
+        SaHpiSessionIdT     session_id;
+        SaHpiAlarmIdT       alarmId;
+
+        DE_XREF *de_entry;
+        doma_keys keys;
+
+        if (!row_ctx)
+                return AGENT_ERR_NULL_DATA;
+
+        session_id = get_session_id(row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]);
+
+       /* see if this is an attempt to ack based on severtiy */
+        if (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] == 0) {
+                /* we are acking based on Severity */
+                alarmId = SAHPI_ENTRY_UNSPECIFIED;
+        } else {
+
+       		keys.key_array[0] = row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX];
+        	keys.key_array[1] = row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX];
+
+                /* domain_alarm_entry_get() generates unique keys based on */
+                /* domainid and alarmId tuples.                            */
+                de_entry = domain_alarm_entry_get(&keys, &doma_de_table); 
+
+                if (de_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: domain_alarm_ack() "
+                                     "domain_alarm_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+
+                /* we have retrieved the HPI Annunciator EntryId */
+                alarmId = de_entry->hpi_alarm_id;
+        }
+
+        rc = saHpiAlarmAcknowledge(session_id,                             
+                                   alarmId, 
+                                   row_ctx->saHpiDomainAlarmSeverity);
+
+        if (rc != SA_OK) {
+                snmp_log (LOG_ERR,
+                "domain_alarm_ack: Call to "
+                "saHpiAlarmAcknowledge() failed rc: %s.\n",
+                oh_lookup_error(rc));
+                DEBUGMSGTL ((AGENT,
+                "domain_alarm_ack: Call to "
+                "saHpiAlarmAcknowledge() failed rc: %s.\n",
+                oh_lookup_error(rc)));
+                return get_snmp_error(rc);
+        } 
+
+        DEBUGMSGTL ((AGENT, "domain_alarm_ack: Call to "
+                   "saHpiAlarmAcknowledge() succeeded rc: %s.\n",
+                   oh_lookup_error(rc)));
+
+        /* if we ack'd based on severity then we need to set ack to true   */
+        /* for all rows for the given DomainId and Severity               */
+        if (alarmId == SAHPI_ENTRY_UNSPECIFIED) {
+
+                netsnmp_index *row_idx;
+                saHpiDomainAlarmTable_context *doma_ctx;
+
+                row_idx = CONTAINER_FIRST(cb.container);
+                if (row_idx) //At least one entry was found.
+                {
+                        do {
+                                doma_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                                if ((doma_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX] ==
+                                     row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]) &&
+
+                                    ((doma_ctx->saHpiDomainAlarmSeverity == 
+                                      row_ctx->saHpiDomainAlarmSeverity) ||
+                                    (row_ctx->saHpiDomainAlarmSeverity == 
+                                     SAHPI_ALL_SEVERITIES)))
+
+                                     row_ctx->saHpiDomainAlarmAcknowledged = MIB_TRUE;
+                                     DEBUGMSGTL ((AGENT, "domain_alarm_ack: found row for "
+                                                         "setting ack based on severity\n"));
+
+                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                        } while (row_idx);
+                }
+        } /* end check for all rows deleted based on Severity */
+
+        return SNMP_ERR_NOERROR; 
 }
 
 
@@ -830,10 +1037,7 @@ saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
     ctx->sahpi_domain_alarm_acknowledged_set     = MIB_FALSE;
     ctx->sahpi_domain_alarm_status_cond_type_set = MIB_FALSE;
     ctx->sahpi_domain_alarm_entitypath_set       = MIB_FALSE;
-    ctx->sahpi_domain_alarm_sensornum_set        = MIB_FALSE;
-    ctx->sahpi_domain_alarm_event_state_set      = MIB_FALSE;
     ctx->sahpi_domain_alarm_name_set             = MIB_FALSE;
-    ctx->sahpi_domain_alarm_mid                  = MIB_FALSE;
     ctx->sahpi_domain_alarm_text_type_set        = MIB_FALSE;
     ctx->sahpi_domain_alarm_text_language_set    = MIB_FALSE;
     ctx->sahpi_domain_alarm_text                 = MIB_FALSE;
@@ -962,21 +1166,6 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
             }	
         break;
 
-        case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondSensorNum));
-        break;
-
-        case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
-            if (rc == SNMP_ERR_NOERROR ) {
-            	    if (var->val_len > 
-                        sizeof(row_ctx->saHpiDomainAlarmCondEventState)) {
-            		    rc = SNMP_ERR_WRONGLENGTH;
-            	    }
-            }
-        break;
-
         case COLUMN_SAHPIDOMAINALARMCONDNAMEVALUE:
             /** OCTETSTR = ASN_OCTET_STR */
 	    rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
@@ -988,11 +1177,6 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
             }	
         break;
 
-        case COLUMN_SAHPIDOMAINALARMCONDMID:
-            /** SaHpiManufacturerId = ASN_UNSIGNED */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_UNSIGNED,
-                                                sizeof(row_ctx->saHpiDomainAlarmCondMid));
-        break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
@@ -1080,40 +1264,21 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
-                if (oh_lookup_statuscondtype(*var->val.integer - 1) == NULL)
+                if (oh_lookup_statuscondtype(*var->val.integer - 1) == NULL) {
                         rc = SNMP_ERR_BADVALUE;
+		}	
+		if ((*var->val.integer - 1) != SAHPI_STATUS_COND_TYPE_USER) {
+                        DEBUGMSGTL ((AGENT, "COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE"
+                                             " saHpiDomainAlarmTable_set_reserve2:"
+                                             " Only type SAHPI_STATUS_COND_TYPE_USER"
+                                             " is allowed\n"));
+                        rc = SNMP_ERR_BADVALUE;
+		}		
+					     		        	
         break;
 
         case COLUMN_SAHPIDOMAINALARMCONDENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( XXX_check_value( var->val.string, XXX ) ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
-
-        case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
-
-        case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
-            /** SaHpiEventState = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -1140,19 +1305,6 @@ void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
                 */
         break;
 
-        case COLUMN_SAHPIDOMAINALARMCONDMID:
-            /** SaHpiManufacturerId = ASN_UNSIGNED */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
-        break;
 
         case COLUMN_SAHPIDOMAINALARMCONDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
@@ -1302,29 +1454,6 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
-        case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
-            /** UNSIGNED32 = ASN_UNSIGNED */
-            row_ctx->saHpiDomainAlarmCondSensorNum = *var->val.integer;
-            if (rg->row_created == 1) {
-                    row_ctx->saHpiDomainAlarmRowStatus = 
-                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_sensornum_set = MIB_TRUE;
-            }
-            row_err = domain_alarm_add(row_ctx);	    
-        break;
-
-        case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
-            /** SaHpiEventState = ASN_OCTET_STR */
-            memcpy(row_ctx->saHpiDomainAlarmCondEventState,var->val.string,var->val_len);
-            row_ctx->saHpiDomainAlarmCondEventState_len = var->val_len;
-            if (rg->row_created == 1) {
-                    row_ctx->saHpiDomainAlarmRowStatus = 
-                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_event_state_set = MIB_TRUE;
-            }
-            row_err = domain_alarm_add(row_ctx);	    
-        break;
-
         case COLUMN_SAHPIDOMAINALARMCONDNAMEVALUE:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiDomainAlarmCondNameValue,var->val.string,var->val_len);
@@ -1333,17 +1462,6 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
                     row_ctx->sahpi_domain_alarm_name_set = MIB_TRUE;
-            }
-            row_err = domain_alarm_add(row_ctx);	    
-        break;
-
-        case COLUMN_SAHPIDOMAINALARMCONDMID:
-            /** SaHpiManufacturerId = ASN_UNSIGNED */
-            row_ctx->saHpiDomainAlarmCondMid = *var->val.integer;
-            if (rg->row_created == 1) {
-                    row_ctx->saHpiDomainAlarmRowStatus = 
-                            SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_mid = MIB_TRUE;
             }
             row_err = domain_alarm_add(row_ctx);	    
         break;
