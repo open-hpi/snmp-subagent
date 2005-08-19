@@ -32,10 +32,7 @@ typedef struct saHpiDomainAlarmTable_context_s {
     int sahpi_domain_alarm_acknowledged_set;
     int sahpi_domain_alarm_status_cond_type_set;
     int sahpi_domain_alarm_entitypath_set;
-    int sahpi_domain_alarm_sensornum_set;
-    int sahpi_domain_alarm_event_state_set;
     int sahpi_domain_alarm_name_set;
-    int sahpi_domain_alarm_mid;
     int sahpi_domain_alarm_text_type_set;
     int sahpi_domain_alarm_text_language_set;
     int sahpi_domain_alarm_text;
