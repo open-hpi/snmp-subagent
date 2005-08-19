@@ -101,6 +101,10 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	oh_big_textbuffer bigbuf;
 	SaHpiTextBufferT buf;
 	
+	/* Used for mapping */
+        DE_XREF *de_entry;
+        doma_keys keys;
+	
         DEBUGMSGTL ((AGENT, "populate_saHpiDomainAlarmTable, called\n"));		
 		
        	/* Get the first DAT Entry for this Session */	
@@ -124,6 +128,31 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	}
 	
 	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
+
+                /* Store sa value                                       */
+                /* this is the same as the AlarmId obtained from HPI    */
+                /* BUT in the case of a user defined Alarm they  */
+                /* will be different                                    */
+                keys.key_array[0] = Alarm.AlarmCond.DomainId;
+                keys.key_array[1] = Alarm.AlarmId;
+
+                /* domain_alarm_entry_get() generates unique keys based on */
+                /* domainid and alarmid values.                            */
+                de_entry = domain_alarm_entry_get(&keys, &doma_de_table); 
+
+                if (de_entry == NULL) {
+                        DEBUGMSGTL ((AGENT, 
+                                     "ERROR: populate_saHpiDomainAlarmTable() "
+                                     "domain_alarm_entry_get returned NULL\n"));
+                        return AGENT_ERR_INTERNAL_ERROR;
+                }
+                /* here is where the mapped id is the same as the key value     */
+                /* remember when the user creates an announcement the user      */
+                /* specifies the entryId and will be different from the         */
+                /* entryId returned from the HPI API that generates the         */
+                /* new announcement                                             */    
+                de_entry->hpi_alarm_id = Alarm.AlarmId;
+
 	        
 		/* assign the number of indices */
 	        domain_alarm_idx.len = DOMAIN_ALARM_INDEX_NR;
