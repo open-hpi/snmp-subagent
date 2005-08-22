@@ -405,6 +405,13 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
                 /* EP */
                 rc = oh_encode_entitypath(row_ctx->saHpiAnnouncementEntityPath, 
                                           &announcement.StatusCond.Entity);
+                if (rc != SA_OK) {
+                        DEBUGMSGTL ((AGENT, 
+                        "announcement_add: oh_encode_entitypath Failed:"
+                        " rc = %d\n",
+                        oh_lookup_error(rc)));
+                }
+
 
                 /* EventState */
                 SaHpiTextBufferT        buffer;
