@@ -1906,7 +1906,7 @@ saHpiDomainAlarmTimestamp OBJECT-TYPE
 
 saHpiDomainAlarmSeverity OBJECT-TYPE
         SYNTAX SaHpiSeverity
-        MAX-ACCESS accessible-for-notify 
+        MAX-ACCESS read-create 
         STATUS current
         DESCRIPTION
                 "Severity of alarm.
