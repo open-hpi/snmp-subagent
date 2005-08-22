@@ -383,7 +383,6 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
 
         g_mutex_lock(thread_mutex);
 
-//        if ((row_ctx->timestamp_set     == MIB_TRUE) && decide this will be read-only
           if ((row_ctx->text_type_set     == MIB_TRUE) &&
               (row_ctx->text_language_set == MIB_TRUE) &&
               (row_ctx->text_set          == MIB_TRUE)) {
@@ -425,7 +424,7 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
 
                 row_ctx->saHpiUserEventTimestamp = event.Timestamp;
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
-        }  
+        }          
 
         g_mutex_unlock(thread_mutex);
 
@@ -1081,7 +1080,7 @@ void saHpiUserEventTable_set_reserve1( netsnmp_request_group *rg )
                     }
             }
 
-            /* if this is a new row check the validity of the user specified AreaId */
+            /* if this is a new row check the validity of the user specified EntryId */
             if (((rg->row_created)) && (rc == SNMP_ERR_NOERROR)) {
                     /* check for valid saHpiUserEventEntryId specified */
                     /* this is not the same as the EntryId obtained from HPI */
