@@ -1,0 +1,313 @@
+<!-- ...................................................................... -->
+<!-- $Id$  -->
+<!-- 
+        This material may be distributed only subject to the terms and 
+        conditions set forth in the Open Publication License, v1.0 or later 
+        (the latest version is currently available at 
+        http://www.opencontent.org/openpub/).  Distribution of substantively 
+        modified version of this document is prohibited without the explicit 
+        permission of the copyright holder.
+
+        Other company, product, or service names may be trademarks or service 
+        marks of others.
+-->
+<chapter>
+  <title>Getting the pieces</title>
+  <sect1>
+    <title>Pre-requisities</title>
+	<para>
+	To understand this tutorial its important to have the following under hand:
+	<itemizedlist mark='closedcircle'>
+		<listitem>
+			<para>NetSNMP 5.0.x installed. You can download the latest
+			binary and source code from: 
+			 <ulink  url="http://www.net-snmp.org/">The NET-SNMP Project Home Page</ulink>.
+			</para>
+		</listitem>
+		<listitem>
+			<para>Understanding of Management Information Base (MIB) syntax. I recommend 
+			<literal>Understanding SNMP MIBs</literal> by  David T. Perkins and Evan McGinnis, published by Prentice Hall. ISBN 0-13-437708-7.
+			</para>
+		</listitem>
+		<listitem>
+			<para>Knowledge of SNMP GET/SET operation. The above mentioned book covers it thoroughly, however these Requests for Comments (RFCs) are also a good read:
+			<itemizedlist mark='opencircle'>
+			<listitem>
+				<para>
+				<ulink url="http://www.ietf.org/rfc/rfc1157.txt">RFC 1157:  A Simple Network Management Protocol (SNMP)</ulink>.</para>
+			</listitem>
+			<listitem>
+				<para>
+				<ulink url="http://www.ietf.org/rfc/rfc2572.txt">RFC 2572: Message Processing and Dispatching for the Simple Network Management Protocol (SNMP)</ulink></para>
+			</listitem>
+			<listitem>
+				<para>"The Party-based SNMPv2" circa 1993-1995 [RFC 1441 - RFC 1452].</para>
+			</listitem>
+			</itemizedlist>
+			</para>	
+		</listitem>	
+		<listitem>
+			<para>MIB definition file. In this tutorial I refer to
+			<ulink url="http://www.net-snmp.org/tutorial-5/toolkit/mib_module/NET-SNMP-TUTORIAL-MIB.txt">NET-SNMP-TUTORIAL-MIB.txt</ulink> and implement a sub-agent based on this file.
+			</para>
+		</listitem>
+	</itemizedlist>
+	</para>
+
+  <sect2>
+    <title>Generation of skeleton code</title>
+    <para>
+     In order to implement a new sub-agent, three files are necessary:
+
+	      <itemizedlist mark='opencircle'>
+	 	<listitem>
+		  <para>
+                MIB definition file.
+                  </para>
+		</listitem>
+		<listitem>
+              <para>
+                C header file
+              </para>
+		</listitem>
+		<listitem>
+              <para>
+                C implementation file
+              </para>
+            </listitem>
+          </itemizedlist>
+	</para>
+	<note>
+		<para>The MIB definition file we refer to in this tutorial is the <literal>	
+	NET-SNMP-TUTORIAL-MIB.txt</literal>.
+		</para>
+	</note>
+	<note>
+		<para>
+	The C header and implementation file can be generated automaticly from
+	the MIB definition file using the <emphasis>mib2c</emphasis> tool.
+		</para>
+		<para>
+	It generates the corresponding the C and header file (or files) with the skeleton
+	code. This chapter will explain in details how to use the mib2c tool. The next chapter
+	will explain the generated C and header file (or files). 
+		</para>
+	</note>	
+    </sect2>
+	
+    <sect2>
+      <title>mib2c</title>
+      <para>
+	From the <emphasis>mib2c</emphasis> manpage. The  <emphasis>mib2c</emphasis> tool is designed 
+	to take a portion  of  the  MIB tree  (as defined by a MIB file) 
+	and generate the template C code necessary to implement the 
+	corresponding  MIB  module.
+	</para>
+	<para>
+       The mib2c tool uses the MIB definition file to produce the
+       two  C  code  files. Thus, mib2c generates a template that
+       you can edit to add logic necessary to obtain  information
+       from  the  operating system or application to complete the
+       module.
+	</para>
+	<para>
+       <emphasis>MIBNODE</emphasis> is the top level mib node  you  want  to  generate
+       code for.  You must give mib2c a mib node (e.g., netSnmpIETFWGTable),
+       not a mib file on the command line.   (this  is  the  most
+       common mistake).
+	</para>
+	<para>
+       The mib2c tool accepts both SMIv1 and SMIv2 MIBs.
+	</para>
+	<para>
+       mib2c  needs  to  be  able  to find and load a MIB file in
+       order to generate C code for the MIB. To enable  mib2c  to
+       find  the  MIB  file, set the MIBS environment variable to
+       include the MIB file you are using.  An example of setting
+       this environment variable is:
+	</para>
+	<para>
+   <programlisting role="C">$ export MIBS=+NET-SNMP-TUTORIAL-MIB</programlisting>
+	</para>
+	<para>
+          or
+	</para>
+	<para>
+          <programlisting role="C">$ export MIBS=ALL</programlisting>
+        </para>
+        <para>
+          The  first  example ensures that mib2c finds the NET-SNMP-
+          TUTORIAL-MIB mib, in addition to the default MIB  modules.
+          The  default  list of MIB modules is set when the suite is
+          first configured and built and  basically  corresponds  to
+          the  list  of modules that the agent supports.  The second
+          example ensures that mib2c finds all MIBs  in  the  search
+          location  for  MIB  files. The default search location for
+          MIB files is /usr/share/snmp/mibs.  This  search  location
+          can be modified by the <emphasis>MIBDIRS</emphasis> environment variable.
+        </para>
+        <para>
+          Both  the  MIB  files to be loaded and the MIB file search
+          location can also be configured  in  the  snmp.conf  file.
+          Please see snmp.conf(5) for more information.
+	</para>
+        <para>
+          The  generated  *.c  and  *.h files will be created in the
+          current working directory.
+        </para>
+      </sect2>
+      <sect2>
+        <title>How should the sub-agent be generated ?</title>
+        <para>
+	The second parameter to <emphasis>mib2c</emphasis> tool is the
+        <emphasis>CONFIGFILE</emphasis> which is used when generating code.  
+          These  files
+          will be searched for first in the current directory
+          and then in  the  /usr/share  directory  (which  is
+          where  the default mib2c configuration files can be
+          found).  Running mib2c without  the  -c  CONFIGFILE
+          option will display a description of the valid val­
+          ues for CONFIGFILE, that is, the  available  config
+          files, including new ones that you might author.
+        </para> 
+        <para>        
+          For example,
+        </para>
+        <para>
+          <programlisting role="C">$ mib2c netSnmpIETFWGTable
+          </programlisting>
+        </para>
+        <para>
+          will  display a description of the currently avail­
+          able values for CONFIGFILE.
+        </para>
+        <para>
+          The following values are supported for CONFIGFILE:
+         </para>
+        <para>
+          <programlisting role="C">
+mib2c.scalar.conf
+mib2c.int_watch.conf
+mib2c.iterate.conf
+mib2c.create-dataset.conf
+mib2c.array-user.conf
+mib2c.column_defines.conf
+mib2c.column_enums.conf
+          </programlisting>
+        </para>
+	<sect3>
+        <title>Generating code for scalar objects
+        </title>
+        <para>
+          If you're writing code for some scalars, run:
+        </para>
+        <para>
+          <programlisting role="C">$ mib2c -c mib2c.scalar.conf MIBNODE
+          </programlisting>
+        </para>
+        <para>
+            If you want to magically "tie" integer variables to
+            integer scalars, use:
+	</para>
+	<para>
+	  <programlisting role="C">$ mib2c -c mib2c.int_watch.conf MIBNODE
+	  </programlisting>
+	</para>
+	</sect3>
+	<sect3>
+	<title>
+           Generating code for tables 
+        </title>
+	<para>    
+            If  your  table  data  is kept somewhere else (e.g.
+            it's in the kernel and not in  the  memory  of  the
+            agent  itself) and you need to "iterate" over it to
+            find  the  right  data  for  the  SNMP  row   being
+            accessed.   See  the agent/mibgroup/mibII/vacm_con­
+            text.c file for an example:
+        </para>
+	<para>
+	  <programlisting role="C">$ mib2c -c mib2c.iterate.conf MIBNODE
+          </programlisting>
+	</para>
+	<para> 
+            If your table data is kept in the agent (i.e.  it's
+            not  located  in  an external source) and is purely
+            data driven (i.e. you do not need  to  perform  any
+            work  when  a  set  occurs).   See  the  agent/mib­
+            group/examples/data_set.c file for  an  example  of
+            such a table:
+           </para>
+	 <para>
+	   <programlisting role="C">$ mib2c -c mib2c.create-dataset.conf MIBNODE
+           </programlisting>
+	</para>
+	<para> 
+            If  your table data is kept in the agent (i.e. it's
+            not located in an external  source),  and  you  can
+            keep your data sorted by the table index but you do
+            need to perform work when a set occurs:
+         </para>
+	<para>
+	  <programlisting role="C">$ mib2c -c mib2c.array-user.conf MIBNODE
+          </programlisting>
+	</para>
+	</sect3>
+	<sect3>
+	<title>Generating header file definitions
+        </title>
+	<para>    
+            To generate just a header with a  define  for  each
+            column number in your table:
+         </para>
+ 	<para>
+	 <programlisting role="C">$ mib2c -c mib2c.column_defines.conf MIBNODE
+         </programlisting>   
+	</para>
+	<para>
+            To  generate  just  a header with a define for each
+            enum for any column containing enums:
+        </para>
+	<para>
+	  <programlisting role="C">$ mib2c -c mib2c.column_enums.conf MIBNODE
+	  </programlisting>
+	</para>
+	</sect3>
+	<sect3>
+	<title>Generating code for the 4.x line of code (the older API)
+	</title>
+	<para>
+	  <programlisting role="C">$ mib2c -c mib2c.old-api.conf MIBNODE
+	  </programlisting>
+	</para>
+	</sect3>
+	<sect3> 
+	<title>Example</title>
+	<warning>
+		<para>If you get a warning message, such as:
+		<programlisting role="output">
+you didn't give me a valid OID to start with at /usr/bin/mib2c line 115.
+		</programlisting>
+		do define the environment variable MIBS to be ALL or the name of your MIB.
+		<programlisting role='C'>
+$export MIBS=ALL
+		</programlisting>
+
+		</para>
+	</warning>
+	<para>
+ For our implementation of the netSnmpIETFWGTable we picked
+         the <emphasis>mib2c.array-user.conf</emphasis> configuration file.
+        </para>
+        <programlisting role="C">
+$ mib2c -c mib2c.array-user.conf netSnmpIETFWGTable
+writing to netSnmpIETFWGTable.h
+writing to netSnmpIETFWGTable.c
+running indent on netSnmpIETFWGTable.c
+running indent on netSnmpIETFWGTable.h
+        </programlisting>
+
+	</sect3> 
+    </sect2>
+  </sect1>
+</chapter>
