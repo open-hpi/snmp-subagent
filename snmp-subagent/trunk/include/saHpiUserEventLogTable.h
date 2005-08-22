@@ -26,6 +26,14 @@ extern "C" {
 typedef struct saHpiUserEventLogTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
+    /* flags used to tract data needed to create OEM Event */
+     unsigned char timestamp_set;
+     unsigned char text_type_set;
+     unsigned char text_language_set;
+     unsigned char text_set;
+     unsigned char saHpiEventAdd_called;
+
+
     /*************************************************************
      * You can store data internally in this structure.
      *
@@ -81,6 +89,8 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
                                          SaHpiEventLogEntryT *event,
                                          oid * this_child_oid, 
                                          size_t *this_child_oid_len);
+int user_event_log_delete (saHpiUserEventLogTable_context *row_ctx);
+int user_event_log_add (saHpiUserEventLogTable_context *row_ctx);
 
 /*************************************************************
  * oid declarations
@@ -99,11 +109,19 @@ extern size_t saHpiUserEventLogTable_oid_len;
 #define SAHPIUSEREVENTLOGROWSTATUS_CREATEANDGO       4
 #define SAHPIUSEREVENTLOGROWSTATUS_CREATEANDWAIT     5
 #define SAHPIUSEREVENTLOGROWSTATUS_DESTROY	     6
+
+/*************************************************************
+ * column number definitions for table saHpiUserEventTable
+ */
+#define USER_EVENT_LOG_INDEX_NR 3 
+#define saHpiDomainId_event_log_INDEX 0
+#define saHpiEventSeverity_event_log_INDEX 1
+#define saHpiUserEventEntryId_event_log_INDEX 2
+
     
 /*************************************************************
  * column number definitions for table saHpiUserEventLogTable
  */
-#define USER_EVENT_LOG_INDEX_NR 3 
 #define COLUMN_SAHPIUSEREVENTLOGTIMESTAMP 1
 #define COLUMN_SAHPIUSEREVENTLOGTEXTTYPE 2
 #define COLUMN_SAHPIUSEREVENTLOGTEXTLANGUAGE 3
