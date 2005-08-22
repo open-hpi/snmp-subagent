@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiEventThread.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -84,9 +85,9 @@ int initialize_table_saHpiUserEvenLogtEntryCount(void);
 
 
 SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid, 
-                                             SaHpiEventLogEntryT *event,
-                                             oid * this_child_oid, 
-                                             size_t *this_child_oid_len)
+                                         SaHpiEventLogEntryT *event,
+                                         oid * this_child_oid, 
+                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
 
@@ -181,6 +182,92 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;
+}
+
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
+{
+        SaErrorT                rc = SA_OK;
+        SaHpiSessionIdT         session_id;
+        SaHpiResourceIdT        resource_id;
+        SaHpiEventT             event;
+
+        DEBUGMSGTL ((AGENT, "user_event_log_add() called\n"));
+
+        g_mutex_lock(thread_mutex);
+
+          if ((row_ctx->text_type_set     == MIB_TRUE) &&
+              (row_ctx->text_language_set == MIB_TRUE) &&
+              (row_ctx->text_set          == MIB_TRUE)) {
+
+                if (!row_ctx)
+                        return AGENT_ERR_NULL_DATA;
+
+                session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_event_log_INDEX]);
+                resource_id = SAHPI_UNSPECIFIED_RESOURCE_ID;
+
+                event.EventType = SAHPI_ET_USER;
+                event.Severity  = row_ctx->index.oids[saHpiEventSeverity_event_log_INDEX] - 1;
+                event.Source    = SAHPI_UNSPECIFIED_RESOURCE_ID;
+                //event.Timestamp = 0; shall be set by hpi implementation 
+                memcpy(event.EventDataUnion.UserEvent.UserEventData.Data,
+                       row_ctx->saHpiUserEventLogText,
+                       row_ctx->saHpiUserEventLogText_len);
+                event.EventDataUnion.UserEvent.UserEventData.DataLength =
+                        row_ctx->saHpiUserEventLogText_len;
+                event.EventDataUnion.UserEvent.UserEventData.DataType =
+                        row_ctx->saHpiUserEventLogTextType - 1;
+                event.EventDataUnion.UserEvent.UserEventData.Language = 
+                        row_ctx->saHpiUserEventLogTextLanguage - 1;
+
+
+                /* the premise here is we won't set the row to active until */
+                /* the event is received from the event handling thread */
+                /* at which point we will need to set this tables RowStatus */
+                /* to ACTIVE(1) and update the EventTable as well */
+                rc = saHpiEventLogEntryAdd (session_id, 
+                                            resource_id,
+                                            &event);
+                if (rc != SA_OK) {
+                        snmp_log (LOG_ERR,
+                                  "user_event_add: Call to "
+                                  "saHpiEventLogentryAdd() failed "
+                                  "to set Mode rc: %s.\n",
+                                  oh_lookup_error(rc));
+                        DEBUGMSGTL ((AGENT,
+                                     "user_event_log_add: Call to "
+                                     "saHpiEventLogentryAdd() failed to set "
+                                     "Mode rc: %s.\n",
+                                     oh_lookup_error(rc)));
+                        return get_snmp_error(rc);
+                }
+
+                row_ctx->saHpiUserEventLogRowStatus = SAHPIUSEREVENTLOGROWSTATUS_ACTIVE;
+                row_ctx->saHpiUserEventLogTimestamp = event.Timestamp;
+                row_ctx->saHpiEventAdd_called = MIB_TRUE;
+        }  
+
+        g_mutex_unlock(thread_mutex);
+
+        return SNMP_ERR_NOERROR; 
+}
+
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int user_event_log_delete (saHpiUserEventLogTable_context *row_ctx)
+{
+        DEBUGMSGTL ((AGENT, "user_event_add() called\n"));
+                    
+        return SNMP_ERR_NOERROR;
 }
 
 
@@ -370,41 +457,6 @@ saHpiUserEventLogTable_cmp( const void *lhs, const void *rhs )
 	
 	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiUserEventLogTable_context *
-saHpiUserEventLogTable_get( const char *name, int len )
-{
-    saHpiUserEventLogTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiUserEventLogTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 
 /************************************************************
  * Initializes the saHpiUserEventLogTable module
@@ -764,18 +816,42 @@ void saHpiUserEventLogTable_set_reserve1( netsnmp_request_group *rg )
             /** SaHpiTime = ASN_COUNTER64 */
             rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
                                                 sizeof(row_ctx->saHpiUserEventLogTimestamp));
+
+            /* check rowstatus is in correct state, createANDwait */
+            if ( rc != SNMP_ERR_NOERROR )  {
+                    DEBUGMSGTL ((AGENT, "saHpiUserEventLogTable_set_reserve1, "
+                                        "netsnmp_check_vb_type_and_size failed\n"));
+            }
+
+            /* check rowstatus is in correct state, createANDwait */
+            if ((rc == SNMP_ERR_NOERROR) && 
+                (row_ctx->saHpiUserEventLogRowStatus != SNMP_ROW_CREATEANDWAIT)) {
+                    rc = SNMP_ERR_NOCREATION;
+                    DEBUGMSGTL ((AGENT, "saHpiUserEventLogTable_set_reserve1, "
+                                        "SNMP_ERR_NOCREATION\n"));
+            }
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiUserEventLogTextType));
+            /* check rowstatus is in correct state, createANDwait */
+            if ((rc == SNMP_ERR_NOERROR) && 
+                (row_ctx->saHpiUserEventLogRowStatus != SNMP_ROW_CREATEANDWAIT))
+                    rc = SNMP_ERR_NOCREATION;
+
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiUserEventLogTextLanguage));
+            /* check rowstatus is in correct state, createANDwait */
+            if ((rc == SNMP_ERR_NOERROR) && 
+                (row_ctx->saHpiUserEventLogRowStatus != SNMP_ROW_CREATEANDWAIT))
+                    rc = SNMP_ERR_NOCREATION;
+
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXT:
@@ -784,14 +860,71 @@ void saHpiUserEventLogTable_set_reserve1( netsnmp_request_group *rg )
             if (rc == SNMP_ERR_NOERROR ) {
             	    if (var->val_len > sizeof(row_ctx->saHpiUserEventLogText)) {
             		    rc = SNMP_ERR_WRONGLENGTH;
-            	    }
+                    }
             }	    	    
+            /* check rowstatus is in correct state, createANDwait */
+            if ((rc == SNMP_ERR_NOERROR) && 
+                (row_ctx->saHpiUserEventLogRowStatus != SNMP_ROW_CREATEANDWAIT))
+                    rc = SNMP_ERR_NOCREATION;
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGROWSTATUS:
             /** RowStatus = ASN_INTEGER */
             rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiUserEventLogRowStatus));
+           /* check for valid status and state transitions*/
+            if ((rc == SNMP_ERR_NOERROR ) &&  (rg->row_created) && 
+                (*var->val.integer != SNMP_ROW_CREATEANDWAIT)) {
+                    DEBUGMSGTL ((AGENT, 
+                    "COLUMN_SAHPIUSEREVENTLOGROWSTATUS, should be SNMP_ROW_CREATEANDWAIT on new row\n"));
+                    rc = SNMP_ERR_WRONGVALUE;
+            } else if ((rc == SNMP_ERR_NOERROR ) && (!rg->row_created)) {
+                    if ((row_ctx->saHpiUserEventLogRowStatus != SNMP_ROW_DESTROY) &&
+                        (*var->val.integer == SNMP_ROW_DESTROY)) {
+                            rc = SNMP_ERR_NOERROR;
+                    } else {
+                            DEBUGMSGTL ((AGENT, 
+                            "COLUMN_SAHPIUSEREVENTLOGROWSTATUS, SNMP_ERR_INCONSISTENTVALUE\n"));
+                            rc = SNMP_ERR_INCONSISTENTVALUE;
+                    }
+            }
+            /* if this is a new row check the validity of the user specified EntryId */
+            if (((rg->row_created)) && (rc == SNMP_ERR_NOERROR)) {
+                    /* check for valid saHpiUserEventLogEntryId specified */
+                    /* this is not the same as the EntryId obtained from HPI */
+                    /* it is maintained in the subagent                     */
+                    DR_XREF *dr_entry;
+                    SaHpiDomainIdResourceIdArrayT dr_pair;
+
+                    dr_pair.domainId_resourceId_arry[0] = 
+                            row_ctx->index.oids[saHpiDomainId_event_log_INDEX];
+                    dr_pair.domainId_resourceId_arry[1] = 
+                            SAHPI_UNSPECIFIED_RESOURCE_ID;
+
+                    /* domainid, resourceid, */
+                    dr_entry = domain_resource_pair_get(&dr_pair, &dr_table);
+                    if (dr_entry == NULL) {
+                            DEBUGMSGTL ((AGENT, 
+                                         "ERROR: saHpiUserEventLogTable_set_reserve1()"
+                                         " domain_resource_pair_get returned NULL\n"));
+                            rc = SNMP_ERR_GENERR;
+                    }
+
+                    if ( row_ctx->index.oids[saHpiUserEventEntryId_event_log_INDEX] >= dr_entry->entry_id ) {
+                            dr_entry->entry_id = row_ctx->index.oids[saHpiUserEventEntryId_event_log_INDEX];
+                            dr_entry->entry_id++;
+                    } else {
+                            DEBUGMSGTL ((AGENT,"***********************************************\n"));
+                            DEBUGMSGTL ((AGENT,"dr_entry->entry_id [%d]\n", dr_entry->entry_id));
+                            DEBUGMSGTL ((AGENT,"row_ctx->index.oids[saHpiUserEventEntryId_event_log_INDEX] [%d]\n", 
+                                         row_ctx->index.oids[saHpiUserEventEntryId_event_log_INDEX]));
+                            DEBUGMSGTL ((AGENT, 
+                                         "ERROR: saHpiUserEventLogTable_set_reserve1() "
+                                         "User specified UserEventLogEntryId invalid!!!\n"));
+                            DEBUGMSGTL ((AGENT,"***********************************************\n"));
+                            rc = SNMP_ERR_WRONGVALUE;
+                    }
+            }
         break;
 
         default: /** We shouldn't get here */
@@ -848,30 +981,14 @@ void saHpiUserEventLogTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_texttype(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (oh_lookup_language(*var->val.integer - 1) == NULL)
+                        rc = SNMP_ERR_BADVALUE;
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXT:
@@ -949,27 +1066,52 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             row_ctx->saHpiUserEventLogTimestamp = *var->val.integer;
+            row_ctx->timestamp_set = MIB_TRUE;
+            if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
+                    user_event_log_add (row_ctx);
+            } 
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             row_ctx->saHpiUserEventLogTextType = *var->val.integer;
+            row_ctx->text_type_set = MIB_TRUE;
+            if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
+                    user_event_log_add (row_ctx);
+            } 
+
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             row_ctx->saHpiUserEventLogTextLanguage = *var->val.integer;
+            row_ctx->text_language_set = MIB_TRUE;
+            if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
+                    user_event_log_add (row_ctx);
+            } 
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiUserEventLogText,var->val.string,var->val_len);
             row_ctx->saHpiUserEventLogText_len = var->val_len;
+            row_ctx->text_set = MIB_TRUE;
+            if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
+                    user_event_log_add (row_ctx);
+            } 
+
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGROWSTATUS:
             /** RowStatus = ASN_INTEGER */
+            if (*var->val.integer == SNMP_ROW_DESTROY) {
+                    if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_ACTIVE) {
+                            row_err = user_event_log_delete (row_ctx);
+                    }
+                    rg->row_deleted = 1;
+            }
             row_ctx->saHpiUserEventLogRowStatus = *var->val.integer;
+
         break;
 
         default: /** We shouldn't get here */
