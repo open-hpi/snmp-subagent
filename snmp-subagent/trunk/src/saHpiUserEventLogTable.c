@@ -175,7 +175,7 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPIUSEREVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
+	memset(this_child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiUserEventLogTable_oid, saHpiUserEventLogTable_oid_len,
 			column, column_len,
 			&user_evt_idx,
@@ -183,6 +183,25 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 
         return SA_OK;
 }
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT user_event_log_clear(SaHpiSessionIdT session_id, 
+                              SaHpiResourceIdT resource_id,  
+                              oid *saHpiEventLogRowPointer, 
+                              size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
+        return SA_OK;
+}
+
 
 /**
  * 
@@ -196,6 +215,15 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
         SaHpiSessionIdT         session_id;
         SaHpiResourceIdT        resource_id;
         SaHpiEventT             event;
+
+	netsnmp_index user_evt_idx;
+	saHpiUserEventLogTable_context *user_evt_ctx;
+
+        oid this_child_oid[MAX_OID_LEN];
+        size_t this_child_oid_len;
+
+	oid column[2];
+	int column_len = 2;
 
         DEBUGMSGTL ((AGENT, "user_event_log_add() called\n"));
 
@@ -250,6 +278,23 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
                 row_ctx->saHpiUserEventLogRowStatus = SAHPIUSEREVENTLOGROWSTATUS_ACTIVE;
                 row_ctx->saHpiUserEventLogTimestamp = event.Timestamp;
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
+
+                /* create full oid on This row for parent RowPointer */
+                column[0] = 1;
+                column[1] = COLUMN_SAHPIUSEREVENTLOGTIMESTAMP;
+                memset(this_child_oid, 0, MAX_OID_LEN);
+                build_full_oid(saHpiUserEventLogTable_oid, 
+                               saHpiUserEventLogTable_oid_len,
+                               column, column_len,
+                               &user_evt_idx,
+                               this_child_oid, MAX_OID_LEN, &this_child_oid_len);
+
+                /* Now Push newly craeted RowPointer and data up to */
+                /* saHpiEventLogTable */
+                rc = event_log_add(session_id, resource_id, &event, 
+                                   this_child_oid, this_child_oid_len);
+
+
         }  
 
         g_mutex_unlock(thread_mutex);
@@ -1068,7 +1113,7 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiUserEventLogTimestamp = *var->val.integer;
             row_ctx->timestamp_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
-                    user_event_log_add (row_ctx);
+                    row_err = user_event_log_add (row_ctx);
             } 
         break;
 
@@ -1077,7 +1122,7 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiUserEventLogTextType = *var->val.integer;
             row_ctx->text_type_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
-                    user_event_log_add (row_ctx);
+                    row_err = user_event_log_add (row_ctx);
             } 
 
         break;
@@ -1087,7 +1132,7 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiUserEventLogTextLanguage = *var->val.integer;
             row_ctx->text_language_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
-                    user_event_log_add (row_ctx);
+                    row_err = user_event_log_add (row_ctx);
             } 
         break;
 
@@ -1097,7 +1142,7 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
             row_ctx->saHpiUserEventLogText_len = var->val_len;
             row_ctx->text_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
-                    user_event_log_add (row_ctx);
+                    row_err = user_event_log_add (row_ctx);
             } 
 
         break;
