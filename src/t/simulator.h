@@ -28,16 +28,16 @@ typedef enum {
 
 
 /* function prototypes */
-static int usage(int type);
+static void print_usage(void);
 
 static int get_user_input (char *input);
 
-static int inject_resource_event ();
-static int inject_domain_event ();
-static int inject_sensor_event ();
-static int inject_sensorec_event ();
-static int inject_hotswap_event ();
-static int inject_watchdog_event ();
-static int inject_software_event ();
-static int inject_oem_event ();
-static int inject_user_event ();
+static int inject_resource_event (char *handler_name);
+static int inject_domain_event   (char *handler_name);
+static int inject_sensor_event   (char *handler_name);
+static int inject_sensorec_event (char *handler_name);
+static int inject_hotswap_event  (char *handler_name);
+static int inject_watchdog_event (char *handler_name);
+static int inject_software_event (char *handler_name);
+static int inject_oem_event      (char *handler_name);
+static int inject_user_event     (char *handler_name);
