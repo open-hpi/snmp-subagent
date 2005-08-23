@@ -75,6 +75,15 @@ int saHpiEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
  */
 SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid);
 
+SaErrorT event_log_clear (SaHpiSessionIdT session_id, 
+                          SaHpiResourceIdT resource_id);
+
+int event_log_add(SaHpiSessionIdT session_id, 
+                  SaHpiResourceIdT resource_id, 
+                  SaHpiEventT *event,
+                  oid *child_oid, 
+                  size_t this_child_oid_len);
+
 /*************************************************************
  * oid declarations
  */
@@ -87,6 +96,10 @@ extern size_t saHpiEventLogTable_oid_len;
  * column number definitions for table saHpiEventLogTable
  */
 #define EVENT_LOG_INDEX_NR 3
+#define saHpiEventLogDomainId_INDEX 0
+#define saHpiEventLogResourceId_INDEX 1
+#define saHpiEventLogIndex_INDEX 2
+
 #define COLUMN_SAHPIEVENTLOGINDEX 1
 #define COLUMN_SAHPIEVENTLOGTYPE 2
 #define COLUMN_SAHPIEVENTLOGADDEDTIMESTAMP 3
