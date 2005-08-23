@@ -176,6 +176,24 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 
 /**
  * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id, 
+                                 SaHpiResourceIdT resource_id,  
+                                 oid *saHpiEventLogRowPointer, 
+                                 size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
+        return SA_OK;
+}
+
+/**
+ * 
  * @handler:
  * @reginfo:
  * @reqinfo:
