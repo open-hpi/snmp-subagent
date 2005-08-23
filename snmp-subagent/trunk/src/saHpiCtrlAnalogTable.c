@@ -136,7 +136,7 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPICTRLANALOGNUM;
-	memset(child_oid, 0, sizeof(child_oid_len));
+	memset(child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiCtrlAnalogTable_oid, saHpiCtrlAnalogTable_oid_len,
 			column, column_len,
 			&ctrl_analog_index,

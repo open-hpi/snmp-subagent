@@ -317,7 +317,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 /* create full oid on This row for parent RowPointer */
                 column[0] = 1;
                 column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
-                memset(child_oid, 0, sizeof(child_oid_len));
+                memset(child_oid, 0, MAX_OID_LEN);
                 build_full_oid(saHpiAnnouncementTable_oid, 
                                saHpiAnnouncementTable_oid_len,
                               column, column_len,
@@ -333,9 +333,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	
 	}
 	
-	
 	announcement_entry_count = CONTAINER_SIZE (cb.container);
-	
 		       
         return SA_OK; 		       
 
