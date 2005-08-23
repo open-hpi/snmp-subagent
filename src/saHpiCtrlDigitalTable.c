@@ -134,7 +134,7 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPICTRLDIGITALNUM;
-	memset(child_oid, 0, sizeof(child_oid));
+	memset(child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiCtrlDigitalTable_oid, saHpiCtrlDigitalTable_oid_len,
 			column, column_len,
 			&ctrl_digital_index,

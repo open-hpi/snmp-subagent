@@ -148,7 +148,7 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPISENSOREVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
+	memset(this_child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiSensorEventLogTable_oid, saHpiSensorEventLogTable_oid_len,
 			column, column_len,
 			&sen_evt_idx,
@@ -287,6 +287,24 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 		
 	sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
 
+        return SA_OK;
+}
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id, 
+                                SaHpiResourceIdT resource_id,  
+                                oid *saHpiEventLogRowPointer, 
+                                size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
         return SA_OK;
 }
 
