@@ -182,6 +182,26 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
         return SA_OK;
 }
 
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id, 
+                                  SaHpiResourceIdT resource_id,  
+                                  oid *saHpiEventLogRowPointer, 
+                                  size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
+        return SA_OK;
+}
+
+
 					
 /**
  * 
