@@ -14,6 +14,17 @@
 *     Daniel de Araujo <ddearauj@us.ibm.com>
 */
 
+/* Instructions for use: 
+ * 1. Compile: gcc [-o pick_a_name] simulator.c
+ * 2. Copy the executable to the directory 
+ *    where you are running the subagent. 
+ *    Likely: <path>/openhpi-subagent/src
+ * 3. Login as root.
+ * 4. To execute: ./exectuable -n handler_name,
+ *    where the handler_name is the name you 
+ *    specified in openhpi.conf.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -738,6 +749,12 @@ static int inject_user_event (char *handler_name)
     return 0;
 }
 
+static void print_usage (void)
+{
+   printf("Usage is ./executable -n your_handler_name*\n");
+   printf("*Note: your_handler_name is the handler_name specified in openhpi.conf\n\n");
+}   
+   
 
 int main(int argc, char **argv)
 {
@@ -745,22 +762,21 @@ int main(int argc, char **argv)
 	char *handler_name = NULL;
 	char selection;
 	
-	if (argc < 3) { printf("Too few arguments\n"); exit(1); }
-	else if (argc > 3) { printf("Too many arguments\n"); exit(1); }
+	if (argc < 3) { printf("Too few arguments\n"); print_usage(); exit(1); }
+	else if (argc > 3) { printf("Too many arguments\n"); print_usage(); exit(1); }
 	
 	while ((c = getopt (argc, argv, "n:s")) != EOF) {
 	    switch (c) {
 
 	 	case 'n':
 			handler_name = optarg;
-			printf("name is %s", handler_name);
 			break;
 			
 	    default:
 			exit(1);
 	      	break;
 	    }
-	  }	
+	}	
 	
 	while (get_user_input(&selection)) {
 
