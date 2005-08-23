@@ -304,6 +304,23 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
         return SA_OK;
 }
 
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT sen_en_chnge_event_log_clear(SaHpiSessionIdT session_id, 
+                                      SaHpiResourceIdT resource_id,  
+                                      oid *saHpiEventLogRowPointer, 
+                                      size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
+        return SA_OK;
+}
 
 /**
  * 
