@@ -380,6 +380,8 @@ int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx)
 	SaHpiSessionIdT         session_id;
 	SaHpiResourceIdT        resource_id;
 
+        int                     rv = SNMP_ERR_NOERROR;
+
         DEBUGMSGTL ((AGENT, "event_log_info_clear, called\n"));
 
 	if (!row_ctx)
@@ -389,7 +391,7 @@ int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx)
 	resource_id = row_ctx->index.oids[saHpiResourceId_INDEX];
 	
         rc = saHpiEventLogClear(session_id, resource_id);
-       
+
 	if (rc != SA_OK) {
 	
 	        // Since the command wasn't successful, we reset the saHpiEventLogClear node.
@@ -404,6 +406,9 @@ int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx)
 		return get_snmp_error(rc);
  
 	}		
+
+        /* it succeeded clear the underlying tables */
+        rv = event_log_clear(session_id, resource_id);
 
 	return SNMP_ERR_NOERROR; 
 	
