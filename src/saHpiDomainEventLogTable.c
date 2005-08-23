@@ -168,7 +168,26 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;
-}					  
+}  
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT domain_event_log_clear(SaHpiSessionIdT session_id, 
+                                  SaHpiResourceIdT resource_id,  
+                                  oid *saHpiEventLogRowPointer, 
+                                  size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
+        return SA_OK;
+}
+
 
 /**
  * 
@@ -359,41 +378,6 @@ saHpiDomainEventLogTable_cmp( const void *lhs, const void *rhs )
 	
 	return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiDomainEventLogTable_context *
-saHpiDomainEventLogTable_get( const char *name, int len )
-{
-    saHpiDomainEventLogTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainEventLogTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 
 /************************************************************
  * Initializes the saHpiDomainEventLogTable module
