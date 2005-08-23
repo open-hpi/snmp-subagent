@@ -376,8 +376,71 @@ int event_log_add(SaHpiSessionIdT session_id,
                   SaHpiResourceIdT resource_id, 
                   SaHpiEventT *event,
                   oid *child_oid, 
-                  size_t tchild_oid_len) 
+                  size_t child_oid_len) 
 {
+        SaErrorT rv;
+
+        oid evt_log_oid[EVENT_LOG_INDEX_NR];
+        netsnmp_index evt_log_index;
+        saHpiEventLogTable_context *evt_log_context;
+
+        DR_XREF *dr_entry;
+        SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        /* BUILD oid for new row */
+                /* assign the number of indices */
+        evt_log_index.len = EVENT_LOG_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        evt_log_oid[0] = get_domain_id(session_id);
+        /** Index saHpiResourceId is external */
+        evt_log_oid[1] = resource_id;
+        /** Index saHpiEventLogIndex is internal */
+        dr_pair.domainId_resourceId_arry[0] = get_domain_id(session_id);
+        dr_pair.domainId_resourceId_arry[1] = resource_id;
+        dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+        if (dr_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                "ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        evt_log_oid[2] = dr_entry->entry_id++;
+        /* assign the indices to the index */
+        evt_log_index.oids = (oid *) & evt_log_oid;
+
+        /* See if it exists. */
+        evt_log_context = NULL;
+        evt_log_context = CONTAINER_FIND (cb.container, &evt_log_index);
+
+        if (!evt_log_context) { 
+                // New entry. Add it
+                evt_log_context = 
+                        saHpiEventLogTable_create_row ( &evt_log_index);
+        }
+        if (!evt_log_context) {
+                snmp_log (LOG_ERR, "Not enough memory for a EventLog row!");
+                return  AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /** SaHpiEntryId = ASN_UNSIGNED */
+        evt_log_context->saHpiEventLogIndex = evt_log_oid[2];
+
+        /** INTEGER = ASN_INTEGER */
+        evt_log_context->saHpiEventLogType = 
+                event->EventType + 1; 
+
+        /** SaHpiTime = ASN_COUNTER64 */
+        evt_log_context->saHpiEventLogAddedTimestamp = 
+                event->Timestamp;
+
+        /** RowPointer = ASN_OBJECT_ID */
+        evt_log_context->saHpiEventLogRowPointer_len = 
+                child_oid_len * sizeof (oid);
+        memcpy (evt_log_context->saHpiEventLogRowPointer, 
+                child_oid, 
+                evt_log_context->saHpiEventLogRowPointer_len);
+
+        CONTAINER_INSERT (cb.container, evt_log_context);
+
         return SNMP_ERR_NOERROR;
 }
 
