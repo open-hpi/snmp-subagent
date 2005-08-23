@@ -171,12 +171,30 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPIWATCHDOGEVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
+	memset(this_child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiWatchdogEventLogTable_oid, saHpiWatchdogEventLogTable_oid_len,
 			column, column_len,
 			&watchdog_evt_idx,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
+        return SA_OK;
+}
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * @saHpiEventLogRowPointer
+ * @aHpiEventLogRowPointer_len
+ * 
+ * @return 
+ */
+SaErrorT watchdog_event_log_clear(SaHpiSessionIdT session_id, 
+                                  SaHpiResourceIdT resource_id,  
+                                  oid *saHpiEventLogRowPointer, 
+                                  size_t saHpiEventLogRowPointer_len)
+{
+        //TODO DMJ
         return SA_OK;
 }
 

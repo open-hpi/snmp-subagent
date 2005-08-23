@@ -182,7 +182,7 @@ SaErrorT populate_saHpiSoftwareEventTable(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPISOFTWAREEVENTTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
+	memset(this_child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiSoftwareEventTable_oid, saHpiSoftwareEventTable_oid_len,
 			column, column_len,
 			&software_evt_idx,
@@ -305,7 +305,7 @@ SaErrorT async_software_event_add(SaHpiSessionIdT sessionid,
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPISOFTWAREEVENTTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
+	memset(this_child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiSoftwareEventTable_oid, saHpiSoftwareEventTable_oid_len,
 			column, column_len,
 			&software_evt_idx,
