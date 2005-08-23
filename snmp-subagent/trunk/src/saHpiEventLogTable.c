@@ -360,6 +360,144 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid)
 
 }
 
+/**
+ * When a User Event Log Entry is successfully added in saHpiUserEventLogTable
+ * a corresponding entry must be craeted here and the udpate count maintained
+ * 
+ * @session_id
+ * @resource_id
+ * @event
+ * @child_oid
+ * @child_oid_len
+ * 
+ * @return 
+ */
+int event_log_add(SaHpiSessionIdT session_id, 
+                  SaHpiResourceIdT resource_id, 
+                  SaHpiEventT *event,
+                  oid *child_oid, 
+                  size_t tchild_oid_len) 
+{
+        return SNMP_ERR_NOERROR;
+}
+
+/**
+ * 
+ * @session_id
+ * @resource_id
+ * 
+ * @return 
+ */
+SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_id)
+{
+        netsnmp_index *row_idx;
+        saHpiEventLogTable_context *event_log_ctx;
+
+        DEBUGMSGTL ((AGENT, "event_log_clear, called\n"));
+
+        row_idx = CONTAINER_FIRST(cb.container);                  
+        if (row_idx) { //At least one entry was found.
+               do {
+                       event_log_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                       if ((event_log_ctx->index.oids[saHpiEventLogDomainId_INDEX] ==
+                            get_domain_id(session_id)) &&
+                           (event_log_ctx->index.oids[saHpiEventLogResourceId_INDEX] ==
+                            resource_id)) {
+
+                               DEBUGMSGTL ((AGENT, "event_log_clear: deleting \n"));
+
+                               /* all conditions met remove row */
+                               CONTAINER_REMOVE (cb.container, event_log_ctx);
+                               saHpiEventLogTable_delete_row (event_log_ctx);
+                               DEBUGMSGTL ((AGENT, "event_log_clear: found row for "
+                                                   "clearing/deltetion\n"));
+
+                               switch (event_log_ctx->saHpiEventLogType) {
+                               case SAHPI_ET_RESOURCE:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, "
+                                                    "called\n"));
+                                       resource_event_log_clear(session_id, 
+                                                                resource_id,  
+                                                                event_log_ctx->saHpiEventLogRowPointer,
+                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_DOMAIN:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_DOMAIN, "
+                                                    "called\n"));
+                                       domain_event_log_clear(session_id, 
+                                                              resource_id,  
+                                                              event_log_ctx->saHpiEventLogRowPointer,
+                                                              event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_SENSOR:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_SENSOR, "
+                                                    "called\n"));
+                                       sensor_event_log_clear(session_id, 
+                                                              resource_id,  
+                                                              event_log_ctx->saHpiEventLogRowPointer,
+                                                              event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_SENSOR_ENABLE_CHANGE, "
+                                                    "called\n"));
+                                       sen_en_chnge_event_log_clear(session_id, 
+                                                                    resource_id,  
+                                                                    event_log_ctx->saHpiEventLogRowPointer,
+                                                                    event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_HOTSWAP:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_HOTSWAP, "
+                                                    "called\n"));
+                                       hotswap_event_log_clear(session_id, 
+                                                               resource_id,  
+                                                               event_log_ctx->saHpiEventLogRowPointer,
+                                                               event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_WATCHDOG:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_WATCHDOG, "
+                                                    "called\n"));
+                                       watchdog_event_log_clear(session_id, 
+                                                                resource_id,  
+                                                                event_log_ctx->saHpiEventLogRowPointer,
+                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_HPI_SW:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, "
+                                                    "called\n"));
+                                       software_event_log_clear(session_id, 
+                                                                resource_id,  
+                                                                event_log_ctx->saHpiEventLogRowPointer,
+                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_OEM:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_OEM, "
+                                                    "called\n"));
+                                       oem_event_log_clear(session_id, 
+                                                           resource_id,  
+                                                           event_log_ctx->saHpiEventLogRowPointer,
+                                                           event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;
+                               case SAHPI_ET_USER:
+                                       DEBUGMSGTL ((AGENT, "SAHPI_ET_USER, "
+                                                    "called\n"));
+                                       user_event_log_clear(session_id, 
+                                                            resource_id,  
+                                                            event_log_ctx->saHpiEventLogRowPointer,
+                                                            event_log_ctx->saHpiEventLogRowPointer_len);
+                                       break;                               
+                               default:
+                                       printf("********* unknown event type *********\n");
+                                       break;        
+                               }
+                       }
+                       row_idx = CONTAINER_NEXT(cb.container, row_idx);
+               } while (row_idx);
+       }
+
+        return SA_OK;
+}
+
 /************************************************************/
 /************************************************************/
 /************************************************************/
