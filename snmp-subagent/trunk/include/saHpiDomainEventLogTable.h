@@ -74,6 +74,12 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
                                             SaHpiEventLogEntryT *event,
                                             oid * this_child_oid, 
                                             size_t *this_child_oid_len);
+
+SaErrorT domain_event_log_clear(SaHpiSessionIdT session_id, 
+                                  SaHpiResourceIdT resource_id,  
+                                  oid *saHpiEventLogRowPointer, 
+                                  size_t saHpiEventLogRowPointer_len);
+
 					    
 /*************************************************************
  * oid declarations
