@@ -148,7 +148,7 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
                 dria_tuple.domainId_resourceId_idr_area_arry[1] = rpt_entry->ResourceId;
                 dria_tuple.domainId_resourceId_idr_area_arry[2] = 
                         rdr_entry->RdrTypeUnion.InventoryRec.IdrId;
-                dria_tuple.domainId_resourceId_idr_area_arry[4] = area_context->saHpiAreaId;
+                dria_tuple.domainId_resourceId_idr_area_arry[3] = area_context->saHpiAreaId;
 
                 /* domain_resource_idr_get() generates unique keys based on */
                 /* domainid, resourceid, and IdrId tuples.                  */
