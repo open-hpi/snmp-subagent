@@ -637,7 +637,8 @@ int saHpiFieldTable_delete_area_fields(SaHpiSessionIdT  session_id,
 	     	  	  	 && (field_ctx->index.oids[saHpiInventoryId_field_INDEX] == idr_id) 
 	          	  	 && (field_ctx->index.oids[saHpiAreaId_field_INDEX] == area_id) )
 				{		   	       		
-					CONTAINER_REMOVE( cb.container, field_ctx);
+					if (CONTAINER_REMOVE(cb.container, field_ctx) != 0)
+					     DEBUGMSGTL ((AGENT,"FAILURE IN REMOVE\n"));
 					saHpiFieldTable_delete_row(field_ctx);
 					field_entry_count = CONTAINER_SIZE (cb.container);
                                         DEBUGMSGTL ((AGENT, "saHpiFieldTable_delete_area_fields: found row for "
@@ -684,7 +685,7 @@ int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
         case MODE_GET:
             snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
                                      (u_char *) &field_entry_count,
-                                     field_entry_count);
+                                     sizeof(field_entry_count));
             break;
 
 
