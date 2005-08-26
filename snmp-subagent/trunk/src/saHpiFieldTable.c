@@ -288,7 +288,7 @@ printf("**********************************************\n");
                         row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[2] = 
                         row_ctx->index.oids[saHpiInventoryId_field_INDEX];
-                dria_tuple.domainId_resourceId_idr_area_arry[4] = 
+                dria_tuple.domainId_resourceId_idr_area_arry[3] = 
                         row_ctx->index.oids[saHpiAreaId_field_INDEX];
 
                 dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
@@ -391,7 +391,7 @@ printf("**********************************************\n");
                         row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[2] = 
                         row_ctx->index.oids[saHpiInventoryId_field_INDEX];
-                dria_tuple.domainId_resourceId_idr_area_arry[4] = 
+                dria_tuple.domainId_resourceId_idr_area_arry[3] = 
                         row_ctx->index.oids[saHpiAreaId_field_INDEX];
 
                 dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
@@ -538,7 +538,7 @@ printf("**********************************************\n");
                         row_ctx->index.oids[saHpiResourceEntryId_field_INDEX];
                 dria_tuple.domainId_resourceId_idr_area_arry[2] = 
                         row_ctx->index.oids[saHpiInventoryId_field_INDEX];
-                dria_tuple.domainId_resourceId_idr_area_arry[4] = 
+                dria_tuple.domainId_resourceId_idr_area_arry[3] = 
                         row_ctx->index.oids[saHpiAreaId_field_INDEX];
 
                 dria_entry = domain_resoruce_idr_area_lookup(&dria_tuple, &dria_table);
@@ -606,6 +606,51 @@ printf("**********************************************\n");
 
         return SNMP_ERR_NOERROR; 
 }
+
+
+/**
+ * 
+ * @row_ctx:
+ * 
+ * @return: 
+ */
+int saHpiFieldTable_delete_area_fields(SaHpiSessionIdT  session_id,
+				       SaHpiResourceIdT resource_id,
+				       SaHpiIdrIdT	idr_id,
+				       SaHpiEntryIdT    area_id)
+{
+        SaErrorT                 rc = SA_OK;
+	saHpiFieldTable_context *field_ctx;
+	netsnmp_index           *field_index;			
+
+        DEBUGMSGTL ((AGENT, "saHpiFieldTable_delete_area_fields, called\n"));
+
+	field_index = CONTAINER_FIRST(cb.container);
+
+	if (field_index) {
+		do {			
+			field_ctx = CONTAINER_FIND(cb.container, field_index);
+			if (field_ctx) {
+				if (  (field_ctx->index.oids[saHpiDomainId_field_INDEX] == 
+		                                                      get_domain_id(session_id))
+		 	 	 && (field_ctx->index.oids[saHpiResourceEntryId_field_INDEX] == resource_id) 
+	     	  	  	 && (field_ctx->index.oids[saHpiInventoryId_field_INDEX] == idr_id) 
+	          	  	 && (field_ctx->index.oids[saHpiAreaId_field_INDEX] == area_id) )
+				{
+		   	       		CONTAINER_REMOVE( cb.container, field_index);
+					saHpiFieldTable_delete_row(field_ctx);	
+									
+				}
+			}
+			
+			field_index = CONTAINER_NEXT(cb.container, field_index);
+		
+		}while(field_index);	
+
+	}	
+
+	return rc;
+}	
 
 /**
  * 
