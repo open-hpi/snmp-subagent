@@ -636,9 +636,12 @@ int saHpiFieldTable_delete_area_fields(SaHpiSessionIdT  session_id,
 		 	 	 && (field_ctx->index.oids[saHpiResourceEntryId_field_INDEX] == resource_id) 
 	     	  	  	 && (field_ctx->index.oids[saHpiInventoryId_field_INDEX] == idr_id) 
 	          	  	 && (field_ctx->index.oids[saHpiAreaId_field_INDEX] == area_id) )
-				{
-		   	       		CONTAINER_REMOVE( cb.container, field_index);
-					saHpiFieldTable_delete_row(field_ctx);	
+				{		   	       		
+					CONTAINER_REMOVE( cb.container, field_ctx);
+					saHpiFieldTable_delete_row(field_ctx);
+					field_entry_count = CONTAINER_SIZE (cb.container);
+                                        DEBUGMSGTL ((AGENT, "saHpiFieldTable_delete_area_fields: found row for "
+                                                     "deletion\n"));						
 									
 				}
 			}
