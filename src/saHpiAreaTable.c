@@ -289,12 +289,14 @@ int set_table_area_delete (saHpiAreaTable_context *row_ctx)
         area_id = row_ctx->saHpiAreaIdIndex;
 
         rc = saHpiIdrAreaDelete(session_id, resource_id, idr_id, area_id);
+	
 
         if (rc == SA_OK) {
 
-// DMJ TODO                delete all fields!!!!!!!!!!!!!
+                saHpiFieldTable_delete_area_fields(session_id, resource_id, idr_id, row_ctx->saHpiAreaId);
 
                 return SNMP_ERR_NOERROR; 
+		
         } else {
                 snmp_log (LOG_ERR,
                           "set_table_area_delete: Call to saHpiIdrAreaDelete failed %s.\n",
