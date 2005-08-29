@@ -135,6 +135,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiDomainEventTable(sessionid, &event,                                           
                                                        child_oid, 
                                                        &child_oid_len);
+//TODO DMJ                        rv = async_domain_add(sessionid, event, rdr, rpt_entry);
                         break;
                 case SAHPI_ET_SENSOR:
                         printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
@@ -267,13 +268,14 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		                              rdr, rpt_entry,                                           
                                               child_oid, 
                                               &child_oid_len);
-                //rv = async_resource_add(sessionid, event, rdr, rpt_entry);
+                rv = async_resource_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_DOMAIN:
                 rv = async_domain_event_add(sessionid, event,
 		                            rdr, rpt_entry,                                           
                                             child_oid, 
                                             &child_oid_len);
+//TODO DMJ                rv = async_domain_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_SENSOR:
                 rv = async_sensor_event_add(sessionid, event,

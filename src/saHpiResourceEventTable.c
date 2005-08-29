@@ -262,6 +262,10 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
         res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
 
 	CONTAINER_INSERT (cb.container, res_evt_ctx);
+
+        //TODO: need to follow changes down to sub tables!!!!!
+
+
 		
 	resource_event_entry_count = CONTAINER_SIZE (cb.container);
 
