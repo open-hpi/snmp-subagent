@@ -50,8 +50,18 @@ char topmenu[]="\nPlease select an event type to inject:\n\n"
 	       "9. USER \n\n"
 	       "...or select q to quit:  ";
 
+char resource_menu[]="\nPlease select a Resource Event Type:\n\n"
+               "1. RESOURCE_FAILURE \n"
+	       "2. RESOURCE_RESTORED \n"
+	       "3. RESOURCE_ADDED \n"
+	       "...or select q to quit:  ";
 
-static int get_user_input (char *input) 
+char domain_menu[]="\nPlease select a Resource Event Type:\n\n"
+               "1. DOMAIN_REF_ADDED \n"
+	       "2. DOMAIN_REF_REMOVED \n"
+	       "...or select q to quit:  ";
+
+static int get_user_input (char *input, char *menu) 
 {
  	int retcode = -1;
 	char val = 0;
@@ -61,7 +71,7 @@ static int get_user_input (char *input)
 	
 	do {     
 
-		printf("%s", topmenu);
+		printf("%s", menu);
 	
 		fgets(s, sizeof(s), stdin);
 		
@@ -86,7 +96,7 @@ static int get_user_input (char *input)
 	return retcode;
 }
 
-static int inject_resource_event (char *handler_name)
+static int inject_resource_event (char *handler_name, char selection)
 {
     key_t ipckey;
     int msgqueid;
@@ -125,7 +135,24 @@ static int inject_resource_event (char *handler_name)
     if (n > SIM_MSG_QUEUE_BUFSIZE) {
         return -1;
     }
-    sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_RESTORED);
+
+
+    /* build the correct Resource EVENT Type */
+    switch (selection) {
+    case RESOURCE_FAILURE:
+            sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_FAILURE);
+            break;
+    case RESOURCE_RESTORED:
+            sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_RESTORED);
+            break;
+    case RESOURCE_ADDED:
+            printf("SAHPI_RESE_RESOURCE_ADDED: returning No Action!!!!\n");
+            return -1;
+            sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_ADDED);
+            break;
+    default:
+            break;
+    }
     n += strlen(txtptr) + 1;
     txtptr = buf.mtext + n;
     if (n > SIM_MSG_QUEUE_BUFSIZE) {
@@ -144,7 +171,7 @@ static int inject_resource_event (char *handler_name)
 
 }
 
-static int inject_domain_event (char *handler_name)
+static int inject_domain_event (char *handler_name, char selection)
 {
     key_t ipckey;
     int msgqueid;
@@ -778,49 +805,51 @@ int main(int argc, char **argv)
 	    }
 	}	
 	
-	while (get_user_input(&selection)) {
+	while (get_user_input(&selection, topmenu)) {
 
 		switch (selection) {
 		
-			case RESOURCE:
-				inject_resource_event(handler_name);
-				break;
+                case RESOURCE:
+                        get_user_input(&selection, resource_menu);
+			inject_resource_event(handler_name, selection);
+                        break;
 				
-			case DOMAIN:
-				inject_domain_event(handler_name);
-				break;
+		case DOMAIN:
+                        get_user_input(&selection, domain_menu);
+			inject_domain_event(handler_name, selection);
+			break;
 							
-			case SENSOR:
-				inject_sensor_event(handler_name);
-				break;
+		case SENSOR:
+			inject_sensor_event(handler_name);
+			break;
 
-			case SENSOR_ENABLE_CHANGE:
-				inject_sensorec_event(handler_name);
-				break;
+		case SENSOR_ENABLE_CHANGE:
+			inject_sensorec_event(handler_name);
+			break;
 			
-			case HOTSWAP:
-				inject_hotswap_event(handler_name);
-				break;
+		case HOTSWAP:
+			inject_hotswap_event(handler_name);
+			break;
 			
-			case WATCHDOG:
-				inject_watchdog_event(handler_name);
-				break;
+		case WATCHDOG:
+			inject_watchdog_event(handler_name);
+			break;
 			
-			case SOFTWARE:
-				inject_software_event(handler_name);
-				break;
+		case SOFTWARE:
+			inject_software_event(handler_name);
+			break;
 			
-			case OEM:
-				inject_oem_event(handler_name);
-				break;
+		case OEM:
+			inject_oem_event(handler_name);
+			break;
 			
-			case USER:
-				inject_user_event(handler_name);
-				break;
+		case USER:
+			inject_user_event(handler_name);
+			break;
 		
-			default:
-				printf("Unrecognized selection\n");
-				break;
+		default:
+			printf("Unrecognized selection\n");
+			break;
 		}
 		
 	}

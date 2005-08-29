@@ -25,15 +25,22 @@ typedef enum {
 	USER
 }event_types;
 
+typedef enum {
+        RESOURCE_FAILURE = 1,
+        RESOURCE_RESTORED,
+        RESOURCE_ADDED
+}resource_event_types;
+
+
 
 
 /* function prototypes */
 static void print_usage(void);
 
-static int get_user_input (char *input);
+static int get_user_input (char *input, char *menu);
 
-static int inject_resource_event (char *handler_name);
-static int inject_domain_event   (char *handler_name);
+static int inject_resource_event (char *handler_name, char selection);
+static int inject_domain_event   (char *handler_name, char selection);
 static int inject_sensor_event   (char *handler_name);
 static int inject_sensorec_event (char *handler_name);
 static int inject_hotswap_event  (char *handler_name);
