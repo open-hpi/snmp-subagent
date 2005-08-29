@@ -777,7 +777,7 @@ void saHpiAnnunciatorTable_set_reserve2( netsnmp_request_group *rg )
                 case COLUMN_SAHPIANNUNCIATORMODE:
                 	if ( ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_AUTO) &&
                      	     ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_USER) &&
-			     ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_SHARED) )   {
+			     ((*var->val.integer - 1) != SAHPI_ANNUNCIATOR_MODE_SHARED) ) {
                         	DEBUGMSGTL ((AGENT, "COLUMN_SAHPIANNUNCIATORMODE"
                                              " saHpiAnnunciatorTable_set_reserve2"
                                              " Only modes of "
