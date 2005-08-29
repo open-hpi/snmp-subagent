@@ -282,7 +282,7 @@ static int set_table_watchdog_set (saHpiWatchdogTable_context *row_ctx)
         buffer.DataLength = row_ctx->saHpiWatchdogTimerUseExpFlags_len;
         memcpy(buffer.Data, row_ctx->saHpiWatchdogTimerUseExpFlags, row_ctx->saHpiWatchdogTimerUseExpFlags_len);
         watchdog.TimerUseExpFlags = 0;
-//        row_err = oh_encode_exp_flags(&buffer, &watchdog.TimerUseExpFlags);
+
         if (oh_encode_exp_flags(&buffer, &watchdog.TimerUseExpFlags) != SNMP_ERR_NOERROR) {
                 return SNMP_ERR_GENERR;
         }
