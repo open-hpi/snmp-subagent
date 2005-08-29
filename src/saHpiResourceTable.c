@@ -365,8 +365,8 @@ DEBUGMSGTL ((AGENT, "*****************************\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
-        /* Get the RPT entry structure,  If the RPT entry does not exist we need to remove it */
-        /* from the container */
+        /* Get the RPT entry structure,  If the RPT entry does not exist */
+        /* within HPI we need to remove it from our NET-SNMP container */
         rv = saHpiRptEntryGetByResourceId (sessionid, event->Source, &rpt_entry);    
         if (rv == SA_OK) {
                 remove_rpt_entry = MIB_FALSE;
