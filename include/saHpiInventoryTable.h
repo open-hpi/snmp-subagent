@@ -88,6 +88,9 @@ const saHpiInventoryTable_context * saHpiInventoryTable_get_by_idx_rs(netsnmp_in
                                         int row_status);
 int saHpiInventoryTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_table_request_info *);
 
+int decrement_area_num(SaHpiSessionIdT session_id, SaHpiResourceIdT resource_id,
+                                           SaHpiIdrIdT idr_id);
+
 
 /*************************************************************
  * oid declarations

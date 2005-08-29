@@ -208,6 +208,46 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         return rv;
 } 
 
+
+
+int decrement_area_num(SaHpiSessionIdT session_id, 
+					   SaHpiResourceIdT resource_id,
+                                           SaHpiIdrIdT idr_id)
+{
+        oid inventory_oid[INVENTORY_INDEX_NR];
+        netsnmp_index inventory_index;
+        saHpiInventoryTable_context *inventory_context;
+
+        DEBUGMSGTL ((AGENT, "saHpiInventoryTable_decrement_area_num, called\n"));
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        inventory_index.len = INVENTORY_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        inventory_oid[0] = get_domain_id(session_id);
+        /** Index saHpiResourceId is external */
+        inventory_oid[1] = resource_id;
+        /** Index saHpiResourceIsHistorical is external */
+        inventory_oid[2] = MIB_FALSE;
+        /** Index saHpiInventoryId */                        
+        inventory_oid[3] = idr_id;
+        /* assign the indices to the index */
+        inventory_index.oids = (oid *) & inventory_oid;
+
+        /* See if Row exists. */
+        inventory_context = NULL;
+        inventory_context = CONTAINER_FIND(cb.container, &inventory_index); 
+        if (!inventory_context) {
+		DEBUGMSGTL ((AGENT, "saHpiInventoryTable_decrement_area_num, context not found\n"));
+                return SA_ERR_HPI_UNKNOWN;
+        }
+
+        inventory_context->saHpiInventoryNumAreas -= 1;
+
+        return SNMP_ERR_NOERROR; 
+
+}					  
+
 /**
  * 
  * @handler:
