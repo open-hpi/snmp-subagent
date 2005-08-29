@@ -95,7 +95,17 @@ static gpointer event_thread_loop(gpointer data)
 
                         break;
                 case SAHPI_ET_DOMAIN:
+
+                        if (event.EventDataUnion.DomainEvent.Type == 
+                            SAHPI_DOMAIN_REF_ADDED) {
+                                DEBUGMSGTL ((AGENT, "SAHPI_DOMAIN_REF_ADDED\n"));
+                        } else if (event.EventDataUnion.DomainEvent.Type == 
+                                   SAHPI_DOMAIN_REF_REMOVED) {
+                                DEBUGMSGTL ((AGENT, "SAHPI_DOMAIN_REF_REMOVED\n"));
+                        }
+
                         rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+
                         break;
                 case SAHPI_ET_SENSOR:              
                         rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
