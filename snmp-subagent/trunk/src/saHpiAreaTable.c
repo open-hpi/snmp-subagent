@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <saHpiResourceTable.h>
 #include <saHpiFieldTable.h>
+#include <saHpiInventoryTable.h>
 #include <session_info.h>
 #include <hash_utils.h>
 #include <oh_utils.h>
@@ -272,7 +273,7 @@ int set_table_area_delete (saHpiAreaTable_context *row_ctx)
         DEBUGMSGTL ((AGENT, "*** NEED TO DELETE ALL ASSOCIATED FIELDS ***\n"));
         DEBUGMSGTL ((AGENT, "********************************************\n"));
 
-        DEBUGMSGTL ((AGENT, "set_table_area_row_status, called\n"));
+        DEBUGMSGTL ((AGENT, "set_table_area_delete, called\n"));
 
         SaErrorT            rc = SA_OK;
         SaHpiSessionIdT     session_id;
@@ -290,10 +291,11 @@ int set_table_area_delete (saHpiAreaTable_context *row_ctx)
 
         rc = saHpiIdrAreaDelete(session_id, resource_id, idr_id, area_id);
 	
-
         if (rc == SA_OK) {
-
-                saHpiFieldTable_delete_area_fields(session_id, resource_id, idr_id, row_ctx->saHpiAreaId);
+	
+		rc = decrement_area_num(session_id, resource_id, idr_id);
+		
+                rc = delete_fields(session_id, resource_id, idr_id, row_ctx->saHpiAreaId);
 
                 return SNMP_ERR_NOERROR; 
 		
