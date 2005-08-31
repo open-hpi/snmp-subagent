@@ -295,34 +295,6 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 						    resource_index.len);
 		}
 
-/*	       	DMJ TODO:  Maybe from A spec agent maybe same here,
-		This would be the 'hpiEvents' branch, 'events' and 'eventLog' sub-branches
-		
-		// Reminder: The SEL are "historical" events that are
-		// ResourceID driven, not event-driven. Thus we populate them
-		// here.
-
-		// SEL and EVENTs (SEL corresponding Event information to be
-		// specific) MUST be the last to be populated. The reason 
-		// is b/c it calls entries in hotswap, rdr, and rpt rows - and
-		// if they don't exist before this populate_sel is called - 
-		// then the information (updating the HotSwap row with State and
-		// PreviousState) will be lost.
-
-		if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_SEL)
-		    || (rpt_entry.
-			ResourceCapabilities &
-			SAHPI_CAPABILITY_EVT_DEASSERTS)
-		    || (rpt_entry.
-			ResourceCapabilities &
-			SAHPI_CAPABILITY_AGGREGATE_STATUS))
-		  {
-		    rc = populate_sel (&rpt_entry);
-		    //DomainID_oid, DomainID_oid_len,
-		    //        ResourceID_oid, ResourceID_oid_len);
-		  }
-
-*/
 	} while (EntryId != SAHPI_LAST_ENTRY);
 
 	resource_entry_count = CONTAINER_SIZE (cb.container);
@@ -443,7 +415,7 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	memset( resource_context->saHpiResourceEntityPath, 
 		0, sizeof(oh_big_textbuffer));
 	memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
-	rv = oh_decode_entitypath(      &rpt_entry.ResourceEntity, &bigbuf );
+	rv = oh_decode_entitypath(&rpt_entry.ResourceEntity, &bigbuf);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 			     "ERROR: async_resource_add: RPT, oh_decode_entitypath() rv = %d\n",rv));
@@ -593,10 +565,12 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
 
 	if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-		rv = async_rdr_add(sessionid, event, rdr_event, 
-                                   rpt_entry_event, &rpt_entry, 
-                                   resource_index.oids, 
-                                   resource_index.len);
+                /* for now we are using the standard rdr populate call */
+                /*in servicing the async event */
+                rv = populate_saHpiRdrTable(sessionid, 
+                                            rpt_entry_event,
+                                            resource_index.oids, 
+                                            resource_index.len);
 	}
 
         if (new_row == MIB_TRUE) {
@@ -604,6 +578,7 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
         }
 
 	resource_entry_count = CONTAINER_SIZE (cb.container);
+
 
 	DEBUGMSGTL ((AGENT, "async_event_resource: resource_entry_count = %d\n", 
                      resource_entry_count));
