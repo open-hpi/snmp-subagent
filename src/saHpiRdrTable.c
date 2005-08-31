@@ -94,7 +94,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	oh_big_textbuffer	bigbuf;
 		
 	oid 			rdr_oid[RDR_INDEX_NR];
-	netsnmp_index 		rdr_index;;
+	netsnmp_index 		rdr_index;
 	saHpiRdrTable_context	*rdr_context;
 
 	oid column[2];
@@ -103,6 +103,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	size_t full_oid_len;
 	oid child_oid[MAX_OID_LEN];
 	size_t child_oid_len;
+
 	netsnmp_index resource_index;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
@@ -154,7 +155,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		/*
 		 * Build the full oid for THIS rdr, then pass it to
 		 * the appropriate populate() for its RowPointer. Then accept 
-		 * its full oidto use in this rdr's RowPointer.
+		 * its full oid to use in this rdr's RowPointer.
 		 */
 		column[0] = 1;
 		column[1] = COLUMN_SAHPIRDRENTRYID;
@@ -441,16 +442,6 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 }
 
-
-int async_rdr_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
-                  SaHpiRdrT *rdr_entry_event, SaHpiRptEntryT *rpt_entry_event,
-		  SaHpiRptEntryT *rpt_entry, 
-                  oid * resource_oid, size_t resource_oid_len) 
-{
-	DEBUGMSGTL ((AGENT, "async_rdr_add\n"));
-
-        return SA_OK;
-}
 
 /*
  * int handle_saHpiRdrEntryCount()
