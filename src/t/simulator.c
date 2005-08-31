@@ -96,6 +96,98 @@ static int get_user_input (char *input, char *menu)
 	return retcode;
 }
 
+
+/**
+ * 
+ * SIM_MSG_RESOURCE_ADD_EVENT
+ * 
+ * @param plugin_name
+ * 
+ * @return 
+ */
+static int inject_resource_add_event(char *plugin_name) {
+    key_t ipckey;
+    int msgqueid;
+    SIM_MSG_QUEUE_BUF buf;
+    size_t n = 0;  // size of the data in the msg buf
+    char *txtptr = buf.mtext;
+    int rc;
+
+    /* get the  queue */
+    ipckey = ftok(".", SIM_MSG_QUEUE_KEY);
+    msgqueid = msgget(ipckey, 0660);
+    if (msgqueid == -1) {
+        return -1;
+    }
+
+    /* fill out the message */
+    buf.mtype = SIM_MSG_RESOURCE_ADD_EVENT;
+    *txtptr = '\0';
+    sprintf(txtptr, "%s=%s", SIM_MSG_HANDLER_NAME, plugin_name);
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%s", SIM_MSG_RPT_ENTITYPATH,
+            "{BIOS,1}");
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%d", SIM_MSG_RPT_CAPABILITIES, SAHPI_CAPABILITY_RESOURCE);
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%d", SIM_MSG_RPT_HSCAPABILITIES, 0);
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%d", SIM_MSG_EVENT_SEVERITY, SAHPI_OK);
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%d", SIM_MSG_RPT_FAILED, SAHPI_FALSE);
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    sprintf(txtptr, "%s=%s", SIM_MSG_RPT_COMMENT, "BIOS comment");
+    n += strlen(txtptr) + 1;
+    txtptr = buf.mtext + n;
+    if (n > SIM_MSG_QUEUE_BUFSIZE) {
+        return -1;
+    }
+    *txtptr = '\0'; // terminate buf with a zero-length string
+    n++;
+
+    /* send the msg */
+    rc = msgsnd(msgqueid, &buf, n, 0);
+    if (rc) {
+        return -1;
+    }
+
+    return 0;
+ }
+
+
+/**
+ * 
+ * SAHPI_RESE_RESOURCE_RESTORED
+ * 
+ * @param handler_name
+ * @param selection
+ * 
+ * @return 
+ */
 static int inject_resource_event (char *handler_name, char selection)
 {
     key_t ipckey;
@@ -811,7 +903,20 @@ int main(int argc, char **argv)
 		
                 case RESOURCE:
                         get_user_input(&selection, resource_menu);
-			inject_resource_event(handler_name, selection);
+
+                        switch (selection) {
+                        case 1:
+                        case 2:
+                                inject_resource_event(handler_name, selection);
+                                break;
+                        case 3:
+                                inject_resource_add_event(handler_name);
+                                break;
+                        default:
+                                break;
+
+                        }
+
                         break;
 				
 		case DOMAIN:
