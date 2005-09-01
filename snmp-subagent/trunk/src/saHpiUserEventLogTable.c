@@ -38,6 +38,7 @@
 
 #include <SaHpi.h>
 #include "saHpiUserEventLogTable.h"
+#include <saHpiEventLogTable.h>
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <session_info.h>
@@ -217,7 +218,6 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
         SaHpiEventT             event;
 
 	netsnmp_index user_evt_idx;
-	saHpiUserEventLogTable_context *user_evt_ctx;
 
         oid this_child_oid[MAX_OID_LEN];
         size_t this_child_oid_len;
