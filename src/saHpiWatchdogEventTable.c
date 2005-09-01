@@ -429,8 +429,6 @@ int initialize_table_saHpiWatchdogEventEntryCount(void)
 /************************************************************/
 /************************************************************/
 
-
-#ifdef saHpiWatchdogEventTable_IDX2
 /************************************************************
  * keep binary tree to find context by name
  */
@@ -511,42 +509,6 @@ saHpiWatchdogEventTable_cmp( const void *lhs, const void *rhs )
 
         return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiWatchdogEventTable_context *
-saHpiWatchdogEventTable_get( const char *name, int len )
-{
-    saHpiWatchdogEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiWatchdogEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-#endif
-
 
 /************************************************************
  * Initializes the saHpiWatchdogEventTable module
@@ -777,7 +739,6 @@ int saHpiWatchdogEventTable_can_delete(saHpiWatchdogEventTable_context *undo_ctx
     return 1;
 }
 
-#ifdef saHpiWatchdogEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -825,7 +786,6 @@ saHpiWatchdogEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1209,18 +1169,18 @@ initialize_table_saHpiWatchdogEventTable(void)
     cb.container = netsnmp_container_find("saHpiWatchdogEventTable_primary:"
                                           "saHpiWatchdogEventTable:"
                                           "table_container");
-#ifdef saHpiWatchdogEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiWatchdogEventTable_secondary:"
                                                        "saHpiWatchdogEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiWatchdogEventTable_cmp;
-#endif
-#ifdef saHpiWatchdogEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiWatchdogEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiWatchdogEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiWatchdogEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiWatchdogEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiWatchdogEventTable_row_copy;
@@ -1235,7 +1195,7 @@ initialize_table_saHpiWatchdogEventTable(void)
     cb.set_commit = saHpiWatchdogEventTable_set_commit;
     cb.set_free = saHpiWatchdogEventTable_set_free;
     cb.set_undo = saHpiWatchdogEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiWatchdogEventTable",
                 "Registering table saHpiWatchdogEventTable "
                 "as a table array\n"));
