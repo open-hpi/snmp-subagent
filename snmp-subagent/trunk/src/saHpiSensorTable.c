@@ -92,6 +92,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sensor, called\n"));
 
 	SaErrorT rv = SA_OK;	
+        int new_row = MIB_FALSE;
 	SaHpiTextBufferT buffer;
 	SaHpiSensorThresholdsT sensor_thresholds;
 
@@ -147,6 +148,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_context = 
 		saHpiSensorTable_create_row(&sensor_index);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor row!");
@@ -290,10 +292,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			     oh_lookup_error(rv)));
 	}
 
-
-	
-
-	CONTAINER_INSERT (cb.container, sensor_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sensor_context);
 
 	sensor_entry_count = CONTAINER_SIZE (cb.container);
 
