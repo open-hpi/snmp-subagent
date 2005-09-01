@@ -86,6 +86,7 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 
  	DEBUGMSGTL ((AGENT, "populate_ctrl_analog, called\n"));
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid ctrl_analog_oid[CTRL_ANALOG_INDEX_NR];
 	netsnmp_index ctrl_analog_index;
@@ -150,6 +151,7 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		ctrl_analog_context = 
 			saHpiCtrlAnalogTable_create_row(&ctrl_analog_index);
+                new_row = MIB_TRUE;
 	}
 	if (!ctrl_analog_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
@@ -217,7 +219,8 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	       ctrl_analog_context->saHpiCtrlAnalogRDR_len);
 
 
-	CONTAINER_INSERT (cb.container, ctrl_analog_context);
+	if (new_row == MIB_TRUE)
+                 CONTAINER_INSERT (cb.container, ctrl_analog_context);
 		
 	ctrl_analog_entry_count = CONTAINER_SIZE (cb.container);
 
