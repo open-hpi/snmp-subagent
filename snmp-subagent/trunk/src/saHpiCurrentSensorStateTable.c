@@ -68,6 +68,7 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_current_sensor_state, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid             current_sensor_state_oid[CURRENT_SENSOR_STATE_INDEX_NR];
 	netsnmp_index   current_sensor_state_index;
@@ -118,6 +119,7 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		current_sensor_state_context = 
 		saHpiCurrentSensorStateTable_create_row(&current_sensor_state_index);
+                new_row = MIB_FALSE;
 	}
 	if (!current_sensor_state_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
@@ -245,7 +247,8 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	current_sensor_state_context->saHpiCurrentSensorStateDeassertRemoveEventMask_len =
 	buffer.DataLength;  
 
-	CONTAINER_INSERT (cb.container, current_sensor_state_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, current_sensor_state_context);
 
 	return rv;
 }  

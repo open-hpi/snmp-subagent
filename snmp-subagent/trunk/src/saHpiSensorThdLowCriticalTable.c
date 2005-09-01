@@ -66,6 +66,7 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sen_thd_low_crit, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sen_thd_low_crit_oid[SEN_THD_LOW_CRIT_IDX_NR];
 	netsnmp_index sen_thd_low_crit_idx;
@@ -105,6 +106,7 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sen_thd_low_crit_ctx = 
 		saHpiSensorThdLowCriticalTable_create_row(&sen_thd_low_crit_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sen_thd_low_crit_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a ThdLowCrit row!");
@@ -142,10 +144,11 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 
 	/** TruthValue = ASN_INTEGER */
 	sen_thd_low_crit_ctx->saHpiSensorThdLowCriticalNonLinear = 
-	(rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
-	 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+                (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
+                 == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-	CONTAINER_INSERT (cb.container, sen_thd_low_crit_ctx);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sen_thd_low_crit_ctx);
 
 	return rv;
 }

@@ -88,6 +88,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	 */
 
  	SaErrorT 		rv;   
+        int                     new_row = MIB_FALSE;
 
 	SaHpiEntryIdT    	rdr_entry_id;
 	SaHpiRdrT		rdr_entry;
@@ -105,6 +106,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	size_t child_oid_len;
 
 	netsnmp_index resource_index;
+
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 	
@@ -145,7 +147,8 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			// New entry. Add it
 			rdr_context = 
 				saHpiRdrTable_create_row(&rdr_index);
-		}
+                        new_row = MIB_TRUE;
+		} 
 		if (!rdr_context) {
 			snmp_log (LOG_ERR, "Not enough memory for a Rdr row!");
 			rv = AGENT_ERR_INTERNAL_ERROR;
@@ -430,13 +433,14 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 			rdr_context->saHpiRdrIdString_len = 
 				rdr_entry.IdString.DataLength;  
 
-		CONTAINER_INSERT (cb.container, rdr_context);
+                if (new_row == MIB_TRUE) 
+                        CONTAINER_INSERT (cb.container, rdr_context);
 	
 	} while (rdr_entry_id !=  SAHPI_LAST_ENTRY );
 	
 	rdr_entry_count = CONTAINER_SIZE (cb.container);
 	
-	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", rdr_entry_count));
+	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable: rdr_entry_count = %d\n", rdr_entry_count));
 		
 	return rv;
 

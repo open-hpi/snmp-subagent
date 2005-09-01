@@ -89,7 +89,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         DEBUGMSGTL ((AGENT, "populate_annunciator, called\n"));
 
         SaErrorT rv = SA_OK; 
-	SaErrorT rc = SA_OK;   
+	SaErrorT rc = SA_OK; 
+        int new_row = MIB_FALSE;
         SaHpiAnnunciatorModeT mode;
 
         oid annunciator_oid[ANNUNCIATOR_INDEX_NR];
@@ -142,6 +143,7 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                 // New entry. Add it
                 annunciator_context = 
                 saHpiAnnunciatorTable_create_row(&annunciator_index);
+                new_row = MIB_TRUE;
         }
         if (!annunciator_context) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
@@ -192,7 +194,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                full_oid, 
                annunciator_context->saHpiAnnunciatorRDR_len);
 
-        CONTAINER_INSERT (cb.container, annunciator_context);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, annunciator_context);
 
         annunciator_entry_count = CONTAINER_SIZE (cb.container);
 	

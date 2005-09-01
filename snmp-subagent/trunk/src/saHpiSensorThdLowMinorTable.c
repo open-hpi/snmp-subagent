@@ -67,6 +67,7 @@ SaErrorT populate_sen_thd_low_minor (SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sen_thd_low_minor, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sen_thd_low_minor_oid[SEN_THD_LOW_MINOR_IDX_NR];
 	netsnmp_index sen_thd_low_minor_idx;
@@ -106,6 +107,7 @@ SaErrorT populate_sen_thd_low_minor (SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sen_thd_low_minor_ctx = 
 		saHpiSensorThdLowMinorTable_create_row(&sen_thd_low_minor_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sen_thd_low_minor_ctx) {
 		snmp_log (LOG_ERR, 
@@ -147,7 +149,8 @@ SaErrorT populate_sen_thd_low_minor (SaHpiSessionIdT sessionid,
 		    (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
 		     == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-	CONTAINER_INSERT (cb.container, sen_thd_low_minor_ctx);
+        if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sen_thd_low_minor_ctx);
 
 	return rv;
 }

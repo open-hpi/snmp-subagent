@@ -67,6 +67,7 @@ SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sensor_nominal, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_nominal_oid[SENSOR_READING_NOMINAL_INDEX_NR];
 	netsnmp_index sensor_nominal_index;
@@ -106,6 +107,7 @@ SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_nominal_context = 
 		saHpiSensorReadingNominalTable_create_row(&sensor_nominal_index);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_nominal_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Nominal row!");
@@ -127,7 +129,8 @@ SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid,
 				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Nominal,
 				sensor_nominal_context->saHpiSensorReadingNominalValue);
 
-	CONTAINER_INSERT (cb.container, sensor_nominal_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sensor_nominal_context);
 
 	return rv;
 }

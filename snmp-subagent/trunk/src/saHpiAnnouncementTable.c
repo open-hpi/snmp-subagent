@@ -100,6 +100,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 {
 	SaErrorT rv = SA_OK;
         SaErrorT rc = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid announcement_oid[ANNOUNCEMENT_INDEX_NR];
 	netsnmp_index announcement_index;
@@ -198,6 +199,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                        // New entry. Add it
                         announcement_ctx = 
                              saHpiAnnouncementTable_create_row(&announcement_index);
+                        new_row = MIB_TRUE;
                 }
                 if (!announcement_ctx) {
                         snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
@@ -312,7 +314,8 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 announcement_ctx->saHpiAnnouncementDelete = 
                         SAHPIANNOUNCEMENTDELETE_ACTIVE;
 
-	        CONTAINER_INSERT (cb.container, announcement_ctx);
+                if (new_row == MIB_FALSE) 
+                        CONTAINER_INSERT (cb.container, announcement_ctx);
 			
                 /* create full oid on This row for parent RowPointer */
                 column[0] = 1;

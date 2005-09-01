@@ -85,6 +85,7 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_ctrl_oem, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid ctrl_oem_oid[CTRL_OEM_INDEX_NR];
 	netsnmp_index ctrl_oem_index;
@@ -149,6 +150,7 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		ctrl_oem_context = 
 		saHpiCtrlOemTable_create_row(&ctrl_oem_index);
+                new_row = MIB_TRUE;
 	}
 	if (!ctrl_oem_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
@@ -234,7 +236,8 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 	       full_oid, 
 	       ctrl_oem_context->saHpiCtrlOemRDR_len);
 
-	CONTAINER_INSERT (cb.container, ctrl_oem_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, ctrl_oem_context);
 
 	ctrl_oem_entry_count = CONTAINER_SIZE (cb.container);
 

@@ -67,6 +67,7 @@ SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sensor_normal_min, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_normal_min_oid[SENSOR_READING_NORMAL_MIN_INDEX_NR];
 	netsnmp_index sensor_normal_min_index;
@@ -106,6 +107,7 @@ SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_normal_min_context = 
 		saHpiSensorReadingNormalMinTable_create_row(&sensor_normal_min_index);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_normal_min_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Normal Min row!");
@@ -127,7 +129,8 @@ SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid,
 				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.NormalMin,
 				sensor_normal_min_context->saHpiSensorReadingNormalMinValue);
 
-	CONTAINER_INSERT (cb.container, sensor_normal_min_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sensor_normal_min_context);
 
 	return rv;
 }

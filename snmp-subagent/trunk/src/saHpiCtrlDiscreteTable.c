@@ -86,6 +86,7 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 {
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid ctrl_discrete_oid[CTRL_DISCRETE_INDEX_NR];
 	netsnmp_index ctrl_discrete_index;
@@ -150,6 +151,7 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		ctrl_discrete_context = 
 			saHpiCtrlDiscreteTable_create_row(&ctrl_discrete_index);
+                new_row = MIB_TRUE;
 	}
 	if (!ctrl_discrete_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Digital row!");
@@ -208,8 +210,8 @@ SaErrorT populate_ctrl_discrete(SaHpiSessionIdT sessionid,
 	       full_oid, 
 	       ctrl_discrete_context->saHpiCtrlDiscreteRDR_len);
 
-
-	CONTAINER_INSERT (cb.container, ctrl_discrete_context);
+	if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, ctrl_discrete_context);
 		
 	ctrl_discrete_entry_count = CONTAINER_SIZE (cb.container);
 
