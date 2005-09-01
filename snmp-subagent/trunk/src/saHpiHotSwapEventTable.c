@@ -485,41 +485,6 @@ saHpiHotSwapEventTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiHotSwapEventTable_context *
-saHpiHotSwapEventTable_get( const char *name, int len )
-{
-    saHpiHotSwapEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
-
-/************************************************************
  * Initializes the saHpiHotSwapEventTable module
  */
 void
@@ -572,8 +537,6 @@ static int saHpiHotSwapEventTable_row_copy(saHpiHotSwapEventTable_context * dst,
 
     return 0;
 }
-
-#ifdef saHpiHotSwapEventTable_SET_HANDLING
 
 /**
  * the *_extract_index routine
@@ -737,7 +700,6 @@ int saHpiHotSwapEventTable_can_delete(saHpiHotSwapEventTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiHotSwapEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -786,7 +748,6 @@ saHpiHotSwapEventTable_create_row( netsnmp_index* hdr)
     
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1102,9 +1063,6 @@ void saHpiHotSwapEventTable_set_undo( netsnmp_request_group *rg )
      */
 }
 
-#endif /** saHpiHotSwapEventTable_SET_HANDLING */
-
-
 /************************************************************
  *
  * Initialize the saHpiHotSwapEventTable table by defining its contents and how it's structured
@@ -1168,18 +1126,18 @@ initialize_table_saHpiHotSwapEventTable(void)
     cb.container = netsnmp_container_find("saHpiHotSwapEventTable_primary:"
                                           "saHpiHotSwapEventTable:"
                                           "table_container");
-#ifdef saHpiHotSwapEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiHotSwapEventTable_secondary:"
                                                        "saHpiHotSwapEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiHotSwapEventTable_cmp;
-#endif
-#ifdef saHpiHotSwapEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiHotSwapEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiHotSwapEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiHotSwapEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiHotSwapEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiHotSwapEventTable_row_copy;
@@ -1194,7 +1152,7 @@ initialize_table_saHpiHotSwapEventTable(void)
     cb.set_commit = saHpiHotSwapEventTable_set_commit;
     cb.set_free = saHpiHotSwapEventTable_set_free;
     cb.set_undo = saHpiHotSwapEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiHotSwapEventTable",
                 "Registering table saHpiHotSwapEventTable "
                 "as a table array\n"));

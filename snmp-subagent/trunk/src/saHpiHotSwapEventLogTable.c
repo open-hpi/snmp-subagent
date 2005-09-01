@@ -388,41 +388,6 @@ saHpiHotSwapEventLogTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiHotSwapEventLogTable_context *
-saHpiHotSwapEventLogTable_get( const char *name, int len )
-{
-    saHpiHotSwapEventLogTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiHotSwapEventLogTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
-
-/************************************************************
  * Initializes the saHpiHotSwapEventLogTable module
  */
 void
@@ -639,7 +604,6 @@ int saHpiHotSwapEventLogTable_can_delete(saHpiHotSwapEventLogTable_context *undo
     return 1;
 }
 
-#ifdef saHpiHotSwapEventLogTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -687,7 +651,6 @@ saHpiHotSwapEventLogTable_create_row( netsnmp_index* hdr)
     hotswap_event_log_entry_count_total++;
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1069,18 +1032,18 @@ initialize_table_saHpiHotSwapEventLogTable(void)
     cb.container = netsnmp_container_find("saHpiHotSwapEventLogTable_primary:"
                                           "saHpiHotSwapEventLogTable:"
                                           "table_container");
-#ifdef saHpiHotSwapEventLogTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiHotSwapEventLogTable_secondary:"
                                                        "saHpiHotSwapEventLogTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiHotSwapEventLogTable_cmp;
-#endif
-#ifdef saHpiHotSwapEventLogTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiHotSwapEventLogTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiHotSwapEventLogTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiHotSwapEventLogTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiHotSwapEventLogTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiHotSwapEventLogTable_row_copy;
@@ -1095,7 +1058,7 @@ initialize_table_saHpiHotSwapEventLogTable(void)
     cb.set_commit = saHpiHotSwapEventLogTable_set_commit;
     cb.set_free = saHpiHotSwapEventLogTable_set_free;
     cb.set_undo = saHpiHotSwapEventLogTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiHotSwapEventLogTable",
                 "Registering table saHpiHotSwapEventLogTable "
                 "as a table array\n"));
