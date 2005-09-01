@@ -43,6 +43,7 @@
 #include <saHpiResourceTable.h>
 #include <saHpiResourceEventTable.h>
 #include <saHpiDomainEventTable.h>
+#include <saHpiEventLogTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
