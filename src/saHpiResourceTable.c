@@ -43,6 +43,8 @@
 #include <session_info.h>
 #include <saHpiRdrTable.h>
 #include <saHpiHotSwapTable.h>
+#include <saHpiDomainInfoTable.h>
+#include <saHpiDomainAlarmTable.h>
 
 #include <oh_utils.h>
 
@@ -564,6 +566,10 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	/** TruthValue = ASN_INTEGER */
 	resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
 
+
+        /***************************/
+        /* update applicable RDR's */
+        /***************************/
 	if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
                 /* for now we are using the standard rdr populate call */
                 /*in servicing the async event */
@@ -573,9 +579,22 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
                                             resource_index.len);
 	}
 
-        if (new_row == MIB_TRUE) {
+        /*********************************************************/
+        /* need to update DomainInfoTable,  RPT data has changed */
+        /*********************************************************/
+        rv = populate_saHpiDomainInfoTable(sessionid);
+
+        /*********************************************************/
+        /* need to update DomainAlarmTable,  RPT data has changed*/
+        /*********************************************************/
+        //TODO DMJ: this could be cleaner, calling this fucntion will 
+        // loop thru the entire table for the given sessionid, we could
+        // check and call only when a new entry is expected instead
+        rv = populate_saHpiDomainAlarmTable(sessionid);
+
+        if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, resource_context);
-        }
+        
 
 	resource_entry_count = CONTAINER_SIZE (cb.container);
 

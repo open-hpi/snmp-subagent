@@ -449,41 +449,6 @@ saHpiDomainEventTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiDomainEventTable_context *
-saHpiDomainEventTable_get( const char *name, int len )
-{
-    saHpiDomainEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
-
-/************************************************************
  * Initializes the saHpiDomainEventTable module
  */
 void
@@ -695,7 +660,6 @@ int saHpiDomainEventTable_can_delete(saHpiDomainEventTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiDomainEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -743,7 +707,6 @@ saHpiDomainEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1126,18 +1089,18 @@ initialize_table_saHpiDomainEventTable(void)
     cb.container = netsnmp_container_find("saHpiDomainEventTable_primary:"
                                           "saHpiDomainEventTable:"
                                           "table_container");
-#ifdef saHpiDomainEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiDomainEventTable_secondary:"
                                                        "saHpiDomainEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiDomainEventTable_cmp;
-#endif
-#ifdef saHpiDomainEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiDomainEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiDomainEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiDomainEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiDomainEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiDomainEventTable_row_copy;
@@ -1152,7 +1115,7 @@ initialize_table_saHpiDomainEventTable(void)
     cb.set_commit = saHpiDomainEventTable_set_commit;
     cb.set_free = saHpiDomainEventTable_set_free;
     cb.set_undo = saHpiDomainEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiDomainEventTable",
                 "Registering table saHpiDomainEventTable "
                 "as a table array\n"));

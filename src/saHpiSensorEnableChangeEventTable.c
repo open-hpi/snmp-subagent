@@ -747,41 +747,6 @@ saHpiSensorEnableChangeEventTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiSensorEnableChangeEventTable_context *
-saHpiSensorEnableChangeEventTable_get( const char *name, int len )
-{
-    saHpiSensorEnableChangeEventTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiSensorEnableChangeEventTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
-
-/************************************************************
  * Initializes the saHpiSensorEnableChangeEventTable module
  */
 void
@@ -1025,7 +990,6 @@ int saHpiSensorEnableChangeEventTable_can_delete(saHpiSensorEnableChangeEventTab
     return 1;
 }
 
-#ifdef saHpiSensorEnableChangeEventTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -1073,7 +1037,6 @@ saHpiSensorEnableChangeEventTable_create_row( netsnmp_index* hdr)
 
     return ctx;
 }
-#endif
 
 /************************************************************
  * the *_duplicate row routine
@@ -1455,18 +1418,18 @@ initialize_table_saHpiSensorEnableChangeEventTable(void)
     cb.container = netsnmp_container_find("saHpiSensorEnableChangeEventTable_primary:"
                                           "saHpiSensorEnableChangeEventTable:"
                                           "table_container");
-#ifdef saHpiSensorEnableChangeEventTable_IDX2
+
     netsnmp_container_add_index(cb.container,
                                 netsnmp_container_find("saHpiSensorEnableChangeEventTable_secondary:"
                                                        "saHpiSensorEnableChangeEventTable:"
                                                        "table_container"));
     cb.container->next->compare = saHpiSensorEnableChangeEventTable_cmp;
-#endif
-#ifdef saHpiSensorEnableChangeEventTable_SET_HANDLING
+
+
     cb.can_set = 1;
-#ifdef saHpiSensorEnableChangeEventTable_ROW_CREATION
+
     cb.create_row = (UserRowMethod*)saHpiSensorEnableChangeEventTable_create_row;
-#endif
+
     cb.duplicate_row = (UserRowMethod*)saHpiSensorEnableChangeEventTable_duplicate_row;
     cb.delete_row = (UserRowMethod*)saHpiSensorEnableChangeEventTable_delete_row;
     cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiSensorEnableChangeEventTable_row_copy;
@@ -1481,7 +1444,7 @@ initialize_table_saHpiSensorEnableChangeEventTable(void)
     cb.set_commit = saHpiSensorEnableChangeEventTable_set_commit;
     cb.set_free = saHpiSensorEnableChangeEventTable_set_free;
     cb.set_undo = saHpiSensorEnableChangeEventTable_set_undo;
-#endif
+
     DEBUGMSGTL(("initialize_table_saHpiSensorEnableChangeEventTable",
                 "Registering table saHpiSensorEnableChangeEventTable "
                 "as a table array\n"));
