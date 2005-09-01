@@ -67,6 +67,7 @@ SaErrorT populate_sensor_normal_max(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sensor_normal_max, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_normal_max_oid[SENSOR_READING_NORMAL_MAX_INDEX_NR];
 	netsnmp_index sensor_normal_max_index;
@@ -106,6 +107,7 @@ SaErrorT populate_sensor_normal_max(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_normal_max_context = 
 		saHpiSensorReadingNormalMaxTable_create_row(&sensor_normal_max_index);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_normal_max_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Max row!");
@@ -127,7 +129,8 @@ SaErrorT populate_sensor_normal_max(SaHpiSessionIdT sessionid,
 				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.NormalMax,
 				sensor_normal_max_context->saHpiSensorReadingNormalMaxValue);
 
-	CONTAINER_INSERT (cb.container, sensor_normal_max_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sensor_normal_max_context);
 
 	return rv;
 }

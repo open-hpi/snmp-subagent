@@ -88,7 +88,8 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
 
         DEBUGMSGTL ((AGENT, "populate_inventory, called\n"));
 
-        SaErrorT rv = SA_OK;    
+        SaErrorT rv = SA_OK; 
+        int new_row = MIB_FALSE;
         SaHpiIdrInfoT idr_info;
 
         oid inventory_oid[INVENTORY_INDEX_NR];
@@ -143,6 +144,7 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
                 // New entry. Add it
                 inventory_context = 
                 saHpiInventoryTable_create_row(&inventory_index);
+                new_row = MIB_TRUE;
         }
         if (!inventory_context) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
@@ -201,7 +203,8 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         /********************************************/
         rv = populate_area (sessionid, rdr_entry, rpt_entry);
 
-        CONTAINER_INSERT (cb.container, inventory_context);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, inventory_context);
 
         inventory_entry_count = CONTAINER_SIZE (cb.container);
 

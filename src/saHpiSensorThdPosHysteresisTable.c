@@ -67,6 +67,7 @@ SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid,
         DEBUGMSGTL ((AGENT, "populate_sen_thd_pos_hys, called\n"));
 
         SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
         oid sen_thd_pos_hys_oid[SEN_THD_POS_HYS_IDX_NR];
         netsnmp_index sen_thd_pos_hys_idx;
@@ -106,6 +107,7 @@ SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid,
                 // New entry. Add it
                 sen_thd_pos_hys_ctx = 
                 saHpiSensorThdPosHysteresisTable_create_row(&sen_thd_pos_hys_idx);
+                new_row = MIB_TRUE;
         }
         if (!sen_thd_pos_hys_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a ThdPosHys row!");
@@ -146,7 +148,8 @@ SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid,
         (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.Nonlinear
          == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
 
-        CONTAINER_INSERT (cb.container, sen_thd_pos_hys_ctx);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sen_thd_pos_hys_ctx);
 
         return rv;
 }

@@ -95,6 +95,7 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
         DEBUGMSGTL ((AGENT, "populate_watchdog, called\n"));
 
         SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
         SaHpiWatchdogT watchdog;
         SaHpiTextBufferT buffer;
 
@@ -150,6 +151,7 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
                 // New entry. Add it
                 watchdog_ctx = 
                 saHpiWatchdogTable_create_row(&watchdog_idx);
+                new_row = MIB_TRUE;
         }
         if (!watchdog_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
@@ -223,7 +225,8 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
                full_oid, 
                watchdog_ctx->saHpiWatchdogRDR_len);
 
-        CONTAINER_INSERT (cb.container, watchdog_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, watchdog_ctx);
 
         watchdog_entry_count = CONTAINER_SIZE (cb.container);
 

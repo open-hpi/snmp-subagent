@@ -88,6 +88,7 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 {
 	SaErrorT rv = SA_OK;
         SaErrorT rc = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid domain_alarm_oid[DOMAIN_ALARM_INDEX_NR];
 	netsnmp_index domain_alarm_idx;
@@ -173,6 +174,7 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 		        // New entry. Add it
 		        domain_alarm_ctx = 
 			        saHpiDomainAlarmTable_create_row(&domain_alarm_idx);
+                        new_row = MIB_TRUE;
 	        }
 	        if (!domain_alarm_ctx) {
 		        snmp_log (LOG_ERR, "Not enough memory for a Domain Alarm row!");
@@ -254,8 +256,9 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 		                        Alarm.AlarmCond.Data.Data, Alarm.AlarmCond.Data.DataLength);
 					
 		domain_alarm_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
-		
-	        CONTAINER_INSERT (cb.container, domain_alarm_ctx);
+
+                if (new_row == MIB_TRUE) 
+                        CONTAINER_INSERT (cb.container, domain_alarm_ctx);
 	
 	        //Get the next Alarm
         	rv = saHpiAlarmGetNext( sessionid,
@@ -733,41 +736,6 @@ saHpiDomainAlarmTable_cmp( const void *lhs, const void *rhs )
 
         return 0;
 }
-
-/************************************************************
- * search tree
- */
-/** TODO: set additional indexes as parameters */
-saHpiDomainAlarmTable_context *
-saHpiDomainAlarmTable_get( const char *name, int len )
-{
-    saHpiDomainAlarmTable_context tmp;
-
-    /** we should have a secondary index */
-    netsnmp_assert(cb.container->next != NULL);
-    
-    /*
-     * TODO: implement compare. Remove this ifdef code and
-     * add your own code here.
-     */
-#ifdef TABLE_CONTAINER_TODO
-    snmp_log(LOG_ERR, "saHpiDomainAlarmTable_get not implemented!\n" );
-    return NULL;
-#endif
-
-    /*
-     * EXAMPLE:
-     *
-     * if(len > sizeof(tmp.xxName))
-     *   return NULL;
-     *
-     * strncpy( tmp.xxName, name, sizeof(tmp.xxName) );
-     * tmp.xxName_len = len;
-     *
-     * return CONTAINER_FIND(cb.container->next, &tmp);
-     */
-}
-
 
 /************************************************************
  * Initializes the saHpiDomainAlarmTable module

@@ -73,6 +73,7 @@ int initialize_table_saHpiDomainInfoEntryCount(void);
 int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid) 
 {
 	SaErrorT rv;
+        int new_row = MIB_FALSE;
 	SaHpiDomainInfoT domain_info;
 	
 	oid domain_info_oid[DOMAIN_INFO_INDEX_NR];
@@ -99,6 +100,7 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 		// New entry. Add it
 		domain_info_context = 
 			saHpiDomainInfoTable_create_row ( &domain_info_index);
+                new_row = MIB_TRUE;
 	}
 	if (!domain_info_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a DomainInfo row!");
@@ -195,8 +197,9 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 		domain_info.Guid,
 		16);
 	domain_info_context->saHpiDomainGuid_len = 16;
-	
-	CONTAINER_INSERT (cb.container, domain_info_context);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, domain_info_context);
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
 		

@@ -85,6 +85,7 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 {
  	DEBUGMSGTL ((AGENT, "populate_ctrl_analog, called\n"));
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid ctrl_stream_oid[CTRL_STREAM_INDEX_NR];
 	netsnmp_index ctrl_stream_index;
@@ -149,6 +150,7 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		ctrl_stream_context = 
 			saHpiCtrlStreamTable_create_row(&ctrl_stream_index);
+                new_row = MIB_TRUE;
 	}
 	if (!ctrl_stream_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Analog row!");
@@ -227,7 +229,8 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 	       full_oid, 
 	       ctrl_stream_context->saHpiCtrlStreamRDR_len);
 
-	CONTAINER_INSERT (cb.container, ctrl_stream_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, ctrl_stream_context);
 		
 	ctrl_stream_entry_count = CONTAINER_SIZE (cb.container);
 

@@ -67,6 +67,7 @@ SaErrorT populate_sensor_min(SaHpiSessionIdT sessionid,
 	DEBUGMSGTL ((AGENT, "populate_sensor_max, called\n"));
 
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_min_oid[SENSOR_READING_MIN_INDEX_NR];
 	netsnmp_index sensor_min_index;
@@ -106,6 +107,7 @@ SaErrorT populate_sensor_min(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_min_context = 
 		saHpiSensorReadingMinTable_create_row(&sensor_min_index);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_min_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Max row!");
@@ -127,7 +129,8 @@ SaErrorT populate_sensor_min(SaHpiSessionIdT sessionid,
 				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Min,
 				sensor_min_context->saHpiSensorReadingMinValue);
 
-	CONTAINER_INSERT (cb.container, sensor_min_context);
+	if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, sensor_min_context);
 
 	return rv;
 }
