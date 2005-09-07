@@ -79,58 +79,40 @@ static gpointer event_thread_loop(gpointer data)
 
                 switch (event.EventType) {
                 case SAHPI_ET_RESOURCE:
-
-                        if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
-                            SAHPI_RESE_RESOURCE_ADDED) {
-                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_ADDED\n"));
-                        } else if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
-                                   SAHPI_RESE_RESOURCE_FAILURE) {
-                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_FAILURE\n"));
-                        } else if (event.EventDataUnion.ResourceEvent.ResourceEventType == 
-                                   SAHPI_RESE_RESOURCE_RESTORED) {
-                                DEBUGMSGTL ((AGENT, "SAHPI_RESE_RESOURCE_RESTORED\n"));
-                        }
-
-                       rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
-
+                        DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, [%s]\n",
+                                     oh_lookup_resourceeventtype(
+                                             event.EventDataUnion.ResourceEvent.ResourceEventType)));
                         break;
                 case SAHPI_ET_DOMAIN:
-
-                        if (event.EventDataUnion.DomainEvent.Type == 
-                            SAHPI_DOMAIN_REF_ADDED) {
-                                DEBUGMSGTL ((AGENT, "SAHPI_DOMAIN_REF_ADDED\n"));
-                        } else if (event.EventDataUnion.DomainEvent.Type == 
-                                   SAHPI_DOMAIN_REF_REMOVED) {
-                                DEBUGMSGTL ((AGENT, "SAHPI_DOMAIN_REF_REMOVED\n"));
-                        }
-
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
-
+                      DEBUGMSGTL ((AGENT, "SAHPI_ET_DOMAIN, [%s]\n",
+                                   oh_lookup_domaineventtype(
+                                           event.EventDataUnion.DomainEvent.Type)));
                         break;
                 case SAHPI_ET_SENSOR:              
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_SENSOR_ENABLE_CHANGE:
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_HOTSWAP:
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_WATCHDOG:            
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
-                case SAHPI_ET_HPI_SW:            
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+                case SAHPI_ET_HPI_SW:  
+                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
+                                     oh_lookup_sweventtype(
+                                             event.EventDataUnion.HpiSwEvent.Type)));
                         break;
                 case SAHPI_ET_OEM:              
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
+                                     oh_lookup_sweventtype(
+                                             event.EventDataUnion.HpiSwEvent.Type)));
                         break;
                 case SAHPI_ET_USER: 
-                        rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 default:
                         break;
                 }
+
+                rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
 
                 /* serialize access */
                 g_mutex_unlock(thread_mutex);
