@@ -107,6 +107,8 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
 	oid column[2];
 	int column_len = 2;
 
+        int isNewRow = MIB_TRUE;
+
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
 
@@ -160,6 +162,9 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
 		res_evt_ctx = 
 			saHpiResourceEventLogTable_create_row(&res_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}	
 	if (!res_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Resource Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -174,8 +179,11 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventLogType = 
                event->Event.EventDataUnion.ResourceEvent.ResourceEventType + 1;
-
-	CONTAINER_INSERT (cb.container, res_evt_ctx);
+	
+	if (isNewRow == MIB_TRUE) {
+	
+		CONTAINER_INSERT (cb.container, res_evt_ctx);
+	}
 		
 	resource_event_log_entry_count = CONTAINER_SIZE (cb.container);
 

@@ -180,9 +180,9 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
  * @return 
  */
 SaErrorT domain_event_log_clear(SaHpiSessionIdT session_id, 
-                                  SaHpiResourceIdT resource_id,  
-                                  oid *saHpiEventLogRowPointer, 
-                                  size_t saHpiEventLogRowPointer_len)
+                                SaHpiResourceIdT resource_id,  
+                                oid *saHpiEventLogRowPointer, 
+                                size_t saHpiEventLogRowPointer_len)
 {
         //TODO DMJ
         return SA_OK;

@@ -201,6 +201,10 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                              saHpiAnnouncementTable_create_row(&announcement_index);
                         new_row = MIB_TRUE;
                 }
+		else {
+			new_row = MIB_FALSE;
+		}	
+		
                 if (!announcement_ctx) {
                         snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
                         return AGENT_ERR_INTERNAL_ERROR;
@@ -314,7 +318,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 announcement_ctx->saHpiAnnouncementDelete = 
                         SAHPIANNOUNCEMENTDELETE_ACTIVE;
 
-                if (new_row == MIB_FALSE) 
+                if (new_row == MIB_TRUE) 
                         CONTAINER_INSERT (cb.container, announcement_ctx);
 			
                 /* create full oid on This row for parent RowPointer */
