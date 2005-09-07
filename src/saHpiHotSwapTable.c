@@ -987,7 +987,7 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
-                if ( ((*var->val.integer - 1) != SAHPI_HS_ACTION_INSERTION) ||
+                if ( ((*var->val.integer - 1) != SAHPI_HS_ACTION_INSERTION) &&
                      ((*var->val.integer - 1) != SAHPI_HS_ACTION_EXTRACTION) )   {
                         DEBUGMSGTL ((AGENT, "COLUMN_SAHPIHOTSWAPACTIONREQUEST"
                                      " saHpiHotSwapTable_set_reserve2"

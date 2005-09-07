@@ -100,6 +100,8 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -137,6 +139,15 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 	sec_evt_oid[4] = dr_entry->entry_id++;
 		/* assign the indices to the index */
 	sec_evt_idx.oids = (oid *) & sec_evt_oid;
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiSensorEnableChangeEventLogTable_oid, saHpiSensorEnableChangeEventLogTable_oid_len,
+			column, column_len,
+			&sec_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
 
 	/* See if Row exists. */
 	sec_evt_ctx = NULL;
@@ -147,6 +158,10 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 		sec_evt_ctx = 
 			saHpiSensorEnableChangeEventLogTable_create_row(&sec_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}
+		
 	if (!sec_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Enable Change Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -288,18 +303,11 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 
 
 
-	CONTAINER_INSERT (cb.container, sec_evt_ctx);
+	if (isNewRow == MIB_TRUE) {
+		CONTAINER_INSERT (cb.container, sec_evt_ctx);
+	}
 		
 	sensor_enable_change_event_log_entry_count = CONTAINER_SIZE (cb.container);
-	
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
-	build_full_oid(saHpiSensorEnableChangeEventLogTable_oid, saHpiSensorEnableChangeEventLogTable_oid_len,
-			column, column_len,
-			&sec_evt_idx,
-			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;
 }

@@ -96,6 +96,8 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -131,6 +133,15 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 	software_evt_oid[3] = dr_entry->entry_id++;
 		/* assign the indices to the index */
 	software_evt_idx.oids = (oid *) & software_evt_oid;
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPISOFTWAREEVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, MAX_OID_LEN);
+	build_full_oid(saHpiSoftwareEventLogTable_oid, saHpiSoftwareEventLogTable_oid_len,
+			column, column_len,
+			&software_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
 
 	/* See if Row exists. */
 	software_evt_ctx = NULL;
@@ -141,6 +152,10 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 		software_evt_ctx = 
 			saHpiSoftwareEventLogTable_create_row(&software_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}	
+	
 	if (!software_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Software Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -174,19 +189,13 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 	software_evt_ctx->saHpiSoftwareEventLogText_len	= 
 	        event->Event.EventDataUnion.HpiSwEvent.EventData.DataLength;				
 
-	CONTAINER_INSERT (cb.container, software_evt_ctx);
+	if(isNewRow == MIB_TRUE) {
+	
+		CONTAINER_INSERT (cb.container, software_evt_ctx);
+	}
 		
 	software_event_log_entry_count = CONTAINER_SIZE (cb.container);
 		
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPISOFTWAREEVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, MAX_OID_LEN);
-	build_full_oid(saHpiSoftwareEventLogTable_oid, saHpiSoftwareEventLogTable_oid_len,
-			column, column_len,
-			&software_evt_idx,
-			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-
         return SA_OK;
 }
 

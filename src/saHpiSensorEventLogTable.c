@@ -105,6 +105,8 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -163,6 +165,10 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 		sen_evt_ctx = 
 			saHpiSensorEventLogTable_create_row(&sen_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}
+	
 	if (!sen_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -282,8 +288,10 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
         sen_evt_ctx->saHpiSensorEventLogSpecific = 
                 event->Event.EventDataUnion.SensorEvent.SensorSpecific;
 
-
-	CONTAINER_INSERT (cb.container, sen_evt_ctx);
+	if (isNewRow == MIB_TRUE) {
+	
+		CONTAINER_INSERT (cb.container, sen_evt_ctx);
+	}
 		
 	sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
 

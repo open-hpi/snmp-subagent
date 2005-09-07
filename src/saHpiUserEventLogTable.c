@@ -98,6 +98,8 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -131,6 +133,15 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 	user_evt_oid[2] = dr_entry->entry_id++;
 		/* assign the indices to the index */
 	user_evt_idx.oids = (oid *) & user_evt_oid;
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIUSEREVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, MAX_OID_LEN);
+	build_full_oid(saHpiUserEventLogTable_oid, saHpiUserEventLogTable_oid_len,
+			column, column_len,
+			&user_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
 
 	/* See if Row exists. */
 	user_evt_ctx = NULL;
@@ -141,6 +152,10 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 		user_evt_ctx = 
 			saHpiUserEventLogTable_create_row(&user_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}	
+	
 	if (!user_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a User Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -168,19 +183,11 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 
         user_evt_ctx->saHpiUserEventLogRowStatus = SAHPIUSEREVENTLOGROWSTATUS_ACTIVE;
 
-
-	CONTAINER_INSERT (cb.container, user_evt_ctx);
+	if (isNewRow == MIB_TRUE) {
+		CONTAINER_INSERT (cb.container, user_evt_ctx);
+	}
 		
 	user_event_log_entry_count = CONTAINER_SIZE (cb.container);
-	
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPIUSEREVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, MAX_OID_LEN);
-	build_full_oid(saHpiUserEventLogTable_oid, saHpiUserEventLogTable_oid_len,
-			column, column_len,
-			&user_evt_idx,
-			this_child_oid, MAX_OID_LEN, this_child_oid_len);
 
         return SA_OK;
 }

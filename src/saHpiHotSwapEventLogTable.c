@@ -97,6 +97,8 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -132,6 +134,15 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 	hotswap_evt_oid[3] = dr_entry->entry_id++;
 		/* assign the indices to the index */
 	hotswap_evt_idx.oids = (oid *) & hotswap_evt_oid;
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIHOTSWAPEVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiHotSwapEventLogTable_oid, saHpiHotSwapEventLogTable_oid_len,
+			column, column_len,
+			&hotswap_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
 
 	/* See if Row exists. */
 	hotswap_evt_ctx = NULL;
@@ -142,6 +153,10 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 		hotswap_evt_ctx = 
 			saHpiHotSwapEventLogTable_create_row(&hotswap_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}	
+	
 	if (!hotswap_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Hot Swap Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
@@ -158,19 +173,12 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
         hotswap_evt_ctx->saHpiHotSwapEventLogPreviousState = 
                event->Event.EventDataUnion.HotSwapEvent.PreviousHotSwapState + 1;
 
-	CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
-		
+ 	if(isNewRow == MIB_TRUE) {
+		CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
+	}	
+	
 	hotswap_event_log_entry_count = CONTAINER_SIZE (cb.container);
 	
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPIHOTSWAPEVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
-	build_full_oid(saHpiHotSwapEventLogTable_oid, saHpiHotSwapEventLogTable_oid_len,
-			column, column_len,
-			&hotswap_evt_idx,
-			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-
         return SA_OK;
 }
 
