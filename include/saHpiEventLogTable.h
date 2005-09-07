@@ -73,7 +73,7 @@ int saHpiEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 /*************************************************************
  * function declarations
  */
-SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid);
+SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT resourceid);
 
 SaErrorT event_log_clear (SaHpiSessionIdT session_id, 
                           SaHpiResourceIdT resource_id);
