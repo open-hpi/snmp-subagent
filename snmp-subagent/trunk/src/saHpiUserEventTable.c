@@ -101,6 +101,7 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
                                       size_t *this_child_oid_len)
 {					
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid user_evt_oid[USER_EVENT_INDEX_NR];
 	netsnmp_index user_evt_idx;
@@ -148,6 +149,7 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		user_evt_ctx = 
 			saHpiUserEventTable_create_row(&user_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!user_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a User Event row!");
@@ -179,7 +181,8 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
         /** RowStatus = ASN_INTEGER */
         user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
 
-	CONTAINER_INSERT (cb.container, user_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, user_evt_ctx);
 		
 	user_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -203,6 +206,7 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                               size_t *this_child_oid_len)
 {					
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid user_evt_oid[USER_EVENT_INDEX_NR];
 	netsnmp_index user_evt_idx;
@@ -316,6 +320,7 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
         		// New entry. Add it
         		user_evt_ctx = 
         			saHpiUserEventTable_create_row(&user_evt_idx);
+                        new_row = MIB_TRUE;
                         if (!user_evt_ctx) {
                                 snmp_log (LOG_ERR, 
                                 "async_user_event_add: Not enough memory for a User Event row!");
@@ -347,9 +352,10 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
         
                         /** RowStatus = ASN_INTEGER */
                         user_evt_ctx->saHpiUserEventRowStatus = SAHPIUSEREVENTROWSTATUS_ACTIVE;
-        
-                        CONTAINER_INSERT (cb.container, user_evt_ctx);
-        
+
+                        if (new_row == MIB_TRUE) 
+                                CONTAINER_INSERT (cb.container, user_evt_ctx);
+
                         user_event_entry_count = CONTAINER_SIZE (cb.container);
                 }
         }

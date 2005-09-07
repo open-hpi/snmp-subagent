@@ -90,6 +90,7 @@ SaErrorT populate_saHpiSoftwareEventTable(SaHpiSessionIdT sessionid,
                                           size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid software_evt_oid[SOFTWARE_EVENT_INDEX_NR];
 	netsnmp_index software_evt_idx;
@@ -139,6 +140,7 @@ SaErrorT populate_saHpiSoftwareEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		software_evt_ctx = 
 			saHpiSoftwareEventTable_create_row(&software_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!software_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Software Event row!");
@@ -175,7 +177,8 @@ SaErrorT populate_saHpiSoftwareEventTable(SaHpiSessionIdT sessionid,
 	          	        event->EventDataUnion.HpiSwEvent.EventData.Data,
 				        SAHPI_MAX_TEXT_BUFFER_LENGTH);
               			
-	CONTAINER_INSERT (cb.container, software_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, software_evt_ctx);
 		
 	software_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -201,6 +204,7 @@ SaErrorT async_software_event_add(SaHpiSessionIdT sessionid,
                                   size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid software_evt_oid[SOFTWARE_EVENT_INDEX_NR];
 	netsnmp_index software_evt_idx;
@@ -262,6 +266,7 @@ SaErrorT async_software_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		software_evt_ctx = 
 			saHpiSoftwareEventTable_create_row(&software_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!software_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Software Event row!");
@@ -297,8 +302,8 @@ SaErrorT async_software_event_add(SaHpiSessionIdT sessionid,
 	memcpy(software_evt_ctx->saHpiSoftwareEventText, 
 	          	        event->EventDataUnion.HpiSwEvent.EventData.Data,
 				        SAHPI_MAX_TEXT_BUFFER_LENGTH);
-              			
-	CONTAINER_INSERT (cb.container, software_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, software_evt_ctx);
 		
 	software_event_entry_count = CONTAINER_SIZE (cb.container);
 	

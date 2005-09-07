@@ -91,6 +91,7 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid watchdog_evt_oid[WATCHDOG_EVENT_INDEX_NR];
 	netsnmp_index watchdog_evt_idx;
@@ -142,6 +143,7 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		watchdog_evt_ctx = 
 			saHpiWatchdogEventTable_create_row(&watchdog_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!watchdog_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Watchdog Event row!");
@@ -165,8 +167,9 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiWatchdogTimerUse = ASN_INTEGER */		
 	watchdog_evt_ctx->saHpiWatchdogEventUse = 	
 	        event->EventDataUnion.WatchdogEvent.WatchdogUse + 1;		
-		
-	CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
 		
 	watchdog_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -193,6 +196,7 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
                                   size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid watchdog_evt_oid[WATCHDOG_EVENT_INDEX_NR];
 	netsnmp_index watchdog_evt_idx;
@@ -256,6 +260,7 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		watchdog_evt_ctx = 
 			saHpiWatchdogEventTable_create_row(&watchdog_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!watchdog_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Watchdog Event row!");
@@ -279,8 +284,9 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiWatchdogTimerUse = ASN_INTEGER */		
 	watchdog_evt_ctx->saHpiWatchdogEventUse = 	
 	        event->EventDataUnion.WatchdogEvent.WatchdogUse + 1;		
-		
-	CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, watchdog_evt_ctx);
 		
 	watchdog_event_entry_count = CONTAINER_SIZE (cb.container);        
 

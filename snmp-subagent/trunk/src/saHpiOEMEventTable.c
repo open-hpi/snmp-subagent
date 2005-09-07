@@ -91,6 +91,7 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid oem_evt_oid[OEM_EVENT_INDEX_NR];
 	netsnmp_index oem_evt_idx;
@@ -140,6 +141,7 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		oem_evt_ctx = 
 			saHpiOEMEventTable_create_row(&oem_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!oem_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a OEM Event row!");
@@ -172,7 +174,8 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
         oem_evt_ctx->saHpiOEMEventText_len = 
 	        event->EventDataUnion.OemEvent.OemEventData.DataLength;		
 
-	CONTAINER_INSERT (cb.container, oem_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, oem_evt_ctx);
 		
 	oem_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -197,6 +200,7 @@ SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid,
                              size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid oem_evt_oid[OEM_EVENT_INDEX_NR];
 	netsnmp_index oem_evt_idx;
@@ -258,6 +262,7 @@ SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		oem_evt_ctx = 
 			saHpiOEMEventTable_create_row(&oem_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!oem_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a OEM Event row!");
@@ -290,7 +295,8 @@ SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid,
         oem_evt_ctx->saHpiOEMEventText_len = 
 	        event->EventDataUnion.OemEvent.OemEventData.DataLength;		
 
-	CONTAINER_INSERT (cb.container, oem_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, oem_evt_ctx);
 		
 	oem_event_entry_count = CONTAINER_SIZE (cb.container);
 

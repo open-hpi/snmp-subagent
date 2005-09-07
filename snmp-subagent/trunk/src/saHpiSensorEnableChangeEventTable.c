@@ -91,6 +91,7 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
                                                     size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_enable_change_evt_oid[SENSOR_ENABLE_CHANGE_EVENT_INDEX_NR];
 	netsnmp_index sensor_enable_change_evt_idx;
@@ -144,6 +145,7 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_enable_change_evt_ctx = 
 			saHpiSensorEnableChangeEventTable_create_row(&sensor_enable_change_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_enable_change_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Enable Change Event row!");
@@ -289,8 +291,9 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
 	                                sensor_enable_change_text_buf.Data,
 					        sensor_enable_change_text_buf.DataLength);  
         }
-	
-	CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
 		
 	sensor_enable_change_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -314,6 +317,7 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
                                               size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_enable_change_evt_oid[SENSOR_ENABLE_CHANGE_EVENT_INDEX_NR];
 	netsnmp_index sensor_enable_change_evt_idx;
@@ -379,6 +383,7 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_enable_change_evt_ctx = 
 			saHpiSensorEnableChangeEventTable_create_row(&sensor_enable_change_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_enable_change_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Enable Change Event row!");
@@ -525,8 +530,9 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
 	                                sensor_enable_change_text_buf.Data,
 					        sensor_enable_change_text_buf.DataLength);  
         }
-	
-	CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, sensor_enable_change_evt_ctx);
 		
 	sensor_enable_change_event_entry_count = CONTAINER_SIZE (cb.container);
 

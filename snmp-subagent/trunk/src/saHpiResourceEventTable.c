@@ -92,6 +92,7 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
                                           size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid res_evt_oid[RESOURCE_EVENT_INDEX_NR];
 	netsnmp_index res_evt_idx;
@@ -154,6 +155,7 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		res_evt_ctx = 
 			saHpiResourceEventTable_create_row(&res_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!res_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Resource Event row!");
@@ -169,7 +171,8 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
 
-	CONTAINER_INSERT (cb.container, res_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, res_evt_ctx);
 		
 	resource_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -184,6 +187,7 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
                                   size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid res_evt_oid[RESOURCE_EVENT_INDEX_NR];
 	netsnmp_index res_evt_idx;
@@ -246,6 +250,7 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		res_evt_ctx = 
 			saHpiResourceEventTable_create_row(&res_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!res_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Resource Event row!");
@@ -261,12 +266,9 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
 
-	CONTAINER_INSERT (cb.container, res_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, res_evt_ctx);
 
-        //TODO: need to follow changes down to sub tables!!!!!
-
-
-		
 	resource_event_entry_count = CONTAINER_SIZE (cb.container);
 
         return SA_OK;
