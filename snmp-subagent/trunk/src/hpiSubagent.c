@@ -133,7 +133,6 @@ static int do_fork = AGENT_FALSE;
 // Check for information every x seconds.
 int alarm_interval = 5;
 
-
 /*
  * Internal prototypes
  */
@@ -146,7 +145,7 @@ static RETSIGTYPE stop_server (int a)
         set_run_threaded(FALSE);
         keep_running = 0;
 }
-
+   
 void hpiSubagent_parse_config_traps (const char *token, char *cptr)
 {
   int x = -1;
@@ -222,8 +221,8 @@ main (int argc, char **argv)
 		SaHpiVersionT	hpiVer;
 		SaHpiSessionIdT sessionid;
                 SaHpiDomainInfoT        domain_info;  		
-		SaHpiBoolT      run_threaded = TRUE;
-		
+		SaHpiBoolT      run_threaded = TRUE;	
+								
 	  	pid_t child;
 		
 		char * env;
@@ -462,7 +461,8 @@ main (int argc, char **argv)
 	     * populate_saHpiUserEventTable();
 	     */
         populate_saHpiEventLogInfo(sessionid);
-        populate_saHpiEventLog (sessionid);
+	    /* populate_saHpiEventLog (sessionid);
+	     */
             /*
              * populate_saHpiResourceEventLogTable();
              * populate_saHpiSensorEventLogTable();
@@ -521,7 +521,7 @@ main (int argc, char **argv)
         while (keep_running) {
                 /* if you use select(), see snmp_select_info() in snmp_api(3) */
                 /*     --- OR ---  */		
-                rc = agent_check_and_process (1);
+                rc = agent_check_and_process (1);			
 		
         }
 stop:
