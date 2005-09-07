@@ -90,6 +90,7 @@ SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid hotswap_evt_oid[HOTSWAP_EVENT_INDEX_NR];
 	netsnmp_index hotswap_evt_idx;
@@ -139,6 +140,7 @@ SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		hotswap_evt_ctx = 
 			saHpiHotSwapEventTable_create_row(&hotswap_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!hotswap_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a HotSwap Event row!");
@@ -159,7 +161,8 @@ SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
         hotswap_evt_ctx->saHpiHotSwapEventPreviousState = 
                         event->EventDataUnion.HotSwapEvent.PreviousHotSwapState + 1;			
 
-	CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
 		
 	hotswap_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -184,6 +187,7 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
                                  size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid hotswap_evt_oid[HOTSWAP_EVENT_INDEX_NR];
 	netsnmp_index hotswap_evt_idx;
@@ -246,6 +250,7 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		hotswap_evt_ctx = 
 			saHpiHotSwapEventTable_create_row(&hotswap_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!hotswap_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a HotSwap Event row!");
@@ -266,7 +271,8 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
         hotswap_evt_ctx->saHpiHotSwapEventPreviousState = 
                         event->EventDataUnion.HotSwapEvent.PreviousHotSwapState + 1;			
 
-	CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, hotswap_evt_ctx);
 		
 	hotswap_event_entry_count = CONTAINER_SIZE (cb.container);
 

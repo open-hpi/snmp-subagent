@@ -90,6 +90,7 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid domain_evt_oid[DOMAIN_EVENT_INDEX_NR];
 	netsnmp_index domain_evt_idx;
@@ -138,6 +139,7 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		domain_evt_ctx = 
 			saHpiDomainEventTable_create_row(&domain_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!domain_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Domain Event row!");
@@ -153,7 +155,8 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = event->EventType + 1;
 
-	CONTAINER_INSERT (cb.container, domain_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, domain_evt_ctx);
 		
 	domain_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -178,6 +181,7 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
                                 size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid domain_evt_oid[DOMAIN_EVENT_INDEX_NR];
 	netsnmp_index domain_evt_idx;
@@ -226,6 +230,7 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		domain_evt_ctx = 
 			saHpiDomainEventTable_create_row(&domain_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!domain_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Domain Event row!");
@@ -241,7 +246,8 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = event->EventType + 1;
 
-	CONTAINER_INSERT (cb.container, domain_evt_ctx);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, domain_evt_ctx);
 		
 	domain_event_entry_count = CONTAINER_SIZE (cb.container);
 

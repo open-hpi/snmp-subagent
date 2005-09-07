@@ -91,6 +91,7 @@ SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
                                         size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_evt_oid[SENSOR_EVENT_INDEX_NR];
 	netsnmp_index sensor_evt_idx;
@@ -144,6 +145,7 @@ SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_evt_ctx = 
 			saHpiSensorEventTable_create_row(&sensor_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Event row!");
@@ -315,8 +317,9 @@ SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
                 sensor_evt_ctx->saHpiSensorEventSpecific = 
 	                event->EventDataUnion.SensorEvent.SensorSpecific;
         }
-	
-	CONTAINER_INSERT (cb.container, sensor_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, sensor_evt_ctx);
 		
 	sensor_event_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -342,6 +345,7 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
                                 size_t *this_child_oid_len)
 {
 	SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid sensor_evt_oid[SENSOR_EVENT_INDEX_NR];
 	netsnmp_index sensor_evt_idx;
@@ -395,6 +399,7 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
 		// New entry. Add it
 		sensor_evt_ctx = 
 			saHpiSensorEventTable_create_row(&sensor_evt_idx);
+                new_row = MIB_TRUE;
 	}
 	if (!sensor_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor Event row!");
@@ -566,8 +571,9 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
                 sensor_evt_ctx->saHpiSensorEventSpecific = 
 	                event->EventDataUnion.SensorEvent.SensorSpecific;
         }
-	
-	CONTAINER_INSERT (cb.container, sensor_evt_ctx);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, sensor_evt_ctx);
 		
 	sensor_event_entry_count = CONTAINER_SIZE (cb.container);
 	

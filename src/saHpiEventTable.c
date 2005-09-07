@@ -84,6 +84,7 @@ int initialize_table_saHpiEventEntryCount(void);
 SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
 {
         SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
         SaHpiEventT          event;         
         SaHpiRdrT            rdr;            
@@ -99,7 +100,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
 
         int i;
 
-        printf( "populate_saHpiEventTable, called\n");
+        printf("populate_saHpiEventTable, called\n");
         printf(" ***************************************\n");
         printf(" ***************************************\n");
         printf(" EVENT TABLES \n");
@@ -126,7 +127,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiResourceEventTable(sessionid, &event,                                           
                                                          child_oid, 
                                                          &child_oid_len);
-                        rv = async_resource_add(sessionid, &event, &rdr, &rpt_entry);
+                        async_resource_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_DOMAIN:
                         printf("SAHPI_ET_DOMAIN: rv [%d]\n", rv);
@@ -199,6 +200,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         // New entry. Add it
                         event_context = 
                                 saHpiEventTable_create_row (&event_index);
+                        new_row = MIB_TRUE;
                 }
                 if (!event_context) {
                         snmp_log (LOG_ERR, "Not enough memory for a Event row!");
@@ -222,9 +224,14 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 /** INTEGER = ASN_INTEGER */
                 event_context->saHpiEventType = event.EventType + 1;
 
+                /* only add row if it is a new one */
+                if (new_row == MIB_TRUE) 
+                        CONTAINER_INSERT (cb.container, event_context);
 
-                CONTAINER_INSERT (cb.container, event_context);
+                /* set new_row == MIB_FALSE, because we are looping */
+                new_row = MIB_FALSE;
 
+                /* update the latest count */
                 event_entry_count = CONTAINER_SIZE (cb.container);
 		
                 /* get next event if available */
@@ -250,6 +257,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 {
 
         SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
 	oid event_oid[MAX_OID_LEN];
 	netsnmp_index event_index;
@@ -306,6 +314,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                               rdr, rpt_entry,
 					      child_oid, 
                                               &child_oid_len);
+
                 break;
         case SAHPI_ET_OEM:
                 rv = async_oem_event_add(sessionid, event,                                           
@@ -320,7 +329,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                           &child_oid_len);
                 break;
         default:
-                printf("********* unknown event type *********\n");
+                DEBUGMSGTL ((AGENT, "** async_event_add: unknown event type **\n"));
                 return rv;
                 break;        
         }
@@ -341,6 +350,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                 // New entry. Add it
                 event_context = 
                         saHpiEventTable_create_row (&event_index);
+                new_row = MIB_TRUE;
         }
         if (!event_context) {
                 snmp_log (LOG_ERR, "Not enough memory for a Event row!");
@@ -364,7 +374,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
         /** INTEGER = ASN_INTEGER */
         event_context->saHpiEventType = event->EventType + 1;
 
-        CONTAINER_INSERT (cb.container, event_context);
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, event_context);
 
         event_entry_count = CONTAINER_SIZE (cb.container);
 
