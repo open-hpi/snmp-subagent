@@ -289,9 +289,10 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 	          (event_log_info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
         
 	if (isNewRow == MIB_TRUE) {
-        	CONTAINER_INSERT (cb.container, evt_log_info_context);
-		populate_saHpiEventLog(sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
+        	CONTAINER_INSERT (cb.container, evt_log_info_context);	
 	}
+	
+	populate_saHpiEventLog(sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
 	
 	return rv;
 
@@ -530,19 +531,87 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                 evt_log_info_context = NULL;
                 evt_log_info_context = CONTAINER_FIND (cb.container, &evt_log_info_index);
 		
-		if (!evt_log_info_context) {
+		if (!evt_log_info_context) { //Obviously a new entry
 		
-		}
-		else { //found the entry, do a compare of the timestamps
+			evt_log_info_context = 
+                                saHpiEventLogInfoTable_create_row ( &evt_log_info_index);
+			
+			if (!evt_log_info_context) {
+                        	snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
+                        	rv = AGENT_ERR_INTERNAL_ERROR;
+                        	break;
+			}	
+			
+                	/** UNSIGNED32 = ASN_UNSIGNED */
+                	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
+
+                	/** UNSIGNED32 = ASN_UNSIGNED */
+                	evt_log_info_context->saHpiEventLogInfoSize = event_log_info.Size;
+	
+                	/** UNSIGNED32 = ASN_UNSIGNED */
+                	evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
+                        event_log_info.UserEventMaxSize;
+
+                	/** SaHpiTime = ASN_COUNTER64 */
+                	evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
+                        	event_log_info.UpdateTimestamp;
+
+                	/** SaHpiTime = ASN_OPAQUE */
+                	evt_log_info_context->saHpiEventLogInfoTime_len = 
+                	       sizeof(SaHpiTimeT);
+                	memset(evt_log_info_context->saHpiEventLogInfoTime, 
+                 	      0, SAF_UNSIGNED_64_LEN);
+                	memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
+                  	     &event_log_info.CurrentTime,
+                   	    sizeof(SaHpiTimeT));
+
+                	/** TruthValue = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogInfoIsEnabled =
+                        	(event_log_info.Enabled == SAHPI_TRUE) ? 
+                     	           MIB_TRUE : MIB_FALSE;
+
+                	/** TruthValue = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogInfoOverflowFlag =
+                       	 	(event_log_info.OverflowFlag == SAHPI_TRUE) ? 
+                        	        MIB_TRUE : MIB_FALSE;
+
+                	/** TruthValue = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogInfoOverflowResetable =
+                        	(event_log_info.OverflowResetable == SAHPI_TRUE) ? 
+                                	MIB_TRUE : MIB_FALSE; 
+
+                	/** INTEGER = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogInfoOverflowAction = 
+                        	event_log_info.OverflowAction + 1;
+
+                	/** INTEGER = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogInfoOverflowReset = 0;
+
+                	/** TruthValue = ASN_INTEGER */
+                	evt_log_info_context->saHpiEventLogClear = MIB_FALSE;
+
+                	/** TruthValue = ASN_INTEGER */                	
+	                evt_log_info_context->saHpiEventLogState =                         
+		        	(event_log_info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
+			
+			CONTAINER_INSERT (cb.container, evt_log_info_context);	
+			
+			populate_saHpiEventLog(sessionid, rpt_entry.ResourceId);			
+			
+                }	
+		else { //found the entry, dot a compare of the timestamps
 			if ((event_log_info.UpdateTimestamp - 
 			     evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0) {
 			     
-			     //Timestamp has changed, need to get the new event logs
+			     //Timestamp has changed, need to update the information here
+			     //and in the eventLogs
+			     
+			     
 			}     
 		}
-	}while(0);	     
-#endif		
-
+		
+	}while(EntryId != SAHPI_LAST_ENTRY);	     		
+#endif
 	return SA_OK;	
 }
 
