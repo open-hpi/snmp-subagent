@@ -52,13 +52,15 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiCurrentSensorStateTable_oid[] = { saHpiCurrentSensorStateTable_TABLE_OID};
 size_t saHpiCurrentSensorStateTable_oid_len = OID_LENGTH(saHpiCurrentSensorStateTable_oid);
 
-/************************************************************/
-/************************************************************/
-/************************************************************/
-/************************************************************/
-
-/*
- * SaErrorT populate_ctrl_text()
+/**
+ * 
+ * @sessionid
+ * @rdr_entry
+ * @rpt_entry
+ * @full_oid
+ * @full_oid_len
+ * 
+ * @return 
  */
 SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid, 
 				       SaHpiRdrT *rdr_entry,
