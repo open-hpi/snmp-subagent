@@ -96,6 +96,8 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 
 	oid column[2];
 	int column_len = 2;
+	
+	int isNewRow = MIB_TRUE;
 
         DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;
@@ -139,13 +141,17 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 		domain_evt_ctx = 
 			saHpiDomainEventLogTable_create_row(&domain_evt_idx);
 	}
+	else {
+		isNewRow = MIB_FALSE;
+	}
+		
 	if (!domain_evt_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a Domain Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	}
 
         /** SaHpiEntryId = ASN_UNSIGNED */
-        domain_evt_ctx->saHpiDomainEventLogTimestamp = domain_evt_oid[1];
+        domain_evt_ctx->saHpiDomainEventLogEntryId = domain_evt_oid[1];
 
         /** SaHpiTime = ASN_COUNTER64 */
         domain_evt_ctx->saHpiDomainEventLogTimestamp = event->Timestamp;              
@@ -154,19 +160,12 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventLogType = 
 	                event->Event.EventDataUnion.DomainEvent.Type + 1;
 
-	CONTAINER_INSERT (cb.container, domain_evt_ctx);
-		
-	domain_event_log_entry_count = CONTAINER_SIZE (cb.container);
 	
-	/* create full oid on This row for parent RowPointer */
-	column[0] = 1;
-	column[1] = COLUMN_SAHPIDOMAINEVENTLOGTIMESTAMP;
-	memset(this_child_oid, 0, sizeof(this_child_oid));
-	build_full_oid(saHpiDomainEventLogTable_oid, saHpiDomainEventLogTable_oid_len,
-			column, column_len,
-			&domain_evt_idx,
-			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-
+	if (isNewRow == MIB_TRUE) {
+		CONTAINER_INSERT (cb.container, domain_evt_ctx);
+		domain_event_log_entry_count = CONTAINER_SIZE (cb.container);		
+	}
+	
         return SA_OK;
 }  
 
@@ -184,8 +183,38 @@ SaErrorT domain_event_log_clear(SaHpiSessionIdT session_id,
                                 oid *saHpiEventLogRowPointer, 
                                 size_t saHpiEventLogRowPointer_len)
 {
-        //TODO DMJ
+
+	//TODO DMJ
+#if 0        
+	oid domain_evt_oid[DOMAIN_EVENT_LOG_INDEX_NR];
+	netsnmp_index domain_evt_idx;
+	saHpiDomainEventLogTable_context *domain_evt_ctx;
+
+	oid column[2];
+	int column_len = 2;
+
+        DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        DEBUGMSGTL ((AGENT, "domain_event_log_clear, called\n"));
+	
+	/* BUILD oid for new row */
+		/* assign the number of indices */
+	domain_evt_idx.len = DOMAIN_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	domain_evt_oid[0] = saHpiEventLogRowPointer[15];
+                /** Index saHpiDomainEventEntryId is external */	
+	domain_evt_oid[1] = saHpiEventLogRowPointer[16];
+		/** Index saHpiEventSeverity is external */
+	domain_evt_oid[2] = saHpiEventLogRowPointer[17];
+		/* assign the indices to the index */
+	domain_evt_idx.oids = (oid *) & domain_evt_oid;
+	
+	DEBUGMSGTL ((AGENT, "******domain_event_log_clear, %d:%d:%d\n", saHpiEventLogRowPointer[6],
+	saHpiEventLogRowPointer[15],saHpiEventLogRowPointer[16]));			
+	
         return SA_OK;
+#endif
 }
 
 
