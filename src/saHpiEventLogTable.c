@@ -564,9 +564,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                DEBUGMSGTL ((AGENT, "event_log_clear: deleting \n"));
 
                                /* all conditions met remove row */
-                               
 
-                               switch (event_log_ctx->saHpiEventLogType) {
+                               switch (event_log_ctx->saHpiEventLogType - 1) {
                                case SAHPI_ET_RESOURCE:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, "
                                                     "called\n"));
