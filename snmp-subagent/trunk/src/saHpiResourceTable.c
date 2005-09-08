@@ -131,7 +131,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		memset( resource_context->saHpiResourceEntityPath, 
 			0, sizeof(oh_big_textbuffer));
 		memset(&bigbuf, 0, sizeof(oh_big_textbuffer));        
-		rv = oh_decode_entitypath(      &RptEntry.ResourceEntity, &bigbuf );
+		rv = oh_decode_entitypath(&RptEntry.ResourceEntity, &bigbuf );
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, 
 				     "ERROR: populate_saHpiResourceTable RPT, oh_decode_entitypath() rv = %d\n",rv));
@@ -285,10 +285,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 
 		if (RptEntry.ResourceCapabilities & 
                     SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
-			 rv = populate_hotswap (sessionid,
-			 	                &RptEntry,
-						resource_index.oids, 
-						resource_index.len);
+			 rv = populate_hotswap (sessionid, &RptEntry);
                 }
 		if (RptEntry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
 			rv = populate_saHpiRdrTable(sessionid, 
@@ -372,12 +369,13 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 
 		// New entry. Add it
 		resource_context = saHpiResourceTable_create_row ( &resource_index);
+                new_row = MIB_TRUE;
+
 	        if (!resource_context) {
                         snmp_log (LOG_ERR, "async_event_resource: Not enough memory for a Resource row!");
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
 
-                new_row = MIB_TRUE;
                 DEBUGMSGTL ((AGENT, "!!!!!!!!!! async_resource_add: NEW ROW !!!!!!!!!!!\n"));
 
         } else if ((!resource_context) && (remove_rpt_entry == MIB_TRUE)) {
@@ -566,18 +564,20 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	/** TruthValue = ASN_INTEGER */
 	resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
 
-
         /***************************/
         /* update applicable RDR's */
         /***************************/
-	if (rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) {
-                /* for now we are using the standard rdr populate call */
-                /*in servicing the async event */
+	if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_RDR) && 
+            (event->EventDataUnion.ResourceEvent.ResourceEventType != 
+             SAHPI_RESE_RESOURCE_FAILURE)) {
+
                 rv = populate_saHpiRdrTable(sessionid, 
                                             rpt_entry_event,
                                             resource_index.oids, 
                                             resource_index.len);
+
 	}
+
 
         /*********************************************************/
         /* need to update DomainInfoTable,  RPT data has changed */
