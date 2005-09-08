@@ -360,7 +360,7 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
         /* build index */
 	resource_index.len = RESOURCE_INDEX_NR;
 	resource_oid[0] = domain_info.DomainId;
-	resource_oid[1] = event->Source;
+	resource_oid[1] = rpt_entry.ResourceId;
 	resource_oid[2] = MIB_FALSE;
 	resource_index.oids = (oid *) & resource_oid;
 
