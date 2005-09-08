@@ -107,8 +107,18 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 	netsnmp_index resource_index;
 
-
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
+
+
+#if 0
+remove all matching rows for domainId and resourceId pairs.
+seems have to pass in if this a new rdr or existing to theunder lying tables.
+then we can determine
+
+for every this rdr it should be very simple to vector down into the accompanying 
+underlying table and find and delete
+#endif
+
 	
 	rdr_entry_id = SAHPI_FIRST_ENTRY;
 	do {
@@ -162,7 +172,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		 */
 		column[0] = 1;
 		column[1] = COLUMN_SAHPIRDRENTRYID;
-		memset(full_oid, 0, sizeof(full_oid_len));
+		memset(full_oid, 0, MAX_OID_LEN);
 		build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
 				column, column_len,
 				&rdr_index,
@@ -172,7 +182,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		 * this shall be the oid of the corresponding rdr type's 
 		 * table
 		 */
-		memset(&child_oid, 0, sizeof(child_oid));
+		memset(&child_oid, 0, MAX_OID_LEN);
 		child_oid_len = 0;
 
 		/*
@@ -241,7 +251,8 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 					    "populate_ctrl_text rv: %s\n",
 					    oh_lookup_error(rv))); 
 				break;
-			case SAHPI_CTRL_TYPE_OEM:
+
+		       case SAHPI_CTRL_TYPE_OEM:
 				rv = populate_ctrl_oem(sessionid,
 						       &rdr_entry,
 						       rpt_entry,
@@ -260,10 +271,10 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 		case SAHPI_SENSOR_RDR:
 			DEBUGMSGTL ((AGENT,
-				     "SAHPI_CTRL_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				     "SAHPI_SENSOR_RDR; RPT: %d, RDR: %d, SensorRec.Num: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
-				      rdr_entry.RdrTypeUnion.CtrlRec.Num));
+				      rdr_entry.RdrTypeUnion.SensorRec.Num));
 
 			/* saHpiSensorTable */
 			rv = populate_sensor (sessionid,
@@ -286,7 +297,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 		case SAHPI_INVENTORY_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_inventory; RPT: %d, RDR: %d, InventoryRec.IdrId: %d\n",
+				      "SAHPI_INVENTORY_RDR; RPT: %d, RDR: %d, InventoryRec.IdrId: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.InventoryRec.IdrId));
@@ -302,7 +313,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 		case SAHPI_WATCHDOG_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "Calling populate_watchdog; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      "SAHPI_WATCHDOG_RDR; RPT: %d, RDR: %d, WatchdogRec.WatchdogNum: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.WatchdogRec.WatchdogNum));
@@ -318,7 +329,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 		case SAHPI_ANNUNCIATOR_RDR:
 			DEBUGMSGTL ((AGENT,
-				      "SAHPI_ANNUNCIATOR_RDR; RPT: %d, RDR: %d, CtrlRec.Num: %d\n",
+				      "SAHPI_ANNUNCIATOR_RDR; RPT: %d, RDR: %d, AnnunciatorRec.AnnunciatorNum: %d\n",
 				      rpt_entry->ResourceId,
 				      rdr_entry.RecordId,
 				      rdr_entry.RdrTypeUnion.AnnunciatorRec.AnnunciatorNum));
@@ -348,7 +359,6 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		/** INTEGER = ASN_INTEGER */
 		rdr_context->saHpiRdrType = rdr_entry.RdrType + 1;
 	
-		/** SaHpiEntityPath = ASN_OCTET_STR */
 		/** SaHpiEntityPath = ASN_OCTET_STR */
 		memset(rdr_context->saHpiRdrEntityPath,
 		       0, sizeof(oh_big_textbuffer));
@@ -398,7 +408,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 		column[1] = COLUMN_SAHPIRESOURCEID;
 		resource_index.len = resource_oid_len;
 		resource_index.oids = resource_oid;
-		memset(full_oid, 0, sizeof(full_oid_len));
+		memset(full_oid, 0, MAX_OID_LEN);
 
 		build_full_oid (saHpiResourceTable_oid, saHpiResourceTable_oid_len,
 				column, column_len,
