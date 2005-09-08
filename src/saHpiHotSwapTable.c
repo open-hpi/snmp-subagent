@@ -89,6 +89,7 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
         DEBUGMSGTL ((AGENT, "populate_hotswap, called\n"));
 
         SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
 
         oid hotswap_oid[HOTSWAP_INDEX_NR];
         netsnmp_index hotswap_idx;
@@ -126,6 +127,7 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
                 // New entry. Add it
                 hotswap_ctx = 
                 saHpiHotSwapTable_create_row(&hotswap_idx);
+                new_row = MIB_TRUE;
         }
         if (!hotswap_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a HotSwap row!");
@@ -168,7 +170,8 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
         /** INTEGER = ASN_INTEGER */
         hotswap_ctx->saHpiHotSwapResourceRequest = 0;
 
-        CONTAINER_INSERT (cb.container, hotswap_ctx);
+        if (new_row == MIB_TRUE)
+                CONTAINER_INSERT (cb.container, hotswap_ctx);
 
         hotswap_entry_count = CONTAINER_SIZE (cb.container);
 

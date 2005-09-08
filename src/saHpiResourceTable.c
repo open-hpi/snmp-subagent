@@ -562,7 +562,17 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 	}
 
 	/** TruthValue = ASN_INTEGER */
-	resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
+	resource_context->saHpiResourceIsHistorical = MIB_FALSE;  
+
+        /*******************************/
+        /* update applicable Hotswap's */
+        /*******************************/
+        if ((rpt_entry.ResourceCapabilities & 
+            SAHPI_CAPABILITY_MANAGED_HOTSWAP) && 
+            (event->EventDataUnion.ResourceEvent.ResourceEventType != 
+             SAHPI_RESE_RESOURCE_FAILURE)) {
+                 rv = populate_hotswap (sessionid, &rpt_entry);
+        }
 
         /***************************/
         /* update applicable RDR's */
