@@ -471,8 +471,6 @@ int event_log_add(SaHpiSessionIdT session_id,
                   oid *child_oid, 
                   size_t child_oid_len) 
 {
-        SaErrorT rv;
-
         oid evt_log_oid[EVENT_LOG_INDEX_NR];
         netsnmp_index evt_log_index;
         saHpiEventLogTable_context *evt_log_context;
@@ -593,7 +591,7 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                case SAHPI_ET_SENSOR_ENABLE_CHANGE:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_SENSOR_ENABLE_CHANGE, "
                                                     "called\n"));
-                                       sen_en_chnge_event_log_clear(session_id, 
+                                       sen_en_change_event_log_clear(session_id, 
                                                                     resource_id,  
                                                                     event_log_ctx->saHpiEventLogRowPointer,
                                                                     event_log_ctx->saHpiEventLogRowPointer_len);
