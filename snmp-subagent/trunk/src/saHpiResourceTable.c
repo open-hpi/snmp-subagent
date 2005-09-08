@@ -65,6 +65,7 @@ static u_long resource_entry_count = 0;
 int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 {       
 	SaErrorT                rv;
+        int                     new_row = MIB_FALSE;
 	SaHpiDomainInfoT        domain_info;    
 	SaHpiEntryIdT           EntryId;
 	SaHpiRptEntryT          RptEntry;
@@ -114,6 +115,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 			// New entry. Add it
 			resource_context = 
 			saHpiResourceTable_create_row ( &resource_index);
+                        new_row = MIB_TRUE;
 		}
 		if (!resource_context) {
 			snmp_log (LOG_ERR, "Not enough memory for a Resource row!");
@@ -281,7 +283,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		/** TruthValue = ASN_INTEGER */
 		resource_context->saHpiResourceIsHistorical = MIB_FALSE;                
 
-		CONTAINER_INSERT (cb.container, resource_context);
+                if (new_row == MIB_TRUE) 
+                        CONTAINER_INSERT (cb.container, resource_context);
 
 		if (RptEntry.ResourceCapabilities & 
                     SAHPI_CAPABILITY_MANAGED_HOTSWAP) {
@@ -563,16 +566,6 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 
 	/** TruthValue = ASN_INTEGER */
 	resource_context->saHpiResourceIsHistorical = MIB_FALSE;  
-
-        /*******************************/
-        /* update applicable Hotswap's */
-        /*******************************/
-        if ((rpt_entry.ResourceCapabilities & 
-            SAHPI_CAPABILITY_MANAGED_HOTSWAP) && 
-            (event->EventDataUnion.ResourceEvent.ResourceEventType != 
-             SAHPI_RESE_RESOURCE_FAILURE)) {
-                 rv = populate_hotswap (sessionid, &rpt_entry);
-        }
 
         /***************************/
         /* update applicable RDR's */
