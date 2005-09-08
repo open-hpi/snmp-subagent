@@ -196,7 +196,52 @@ SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id,
                                  oid *saHpiEventLogRowPointer, 
                                  size_t saHpiEventLogRowPointer_len)
 {
-        //TODO DMJ
+	oid hotswap_evt_oid[HOTSWAP_EVENT_LOG_INDEX_NR];
+	netsnmp_index hotswap_evt_idx;
+	netsnmp_index *hotswap_index;
+	saHpiHotSwapEventLogTable_context *hotswap_evt_ctx;
+
+	int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "hotswap_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete hotswap el row with the following indexes:\n"));
+        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len]);
+        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 1]); 
+	printf("     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 2]-1));
+	printf("     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 3]);								
+
+
+	/* BUILD oid to lookup row */
+		/* assign the number of indices */
+	hotswap_evt_idx.len = HOTSWAP_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	hotswap_evt_oid[0] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len];
+		/** Index saHpiResourceId is external */
+	hotswap_evt_oid[1] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 1];
+		/** Index saHpiEventSeverity is external */
+	hotswap_evt_oid[2] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 2];
+                /** Index saHpiHotSwapEventEntryId is external */
+	hotswap_evt_oid[3] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 3];
+		/* assign the indices to the index */
+	hotswap_evt_idx.oids = (oid *) & hotswap_evt_oid;
+	
+	hotswap_index = CONTAINER_FIRST(cb.container);
+	hotswap_evt_ctx = CONTAINER_FIND(cb.container, hotswap_index);
+	
+	if (!hotswap_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "hotswap_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "hotswap_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, hotswap_evt_ctx);
+		saHpiHotSwapEventLogTable_delete_row(hotswap_evt_ctx);
+		
+		hotswap_event_log_entry_count = CONTAINER_SIZE (cb.container);
+		hotswap_event_log_entry_count_total--;	
+	}	
+	
         return SA_OK;
 }
 

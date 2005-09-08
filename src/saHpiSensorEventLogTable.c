@@ -312,7 +312,52 @@ SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id,
                                 oid *saHpiEventLogRowPointer, 
                                 size_t saHpiEventLogRowPointer_len)
 {
-        //TODO DMJ
+
+	oid sen_evt_oid[SENSOR_EVENT_LOG_INDEX_NR];
+	netsnmp_index sen_evt_idx;
+	netsnmp_index *sensor_index;
+	saHpiSensorEventLogTable_context *sen_evt_ctx;
+
+	int column_len = 2;
+	
+        DEBUGMSGTL ((AGENT, "sensor_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete sensor el row with the following indexes:\n"));
+        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len]);
+        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 1]);
+	printf("     Sensor # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2]); 
+	printf("     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3]-1));		
+   
+	/* BUILD oid to lookup row */
+		/* assign the number of indices */
+	sen_evt_idx.len = SENSOR_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	sen_evt_oid[0] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len];
+		/** Index saHpiResourceId is external */
+	sen_evt_oid[1] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 1];
+		/** Index saHpiSensorNum is external */
+	sen_evt_oid[2] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2];
+		/** Index saHpiEventSeverity is external */
+	sen_evt_oid[3] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3];
+		/* assign the indices to the index */	
+	sen_evt_idx.oids = (oid *) & sen_evt_oid;
+
+	sensor_index = CONTAINER_FIRST(cb.container);
+	sen_evt_ctx = CONTAINER_FIND(cb.container, sensor_index);
+	
+	if (!sen_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "sensor_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "sensor_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, sen_evt_ctx);
+		saHpiSensorEventLogTable_delete_row(sen_evt_ctx);
+		
+		sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
+		sensor_event_log_entry_count_total--;	
+	}	
+
         return SA_OK;
 }
 
