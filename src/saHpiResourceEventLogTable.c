@@ -205,8 +205,52 @@ SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id,
                                   oid *saHpiEventLogRowPointer, 
                                   size_t saHpiEventLogRowPointer_len)
 {
-        //TODO DMJ
+	oid res_evt_oid[RESOURCE_EVENT_LOG_INDEX_NR];
+	netsnmp_index res_evt_idx;
+	netsnmp_index *res_index;
+	saHpiResourceEventLogTable_context *res_evt_ctx;
+
+	int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "resource_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete resource el row with the following indexes:\n"));
+        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len]);
+        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 1]);
+	printf("     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 2]-1));
+	printf("     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 3]);
+
+	/* BUILD oid to look for row */
+	/* assign the number of indices */
+	res_evt_idx.len = RESOURCE_EVENT_LOG_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	res_evt_oid[0] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len];
+	/** Index saHpiResourceId is external */
+	res_evt_oid[1] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 1];
+	/** Index saHpiEventSeverity is external */
+	res_evt_oid[2] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 2];
+        /** Index saHpiResourceEventEntryId is internal */
+	res_evt_oid[3] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 3];
+	/* assign the indices to the index */
+	res_evt_idx.oids = (oid *) & res_evt_oid;
+	
+	res_index = CONTAINER_FIRST(cb.container);
+	res_evt_ctx = CONTAINER_FIND(cb.container, res_index);
+	
+	if (!res_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "resource_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "resource_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, res_evt_ctx);
+		saHpiResourceEventLogTable_delete_row(res_evt_ctx);
+		
+		resource_event_log_entry_count = CONTAINER_SIZE (cb.container);	
+	}	
+		
         return SA_OK;
+
 }
 
 
