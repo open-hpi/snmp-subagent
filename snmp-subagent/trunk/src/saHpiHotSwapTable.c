@@ -83,8 +83,7 @@ int initialize_table_saHpiHotSwapEntryCount(void);
  * @return 
  */
 SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
-                           SaHpiRptEntryT *rpt_entry,
-                           oid *child_oid, size_t child_oid_len)
+                          SaHpiRptEntryT *rpt_entry)
 {
 
         DEBUGMSGTL ((AGENT, "populate_hotswap, called\n"));
@@ -98,9 +97,6 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 	SaHpiHsIndicatorStateT indicator_state;
 	SaHpiHsStateT hs_state;
 	SaHpiTimeoutT extract_timeout;
-
-        oid column[2];
-        int column_len = 2;
 
         DEBUGMSGTL ((AGENT, "SAHPI_HOTSWAP_RDR populate_hotswap() called\n"));
 
@@ -121,15 +117,6 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
         hotswap_oid[2] = MIB_FALSE;
         /* assign the indices to the index */
         hotswap_idx.oids = (oid *) & hotswap_oid;
-
-        /* create full oid on This row for parent RowPointer */
-        column[0] = 1;
-        column[1] = COLUMN_SAHPIHOTSWAPINDICATOR;
-        memset(child_oid, 0, MAX_OID_LEN);
-        build_full_oid(saHpiHotSwapTable_oid, saHpiHotSwapTable_oid_len,
-                       column, column_len,
-                       &hotswap_idx,
-                       child_oid, MAX_OID_LEN, &child_oid_len);
 
         /* See if Row exists. */
         hotswap_ctx = NULL;
