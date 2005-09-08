@@ -439,11 +439,11 @@ main (int argc, char **argv)
 	     *	           populate_saHpiSensorThdPosHysteresisTable();		
 	     *	           populate_saHpiSensorThdNegHysteresisTable();		
 	     *	       populate_saHpiCurrentSensorStateTable();		
-	     *	       populate_saHpiInventoyTable();		
+	     *	       populate_saHpiInventoryTable();	
+	     *       	   populate_saHpiAreaTable();		
+	     *	               populate_saHpiFieldTable(); 	     	
 	     *	       populate_saHpiWatchdogTable();		
 	     *	       populate_saHpiAnnunciatorTable();		
-	     *	       populate_saHpiAreaTable();		
-	     *	           populate_saHpiFieldTable(); 
              *         populate_saHpiHotSwapTable();
              *             populate_saHpiAutoInsertTimeoutTable();             
   	     *         populate_saHpiAnnouncementTable();
@@ -462,17 +462,15 @@ main (int argc, char **argv)
 	     */
         populate_saHpiEventLogInfo(sessionid);
 	    /* populate_saHpiEventLog (sessionid);
-	     */
-            /*
-             * populate_saHpiResourceEventLogTable();
-             * populate_saHpiSensorEventLogTable();
-	     * populate_saHpiHotSwapEventLogTable();
-	     * populate_saHpiWatchdogEventLogTable();
-	     * populate_saHpiSoftwareEventLogTable();
-	     * populate_saHpiOemEventLogTable();
-	     * populate_saHpiUserEventLogTable();
-	     * populate_saHpiSensorEnableChangeEventLogTable();
-	     * populate_saHpiDomainEventLogTable();	     
+             * 	   populate_saHpiResourceEventLogTable();
+             * 	   populate_saHpiSensorEventLogTable();
+	     * 	   populate_saHpiHotSwapEventLogTable();
+	     * 	   populate_saHpiWatchdogEventLogTable();
+	     * 	   populate_saHpiSoftwareEventLogTable();
+	     * 	   populate_saHpiOemEventLogTable();
+	     * 	   populate_saHpiUserEventLogTable();
+	     *     populate_saHpiSensorEnableChangeEventLogTable();
+	     *     populate_saHpiDomainEventLogTable();	     
              */
 
         /* Determine whether or not we're in threaded mode */
