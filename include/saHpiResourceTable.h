@@ -22,6 +22,12 @@ extern "C" {
 #include <SaHpi.h>
 #include <oh_utils.h>
 
+/*
+        saHpiDomainId
+        saHpiResourceEntryId
+        saHpiResourceIsHistorical
+*/
+
 typedef struct saHpiResourceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
