@@ -131,6 +131,15 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 	domain_evt_oid[2] = event->Event.Severity + 1;
 		/* assign the indices to the index */
 	domain_evt_idx.oids = (oid *) & domain_evt_oid;
+	
+	/* create full oid on This row for parent RowPointer */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIDOMAINEVENTLOGTIMESTAMP;
+	memset(this_child_oid, 0, sizeof(this_child_oid));
+	build_full_oid(saHpiDomainEventLogTable_oid, saHpiDomainEventLogTable_oid_len,
+			column, column_len,
+			&domain_evt_idx,
+			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
 
 	/* See if Row exists. */
 	domain_evt_ctx = NULL;
@@ -183,38 +192,49 @@ SaErrorT domain_event_log_clear(SaHpiSessionIdT session_id,
                                 oid *saHpiEventLogRowPointer, 
                                 size_t saHpiEventLogRowPointer_len)
 {
-
-	//TODO DMJ
-#if 0        
+     
 	oid domain_evt_oid[DOMAIN_EVENT_LOG_INDEX_NR];
 	netsnmp_index domain_evt_idx;
+	netsnmp_index *domain_index;
 	saHpiDomainEventLogTable_context *domain_evt_ctx;
 
-	oid column[2];
 	int column_len = 2;
 
-        DR_XREF *dr_entry;
-	SaHpiDomainIdResourceIdArrayT dr_pair;
-
         DEBUGMSGTL ((AGENT, "domain_event_log_clear, called\n"));
-	
+	DEBUGMSGTL ((AGENT, "Attempting to delete domain el row with the following indexes:\n"));
+        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len]);
+        printf("     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len + 1]);
+	printf("     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len + 2]-1));	
 	/* BUILD oid for new row */
 		/* assign the number of indices */
 	domain_evt_idx.len = DOMAIN_EVENT_LOG_INDEX_NR;
 		/** Index saHpiDomainId is external */
-	domain_evt_oid[0] = saHpiEventLogRowPointer[15];
+	domain_evt_oid[0] = saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len];
                 /** Index saHpiDomainEventEntryId is external */	
-	domain_evt_oid[1] = saHpiEventLogRowPointer[16];
+	domain_evt_oid[1] = saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len + 1];
 		/** Index saHpiEventSeverity is external */
-	domain_evt_oid[2] = saHpiEventLogRowPointer[17];
+	domain_evt_oid[2] = saHpiEventLogRowPointer[saHpiDomainEventLogTable_oid_len + column_len + 2];
 		/* assign the indices to the index */
 	domain_evt_idx.oids = (oid *) & domain_evt_oid;
+			
+	domain_index = CONTAINER_FIRST(cb.container);
+	domain_evt_ctx = CONTAINER_FIND(cb.container, domain_index);
 	
-	DEBUGMSGTL ((AGENT, "******domain_event_log_clear, %d:%d:%d\n", saHpiEventLogRowPointer[6],
-	saHpiEventLogRowPointer[15],saHpiEventLogRowPointer[16]));			
+	if (!domain_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "domain_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "domain_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, domain_evt_ctx);
+		saHpiDomainEventLogTable_delete_row(domain_evt_ctx);
+		
+		domain_event_log_entry_count = CONTAINER_SIZE (cb.container);	
+		domain_event_log_entry_count_total--;
+	}	
 	
         return SA_OK;
-#endif
 }
 
 

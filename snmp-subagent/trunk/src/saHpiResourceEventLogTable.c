@@ -247,6 +247,7 @@ SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id,
 		saHpiResourceEventLogTable_delete_row(res_evt_ctx);
 		
 		resource_event_log_entry_count = CONTAINER_SIZE (cb.container);	
+		resource_event_log_entry_count_total--;
 	}	
 		
         return SA_OK;
