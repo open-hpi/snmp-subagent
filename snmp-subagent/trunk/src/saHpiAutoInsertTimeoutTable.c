@@ -64,6 +64,8 @@ static int saHpiAutoInsertTimeoutTable_cmp( const void *lhs, const void *rhs );
 SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 {
 	SaErrorT rv;
+        int new_row = MIB_FALSE;
+
 	SaHpiDomainInfoT domain_info;
 	SaHpiTimeoutT timeout;
 	
@@ -94,6 +96,7 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 	        // New entry. Add it
 		auto_insert_context = 
 			        saHpiAutoInsertTimeoutTable_create_row(&auto_insert_index);
+                new_row = MIB_TRUE;
 	}
 	if (!auto_insert_context) {
 	        snmp_log (LOG_ERR, "Not enough memory for an Auto Insert Timeout row!");
@@ -113,8 +116,9 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
         memcpy(auto_insert_context->saHpiAutoInsertTimeoutForInsert, 
                &timeout, 
                auto_insert_context->saHpiAutoInsertTimeoutForInsert_len);		        
-	  
-	CONTAINER_INSERT (cb.container, auto_insert_context);
+
+        if (new_row == MIB_TRUE) 
+                CONTAINER_INSERT (cb.container, auto_insert_context);
 	
 	return SA_OK;
 }	
