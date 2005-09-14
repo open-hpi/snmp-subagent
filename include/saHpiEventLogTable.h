@@ -40,7 +40,7 @@ typedef struct saHpiEventLogTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiEventLogAddedTimestamp;
+            struct counter64 saHpiEventLogAddedTimestamp;
 
         /** RowPointer = ASN_OBJECT_ID */
             oid saHpiEventLogRowPointer[MAX_OID_LEN];
@@ -76,8 +76,9 @@ int saHpiEventLogTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnm
 SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT resourceid);
 
 SaErrorT event_log_clear (SaHpiSessionIdT session_id, 
-                          SaHpiResourceIdT resource_id);
-
+                          SaHpiResourceIdT resource_id,
+		          int modifyTotal);
+			  
 int event_log_add(SaHpiSessionIdT session_id, 
                   SaHpiResourceIdT resource_id, 
                   SaHpiEventT *event,

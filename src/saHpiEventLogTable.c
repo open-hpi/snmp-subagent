@@ -99,6 +99,10 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
         printf(" ***************************************\n");
         printf(" ***************************************\n");
         printf(" EVENT LOG TABLES \n");
+		
+	event_log_clear(sessionid, resourceid, MIB_TRUE);
+	
+	printf("event_log_clear: done \n");
 
 	event_entry_id = SAHPI_OLDEST_ENTRY;
 	if (resourceid != SAHPI_UNSPECIFIED_RESOURCE_ID) { 
@@ -135,8 +139,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                         	rv = AGENT_ERR_INTERNAL_ERROR;
                         	break;
                 	}
-
-
+							
                 	switch (event_log_entry.Event.EventType) {
                 	case SAHPI_ET_RESOURCE:
                         	printf("SAHPI_ET_RESOURCE: rv [%d]\n", rv);
@@ -147,8 +150,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                         	populate_saHpiResourceEventLogTable(sessionid, &event_log_entry,                                           
                                                             child_oid, 
                                                             &child_oid_len);
-                        	break;
-       	 		case SAHPI_ET_DOMAIN:
+                        	break;	
+			case SAHPI_ET_DOMAIN:	
 				printf("SAHPI_ET_DOMAIN: rv [%d]\n\n", rv);
 				printf("        Event Type: [%s]\n", 
                                	oh_lookup_domaineventtype(event_log_entry.Event.EventDataUnion.DomainEvent.Type));
@@ -158,7 +161,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
 	                                    &event_log_entry,					    
                                             child_oid, 
                                             &child_oid_len);
-				break;					
+				break;							
                 	case SAHPI_ET_SENSOR:
                         	printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
                         	printf("        Sensor Type: [%s]\n\n",
@@ -211,8 +214,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                         	printf("********* unknown event type *********\n");
                         	break;        
                 	}
-
-                	/* BUILD oid for new row */
+			
+               		/* BUILD oid for new row */
                         /* assign the number of indices */
                 	evt_log_index.len = EVENT_LOG_INDEX_NR;
                 	/** Index saHpiDomainId is external */
@@ -227,8 +230,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                         	DEBUGMSGTL ((AGENT, 
                         	"ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
                         	return AGENT_ERR_INTERNAL_ERROR;
-                	}
-                	evt_log_oid[2] = dr_entry->entry_id++;
+                	}						
+			evt_log_oid[2] = dr_entry->entry_id++;
                 	/* assign the indices to the index */
                 	evt_log_index.oids = (oid *) & evt_log_oid;
 	
@@ -259,8 +262,9 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 	        event_log_entry.Event.EventType + 1; 
 
                 	/** SaHpiTime = ASN_COUNTER64 */
-                	evt_log_context->saHpiEventLogAddedTimestamp = 
-                        	event_log_entry.Timestamp;
+			memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
+                        	&event_log_entry.Timestamp,
+				sizeof(struct counter64));			                	
 
                 	/** RowPointer = ASN_OBJECT_ID */
                 	evt_log_context->saHpiEventLogRowPointer_len = 
@@ -274,7 +278,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
 			}
 			else { //reset it
 				isNewRow = MIB_TRUE;
-			}		
+			}			
 
         	} while (event_entry_id != SAHPI_NO_MORE_ENTRIES);
 	}	
@@ -400,7 +404,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 		"ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
                 		return AGENT_ERR_INTERNAL_ERROR;
         		}
-        		evt_log_oid[2] = dr_entry->entry_id++;
+        		evt_log_oid[2] = dr_entry->entry_id++;			
+			
         		/* assign the indices to the index */
         		evt_log_index.oids = (oid *) & evt_log_oid;
 	
@@ -430,8 +435,9 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 		event_log_entry.Event.EventType + 1; 
 
 	        	/** SaHpiTime = ASN_COUNTER64 */
-        		evt_log_context->saHpiEventLogAddedTimestamp = 
-                		event_log_entry.Timestamp;
+			memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
+                        	&event_log_entry.Timestamp,
+				sizeof(struct counter64));
 
 	        	/** RowPointer = ASN_OBJECT_ID */
         		evt_log_context->saHpiEventLogRowPointer_len = 
@@ -520,8 +526,9 @@ int event_log_add(SaHpiSessionIdT session_id,
                 event->EventType + 1; 
 
         /** SaHpiTime = ASN_COUNTER64 */
-        evt_log_context->saHpiEventLogAddedTimestamp = 
-                event->Timestamp;
+	memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
+                        	&event->Timestamp,
+				sizeof(struct counter64));
 
         /** RowPointer = ASN_OBJECT_ID */
         evt_log_context->saHpiEventLogRowPointer_len = 
@@ -535,6 +542,7 @@ int event_log_add(SaHpiSessionIdT session_id,
         return SNMP_ERR_NOERROR;
 }
 
+
 /**
  * 
  * @session_id
@@ -542,12 +550,26 @@ int event_log_add(SaHpiSessionIdT session_id,
  * 
  * @return 
  */
-SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_id)
+SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_id, int modifyTotal)
 {
         netsnmp_index *row_idx;
         saHpiEventLogTable_context *event_log_ctx;
+	
+	DR_XREF *dr_entry;
+        SaHpiDomainIdResourceIdArrayT dr_pair;
 
         DEBUGMSGTL ((AGENT, "event_log_clear, called\n"));
+
+        dr_pair.domainId_resourceId_arry[0] = get_domain_id(session_id);
+        dr_pair.domainId_resourceId_arry[1] = resource_id;
+        dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
+        if (dr_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                "ERROR: event_log_clear() domain_resource_pair_get returned NULL\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        
+	dr_entry->entry_id = 0;
 
         row_idx = CONTAINER_FIRST(cb.container);                  
         if (row_idx) { //At least one entry was found.
@@ -570,7 +592,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        resource_event_log_clear(session_id, 
                                                                 resource_id,  
                                                                 event_log_ctx->saHpiEventLogRowPointer,
-                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                                                event_log_ctx->saHpiEventLogRowPointer_len,
+								modifyTotal);
                                        break;
                                case SAHPI_ET_DOMAIN:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_DOMAIN, "
@@ -578,7 +601,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        domain_event_log_clear(session_id, 
                                                               resource_id,  
                                                               event_log_ctx->saHpiEventLogRowPointer,
-                                                              event_log_ctx->saHpiEventLogRowPointer_len);
+                                                              event_log_ctx->saHpiEventLogRowPointer_len,
+							      modifyTotal);
                                        break;
                                case SAHPI_ET_SENSOR:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_SENSOR, "
@@ -586,7 +610,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        sensor_event_log_clear(session_id, 
                                                               resource_id,  
                                                               event_log_ctx->saHpiEventLogRowPointer,
-                                                              event_log_ctx->saHpiEventLogRowPointer_len);
+                                                              event_log_ctx->saHpiEventLogRowPointer_len,
+							      modifyTotal);
                                        break;
                                case SAHPI_ET_SENSOR_ENABLE_CHANGE:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_SENSOR_ENABLE_CHANGE, "
@@ -594,7 +619,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        sen_en_change_event_log_clear(session_id, 
                                                                     resource_id,  
                                                                     event_log_ctx->saHpiEventLogRowPointer,
-                                                                    event_log_ctx->saHpiEventLogRowPointer_len);
+                                                                    event_log_ctx->saHpiEventLogRowPointer_len,
+								    modifyTotal);
                                        break;
                                case SAHPI_ET_HOTSWAP:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HOTSWAP, "
@@ -602,7 +628,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        hotswap_event_log_clear(session_id, 
                                                                resource_id,  
                                                                event_log_ctx->saHpiEventLogRowPointer,
-                                                               event_log_ctx->saHpiEventLogRowPointer_len);
+                                                               event_log_ctx->saHpiEventLogRowPointer_len,
+							       modifyTotal);
                                        break;
                                case SAHPI_ET_WATCHDOG:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_WATCHDOG, "
@@ -610,7 +637,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        watchdog_event_log_clear(session_id, 
                                                                 resource_id,  
                                                                 event_log_ctx->saHpiEventLogRowPointer,
-                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                                                event_log_ctx->saHpiEventLogRowPointer_len,
+								modifyTotal);
                                        break;
                                case SAHPI_ET_HPI_SW:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, "
@@ -618,7 +646,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        software_event_log_clear(session_id, 
                                                                 resource_id,  
                                                                 event_log_ctx->saHpiEventLogRowPointer,
-                                                                event_log_ctx->saHpiEventLogRowPointer_len);
+                                                                event_log_ctx->saHpiEventLogRowPointer_len,
+								modifyTotal);
                                        break;
                                case SAHPI_ET_OEM:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_OEM, "
@@ -626,7 +655,8 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        oem_event_log_clear(session_id, 
                                                            resource_id,  
                                                            event_log_ctx->saHpiEventLogRowPointer,
-                                                           event_log_ctx->saHpiEventLogRowPointer_len);
+                                                           event_log_ctx->saHpiEventLogRowPointer_len,
+							   modifyTotal);
                                        break;
                                case SAHPI_ET_USER:
                                        DEBUGMSGTL ((AGENT, "SAHPI_ET_USER, "
@@ -634,19 +664,25 @@ SaErrorT event_log_clear (SaHpiSessionIdT session_id, SaHpiResourceIdT resource_
                                        user_event_log_clear(session_id, 
                                                             resource_id,  
                                                             event_log_ctx->saHpiEventLogRowPointer,
-                                                            event_log_ctx->saHpiEventLogRowPointer_len);
+                                                            event_log_ctx->saHpiEventLogRowPointer_len,
+							    modifyTotal);
                                        break;                               
                                default:
                                        printf("********* unknown event type *********\n");
                                        break;        
                                }
 			       
+			       row_idx = CONTAINER_NEXT(cb.container, row_idx);
+			       
 			       CONTAINER_REMOVE (cb.container, event_log_ctx);
                                saHpiEventLogTable_delete_row (event_log_ctx);
                                DEBUGMSGTL ((AGENT, "event_log_clear: found row for "
-                                                   "clearing/deletion\n"));
+                                                   "clearing/deletion\n"));	   
                        }
-                       row_idx = CONTAINER_NEXT(cb.container, row_idx);
+		       else {
+		        	row_idx = CONTAINER_NEXT(cb.container, row_idx);	
+		       }		
+                       
                } while (row_idx);
        }
 
@@ -680,11 +716,11 @@ saHpiEventLogTable_cmp( const void *lhs, const void *rhs )
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiSensorEventLogTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiEventLogTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiSensorEventLogTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiEventLogTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
