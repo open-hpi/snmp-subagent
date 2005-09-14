@@ -201,9 +201,79 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT watchdog_event_log_clear(SaHpiSessionIdT session_id, 
                                   SaHpiResourceIdT resource_id,  
                                   oid *saHpiEventLogRowPointer, 
-                                  size_t saHpiEventLogRowPointer_len)
+                                  size_t saHpiEventLogRowPointer_len,
+				  int modifyTotal)
 {
-        //TODO DMJ
+        
+	oid watchdog_evt_oid[WATCHDOG_EVENT_LOG_INDEX_NR];
+	netsnmp_index watchdog_evt_idx;
+	netsnmp_index *watchdog_index;
+	saHpiWatchdogEventLogTable_context *watchdog_evt_ctx;
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
+
+	int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "watchdog_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete watchdog el row with the following indexes:\n"));
+        DEBUGMSGTL ((AGENT,"     Domain    [%ld]\n", saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource  [%ld]\n", saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 1]));
+	DEBUGMSGTL ((AGENT,"     Watchdog# [%ld]\n", saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 2]));
+	DEBUGMSGTL ((AGENT,"     Severity  [%s]\n", oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 3]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id  [%ld]\n", saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 4]));
+
+	/* BUILD oid to lookup row */
+		/* assign the number of indices */
+	watchdog_evt_idx.len = WATCHDOG_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	watchdog_evt_oid[0] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len];
+		/** Index saHpiResourceId is external */
+	watchdog_evt_oid[1] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 1];
+               /** Index saHpiWatchdogNum is external */	
+	watchdog_evt_oid[2] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 2];
+		/** Index saHpiEventSeverity is external */
+	watchdog_evt_oid[3] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 3];
+                /** Index saHpiWatchdogEventEntryId is external */
+	watchdog_evt_oid[4] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 4];
+		/* assign the indices to the index */
+	watchdog_evt_idx.oids = (oid *) & watchdog_evt_oid;
+		
+	watchdog_index = CONTAINER_FIRST(cb.container);
+	watchdog_evt_ctx = CONTAINER_FIND(cb.container, &watchdog_evt_idx);
+	
+	if (!watchdog_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "watchdog_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "watchdog_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, watchdog_evt_ctx);
+		saHpiWatchdogEventLogTable_delete_row(watchdog_evt_ctx);
+		
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiWatchdogEventLogTable_oid_len + column_len + 1];
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: watchdog_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"watchdog_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
+		
+		watchdog_event_log_entry_count = CONTAINER_SIZE (cb.container);	
+		
+		if (modifyTotal == MIB_TRUE) {		
+			watchdog_event_log_entry_count_total--;
+		}	
+	}	
+		
         return SA_OK;
 }
 

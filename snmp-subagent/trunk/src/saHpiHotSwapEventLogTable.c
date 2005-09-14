@@ -110,9 +110,8 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_saHpiHotSwapEventLogTable() passed NULL event pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
-	}    
-
-
+	} 
+	   
 	/* BUILD oid for new row */
 		/* assign the number of indices */
 	hotswap_evt_idx.len = HOTSWAP_EVENT_LOG_INDEX_NR;
@@ -194,22 +193,26 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id, 
                                  SaHpiResourceIdT resource_id,  
                                  oid *saHpiEventLogRowPointer, 
-                                 size_t saHpiEventLogRowPointer_len)
+                                 size_t saHpiEventLogRowPointer_len,
+				 int modifyTotal)
 {
 	oid hotswap_evt_oid[HOTSWAP_EVENT_LOG_INDEX_NR];
 	netsnmp_index hotswap_evt_idx;
 	netsnmp_index *hotswap_index;
 	saHpiHotSwapEventLogTable_context *hotswap_evt_ctx;
-
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
+	
 	int column_len = 2;
 
         DEBUGMSGTL ((AGENT, "hotswap_event_log_clear, called\n"));
 	DEBUGMSGTL ((AGENT, "Attempting to delete hotswap el row with the following indexes:\n"));
-        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len]);
-        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 1]); 
-	printf("     Severity [%s]\n",  oh_lookup_severity(
-						saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 2]-1));
-	printf("     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 3]);								
+        DEBUGMSGTL ((AGENT,"     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 1])); 
+	DEBUGMSGTL ((AGENT,"     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 2]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 3]));								
 
 
 	/* BUILD oid to lookup row */
@@ -227,7 +230,7 @@ SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id,
 	hotswap_evt_idx.oids = (oid *) & hotswap_evt_oid;
 	
 	hotswap_index = CONTAINER_FIRST(cb.container);
-	hotswap_evt_ctx = CONTAINER_FIND(cb.container, hotswap_index);
+	hotswap_evt_ctx = CONTAINER_FIND(cb.container, &hotswap_evt_idx);
 	
 	if (!hotswap_evt_ctx) {
 		DEBUGMSGTL ((AGENT, "hotswap_event_log_clear did not find a row to delete\n"));
@@ -238,8 +241,25 @@ SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id,
 		CONTAINER_REMOVE(cb.container, hotswap_evt_ctx);
 		saHpiHotSwapEventLogTable_delete_row(hotswap_evt_ctx);
 		
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiHotSwapEventLogTable_oid_len + column_len + 1];
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: hotswap_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"hotswap_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
+		
 		hotswap_event_log_entry_count = CONTAINER_SIZE (cb.container);
-		hotswap_event_log_entry_count_total--;	
+		if (modifyTotal == MIB_TRUE) {
+			hotswap_event_log_entry_count_total--;	
+		}	
 	}	
 	
         return SA_OK;

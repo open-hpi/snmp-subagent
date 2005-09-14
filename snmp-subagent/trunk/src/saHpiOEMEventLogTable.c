@@ -206,9 +206,77 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT oem_event_log_clear(SaHpiSessionIdT session_id, 
                              SaHpiResourceIdT resource_id,  
                              oid *saHpiEventLogRowPointer, 
-                             size_t saHpiEventLogRowPointer_len)
+                             size_t saHpiEventLogRowPointer_len,
+			     int modifyTotal)
 {
-        //TODO DMJ
+	oid oem_evt_oid[OEM_EVENT_LOG_INDEX_NR];
+	netsnmp_index oem_evt_idx;
+	netsnmp_index *oem_index;
+	saHpiOEMEventLogTable_context *oem_evt_ctx;
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
+
+	int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "oem_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete oem el row with the following indexes:\n"));
+        DEBUGMSGTL ((AGENT,"     Domain    [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource  [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1]));
+	DEBUGMSGTL ((AGENT,"     Severity  [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 2]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id  [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 3]));
+
+
+	/* BUILD oid to lookup row */
+		/* assign the number of indices */
+	oem_evt_idx.len = OEM_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	oem_evt_oid[0] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len];
+		/** Index saHpiResourceId is external */
+	oem_evt_oid[1] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1];
+		/** Index saHpiEventSeverity is external */
+	oem_evt_oid[2] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 2];
+                /** Index saHpiOEMEventEntryId is external */
+	oem_evt_oid[3] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 3];
+		/* assign the indices to the index */
+	oem_evt_idx.oids = (oid *) & oem_evt_oid;
+	
+	oem_index = CONTAINER_FIRST(cb.container);
+	oem_evt_ctx = CONTAINER_FIND(cb.container, &oem_evt_idx);
+	
+	if (!oem_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "oem_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "oem_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, oem_evt_ctx);
+		saHpiOEMEventLogTable_delete_row(oem_evt_ctx);
+		
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1];
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: oem_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"oem_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
+		
+		oem_event_log_entry_count = CONTAINER_SIZE (cb.container);
+		
+		if (modifyTotal == MIB_TRUE) {			
+			oem_event_log_entry_count_total--;
+		}
+	}		
+		
+	
         return SA_OK;
 }
 

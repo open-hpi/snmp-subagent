@@ -93,7 +93,8 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT user_event_log_clear(SaHpiSessionIdT session_id, 
                               SaHpiResourceIdT resource_id,  
                               oid *saHpiEventLogRowPointer, 
-                              size_t saHpiEventLogRowPointer_len);
+                              size_t saHpiEventLogRowPointer_len,
+			      int modifyTotal);
 
 int user_event_log_delete (saHpiUserEventLogTable_context *row_ctx);
 int user_event_log_add (saHpiUserEventLogTable_context *row_ctx);
