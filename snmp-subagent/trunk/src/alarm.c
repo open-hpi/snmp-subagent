@@ -24,6 +24,7 @@
 #include <hpiSubagent.h>
 #include <oh_utils.h>
 #include <saHpiEventTable.h>
+#include <saHpiEventLogInfoTable.h>
 #include <session_info.h>
 
 extern int alarm_interval;
@@ -120,6 +121,12 @@ do_alarm (unsigned int clientreg, void *clientarg)
         
 
         }
+	
+	
+	// Now check for updates to the event logs
+	rv = event_log_info_update(sessionid);
+	
 
         DEBUGMSGTL ((AGENT, "do_alarm: Exit\n"));
 }
+
