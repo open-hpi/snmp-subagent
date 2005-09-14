@@ -331,7 +331,7 @@ SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id,
 	DEBUGMSGTL ((AGENT,"     Sensor # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2])); 
 	DEBUGMSGTL ((AGENT,"     Severity [%s]\n",  oh_lookup_severity(
 						saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3]-1)));
-	DEBUGMSGTL ((AGENT"     Entry Id # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 4]));								
+	DEBUGMSGTL ((AGENT,"     Entry Id # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 4]));								
    
 	/* BUILD oid to lookup row */
 		/* assign the number of indices */
