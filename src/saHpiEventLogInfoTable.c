@@ -136,8 +136,9 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                         event_log_info.UserEventMaxSize;
 
                 /** SaHpiTime = ASN_COUNTER64 */
-                evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
-                        event_log_info.UpdateTimestamp;
+                memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
+                        &event_log_info.UpdateTimestamp,
+			sizeof(struct counter64));
 
                 /** SaHpiTime = ASN_OPAQUE */
                 evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -247,8 +248,9 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                 event_log_info.UserEventMaxSize;
 
         /** SaHpiTime = ASN_COUNTER64 */
-        evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
-                event_log_info.UpdateTimestamp;
+        memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
+               &event_log_info.UpdateTimestamp,
+	       sizeof(struct counter64));
 
         /** SaHpiTime = ASN_OPAQUE */
         evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -423,7 +425,7 @@ int event_log_info_clear (saHpiEventLogInfoTable_context *row_ctx)
 	}		
 
         /* it succeeded clear the underlying tables */
-        rv = event_log_clear(session_id, resource_id);
+        rv = event_log_clear(session_id, resource_id, MIB_FALSE);
 
 	return SNMP_ERR_NOERROR; 
 	
@@ -482,14 +484,13 @@ int event_log_info_state_set (saHpiEventLogInfoTable_context *row_ctx)
 
 SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 {
-#if 0
 	SaErrorT rv;
 	SaHpiEventLogInfoT event_log_info;
 
         SaHpiEntryIdT EntryId;
 	SaHpiRptEntryT rpt_entry;
 
-        SaHpiBoolT event_log_state;
+	int isNewRow = MIB_TRUE;
 	
 	oid evt_log_info_oid[EVENT_LOG_INFO_INDEX_NR];
 	netsnmp_index evt_log_info_index;
@@ -498,7 +499,7 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 	DEBUGMSGTL ((AGENT, "event_log_info_update called\n"));
 
         EntryId = SAHPI_FIRST_ENTRY;
-        do {
+        do { //Get the plugin event log first
                 rv = saHpiRptEntryGet(sessionid, EntryId, &EntryId, &rpt_entry);
 
                 if (rv != SA_OK) {
@@ -531,8 +532,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                 evt_log_info_context = NULL;
                 evt_log_info_context = CONTAINER_FIND (cb.container, &evt_log_info_index);
 		
+
 		if (!evt_log_info_context) { //Obviously a new entry
-		
 			evt_log_info_context = 
                                 saHpiEventLogInfoTable_create_row ( &evt_log_info_index);
 			
@@ -540,9 +541,19 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                         	snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
                         	rv = AGENT_ERR_INTERNAL_ERROR;
                         	break;
-			}	
+			}		
+		
+		}
+		else {
+			isNewRow = MIB_FALSE;
+		}	
 			
-                	/** UNSIGNED32 = ASN_UNSIGNED */
+	
+		if ((isNewRow == MIB_TRUE) || (memcmp(&event_log_info.UpdateTimestamp, 
+			                       &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high,
+					       sizeof(struct counter64)) != 0)) {	
+                	
+			/** UNSIGNED32 = ASN_UNSIGNED */
                 	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
 
                 	/** UNSIGNED32 = ASN_UNSIGNED */
@@ -553,8 +564,9 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                         event_log_info.UserEventMaxSize;
 
                 	/** SaHpiTime = ASN_COUNTER64 */
-                	evt_log_info_context->saHpiEventLogInfoUpdateTimestamp = 
-                        	event_log_info.UpdateTimestamp;
+               		memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
+                        	&event_log_info.UpdateTimestamp,
+				sizeof(struct counter64));
 
                 	/** SaHpiTime = ASN_OPAQUE */
                 	evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -594,24 +606,119 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 	                evt_log_info_context->saHpiEventLogState =                         
 		        	(event_log_info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
 			
-			CONTAINER_INSERT (cb.container, evt_log_info_context);	
-			
+			if (isNewRow == MIB_TRUE) {
+				CONTAINER_INSERT (cb.container, evt_log_info_context);	
+			}
+			else {
+				isNewRow = MIB_TRUE;
+			}	
+					
 			populate_saHpiEventLog(sessionid, rpt_entry.ResourceId);			
 			
                 }	
-		else { //found the entry, dot a compare of the timestamps
-			if ((event_log_info.UpdateTimestamp - 
-			     evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0) {
-			     
-			     //Timestamp has changed, need to update the information here
-			     //and in the eventLogs
-			     
-			     
-			}     
-		}
 		
-	}while(EntryId != SAHPI_LAST_ENTRY);	     		
-#endif
+	}while(EntryId != SAHPI_LAST_ENTRY);
+	
+        /******************************************************/
+        /* now get the Domain Event Log Info for this session */
+        /* this is accomplished by using                      */
+        /* in saHpiEventLogInfoGet()                          */
+        /* SAHPI_UNSPECIFIED_RESOURCE_ID                      */
+        /******************************************************/	
+        rv = saHpiEventLogInfoGet (sessionid, 
+                                   SAHPI_UNSPECIFIED_RESOURCE_ID,
+                                   &event_log_info);
+        if (rv != SA_OK) {
+                DEBUGMSGTL ((AGENT, "getting Domain Event Log Failed: rv = %d\n",rv));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        evt_log_info_index.len = EVENT_LOG_INFO_INDEX_NR;
+        evt_log_info_oid[0] = get_domain_id(sessionid);
+        evt_log_info_oid[1] = SAHPI_UNSPECIFIED_RESOURCE_ID;
+        evt_log_info_index.oids = (oid *) & evt_log_info_oid;
+
+        /* See if it exists. */
+        evt_log_info_context = NULL;
+        evt_log_info_context = CONTAINER_FIND (cb.container, &evt_log_info_index);
+
+        if (!evt_log_info_context) { 
+		evt_log_info_context = 
+                	saHpiEventLogInfoTable_create_row ( &evt_log_info_index);
+			
+		if (!evt_log_info_context) {
+                       	snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
+                       	rv = AGENT_ERR_INTERNAL_ERROR;
+			return rv;
+		}	
+        }
+	else {
+		isNewRow = MIB_FALSE;
+	}	
+	
+	if ((isNewRow == MIB_TRUE) || (memcmp(&event_log_info.UpdateTimestamp, 
+			                       &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high,
+					       sizeof(struct counter64)) != 0)) {
+	        /** UNSIGNED32 = ASN_UNSIGNED */
+        	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
+
+	        /** UNSIGNED32 = ASN_UNSIGNED */
+        	evt_log_info_context->saHpiEventLogInfoSize = event_log_info.Size;
+
+	        /** UNSIGNED32 = ASN_UNSIGNED */
+        	evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
+                	event_log_info.UserEventMaxSize;
+
+	        /** SaHpiTime = ASN_COUNTER64 */
+                memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
+                        &event_log_info.UpdateTimestamp,
+			sizeof(struct counter64));
+
+	        /** SaHpiTime = ASN_OPAQUE */
+        	evt_log_info_context->saHpiEventLogInfoTime_len = 
+        	       	sizeof(SaHpiTimeT);
+	        memset(evt_log_info_context->saHpiEventLogInfoTime, 
+        	       0, SAF_UNSIGNED_64_LEN);
+	        memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
+        	       &event_log_info.CurrentTime,
+	               sizeof(SaHpiTimeT));
+
+	        /** TruthValue = ASN_INTEGER */
+        	evt_log_info_context->saHpiEventLogInfoIsEnabled =
+                	(event_log_info.Enabled == SAHPI_TRUE) ? 
+                        	MIB_TRUE : MIB_FALSE;
+
+	        /** TruthValue = ASN_INTEGER */
+        	evt_log_info_context->saHpiEventLogInfoOverflowFlag =
+                	(event_log_info.OverflowFlag == SAHPI_TRUE) ? 
+                        	MIB_TRUE : MIB_FALSE;
+
+	        /** TruthValue = ASN_INTEGER */
+        	evt_log_info_context->saHpiEventLogInfoOverflowResetable =
+                	(event_log_info.OverflowResetable == SAHPI_TRUE) ? 
+                        	MIB_TRUE : MIB_FALSE; 
+
+	        /** INTEGER = ASN_INTEGER */
+        	evt_log_info_context->saHpiEventLogInfoOverflowAction = 
+                	event_log_info.OverflowAction + 1;
+
+	        /** INTEGER = ASN_INTEGER */
+        	evt_log_info_context->saHpiEventLogInfoOverflowReset = 0;
+	
+        	/** TruthValue = ASN_INTEGER */
+	        evt_log_info_context->saHpiEventLogClear = MIB_FALSE;
+
+        	/** TruthValue = ASN_INTEGER */
+	        evt_log_info_context->saHpiEventLogState = 		
+		          (event_log_info.Enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE; 
+        
+		if (isNewRow == MIB_TRUE) {
+        		CONTAINER_INSERT (cb.container, evt_log_info_context);	
+		}
+	
+		populate_saHpiEventLog(sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
+		     		
+	}
 	return SA_OK;	
 }
 
