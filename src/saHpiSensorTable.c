@@ -300,6 +300,77 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	return rv;
 } 
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_sensor(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiSensorTable_context *sen_ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_sensor, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        /********************************************/
+        /* Clear all the under lying tables as well */
+        /********************************************/
+        rv = clear_sensor_max(domainId, resourceId);
+        rv = clear_sensor_min(domainId, resourceId); 
+        rv = clear_sensor_nominal(domainId, resourceId); 
+        rv = clear_sensor_normal_max(domainId, resourceId); 
+        rv = clear_sensor_normal_min(domainId, resourceId);
+        rv = clear_sen_thd_low_crit(domainId, resourceId); 
+        rv = clear_sen_thd_low_major(domainId, resourceId); 
+        rv = clear_sen_thd_low_minor(domainId, resourceId); 
+        rv = clear_sen_thd_up_crit(domainId, resourceId); 
+        rv = clear_sen_thd_up_major(domainId, resourceId); 
+        rv = clear_sen_thd_up_minor(domainId, resourceId); 
+        rv = clear_sen_thd_pos_hys(domainId, resourceId); 
+        rv = clear_sen_thd_neg_hys(domainId, resourceId); 
+
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        sen_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((sen_ctx->index.oids[saHpiSensorDomainId_INDEX] ==
+                             domainId) &&
+
+                            (sen_ctx->index.oids[saHpiSensorResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, sen_ctx);
+                                saHpiSensorTable_delete_row (sen_ctx);
+                                sensor_entry_count =
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_sensor: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 /*
  * int handle_saHpiSensorEntryCount()
  */

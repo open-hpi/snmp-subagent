@@ -75,6 +75,8 @@ SaErrorT populate_sen_thd_low_major(SaHpiSessionIdT sessionid,
 					    SaHpiRdrT *rdr_entry,
 					    SaHpiRptEntryT *rpt_entry,
 					    SaHpiSensorThresholdsT *sensor_thresholds);
+SaErrorT clear_sen_thd_low_major(SaHpiDomainIdT domainId, 
+                                SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations
@@ -97,10 +99,10 @@ extern size_t saHpiSensorThdLowMajorTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_LOW_MAJOR_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdLoMajDomainId_INDEX 0
+#define saHpiThdLoMajResourceEntryId_INDEX 1
+#define saHpiThdLoMajResourceIsHistorical_INDEX 2
+#define saHpiSensorThdLoMajNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowMajorTable

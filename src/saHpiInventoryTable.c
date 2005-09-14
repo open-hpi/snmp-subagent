@@ -211,7 +211,65 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         return rv;
 } 
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_inventory(SaHpiDomainIdT domainId, 
+                         SaHpiResourceIdT resourceId)
 
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiInventoryTable_context *ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_inventory, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((ctx->index.oids[saHpiDomainId_INDEX] ==
+                             domainId) &&
+
+                            (ctx->index.oids[saHpiResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /********************************************/
+                                /* Clear all the under lying tables as well */
+                                /********************************************/
+                                rv = clear_area(domainId, 
+                                                resourceId, 
+                                                ctx->saHpiInventoryId);
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiInventoryTable_delete_row (ctx);
+                                inventory_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_inventory: "
+                                                    "found row: removing\n"));
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
 
 int decrement_area_num(SaHpiSessionIdT session_id, 
 					   SaHpiResourceIdT resource_id,
@@ -335,11 +393,11 @@ saHpiInventoryTable_cmp( const void *lhs, const void *rhs )
      * check primary key, then secondary. Add your own code if
      * there are more than 2 indexes
      */
-	DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_cmp, called\n"));
+	DEBUGMSGTL ((AGENT, "saHpiInventoryTable_cmp, called\n"));
 
 	/* check for NULL pointers */
 	if (lhs == NULL || rhs == NULL ) {
-		DEBUGMSGTL((AGENT,"saHpiAnnunciatorTable_cmp() NULL pointer ERROR\n" ));
+		DEBUGMSGTL((AGENT,"saHpiInventoryTable_cmp() NULL pointer ERROR\n" ));
 		return 0;
 	}
 	/* CHECK FIRST INDEX,  saHpiDomainId */

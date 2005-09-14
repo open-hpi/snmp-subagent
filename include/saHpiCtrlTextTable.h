@@ -115,6 +115,8 @@ SaErrorT populate_ctrl_text(SaHpiSessionIdT sessionid,
 			    SaHpiRptEntryT *rpt_entry,
 			    oid *full_oid, size_t full_oid_len,
 			    oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_ctrl_text(SaHpiDomainIdT domainId, 
+                         SaHpiResourceIdT resourceId);
 
 
 /*************************************************************
@@ -138,9 +140,9 @@ extern size_t saHpiCtrlTextTable_oid_len;
 
 /* Number of table Indexes */
 #define CTRL_TEXT_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlTextDomainId_INDEX 0
+#define saHpiCtrlTextResourceEntryId_INDEX 1
+#define saHpiCtrlTextResourceIsHistorical_INDEX 2
 #define saHpiCtrlTextEntryId_INDEX 3
 
 /*************************************************************

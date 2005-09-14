@@ -77,6 +77,10 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
                              SaHpiRptEntryT *rpt_entry,
                              oid *full_oid, size_t full_oid_len,
                              oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_inventory(SaHpiDomainIdT domainId, 
+                         SaHpiResourceIdT resourceId);
+SaErrorT clear_ctrl_digital(SaHpiDomainIdT domainId, 
+                            SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations

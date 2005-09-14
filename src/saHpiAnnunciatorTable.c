@@ -208,6 +208,60 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         return rv;
 } 
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_annunciator(SaHpiDomainIdT domainId, 
+                           SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiAnnunciatorTable_context *ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_annunciator, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((ctx->index.oids[saHpiDomainId_INDEX] ==
+                             domainId) &&
+
+                            (ctx->index.oids[saHpiResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiCtrlDigitalTable_delete_row (ctx);
+                                annunciator_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_annunciator: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx)
 {
 

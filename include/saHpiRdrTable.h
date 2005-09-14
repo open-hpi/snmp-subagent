@@ -113,6 +113,8 @@ int handle_saHpiRdrEntryCount( netsnmp_mib_handler *handler,
 			       netsnmp_request_info *requests);
 
 int initialize_table_saHpiRdrEntryCount(void);
+SaErrorT clear_rdr_container(SaHpiDomainIdT domainId, 
+                             SaHpiResourceIdT resourceId);
 
 
 /*************************************************************
@@ -126,6 +128,11 @@ extern size_t saHpiRdrTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiRdrTable
  */
+#define saHpiRdrDomainId_Index 0
+#define saHpiRdrResourceId_Index 1
+#define saHpiRdrResourceIsHistorical_Index 2
+#define saHpiRdrEntryId_Index 3
+
 #define COLUMN_SAHPIRDRENTRYID 1
 #define COLUMN_SAHPIRDRNEXTENTRYID 2
 #define COLUMN_SAHPIRDRTYPE 3

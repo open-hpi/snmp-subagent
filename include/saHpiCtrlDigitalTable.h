@@ -100,6 +100,9 @@ SaErrorT populate_ctrl_digital(SaHpiSessionIdT sessionid,
 			       SaHpiRptEntryT *rpt_entry,
 			       oid *full_oid, size_t full_oid_len,
 			       oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_ctrl_digital(SaHpiDomainIdT domainId, 
+                            SaHpiResourceIdT resourceId);
+
 
 /*************************************************************
  * function declarations
@@ -122,9 +125,9 @@ extern size_t saHpiCtrlDigitalTable_oid_len;
 
 /* Number of table Indexes */
 #define CTRL_DIGITAL_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlDigitalDomainId_INDEX 0
+#define saHpiCtrlDigitalResourceEntryId_INDEX 1
+#define saHpiCtrlDigitalResourceIsHistorical_INDEX 2
 #define saHpiCtrlDigitalEntryId_INDEX 3
     
 /*************************************************************

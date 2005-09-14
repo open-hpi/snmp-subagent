@@ -135,6 +135,58 @@ SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid,
 	return rv;
 }
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_sensor_nominal(SaHpiDomainIdT domainId, 
+                              SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiSensorReadingNominalTable_context *sen_nom_ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_sensor_nom, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        sen_nom_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((sen_nom_ctx->index.oids[saHpiSenNomDomainId_INDEX] ==
+                             domainId) &&
+
+                            (sen_nom_ctx->index.oids[saHpiSenNomResourceId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, sen_nom_ctx);
+                                saHpiSensorReadingNominalTable_delete_row (sen_nom_ctx);
+                                DEBUGMSGTL ((AGENT, "clear_sensor_nom: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 /************************************************************/
 /************************************************************/
 /************************************************************/

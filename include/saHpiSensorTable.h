@@ -107,6 +107,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			 SaHpiRptEntryT *rpt_entry,
 			 oid *full_oid, size_t full_oid_len,
 			 oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_sensor(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId);
+
 
 
 /*************************************************************
@@ -130,9 +132,9 @@ extern size_t saHpiSensorTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiSensorDomainId_INDEX 0
+#define saHpiSensorResourceEntryId_INDEX 1
+#define saHpiSensorResourceIsHistorical_INDEX 2
 #define saHpiSensorEntryId_INDEX 3
     
 /*************************************************************

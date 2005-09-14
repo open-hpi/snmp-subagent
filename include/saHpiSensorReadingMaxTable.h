@@ -64,6 +64,8 @@ typedef struct saHpiSensorReadingMaxTable_context_s {
 SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid, 
 				     SaHpiRdrT *rdr_entry,
 				     SaHpiRptEntryT *rpt_entry);
+SaErrorT clear_sensor_max(SaHpiDomainIdT domainId, 
+                          SaHpiResourceIdT resourceId);
 
 
 /*************************************************************
@@ -86,7 +88,11 @@ extern size_t saHpiSensorReadingMaxTable_oid_len;
 #define saHpiSensorReadingMaxTable_TABLE_OID 1,3,6,1,4,1,18568,2,1,1,4,9,4
 
 /* Number of table Indexes */
-#define SENSOR_READING_MAX_INDEX_NR 4 
+#define SENSOR_READING_MAX_INDEX_NR 4
+#define saHpiSenMaxDomainId_INDEX 0
+#define saHpiSenMaxResourceId_INDEX 1
+#define saHpiSenMaxResourceIsHistorical_INDEX 2
+#define saHpiSensorMaxNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorReadingMaxTable

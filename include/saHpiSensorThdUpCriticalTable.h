@@ -70,7 +70,8 @@ SaErrorT populate_sen_thd_up_crit(SaHpiSessionIdT sessionid,
                                           SaHpiRdrT *rdr_entry,
                                           SaHpiRptEntryT *rpt_entry,
                                           SaHpiSensorThresholdsT *sensor_thresholds);
-
+SaErrorT clear_sen_thd_up_crit(SaHpiDomainIdT domainId, 
+                               SaHpiResourceIdT resourceId);
 int set_table_sen_thds_up_crit (saHpiSensorThdUpCriticalTable_context *row_ctx);
 
 /*************************************************************
@@ -94,10 +95,10 @@ extern size_t saHpiSensorThdUpCriticalTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_UP_CRIT_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdUpCritDomainId_INDEX 0
+#define saHpiThdUpCritResourceEntryId_INDEX 1
+#define saHpiThdUpCritResourceIsHistorical_INDEX 2
+#define saHpiSensorThdUpCritNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpCriticalTable

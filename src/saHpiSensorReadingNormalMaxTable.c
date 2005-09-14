@@ -135,6 +135,58 @@ SaErrorT populate_sensor_normal_max(SaHpiSessionIdT sessionid,
 	return rv;
 }
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_sensor_normal_max(SaHpiDomainIdT domainId, 
+                              SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiSensorReadingNormalMaxTable_context *sen_norm_max_ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_sensor_normal_max, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        sen_norm_max_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((sen_norm_max_ctx->index.oids[saHpiSenNormMaxDomainId_INDEX] ==
+                             domainId) &&
+
+                            (sen_norm_max_ctx->index.oids[saHpiSenNormMaxResourceId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, sen_norm_max_ctx);
+                                saHpiSensorReadingNormalMaxTable_delete_row (sen_norm_max_ctx);
+                                DEBUGMSGTL ((AGENT, "clear_sensor_normal_max: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 /************************************************************/
 /************************************************************/
 /************************************************************/

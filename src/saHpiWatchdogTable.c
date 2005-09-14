@@ -233,6 +233,60 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
         return rv;
 }
 
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_watchdog(SaHpiDomainIdT domainId, 
+                        SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiWatchdogTable_context *ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_watchdog, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((ctx->index.oids[watchdog_saHpiDomainId_INDEX] ==
+                             domainId) &&
+
+                            (ctx->index.oids[watchdog_saHpiResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiWatchdogTable_delete_row (ctx);
+                                watchdog_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_watchdog: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 static int set_table_watchdog_set (saHpiWatchdogTable_context *row_ctx) 
 {
 	SaErrorT            rc = SA_OK;
