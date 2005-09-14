@@ -121,7 +121,6 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
 		return AGENT_ERR_INTERNAL_ERROR;
 	}    
 
-
 	/* BUILD oid for new row */
 		/* assign the number of indices */
 	res_evt_idx.len = RESOURCE_EVENT_LOG_INDEX_NR;
@@ -203,22 +202,26 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id, 
                                   SaHpiResourceIdT resource_id,  
                                   oid *saHpiEventLogRowPointer, 
-                                  size_t saHpiEventLogRowPointer_len)
+                                  size_t saHpiEventLogRowPointer_len,
+				  int modifyTotal)
 {
 	oid res_evt_oid[RESOURCE_EVENT_LOG_INDEX_NR];
 	netsnmp_index res_evt_idx;
 	netsnmp_index *res_index;
 	saHpiResourceEventLogTable_context *res_evt_ctx;
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
 
 	int column_len = 2;
 
         DEBUGMSGTL ((AGENT, "resource_event_log_clear, called\n"));
 	DEBUGMSGTL ((AGENT, "Attempting to delete resource el row with the following indexes:\n"));
-        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len]);
-        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 1]);
-	printf("     Severity [%s]\n",  oh_lookup_severity(
-						saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 2]-1));
-	printf("     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 3]);
+        DEBUGMSGTL ((AGENT,"     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 1]));
+	DEBUGMSGTL ((AGENT,"     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 2]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id [%ld]\n", saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 3]));
 
 	/* BUILD oid to look for row */
 	/* assign the number of indices */
@@ -235,7 +238,7 @@ SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id,
 	res_evt_idx.oids = (oid *) & res_evt_oid;
 	
 	res_index = CONTAINER_FIRST(cb.container);
-	res_evt_ctx = CONTAINER_FIND(cb.container, res_index);
+	res_evt_ctx = CONTAINER_FIND(cb.container, &res_evt_idx);
 	
 	if (!res_evt_ctx) {
 		DEBUGMSGTL ((AGENT, "resource_event_log_clear did not find a row to delete\n"));
@@ -246,8 +249,26 @@ SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id,
 		CONTAINER_REMOVE(cb.container, res_evt_ctx);
 		saHpiResourceEventLogTable_delete_row(res_evt_ctx);
 		
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiResourceEventLogTable_oid_len + column_len + 1];
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: resource_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"resource_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
+		
 		resource_event_log_entry_count = CONTAINER_SIZE (cb.container);	
-		resource_event_log_entry_count_total--;
+
+		if (modifyTotal == MIB_TRUE) {
+			resource_event_log_entry_count_total--;
+		}	
 	}	
 		
         return SA_OK;

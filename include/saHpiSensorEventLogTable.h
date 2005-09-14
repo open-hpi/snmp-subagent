@@ -119,7 +119,8 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id, 
                                 SaHpiResourceIdT resource_id,  
                                 oid *saHpiEventLogRowPointer, 
-                                size_t saHpiEventLogRowPointer_len);
+                                size_t saHpiEventLogRowPointer_len,
+				int modifyTotal);
 
 /*************************************************************
  * oid declarations

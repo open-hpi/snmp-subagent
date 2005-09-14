@@ -82,7 +82,8 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT watchdog_event_log_clear(SaHpiSessionIdT session_id, 
                                   SaHpiResourceIdT resource_id,  
                                   oid *saHpiEventLogRowPointer, 
-                                  size_t saHpiEventLogRowPointer_len);
+                                  size_t saHpiEventLogRowPointer_len,
+				  int modifyTotal);
 
 /*************************************************************
  * oid declarations

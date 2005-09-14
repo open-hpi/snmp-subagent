@@ -310,23 +310,28 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id, 
                                 SaHpiResourceIdT resource_id,  
                                 oid *saHpiEventLogRowPointer, 
-                                size_t saHpiEventLogRowPointer_len)
+                                size_t saHpiEventLogRowPointer_len,
+				int modifyTotal)
 {
 
 	oid sen_evt_oid[SENSOR_EVENT_LOG_INDEX_NR];
 	netsnmp_index sen_evt_idx;
 	netsnmp_index *sensor_index;
 	saHpiSensorEventLogTable_context *sen_evt_ctx;
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
 
 	int column_len = 2;
 	
         DEBUGMSGTL ((AGENT, "sensor_event_log_clear, called\n"));
 	DEBUGMSGTL ((AGENT, "Attempting to delete sensor el row with the following indexes:\n"));
-        printf("     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len]);
-        printf("     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 1]);
-	printf("     Sensor # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2]); 
-	printf("     Severity [%s]\n",  oh_lookup_severity(
-						saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3]-1));		
+        DEBUGMSGTL ((AGENT,"     Domain   [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 1]));
+	DEBUGMSGTL ((AGENT,"     Sensor # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2])); 
+	DEBUGMSGTL ((AGENT,"     Severity [%s]\n",  oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3]-1)));
+	DEBUGMSGTL ((AGENT"     Entry Id # [%ld]\n", saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 4]));								
    
 	/* BUILD oid to lookup row */
 		/* assign the number of indices */
@@ -339,11 +344,13 @@ SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id,
 	sen_evt_oid[2] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 2];
 		/** Index saHpiEventSeverity is external */
 	sen_evt_oid[3] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 3];
+                /** Index saHpiSensorEventEntryId is internal */	
+	sen_evt_oid[4] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 4];	
 		/* assign the indices to the index */	
 	sen_evt_idx.oids = (oid *) & sen_evt_oid;
 
 	sensor_index = CONTAINER_FIRST(cb.container);
-	sen_evt_ctx = CONTAINER_FIND(cb.container, sensor_index);
+	sen_evt_ctx = CONTAINER_FIND(cb.container, &sen_evt_idx);
 	
 	if (!sen_evt_ctx) {
 		DEBUGMSGTL ((AGENT, "sensor_event_log_clear did not find a row to delete\n"));
@@ -353,9 +360,26 @@ SaErrorT sensor_event_log_clear(SaHpiSessionIdT session_id,
 		DEBUGMSGTL ((AGENT, "sensor_event_log_clear found row to delete\n"));
 		CONTAINER_REMOVE(cb.container, sen_evt_ctx);
 		saHpiSensorEventLogTable_delete_row(sen_evt_ctx);
+			
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiSensorEventLogTable_oid_len + column_len + 1];		
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: sensor_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"sensor_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
 		
 		sensor_event_log_entry_count = CONTAINER_SIZE (cb.container);
-		sensor_event_log_entry_count_total--;	
+		if (modifyTotal == MIB_TRUE) {
+			sensor_event_log_entry_count_total--;	
+		}	
 	}	
 
         return SA_OK;

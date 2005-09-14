@@ -211,9 +211,75 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 SaErrorT software_event_log_clear(SaHpiSessionIdT session_id, 
                                   SaHpiResourceIdT resource_id,  
                                   oid *saHpiEventLogRowPointer, 
-                                  size_t saHpiEventLogRowPointer_len)
+                                  size_t saHpiEventLogRowPointer_len,
+				  int modifyTotal)
 {
-        //TODO DMJ
+	oid software_evt_oid[SOFTWARE_EVENT_LOG_INDEX_NR];
+	netsnmp_index software_evt_idx;
+	netsnmp_index *software_index;
+	saHpiSoftwareEventLogTable_context *software_evt_ctx;
+	
+	DR_XREF *dr_entry;
+	SaHpiDomainIdResourceIdArrayT dr_pair;	
+
+	int column_len = 2;
+
+        DEBUGMSGTL ((AGENT, "software_event_log_clear, called\n"));
+	DEBUGMSGTL ((AGENT, "Attempting to delete software el row with the following indexes:\n"));
+        DEBUGMSGTL ((AGENT,"     Domain    [%ld]\n", saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource  [%ld]\n", saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 1]));
+	DEBUGMSGTL ((AGENT,"     Severity  [%s]\n", oh_lookup_severity(
+						saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 2]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id  [%ld]\n", saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 3]));
+
+	/* BUILD oid to lookup row */
+		/* assign the number of indices */
+	software_evt_idx.len = SOFTWARE_EVENT_LOG_INDEX_NR;
+		/** Index saHpiDomainId is external */
+	software_evt_oid[0] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len];
+		/** Index saHpiResourceId is external */
+	software_evt_oid[1] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 1];
+		/** Index saHpiEventSeverity is external */
+	software_evt_oid[2] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 2];
+                /** Index saHpiSoftwareEventEntryId is external */
+	software_evt_oid[3] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 3];
+		/* assign the indices to the index */
+	software_evt_idx.oids = (oid *) & software_evt_oid;
+	
+	software_index = CONTAINER_FIRST(cb.container);
+	software_evt_ctx = CONTAINER_FIND(cb.container, &software_evt_idx);
+	
+	if (!software_evt_ctx) {
+		DEBUGMSGTL ((AGENT, "software_event_log_clear did not find a row to delete\n"));
+	}
+	else {
+		
+		DEBUGMSGTL ((AGENT, "software_event_log_clear found row to delete\n"));
+		CONTAINER_REMOVE(cb.container, software_evt_ctx);
+		saHpiSoftwareEventLogTable_delete_row(software_evt_ctx);
+		
+		/* Reset the entry id for this domain/resource pair */
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiSoftwareEventLogTable_oid_len + column_len + 1];
+		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+		
+		if (dr_entry == NULL) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: software_event_log_clear() domain_resoruce_pair_lookup returned NULL\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	
+		DEBUGMSGTL ((AGENT, 
+			"software_event_log_clear() resetting entry_id to 0\n"));
+		dr_entry->entry_id = 0;		
+		
+		software_event_log_entry_count = CONTAINER_SIZE (cb.container);	
+		
+		if (modifyTotal == MIB_TRUE) {		
+			software_event_log_entry_count_total--;
+		}	
+	}		
+	
         return SA_OK;
 }
 
