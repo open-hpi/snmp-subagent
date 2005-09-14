@@ -581,7 +581,6 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
 
 	}
 
-
         /*********************************************************/
         /* need to update DomainInfoTable,  RPT data has changed */
         /*********************************************************/

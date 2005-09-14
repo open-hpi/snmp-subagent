@@ -106,6 +106,8 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 			      SaHpiRptEntryT *rpt_entry,
 			      oid *full_oid, size_t full_oid_len,
 			      oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_ctrl_analog(SaHpiDomainIdT domainId, 
+                           SaHpiResourceIdT resourceId);
 
 
 /*************************************************************
@@ -129,9 +131,9 @@ extern size_t saHpiCtrlAnalogTable_oid_len;
 
 /* Number of table Indexes */
 #define CTRL_ANALOG_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlAnalogDomainId_INDEX 0
+#define saHpiCtrlAnalogResourceEntryId_INDEX 1
+#define saHpiCtrlAnalogResourceIsHistorical_INDEX 2
 #define saHpiCtrlAnalogEntryId_INDEX 3
 
 /*************************************************************

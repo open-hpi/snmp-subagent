@@ -153,6 +153,59 @@ SaErrorT populate_sen_thd_low_major(SaHpiSessionIdT sessionid,
 	return rv;
 }
 
+
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_sen_thd_low_major(SaHpiDomainIdT domainId, 
+                                SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiSensorThdLowMajorTable_context *thd_ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_sen_thd_low_major, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        thd_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((thd_ctx->index.oids[saHpiThdLoMajDomainId_INDEX] ==
+                             domainId) &&
+
+                            (thd_ctx->index.oids[saHpiThdLoMajResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, thd_ctx);
+                                saHpiSensorThdLowMajorTable_delete_row (thd_ctx);
+                                DEBUGMSGTL ((AGENT, "clear_sen_thd_low_major: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 /*
  * int set_table_ctrl_analog_mode()
  */
@@ -170,9 +223,9 @@ int set_table_sen_thds_low_major (saHpiSensorThdLowMajorTable_context *row_ctx)
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
-	sensor_num = row_ctx->index.oids[saHpiSensorNum_INDEX];
+	session_id = get_session_id(row_ctx->index.oids[saHpiThdLoMajDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiThdLoMajResourceEntryId_INDEX];
+	sensor_num = row_ctx->index.oids[saHpiSensorThdLoMajNum_INDEX];
 
 	memset(&sensor_thresholds, 0, sizeof(sensor_thresholds));
 

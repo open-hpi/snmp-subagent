@@ -71,6 +71,8 @@ SaErrorT populate_sen_thd_up_minor(SaHpiSessionIdT sessionid,
                                            SaHpiRdrT *rdr_entry,
                                            SaHpiRptEntryT *rpt_entry,
                                            SaHpiSensorThresholdsT *sensor_thresholds);
+SaErrorT clear_sen_thd_up_minor(SaHpiDomainIdT domainId, 
+                                SaHpiResourceIdT resourceId);
 int set_table_sen_thds_up_minor (saHpiSensorThdUpMinorTable_context *row_ctx);
 
 /*************************************************************
@@ -94,10 +96,10 @@ extern size_t saHpiSensorThdUpMinorTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_UP_MINOR_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdUpMinDomainId_INDEX 0
+#define saHpiThdUpMinResourceEntryId_INDEX 1
+#define saHpiThdUpMinResourceIsHistorical_INDEX 2
+#define saHpiSensorThdUpMinNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpMinorTable

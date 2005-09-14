@@ -76,6 +76,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                                       SaHpiRptEntryT *rpt_entry,
                                       oid *full_oid, size_t full_oid_len,
                                       oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_annunciator(SaHpiDomainIdT domainId, 
+                           SaHpiResourceIdT resourceId);
 int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx);
 
 /*************************************************************

@@ -70,6 +70,8 @@ SaErrorT populate_sen_thd_pos_hys(SaHpiSessionIdT sessionid,
                                           SaHpiRdrT *rdr_entry,
                                           SaHpiRptEntryT *rpt_entry,
                                           SaHpiSensorThresholdsT *sensor_thresholds);
+SaErrorT clear_sen_thd_pos_hys(SaHpiDomainIdT domainId, 
+                               SaHpiResourceIdT resourceId);
 int set_table_sen_thds_pos_hys (saHpiSensorThdPosHysteresisTable_context *row_ctx);
 
 /*************************************************************
@@ -93,10 +95,10 @@ extern size_t saHpiSensorThdPosHysteresisTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_POS_HYS_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdPosHysDomainId_INDEX 0
+#define saHpiThdPosHysResourceEntryId_INDEX 1
+#define saHpiThdPosHysResourceIsHistorical_INDEX 2
+#define saHpiSensorThdPosHysNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdPosHysteresisTable

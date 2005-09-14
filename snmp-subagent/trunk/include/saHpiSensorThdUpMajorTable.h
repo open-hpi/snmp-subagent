@@ -70,7 +70,8 @@ SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid,
                                            SaHpiRdrT *rdr_entry,
                                            SaHpiRptEntryT *rpt_entry,
                                            SaHpiSensorThresholdsT *sensor_thresholds);
-
+SaErrorT clear_sen_thd_up_major(SaHpiDomainIdT domainId, 
+                                SaHpiResourceIdT resourceId);
 int set_table_sen_thds_up_major (saHpiSensorThdUpMajorTable_context *row_ctx);
 
 /*************************************************************
@@ -94,10 +95,10 @@ extern size_t saHpiSensorThdUpMajorTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_UP_MAJOR_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdUpMajDomainId_INDEX 0
+#define saHpiThdUpMajResourceEntryId_INDEX 1
+#define saHpiThdUpMajResourceIsHistorical_INDEX 2
+#define saHpiSensorThdUpMajNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdUpMajorTable

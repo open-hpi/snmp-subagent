@@ -102,6 +102,8 @@ SaErrorT populate_ctrl_stream(SaHpiSessionIdT sessionid,
 			      SaHpiRptEntryT *rpt_entry,
 			      oid *full_oid, size_t full_oid_len,
 			      oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_ctrl_stream(SaHpiDomainIdT domainId, 
+                           SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations
@@ -125,9 +127,9 @@ extern size_t saHpiCtrlStreamTable_oid_len;
 
 /* Number of table Indexes */
 #define CTRL_STREAM_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlStreamDomainId_INDEX 0
+#define saHpiCtrlStreamResourceEntryId_INDEX 1
+#define saHpiCtrlStreamResourceIsHistorical_INDEX 2
 #define saHpiCtrlStreamEntryId_INDEX 3
 
 /*************************************************************

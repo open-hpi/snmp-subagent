@@ -244,6 +244,75 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 	return rv;
 }
 
+
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_ctrl_oem(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiCtrlOemTable_context *ctrl_ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_ctrl_oem, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+
+        DR_XREF *dr_entry;
+        SaHpiDomainIdResourceIdArrayT dr_pair;
+
+        /* reset any existing indexEntry value */
+        dr_pair.domainId_resourceId_arry[0] = domainId;
+        dr_pair.domainId_resourceId_arry[1] = resourceId;
+        dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
+        if (dr_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                "INFO: clear_ctrl_oem() domain_resource_pair_get returned NULL\n"));
+                return SA_ERR_HPI_NOT_PRESENT;
+        } else {
+                dr_entry->entry_id = 0;
+        }
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        ctrl_ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((ctrl_ctx->index.oids[saHpiCtrlOemDomainId_INDEX] ==
+                             domainId) &&
+
+                            (ctrl_ctx->index.oids[saHpiCtrlOemResourceEntryId_INDEX] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctrl_ctx);
+                                saHpiCtrlOemTable_delete_row (ctrl_ctx);
+                                ctrl_oem_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_ctrl_oem: "
+                                                    "found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 /*************************************************************
  * int set_table_ctrl_oem()
  */
@@ -259,8 +328,8 @@ int set_table_ctrl_oem (saHpiCtrlOemTable_context *row_ctx)
 	if (!row_ctx)
 		return AGENT_ERR_NULL_DATA;
 
-	session_id = get_session_id(row_ctx->index.oids[saHpiDomainId_INDEX]);
-	resource_id = row_ctx->index.oids[saHpiResourceEntryId_INDEX];
+	session_id = get_session_id(row_ctx->index.oids[saHpiCtrlOemDomainId_INDEX]);
+	resource_id = row_ctx->index.oids[saHpiCtrlOemResourceEntryId_INDEX];
 
 	/* body */
 	memset(ctrl_state.StateUnion.Oem.Body, 0, 

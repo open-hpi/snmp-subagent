@@ -73,6 +73,8 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 					   SaHpiRdrT *rdr_entry,
 					   SaHpiRptEntryT *rpt_entry,
 					   SaHpiSensorThresholdsT *sensor_thresholds);
+SaErrorT clear_sen_thd_low_crit(SaHpiDomainIdT domainId, 
+                                SaHpiResourceIdT resourceId);
 
 
 
@@ -97,10 +99,10 @@ extern size_t saHpiSensorThdLowCriticalTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_LOW_CRIT_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdLoCritDomainId_INDEX 0
+#define saHpiThdLoCritResourceEntryId_INDEX 1
+#define saHpiThdLoCritResourceIsHistorical_INDEX 2
+#define saHpiSensorThdLoCritNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdLowCriticalTable

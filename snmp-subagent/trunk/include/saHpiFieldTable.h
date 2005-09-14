@@ -89,6 +89,10 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
                          SaHpiRdrT *rdr_entry,
                          SaHpiRptEntryT *rpt_entry,
                          saHpiAreaTable_context *area_context);
+SaErrorT clear_field(SaHpiDomainIdT   domainId, 
+                     SaHpiResourceIdT resourceId,
+                     SaHpiIdrIdT      idrId,
+                     SaHpiEntryIdT    areaId);
 
 /*************************************************************
  * function declarations

@@ -74,7 +74,7 @@ static u_long rdr_entry_count = 0;
  * void populate_saHpiRdrTable(void)
  */
 int populate_saHpiRdrTable(SaHpiSessionIdT sessionid, 
-			   SaHpiRptEntryT * rpt_entry,
+			   SaHpiRptEntryT *rpt_entry,
 			   oid * resource_oid, 
 			   size_t resource_oid_len)
 {
@@ -109,17 +109,41 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable, called\n"));
 
+        /*
+        remove all matching rows for domainId and resourceId pairs.
+        seems have to pass in if this a new rdr or existing to theunder lying tables.
+        then we can determine
 
-#if 0
-remove all matching rows for domainId and resourceId pairs.
-seems have to pass in if this a new rdr or existing to theunder lying tables.
-then we can determine
+        for every this rdr it should be very simple to vector down into the accompanying 
+        underlying table and find and delete    
 
-for every this rdr it should be very simple to vector down into the accompanying 
-underlying table and find and delete
-#endif
+        If its a RESTORE or ADD we need to Remove all existing RDR's and rediscover..this 
+        can also work for rediscovery
 
-	
+        so we need a purge fucntion for all rdr's here and all underlying sub tables based in domian, 
+        resource and rdr num values we can use the child RowStatus here to get to sub tables and scan 
+        here based on row pointer to Resource in Resource Table
+
+        based on Resoruce above we can build the expected RowPointer value that would be stored here
+        and then scan the RDR table here looking for matches.  
+
+        Then when a row is found we can get the RowPointer to the underlying table and jump to it and
+        purge that row.  INventory RDR's will require multiple hops.
+        */
+
+        rv = clear_rdr_container(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_digital(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_discrete(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_analog(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_stream(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_text(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_ctrl_oem(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_sensor(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_current_sensor_state(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_inventory(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_watchdog(resource_oid[0], rpt_entry->ResourceId);
+        rv = clear_annunciator(resource_oid[0], rpt_entry->ResourceId);
+
 	rdr_entry_id = SAHPI_FIRST_ENTRY;
 	do {
 		rv =  saHpiRdrGet(sessionid, 
@@ -143,7 +167,7 @@ underlying table and find and delete
 		 * }
 		 */
 		rdr_index.len = RDR_INDEX_NR;
-		rdr_oid[0] = resource_oid[0];
+		rdr_oid[0] = resource_oid[0];   
 		rdr_oid[1] = rpt_entry->ResourceId;
 		rdr_oid[2] = MIB_FALSE;
 		rdr_oid[3] = rdr_entry.RecordId;
@@ -454,6 +478,60 @@ underlying table and find and delete
 		
 	return rv;
 
+} 
+
+
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * 
+ * @return 
+ */
+SaErrorT clear_rdr_container(SaHpiDomainIdT domainId, 
+                             SaHpiResourceIdT resourceId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiRdrTable_context *rdr_ctx;
+
+        int counter = 1;
+
+	DEBUGMSGTL ((AGENT, "clear_rdr_container, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));	
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        rdr_ctx = CONTAINER_FIND(cb.container, row_idx);
+                        
+                        DEBUGMSGTL ((AGENT, "CONTAINER_FIND: rdr_ctx: [%d] row_idx: [%d]"
+                                            " counter [%d], rdr_entry_count [%d]\n", 
+                                     rdr_ctx, row_idx, counter++, rdr_entry_count));
+
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((rdr_ctx->index.oids[saHpiRdrDomainId_Index] ==
+                             domainId) &&
+
+                            (rdr_ctx->index.oids[saHpiRdrResourceId_Index] ==
+                             resourceId)) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, rdr_ctx);
+                                saHpiRdrTable_delete_row (rdr_ctx);
+                                rdr_entry_count = CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_rdr_container: found row: removing\n"));
+
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
 }
 
 
@@ -471,6 +549,8 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
 
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
+
+	DEBUGMSGTL ((AGENT, "handle_saHpiRdrEntryCount, called\n"));	
 
     rdr_entry_count = CONTAINER_SIZE (cb.container);
     

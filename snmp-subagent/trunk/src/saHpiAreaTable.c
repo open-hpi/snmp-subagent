@@ -216,7 +216,94 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
         area_entry_count = CONTAINER_SIZE (cb.container);
 
         return rv;
-} 
+}
+
+/**
+ * 
+ * @domainId
+ * @resourceId
+ * @idrId
+ * 
+ * @return 
+ */
+SaErrorT clear_area(SaHpiDomainIdT   domainId, 
+                    SaHpiResourceIdT resourceId,
+                    SaHpiIdrIdT      idrId)
+
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiAreaTable_context *ctx;
+
+        DRI_XREF *dri_entry;
+        SaHpiDomainIdResourceIdInventoryIdArrayT dri_tuple;
+
+	DEBUGMSGTL ((AGENT, "area_inventory, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domainId));	
+	DEBUGMSGTL ((AGENT, "           resourceId [%d]\n", resourceId));
+	DEBUGMSGTL ((AGENT, "           idrId      [%d]\n", idrId));
+
+        /***************************/
+        /* build the key to lookup */
+        /***************************/
+        dri_tuple.domainId_resourceId_idr_arry[0] = domainId;
+        dri_tuple.domainId_resourceId_idr_arry[1] = resourceId;
+        dri_tuple.domainId_resourceId_idr_arry[2] = idrId;
+
+        /* domain_resource_idr_get() generates unique keys based on */
+        /* domainid, resourceid, and IdrId tuples.                  */
+        dri_entry = domain_resoruce_idr_lookup(&dri_tuple, &dri_table);
+
+        if (dri_entry == NULL) {
+                DEBUGMSGTL ((AGENT, 
+                             "INFO: area_inventory() domain_resource_idr_get"
+                             " returned NULL\n"));
+                rv = SA_ERR_HPI_NOT_PRESENT;
+        } else {
+                dri_entry->entry_id = 0;
+        }
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        /* based on the found row_idx get the pointer   */
+                        /* to its context (row data)                    */
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+
+                        /* before we delete the context we should get the  */
+                        /* next row (context) if any before we delete this */ 
+                        /* one.                                            */
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if ((ctx->index.oids[saHpiDomainId_INDEX] ==
+                             domainId) &&
+
+                            (ctx->index.oids[saHpiResourceEntryId_INDEX] ==
+                             resourceId)) {                     
+
+                                /********************************************/
+                                /* Clear all the under lying tables as well */
+                                /********************************************/
+                                rv = clear_field(domainId, 
+                                                 resourceId, 
+                                                 idrId,
+                                                 ctx->saHpiAreaId);
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiAreaTable_delete_row (ctx);
+                                area_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "area_inventory: "
+                                                    "found row: removing\n"));
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
 
 /**
  * 

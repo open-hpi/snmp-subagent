@@ -73,6 +73,9 @@ typedef struct saHpiAreaTable_context_s {
 SaErrorT populate_area (SaHpiSessionIdT sessionid, 
                                 SaHpiRdrT *rdr_entry,
                                 SaHpiRptEntryT *rpt_entry);
+SaErrorT clear_area(SaHpiDomainIdT   domainId, 
+                    SaHpiResourceIdT resourceId,
+                    SaHpiIdrIdT      idrId);
 int set_table_area_type (saHpiAreaTable_context *row_ctx);
 int set_table_area_delete (saHpiAreaTable_context *row_ctx);
 int update_num_data_fields ( oid *field_oids,  SaHpiUint32T num_fields);

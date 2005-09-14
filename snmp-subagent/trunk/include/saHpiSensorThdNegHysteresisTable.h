@@ -71,6 +71,8 @@ SaErrorT populate_sen_thd_neg_hys(SaHpiSessionIdT sessionid,
                                           SaHpiRdrT *rdr_entry,
                                           SaHpiRptEntryT *rpt_entry,
                                           SaHpiSensorThresholdsT *sensor_thresholds);
+SaErrorT clear_sen_thd_neg_hys(SaHpiDomainIdT domainId, 
+                               SaHpiResourceIdT resourceId); 
 int set_table_sen_thds_neg_hys (saHpiSensorThdNegHysteresisTable_context *row_ctx);
 
 /*************************************************************
@@ -94,10 +96,10 @@ extern size_t saHpiSensorThdNegHysteresisTable_oid_len;
 
 /* Number of table Indexes */
 #define SEN_THD_NEG_HYS_IDX_NR 4
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
-#define saHpiSensorNum_INDEX 3
+#define saHpiThdNegHysDomainId_INDEX 0
+#define saHpiThdNegHysResourceEntryId_INDEX 1
+#define saHpiThdNegHysResourceIsHistorical_INDEX 2
+#define saHpiSensorThdNegHysNum_INDEX 3
 
 /*************************************************************
  * column number definitions for table saHpiSensorThdNegHysteresisTable

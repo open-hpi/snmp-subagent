@@ -63,7 +63,8 @@ typedef struct saHpiSensorReadingNormalMinTable_context_s {
 SaErrorT populate_sensor_normal_min(SaHpiSessionIdT sessionid, 
 					    SaHpiRdrT *rdr_entry,
 					    SaHpiRptEntryT *rpt_entry);
-
+SaErrorT clear_sensor_normal_min(SaHpiDomainIdT domainId, 
+                              SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations
@@ -86,6 +87,11 @@ extern size_t saHpiSensorReadingNormalMinTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_READING_NORMAL_MIN_INDEX_NR 4 
+#define saHpiSenNormMinDomainId_INDEX 0
+#define saHpiSenNormMinResourceId_INDEX 1
+#define saHpiSenNormMinResourceIsHistorical_INDEX 2
+#define saHpiSensorNormMinNum_INDEX 3
+
 
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNormalMinTable

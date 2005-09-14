@@ -106,6 +106,7 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 			    SaHpiRptEntryT *rpt_entry,
 			    oid *full_oid, size_t full_oid_len,
 			    oid *child_oid, size_t *child_oid_len);
+SaErrorT clear_ctrl_oem(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations
@@ -129,9 +130,9 @@ extern size_t saHpiCtrlOemTable_oid_len;
 
 /* Number of table Indexes */
 #define CTRL_OEM_INDEX_NR 4 
-#define saHpiDomainId_INDEX 0
-#define saHpiResourceEntryId_INDEX 1
-#define saHpiResourceIsHistorical_INDEX 2
+#define saHpiCtrlOemDomainId_INDEX 0
+#define saHpiCtrlOemResourceEntryId_INDEX 1
+#define saHpiCtrlOemResourceIsHistorical_INDEX 2
 #define saHpiCtrlOemEntryId_INDEX 3
     
 /*************************************************************

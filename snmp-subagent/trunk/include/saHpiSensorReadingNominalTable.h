@@ -63,6 +63,8 @@ typedef struct saHpiSensorReadingNominalTable_context_s {
 	SaErrorT populate_sensor_nominal(SaHpiSessionIdT sessionid, 
 					 SaHpiRdrT *rdr_entry,
 					 SaHpiRptEntryT *rpt_entry);
+SaErrorT clear_sensor_nominal(SaHpiDomainIdT domainId, 
+                              SaHpiResourceIdT resourceId);
 
 /*************************************************************
  * function declarations
@@ -85,6 +87,11 @@ extern size_t saHpiSensorReadingNominalTable_oid_len;
 
 /* Number of table Indexes */
 #define SENSOR_READING_NOMINAL_INDEX_NR 4 
+#define saHpiSenNomDomainId_INDEX 0
+#define saHpiSenNomResourceId_INDEX 1
+#define saHpiSenNomResourceIsHistorical_INDEX 2
+#define saHpiSensorNomNum_INDEX 3
+
 
 /*************************************************************
  * column number definitions for table saHpiSensorReadingNominalTable
