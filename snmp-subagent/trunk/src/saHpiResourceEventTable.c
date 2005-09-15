@@ -170,7 +170,8 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
 	       &event->Timestamp, sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
-        res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
+        res_evt_ctx->saHpiResourceEventType = 
+                event->EventDataUnion.ResourceEvent.ResourceEventType + 1;
 
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, res_evt_ctx);
@@ -266,8 +267,9 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
 		&event->Timestamp, sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
-        res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
-
+        res_evt_ctx->saHpiResourceEventType = 
+                event->EventDataUnion.ResourceEvent.ResourceEventType + 1;
+                                              
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, res_evt_ctx);
 
