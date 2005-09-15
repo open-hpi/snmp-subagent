@@ -38,7 +38,7 @@ typedef struct saHpiAnnouncementEventLogTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiAnnouncementEventLogTimestamp;
+            struct counter64 saHpiAnnouncementEventLogTimestamp;
 
         /** TruthValue = ASN_INTEGER */
             long saHpiAnnouncementEventLogAddedByUser;

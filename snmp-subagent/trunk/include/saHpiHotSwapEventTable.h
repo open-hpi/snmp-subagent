@@ -38,7 +38,7 @@ typedef struct saHpiHotSwapEventTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiHotSwapEventTimestamp;
+            struct counter64 saHpiHotSwapEventTimestamp;
 
         /** SaHpiHotSwapState = ASN_INTEGER */
             long saHpiHotSwapEventState;

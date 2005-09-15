@@ -39,7 +39,7 @@ typedef struct saHpiWatchdogEventTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiWatchdogEventTimestamp;
+            struct counter64 saHpiWatchdogEventTimestamp;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiWatchdogEventAction;

@@ -160,7 +160,8 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
         user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        user_evt_ctx->saHpiUserEventTimestamp = event->Timestamp;
+        memcpy(&user_evt_ctx->saHpiUserEventTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiTextType = ASN_INTEGER */
         user_evt_ctx->saHpiUserEventTextType = 
@@ -239,8 +240,8 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
 
                         user_evt_ctx = CONTAINER_FIND(cb.container, row_idx);
 
-                        SaHpiTimeT tmp_ts;
-                        tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
+                        //SaHpiTimeT tmp_ts;
+                        //tmp_ts = (SaHpiTimeT)user_evt_ctx->saHpiUserEventTimestamp;
 
                         if ( !memcmp(user_evt_ctx->saHpiUserEventText, 
                              event->EventDataUnion.UserEvent.UserEventData.Data,
@@ -255,8 +256,8 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                            ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
                               event->EventDataUnion.UserEvent.UserEventData.DataType) &&
 
-                           (user_evt_ctx->saHpiUserEventTimestamp == 
-                            event->Timestamp) &&
+                           (memcmp(&user_evt_ctx->saHpiUserEventTimestamp.high, 
+                                  &event->Timestamp, sizeof(struct counter64)) == 0) &&
 
                            ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
                              event->Severity) &&
@@ -332,7 +333,8 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                         user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
         
                         /** SaHpiTime = ASN_COUNTER64 */
-                        user_evt_ctx->saHpiUserEventTimestamp = event->Timestamp;
+                        memcpy(&user_evt_ctx->saHpiUserEventTimestamp.high,
+			       &event->Timestamp, sizeof(struct counter64));
         
                         /** SaHpiTextType = ASN_INTEGER */
                         user_evt_ctx->saHpiUserEventTextType = 
@@ -428,7 +430,8 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
                         return get_snmp_error(rc);
                 }
 
-                row_ctx->saHpiUserEventTimestamp = event.Timestamp;
+                memcpy(&row_ctx->saHpiUserEventTimestamp.high,
+		       &event.Timestamp, sizeof(struct counter64));
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
         }          
 
@@ -1264,7 +1267,8 @@ void saHpiUserEventTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
-            row_ctx->saHpiUserEventTimestamp = *var->val.integer;
+            memcpy(&row_ctx->saHpiUserEventTimestamp.high,
+	           &*var->val.integer, sizeof(struct counter64));
             row_ctx->timestamp_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventRowStatus == SNMP_ROW_CREATEANDWAIT) {
                     user_event_add (row_ctx);

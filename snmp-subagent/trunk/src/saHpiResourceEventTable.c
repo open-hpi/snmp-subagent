@@ -166,7 +166,8 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
         res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        res_evt_ctx->saHpiResourceEventTimestamp = event->Timestamp;
+        memcpy(&res_evt_ctx->saHpiResourceEventTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = event->EventType + 1;
@@ -261,7 +262,8 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
         res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        res_evt_ctx->saHpiResourceEventTimestamp = event->Timestamp;
+        memcpy(&res_evt_ctx->saHpiResourceEventTimestamp, 
+		&event->Timestamp, sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = event->EventType + 1;

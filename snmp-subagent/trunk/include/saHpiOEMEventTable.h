@@ -38,7 +38,7 @@ typedef struct saHpiOEMEventTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiOEMEventTimestamp;
+            struct counter64 saHpiOEMEventTimestamp;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
             unsigned long saHpiOEMEventManufacturerIdT;

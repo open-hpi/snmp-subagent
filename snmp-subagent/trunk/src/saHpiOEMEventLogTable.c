@@ -163,7 +163,8 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 
 
         /** SaHpiTime = ASN_COUNTER64 */
-        oem_evt_ctx->saHpiOEMEventLogTimestamp = event->Timestamp;
+        memcpy(&oem_evt_ctx->saHpiOEMEventLogTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOEMEventLogManufacturerIdT = 

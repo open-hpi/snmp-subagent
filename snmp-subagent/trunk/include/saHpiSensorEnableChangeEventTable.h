@@ -39,7 +39,7 @@ typedef struct saHpiSensorEnableChangeEventTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiSensorEnableChangeEventTimestamp;
+            struct counter64 saHpiSensorEnableChangeEventTimestamp;
 
         /** SaHpiSensorType = ASN_INTEGER */
             long saHpiSensorEnableChangeEventType;

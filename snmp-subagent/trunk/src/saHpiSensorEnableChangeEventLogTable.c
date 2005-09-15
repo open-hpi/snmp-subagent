@@ -169,7 +169,8 @@ SaErrorT populate_saHpiSensorEnableChangeEventLogTable(SaHpiSessionIdT sessionid
 
 
         /** SaHpiTime = ASN_COUNTER64 */
-        sec_evt_ctx->saHpiSensorEnableChangeEventLogTimestamp = event->Timestamp;
+        memcpy(&sec_evt_ctx->saHpiSensorEnableChangeEventLogTimestamp.high, 
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiSensorType = ASN_INTEGER */	
 	sec_evt_ctx->saHpiSensorEnableChangeEventLogType = 
