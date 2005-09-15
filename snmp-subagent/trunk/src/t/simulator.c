@@ -237,11 +237,6 @@ static int inject_resource_event (char *handler_name, char selection)
     case RESOURCE_RESTORED:
             sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_RESTORED);
             break;
-    case RESOURCE_ADDED:
-            printf("SAHPI_RESE_RESOURCE_ADDED: returning No Action!!!!\n");
-            return -1;
-            sprintf(txtptr, "%s=%d", SIM_MSG_RESOURCE_EVENT_TYPE, SAHPI_RESE_RESOURCE_ADDED);
-            break;
     default:
             break;
     }
@@ -296,7 +291,19 @@ static int inject_domain_event (char *handler_name, char selection)
     if (n > SIM_MSG_QUEUE_BUFSIZE) {
         return -1;
     }
-    sprintf(txtptr, "%s=%d", SIM_MSG_DOMAIN_TYPE, SAHPI_DOMAIN_REF_ADDED);
+
+        /* build the correct Resource EVENT Type */
+    switch (selection) {
+    case DOMAIN_REF_ADDED:
+            sprintf(txtptr, "%s=%d", SIM_MSG_DOMAIN_TYPE, SAHPI_DOMAIN_REF_ADDED);
+            break;
+    case DOMAIN_REF_REMOVED:
+            sprintf(txtptr, "%s=%d", SIM_MSG_DOMAIN_TYPE, SAHPI_DOMAIN_REF_REMOVED);
+            break;
+    default:
+            break;
+    }
+
     n += strlen(txtptr) + 1;
     txtptr = buf.mtext + n;
     if (n > SIM_MSG_QUEUE_BUFSIZE) {

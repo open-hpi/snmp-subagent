@@ -31,7 +31,10 @@ typedef enum {
         RESOURCE_ADDED
 }resource_event_types;
 
-
+typedef enum {
+    DOMAIN_REF_ADDED = 1,
+    DOMAIN_REF_REMOVED
+} domain_event_types;
 
 
 /* function prototypes */
