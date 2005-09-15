@@ -248,7 +248,7 @@ SaErrorT clear_annunciator(SaHpiDomainIdT domainId,
 
                                 /* all conditions met remove row */
                                 CONTAINER_REMOVE (cb.container, ctx);
-                                saHpiCtrlDigitalTable_delete_row (ctx);
+                                saHpiAnnunciatorTable_delete_row (ctx);
                                 annunciator_entry_count = 
                                         CONTAINER_SIZE (cb.container);
                                 DEBUGMSGTL ((AGENT, "clear_annunciator: "
