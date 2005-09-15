@@ -35,7 +35,7 @@ typedef struct saHpiHotSwapEventLogTable_context_s {
     /** TODO: add storage for external index(s)! */
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiHotSwapEventLogTimestamp;
+            struct counter64 saHpiHotSwapEventLogTimestamp;
 
         /** SaHpiHotSwapState = ASN_INTEGER */
             long saHpiHotSwapEventLogState;

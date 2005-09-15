@@ -219,7 +219,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 event_context->saHpiEventSeverity = event.Severity + 1;
 
                 /** SaHpiTime = ASN_COUNTER64 */
-                event_context->saHpiEventSaHpiTime = event.Timestamp;
+                memcpy(&event_context->saHpiEventSaHpiTime.high,
+			&event.Timestamp,
+			sizeof(struct counter64));
 
                 /** INTEGER = ASN_INTEGER */
                 event_context->saHpiEventType = event.EventType + 1;
@@ -369,7 +371,9 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
         event_context->saHpiEventSeverity = event->Severity + 1;
 
         /** SaHpiTime = ASN_COUNTER64 */
-        event_context->saHpiEventSaHpiTime = event->Timestamp;
+        memcpy(&event_context->saHpiEventSaHpiTime.high,
+	       &event->Timestamp,
+	       sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
         event_context->saHpiEventType = event->EventType + 1;

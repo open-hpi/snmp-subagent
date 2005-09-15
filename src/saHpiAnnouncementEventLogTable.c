@@ -167,7 +167,8 @@ SaErrorT populate_saHpiAnnouncementEventLogTable(SaHpiSessionIdT sessionid,
                 announcement_ctx->saHpiAnnouncementEventLogEntryId = announcement.EntryId;
 	 	
                 /** SaHpiTime = ASN_COUNTER64 */
-                announcement_ctx->saHpiAnnouncementEventLogTimestamp = announcement.Timestamp;
+                memcpy(&announcement_ctx->saHpiAnnouncementEventLogTimestamp.high,
+		       &announcement.Timestamp, sizeof(struct counter64));
  
                 /** TruthValue = ASN_INTEGER */
                 announcement_ctx->saHpiAnnouncementEventLogAddedByUser = announcement.AddedByUser;

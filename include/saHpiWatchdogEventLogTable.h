@@ -36,7 +36,7 @@ typedef struct saHpiWatchdogEventLogTable_context_s {
     /** TODO: add storage for external index(s)! */
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiWatchdogEventLogTimestamp;
+            struct counter64 saHpiWatchdogEventLogTimestamp;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiWatchdogEventLogAction;

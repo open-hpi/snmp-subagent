@@ -185,7 +185,8 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
                 domain_alarm_ctx->saHpiDomainAlarmId = Alarm.AlarmId;
 	
                 /** SaHpiTime = ASN_COUNTER64 */
-	        domain_alarm_ctx->saHpiDomainAlarmTimestamp = Alarm.Timestamp;
+	        memcpy(&domain_alarm_ctx->saHpiDomainAlarmTimestamp.high, 
+		       &Alarm.Timestamp, sizeof(struct counter64));
 	
                 /** TruthValue = ASN_INTEGER */
 	        domain_alarm_ctx->saHpiDomainAlarmAcknowledged = 
@@ -409,8 +410,8 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                 alarm.AlarmId = row_ctx->saHpiDomainAlarmId;
 
                 /* Timestamp */
-                alarm.Timestamp = 
-                        row_ctx->saHpiDomainAlarmTimestamp;
+                memcpy(&alarm.Timestamp, 
+                       &row_ctx->saHpiDomainAlarmTimestamp.high, sizeof(struct counter64));
 
 		/* Severity */
 		alarm.Severity =

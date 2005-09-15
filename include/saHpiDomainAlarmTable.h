@@ -48,7 +48,7 @@ typedef struct saHpiDomainAlarmTable_context_s {
 
         /** SaHpiTime = ASN_COUNTER64 */
     /** TODO: Is this type correct? */
-            long saHpiDomainAlarmTimestamp;
+            struct counter64 saHpiDomainAlarmTimestamp;
 
         /** SaHpiSeverity = ASN_INTEGER */
             long saHpiDomainAlarmSeverity;

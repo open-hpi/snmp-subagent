@@ -157,8 +157,8 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
 	                                        sensor_enable_change_evt_oid[4];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp = 
-	                                        event->Timestamp;
+        memcpy(&sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiSensorType = ASN_INTEGER */
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventType = 
@@ -395,8 +395,8 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
 	                                        sensor_enable_change_evt_oid[4];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp = 
-	                                        event->Timestamp;
+        memcpy(&sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiSensorType = ASN_INTEGER */
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventType = 

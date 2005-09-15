@@ -152,7 +152,8 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
         oem_evt_ctx->saHpiOEMEventEntryId = oem_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        oem_evt_ctx->saHpiOEMEventTimestamp = event->Timestamp;
+        memcpy(&oem_evt_ctx->saHpiOEMEventTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 	
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOEMEventManufacturerIdT = 
@@ -273,7 +274,8 @@ SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid,
         oem_evt_ctx->saHpiOEMEventEntryId = oem_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        oem_evt_ctx->saHpiOEMEventTimestamp = event->Timestamp;
+        memcpy(&oem_evt_ctx->saHpiOEMEventTimestamp.high, 
+	       &event->Timestamp, sizeof(struct counter64));
 	
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOEMEventManufacturerIdT = 

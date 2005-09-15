@@ -54,19 +54,19 @@ typedef struct saHpiDomainInfoTable_context_s {
             unsigned long saHpiDomainReferenceUpdateCount;
 
         /** SaHpiTime = ASN_COUNTER64 */
-            long saHpiDomainReferenceUpdateTimestamp;
+            struct counter64 saHpiDomainReferenceUpdateTimestamp;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainResourcePresenceUpdateCount;
 
         /** SaHpiTime = ASN_COUNTER64 */
-            long saHpiDomainResourcePresenceUpdateTimestamp;
+            struct counter64 saHpiDomainResourcePresenceUpdateTimestamp;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainAlarmUpdateCount;
 
         /** SaHpiTime = ASN_COUNTER64 */
-            long saHpiDomainAlarmUpdateTimestamp;
+            struct counter64 saHpiDomainAlarmUpdateTimestamp;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainActiveAlarms;

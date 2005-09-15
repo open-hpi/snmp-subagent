@@ -162,7 +162,8 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 	}
 
         /** SaHpiTime = ASN_COUNTER64 */
-        hotswap_evt_ctx->saHpiHotSwapEventLogTimestamp = event->Timestamp;
+        memcpy(&hotswap_evt_ctx->saHpiHotSwapEventLogTimestamp.high,
+	       &event->Timestamp, sizeof(struct counter64));
 
         /** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventLogState = 
