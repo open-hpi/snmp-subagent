@@ -149,6 +149,48 @@ int initialize_table_saHpiDomainReferenceEntryCount(void);
 	return rv;
 }
 
+/**
+ * 
+ * @sessionid
+ * 
+ * @return 
+ */
+SaErrorT clear_domain_reference_entry(SaHpiDomainIdT domain_id)
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiDomainReferenceTable_context *ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_domain_reference_entry, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domain_id));	
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+                        
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if (ctx->index.oids[saHpiDRTDomainId_INDEX] == 
+                             domain_id) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiDomainReferenceTable_delete_row (ctx);
+                                domain_reference_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, 
+                                             "clear_domain_reference_entry:"
+                                             " found row: removing\n"));
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
+
 int
 handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
