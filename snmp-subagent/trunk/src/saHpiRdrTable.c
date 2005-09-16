@@ -111,7 +111,7 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 
         /*
         remove all matching rows for domainId and resourceId pairs.
-        seems have to pass in if this a new rdr or existing to theunder lying tables.
+        seems have to pass in if this a new rdr or existing to the under lying tables.
         then we can determine
 
         for every this rdr it should be very simple to vector down into the accompanying 
