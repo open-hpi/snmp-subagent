@@ -54,6 +54,7 @@
 #include <saHpiSensorThdUpMinorTable.h>
 #include <saHpiSensorThdPosHysteresisTable.h>
 #include <saHpiSensorThdNegHysteresisTable.h>
+#include <saHpiRdrTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -149,7 +150,11 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		sensor_context = 
 		saHpiSensorTable_create_row(&sensor_index);
                 new_row = MIB_TRUE;
-	}
+	} else {
+                DEBUGMSGTL ((AGENT, "SAHPI_SENSOR_RDR populate_sensor() "
+                             "CONTAINER_FIND() found\n"));
+        }
+
 	if (!sensor_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor row!");
 		return AGENT_ERR_INTERNAL_ERROR;
@@ -292,8 +297,11 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			     oh_lookup_error(rv)));
 	}
 
-	if (new_row == MIB_TRUE)
+	if (new_row == MIB_TRUE) {
                 CONTAINER_INSERT (cb.container, sensor_context);
+		DEBUGMSGTL ((AGENT, "populate_sensor: "
+                             "CONTAINER_INSERT()'ing\n"));
+        }
 
 	sensor_entry_count = CONTAINER_SIZE (cb.container);
 
@@ -369,6 +377,69 @@ SaErrorT clear_sensor(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId)
         } 
 
         return rv;
+}
+
+/**
+ * 
+ * @sessionid
+ * @event
+ * @rdr
+ * @rpt_entry
+ * 
+ * @return 
+ */
+SaErrorT async_sensor_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                          SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry)
+{
+        SaErrorT rv = SA_OK;
+
+        oid 			rdr_oid[RDR_INDEX_NR];
+        netsnmp_index 		rdr_index;
+
+        oid column[2];
+        int column_len = 2;
+        oid full_oid[MAX_OID_LEN];
+        size_t full_oid_len;
+        oid child_oid[MAX_OID_LEN];
+        size_t child_oid_len;
+
+	DEBUGMSGTL ((AGENT, "async_sensor_add, called\n"));	
+
+       	/* From MIB table index 
+         * INDEX { 
+         *	saHpiDomainId, 
+	 *	saHpiResourceId, 
+	 *      saHpiResourceIsHistorical,
+	 *	saHpiRdrEntryId
+	 * }
+         */
+        rdr_index.len = RDR_INDEX_NR;
+	rdr_oid[0] = get_domain_id(sessionid);   
+	rdr_oid[1] = rpt_entry->ResourceId;
+	rdr_oid[2] = MIB_FALSE;
+	rdr_oid[3] = rdr->RecordId;
+	rdr_index.oids = (oid *) &rdr_oid;
+
+	/*
+	 * Build the full oid for THIS psuedo rdr, then pass it to
+	 * the populate_sensor() for its RowPointer. 
+	 */
+	column[0] = 1;
+	column[1] = COLUMN_SAHPIRDRENTRYID;
+	memset(full_oid, 0, MAX_OID_LEN);
+	build_full_oid (saHpiRdrTable_oid, saHpiRdrTable_oid_len,
+			column, column_len,
+			&rdr_index,
+			full_oid, MAX_OID_LEN, &full_oid_len);
+
+        rv =  populate_sensor(sessionid, 
+                              rdr,
+                              rpt_entry,
+                              full_oid,  full_oid_len,
+                              child_oid, &child_oid_len);
+
+        return rv;
+                                          
 }
 
 /*

@@ -17,7 +17,7 @@ extern "C" {
     
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/library/container.h>
-#include <net-snmp/agent/table_array.h>
+#include <net-snmp/agent/table_array.h>                 
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -107,6 +107,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			 SaHpiRptEntryT *rpt_entry,
 			 oid *full_oid, size_t full_oid_len,
 			 oid *child_oid, size_t *child_oid_len);
+SaErrorT async_sensor_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                          SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry);
 SaErrorT clear_sensor(SaHpiDomainIdT domainId, SaHpiResourceIdT resourceId);
 
 
