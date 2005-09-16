@@ -108,6 +108,9 @@ typedef struct saHpiDomainInfoTable_context_s {
  * function declarations: OpenHpi
  */
 int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid);
+SaErrorT async_domain_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                          SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry);
+SaErrorT clear_domain_info_entry(SaHpiDomainIdT domain_id); 
 
 /*************************************************************
  * function declarations

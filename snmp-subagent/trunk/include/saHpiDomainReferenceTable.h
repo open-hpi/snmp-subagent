@@ -23,7 +23,6 @@ extern "C" {
 
         /** Index saHpiDomainId is external */
         /** Index saHpiDomainRef is internal */
-#define DOMAIN_REFERENCE_INDEX_NR	2        
 
 typedef struct saHpiDomainReferenceTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
@@ -55,6 +54,7 @@ typedef struct saHpiDomainReferenceTable_context_s {
  * function declarations: OpenHpi
  */
 int poplulate_saHpiDomainReferenceTable(SaHpiSessionIdT sessionid); 
+SaErrorT clear_domain_reference_entry(SaHpiDomainIdT domain_id);
 
 /*************************************************************
  * function declarations
@@ -82,6 +82,10 @@ extern size_t saHpiDomainReferenceTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiDomainReferenceTable
  */
+#define DOMAIN_REFERENCE_INDEX_NR	2
+#define saHpiDRTDomainId_INDEX 0
+#define saHpiDRTDomainRef_INDEX 1
+
 #define COLUMN_SAHPIDOMAINREF 1
 #define COLUMN_SAHPIDOMAINREFERENCEISPEER 2
 #define saHpiDomainReferenceTable_COL_MIN 2
