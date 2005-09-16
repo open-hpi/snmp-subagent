@@ -38,9 +38,11 @@
 
 #include <SaHpi.h>
 #include "saHpiDomainInfoTable.h"
+#include <saHpiDomainReferenceTable.h>
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 
+#include <SaHpi.h>
 #include <oh_utils.h>
 #include <session_info.h>
 
@@ -209,6 +211,71 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	return rv;
 }
 
+SaErrorT async_domain_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                          SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry)
+{        
+        SaErrorT rv = SA_OK;
+
+        if (event->EventDataUnion.DomainEvent.Type == 
+            SAHPI_DOMAIN_REF_REMOVED) {
+                rv = clear_domain_info_entry(
+                        event->EventDataUnion.DomainEvent.DomainId);
+                if (rv != SA_OK) return rv;
+                rv = clear_domain_reference_entry(
+                        event->EventDataUnion.DomainEvent.DomainId);
+        } else if (event->EventDataUnion.DomainEvent.Type == 
+                   SAHPI_DOMAIN_REF_ADDED) {
+                rv = populate_saHpiDomainInfoTable(
+                        get_session_id(event->EventDataUnion.DomainEvent.DomainId));
+                if (rv != SA_OK) return rv;
+                rv = poplulate_saHpiDomainReferenceTable(
+                        get_session_id(event->EventDataUnion.DomainEvent.DomainId)); 
+        } else {
+                rv =  SA_ERR_HPI_INVALID_PARAMS;
+        }
+
+        return rv;
+}
+
+/**
+ * 
+ * @sessionid
+ * 
+ * @return 
+ */
+SaErrorT clear_domain_info_entry(SaHpiDomainIdT domain_id)
+{
+        SaErrorT rv = SA_OK;
+        netsnmp_index *row_idx;
+        saHpiDomainInfoTable_context *ctx;
+
+	DEBUGMSGTL ((AGENT, "clear_domain_info_entry, called\n"));	
+	DEBUGMSGTL ((AGENT, "           domainId   [%d]\n", domain_id));	
+
+        row_idx = CONTAINER_FIRST(cb.container);
+        if (row_idx) //At least one entry was found.
+        {
+                do {
+                        ctx = CONTAINER_FIND(cb.container, row_idx);
+                        
+                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+
+                        if (ctx->index.oids[saHpiDomainId_INDEX] == domain_id) {
+
+                                /* all conditions met remove row */
+                                CONTAINER_REMOVE (cb.container, ctx);
+                                saHpiDomainInfoTable_delete_row (ctx);
+                                domain_info_entry_count = 
+                                        CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "clear_domain_info_entry:"
+                                             " found row: removing\n"));
+                        }
+
+                } while (row_idx);
+        } 
+
+        return rv;
+}
 
 /*
  * int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx)
