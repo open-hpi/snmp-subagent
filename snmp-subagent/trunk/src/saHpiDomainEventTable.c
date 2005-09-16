@@ -153,7 +153,8 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventTimestamp = event->Timestamp;
 
         /** INTEGER = ASN_INTEGER */
-        domain_evt_ctx->saHpiDomainEventType = event->EventType + 1;
+        domain_evt_ctx->saHpiDomainEventType = 
+                event->EventDataUnion.DomainEvent.Type + 1;
 
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, domain_evt_ctx);
@@ -244,7 +245,8 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventTimestamp = event->Timestamp;
 
         /** INTEGER = ASN_INTEGER */
-        domain_evt_ctx->saHpiDomainEventType = event->EventType + 1;
+        domain_evt_ctx->saHpiDomainEventType = 
+                event->EventDataUnion.DomainEvent.Type + 1;
 
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, domain_evt_ctx);
