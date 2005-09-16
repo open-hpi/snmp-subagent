@@ -166,7 +166,7 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
         res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&res_evt_ctx->saHpiResourceEventTimestamp.high,
+        memcpy(&res_evt_ctx->saHpiResourceEventTimestamp,
 	       &event->Timestamp, sizeof(struct counter64));
 
         /** INTEGER = ASN_INTEGER */
