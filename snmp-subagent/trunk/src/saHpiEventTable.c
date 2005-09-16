@@ -50,6 +50,7 @@
 #include <saHpiSensorEnableChangeEventTable.h>
 #include <saHpiUserEventTable.h>
 #include <saHpiSensorEventTable.h>
+#include <saHpiDomainInfoTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
 
@@ -136,7 +137,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiDomainEventTable(sessionid, &event,                                           
                                                        child_oid, 
                                                        &child_oid_len);
-//TODO DMJ                        rv = async_domain_add(sessionid, event, rdr, rpt_entry);
+                        rv = async_domain_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_SENSOR:
                         printf("SAHPI_ET_SENSOR: rv [%d]\n", rv);
@@ -259,6 +260,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 {
 
         SaErrorT rv = SA_OK;
+        SaErrorT rc = SA_OK;
         int new_row = MIB_FALSE;
 
 	oid event_oid[MAX_OID_LEN];
@@ -278,14 +280,14 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		                              rdr, rpt_entry,                                           
                                               child_oid, 
                                               &child_oid_len);
-                rv = async_resource_add(sessionid, event, rdr, rpt_entry);
+                rc = async_resource_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_DOMAIN:
                 rv = async_domain_event_add(sessionid, event,
 		                            rdr, rpt_entry,                                           
                                             child_oid, 
                                             &child_oid_len);
-//TODO DMJ                rv = async_domain_add(sessionid, event, rdr, rpt_entry);
+                rc = async_domain_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_SENSOR:
                 rv = async_sensor_event_add(sessionid, event,
