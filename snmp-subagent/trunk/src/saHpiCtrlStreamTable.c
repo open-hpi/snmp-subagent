@@ -912,7 +912,7 @@ void saHpiCtrlStreamTable_set_reserve1( netsnmp_request_group *rg )
 		}
 
 		if (rc)
-			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc );
+			netsnmp_request_set_error( current->ri, rc );
 		rg->status = SNMP_MAX( rg->status, current->ri->status );
 	}
 
@@ -989,7 +989,7 @@ void saHpiCtrlStreamTable_set_reserve2( netsnmp_request_group *rg )
 		}
 
 		if (rc)
-			netsnmp_set_mode_request_error(MODE_SET_BEGIN, current->ri, rc);
+			netsnmp_request_set_error( current->ri, rc);
 	}
 
 	/*
@@ -1055,8 +1055,7 @@ void saHpiCtrlStreamTable_set_action( netsnmp_request_group *rg )
 	}
 
 	if (row_err) {
-		netsnmp_set_mode_request_error(MODE_SET_BEGIN,
-					       (netsnmp_request_info*)rg->rg_void,
+		netsnmp_request_set_error((netsnmp_request_info*)rg->rg_void,
 					       row_err);
 		return;
 	}
