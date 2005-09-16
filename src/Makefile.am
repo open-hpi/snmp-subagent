@@ -1,13 +1,12 @@
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES 		= -I$(top_srcdir)/include
+INCLUDES 		= -I$(top_srcdir)/include -I/home/davej/dev/openhpi/include
  
 AM_CFLAGS 		= @CFLAGS@
 
 bin_PROGRAMS		= hpiSubagent
 
 SUBDIRS                 = 
-
 
 hpiSubagent_SOURCES	= alarm.c \
 			hpiCheckIndice.c \
@@ -75,9 +74,6 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiAnnouncementEventLogTable.c								
 				
 
-
-hpiSubagent_LDADD	= 
-hpiSubagent_LDFLAGS	= 
 
 clean:
 	rm -f *~
