@@ -698,37 +698,37 @@ int delete_fields(SaHpiSessionIdT  session_id,
 
 	field_index = CONTAINER_FIRST(cb.container);
 	
-
 	if (field_index) {
-		
-		field_ctx = CONTAINER_FIND(cb.container, field_index);
-		
-		do {			
+
+		do {	
+			field_ctx = CONTAINER_FIND(cb.container, field_index);		
 			
-			if (field_ctx) {
-				if (  (field_ctx->index.oids[saHpiDomainId_field_INDEX] == 
+			if (  (field_ctx->index.oids[saHpiDomainId_field_INDEX] == 
 		                                                      get_domain_id(session_id))
 		 	 	 && (field_ctx->index.oids[saHpiResourceEntryId_field_INDEX] == resource_id) 
 	     	  	  	 && (field_ctx->index.oids[saHpiInventoryId_field_INDEX] == idr_id) 
 	          	  	 && (field_ctx->index.oids[saHpiAreaId_field_INDEX] == area_id) )
-				{		   	       		
-					if (CONTAINER_REMOVE(cb.container, field_ctx) != 0) 
-					{
-					     DEBUGMSGTL ((AGENT,"delete_fields: FAILURE IN REMOVE FIELDS\n"));
-					     return SA_ERR_HPI_UNKNOWN;
-					}
-					saHpiFieldTable_delete_row(field_ctx);
-					field_entry_count = CONTAINER_SIZE (cb.container);
-                                        DEBUGMSGTL ((AGENT, "delete_fields: found row for "
+			{	
+				
+				field_index = CONTAINER_NEXT(cb.container, field_index);	   	       		
+				
+				if (CONTAINER_REMOVE(cb.container, field_ctx) != 0) 
+				{
+				     DEBUGMSGTL ((AGENT,"delete_fields: FAILURE IN REMOVE FIELDS\n"));
+				     return SA_ERR_HPI_UNKNOWN;
+				}
+					
+				saHpiFieldTable_delete_row(field_ctx);
+				field_entry_count = CONTAINER_SIZE (cb.container);
+                                DEBUGMSGTL ((AGENT, "delete_fields: found row for "
                                                      "deletion\n"));						
 									
-				}
 			}
-			
-			field_index = CONTAINER_NEXT(cb.container, field_index);
-			field_ctx = CONTAINER_FIND(cb.container, field_index);
-		
-		}while(field_ctx);	
+			else {
+				field_index = CONTAINER_NEXT(cb.container, field_index);
+			}
+								
+		}while(field_index);	
 
 	}	
 
