@@ -92,7 +92,7 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	/* check for NULL pointers */
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
-			     "ERROR: populate_ctpopulate_current_sensor_staterl_text() passed NULL rdr_entry pointer\n"));
+			     "ERROR: populate_current_sensor_state() passed NULL rdr_entry pointer\n"));
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
@@ -154,7 +154,8 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 					    &event_state);
 		if (rv != SA_OK) {
 			DEBUGMSGTL ((AGENT, 
-				     "ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
+				     "ERROR: populate_current_sensor_state() "
+                                     "oh_decode_eventstate() ERRORED out\n"));
 			saHpiCurrentSensorStateTable_delete_row( current_sensor_state_context );
 			return AGENT_ERR_INTERNAL_ERROR;
 		}
@@ -254,6 +255,191 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 
 	return rv;
 }  
+
+SaErrorT async_sensor_enable_change_add(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event, 
+                                        SaHpiRdrT *rdr_entry, 
+                                        SaHpiRptEntryT *rpt_entry)
+{
+	SaErrorT rv = SA_OK;
+
+	oid             current_sensor_state_oid[CURRENT_SENSOR_STATE_INDEX_NR];
+	netsnmp_index   current_sensor_state_index;
+	saHpiCurrentSensorStateTable_context *current_sensor_state_context;
+
+	SaHpiTextBufferT        buffer;
+
+	SaHpiSensorReadingT     reading;
+	SaHpiEventStateT        event_state;
+
+	SaHpiBoolT              sensor_enabled;
+	SaHpiBoolT              sensor_events_enabled;
+
+	SaHpiEventStateT        assert_event_mask;
+	SaHpiEventStateT        deassert_event_mask;
+
+	DEBUGMSGTL ((AGENT, "async_sensor_enable_change_add, called\n"));
+
+	/* check for NULL pointers */
+	if (!rdr_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: async_sensor_enable_change_add passed "
+                             "NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+	if (!rpt_entry) {
+		DEBUGMSGTL ((AGENT, 
+			     "ERROR: async_sensor_enable_change_add passed "
+                             "NULL rdr_entry pointer\n"));
+		return AGENT_ERR_INTERNAL_ERROR;
+	}
+
+	/* BUILD oid for new row */
+	/* assign the number of indices */
+	current_sensor_state_index.len = CURRENT_SENSOR_STATE_INDEX_NR;
+	/** Index saHpiDomainId is external */
+	current_sensor_state_oid[0] = get_domain_id(sessionid);
+	/** Index saHpiResourceId is external */
+	current_sensor_state_oid[1] = event->Source;
+	/** Index saHpiSensorNum */
+	current_sensor_state_oid[2] = event->EventDataUnion.SensorEnableChangeEvent.SensorNum;
+	/* assign the indices to the index */
+	current_sensor_state_index.oids = (oid *) & current_sensor_state_oid;
+
+	/* See if Row exists. */
+	current_sensor_state_context = NULL;
+	current_sensor_state_context = CONTAINER_FIND(cb.container, 
+                                                      &current_sensor_state_index);
+
+	if (!current_sensor_state_context) {
+		DEBUGMSGTL ((AGENT, "async_sensor_enable_change_add: "
+                          "row not found!\n"));
+		return AGENT_ERR_NOT_FOUND;
+	}
+
+	/** INTEGER = ASN_INTEGER */  
+	if (!rdr_entry->RdrTypeUnion.SensorRec.Events && 
+	    !rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported) {
+		current_sensor_state_context->saHpiCurrentSensorStateDataPresent =
+		4; /* noData(4) */
+	} else if (rdr_entry->RdrTypeUnion.SensorRec.Events && 
+		   rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported) {
+		current_sensor_state_context->saHpiCurrentSensorStateDataPresent =
+		3; /* readingAndEventState(3) */
+	} else if (rdr_entry->RdrTypeUnion.SensorRec.Events) {
+		current_sensor_state_context->saHpiCurrentSensorStateDataPresent =
+		2; /* eventState(2) */
+	} else { /* (rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported) */
+		current_sensor_state_context->saHpiCurrentSensorStateDataPresent =
+		1; /* reading(1) */
+	}
+
+	/* if state or event support exist get */
+	if (current_sensor_state_context->saHpiCurrentSensorStateDataPresent) {
+		rv = saHpiSensorReadingGet (sessionid, 
+					    rpt_entry->ResourceId, 
+					    rdr_entry->RdrTypeUnion.SensorRec.Num,
+					    &reading,
+					    &event_state);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, 
+				     "ERROR: async_sensor_enable_change_add"
+                                     " oh_decode_eventstate() ERRORED out\n"));
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+	}
+
+	/* If reading supported populate the following two elements */
+	if (rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported == SAHPI_TRUE) {
+		/** SaHpiSensorReadingType = ASN_INTEGER */
+		current_sensor_state_context->saHpiCurrentSensorStateType =
+		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
+
+		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
+		current_sensor_state_context->saHpiCurrentSensorStateValue_len = 
+		set_sensor_reading_value(&reading,
+                    current_sensor_state_context->saHpiCurrentSensorStateEventState);
+	}
+
+	/** SaHpiEventState = ASN_OCTET_STR */
+	if (rdr_entry->RdrTypeUnion.SensorRec.Events) {
+		rv = oh_decode_eventstate(event_state,
+					  rdr_entry->RdrTypeUnion.SensorRec.Category,
+					  &buffer);
+		oh_decode_char(&buffer);
+		memcpy(current_sensor_state_context->saHpiCurrentSensorStateEventState,
+		       buffer.Data, buffer.DataLength);
+		current_sensor_state_context->saHpiCurrentSensorStateEventState_len =
+		buffer.DataLength;
+	}
+
+	/** TruthValue = ASN_INTEGER */
+	rv = saHpiSensorEnableGet(sessionid, rpt_entry->ResourceId, 
+				  rdr_entry->RdrTypeUnion.SensorRec.Num, 
+				  &sensor_enabled);
+	current_sensor_state_context->saHpiCurrentSensorStateSensorEnable =
+	(sensor_enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;    
+
+	/** TruthValue = ASN_INTEGER */
+	rv = saHpiSensorEventEnableGet(sessionid, rpt_entry->ResourceId, 
+				       rdr_entry->RdrTypeUnion.SensorRec.Num,
+				       &sensor_events_enabled);
+	current_sensor_state_context->saHpiCurrentSensorStateEventEnable =
+	(sensor_events_enabled == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+
+
+	/*******************************************************/
+	/* get EventMasks and convert to string representation */
+	/*******************************************************/
+	rv = saHpiSensorEventMasksGet (sessionid,
+				       rpt_entry->ResourceId,
+				       rdr_entry->RdrTypeUnion.SensorRec.Num,
+				       &assert_event_mask,
+				       &deassert_event_mask);
+
+	/*******************************************************/
+	/* decode assert values  			       */
+	/*******************************************************/
+	rv = oh_decode_eventstate(assert_event_mask,
+				  rdr_entry->RdrTypeUnion.SensorRec.Category,
+				  &buffer);
+	oh_decode_char(&buffer);
+
+	/** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateAssertAddEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateAssertAddEventMask_len =
+	buffer.DataLength;
+
+	/** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateAssertRemoveEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateAssertRemoveEventMask_len =
+	buffer.DataLength;
+
+	/*******************************************************/
+	/* decode deassert values  			       */
+	/*******************************************************/
+	rv = oh_decode_eventstate(deassert_event_mask,
+				  rdr_entry->RdrTypeUnion.SensorRec.Category,
+				  &buffer);
+	oh_decode_char(&buffer);
+
+	/** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateDeassertAddEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateDeassertAddEventMask_len =
+	buffer.DataLength;                    
+
+	/** SaHpiEventState = ASN_OCTET_STR */
+	memcpy(current_sensor_state_context->saHpiCurrentSensorStateDeassertRemoveEventMask,
+	       buffer.Data, buffer.DataLength);
+	current_sensor_state_context->saHpiCurrentSensorStateDeassertRemoveEventMask_len =
+	buffer.DataLength;  
+
+	return rv;
+}
 
 
 /**

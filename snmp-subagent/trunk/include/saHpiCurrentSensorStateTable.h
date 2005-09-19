@@ -97,6 +97,10 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 				       SaHpiRdrT *rdr_entry,
 				       SaHpiRptEntryT *rpt_entry,
 				       oid *full_oid, size_t full_oid_len);
+SaErrorT async_sensor_enable_change_add(SaHpiSessionIdT sessionid,
+                                        SaHpiEventT *event, 
+                                        SaHpiRdrT *rdr_entry, 
+                                        SaHpiRptEntryT *rpt_entry);
 SaErrorT clear_current_sensor_state(SaHpiDomainIdT domainId, 
                                     SaHpiResourceIdT resourceId);
 
