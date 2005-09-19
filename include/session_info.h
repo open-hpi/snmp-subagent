@@ -20,6 +20,7 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
 #include <net-snmp/agent/net-snmp-agent-includes.h>
+//#include <net-snmp/agent/table_array.h>
 #include <signal.h>
 
 #include <stdio.h>
@@ -118,5 +119,7 @@ int oh_encode_exp_flags(SaHpiTextBufferT *buffer,
 
 void res_cap_map(SaHpiUint16T *rs_cap, SaHpiRptEntryT *rpt_entry);
 void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry);
+
+int assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp);
 
 #endif //_SESSION_INFO_H_

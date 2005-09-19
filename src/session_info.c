@@ -748,3 +748,39 @@ void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry)
 		*hs_cap |= 0x20;
 }
 
+
+/**
+ * 
+ * @evt_timestamp - pointer to the timestamp HPI uses and assigns.
+ * @row_timestamp - pointer to the timestamp column in the row.
+ * 
+ * Based on endiness, assigns the timestamp referenced by evt_timestamp to
+ * row_timestamp.
+ */
+int assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp)
+{
+      
+        if (!evt_timestamp || !row_timestamp) {
+		return -1;
+	}
+	
+	/*********************************************
+	 * LE - LSB is in lower byte location.
+	 * BE - MSB is in lower byte location.
+	 * Test for big/little endian from endian.h
+	 ********************************************/
+	 
+        if (__BYTE_ORDER == __LITTLE_ENDIAN) {
+	
+		memcpy(&(row_timestamp->low), evt_timestamp, sizeof(long));
+		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));	
+	}
+	else {
+	
+		memcpy(&(row_timestamp->high), evt_timestamp, sizeof(long));
+		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));
+	}
+	
+	return 0;
+	
+}
