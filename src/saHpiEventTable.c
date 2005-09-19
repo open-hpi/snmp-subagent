@@ -48,6 +48,7 @@
 #include <saHpiWatchdogEventTable.h>
 #include <saHpiSoftwareEventTable.h>
 #include <saHpiSensorEnableChangeEventTable.h>
+#include <saHpiCurrentSensorStateTable.h>
 #include <saHpiUserEventTable.h>
 #include <saHpiSensorEventTable.h>
 #include <saHpiDomainInfoTable.h>
@@ -154,6 +155,8 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiSensorEnableChangeEventTable(sessionid, &event,                                           
                                                        child_oid, 
                                                        &child_oid_len);
+                        async_sensor_enable_change_add(sessionid, &event, 
+                                                       &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_HOTSWAP:
                         printf("SAHPI_ET_HOTSWAP: rv [%d]\n\n", rv);
@@ -302,6 +305,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                                           rdr, rpt_entry,
 							  child_oid, 
                                                           &child_oid_len);
+                async_sensor_enable_change_add(sessionid, event, 
+                                               rdr, rpt_entry);
                 break;
         case SAHPI_ET_HOTSWAP:
                 rv = async_hotswap_event_add(sessionid, event,
@@ -320,7 +325,6 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                               rdr, rpt_entry,
 					      child_oid, 
                                               &child_oid_len);
-
                 break;
         case SAHPI_ET_OEM:
                 rv = async_oem_event_add(sessionid, event,                                           
