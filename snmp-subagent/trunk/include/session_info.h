@@ -122,4 +122,6 @@ void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry);
 
 void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp);
 
+int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp);
+
 #endif //_SESSION_INFO_H_
