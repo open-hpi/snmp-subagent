@@ -106,6 +106,8 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
                            SaHpiRptEntryT *rpt_entry,
                            oid *full_oid, size_t full_oid_len,
                            oid *child_oid, size_t *child_oid_len);
+SaErrorT async_watchdog_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                            SaHpiRdrT *rdr_entry, SaHpiRptEntryT *rpt_entry);
 SaErrorT clear_watchdog(SaHpiDomainIdT domainId, 
                         SaHpiResourceIdT resourceId);
 

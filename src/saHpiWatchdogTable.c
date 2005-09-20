@@ -235,6 +235,140 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
 
 /**
  * 
+ * @sessionid
+ * @event
+ * @rdr_entry
+ * @rpt_entry
+ * 
+ * @return 
+ */
+SaErrorT async_watchdog_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
+                            SaHpiRdrT *rdr_entry, SaHpiRptEntryT *rpt_entry)
+{
+
+        SaErrorT rv = SA_OK;
+        int new_row = MIB_FALSE;
+        SaHpiWatchdogT watchdog;
+        SaHpiTextBufferT buffer;
+
+        oid watchdog_oid[WATCHDOG_INDEX_NR];
+        netsnmp_index watchdog_idx;
+        saHpiWatchdogTable_context *watchdog_ctx;
+
+        DEBUGMSGTL ((AGENT, "async_watchdog_add(), called\n"));
+
+        /* check for NULL pointers */
+        if (!rdr_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: async_watchdog_add() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: async_watchdog_add() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        watchdog_idx.len = WATCHDOG_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        watchdog_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        watchdog_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        watchdog_oid[2] = MIB_FALSE;
+        /** Index saHpiSensorNum */
+        watchdog_oid[3] = rdr_entry->RdrTypeUnion.WatchdogRec.WatchdogNum;
+        /* assign the indices to the index */
+        watchdog_idx.oids = (oid *) & watchdog_oid;
+
+        /* See if Row exists. */
+        watchdog_ctx = NULL;
+        watchdog_ctx = CONTAINER_FIND(cb.container, &watchdog_idx);
+
+        if (!watchdog_ctx) {
+                DEBUGMSGTL ((AGENT, "async_watchdog_add(): row not found\n"));
+                return AGENT_ERR_NOT_FOUND;
+        }
+
+        rv = saHpiWatchdogTimerGet (sessionid,
+                                    rpt_entry->ResourceId,
+                                    rdr_entry->RdrTypeUnion.WatchdogRec.WatchdogNum,
+                                    &watchdog);
+        if (rv != SA_OK) {
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+
+        /** SaHpiInstrumentId = ASN_UNSIGNED */
+        watchdog_ctx->saHpiWatchdogNum = 
+                rdr_entry->RdrTypeUnion.WatchdogRec.WatchdogNum;
+
+        /** TruthValue = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogLog = 
+                (watchdog.Log == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** TruthValue = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogRunning = 
+                (watchdog.Running == SAHPI_TRUE) ? MIB_TRUE : MIB_FALSE;
+
+        /** SaHpiWatchdogTimerUse = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogTimerUseState = 
+                watchdog.TimerUse + 1;
+
+        /** INTEGER = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogTimerAction =
+                watchdog.TimerAction + 1;
+
+        /** SaHpiWatchdogPreTimerAction = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogPretimerInterrupt =
+                watchdog.PretimerInterrupt + 1;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        watchdog_ctx->saHpiWatchdogPreTimeoutInterval =
+                watchdog.PreTimeoutInterval;
+
+        /** OCTETSTR = ASN_OCTET_STR */
+        rv = oh_decode_exp_flags(watchdog.TimerUseExpFlags, &buffer);
+        watchdog_ctx->saHpiWatchdogTimerUseExpFlags_len = buffer.DataLength;
+        memcpy(watchdog_ctx->saHpiWatchdogTimerUseExpFlags,
+               buffer.Data,
+               buffer.DataLength);
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        watchdog_ctx->saHpiWatchdogTimerInitialCount = watchdog.InitialCount;
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        watchdog_ctx->saHpiWatchdogTimerPresentCount = watchdog.PresentCount;
+
+        /** TruthValue = ASN_INTEGER */
+        watchdog_ctx->saHpiWatchdogTimerReset = MIB_FALSE;  
+
+        /** UNSIGNED32 = ASN_UNSIGNED */
+        watchdog_ctx->saHpiWatchdogOem = 
+                rdr_entry->RdrTypeUnion.WatchdogRec.Oem;
+
+        /** RowPointer = ASN_OBJECT_ID */
+        /* don't have  all the necessary data AND if we found the Row   */
+        /* this should not change                                       */
+        /*
+        memset(watchdog_ctx->saHpiWatchdogRDR, 
+               0, 
+               sizeof(watchdog_ctx->saHpiWatchdogRDR));
+        watchdog_ctx->saHpiWatchdogRDR_len = 
+        full_oid_len * sizeof(oid);
+        memcpy(watchdog_ctx->saHpiWatchdogRDR, 
+               full_oid, 
+               watchdog_ctx->saHpiWatchdogRDR_len);
+        */
+
+        return rv;
+}
+
+
+/**
+ * 
  * @domainId
  * @resourceId
  * 
