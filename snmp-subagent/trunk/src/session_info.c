@@ -757,11 +757,12 @@ void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry)
  * Based on endiness, assigns the timestamp referenced by evt_timestamp to
  * row_timestamp.
  */
-int assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp)
+void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp)
 {
       
         if (!evt_timestamp || !row_timestamp) {
-		return -1;
+		row_timestamp->low = 0;
+		row_timestamp->high = 0;
 	}
 	
 	/*********************************************
@@ -780,7 +781,5 @@ int assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp)
 		memcpy(&(row_timestamp->high), evt_timestamp, sizeof(long));
 		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));
 	}
-	
-	return 0;
 	
 }
