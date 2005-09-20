@@ -150,7 +150,7 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventEntryId = domain_evt_oid[2];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        domain_evt_ctx->saHpiDomainEventTimestamp = event->Timestamp;
+	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventTimestamp);
 
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = 
@@ -242,7 +242,7 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventEntryId = domain_evt_oid[2];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        domain_evt_ctx->saHpiDomainEventTimestamp = event->Timestamp;
+	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventTimestamp);
 
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = 

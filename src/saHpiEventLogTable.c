@@ -262,9 +262,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 	        event_log_entry.Event.EventType + 1; 
 
                 	/** SaHpiTime = ASN_COUNTER64 */
-			memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
-                        	&event_log_entry.Timestamp,
-				sizeof(struct counter64));			                	
+			assign_timestamp(&event_log_entry.Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);			                	
 
                 	/** RowPointer = ASN_OBJECT_ID */
                 	evt_log_context->saHpiEventLogRowPointer_len = 
@@ -435,9 +433,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 		event_log_entry.Event.EventType + 1; 
 
 	        	/** SaHpiTime = ASN_COUNTER64 */
-			memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
-                        	&event_log_entry.Timestamp,
-				sizeof(struct counter64));
+			assign_timestamp(&event_log_entry.Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);
 
 	        	/** RowPointer = ASN_OBJECT_ID */
         		evt_log_context->saHpiEventLogRowPointer_len = 
@@ -526,9 +522,7 @@ int event_log_add(SaHpiSessionIdT session_id,
                 event->EventType + 1; 
 
         /** SaHpiTime = ASN_COUNTER64 */
-	memcpy(&evt_log_context->saHpiEventLogAddedTimestamp.high, 
-                        	&event->Timestamp,
-				sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);
 
         /** RowPointer = ASN_OBJECT_ID */
         evt_log_context->saHpiEventLogRowPointer_len = 

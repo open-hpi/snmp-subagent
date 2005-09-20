@@ -136,9 +136,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                         event_log_info.UserEventMaxSize;
 
                 /** SaHpiTime = ASN_COUNTER64 */
-                memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
-                        &event_log_info.UpdateTimestamp,
-			sizeof(struct counter64));
+		assign_timestamp(&event_log_info.UpdateTimestamp, 
+		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
                 /** SaHpiTime = ASN_OPAQUE */
                 evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -248,9 +247,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                 event_log_info.UserEventMaxSize;
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
-               &event_log_info.UpdateTimestamp,
-	       sizeof(struct counter64));
+	assign_timestamp(&event_log_info.UpdateTimestamp, 
+	                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
         /** SaHpiTime = ASN_OPAQUE */
         evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -549,9 +547,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 		}	
 			
 	
-		if ((isNewRow == MIB_TRUE) || (memcmp(&event_log_info.UpdateTimestamp, 
-			                       &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high,
-					       sizeof(struct counter64)) != 0)) {	
+		if ((isNewRow == MIB_TRUE) || (compare_timestamp(&event_log_info.UpdateTimestamp,
+		                              &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {	
                 	
 			/** UNSIGNED32 = ASN_UNSIGNED */
                 	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
@@ -564,9 +561,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                         event_log_info.UserEventMaxSize;
 
                 	/** SaHpiTime = ASN_COUNTER64 */
-               		memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
-                        	&event_log_info.UpdateTimestamp,
-				sizeof(struct counter64));
+			assign_timestamp(&event_log_info.UpdateTimestamp, 
+			                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
                 	/** SaHpiTime = ASN_OPAQUE */
                 	evt_log_info_context->saHpiEventLogInfoTime_len = 
@@ -656,9 +652,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 		isNewRow = MIB_FALSE;
 	}	
 	
-	if ((isNewRow == MIB_TRUE) || (memcmp(&event_log_info.UpdateTimestamp, 
-			                       &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high,
-					       sizeof(struct counter64)) != 0)) {
+	if ((isNewRow == MIB_TRUE) || (compare_timestamp(&event_log_info.UpdateTimestamp,
+		                        &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {
 	        /** UNSIGNED32 = ASN_UNSIGNED */
         	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
 
@@ -670,9 +665,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                 	event_log_info.UserEventMaxSize;
 
 	        /** SaHpiTime = ASN_COUNTER64 */
-                memcpy(&evt_log_info_context->saHpiEventLogInfoUpdateTimestamp.high, 
-                        &event_log_info.UpdateTimestamp,
-			sizeof(struct counter64));
+		assign_timestamp(&event_log_info.UpdateTimestamp, 
+		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
 	        /** SaHpiTime = ASN_OPAQUE */
         	evt_log_info_context->saHpiEventLogInfoTime_len = 
