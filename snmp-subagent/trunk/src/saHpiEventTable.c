@@ -169,6 +169,7 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                         populate_saHpiWatchdogEventTable(sessionid, &event,
                                                          child_oid, 
                                                          &child_oid_len);
+                        async_watchdog_add(sessionid, &event, &rdr, &rpt_entry);
                         break;
                 case SAHPI_ET_HPI_SW:
                         printf("SAHPI_ET_HPI_SW: rv [%d]\n\n", rv);
@@ -319,6 +320,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 		                              rdr, rpt_entry,
                                               child_oid, 
                                               &child_oid_len);
+                async_watchdog_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_HPI_SW:
                 rv = async_software_event_add(sessionid, event,
