@@ -162,8 +162,7 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
         domain_evt_ctx->saHpiDomainEventLogEntryId = domain_evt_oid[1];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&domain_evt_ctx->saHpiDomainEventLogTimestamp.high, 
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventLogTimestamp);
 
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventLogType = 

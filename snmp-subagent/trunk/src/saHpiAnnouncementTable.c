@@ -219,8 +219,7 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                         rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
 	 	
                 /** SaHpiTime = ASN_COUNTER64 */
-                memcpy(&announcement_ctx->saHpiAnnouncementTimestamp.high,
-                       &announcement.Timestamp, sizeof(struct counter64));
+		assign_timestamp(&announcement.Timestamp, &announcement_ctx->saHpiAnnouncementTimestamp);
  
                 /** TruthValue = ASN_INTEGER */
                 announcement_ctx->saHpiAnnouncementAddedByUser = 
@@ -463,8 +462,7 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
                         row_ctx->saHpiAnnouncementStatusCondType - 1;
 
                 /* Timestamp */
-                memcpy(&announcement.Timestamp,
-                       &row_ctx->saHpiAnnouncementTimestamp.high, sizeof(struct counter64));
+		assign_timestamp(&announcement.Timestamp, &row_ctx->saHpiAnnouncementTimestamp);
 
                 session_id = get_session_id(row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX]);
                 resource_id = row_ctx->index.oids[saHpiAnnouncementResourceId_INDEX];

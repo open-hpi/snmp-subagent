@@ -151,8 +151,7 @@ SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
         hotswap_evt_ctx->saHpiHotSwapEventEntryId = hotswap_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&hotswap_evt_ctx->saHpiHotSwapEventTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
 
         /** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventState = 
@@ -262,8 +261,7 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
         hotswap_evt_ctx->saHpiHotSwapEventEntryId = hotswap_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&hotswap_evt_ctx->saHpiHotSwapEventTimestamp.high, 
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
 
         /** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventState = 

@@ -150,27 +150,24 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 		domain_info.DrtUpdateCount;
 
 	/** SaHpiTime = ASN_COUNTER64 */
-	memcpy(&domain_info_context->saHpiDomainReferenceUpdateTimestamp.high,
-	       &domain_info.DrtUpdateTimestamp,
-	       sizeof(struct counter64));
+	assign_timestamp(&domain_info.DrtUpdateTimestamp, 
+	                 &domain_info_context->saHpiDomainReferenceUpdateTimestamp);
     	
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainResourcePresenceUpdateCount =
 		domain_info.RptUpdateCount;
     	
 	/** SaHpiTime = ASN_COUNTER64 */
-	memcpy(&domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp.high,
-		&domain_info.RptUpdateTimestamp,
-		sizeof(struct counter64));
+	assign_timestamp(&domain_info.RptUpdateTimestamp, 
+	                 &domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp);;
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainAlarmUpdateCount =
 		domain_info.DatUpdateCount;
 
 	/** SaHpiTime = ASN_COUNTER64 */
-	memcpy(&domain_info_context->saHpiDomainAlarmUpdateTimestamp.high,
-		&domain_info.DatUpdateTimestamp,
-		sizeof(struct counter64));
+	assign_timestamp(&domain_info.DatUpdateTimestamp, 
+	                 &domain_info_context->saHpiDomainAlarmUpdateTimestamp);
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainActiveAlarms =
