@@ -761,8 +761,7 @@ void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 {
       
         if (!evt_timestamp || !row_timestamp) {
-		row_timestamp->low = 0;
-		row_timestamp->high = 0;
+		return;
 	}
 	
 	/*********************************************
