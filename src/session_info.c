@@ -782,3 +782,51 @@ void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 	}
 	
 }
+
+
+/**
+ * 
+ * @evt_timestamp - pointer to the timestamp HPI uses and assigns.
+ * @row_timestamp - pointer to the timestamp column in the row.
+ * 
+ * Based on endiness, compares the timestamp referenced by evt_timestamp to
+ * row_timestamp. 0 for equal, 1 for not equal.
+ */
+int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp)
+{        
+	if (!evt_timestamp || !row_timestamp) {
+		return -1;
+	}
+	
+	/*********************************************
+	 * LE - LSB is in lower byte location.
+	 * BE - MSB is in lower byte location.
+	 * Test for big/little endian from endian.h
+	 ********************************************/
+	 
+        if (__BYTE_ORDER == __LITTLE_ENDIAN) {
+	
+		if ( (memcmp(&(row_timestamp->low), evt_timestamp, sizeof(long)) == 0) && 
+                     (memcmp(&(row_timestamp->high), 
+		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+			
+			return 0;
+		}
+		else {
+			return 1;
+		}		
+			  	
+	}
+	else {
+	
+		if ( (memcmp(&(row_timestamp->high), evt_timestamp, sizeof(long)) == 0) && 
+		     (memcmp(&(row_timestamp->low), 
+		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+			    
+			return 0;
+		}
+		else {
+			return 1;
+		}		
+	}
+}
