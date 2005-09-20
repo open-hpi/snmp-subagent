@@ -173,8 +173,7 @@ SaErrorT populate_saHpiResourceEventLogTable(SaHpiSessionIdT sessionid,
         res_evt_ctx->saHpiResourceEventLogEntryId = res_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&res_evt_ctx->saHpiResourceEventLogTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &res_evt_ctx->saHpiResourceEventLogTimestamp);
 
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventLogType = 

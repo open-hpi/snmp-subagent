@@ -151,8 +151,7 @@ SaErrorT populate_saHpiSoftwareEventTable(SaHpiSessionIdT sessionid,
         software_evt_ctx->saHpiSoftwareEventEntryId = software_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&software_evt_ctx->saHpiSoftwareEventTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &software_evt_ctx->saHpiSoftwareEventTimestamp);
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         software_evt_ctx->saHpiSoftwareEventManufacturerIdT = 
@@ -278,8 +277,7 @@ SaErrorT async_software_event_add(SaHpiSessionIdT sessionid,
         software_evt_ctx->saHpiSoftwareEventEntryId = software_evt_oid[3];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&software_evt_ctx->saHpiSoftwareEventTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &software_evt_ctx->saHpiSoftwareEventTimestamp);
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         software_evt_ctx->saHpiSoftwareEventManufacturerIdT = 

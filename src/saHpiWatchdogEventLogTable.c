@@ -165,8 +165,7 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 	}
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&watchdog_evt_ctx->saHpiWatchdogEventLogTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventLogTimestamp);
 
         /** INTEGER = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventLogAction = 

@@ -165,8 +165,7 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&user_evt_ctx->saHpiUserEventLogTimestamp.high, 
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &user_evt_ctx->saHpiUserEventLogTimestamp);
 		
         /** SaHpiTextType = ASN_INTEGER */
         user_evt_ctx->saHpiUserEventLogTextType = 
@@ -350,8 +349,9 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
                 }
 
                 row_ctx->saHpiUserEventLogRowStatus = SAHPIUSEREVENTLOGROWSTATUS_ACTIVE;
-                memcpy(&row_ctx->saHpiUserEventLogTimestamp.high, 
-		       &event.Timestamp, sizeof(struct counter64));
+		
+		assign_timestamp(&event.Timestamp, &row_ctx->saHpiUserEventLogTimestamp);
+		
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
 
                 /* create full oid on This row for parent RowPointer */
@@ -1185,8 +1185,7 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
-            memcpy(&row_ctx->saHpiUserEventLogTimestamp.high,
-	           &*var->val.integer, sizeof(struct counter64));
+	    assign_timestamp((SaHpiTimeT *)&*var->val.integer, &row_ctx->saHpiUserEventLogTimestamp);
             row_ctx->timestamp_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
                     row_err = user_event_log_add (row_ctx);

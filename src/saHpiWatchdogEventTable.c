@@ -154,8 +154,7 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
         watchdog_evt_ctx->saHpiWatchdogEventEntryId = watchdog_evt_oid[4];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&watchdog_evt_ctx->saHpiWatchdogEventTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
 
         /** SaHpiWatchdogEventAction = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventAction = 
@@ -272,8 +271,7 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
         watchdog_evt_ctx->saHpiWatchdogEventEntryId = watchdog_evt_oid[4];
 
         /** SaHpiTime = ASN_COUNTER64 */
-        memcpy(&watchdog_evt_ctx->saHpiWatchdogEventTimestamp.high,
-	       &event->Timestamp, sizeof(struct counter64));
+	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
 
         /** SaHpiWatchdogEventAction = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventAction = 
