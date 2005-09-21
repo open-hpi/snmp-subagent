@@ -26,6 +26,7 @@
 #include <saHpiEventTable.h>
 #include <saHpiEventLogInfoTable.h>
 #include <session_info.h>
+#include <hpiEventThread.h>
 
 extern int alarm_interval;
 
@@ -112,6 +113,10 @@ do_alarm (unsigned int clientreg, void *clientarg)
                         break;
                 }
 
+
+		// Now check for updates to the event logs
+		rv = event_log_info_update(sessionid);
+		
 		rv = saHpiEventGet (sessionid,
                             SAHPI_TIMEOUT_IMMEDIATE,
                             &event,
@@ -123,8 +128,7 @@ do_alarm (unsigned int clientreg, void *clientarg)
         }
 	
 	
-	// Now check for updates to the event logs
-	rv = event_log_info_update(sessionid);
+
 	
 
         DEBUGMSGTL ((AGENT, "do_alarm: Exit\n"));
