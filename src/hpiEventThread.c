@@ -31,6 +31,7 @@
 #include <hpiSubagent.h>
 #include <hpiEventThread.h>
 #include <saHpiEventTable.h>
+#include <saHpiEventLogInfoTable.h>
 
 
 GThread *event_thread = NULL;
@@ -61,6 +62,8 @@ static gpointer event_thread_loop(gpointer data)
         SaHpiSessionIdT sessionid = *(SaHpiSessionIdT *)data;
 
         while(get_run_threaded()) {
+	
+		memset(&event, 0, sizeof(event));
                 DEBUGMSGTL ((AGENT, "event_thread_loop started ---- sessionid [%d]\n", sessionid));
                 rv = saHpiEventGet (get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
                                     SAHPI_TIMEOUT_BLOCK,
@@ -70,50 +73,57 @@ static gpointer event_thread_loop(gpointer data)
                                     &event_queue_status);
 
                 DEBUGMSGTL ((AGENT, "rv [%s]\n", oh_lookup_error(rv)));
-                DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
-                             oh_lookup_eventtype(event.EventType)));
-                oh_print_event(&event, 0);
 
                 /* serialize access */
                 g_mutex_lock(thread_mutex);
 
-                switch (event.EventType) {
-                case SAHPI_ET_RESOURCE:
-                        DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, [%s]\n",
-                                     oh_lookup_resourceeventtype(
-                                             event.EventDataUnion.ResourceEvent.ResourceEventType)));
-                        break;
-                case SAHPI_ET_DOMAIN:
-                      DEBUGMSGTL ((AGENT, "SAHPI_ET_DOMAIN, [%s]\n",
+		if (rv == SA_OK) { // NEW
+		
+		 	DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
+                                     oh_lookup_eventtype(event.EventType)));
+               	 	oh_print_event(&event, 0);
+                	
+			switch (event.EventType) {
+                		case SAHPI_ET_RESOURCE:
+                        		DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, [%s]\n",
+                                     	oh_lookup_resourceeventtype(
+                                             	event.EventDataUnion.ResourceEvent.ResourceEventType)));
+                        		break;
+                		case SAHPI_ET_DOMAIN:
+                      		DEBUGMSGTL ((AGENT, "SAHPI_ET_DOMAIN, [%s]\n",
                                    oh_lookup_domaineventtype(
                                            event.EventDataUnion.DomainEvent.Type)));
-                        break;
-                case SAHPI_ET_SENSOR:              
-                        break;
-                case SAHPI_ET_SENSOR_ENABLE_CHANGE:
-                        break;
-                case SAHPI_ET_HOTSWAP:
-                        break;
-                case SAHPI_ET_WATCHDOG:            
-                        break;
-                case SAHPI_ET_HPI_SW:  
-                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
-                                     oh_lookup_sweventtype(
-                                             event.EventDataUnion.HpiSwEvent.Type)));
-                        break;
-                case SAHPI_ET_OEM:              
-                        DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
-                                     oh_lookup_sweventtype(
-                                             event.EventDataUnion.HpiSwEvent.Type)));
-                        break;
-                case SAHPI_ET_USER: 
-                        break;
-                default:
-                        break;
-                }
+                       			break;
+                		case SAHPI_ET_SENSOR:              
+                        		break;
+                		case SAHPI_ET_SENSOR_ENABLE_CHANGE:
+                        		break;
+               		 	case SAHPI_ET_HOTSWAP:
+                       			break;
+                		case SAHPI_ET_WATCHDOG:            
+                        		break;
+                		case SAHPI_ET_HPI_SW:  
+                        		DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
+                                     		oh_lookup_sweventtype(
+                                             		event.EventDataUnion.HpiSwEvent.Type)));
+                        		break;
+                		case SAHPI_ET_OEM:              
+                        		DEBUGMSGTL ((AGENT, "SAHPI_ET_HPI_SW, [%s]\n",
+                                     		oh_lookup_sweventtype(
+                                             		event.EventDataUnion.HpiSwEvent.Type)));
+                        		break;
+                		case SAHPI_ET_USER: 
+                        		break;
+                		default:
+                       		 	break;
+               	 	}
 
-                rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+                	rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
+		
+			// Now check for updates to the event logs
+			rv = event_log_info_update(sessionid);
 
+		} // NEW
                 /* serialize access */
                 g_mutex_unlock(thread_mutex);
 
