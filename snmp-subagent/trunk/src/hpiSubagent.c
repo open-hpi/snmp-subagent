@@ -476,8 +476,9 @@ main (int argc, char **argv)
         /* Determine whether or not we're in threaded mode */
 	env = getenv("OPENHPI_THREADED");
 	if ((env == (char *)NULL) || (strcmp(env, "NO") == 0)) {
-                DEBUGMSGTL ((AGENT, "Running in nonthreaded mode.  Configuring polling mechanism\n"));  
+                DEBUGMSGTL ((AGENT, "Running in nonthreaded mode.  Configuring polling mechanism\n"));
                 run_threaded = SAHPI_FALSE;
+		set_run_threaded(FALSE);
 		if (init_alarm() != AGENT_ERR_NOERROR) {
                     snmp_log (LOG_ERR, "Could not initialize polling mechanism. Exiting\n.");
                     rc = -1;
