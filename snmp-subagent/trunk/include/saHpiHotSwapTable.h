@@ -91,7 +91,10 @@ int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx);
  */
 SaErrorT populate_hotswap(SaHpiSessionIdT sessionid, 
                            SaHpiRptEntryT *rpt_entry); 
-
+SaErrorT async_hotswap_add(SaHpiSessionIdT sessionid,
+                           SaHpiEventT *event, 
+                           SaHpiRdrT *rdr_entry, 
+                           SaHpiRptEntryT *rpt_entry);
 
 /*************************************************************
  * oid declarations

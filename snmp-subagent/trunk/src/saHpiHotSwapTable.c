@@ -73,12 +73,7 @@ int initialize_table_saHpiHotSwapEntryCount(void);
 /**
  * 
  * @sessionid:
- * @rdr_entry:
  * @rpt_entry:
- * @full_oid:
- * @full_oid_len:
- * @child_oid:
- * @child_oid_len:
  * 
  * @return 
  */
@@ -174,6 +169,89 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
                 CONTAINER_INSERT (cb.container, hotswap_ctx);
 
         hotswap_entry_count = CONTAINER_SIZE (cb.container);
+
+        populate_saHpiAutoInsertTimeoutTable(sessionid);
+
+        return rv;	
+}
+
+
+/**
+ * 
+ * @sessionid
+ * @event
+ * @rdr_entry
+ * @rpt_entry
+ * 
+ * @return 
+ */
+SaErrorT async_hotswap_add(SaHpiSessionIdT sessionid,
+                           SaHpiEventT *event, 
+                           SaHpiRdrT *rdr_entry, 
+                           SaHpiRptEntryT *rpt_entry)
+{
+        SaErrorT rv = SA_OK;
+
+        oid hotswap_oid[HOTSWAP_INDEX_NR];
+        netsnmp_index hotswap_idx;
+        saHpiHotSwapTable_context *hotswap_ctx;
+	
+	SaHpiHsIndicatorStateT indicator_state;
+	SaHpiTimeoutT extract_timeout;
+
+        DEBUGMSGTL ((AGENT, "async_hotswap_add(), called\n"));
+
+        if (!rpt_entry) {
+                DEBUGMSGTL ((AGENT, 
+                             "ERROR: async_hotswap_add() passed NULL rdr_entry pointer\n"));
+                return AGENT_ERR_INTERNAL_ERROR;
+        }
+
+        /* BUILD oid for new row */
+        /* assign the number of indices */
+        hotswap_idx.len = HOTSWAP_INDEX_NR;
+        /** Index saHpiDomainId is external */
+        hotswap_oid[0] = get_domain_id(sessionid);
+        /** Index saHpiResourceId is external */
+        hotswap_oid[1] = rpt_entry->ResourceId;
+        /** Index saHpiResourceIsHistorical is external */
+        hotswap_oid[2] = MIB_FALSE;
+        /* assign the indices to the index */
+        hotswap_idx.oids = (oid *) & hotswap_oid;
+
+        /* See if Row exists. */
+        hotswap_ctx = NULL;
+        hotswap_ctx = CONTAINER_FIND(cb.container, &hotswap_idx);
+
+        if (!hotswap_ctx) {
+                DEBUGMSGTL ((AGENT, "async_hotswap_add() row NOT found!\n"));
+                return AGENT_ERR_NOT_FOUND;
+        } else {
+                DEBUGMSGTL ((AGENT, "async_hotswap_add() row FOUND!\n"));
+        }
+
+        /** INTEGER = ASN_INTEGER */	
+	if (SA_OK == saHpiHotSwapIndicatorStateGet (sessionid, 
+				        rpt_entry->ResourceId, 
+					&indicator_state) ) {
+		hotswap_ctx->saHpiHotSwapIndicator = indicator_state + 1;
+			
+	}       
+	
+        /** SaHpiHotSwapState = ASN_INTEGER */
+        hotswap_ctx->saHpiHotSwapState = 
+                event->EventDataUnion.HotSwapEvent.HotSwapState + 1; 
+	
+        /** SaHpiTime = ASN_COUNTER64 */                     
+	if ( SA_OK == saHpiAutoExtractTimeoutGet(sessionid,
+			                rpt_entry->ResourceId,
+					&extract_timeout) ) {
+                hotswap_ctx->saHpiHotSwapExtractTimeout_len = 
+                        sizeof(extract_timeout);
+                memcpy(hotswap_ctx->saHpiHotSwapExtractTimeout,
+                       &extract_timeout, 
+                       hotswap_ctx->saHpiHotSwapExtractTimeout_len);
+	}
 
         populate_saHpiAutoInsertTimeoutTable(sessionid);
 
