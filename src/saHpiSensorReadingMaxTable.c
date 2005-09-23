@@ -125,8 +125,8 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 	/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 	sensor_max_context->saHpiSensorReadingMaxValue_len =
 	set_sensor_reading_value(
-				&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max,
-				sensor_max_context->saHpiSensorReadingMaxValue);
+	        &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Max,
+		sensor_max_context->saHpiSensorReadingMaxValue);
 
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, sensor_max_context);
