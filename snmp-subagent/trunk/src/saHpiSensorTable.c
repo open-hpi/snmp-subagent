@@ -54,6 +54,8 @@
 #include <saHpiSensorThdUpMinorTable.h>
 #include <saHpiSensorThdPosHysteresisTable.h>
 #include <saHpiSensorThdNegHysteresisTable.h>
+#include <saHpiDomainInfoTable.h>
+#include <saHpiDomainAlarmTable.h>
 #include <saHpiRdrTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
@@ -422,7 +424,8 @@ SaErrorT async_sensor_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 
 	/*
 	 * Build the full oid for THIS psuedo rdr, then pass it to
-	 * the populate_sensor() for its RowPointer. 
+	 * the populate_sensor() for its RowPointer. The child oid will
+         * not be used here.
 	 */
 	column[0] = 1;
 	column[1] = COLUMN_SAHPIRDRENTRYID;
@@ -437,6 +440,13 @@ SaErrorT async_sensor_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                               rpt_entry,
                               full_oid,  full_oid_len,
                               child_oid, &child_oid_len);
+
+        /*********************************************************/
+        /* need to update DomainInfoTable and DomainAlarmTables' */
+        /*  RPT data has changed                                 */
+        /*********************************************************/
+        rv = populate_saHpiDomainInfoTable(sessionid);
+        rv = populate_saHpiDomainAlarmTable(sessionid);
 
         return rv;
                                           
