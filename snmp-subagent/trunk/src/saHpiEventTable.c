@@ -45,13 +45,16 @@
 #include <saHpiDomainEventTable.h>
 #include <saHpiOEMEventTable.h>
 #include <saHpiHotSwapEventTable.h>
+#include <saHpiHotSwapTable.h>
 #include <saHpiWatchdogEventTable.h>
+#include <saHpiWatchdogTable.h>
 #include <saHpiSoftwareEventTable.h>
 #include <saHpiSensorEnableChangeEventTable.h>
 #include <saHpiCurrentSensorStateTable.h>
 #include <saHpiUserEventTable.h>
 #include <saHpiSensorEventTable.h>
 #include <saHpiDomainInfoTable.h>
+#include <saHpiDomainAlarmTable.h>
 #include <saHpiSensorTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
@@ -312,6 +315,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                              rdr, rpt_entry,
                                              child_oid, 
                                              &child_oid_len);
+                async_hotswap_add(sessionid, event, rdr, rpt_entry);
                 break;
         case SAHPI_ET_WATCHDOG:
                 rv = async_watchdog_event_add(sessionid, event,
@@ -331,6 +335,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
                                          rdr, rpt_entry,
 					 child_oid, 
                                          &child_oid_len);
+                populate_saHpiDomainInfoTable(sessionid);
+                populate_saHpiDomainAlarmTable(sessionid);
                 break;
         case SAHPI_ET_USER:
                 rv = async_user_event_add(sessionid, event,
