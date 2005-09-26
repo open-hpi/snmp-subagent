@@ -353,7 +353,9 @@ int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
                         do {
                                 da_ctx = CONTAINER_FIND(cb.container, row_idx);
 
-                                if ((da_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX] ==
+                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                                
+				if ((da_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX] ==
                                      row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]) &&
                                     
 				    ((da_ctx->saHpiDomainAlarmSeverity == 
@@ -370,7 +372,7 @@ int domain_alarm_delete (saHpiDomainAlarmTable_context *row_ctx)
                                         DEBUGMSGTL ((AGENT, "domain_alarm_delete: found row for "
                                                      "deletion based on severity\n"));
                                 }
-                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+                                
                         } while (row_idx);
                 }
         } /* end check for all rows deleted based on Severity */
@@ -498,7 +500,20 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
 
                 /* we have retrieved the HPI Annunciator EntryId */
                 de_entry->hpi_alarm_id = alarm.AlarmId;
-
+		
+		printf("SETTING THE ROW TO ACTIVE\n");
+		
+		row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
+		
+		//RESET
+		row_ctx->sahpi_domain_alarm_severity_set	 = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_entitypath_set	 = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_name_set		 = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_text_type_set	 = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_text_language_set	 = MIB_TRUE;
+                row_ctx->sahpi_domain_alarm_text		 = MIB_TRUE;
+		
         } else {
                 return SNMP_ERR_NOCREATION;
 
@@ -1508,9 +1523,16 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
                                 rg->row_deleted = 1;
                         }
 
+                } else if ((rg->row_created == 1) && 
+		           (*var->val.integer == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT )){
+			   
+			row_ctx->saHpiDomainAlarmRowStatus = *var->val.integer;	
+                        
                 } else {
-                        row_err = SNMP_ERR_COMMITFAILED;
-                }	 	    
+		    	row_err = SNMP_ERR_COMMITFAILED;
+		}    
+		
+		 	    
         break;
 
         default: /** We shouldn't get here */
@@ -1522,19 +1544,7 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
      * done with all the columns. Could check row related
      * requirements here.
      */
-#ifndef saHpiDomainAlarmTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
 
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
     if(row_err) {
         netsnmp_request_set_error((netsnmp_request_info*)rg->rg_void,
                                        row_err);
