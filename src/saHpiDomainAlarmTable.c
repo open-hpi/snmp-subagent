@@ -499,6 +499,10 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                 /* we have retrieved the HPI Annunciator EntryId */
                 de_entry->hpi_alarm_id = alarm.AlarmId;
 		
+		row_ctx->saHpiDomainAlarmId =  alarm.AlarmId;
+		
+		assign_timestamp(&alarm.Timestamp, &row_ctx->saHpiDomainAlarmTimestamp);
+		
 		row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
 		
 		//RESET
@@ -538,7 +542,7 @@ int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
         session_id = get_session_id(row_ctx->index.oids[saHpiDomainAlarmDomainId_INDEX]);
 
        /* see if this is an attempt to ack based on severtiy */
-        if (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] == 0) {
+        if (row_ctx->saHpiDomainAlarmRowStatus == SAHPI_ENTRY_UNSPECIFIED) {
                 /* we are acking based on Severity */
                 alarmId = SAHPI_ENTRY_UNSPECIFIED;
         } else {
@@ -563,7 +567,7 @@ int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
 
         rc = saHpiAlarmAcknowledge(session_id,                             
                                    alarmId, 
-                                   row_ctx->saHpiDomainAlarmSeverity);
+                                   row_ctx->saHpiDomainAlarmSeverity - 1);
 
         if (rc != SA_OK) {
                 snmp_log (LOG_ERR,
@@ -600,12 +604,12 @@ int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
                                     ((doma_ctx->saHpiDomainAlarmSeverity == 
                                       row_ctx->saHpiDomainAlarmSeverity) ||
                                     (row_ctx->saHpiDomainAlarmSeverity == 
-                                     SAHPI_ALL_SEVERITIES)))
-
-                                     row_ctx->saHpiDomainAlarmAcknowledged = MIB_TRUE;
+                                     SAHPI_ALL_SEVERITIES))) {
+                                    
+                                     doma_ctx->saHpiDomainAlarmAcknowledged = MIB_TRUE;
                                      DEBUGMSGTL ((AGENT, "domain_alarm_ack: found row for "
                                                          "setting ack based on severity\n"));
-
+                                 }
                                 row_idx = CONTAINER_NEXT(cb.container, row_idx);
                         } while (row_idx);
                 }
@@ -1412,7 +1416,14 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
                     if (*var->val.integer == MIB_TRUE) {
                             row_err = domain_alarm_ack(row_ctx);
                     }
-            } 	    
+            } else if ((rg->row_created != 1) &&                
+                       (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT) &&
+		       (row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE)) {
+		       
+		       if (*var->val.integer == MIB_TRUE) {
+                            row_err = domain_alarm_ack(row_ctx);
+                       }
+            }		       
         break;
 
         case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
@@ -1424,9 +1435,7 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
 
             } else if ((rg->row_created != 1) &&                       /* severity set, time to ACK */
                        (row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE) &&
-                       (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT) &&
-                       (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] ==
-                        SAHPI_ENTRY_UNSPECIFIED)) { 
+                       (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT)) { 
                     if (*var->val.integer == MIB_TRUE) {
                             row_err = domain_alarm_ack(row_ctx);
                     }
