@@ -403,9 +403,7 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
             (row_ctx->sahpi_domain_alarm_name_set             == MIB_TRUE) &&                           
             (row_ctx->sahpi_domain_alarm_text_type_set        == MIB_TRUE) &&   
             (row_ctx->sahpi_domain_alarm_text_language_set    == MIB_TRUE) &&
-            (row_ctx->sahpi_domain_alarm_text                 == MIB_TRUE) &&
-            (row_ctx->index.oids[saHpiDomainAlarmEntryId_INDEX] !=
-             SAHPI_ENTRY_UNSPECIFIED)) {
+            (row_ctx->sahpi_domain_alarm_text                 == MIB_TRUE)) {
 
                 /* EntryId */
                 alarm.AlarmId = row_ctx->saHpiDomainAlarmId;
@@ -501,22 +499,17 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                 /* we have retrieved the HPI Annunciator EntryId */
                 de_entry->hpi_alarm_id = alarm.AlarmId;
 		
-		printf("SETTING THE ROW TO ACTIVE\n");
-		
 		row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
 		
 		//RESET
-		row_ctx->sahpi_domain_alarm_severity_set	 = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_entitypath_set	 = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_name_set		 = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_text_type_set	 = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_text_language_set	 = MIB_TRUE;
-                row_ctx->sahpi_domain_alarm_text		 = MIB_TRUE;
+		row_ctx->sahpi_domain_alarm_severity_set	 = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_entitypath_set	 = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_name_set		 = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_text_type_set	 = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_text_language_set	 = MIB_FALSE;
+                row_ctx->sahpi_domain_alarm_text		 = MIB_FALSE;
 		
-        } else {
-                return SNMP_ERR_NOCREATION;
-
         }
         
         return SNMP_ERR_NOERROR; 
@@ -1447,8 +1440,10 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_TRUE; 
+                     
             }
+	    
+	    row_ctx->sahpi_domain_alarm_status_cond_type_set = MIB_TRUE;
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
@@ -1460,8 +1455,10 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_entitypath_set = MIB_TRUE;
+                    
             }
+	    
+	    row_ctx->sahpi_domain_alarm_entitypath_set = MIB_TRUE;
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
@@ -1472,8 +1469,9 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_name_set = MIB_TRUE;
+                    
             }
+	    row_ctx->sahpi_domain_alarm_name_set = MIB_TRUE;
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
@@ -1483,8 +1481,9 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_text_type_set = MIB_TRUE; 
+                    
             }
+	    row_ctx->sahpi_domain_alarm_text_type_set = MIB_TRUE; 
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
@@ -1494,8 +1493,9 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_text_language_set = MIB_TRUE;
+                    
             }
+	    row_ctx->sahpi_domain_alarm_text_language_set = MIB_TRUE;
             row_err = domain_alarm_add(row_ctx);	    
         break;
 
@@ -1506,15 +1506,18 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
             if (rg->row_created == 1) {
                     row_ctx->saHpiDomainAlarmRowStatus = 
                             SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT; /* createAndWait */
-                    row_ctx->sahpi_domain_alarm_text = MIB_TRUE;
+                    
             }
-            row_err = domain_alarm_add(row_ctx);	    
+	    row_ctx->sahpi_domain_alarm_text = MIB_TRUE;
+            row_err = domain_alarm_add(row_ctx);
+	    	    
         break;
 
         case COLUMN_SAHPIDOMAINALARMROWSTATUS:
             /** RowStatus = ASN_INTEGER */
-                if ((row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE) ||
-                    (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_ACTIVE)) {
+                if (((row_ctx->sahpi_domain_alarm_severity_set == MIB_TRUE) ||
+                    (row_ctx->saHpiDomainAlarmRowStatus == SAHPIDOMAINALARMROWSTATUS_ACTIVE)) &&
+		     (*var->val.integer == SAHPIDOMAINALARMROWSTATUS_DESTROY)){
 
                         row_ctx->saHpiDomainAlarmRowStatus = *var->val.integer;
                         row_err = domain_alarm_delete(row_ctx);
@@ -1523,10 +1526,9 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
                                 rg->row_deleted = 1;
                         }
 
-                } else if ((rg->row_created == 1) && 
-		           (*var->val.integer == SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT )){
+                } else if ((rg->row_created == 1) ){
 			   
-			row_ctx->saHpiDomainAlarmRowStatus = *var->val.integer;	
+			row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_CREATEANDWAIT;	
                         
                 } else {
 		    	row_err = SNMP_ERR_COMMITFAILED;
