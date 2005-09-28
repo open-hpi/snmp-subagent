@@ -131,13 +131,15 @@ int saHpiAnnouncementTable_get_value(netsnmp_request_info *, netsnmp_index *, ne
  */
 SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid, 
                                          SaHpiRdrT *rdr_entry,
-                                         SaHpiRptEntryT *rpt_entry,
-                                         oid *full_oid, size_t full_oid_len,
-                                         oid *child_oid, size_t *child_oid_len);
+                                         SaHpiRptEntryT *rpt_entry);
 
 int announcement_add (saHpiAnnouncementTable_context *row_ctx);
 int announcement_ack (saHpiAnnouncementTable_context *row_ctx);
 int announcement_delete (saHpiAnnouncementTable_context *row_ctx);
+
+void update_announcements (SaHpiSessionIdT sessionid);
+int  clear_announcements (void);
+
 
 /*************************************************************
  * oid declarations
