@@ -32,12 +32,16 @@
 #include <hpiEventThread.h>
 #include <saHpiEventTable.h>
 #include <saHpiEventLogInfoTable.h>
+#include <saHpiAnnouncementTable.h>
 
 
 GThread *event_thread = NULL;
 GMutex *thread_mutex = NULL;
 GError *event_thread_error = NULL;
 static gboolean run_threaded;
+
+SaHpiTimeoutT timeout = 2000000000;
+
 
 static gpointer event_thread_loop(gpointer data);
 
@@ -58,6 +62,8 @@ static gpointer event_thread_loop(gpointer data)
         SaHpiRdrT            rdr;
         SaHpiRptEntryT       rpt_entry;
         SaHpiEvtQueueStatusT event_queue_status;
+	
+	int counter = 0;
 
         SaHpiSessionIdT sessionid = *(SaHpiSessionIdT *)data;
 
@@ -66,13 +72,15 @@ static gpointer event_thread_loop(gpointer data)
 		memset(&event, 0, sizeof(event));
                 DEBUGMSGTL ((AGENT, "event_thread_loop started ---- sessionid [%d]\n", sessionid));
                 rv = saHpiEventGet (get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
-                                    SAHPI_TIMEOUT_BLOCK,
+                                    timeout,
                                     &event,
                                     &rdr,
                                     &rpt_entry,
                                     &event_queue_status);
 
                 DEBUGMSGTL ((AGENT, "rv [%s]\n", oh_lookup_error(rv)));
+
+                counter++;
 
                 /* serialize access */
                 g_mutex_lock(thread_mutex);
@@ -125,6 +133,11 @@ static gpointer event_thread_loop(gpointer data)
 
 		} // NEW
                 /* serialize access */
+		
+		if (counter == 30) { //check for new announcements every minute.
+              		update_announcements(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
+			counter = 0;
+		}
                 g_mutex_unlock(thread_mutex);
 
         }

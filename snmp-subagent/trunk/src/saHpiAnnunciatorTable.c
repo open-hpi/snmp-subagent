@@ -199,9 +199,7 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
 
         annunciator_entry_count = CONTAINER_SIZE (cb.container);
 	
-	rc = populate_saHpiAnnouncementTable(sessionid, rdr_entry, rpt_entry,
-                                             full_oid, full_oid_len,
-                                             child_oid, child_oid_len);
+	rc = populate_saHpiAnnouncementTable(sessionid, rdr_entry, rpt_entry);
 			      
         DEBUGMSGTL ((AGENT, "populate_annunciator: populate_saHpiAnnouncementTable returned %d\n", rc));			      
 

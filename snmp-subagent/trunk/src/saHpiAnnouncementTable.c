@@ -94,9 +94,7 @@ int initialize_table_saHpiAnnouncementEntryCount(void);
  */
 SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid, 
                                          SaHpiRdrT *rdr_entry,
-                                         SaHpiRptEntryT *rpt_entry,
-                                         oid *full_oid, size_t full_oid_len,
-                                         oid *child_oid, size_t *child_oid_len)
+                                         SaHpiRptEntryT *rpt_entry)
 {
 	SaErrorT rv = SA_OK;
         SaErrorT rc = SA_OK;
@@ -106,15 +104,11 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	netsnmp_index announcement_index;
 	saHpiAnnouncementTable_context *announcement_ctx;
 	
-	oid column[2];
-	int column_len = 2;
-	
 	SaHpiAnnouncementT announcement;
 
         DRE_XREF *dre_entry;
         key_tuple dre_tuple;
 
-	
 	announcement.EntryId = SAHPI_FIRST_ENTRY;
 		
 	/* Used for decoding */
@@ -319,16 +313,6 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 
                 if (new_row == MIB_TRUE) 
                         CONTAINER_INSERT (cb.container, announcement_ctx);
-			
-                /* create full oid on This row for parent RowPointer */
-                column[0] = 1;
-                column[1] = COLUMN_SAHPIANNOUNCEMENTTIMESTAMP;
-                memset(child_oid, 0, MAX_OID_LEN);
-                build_full_oid(saHpiAnnouncementTable_oid, 
-                               saHpiAnnouncementTable_oid_len,
-                              column, column_len,
-                              &announcement_index,
-                              child_oid, MAX_OID_LEN, child_oid_len);
 			      
                 rv = saHpiAnnunciatorGetNext(sessionid, 
 	                         rpt_entry->ResourceId,
@@ -724,20 +708,109 @@ int announcement_delete (saHpiAnnouncementTable_context *row_ctx)
                                     (announcement_ctx->index.oids[saHpiAnnouncementEntryId_INDEX] !=
                                      row_ctx->index.oids[saHpiAnnouncementEntryId_INDEX])) {
 
-                                        /* all conditions met remove row */
+                                        row_idx = CONTAINER_NEXT(cb.container, row_idx);
+					/* all conditions met remove row */
                                         CONTAINER_REMOVE (cb.container, announcement_ctx);
                                         saHpiAnnouncementTable_delete_row (announcement_ctx);
                                         announcement_entry_count = CONTAINER_SIZE (cb.container);
                                         DEBUGMSGTL ((AGENT, "announcement_delete: found row for "
                                                      "deletion based on severity\n"));
                                 }
-                                row_idx = CONTAINER_NEXT(cb.container, row_idx);
+				else {
+				     row_idx = CONTAINER_NEXT(cb.container, row_idx);
+				} 
+                                
                         } while (row_idx);
                 }
         } /* end check for all rows deleted based on Severity */
 
         return SNMP_ERR_NOERROR; 
 }
+
+/**
+ * 
+ * @SessionId: current session
+ *
+ * @return:
+ */
+ 
+void update_announcements (SaHpiSessionIdT sessionid)
+{     
+	SaErrorT                rv; 
+	
+	// FOR RPT
+	SaHpiEntryIdT           rpt_entry_id;
+	SaHpiRptEntryT          rpt_entry;
+	
+	// FOR RDR
+	SaHpiEntryIdT    	rdr_entry_id;
+	SaHpiRdrT		rdr_entry;
+
+
+	DEBUGMSGTL ((AGENT, "update_announcements() Called\n"));
+		
+	rv = clear_announcements();
+	
+	rpt_entry_id = SAHPI_FIRST_ENTRY;
+	rdr_entry_id = SAHPI_FIRST_ENTRY;
+        do {
+		rv = saHpiRptEntryGet(sessionid, rpt_entry_id, &rpt_entry_id, &rpt_entry);
+		
+		do {
+			rv =  saHpiRdrGet(sessionid, 
+				          rpt_entry.ResourceId, 
+				          rdr_entry_id, 
+				          &rdr_entry_id, 
+				          &rdr_entry);
+					  
+			if (rdr_entry.RdrType == SAHPI_ANNUNCIATOR_RDR) {
+				
+				populate_saHpiAnnouncementTable(sessionid,
+				                                &rdr_entry,
+								&rpt_entry);
+				
+			}			  
+					  
+	        }while (rdr_entry_id !=  SAHPI_LAST_ENTRY);
+		
+	}while(rpt_entry_id != SAHPI_LAST_ENTRY);
+
+}
+
+int clear_announcements (void)
+{
+	netsnmp_index *ann_idx;
+	saHpiAnnouncementTable_context *ann_ctx;
+	int count = 0;
+	
+	DEBUGMSGTL ((AGENT, "clear_announcements() called\n"));
+	DEBUGMSGTL ((AGENT, "Wiping out announcement table!!!\n"));
+	
+	ann_idx = CONTAINER_FIRST(cb.container);
+	
+	if (ann_idx) //At least one found
+	{
+		do{
+			ann_ctx = CONTAINER_FIND(cb.container, ann_idx);
+			ann_idx = CONTAINER_NEXT(cb.container, ann_idx);
+			
+			if(ann_ctx)
+			{
+							   
+			   count++;	
+	                   CONTAINER_REMOVE (cb.container, ann_ctx);
+                           saHpiAnnouncementTable_delete_row (ann_ctx);
+			   announcement_entry_count = CONTAINER_SIZE (cb.container);
+			   
+			}
+			
+		} while(ann_idx);
+	}
+	
+	DEBUGMSGTL ((AGENT, "clear_announcements removed %d rows\n", count));		   
+	
+	return SA_OK;	
+}	
 
 /**
  * 
