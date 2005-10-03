@@ -1152,7 +1152,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** SafUnsigned64 = ASN_OPAQUE */
-            memcpy(row_ctx->saHpiHotSwapExtractTimeout,var->val.string,var->val_len);
+            assign_timeout(var, row_ctx->saHpiHotSwapExtractTimeout);
             row_ctx->saHpiHotSwapExtractTimeout_len = var->val_len;
             row_err = hot_swap_auto_extract_timeout_set (row_ctx);
         break;
