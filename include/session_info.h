@@ -34,6 +34,8 @@
 
 #include <alarm.h>
 
+
+#define BYTE_MASK 0xFF
 /**************************************************/
 /*** BEGIN: ***************************************/
 /*** Manages All existing sessions and domains  ***/
@@ -123,5 +125,7 @@ void hotswap_cap_map(SaHpiUint8T *hs_cap, SaHpiRptEntryT *rpt_entry);
 void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp);
 
 int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp);
+
+void assign_timeout(netsnmp_variable_list * var, unsigned char timeout[]);
 
 #endif //_SESSION_INFO_H_

@@ -830,3 +830,53 @@ int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 		}		
 	}
 }
+
+/**
+ * 
+ * @var - pointer to netsnmp variables - in.
+ * @timeout - resulting time/timeout value
+ * 
+ * Regardless of endianess, the function takes the value in var and assigns it to the 
+ * timeout array.
+ */
+void assign_timeout(netsnmp_variable_list * var, unsigned char timeout[])
+{
+	int counter;
+
+	for (counter = 0; counter != sizeof(SaHpiTimeT); ++counter) {
+              
+	      
+	        if( counter < sizeof(unsigned long int)) { 
+	        	size_t cnt = CHAR_BIT * (sizeof (var->val.integer) - counter - 1);
+
+                        /*********************************************************
+			 * Take the BYTE_MASK (0xFF) and start ANDING the MSB 
+			 * through the LSB (hence the shifting by cnt).  Then 
+			 * we shift back so that we have a single char
+			 * e.g., 0x012345678 where counter == 2
+			 *      0) 0xFF << 8 = 0x0000FF00
+			 *      1) 0x012345678 & 0x0000FF00 = 0x00005600
+			 *      2) 0x00005600 >> 8 = 0x56.
+			 ********************************************************/
+                	timeout[counter] = (unsigned char)
+	                            (((unsigned long int)(*var->val.integer) & (BYTE_MASK <<cnt))>>cnt);
+
+                }
+		
+		/***************************************************************
+	 	* Since net-snmp defines var->val.integer as a "long" type and 
+		* HPI defines the timeout value as a "long long" type, we must
+		* grab the next 4 bytes of the actual timeout value.
+		**************************************************************/
+		else {
+	        	size_t cnt = CHAR_BIT * (sizeof (var->val.integer) - counter - 1);
+
+                	timeout[counter] = (unsigned char)
+	                            (((unsigned long int)
+				     *(unsigned long int *)((int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
+		}		    		
+      
+	}
+	
+}	
+
