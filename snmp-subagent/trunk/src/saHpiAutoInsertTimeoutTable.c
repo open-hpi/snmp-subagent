@@ -42,6 +42,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <limits.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -622,8 +623,11 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
     saHpiAutoInsertTimeoutTable_context *undo_ctx = (saHpiAutoInsertTimeoutTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
+    unsigned char buff[sizeof(SaHpiTimeT)]; //For timeout
     int            row_err = 0;
-
+    
+    
+	    printf("7\n");    
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -636,8 +640,10 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
             /** SafUnsigned64 = ASN_OPAQUE */
-            memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert,var->val.string,var->val_len);
+            
+	    assign_timeout(var, row_ctx->saHpiAutoInsertTimeoutForInsert);	    	    	    
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
+	    
   	    row_err = auto_insert_timeout_set(row_ctx);
 
         break;
