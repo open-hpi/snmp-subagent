@@ -10,9 +10,10 @@
  *
  * Authors:
  *   David Judkovics  <djudkovi@us.ibm.com>
- *
+ *   Daniel de Araujo <ddearauj@us.ibm.com>
  *					  
  */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>
@@ -489,29 +490,38 @@ int check_sensor_reading_value(size_t val_len, long type)
 int set_sensor_reading_value(SaHpiSensorReadingT *reading, 
 			     unsigned char *saHpiCurrentSensorStateValue)
 {
+	
+	
+	
 	switch (reading->Type) {
 	case SAHPI_SENSOR_READING_TYPE_INT64:
-		memcpy(saHpiCurrentSensorStateValue, 
-		       &reading->Value.SensorInt64, 
-		       sizeof(SaHpiInt64T));
+		
+		sprintf(saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorInt64);
+		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);	
+
 		return sizeof(SaHpiInt64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
-		memcpy(saHpiCurrentSensorStateValue, 
-		       &reading->Value.SensorUint64, 
-		       sizeof(SaHpiUint64T));
+		
+		sprintf(saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorUint64);
+		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
+
 		return sizeof(SaHpiUint64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
-		memcpy(saHpiCurrentSensorStateValue, 
-		       &reading->Value.SensorFloat64, 
-		       sizeof(SaHpiFloat64T));
+
+		sprintf(saHpiCurrentSensorStateValue, "%g", reading->Value.SensorFloat64);
+		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
+		
 		return sizeof(SaHpiFloat64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_BUFFER:
 		memcpy(saHpiCurrentSensorStateValue, 
 		       reading->Value.SensorBuffer, 
 		       SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T));
+		       
+		       
+		       
 		return SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T);
 		break;
 	default:
@@ -538,19 +548,32 @@ SaErrorT set_sen_thd_value(SaHpiSensorReadingUnionT *value,
 	case SAHPI_SENSOR_READING_TYPE_INT64:
 		if (val_len > sizeof(SaHpiInt64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
-		memcpy(&value->SensorInt64, val, val_len);
+		
+		sprintf(val, "%lld", value->SensorInt64);
+		sprintf(val, "%s",   val);				
+		break;
+			
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		if (val_len > sizeof(SaHpiUint64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
-		memcpy(&value->SensorUint64, val, val_len);
+							
+		sprintf(val, "%lld", value->SensorUint64);
+		sprintf(val, "%s",   val);	
+		break;
+		
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 		if (val_len > sizeof(SaHpiFloat64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
-		memcpy(&value->SensorFloat64, val, val_len);
+			
+		sprintf(val, "%g",  value->SensorFloat64);
+		sprintf(val, "%s",  val);					
+		break;	
+		
 	case SAHPI_SENSOR_READING_TYPE_BUFFER:
 		if (val_len > SAHPI_SENSOR_BUFFER_LENGTH * sizeof(SaHpiUint8T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 		memcpy(&value->SensorBuffer, val, val_len);
+		break;
 	default:
 		return SA_ERR_HPI_UNKNOWN;
 	}

@@ -10,9 +10,9 @@
  *
  * Authors:
  *   David Judkovics  <djudkovi@us.ibm.com>
- *
- *					  
+ *   Daniel de Araujo <ddearauj@us.ibm.com>					  
  */
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <glib.h>

@@ -11,6 +11,7 @@
 *
 * Authors:
 *     Daniel de Araujo <ddearauj@us.ibm.com>
+*     David Judkovics  <djudkovi@us.ibm.com>
 */
 
 typedef enum {
