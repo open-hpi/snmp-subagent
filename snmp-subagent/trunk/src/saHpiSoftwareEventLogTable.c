@@ -365,7 +365,7 @@ handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
         			        (u_char *) &software_event_log_entry_count,
         			        sizeof(software_event_log_entry_count));
                 break;
