@@ -90,6 +90,7 @@
 #include <saHpiOEMEventLogTable.h>
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
+#include <session_info.h>
 
 /*************************************************************
  * oid and function declarations scalars
@@ -155,7 +156,7 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 		DEBUGMSGTL ((AGENT, "set_action, called\n"));
 		if (*requests->requestvb->val.integer == MIB_TRUE) {
 			administration_discover = MIB_FALSE;
-		        //repopulate();
+		        repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
 		}	
 		break;
 	case MODE_SET_COMMIT:
@@ -175,7 +176,7 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 }
 
 /**
- * 
+ * registers the scalar as a read-write scalar.
  * @return: 
  */
 int initialize_scalar_saHpiDiscover(void)
@@ -195,7 +196,7 @@ int initialize_scalar_saHpiDiscover(void)
 } 
 
 /************************************************************
- * Initializes the saHpiSoftwareEventLogTable module
+ * Initializes the saHpiAdministration module
  */
 void
 init_saHpiAdministration(void)
@@ -206,4 +207,77 @@ init_saHpiAdministration(void)
         initialize_scalar_saHpiDiscover();
 	
 }
+
+
+/**
+ * Called to repopulate all the tables.
+ * @return: 
+ */
+void repopulate_tables(SaHpiSessionIdT session_id)
+{
+	populate_saHpiDomainInfoTable(session_id);
+
+	populate_saHpiDomainAlarmTable(session_id);
+
+	poplulate_saHpiDomainReferenceTable(session_id);	
+
+	populate_saHpiResourceTable(session_id);
+	    /* populate_saHpiResourceTable() calls:
+	     *     populate_saHpiRdrTable(); calls:
+	     *         populate_saHpiCtrlDigitalTable();		
+	     *	       populate_saHpiCtrlDiscreteTable();		
+	     *	       populate_saHpiCtrlAnalogTable();		
+	     *	       populate_saHpiCtrlStreamTable();		
+	     *	       populate_saHpiCtrlTextTable();		
+	     *	       populate_saHpiCtrlOemTable();		
+	     *	       populate_saHpiSensorTable();		
+	     *	           populate_saHpiSesnorReadingMaxTable();		
+	     *	           populate_saHpiSesnorReadingMinTable();		
+	     *	           populate_saHpiSesnorReadingNominalTable();		
+	     *	           populate_saHpiSesnorReadingNormalMaxTable();		
+	     *	           populate_saHpiSesnorReadingNormalMinTable();		
+	     *	           populate_saHpiSensorThdLowCriticalTable();		
+	     *	           populate_saHpiSensorThdLowMajorTable();		
+	     *	           populate_saHpiSensorThdLowMinorTable();		
+	     *	           populate_saHpiSensorThdUpCriticalTable();		
+	     *	           populate_saHpiSensorThdUpMajorTable();		
+	     *	           populate_saHpiSensorThdUpMinorTable();		
+	     *	           populate_saHpiSensorThdPosHysteresisTable();		
+	     *	           populate_saHpiSensorThdNegHysteresisTable();		
+	     *	       populate_saHpiCurrentSensorStateTable();		
+	     *	       populate_saHpiInventoryTable();	
+	     *       	   populate_saHpiAreaTable();		
+	     *	               populate_saHpiFieldTable(); 	     	
+	     *	       populate_saHpiWatchdogTable();		
+	     *	       populate_saHpiAnnunciatorTable();		
+             *         populate_saHpiHotSwapTable();
+             *             populate_saHpiAutoInsertTimeoutTable();             
+  	     *         populate_saHpiAnnouncementTable();
+	     */
+            
+	populate_saHpiEventTable(session_id);
+            /* populate_saHpiResourceEventTable();
+	     * populate_saHpiDomainEventTable();
+	     * populate_saHpiSensorEventTable();
+	     * populate_saHpiOemEventTable();
+	     * populate_saHpiHotSwapEventTable();
+	     * populate_saHpiWatchdogEventTable();
+	     * populate_saHpiSoftwareEventTable();
+	     * populate_saHpiSensorEnableChangeEventTable();
+	     * populate_saHpiUserEventTable();
+	     */
+        populate_saHpiEventLogInfo(session_id);
+	    /* populate_saHpiEventLog (sessionid);
+             * 	   populate_saHpiResourceEventLogTable();
+             * 	   populate_saHpiSensorEventLogTable();
+	     * 	   populate_saHpiHotSwapEventLogTable();
+	     * 	   populate_saHpiWatchdogEventLogTable();
+	     * 	   populate_saHpiSoftwareEventLogTable();
+	     * 	   populate_saHpiOemEventLogTable();
+	     * 	   populate_saHpiUserEventLogTable();
+	     *     populate_saHpiSensorEnableChangeEventLogTable();
+	     *     populate_saHpiDomainEventLogTable();	     
+             */
+}
+
 
