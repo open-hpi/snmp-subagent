@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2003
+ * (C) Copyright IBM Corp. 2005
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,10 +9,11 @@
  * full licensing terms.
  *
  * Authors:
- *   David Judkovics <djudkovi@us.ibm.com>
- *
+ *   David Judkovics  <djudkovi@us.ibm.com>
+ *   Daniel de Araujo <ddearauj@us.ibm.com>
  *
  */
+ 
 #ifndef _HPI_CHECK_INDICE_
 #define  _HPI_CHECK_INDICE_
 

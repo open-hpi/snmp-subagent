@@ -1,5 +1,5 @@
 /*
-* (C) Copyright IBM Corp. 2003
+ * (C) Copyright IBM Corp. 2005
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,7 +9,8 @@
  * full licensing terms.
  *
  * Authors:
- *   Konrad Rzeszutek <konradr@us.ibm.com>
+ *   David Judkovics  <djudkovi@us.ibm.com>
+ *   Daniel de Araujo <ddearauj@us.ibm.com>
  *
  * $Id$
  *

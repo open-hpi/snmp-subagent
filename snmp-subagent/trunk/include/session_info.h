@@ -10,7 +10,7 @@
  *
  * Authors:
  *   David Judkovics  <djudkovi@us.ibm.com>
- *
+ *   Daniel de Araujo <ddearauj@us.ibm.com>
  *					  
  */
 

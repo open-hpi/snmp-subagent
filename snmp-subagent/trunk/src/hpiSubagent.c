@@ -1,5 +1,5 @@
 /*
- * (C) Copyright IBM Corp. 2003
+ * (C) Copyright IBM Corp. 2005
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,8 +9,8 @@
  * full licensing terms.
  *
  * Authors:
- *   Konrad Rzeszutek <konradr@us.ibm.com>
  *   David Judkovics  <djudkovi@us.ibm.com>
+ *   Daniel de Araujo <ddearauj@us.ibm.com>
  *
  * $Id$
  *					  
@@ -99,6 +99,7 @@
 #include <saHpiOEMEventLogTable.h>
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
+#include <saHpiAdministration.h>
 
 /*
  * Internal data for the sub-agent.
@@ -404,6 +405,8 @@ main (int argc, char **argv)
 	init_saHpiAutoInsertTimeoutTable();
 	init_saHpiAnnouncementTable();
 	init_saHpiAnnouncementEventLogTable();
+	
+	init_saHpiAdministration();
 
 
 	if (send_traps_on_startup == AGENT_TRUE)

@@ -2,7 +2,7 @@
 #
 #  OpenHPI Macros
 #
-#  Copyright (C) IBM Corp 2003
+#  Copyright (C) IBM Corp 2005
 #
 #  Author(s):
 #      Sean Dague <http://dague.net/sean>
