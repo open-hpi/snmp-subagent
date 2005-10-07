@@ -91,6 +91,8 @@
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
 #include <session_info.h>
+#include <hpiEventThread.h>
+#include <alarm.h>
 
 /*************************************************************
  * oid and function declarations scalars
@@ -156,7 +158,12 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 		DEBUGMSGTL ((AGENT, "set_action, called\n"));
 		if (*requests->requestvb->val.integer == MIB_TRUE) {
 			administration_discover = MIB_FALSE;
-		        repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
+			if (get_run_threaded() == TRUE) {
+              		        rediscover = SAHPI_TRUE;
+			}
+			else {
+			        do_rediscover = TRUE;
+			}		
 		}	
 		break;
 	case MODE_SET_COMMIT:
@@ -215,6 +222,7 @@ init_saHpiAdministration(void)
  */
 void repopulate_tables(SaHpiSessionIdT session_id)
 {
+
 	populate_saHpiDomainInfoTable(session_id);
 
 	populate_saHpiDomainAlarmTable(session_id);
@@ -253,20 +261,9 @@ void repopulate_tables(SaHpiSessionIdT session_id)
              *         populate_saHpiHotSwapTable();
              *             populate_saHpiAutoInsertTimeoutTable();             
   	     *         populate_saHpiAnnouncementTable();
-	     */
-            
-	populate_saHpiEventTable(session_id);
-            /* populate_saHpiResourceEventTable();
-	     * populate_saHpiDomainEventTable();
-	     * populate_saHpiSensorEventTable();
-	     * populate_saHpiOemEventTable();
-	     * populate_saHpiHotSwapEventTable();
-	     * populate_saHpiWatchdogEventTable();
-	     * populate_saHpiSoftwareEventTable();
-	     * populate_saHpiSensorEnableChangeEventTable();
-	     * populate_saHpiUserEventTable();
-	     */
-        populate_saHpiEventLogInfo(session_id);
+	     */  
+        
+	event_log_info_update(session_id);
 	    /* populate_saHpiEventLog (sessionid);
              * 	   populate_saHpiResourceEventLogTable();
              * 	   populate_saHpiSensorEventLogTable();
@@ -278,6 +275,9 @@ void repopulate_tables(SaHpiSessionIdT session_id)
 	     *     populate_saHpiSensorEnableChangeEventLogTable();
 	     *     populate_saHpiDomainEventLogTable();	     
              */
+
+
 }
+
 
 
