@@ -270,13 +270,15 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 					
 		domain_alarm_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
 
-                if (new_row == MIB_TRUE) 
+                if (new_row == MIB_TRUE) {
                         CONTAINER_INSERT (cb.container, domain_alarm_ctx);
+			new_row = MIB_FALSE;
+		}	
 	
 	        //Get the next Alarm
         	rv = saHpiAlarmGetNext( sessionid,
 		                        Severity,
-                                        SAHPI_TRUE, //Get Unacknowledged Alarms
+                                        SAHPI_FALSE, //Get Unacknowledged Alarms
 				        &Alarm);
 		
         }	
