@@ -309,6 +309,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 						    resource_index.oids, 
 						    resource_index.len);
 		}
+		
+		new_row = MIB_FALSE;
 
 	} while (EntryId != SAHPI_LAST_ENTRY);
 
