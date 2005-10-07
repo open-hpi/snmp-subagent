@@ -16,6 +16,8 @@
  * $Id$
 */
 
+extern int do_rediscover;
+
 int init_alarm (void);
 
 void do_alarm (unsigned int clientreg, void *clientarg);

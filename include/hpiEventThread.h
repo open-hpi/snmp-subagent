@@ -24,6 +24,7 @@ gboolean get_run_threaded(void);
 void set_run_threaded(gboolean val);
 
 extern GMutex *thread_mutex;
+extern int rediscover;
 
 #endif /*_HPI_EVENT_THREAD_*/
 
