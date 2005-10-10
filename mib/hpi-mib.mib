@@ -417,6 +417,9 @@ SaHpiTime ::= TEXTUAL-CONVENTION
                Wait for all time if necessary.
 
                 SAHPI_TIMEOUT_BLOCK        -1LL"
+		
+	       In all cases, time will be displayed in network-byte
+	       order - big endian.
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
         SYNTAX Counter64
@@ -1267,7 +1270,11 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 
                 This value by itself is of string type and needs to be 
                 evaluated in the context of SaHpiSensorReadingType
-                textual convention."
+                textual convention.  Specifically, the values for 
+		floating point values will be displayed in the "e"
+		notation, where e = 10^1, as ASCII decimal digits.  
+		For example, the value of .000000007 will be displayed
+		in ASCII decimal as "37 65 2D 39"  
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 section 8.4."
         SYNTAX OCTET STRING (SIZE (0..255))
