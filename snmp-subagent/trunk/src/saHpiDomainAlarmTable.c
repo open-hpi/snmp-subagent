@@ -175,7 +175,7 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	        /** Index saHpiDomainAlarmId is internal */
                 domain_alarm_oid[1] = Alarm.AlarmId;
 	        /** Index saHpiDomainAlarmSeverity is internal */
-	        domain_alarm_oid[2] = Alarm.Severity;
+	        domain_alarm_oid[2] = Alarm.Severity + 1;
 		
 	        domain_alarm_idx.oids = (oid *) & domain_alarm_oid;
 	   
