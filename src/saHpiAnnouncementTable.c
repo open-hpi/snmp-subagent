@@ -764,10 +764,9 @@ void update_announcements (SaHpiSessionIdT sessionid)
 	rv = clear_announcements();
 	
 	rpt_entry_id = SAHPI_FIRST_ENTRY;
-	rdr_entry_id = SAHPI_FIRST_ENTRY;
         do {
 		rv = saHpiRptEntryGet(sessionid, rpt_entry_id, &rpt_entry_id, &rpt_entry);
-		
+		rdr_entry_id = SAHPI_FIRST_ENTRY;
 		do {
 			rv =  saHpiRdrGet(sessionid, 
 				          rpt_entry.ResourceId, 
