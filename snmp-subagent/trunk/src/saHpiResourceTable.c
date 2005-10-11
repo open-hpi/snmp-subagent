@@ -595,6 +595,12 @@ DEBUGMSGTL ((AGENT, "**** MIB_FALSE [%d]\n", MIB_FALSE));
                                             resource_index.len);
 
 	}
+	
+	if ((rpt_entry.ResourceCapabilities & SAHPI_CAPABILITY_MANAGED_HOTSWAP) &&
+	    (new_row == MIB_TRUE)) {
+		
+		rv = populate_hotswap (sessionid, &rpt_entry);
+        }
 
         /*********************************************************/
         /* need to update DomainInfoTable,  RPT data has changed */
