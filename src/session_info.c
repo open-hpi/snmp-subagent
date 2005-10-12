@@ -503,7 +503,7 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 		break;
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		
-		sprintf(saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorUint64);
+		sprintf(saHpiCurrentSensorStateValue, "%llu", reading->Value.SensorUint64);
 		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
 
 		return sizeof(SaHpiUint64T);
@@ -557,7 +557,7 @@ SaErrorT set_sen_thd_value(SaHpiSensorReadingUnionT *value,
 		if (val_len > sizeof(SaHpiUint64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 							
-		sprintf(val, "%lld", value->SensorUint64);
+		sprintf(val, "%llu", value->SensorUint64);
 		sprintf(val, "%s",   val);	
 		break;
 		
