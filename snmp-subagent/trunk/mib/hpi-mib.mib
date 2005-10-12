@@ -1270,11 +1270,30 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 
                 This value by itself is of string type and needs to be 
                 evaluated in the context of SaHpiSensorReadingType
-                textual convention.  Specifically, the values for 
-		floating point values will be displayed in the "e"
+                textual convention.  
+		
+		Specifically, signed integer values will be 
+		displayed using the ASCII decimal digit format.
+		This means that each digit in the value will
+		be displayed in its corresponding hexidecimal
+		value. For example, a signed integer value of 
+		-11 will be displayed using the ASCII decimal 
+		notation for the "-" and for each number "1".
+		The corresponding result is "2D 31 31".
+		
+		Like signed integers, unsigned integer values 
+		will be displayed using the ASCII decimal digit 
+		format. This means that each digit in the value 
+		will be displayed in its corresponding hexidecimal
+		value. For example, an unsigned integer value of 
+		99 will be displayed using the ASCII decimal 
+		notation each number "9".  The corresponding result 
+		is "39 39".		
+
+		Floating point values will be displayed in the "e"
 		notation, where e = 10^1, as ASCII decimal digits.  
 		For example, the value of .000000007 will be displayed
-		in ASCII decimal as "37 65 2D 39"  
+		in ASCII decimal as "37 65 2D 39".  
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 section 8.4."
         SYNTAX OCTET STRING (SIZE (0..255))
