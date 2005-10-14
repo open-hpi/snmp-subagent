@@ -81,6 +81,7 @@ size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 /*************************************************************
  *  scalars 
  */
+static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
 static u_long rdr_entry_count = 0;
 
 /*

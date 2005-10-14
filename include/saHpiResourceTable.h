@@ -164,7 +164,7 @@ int set_table_resource_tag (saHpiResourceTable_context *row_ctx);
 /*************************************************************
  * oid and fucntion declarations scalars
  */
-static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
+
 int handle_saHpiResourceEntryCount( netsnmp_mib_handler 	*handler,
 				    netsnmp_handler_registration *reginfo,
 				    netsnmp_agent_request_info   *reqinfo,
