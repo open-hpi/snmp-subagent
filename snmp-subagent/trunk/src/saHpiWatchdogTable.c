@@ -260,7 +260,6 @@ SaErrorT async_watchdog_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 {
 
         SaErrorT rv = SA_OK;
-        int new_row = MIB_FALSE;
         SaHpiWatchdogT watchdog;
         SaHpiTextBufferT buffer;
 
@@ -518,7 +517,7 @@ static int set_table_watchdog_reset (saHpiWatchdogTable_context *row_ctx)
 	SaHpiResourceIdT    resource_id;
         SaHpiWatchdogNumT   watchdog_num;
 
-        SaHpiTextBufferT buffer;
+        //SaHpiTextBufferT buffer;
 
 	DEBUGMSGTL ((AGENT, "set_table_watchdog_set, called\n"));  
 
@@ -1047,8 +1046,8 @@ void saHpiWatchdogTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiWatchdogTable_context *row_ctx =
             (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx =
-            (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *undo_ctx =
+//            (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -1171,8 +1170,8 @@ void saHpiWatchdogTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiWatchdogTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
+//    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -1332,7 +1331,7 @@ void saHpiWatchdogTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int row_err = 0;
@@ -1446,8 +1445,8 @@ void saHpiWatchdogTable_set_action( netsnmp_request_group *rg )
 void saHpiWatchdogTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
+//    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1521,8 +1520,8 @@ void saHpiWatchdogTable_set_commit( netsnmp_request_group *rg )
 void saHpiWatchdogTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
+//    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1608,8 +1607,8 @@ void saHpiWatchdogTable_set_free( netsnmp_request_group *rg )
 void saHpiWatchdogTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
-    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
+//    saHpiWatchdogTable_context *row_ctx = (saHpiWatchdogTable_context *)rg->existing_row;
+//    saHpiWatchdogTable_context *undo_ctx = (saHpiWatchdogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

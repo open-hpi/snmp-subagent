@@ -842,10 +842,10 @@ netsnmp_index * saHpiWatchdogEventLogTable_delete_row( saHpiWatchdogEventLogTabl
  */
 void saHpiWatchdogEventLogTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiWatchdogEventLogTable_context *row_ctx =
-            (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx =
-            (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx =
+//            (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx =
+//            (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -883,8 +883,8 @@ void saHpiWatchdogEventLogTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiWatchdogEventLogTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -930,8 +930,8 @@ void saHpiWatchdogEventLogTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiWatchdogEventLogTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -987,8 +987,8 @@ void saHpiWatchdogEventLogTable_set_action( netsnmp_request_group *rg )
 void saHpiWatchdogEventLogTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1022,8 +1022,8 @@ void saHpiWatchdogEventLogTable_set_commit( netsnmp_request_group *rg )
 void saHpiWatchdogEventLogTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1068,8 +1068,8 @@ void saHpiWatchdogEventLogTable_set_free( netsnmp_request_group *rg )
 void saHpiWatchdogEventLogTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
-    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
+//    saHpiWatchdogEventLogTable_context *row_ctx = (saHpiWatchdogEventLogTable_context *)rg->existing_row;
+//    saHpiWatchdogEventLogTable_context *undo_ctx = (saHpiWatchdogEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
