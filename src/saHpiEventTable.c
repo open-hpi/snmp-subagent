@@ -843,10 +843,10 @@ netsnmp_index * saHpiEventTable_delete_row( saHpiEventTable_context * ctx )
  */
 void saHpiEventTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiEventTable_context *row_ctx =
-            (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx =
-            (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx =
+//            (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx =
+//            (saHpiEventTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -884,8 +884,8 @@ void saHpiEventTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiEventTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -931,8 +931,8 @@ void saHpiEventTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiEventTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -1004,8 +1004,8 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
 void saHpiEventTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1039,8 +1039,8 @@ void saHpiEventTable_set_commit( netsnmp_request_group *rg )
 void saHpiEventTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1086,8 +1086,8 @@ void saHpiEventTable_set_free( netsnmp_request_group *rg )
 void saHpiEventTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
-    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
+//    saHpiEventTable_context *row_ctx = (saHpiEventTable_context *)rg->existing_row;
+//    saHpiEventTable_context *undo_ctx = (saHpiEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

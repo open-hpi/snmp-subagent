@@ -70,6 +70,7 @@ size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 /*************************************************************
  * oid declarations scalars
  */
+static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
 static u_long resource_entry_count = 0;
 
 /*************************************************************
