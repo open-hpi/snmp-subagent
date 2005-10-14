@@ -833,10 +833,10 @@ netsnmp_index * saHpiSoftwareEventLogTable_delete_row( saHpiSoftwareEventLogTabl
  */
 void saHpiSoftwareEventLogTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiSoftwareEventLogTable_context *row_ctx =
-            (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx =
-            (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx =
+//            (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx =
+//            (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -874,8 +874,8 @@ void saHpiSoftwareEventLogTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSoftwareEventLogTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -921,8 +921,8 @@ void saHpiSoftwareEventLogTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiSoftwareEventLogTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -978,8 +978,8 @@ void saHpiSoftwareEventLogTable_set_action( netsnmp_request_group *rg )
 void saHpiSoftwareEventLogTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1013,8 +1013,8 @@ void saHpiSoftwareEventLogTable_set_commit( netsnmp_request_group *rg )
 void saHpiSoftwareEventLogTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1059,8 +1059,8 @@ void saHpiSoftwareEventLogTable_set_free( netsnmp_request_group *rg )
 void saHpiSoftwareEventLogTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
-    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
+//    saHpiSoftwareEventLogTable_context *row_ctx = (saHpiSoftwareEventLogTable_context *)rg->existing_row;
+//    saHpiSoftwareEventLogTable_context *undo_ctx = (saHpiSoftwareEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

@@ -1178,10 +1178,10 @@ netsnmp_index * saHpiSensorEventTable_delete_row( saHpiSensorEventTable_context 
  */
 void saHpiSensorEventTable_set_reserve1( netsnmp_request_group *rg )
 {
-    saHpiSensorEventTable_context *row_ctx =
-            (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx =
-            (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx =
+//            (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx =
+//            (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -1219,8 +1219,8 @@ void saHpiSensorEventTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiSensorEventTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -1266,8 +1266,8 @@ void saHpiSensorEventTable_set_reserve2( netsnmp_request_group *rg )
 void saHpiSensorEventTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -1324,8 +1324,8 @@ void saHpiSensorEventTable_set_action( netsnmp_request_group *rg )
 void saHpiSensorEventTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1359,8 +1359,8 @@ void saHpiSensorEventTable_set_commit( netsnmp_request_group *rg )
 void saHpiSensorEventTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1405,8 +1405,8 @@ void saHpiSensorEventTable_set_free( netsnmp_request_group *rg )
 void saHpiSensorEventTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
-    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
+//    saHpiSensorEventTable_context *row_ctx = (saHpiSensorEventTable_context *)rg->existing_row;
+//    saHpiSensorEventTable_context *undo_ctx = (saHpiSensorEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*

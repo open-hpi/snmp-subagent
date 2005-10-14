@@ -69,6 +69,8 @@ size_t saHpiDomainReferenceTable_oid_len = OID_LENGTH(saHpiDomainReferenceTable_
 /*************************************************************
  * oid and fucntion declarations scalars
  */
+
+static oid saHpiDomainReferenceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,3 };
 static u_long domain_reference_entry_count = 0;
 
 /**
