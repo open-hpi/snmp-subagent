@@ -416,10 +416,10 @@ SaHpiTime ::= TEXTUAL-CONVENTION
                value conveying a time independent wait should occur. 
                Wait for all time if necessary.
 
-                SAHPI_TIMEOUT_BLOCK        -1LL"
+                SAHPI_TIMEOUT_BLOCK        -1LL
 		
 	       In all cases, time will be displayed in network-byte
-	       order - big endian.
+	       order - big endian."
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
         SYNTAX Counter64
@@ -1278,8 +1278,8 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 		be displayed in its corresponding hexidecimal
 		value. For example, a signed integer value of 
 		-11 will be displayed using the ASCII decimal 
-		notation for the "-" and for each number "1".
-		The corresponding result is "2D 31 31".
+		notation for the '-' and for each number '1'.
+		The corresponding result is '2D 31 31'.
 		
 		Like signed integers, unsigned integer values 
 		will be displayed using the ASCII decimal digit 
@@ -1287,13 +1287,13 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 		will be displayed in its corresponding hexidecimal
 		value. For example, an unsigned integer value of 
 		99 will be displayed using the ASCII decimal 
-		notation each number "9".  The corresponding result 
-		is "39 39".		
+		notation each number '9'.  The corresponding result 
+		is '39 39'.		
 
-		Floating point values will be displayed in the "e"
+		Floating point values will be displayed in the 'e'
 		notation, where e = 10^1, as ASCII decimal digits.  
 		For example, the value of .000000007 will be displayed
-		in ASCII decimal as "37 65 2D 39".  
+		in ASCII decimal as '37 65 2D 39'."  
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 section 8.4."
         SYNTAX OCTET STRING (SIZE (0..255))
