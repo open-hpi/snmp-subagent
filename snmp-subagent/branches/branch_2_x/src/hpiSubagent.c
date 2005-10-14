@@ -105,8 +105,6 @@
  * Internal data for the sub-agent.
  */
 static int keep_running;
-static int session_avail = AGENT_FALSE;
-static SaErrorT err;
 
 static const char *version =
   "$Id$";
@@ -121,7 +119,6 @@ static const char *version =
 int send_traps = AGENT_FALSE;
 static int send_traps_on_startup = AGENT_FALSE;
 
-static int rediscover_count = 0;
 int MAX_EVENT_ENTRIES = 512; // Max EVENT rows. 
 
 //Use syslog 

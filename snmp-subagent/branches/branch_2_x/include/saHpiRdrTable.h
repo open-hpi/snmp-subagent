@@ -119,7 +119,6 @@ int saHpiRdrTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_tab
 /*************************************************************
  * oid and fucntion declarations scalars
  */
-static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
 int handle_saHpiRdrEntryCount( netsnmp_mib_handler *handler, 
 			       netsnmp_handler_registration *reginfo,
 			       netsnmp_agent_request_info   *reqinfo, 

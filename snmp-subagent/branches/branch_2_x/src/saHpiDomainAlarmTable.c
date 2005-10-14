@@ -1134,8 +1134,8 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
 {
     saHpiDomainAlarmTable_context *row_ctx =
             (saHpiDomainAlarmTable_context *)rg->existing_row;
-    saHpiDomainAlarmTable_context *undo_ctx =
-            (saHpiDomainAlarmTable_context *)rg->undo_info;
+//    saHpiDomainAlarmTable_context *undo_ctx =
+//            (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -1249,7 +1249,7 @@ void saHpiDomainAlarmTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiDomainAlarmTable_set_reserve2( netsnmp_request_group *rg )
 {
-    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
+//    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
     saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
@@ -1392,7 +1392,7 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
     saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
-    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
+//    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -1603,8 +1603,8 @@ void saHpiDomainAlarmTable_set_action( netsnmp_request_group *rg )
 void saHpiDomainAlarmTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
-    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
+//    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
+//    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1694,8 +1694,8 @@ void saHpiDomainAlarmTable_set_commit( netsnmp_request_group *rg )
 void saHpiDomainAlarmTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
-    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
+//    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
+//    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1796,8 +1796,8 @@ void saHpiDomainAlarmTable_set_free( netsnmp_request_group *rg )
 void saHpiDomainAlarmTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
-    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
+//    saHpiDomainAlarmTable_context *row_ctx = (saHpiDomainAlarmTable_context *)rg->existing_row;
+//    saHpiDomainAlarmTable_context *undo_ctx = (saHpiDomainAlarmTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
