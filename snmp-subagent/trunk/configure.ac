@@ -139,6 +139,7 @@ CC_WARNINGS="-Wall -Wmissing-prototypes \
 	-Wmissing-declarations \
 	-Wstrict-prototypes \
 	-Wpointer-arith \
+	-Werror \
 #	-fprofile-arcs -ftest-coverage \
 	-Wcast-qual -Wcast-align "
 #	-Werror"
