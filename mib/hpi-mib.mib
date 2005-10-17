@@ -1291,7 +1291,10 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
 		Floating point values will be displayed in the 'e'
 		notation, where e = 10^1, as ASCII decimal digits.  
 		For example, the value of .000000007 will be displayed
-		in ASCII decimal as '37 65 2D 39'."  
+		in ASCII decimal as '37 65 2D 39'.
+
+		When reading type is 'buffer' this object will hold arbitrary 
+		data."  
 		
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 section 8.4."
