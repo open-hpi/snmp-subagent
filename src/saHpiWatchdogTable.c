@@ -1789,91 +1789,91 @@ int saHpiWatchdogTable_get_value(
         case COLUMN_SAHPIWATCHDOGNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiWatchdogNum,
+                         (u_char*)&context->saHpiWatchdogNum,
                          sizeof(context->saHpiWatchdogNum) );
         break;
     
         case COLUMN_SAHPIWATCHDOGLOG:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogLog,
+                         (u_char*)&context->saHpiWatchdogLog,
                          sizeof(context->saHpiWatchdogLog) );
         break;
     
         case COLUMN_SAHPIWATCHDOGRUNNING:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogRunning,
+                         (u_char*)&context->saHpiWatchdogRunning,
                          sizeof(context->saHpiWatchdogRunning) );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERUSESTATE:
             /** SaHpiWatchdogTimerUse = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogTimerUseState,
+                         (u_char*)&context->saHpiWatchdogTimerUseState,
                          sizeof(context->saHpiWatchdogTimerUseState) );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERACTION:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogTimerAction,
+                         (u_char*)&context->saHpiWatchdogTimerAction,
                          sizeof(context->saHpiWatchdogTimerAction) );
         break;
     
         case COLUMN_SAHPIWATCHDOGPRETIMERINTERRUPT:
             /** SaHpiWatchdogPreTimerAction = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogPretimerInterrupt,
+                         (u_char*)&context->saHpiWatchdogPretimerInterrupt,
                          sizeof(context->saHpiWatchdogPretimerInterrupt) );
         break;
     
         case COLUMN_SAHPIWATCHDOGPRETIMEOUTINTERVAL:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiWatchdogPreTimeoutInterval,
+                         (u_char*)&context->saHpiWatchdogPreTimeoutInterval,
                          sizeof(context->saHpiWatchdogPreTimeoutInterval) );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERUSEEXPFLAGS:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiWatchdogTimerUseExpFlags,
+                         (u_char*)&context->saHpiWatchdogTimerUseExpFlags,
                          context->saHpiWatchdogTimerUseExpFlags_len );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiWatchdogTimerInitialCount,
+                         (u_char*)&context->saHpiWatchdogTimerInitialCount,
                          sizeof(context->saHpiWatchdogTimerInitialCount) );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiWatchdogTimerPresentCount,
+                         (u_char*)&context->saHpiWatchdogTimerPresentCount,
                          sizeof(context->saHpiWatchdogTimerPresentCount) );
         break;
     
         case COLUMN_SAHPIWATCHDOGTIMERRESET:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogTimerReset,
+                         (u_char*)&context->saHpiWatchdogTimerReset,
                          sizeof(context->saHpiWatchdogTimerReset) );
         break;
     
         case COLUMN_SAHPIWATCHDOGOEM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiWatchdogOem,
+                         (u_char*)&context->saHpiWatchdogOem,
                          sizeof(context->saHpiWatchdogOem) );
         break;
     
         case COLUMN_SAHPIWATCHDOGRDR:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiWatchdogRDR,
+                         (u_char*)&context->saHpiWatchdogRDR,
                          context->saHpiWatchdogRDR_len );
         break;
     

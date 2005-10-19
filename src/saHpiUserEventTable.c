@@ -1665,42 +1665,42 @@ int saHpiUserEventTable_get_value(
         case COLUMN_SAHPIUSEREVENTENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiUserEventEntryId,
+                         (u_char*)&context->saHpiUserEventEntryId,
                          sizeof(context->saHpiUserEventEntryId) );
         break;
     
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiUserEventTimestamp,
+                         (u_char*)&context->saHpiUserEventTimestamp,
                          sizeof(context->saHpiUserEventTimestamp) );
         break;
     
         case COLUMN_SAHPIUSEREVENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiUserEventTextType,
+                         (u_char*)&context->saHpiUserEventTextType,
                          sizeof(context->saHpiUserEventTextType) );
         break;
     
         case COLUMN_SAHPIUSEREVENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiUserEventTextLanguage,
+                         (u_char*)&context->saHpiUserEventTextLanguage,
                          sizeof(context->saHpiUserEventTextLanguage) );
         break;
     
         case COLUMN_SAHPIUSEREVENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiUserEventText,
+                         (u_char*)&context->saHpiUserEventText,
                          context->saHpiUserEventText_len );
         break;
     
         case COLUMN_SAHPIUSEREVENTROWSTATUS:
             /** RowStatus = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiUserEventRowStatus,
+                         (u_char*)&context->saHpiUserEventRowStatus,
                          sizeof(context->saHpiUserEventRowStatus) );
         break;
     
