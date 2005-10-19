@@ -1000,21 +1000,21 @@ int saHpiSensorReadingNormalMaxTable_get_value(
 	case COLUMN_SAHPISENSORREADINGNORMALMAXISSUPPORTED:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNormalMaxIsSupported,
+					 (u_char*)&context->saHpiSensorReadingNormalMaxIsSupported,
 					 sizeof(context->saHpiSensorReadingNormalMaxIsSupported) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNORMALMAXTYPE:
 		/** SaHpiSensorReadingType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNormalMaxType,
+					 (u_char*)&context->saHpiSensorReadingNormalMaxType,
 					 sizeof(context->saHpiSensorReadingNormalMaxType) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNORMALMAXVALUE:
 		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiSensorReadingNormalMaxValue,
+					 (u_char*)&context->saHpiSensorReadingNormalMaxValue,
 					 context->saHpiSensorReadingNormalMaxValue_len );
 		break;
 

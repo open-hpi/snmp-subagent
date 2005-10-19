@@ -250,7 +250,7 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable RptEntry.ResourceTag.DataLength rv = %d\n", 
                              RptEntry.ResourceTag.DataLength));
 		DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable strlen(RptEntry.ResourceTag.Data) rv = %d\n", 
-                             strlen(RptEntry.ResourceTag.Data))); 
+                             strlen((const char *)RptEntry.ResourceTag.Data))); 
 
 
 		/** INTEGER = ASN_INTEGER */
@@ -1940,161 +1940,161 @@ int saHpiResourceTable_get_value(
 	case COLUMN_SAHPIRESOURCEID:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiResourceId,
+					 (unsigned char*)&context->saHpiResourceId,
 					 sizeof(context->saHpiResourceId) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEENTRYID:
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiResourceEntryId,
+					 (unsigned char*)&context->saHpiResourceEntryId,
 					 sizeof(context->saHpiResourceEntryId) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEENTITYPATH:
 		/** SaHpiEntityPath = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiResourceEntityPath,
+					 (unsigned char*)&context->saHpiResourceEntityPath,
 					 context->saHpiResourceEntityPath_len );
 		break;
 
 	case COLUMN_SAHPIRESOURCECAPABILITIES:
 		/** BITS = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiResourceCapabilities,
+					 (unsigned char*)&context->saHpiResourceCapabilities,
 					 context->saHpiResourceCapabilities_len );
 		break;
 
 	case COLUMN_SAHPIRESOURCEHOTSWAPCAPABILITIES:
 		/** BITS = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiResourceHotSwapCapabilities,
+					 (unsigned char*)&context->saHpiResourceHotSwapCapabilities,
 					 context->saHpiResourceHotSwapCapabilities_len );
 		break;
 
 	case COLUMN_SAHPIRESOURCESEVERITY:
 		/** SaHpiSeverity = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceSeverity,
+					 (unsigned char*)&context->saHpiResourceSeverity,
 					 sizeof(context->saHpiResourceSeverity) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEFAILED:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceFailed,
+					 (unsigned char*)&context->saHpiResourceFailed,
 					 sizeof(context->saHpiResourceFailed) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFORESOURCEREV:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoResourceRev,
+					 (unsigned char*)&context->saHpiResourceInfoResourceRev,
 					 sizeof(context->saHpiResourceInfoResourceRev) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOSPECIFICVER:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoSpecificVer,
+					 (unsigned char*)&context->saHpiResourceInfoSpecificVer,
 					 sizeof(context->saHpiResourceInfoSpecificVer) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFODEVICESUPPORT:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoDeviceSupport,
+					 (unsigned char*)&context->saHpiResourceInfoDeviceSupport,
 					 sizeof(context->saHpiResourceInfoDeviceSupport) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOMANUFACTURERID:
 		/** SaHpiManufacturerId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiResourceInfoManufacturerId,
+					 (unsigned char*)&context->saHpiResourceInfoManufacturerId,
 					 sizeof(context->saHpiResourceInfoManufacturerId) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOPRODUCTID:
 		/** Unsigned16 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoProductId,
+					 (unsigned char*)&context->saHpiResourceInfoProductId,
 					 sizeof(context->saHpiResourceInfoProductId) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMAJORREV:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoFirmwareMajorRev,
+					 (unsigned char*)&context->saHpiResourceInfoFirmwareMajorRev,
 					 sizeof(context->saHpiResourceInfoFirmwareMajorRev) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOFIRMWAREMINORREV:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoFirmwareMinorRev,
+					 (unsigned char*)&context->saHpiResourceInfoFirmwareMinorRev,
 					 sizeof(context->saHpiResourceInfoFirmwareMinorRev) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOAUXFIRMWAREREV:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceInfoAuxFirmwareRev,
+					 (unsigned char*)&context->saHpiResourceInfoAuxFirmwareRev,
 					 sizeof(context->saHpiResourceInfoAuxFirmwareRev) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEINFOGUID:
 		/** SaHpiGuid = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiResourceInfoGuid,
+					 (unsigned char*)&context->saHpiResourceInfoGuid,
 					 context->saHpiResourceInfoGuid_len );
 		break;
 
 	case COLUMN_SAHPIRESOURCETAGTEXTTYPE:
 		/** SaHpiTextType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceTagTextType,
+					 (unsigned char*)&context->saHpiResourceTagTextType,
 					 sizeof(context->saHpiResourceTagTextType) );
 		break;
 
 	case COLUMN_SAHPIRESOURCETAGTEXTLANGUAGE:
 		/** SaHpiTextLanguage = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceTagTextLanguage,
+					 (unsigned char*)&context->saHpiResourceTagTextLanguage,
 					 sizeof(context->saHpiResourceTagTextLanguage) );
 		break;
 
 	case COLUMN_SAHPIRESOURCETAG:
 		/** SaHpiText = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiResourceTag,
+					 (unsigned char*)&context->saHpiResourceTag,
 					 context->saHpiResourceTag_len );
 		break;
 
 	case COLUMN_SAHPIRESOURCEPARMCONTROL:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceParmControl,
+					 (unsigned char*)&context->saHpiResourceParmControl,
 					 sizeof(context->saHpiResourceParmControl) );
 		break;
 
 	case COLUMN_SAHPIRESOURCERESETACTION:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceResetAction,
+					 (unsigned char*)&context->saHpiResourceResetAction,
 					 sizeof(context->saHpiResourceResetAction) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEPOWERACTION:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourcePowerAction,
+					 (unsigned char*)&context->saHpiResourcePowerAction,
 					 sizeof(context->saHpiResourcePowerAction) );
 		break;
 
 	case COLUMN_SAHPIRESOURCEISHISTORICAL:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiResourceIsHistorical,
+					 (unsigned char*)&context->saHpiResourceIsHistorical,
 					 sizeof(context->saHpiResourceIsHistorical) );
 		break;
 

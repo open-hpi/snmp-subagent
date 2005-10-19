@@ -1332,98 +1332,98 @@ int saHpiSensorEventLogTable_get_value(
         case COLUMN_SAHPISENSOREVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiSensorEventLogTimestamp,
+                         (u_char*)&context->saHpiSensorEventLogTimestamp,
                          sizeof(context->saHpiSensorEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGTYPE:
             /** SaHpiSensorType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventLogType,
+                         (u_char*)&context->saHpiSensorEventLogType,
                          sizeof(context->saHpiSensorEventLogType) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGCATEGORY:
             /** SaHpiEventCategory = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventLogCategory,
+                         (u_char*)&context->saHpiSensorEventLogCategory,
                          sizeof(context->saHpiSensorEventLogCategory) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGASSERTION:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventLogAssertion,
+                         (u_char*)&context->saHpiSensorEventLogAssertion,
                          sizeof(context->saHpiSensorEventLogAssertion) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogState,
+                         (u_char*)&context->saHpiSensorEventLogState,
                          context->saHpiSensorEventLogState_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGOPTIONALDATA:
             /** SaHpiOptionalData = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogOptionalData,
+                         (u_char*)&context->saHpiSensorEventLogOptionalData,
                          context->saHpiSensorEventLogOptionalData_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGTRIGGERREADINGTYPE:
             /** SaHpiSensorReadingType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventLogTriggerReadingType,
+                         (u_char*)&context->saHpiSensorEventLogTriggerReadingType,
                          sizeof(context->saHpiSensorEventLogTriggerReadingType) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGTRIGGERREADING:
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogTriggerReading,
+                         (u_char*)&context->saHpiSensorEventLogTriggerReading,
                          context->saHpiSensorEventLogTriggerReading_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGTRIGGERTHRESHOLDTYPE:
             /** SaHpiSensorReadingType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventLogTriggerThresholdType,
+                         (u_char*)&context->saHpiSensorEventLogTriggerThresholdType,
                          sizeof(context->saHpiSensorEventLogTriggerThresholdType) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGTRIGGERTHRESHOLD:
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogTriggerThreshold,
+                         (u_char*)&context->saHpiSensorEventLogTriggerThreshold,
                          context->saHpiSensorEventLogTriggerThreshold_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGPREVIOUSSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogPreviousState,
+                         (u_char*)&context->saHpiSensorEventLogPreviousState,
                          context->saHpiSensorEventLogPreviousState_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGCURRENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEventLogCurrentState,
+                         (u_char*)&context->saHpiSensorEventLogCurrentState,
                          context->saHpiSensorEventLogCurrentState_len );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGOEM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSensorEventLogOem,
+                         (u_char*)&context->saHpiSensorEventLogOem,
                          sizeof(context->saHpiSensorEventLogOem) );
         break;
     
         case COLUMN_SAHPISENSOREVENTLOGSPECIFIC:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSensorEventLogSpecific,
+                         (u_char*)&context->saHpiSensorEventLogSpecific,
                          sizeof(context->saHpiSensorEventLogSpecific) );
         break;
     

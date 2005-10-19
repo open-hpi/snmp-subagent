@@ -1207,21 +1207,21 @@ int saHpiResourceEventLogTable_get_value(
         case COLUMN_SAHPIRESOURCEEVENTLOGENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiResourceEventLogEntryId,
+                         (u_char*)&context->saHpiResourceEventLogEntryId,
                          sizeof(context->saHpiResourceEventLogEntryId) );
         break;
     
         case COLUMN_SAHPIRESOURCEEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiResourceEventLogTimestamp,
+                         (u_char*)&context->saHpiResourceEventLogTimestamp,
                          sizeof(context->saHpiResourceEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIRESOURCEEVENTLOGTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiResourceEventLogType,
+                         (u_char*)&context->saHpiResourceEventLogType,
                          sizeof(context->saHpiResourceEventLogType) );
         break;
     

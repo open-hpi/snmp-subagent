@@ -1455,28 +1455,28 @@ int saHpiEventLogTable_get_value(
         case COLUMN_SAHPIEVENTLOGINDEX:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiEventLogIndex,
+                         (u_char*)&context->saHpiEventLogIndex,
                          sizeof(context->saHpiEventLogIndex) );
         break;
     
         case COLUMN_SAHPIEVENTLOGTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogType,
+                         (u_char*)&context->saHpiEventLogType,
                          sizeof(context->saHpiEventLogType) );
         break;
     
         case COLUMN_SAHPIEVENTLOGADDEDTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiEventLogAddedTimestamp,
+                         (u_char*)&context->saHpiEventLogAddedTimestamp,
                          sizeof(context->saHpiEventLogAddedTimestamp) );
         break;
     
         case COLUMN_SAHPIEVENTLOGROWPOINTER:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiEventLogRowPointer,
+                         (u_char*)&context->saHpiEventLogRowPointer,
                          context->saHpiEventLogRowPointer_len );
         break;
     

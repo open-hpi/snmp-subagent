@@ -1223,28 +1223,28 @@ int saHpiEventTable_get_value(
         case COLUMN_SAHPIEVENTROWPOINTER:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiEventRowPointer,
+                         (u_char*)&context->saHpiEventRowPointer,
                          context->saHpiEventRowPointer_len );
         break;
     
         case COLUMN_SAHPIEVENTSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventSeverity,
+                         (u_char*)&context->saHpiEventSeverity,
                          sizeof(context->saHpiEventSeverity) );
         break;
     
         case COLUMN_SAHPIEVENTSAHPITIME:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiEventSaHpiTime,
+                         (u_char*)&context->saHpiEventSaHpiTime,
                          sizeof(context->saHpiEventSaHpiTime) );
         break;
     
         case COLUMN_SAHPIEVENTTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventType,
+                         (u_char*)&context->saHpiEventType,
                          sizeof(context->saHpiEventType) );
         break;
     

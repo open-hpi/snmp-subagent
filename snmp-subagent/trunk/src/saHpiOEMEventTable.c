@@ -1234,42 +1234,42 @@ int saHpiOEMEventTable_get_value(
         case COLUMN_SAHPIOEMEVENTENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiOEMEventEntryId,
+                         (u_char*)&context->saHpiOEMEventEntryId,
                          sizeof(context->saHpiOEMEventEntryId) );
         break;
     
         case COLUMN_SAHPIOEMEVENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiOEMEventTimestamp,
+                         (u_char*)&context->saHpiOEMEventTimestamp,
                          sizeof(context->saHpiOEMEventTimestamp) );
         break;
     
         case COLUMN_SAHPIOEMEVENTMANUFACTURERIDT:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiOEMEventManufacturerIdT,
+                         (u_char*)&context->saHpiOEMEventManufacturerIdT,
                          sizeof(context->saHpiOEMEventManufacturerIdT) );
         break;
     
         case COLUMN_SAHPIOEMEVENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiOEMEventTextType,
+                         (u_char*)&context->saHpiOEMEventTextType,
                          sizeof(context->saHpiOEMEventTextType) );
         break;
     
         case COLUMN_SAHPIOEMEVENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiOEMEventTextLanguage,
+                         (u_char*)&context->saHpiOEMEventTextLanguage,
                          sizeof(context->saHpiOEMEventTextLanguage) );
         break;
     
         case COLUMN_SAHPIOEMEVENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiOEMEventText,
+                         (u_char*)&context->saHpiOEMEventText,
                          context->saHpiOEMEventText_len );
         break;
     

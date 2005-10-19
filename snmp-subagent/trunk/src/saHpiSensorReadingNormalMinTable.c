@@ -1011,21 +1011,21 @@ int saHpiSensorReadingNormalMinTable_get_value(
 	case COLUMN_SAHPISENSORREADINGNORMALMINISSUPPORTED:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNormalMinIsSupported,
+					 (u_char*)&context->saHpiSensorReadingNormalMinIsSupported,
 					 sizeof(context->saHpiSensorReadingNormalMinIsSupported) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNORMALMINTYPE:
 		/** SaHpiSensorReadingType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNormalMinType,
+					 (u_char*)&context->saHpiSensorReadingNormalMinType,
 					 sizeof(context->saHpiSensorReadingNormalMinType) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNORMALMINVALUE:
 		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiSensorReadingNormalMinValue,
+					 (u_char*)&context->saHpiSensorReadingNormalMinValue,
 					 context->saHpiSensorReadingNormalMinValue_len );
 		break;
 

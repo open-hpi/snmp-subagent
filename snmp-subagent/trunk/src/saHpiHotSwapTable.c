@@ -1537,42 +1537,42 @@ int saHpiHotSwapTable_get_value(
         case COLUMN_SAHPIHOTSWAPINDICATOR:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapIndicator,
+                         (u_char*)&context->saHpiHotSwapIndicator,
                          sizeof(context->saHpiHotSwapIndicator) );
         break;
     
         case COLUMN_SAHPIHOTSWAPSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapState,
+                         (u_char*)&context->saHpiHotSwapState,
                          sizeof(context->saHpiHotSwapState) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** SafUnsigned64 = ASN_OPAQUE */
             snmp_set_var_typed_value(var, ASN_OPAQUE,
-                         (char*)&context->saHpiHotSwapExtractTimeout,
+                         (u_char*)&context->saHpiHotSwapExtractTimeout,
                          context->saHpiHotSwapExtractTimeout_len );
         break;
     
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapActionRequest,
+                         (u_char*)&context->saHpiHotSwapActionRequest,
                          sizeof(context->saHpiHotSwapActionRequest) );
         break;
     
         case COLUMN_SAHPIHOTSWAPPOLICYCANCEL:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapPolicyCancel,
+                         (u_char*)&context->saHpiHotSwapPolicyCancel,
                          sizeof(context->saHpiHotSwapPolicyCancel) );
         break;
     
         case COLUMN_SAHPIHOTSWAPRESOURCEREQUEST:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapResourceRequest,
+                         (u_char*)&context->saHpiHotSwapResourceRequest,
                          sizeof(context->saHpiHotSwapResourceRequest) );
         break;
     

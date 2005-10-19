@@ -1190,49 +1190,49 @@ int saHpiInventoryTable_get_value(
         case COLUMN_SAHPIINVENTORYID:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiInventoryId,
+                         (u_char*)&context->saHpiInventoryId,
                          sizeof(context->saHpiInventoryId) );
         break;
     
         case COLUMN_SAHPIINVENTORYPERSISTENT:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiInventoryPersistent,
+                         (u_char*)&context->saHpiInventoryPersistent,
                          sizeof(context->saHpiInventoryPersistent) );
         break;
     
         case COLUMN_SAHPIINVENTORYOEM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiInventoryOEM,
+                         (u_char*)&context->saHpiInventoryOEM,
                          sizeof(context->saHpiInventoryOEM) );
         break;
     
         case COLUMN_SAHPIINVENTORYUPDATECOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiInventoryUpdateCount,
+                         (u_char*)&context->saHpiInventoryUpdateCount,
                          sizeof(context->saHpiInventoryUpdateCount) );
         break;
     
         case COLUMN_SAHPIINVENTORYISREADONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiInventoryIsReadOnly,
+                         (u_char*)&context->saHpiInventoryIsReadOnly,
                          sizeof(context->saHpiInventoryIsReadOnly) );
         break;
     
         case COLUMN_SAHPIINVENTORYNUMAREAS:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiInventoryNumAreas,
+                         (u_char*)&context->saHpiInventoryNumAreas,
                          sizeof(context->saHpiInventoryNumAreas) );
         break;
     
         case COLUMN_SAHPIINVENTORYRDR:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiInventoryRDR,
+                         (u_char*)&context->saHpiInventoryRDR,
                          context->saHpiInventoryRDR_len );
         break;
     

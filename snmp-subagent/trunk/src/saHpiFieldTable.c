@@ -1937,56 +1937,56 @@ int saHpiFieldTable_get_value(
         case COLUMN_SAHPIFIELDID:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiFieldId,
+                         (u_char*)&context->saHpiFieldId,
                          sizeof(context->saHpiFieldId) );
         break;
     
         case COLUMN_SAHPIFIELDIDINDEX:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiFieldIdIndex,
+                         (u_char*)&context->saHpiFieldIdIndex,
                          sizeof(context->saHpiFieldIdIndex) );
         break;
     
         case COLUMN_SAHPIFIELDTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiFieldType,
+                         (u_char*)&context->saHpiFieldType,
                          sizeof(context->saHpiFieldType) );
         break;
     
         case COLUMN_SAHPIFIELDISREADONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiFieldIsReadOnly,
+                         (u_char*)&context->saHpiFieldIsReadOnly,
                          sizeof(context->saHpiFieldIsReadOnly) );
         break;
     
         case COLUMN_SAHPIFIELDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiFieldTextType,
+                         (u_char*)&context->saHpiFieldTextType,
                          sizeof(context->saHpiFieldTextType) );
         break;
     
         case COLUMN_SAHPIFIELDTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiFieldTextLanguage,
+                         (u_char*)&context->saHpiFieldTextLanguage,
                          sizeof(context->saHpiFieldTextLanguage) );
         break;
     
         case COLUMN_SAHPIFIELDTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiFieldText,
+                         (u_char*)&context->saHpiFieldText,
                          context->saHpiFieldText_len );
         break;
     
         case COLUMN_SAHPIFIELDSTATUS:
             /** RowStatus = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiFieldStatus,
+                         (u_char*)&context->saHpiFieldStatus,
                          sizeof(context->saHpiFieldStatus) );
         break;
     

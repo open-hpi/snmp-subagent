@@ -1214,28 +1214,28 @@ int saHpiWatchdogEventLogTable_get_value(
         case COLUMN_SAHPIWATCHDOGEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiWatchdogEventLogTimestamp,
+                         (u_char*)&context->saHpiWatchdogEventLogTimestamp,
                          sizeof(context->saHpiWatchdogEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIWATCHDOGEVENTLOGACTION:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogEventLogAction,
+                         (u_char*)&context->saHpiWatchdogEventLogAction,
                          sizeof(context->saHpiWatchdogEventLogAction) );
         break;
     
         case COLUMN_SAHPIWATCHDOGEVENTLOGPRETIMERACTION:
             /** SaHpiWatchdogPreTimerAction = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogEventLogPreTimerAction,
+                         (u_char*)&context->saHpiWatchdogEventLogPreTimerAction,
                          sizeof(context->saHpiWatchdogEventLogPreTimerAction) );
         break;
     
         case COLUMN_SAHPIWATCHDOGEVENTLOGUSE:
             /** SaHpiWatchdogTimerUse = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiWatchdogEventLogUse,
+                         (u_char*)&context->saHpiWatchdogEventLogUse,
                          sizeof(context->saHpiWatchdogEventLogUse) );
         break;
     

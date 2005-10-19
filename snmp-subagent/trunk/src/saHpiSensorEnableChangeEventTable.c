@@ -1489,70 +1489,70 @@ int saHpiSensorEnableChangeEventTable_get_value(
         case COLUMN_SAHPISENSORENABLECHANGEEVENTENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSensorEnableChangeEventEntryId,
+                         (u_char*)&context->saHpiSensorEnableChangeEventEntryId,
                          sizeof(context->saHpiSensorEnableChangeEventEntryId) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiSensorEnableChangeEventTimestamp,
+                         (u_char*)&context->saHpiSensorEnableChangeEventTimestamp,
                          sizeof(context->saHpiSensorEnableChangeEventTimestamp) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTTYPE:
             /** SaHpiSensorType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventType,
+                         (u_char*)&context->saHpiSensorEnableChangeEventType,
                          sizeof(context->saHpiSensorEnableChangeEventType) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTCATEGORY:
             /** SaHpiEventCategory = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventCategory,
+                         (u_char*)&context->saHpiSensorEnableChangeEventCategory,
                          sizeof(context->saHpiSensorEnableChangeEventCategory) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTENABLED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventEnabled,
+                         (u_char*)&context->saHpiSensorEnableChangeEventEnabled,
                          sizeof(context->saHpiSensorEnableChangeEventEnabled) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTEVENTSENABLED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventEventsEnabled,
+                         (u_char*)&context->saHpiSensorEnableChangeEventEventsEnabled,
                          sizeof(context->saHpiSensorEnableChangeEventEventsEnabled) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTASSERTEVENTS:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventAssertEvents,
+                         (u_char*)&context->saHpiSensorEnableChangeEventAssertEvents,
                          context->saHpiSensorEnableChangeEventAssertEvents_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTDEASSERTEVENTS:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventDeassertEvents,
+                         (u_char*)&context->saHpiSensorEnableChangeEventDeassertEvents,
                          context->saHpiSensorEnableChangeEventDeassertEvents_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTOPTIONALDATA:
             /** SaHpiOptionalData = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventOptionalData,
+                         (u_char*)&context->saHpiSensorEnableChangeEventOptionalData,
                          context->saHpiSensorEnableChangeEventOptionalData_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventState,
+                         (u_char*)&context->saHpiSensorEnableChangeEventState,
                          context->saHpiSensorEnableChangeEventState_len );
         break;
     

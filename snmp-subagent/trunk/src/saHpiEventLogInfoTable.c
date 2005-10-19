@@ -1631,84 +1631,84 @@ int saHpiEventLogInfoTable_get_value(
         case COLUMN_SAHPIEVENTLOGINFOENTRIES:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiEventLogInfoEntries,
+                         (u_char*)&context->saHpiEventLogInfoEntries,
                          sizeof(context->saHpiEventLogInfoEntries) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOSIZE:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiEventLogInfoSize,
+                         (u_char*)&context->saHpiEventLogInfoSize,
                          sizeof(context->saHpiEventLogInfoSize) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOUSEREVENTMAXSIZE:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiEventLogInfoUserEventMaxSize,
+                         (u_char*)&context->saHpiEventLogInfoUserEventMaxSize,
                          sizeof(context->saHpiEventLogInfoUserEventMaxSize) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOUPDATETIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiEventLogInfoUpdateTimestamp,
+                         (u_char*)&context->saHpiEventLogInfoUpdateTimestamp,
                          sizeof(context->saHpiEventLogInfoUpdateTimestamp) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOTIME:
             /** SafUnsigned64 = ASN_OPAQUE */
             snmp_set_var_typed_value(var, ASN_OPAQUE,
-                         (char*)&context->saHpiEventLogInfoTime,
+                         (u_char*)&context->saHpiEventLogInfoTime,
                          context->saHpiEventLogInfoTime_len );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOISENABLED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogInfoIsEnabled,
+                         (u_char*)&context->saHpiEventLogInfoIsEnabled,
                          sizeof(context->saHpiEventLogInfoIsEnabled) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWFLAG:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogInfoOverflowFlag,
+                         (u_char*)&context->saHpiEventLogInfoOverflowFlag,
                          sizeof(context->saHpiEventLogInfoOverflowFlag) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESETABLE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogInfoOverflowResetable,
+                         (u_char*)&context->saHpiEventLogInfoOverflowResetable,
                          sizeof(context->saHpiEventLogInfoOverflowResetable) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWACTION:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogInfoOverflowAction,
+                         (u_char*)&context->saHpiEventLogInfoOverflowAction,
                          sizeof(context->saHpiEventLogInfoOverflowAction) );
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogInfoOverflowReset,
+                         (u_char*)&context->saHpiEventLogInfoOverflowReset,
                          sizeof(context->saHpiEventLogInfoOverflowReset) );
         break;
     
         case COLUMN_SAHPIEVENTLOGCLEAR:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogClear,
+                         (u_char*)&context->saHpiEventLogClear,
                          sizeof(context->saHpiEventLogClear) );
         break;
     
         case COLUMN_SAHPIEVENTLOGSTATE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiEventLogState,
+                         (u_char*)&context->saHpiEventLogState,
                          sizeof(context->saHpiEventLogState) );
         break;
     
