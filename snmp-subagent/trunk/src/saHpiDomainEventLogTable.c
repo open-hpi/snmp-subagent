@@ -1155,21 +1155,21 @@ int saHpiDomainEventLogTable_get_value(
         case COLUMN_SAHPIDOMAINEVENTLOGENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainEventLogEntryId,
+                         (u_char*)&context->saHpiDomainEventLogEntryId,
                          sizeof(context->saHpiDomainEventLogEntryId) );
         break;
     
         case COLUMN_SAHPIDOMAINEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiDomainEventLogTimestamp,
+                         (u_char*)&context->saHpiDomainEventLogTimestamp,
                          sizeof(context->saHpiDomainEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIDOMAINEVENTLOGTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainEventLogType,
+                         (u_char*)&context->saHpiDomainEventLogType,
                          sizeof(context->saHpiDomainEventLogType) );
         break;
     

@@ -977,14 +977,14 @@ int saHpiDomainReferenceTable_get_value(
         case COLUMN_SAHPIDOMAINREF:
             /** SaHpiDomainId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainRef,
+                         (unsigned char*)&context->saHpiDomainRef,
                          sizeof(context->saHpiDomainRef) );
         break;
     
         case COLUMN_SAHPIDOMAINREFERENCEISPEER:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainReferenceIsPeer,
+                         (unsigned char*)&context->saHpiDomainReferenceIsPeer,
                          sizeof(context->saHpiDomainReferenceIsPeer) );
         break;
     

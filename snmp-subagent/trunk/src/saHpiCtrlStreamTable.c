@@ -1366,91 +1366,91 @@ int saHpiCtrlStreamTable_get_value(
 	case COLUMN_SAHPICTRLSTREAMENTRYID:
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlStreamEntryId,
+					 (u_char*)&context->saHpiCtrlStreamEntryId,
 					 sizeof(context->saHpiCtrlStreamEntryId) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMNUM:
 		/** SaHpiInstrumentId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlStreamNum,
+					 (u_char*)&context->saHpiCtrlStreamNum,
 					 sizeof(context->saHpiCtrlStreamNum) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMOUTPUTTYPE:
 		/** SaHpiCtrlOutputType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamOutputType,
+					 (u_char*)&context->saHpiCtrlStreamOutputType,
 					 sizeof(context->saHpiCtrlStreamOutputType) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMDEFAULTMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamDefaultMode,
+					 (u_char*)&context->saHpiCtrlStreamDefaultMode,
 					 sizeof(context->saHpiCtrlStreamDefaultMode) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamMode,
+					 (u_char*)&context->saHpiCtrlStreamMode,
 					 sizeof(context->saHpiCtrlStreamMode) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMISREADONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamIsReadOnly,
+					 (u_char*)&context->saHpiCtrlStreamIsReadOnly,
 					 sizeof(context->saHpiCtrlStreamIsReadOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMISWRITEONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamIsWriteOnly,
+					 (u_char*)&context->saHpiCtrlStreamIsWriteOnly,
 					 sizeof(context->saHpiCtrlStreamIsWriteOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMDEFAULTREPEAT:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamDefaultRepeat,
+					 (u_char*)&context->saHpiCtrlStreamDefaultRepeat,
 					 sizeof(context->saHpiCtrlStreamDefaultRepeat) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMDEFAULTSTATE:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlStreamDefaultState,
+                         (u_char*)&context->saHpiCtrlStreamDefaultState,
                          context->saHpiCtrlStreamDefaultState_len );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMREPEAT:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlStreamRepeat,
+					 (u_char*)&context->saHpiCtrlStreamRepeat,
 					 sizeof(context->saHpiCtrlStreamRepeat) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMSTATE:
 		/** SaHpiText = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlStreamState,
+                         (u_char*)&context->saHpiCtrlStreamState,
                          context->saHpiCtrlStreamState_len );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMOEM:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlStreamOem,
+					 (u_char*)&context->saHpiCtrlStreamOem,
 					 sizeof(context->saHpiCtrlStreamOem) );
 		break;
 
 	case COLUMN_SAHPICTRLSTREAMRDR:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-					 (char*)&context->saHpiCtrlStreamRDR,
+					 (u_char*)&context->saHpiCtrlStreamRDR,
 					 context->saHpiCtrlStreamRDR_len );
 		break;
 

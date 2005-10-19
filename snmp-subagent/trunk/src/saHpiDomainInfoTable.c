@@ -1223,133 +1223,133 @@ int saHpiDomainInfoTable_get_value(
         case COLUMN_SAHPIDOMAINID:
             /** SaHpiDomainId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainId,
+                         (unsigned char*)&context->saHpiDomainId,
                          sizeof(context->saHpiDomainId) );
         break;
     
         case COLUMN_SAHPIDOMAINCAPABILITIES:
             /** BITS = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainCapabilities,
+                         (unsigned char*)&context->saHpiDomainCapabilities,
                          context->saHpiDomainCapabilities_len );
         break;
     
         case COLUMN_SAHPIDOMAINISPEER:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainIsPeer,
+                         (unsigned char*)&context->saHpiDomainIsPeer,
                          sizeof(context->saHpiDomainIsPeer) );
         break;
     
         case COLUMN_SAHPIDOMAINTAGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainTagTextType,
+                         (unsigned char*)&context->saHpiDomainTagTextType,
                          sizeof(context->saHpiDomainTagTextType) );
         break;
     
         case COLUMN_SAHPIDOMAINTAGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainTagTextLanguage,
+                         (unsigned char*)&context->saHpiDomainTagTextLanguage,
                          sizeof(context->saHpiDomainTagTextLanguage) );
         break;
     
         case COLUMN_SAHPIDOMAINTAG:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainTag,
+                         (unsigned char*)&context->saHpiDomainTag,
                          context->saHpiDomainTag_len );
         break;
     
         case COLUMN_SAHPIDOMAINREFERENCEUPDATECOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainReferenceUpdateCount,
+                         (unsigned char*)&context->saHpiDomainReferenceUpdateCount,
                          sizeof(context->saHpiDomainReferenceUpdateCount) );
         break;
     
         case COLUMN_SAHPIDOMAINREFERENCEUPDATETIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiDomainReferenceUpdateTimestamp,
+                         (unsigned char*)&context->saHpiDomainReferenceUpdateTimestamp,
                          sizeof(context->saHpiDomainReferenceUpdateTimestamp) );
         break;
     
         case COLUMN_SAHPIDOMAINRESOURCEPRESENCEUPDATECOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainResourcePresenceUpdateCount,
+                         (unsigned char*)&context->saHpiDomainResourcePresenceUpdateCount,
                          sizeof(context->saHpiDomainResourcePresenceUpdateCount) );
         break;
     
         case COLUMN_SAHPIDOMAINRESOURCEPRESENCEUPDATETIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiDomainResourcePresenceUpdateTimestamp,
+                         (unsigned char*)&context->saHpiDomainResourcePresenceUpdateTimestamp,
                          sizeof(context->saHpiDomainResourcePresenceUpdateTimestamp) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMUPDATECOUNT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainAlarmUpdateCount,
+                         (unsigned char*)&context->saHpiDomainAlarmUpdateCount,
                          sizeof(context->saHpiDomainAlarmUpdateCount) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMUPDATETIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiDomainAlarmUpdateTimestamp,
+                         (unsigned char*)&context->saHpiDomainAlarmUpdateTimestamp,
                          sizeof(context->saHpiDomainAlarmUpdateTimestamp) );
         break;
     
         case COLUMN_SAHPIDOMAINACTIVEALARMS:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainActiveAlarms,
+                         (unsigned char*)&context->saHpiDomainActiveAlarms,
                          sizeof(context->saHpiDomainActiveAlarms) );
         break;
     
         case COLUMN_SAHPIDOMAINCRITICALALARMS:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainCriticalAlarms,
+                         (unsigned char*)&context->saHpiDomainCriticalAlarms,
                          sizeof(context->saHpiDomainCriticalAlarms) );
         break;
     
         case COLUMN_SAHPIDOMAINMAJORALARMS:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainMajorAlarms,
+                         (unsigned char*)&context->saHpiDomainMajorAlarms,
                          sizeof(context->saHpiDomainMajorAlarms) );
         break;
     
         case COLUMN_SAHPIDOMAINMINORALARMS:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainMinorAlarms,
+                         (unsigned char*)&context->saHpiDomainMinorAlarms,
                          sizeof(context->saHpiDomainMinorAlarms) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMUSERLIMIT:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainAlarmUserLimit,
+                         (unsigned char*)&context->saHpiDomainAlarmUserLimit,
                          sizeof(context->saHpiDomainAlarmUserLimit) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMOVERFLOW:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmOverflow,
+                         (unsigned char*)&context->saHpiDomainAlarmOverflow,
                          sizeof(context->saHpiDomainAlarmOverflow) );
         break;
     
         case COLUMN_SAHPIDOMAINGUID:
             /** SaHpiGuid = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainGuid,
+                         (unsigned char*)&context->saHpiDomainGuid,
                          context->saHpiDomainGuid_len );
         break;
     

@@ -1781,70 +1781,70 @@ int saHpiCurrentSensorStateTable_get_value(
 	case COLUMN_SAHPICURRENTSENSORSTATEDATAPRESENT:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCurrentSensorStateDataPresent,
+					 (u_char*)&context->saHpiCurrentSensorStateDataPresent,
 					 sizeof(context->saHpiCurrentSensorStateDataPresent) );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATETYPE:
 		/** SaHpiSensorReadingType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCurrentSensorStateType,
+					 (u_char*)&context->saHpiCurrentSensorStateType,
 					 sizeof(context->saHpiCurrentSensorStateType) );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEVALUE:
 		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateValue,
+					 (u_char*)&context->saHpiCurrentSensorStateValue,
 					 context->saHpiCurrentSensorStateValue_len );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEEVENTSTATE:
 		/** SaHpiEventState = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateEventState,
+					 (u_char*)&context->saHpiCurrentSensorStateEventState,
 					 context->saHpiCurrentSensorStateEventState_len );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATESENSORENABLE:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCurrentSensorStateSensorEnable,
+					 (u_char*)&context->saHpiCurrentSensorStateSensorEnable,
 					 sizeof(context->saHpiCurrentSensorStateSensorEnable) );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEEVENTENABLE:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCurrentSensorStateEventEnable,
+					 (u_char*)&context->saHpiCurrentSensorStateEventEnable,
 					 sizeof(context->saHpiCurrentSensorStateEventEnable) );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEASSERTADDEVENTMASK:
 		/** SaHpiEventState = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateAssertAddEventMask,
+					 (u_char*)&context->saHpiCurrentSensorStateAssertAddEventMask,
 					 context->saHpiCurrentSensorStateAssertAddEventMask_len );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEASSERTREMOVEEVENTMASK:
 		/** SaHpiEventState = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateAssertRemoveEventMask,
+					 (u_char*)&context->saHpiCurrentSensorStateAssertRemoveEventMask,
 					 context->saHpiCurrentSensorStateAssertRemoveEventMask_len );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTADDEVENTMASK:
 		/** SaHpiEventState = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateDeassertAddEventMask,
+					 (u_char*)&context->saHpiCurrentSensorStateDeassertAddEventMask,
 					 context->saHpiCurrentSensorStateDeassertAddEventMask_len );
 		break;
 
 	case COLUMN_SAHPICURRENTSENSORSTATEDEASSERTREMOVEEVENTMASK:
 		/** SaHpiEventState = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCurrentSensorStateDeassertRemoveEventMask,
+					 (u_char*)&context->saHpiCurrentSensorStateDeassertRemoveEventMask,
 					 context->saHpiCurrentSensorStateDeassertRemoveEventMask_len );
 		break;
 

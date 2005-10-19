@@ -1355,119 +1355,119 @@ int saHpiCtrlTextTable_get_value(
 	case COLUMN_SAHPICTRLTEXTENTRYID:
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlTextEntryId,
+					 (u_char*)&context->saHpiCtrlTextEntryId,
 					 sizeof(context->saHpiCtrlTextEntryId) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTNUM:
 		/** SaHpiInstrumentId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlTextNum,
+					 (u_char*)&context->saHpiCtrlTextNum,
 					 sizeof(context->saHpiCtrlTextNum) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTOUTPUTTYPE:
 		/** SaHpiCtrlOutputType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextOutputType,
+					 (u_char*)&context->saHpiCtrlTextOutputType,
 					 sizeof(context->saHpiCtrlTextOutputType) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTDEFAULTMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextDefaultMode,
+					 (u_char*)&context->saHpiCtrlTextDefaultMode,
 					 sizeof(context->saHpiCtrlTextDefaultMode) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextMode,
+					 (u_char*)&context->saHpiCtrlTextMode,
 					 sizeof(context->saHpiCtrlTextMode) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTISREADONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextIsReadOnly,
+					 (u_char*)&context->saHpiCtrlTextIsReadOnly,
 					 sizeof(context->saHpiCtrlTextIsReadOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTISWRITEONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextIsWriteOnly,
+					 (u_char*)&context->saHpiCtrlTextIsWriteOnly,
 					 sizeof(context->saHpiCtrlTextIsWriteOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTMAXCHARS:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextMaxChars,
+					 (u_char*)&context->saHpiCtrlTextMaxChars,
 					 sizeof(context->saHpiCtrlTextMaxChars) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTMAXLINES:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextMaxLines,
+					 (u_char*)&context->saHpiCtrlTextMaxLines,
 					 sizeof(context->saHpiCtrlTextMaxLines) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTLANGUAGE:
 		/** SaHpiTextLanguage = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextLanguage,
+					 (u_char*)&context->saHpiCtrlTextLanguage,
 					 sizeof(context->saHpiCtrlTextLanguage) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTTYPE:
 		/** SaHpiTextType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextType,
+					 (u_char*)&context->saHpiCtrlTextType,
 					 sizeof(context->saHpiCtrlTextType) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTDEFAULTLINE:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextDefaultLine,
+					 (u_char*)&context->saHpiCtrlTextDefaultLine,
 					 sizeof(context->saHpiCtrlTextDefaultLine) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTDEFAULT:
 		/** SaHpiText = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCtrlTextDefault,
+					 (u_char*)&context->saHpiCtrlTextDefault,
 					 context->saHpiCtrlTextDefault_len );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTLINE:
 		/** Unsigned8 = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlTextLine,
+					 (u_char*)&context->saHpiCtrlTextLine,
 					 sizeof(context->saHpiCtrlTextLine) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTSTATE:
 		/** SaHpiText = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiCtrlTextState,
+					 (u_char*)&context->saHpiCtrlTextState,
 					 context->saHpiCtrlTextState_len );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTOEM:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlTextOem,
+					 (u_char*)&context->saHpiCtrlTextOem,
 					 sizeof(context->saHpiCtrlTextOem) );
 		break;
 
 	case COLUMN_SAHPICTRLTEXTRDR:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-					 (char*)&context->saHpiCtrlTextRDR,
+					 (u_char*)&context->saHpiCtrlTextRDR,
 					 context->saHpiCtrlTextRDR_len );
 		break;
 
