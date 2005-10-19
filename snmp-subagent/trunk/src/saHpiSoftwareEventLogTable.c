@@ -1202,42 +1202,42 @@ int saHpiSoftwareEventLogTable_get_value(
         case COLUMN_SAHPISOFTWAREEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiSoftwareEventLogTimestamp,
+                         (u_char*)&context->saHpiSoftwareEventLogTimestamp,
                          sizeof(context->saHpiSoftwareEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPISOFTWAREEVENTLOGMANUFACTURERIDT:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSoftwareEventLogManufacturerIdT,
+                         (u_char*)&context->saHpiSoftwareEventLogManufacturerIdT,
                          sizeof(context->saHpiSoftwareEventLogManufacturerIdT) );
         break;
     
         case COLUMN_SAHPISOFTWAREEVENTLOGTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSoftwareEventLogType,
+                         (u_char*)&context->saHpiSoftwareEventLogType,
                          sizeof(context->saHpiSoftwareEventLogType) );
         break;
     
         case COLUMN_SAHPISOFTWAREEVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSoftwareEventLogTextType,
+                         (u_char*)&context->saHpiSoftwareEventLogTextType,
                          sizeof(context->saHpiSoftwareEventLogTextType) );
         break;
     
         case COLUMN_SAHPISOFTWAREEVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSoftwareEventLogTextLanguage,
+                         (u_char*)&context->saHpiSoftwareEventLogTextLanguage,
                          sizeof(context->saHpiSoftwareEventLogTextLanguage) );
         break;
     
         case COLUMN_SAHPISOFTWAREEVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSoftwareEventLogText,
+                         (u_char*)&context->saHpiSoftwareEventLogText,
                          context->saHpiSoftwareEventLogText_len );
         break;
     

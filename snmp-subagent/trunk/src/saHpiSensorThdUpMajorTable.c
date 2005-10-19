@@ -1125,35 +1125,35 @@ int saHpiSensorThdUpMajorTable_get_value(
         case COLUMN_SAHPISENSORTHDUPMAJORISREADABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdUpMajorIsReadable,
+                                         (u_char*)&context->saHpiSensorThdUpMajorIsReadable,
                                          sizeof(context->saHpiSensorThdUpMajorIsReadable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDUPMAJORISWRITABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdUpMajorIsWritable,
+                                         (u_char*)&context->saHpiSensorThdUpMajorIsWritable,
                                          sizeof(context->saHpiSensorThdUpMajorIsWritable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDUPMAJORTYPE:
                 /** SaHpiSensorReadingType = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdUpMajorType,
+                                         (u_char*)&context->saHpiSensorThdUpMajorType,
                                          sizeof(context->saHpiSensorThdUpMajorType) );
                 break;
 
         case COLUMN_SAHPISENSORTHDUPMAJORVALUE:
                 /** SaHpiSensorReadingValue = ASN_OCTET_STR */
                 snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                         (char*)&context->saHpiSensorThdUpMajorValue,
+                                         (u_char*)&context->saHpiSensorThdUpMajorValue,
                                          context->saHpiSensorThdUpMajorValue_len );
                 break;
 
         case COLUMN_SAHPISENSORTHDUPMAJORNONLINEAR:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdUpMajorNonLinear,
+                                         (u_char*)&context->saHpiSensorThdUpMajorNonLinear,
                                          sizeof(context->saHpiSensorThdUpMajorNonLinear) );
                 break;
 

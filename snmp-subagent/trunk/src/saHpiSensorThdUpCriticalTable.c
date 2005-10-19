@@ -1113,35 +1113,35 @@ int saHpiSensorThdUpCriticalTable_get_value(
         case COLUMN_SAHPISENSORTHDUPCRITICALISREADABLE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpCriticalIsReadable,
+                         (u_char*)&context->saHpiSensorThdUpCriticalIsReadable,
                          sizeof(context->saHpiSensorThdUpCriticalIsReadable) );
         break;
     
         case COLUMN_SAHPISENSORTHDUPCRITICALISWRITABLE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpCriticalIsWritable,
+                         (u_char*)&context->saHpiSensorThdUpCriticalIsWritable,
                          sizeof(context->saHpiSensorThdUpCriticalIsWritable) );
         break;
     
         case COLUMN_SAHPISENSORTHDUPCRITICALTYPE:
             /** SaHpiSensorReadingType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpCriticalType,
+                         (u_char*)&context->saHpiSensorThdUpCriticalType,
                          sizeof(context->saHpiSensorThdUpCriticalType) );
         break;
     
         case COLUMN_SAHPISENSORTHDUPCRITICALVALUE:
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorThdUpCriticalValue,
+                         (u_char*)&context->saHpiSensorThdUpCriticalValue,
                          context->saHpiSensorThdUpCriticalValue_len );
         break;
     
         case COLUMN_SAHPISENSORTHDUPCRITICALNONLINEAR:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdUpCriticalNonLinear,
+                         (u_char*)&context->saHpiSensorThdUpCriticalNonLinear,
                          sizeof(context->saHpiSensorThdUpCriticalNonLinear) );
         break;
     

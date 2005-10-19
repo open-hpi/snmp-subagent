@@ -1115,35 +1115,35 @@ int saHpiSensorThdNegHysteresisTable_get_value(
         case COLUMN_SAHPISENSORTHDNEGHYSTERESISISREADABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdNegHysteresisIsReadable,
+                                         (u_char*)&context->saHpiSensorThdNegHysteresisIsReadable,
                                          sizeof(context->saHpiSensorThdNegHysteresisIsReadable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDNEGHYSTERESISISWRITABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdNegHysteresisIsWritable,
+                                         (u_char*)&context->saHpiSensorThdNegHysteresisIsWritable,
                                          sizeof(context->saHpiSensorThdNegHysteresisIsWritable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDNEGHYSTERESISTYPE:
                 /** SaHpiSensorReadingType = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdNegHysteresisType,
+                                         (u_char*)&context->saHpiSensorThdNegHysteresisType,
                                          sizeof(context->saHpiSensorThdNegHysteresisType) );
                 break;
 
         case COLUMN_SAHPISENSORTHDNEGHYSTERESISVALUE:
                 /** SaHpiSensorReadingValue = ASN_OCTET_STR */
                 snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                         (char*)&context->saHpiSensorThdNegHysteresisValue,
+                                         (u_char*)&context->saHpiSensorThdNegHysteresisValue,
                                          context->saHpiSensorThdNegHysteresisValue_len );
                 break;
 
         case COLUMN_SAHPISENSORTHDNEGHYSTERESISNONLINEAR:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdNegHysteresisNonLinear,
+                                         (u_char*)&context->saHpiSensorThdNegHysteresisNonLinear,
                                          sizeof(context->saHpiSensorThdNegHysteresisNonLinear) );
                 break;
 

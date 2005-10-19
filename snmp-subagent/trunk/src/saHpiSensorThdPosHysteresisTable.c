@@ -1111,35 +1111,35 @@ int saHpiSensorThdPosHysteresisTable_get_value(
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISISREADABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdPosHysteresisIsReadable,
+                                         (u_char*)&context->saHpiSensorThdPosHysteresisIsReadable,
                                          sizeof(context->saHpiSensorThdPosHysteresisIsReadable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISISWRITABLE:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdPosHysteresisIsWritable,
+                                         (u_char*)&context->saHpiSensorThdPosHysteresisIsWritable,
                                          sizeof(context->saHpiSensorThdPosHysteresisIsWritable) );
                 break;
 
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISTYPE:
                 /** SaHpiSensorReadingType = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdPosHysteresisType,
+                                         (u_char*)&context->saHpiSensorThdPosHysteresisType,
                                          sizeof(context->saHpiSensorThdPosHysteresisType) );
                 break;
 
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISVALUE:
                 /** SaHpiSensorReadingValue = ASN_OCTET_STR */
                 snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                                         (char*)&context->saHpiSensorThdPosHysteresisValue,
+                                         (u_char*)&context->saHpiSensorThdPosHysteresisValue,
                                          context->saHpiSensorThdPosHysteresisValue_len );
                 break;
 
         case COLUMN_SAHPISENSORTHDPOSHYSTERESISNONLINEAR:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiSensorThdPosHysteresisNonLinear,
+                                         (u_char*)&context->saHpiSensorThdPosHysteresisNonLinear,
                                          sizeof(context->saHpiSensorThdPosHysteresisNonLinear) );
                 break;
 
