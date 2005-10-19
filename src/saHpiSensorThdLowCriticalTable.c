@@ -1130,35 +1130,35 @@ int saHpiSensorThdLowCriticalTable_get_value(
 	case COLUMN_SAHPISENSORTHDLOWCRITICALISREADABLE:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorThdLowCriticalIsReadable,
+					 (u_char*)&context->saHpiSensorThdLowCriticalIsReadable,
 					 sizeof(context->saHpiSensorThdLowCriticalIsReadable) );
 		break;
 
 	case COLUMN_SAHPISENSORTHDLOWCRITICALISWRITABLE:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorThdLowCriticalIsWritable,
+					 (u_char*)&context->saHpiSensorThdLowCriticalIsWritable,
 					 sizeof(context->saHpiSensorThdLowCriticalIsWritable) );
 		break;
 
 	case COLUMN_SAHPISENSORTHDLOWCRITICALTYPE:
 		/** SaHpiSensorReadingType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorThdLowCriticalType,
+					 (u_char*)&context->saHpiSensorThdLowCriticalType,
 					 sizeof(context->saHpiSensorThdLowCriticalType) );
 		break;
 
 	case COLUMN_SAHPISENSORTHDLOWCRITICALVALUE:
 		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiSensorThdLowCriticalValue,
+					 (u_char*)&context->saHpiSensorThdLowCriticalValue,
 					 context->saHpiSensorThdLowCriticalValue_len );
 		break;
 
 	case COLUMN_SAHPISENSORTHDLOWCRITICALNONLINEAR:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorThdLowCriticalNonLinear,
+					 (u_char*)&context->saHpiSensorThdLowCriticalNonLinear,
 					 sizeof(context->saHpiSensorThdLowCriticalNonLinear) );
 		break;
 

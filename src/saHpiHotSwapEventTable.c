@@ -1199,28 +1199,28 @@ int saHpiHotSwapEventTable_get_value(
         case COLUMN_SAHPIHOTSWAPEVENTENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiHotSwapEventEntryId,
+                         (u_char*)&context->saHpiHotSwapEventEntryId,
                          sizeof(context->saHpiHotSwapEventEntryId) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiHotSwapEventTimestamp,
+                         (u_char*)&context->saHpiHotSwapEventTimestamp,
                          sizeof(context->saHpiHotSwapEventTimestamp) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapEventState,
+                         (u_char*)&context->saHpiHotSwapEventState,
                          sizeof(context->saHpiHotSwapEventState) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTPREVIOUSSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapEventPreviousState,
+                         (u_char*)&context->saHpiHotSwapEventPreviousState,
                          sizeof(context->saHpiHotSwapEventPreviousState) );
         break;
     

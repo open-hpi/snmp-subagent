@@ -1172,21 +1172,21 @@ int saHpiHotSwapEventLogTable_get_value(
         case COLUMN_SAHPIHOTSWAPEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiHotSwapEventLogTimestamp,
+                         (u_char*)&context->saHpiHotSwapEventLogTimestamp,
                          sizeof(context->saHpiHotSwapEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTLOGSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapEventLogState,
+                         (u_char*)&context->saHpiHotSwapEventLogState,
                          sizeof(context->saHpiHotSwapEventLogState) );
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTLOGPREVIOUSSTATE:
             /** SaHpiHotSwapState = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiHotSwapEventLogPreviousState,
+                         (u_char*)&context->saHpiHotSwapEventLogPreviousState,
                          sizeof(context->saHpiHotSwapEventLogPreviousState) );
         break;
     

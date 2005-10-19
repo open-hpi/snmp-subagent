@@ -1339,112 +1339,112 @@ int saHpiSensorTable_get_value(
         case COLUMN_SAHPISENSORNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSensorNum,
+                         (u_char*)&context->saHpiSensorNum,
                          sizeof(context->saHpiSensorNum) );
         break;
     
         case COLUMN_SAHPISENSORTYPE:
             /** SaHpiSensorType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorType,
+                         (u_char*)&context->saHpiSensorType,
                          sizeof(context->saHpiSensorType) );
         break;
     
         case COLUMN_SAHPISENSORCATEGORY:
             /** SaHpiEventCategory = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorCategory,
+                         (u_char*)&context->saHpiSensorCategory,
                          sizeof(context->saHpiSensorCategory) );
         break;
     
         case COLUMN_SAHPISENSORENABLECTRL:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableCtrl,
+                         (u_char*)&context->saHpiSensorEnableCtrl,
                          sizeof(context->saHpiSensorEnableCtrl) );
         break;
     
         case COLUMN_SAHPISENSOREVENTCTRL:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEventCtrl,
+                         (u_char*)&context->saHpiSensorEventCtrl,
                          sizeof(context->saHpiSensorEventCtrl) );
         break;
     
         case COLUMN_SAHPISENSORSUPPORTEDEVENTSTATES:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorSupportedEventStates,
+                         (u_char*)&context->saHpiSensorSupportedEventStates,
                          context->saHpiSensorSupportedEventStates_len );
         break;
     
         case COLUMN_SAHPISENSORISSUPPORTED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorIsSupported,
+                         (u_char*)&context->saHpiSensorIsSupported,
                          sizeof(context->saHpiSensorIsSupported) );
         break;
     
         case COLUMN_SAHPISENSORREADINGTYPE:
             /** SaHpiSensorReadingType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorReadingType,
+                         (u_char*)&context->saHpiSensorReadingType,
                          sizeof(context->saHpiSensorReadingType) );
         break;
     
         case COLUMN_SAHPISENSORBASEUNITS:
             /** SaHpiSensorUnits = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorBaseUnits,
+                         (u_char*)&context->saHpiSensorBaseUnits,
                          sizeof(context->saHpiSensorBaseUnits) );
         break;
     
         case COLUMN_SAHPISENSORMODIFIERUNITS:
             /** SaHpiSensorUnits = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorModifierUnits,
+                         (u_char*)&context->saHpiSensorModifierUnits,
                          sizeof(context->saHpiSensorModifierUnits) );
         break;
     
         case COLUMN_SAHPISENSORMODIFIERUSE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorModifierUse,
+                         (u_char*)&context->saHpiSensorModifierUse,
                          sizeof(context->saHpiSensorModifierUse) );
         break;
     
         case COLUMN_SAHPISENSORPERCENTAGE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorPercentage,
+                         (u_char*)&context->saHpiSensorPercentage,
                          sizeof(context->saHpiSensorPercentage) );
         break;
     
         case COLUMN_SAHPISENSORRANGEFLAGS:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorRangeFlags,
+                         (u_char*)&context->saHpiSensorRangeFlags,
                          context->saHpiSensorRangeFlags_len );
         break;
     
         case COLUMN_SAHPISENSORACCURACYFACTOR:
             /** Double = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorAccuracyFactor,
+                         (u_char*)&context->saHpiSensorAccuracyFactor,
                          context->saHpiSensorAccuracyFactor_len );
         break;
     
         case COLUMN_SAHPISENSOROEM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiSensorOem,
+                         (u_char*)&context->saHpiSensorOem,
                          sizeof(context->saHpiSensorOem) );
         break;
     
         case COLUMN_SAHPISENSORRDR:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiSensorRDR,
+                         (u_char*)&context->saHpiSensorRDR,
                          context->saHpiSensorRDR_len );
         break;
     

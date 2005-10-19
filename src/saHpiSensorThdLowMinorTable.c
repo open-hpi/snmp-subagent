@@ -1137,35 +1137,35 @@ int saHpiSensorThdLowMinorTable_get_value(
         case COLUMN_SAHPISENSORTHDLOWMINORISREADABLE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdLowMinorIsReadable,
+                         (u_char*)&context->saHpiSensorThdLowMinorIsReadable,
                          sizeof(context->saHpiSensorThdLowMinorIsReadable) );
         break;
     
         case COLUMN_SAHPISENSORTHDLOWMINORISWRITABLE:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdLowMinorIsWritable,
+                         (u_char*)&context->saHpiSensorThdLowMinorIsWritable,
                          sizeof(context->saHpiSensorThdLowMinorIsWritable) );
         break;
     
         case COLUMN_SAHPISENSORTHDLOWMINORTYPE:
             /** SaHpiSensorReadingType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdLowMinorType,
+                         (u_char*)&context->saHpiSensorThdLowMinorType,
                          sizeof(context->saHpiSensorThdLowMinorType) );
         break;
     
         case COLUMN_SAHPISENSORTHDLOWMINORVALUE:
             /** SaHpiSensorReadingValue = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorThdLowMinorValue,
+                         (u_char*)&context->saHpiSensorThdLowMinorValue,
                          context->saHpiSensorThdLowMinorValue_len );
         break;
     
         case COLUMN_SAHPISENSORTHDLOWMINORNONLINEAR:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorThdLowMinorNonLinear,
+                         (u_char*)&context->saHpiSensorThdLowMinorNonLinear,
                          sizeof(context->saHpiSensorThdLowMinorNonLinear) );
         break;
     

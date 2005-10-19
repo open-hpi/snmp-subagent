@@ -1195,35 +1195,35 @@ int saHpiOEMEventLogTable_get_value(
         case COLUMN_SAHPIOEMEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiOEMEventLogTimestamp,
+                         (u_char*)&context->saHpiOEMEventLogTimestamp,
                          sizeof(context->saHpiOEMEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIOEMEVENTLOGMANUFACTURERIDT:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiOEMEventLogManufacturerIdT,
+                         (u_char*)&context->saHpiOEMEventLogManufacturerIdT,
                          sizeof(context->saHpiOEMEventLogManufacturerIdT) );
         break;
     
         case COLUMN_SAHPIOEMEVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiOEMEventLogTextType,
+                         (u_char*)&context->saHpiOEMEventLogTextType,
                          sizeof(context->saHpiOEMEventLogTextType) );
         break;
     
         case COLUMN_SAHPIOEMEVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiOEMEventLogTextLanguage,
+                         (u_char*)&context->saHpiOEMEventLogTextLanguage,
                          sizeof(context->saHpiOEMEventLogTextLanguage) );
         break;
     
         case COLUMN_SAHPIOEMEVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiOEMEventLogText,
+                         (u_char*)&context->saHpiOEMEventLogText,
                          context->saHpiOEMEventLogText_len );
         break;
     

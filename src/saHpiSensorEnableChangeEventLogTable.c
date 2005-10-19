@@ -1354,63 +1354,63 @@ int saHpiSensorEnableChangeEventLogTable_get_value(
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiSensorEnableChangeEventLogTimestamp,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogTimestamp,
                          sizeof(context->saHpiSensorEnableChangeEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGTYPE:
             /** SaHpiSensorType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventLogType,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogType,
                          sizeof(context->saHpiSensorEnableChangeEventLogType) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGCATEGORY:
             /** SaHpiEventCategory = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventLogCategory,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogCategory,
                          sizeof(context->saHpiSensorEnableChangeEventLogCategory) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGENABLED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventLogEnabled,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogEnabled,
                          sizeof(context->saHpiSensorEnableChangeEventLogEnabled) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGEVENTSENABLED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiSensorEnableChangeEventLogEventsEnabled,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogEventsEnabled,
                          sizeof(context->saHpiSensorEnableChangeEventLogEventsEnabled) );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGASSERTEVENTS:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventLogAssertEvents,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogAssertEvents,
                          context->saHpiSensorEnableChangeEventLogAssertEvents_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGDEASSERTEVENTS:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventLogDeassertEvents,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogDeassertEvents,
                          context->saHpiSensorEnableChangeEventLogDeassertEvents_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGOPTIONALDATA:
             /** SaHpiOptionalData = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventLogOptionalData,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogOptionalData,
                          context->saHpiSensorEnableChangeEventLogOptionalData_len );
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTLOGSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiSensorEnableChangeEventLogState,
+                         (u_char*)&context->saHpiSensorEnableChangeEventLogState,
                          context->saHpiSensorEnableChangeEventLogState_len );
         break;
     

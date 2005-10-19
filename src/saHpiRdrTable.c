@@ -1413,70 +1413,70 @@ int saHpiRdrTable_get_value(
 	    case COLUMN_SAHPIRDRENTRYID:
 		/** COUNTER = ASN_COUNTER */
 		snmp_set_var_typed_value(var, ASN_COUNTER,
-			 (char*)&context->saHpiRdrEntryId,
+			 (unsigned char*)&context->saHpiRdrEntryId,
 			 sizeof(context->saHpiRdrEntryId) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRNEXTENTRYID:
 		/** COUNTER = ASN_COUNTER */
 		snmp_set_var_typed_value(var, ASN_COUNTER,
-			 (char*)&context->saHpiRdrNextEntryId,
+			 (unsigned char*)&context->saHpiRdrNextEntryId,
 			 sizeof(context->saHpiRdrNextEntryId) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRTYPE:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-			 (char*)&context->saHpiRdrType,
+			 (unsigned char*)&context->saHpiRdrType,
 			 sizeof(context->saHpiRdrType) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRENTITYPATH:
 		/** SaHpiEntityPath = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-			 (char*)&context->saHpiRdrEntityPath,
+			 (unsigned char*)&context->saHpiRdrEntityPath,
 			 context->saHpiRdrEntityPath_len );
 	    break;
 	
 	    case COLUMN_SAHPIRDRISFRU:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-			 (char*)&context->saHpiRdrIsFru,
+			 (unsigned char*)&context->saHpiRdrIsFru,
 			 sizeof(context->saHpiRdrIsFru) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRROWPOINTER:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-			 (char*)&context->saHpiRdrRowPointer,
+			 (unsigned char*)&context->saHpiRdrRowPointer,
 			 context->saHpiRdrRowPointer_len );
 	    break;
 	
 	    case COLUMN_SAHPIRDRRPT:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-			 (char*)&context->saHpiRdrRPT,
+			 (unsigned char*)&context->saHpiRdrRPT,
 			 context->saHpiRdrRPT_len );
 	    break;
 	
 	    case COLUMN_SAHPIRDRTEXTTYPE:
 		/** SaHpiTextType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-			 (char*)&context->saHpiRdrTextType,
+			 (unsigned char*)&context->saHpiRdrTextType,
 			 sizeof(context->saHpiRdrTextType) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRTEXTLANGUAGE:
 		/** SaHpiTextLanguage = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-			 (char*)&context->saHpiRdrTextLanguage,
+			 (unsigned char*)&context->saHpiRdrTextLanguage,
 			 sizeof(context->saHpiRdrTextLanguage) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRIDSTRING:
 		/** OCTETSTR = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-			 (char*)&context->saHpiRdrIdString,
+			 (unsigned char*)&context->saHpiRdrIdString,
 			 context->saHpiRdrIdString_len );
 	    break;
 	

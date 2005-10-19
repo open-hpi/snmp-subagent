@@ -971,21 +971,21 @@ int saHpiSensorReadingNominalTable_get_value(
 	case COLUMN_SAHPISENSORREADINGNOMINALISSUPPORTED:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNominalIsSupported,
+					 (u_char*)&context->saHpiSensorReadingNominalIsSupported,
 					 sizeof(context->saHpiSensorReadingNominalIsSupported) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNOMINALTYPE:
 		/** SaHpiSensorReadingType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiSensorReadingNominalType,
+					 (u_char*)&context->saHpiSensorReadingNominalType,
 					 sizeof(context->saHpiSensorReadingNominalType) );
 		break;
 
 	case COLUMN_SAHPISENSORREADINGNOMINALVALUE:
 		/** SaHpiSensorReadingValue = ASN_OCTET_STR */
 		snmp_set_var_typed_value(var, ASN_OCTET_STR,
-					 (char*)&context->saHpiSensorReadingNominalValue,
+					 (u_char*)&context->saHpiSensorReadingNominalValue,
 					 context->saHpiSensorReadingNominalValue_len );
 		break;
 
