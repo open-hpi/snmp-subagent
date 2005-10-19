@@ -1305,77 +1305,77 @@ int saHpiCtrlDiscreteTable_get_value(
 	case COLUMN_SAHPICTRLDISCRETEENTRYID:
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlDiscreteEntryId,
+					 (unsigned char*)&context->saHpiCtrlDiscreteEntryId,
 					 sizeof(context->saHpiCtrlDiscreteEntryId) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETENUM:
 		/** SaHpiInstrumentId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlDiscreteNum,
+					 (unsigned char*)&context->saHpiCtrlDiscreteNum,
 					 sizeof(context->saHpiCtrlDiscreteNum) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEOUTPUTTYPE:
 		/** SaHpiCtrlOutputType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlDiscreteOutputType,
+					 (unsigned char*)&context->saHpiCtrlDiscreteOutputType,
 					 sizeof(context->saHpiCtrlDiscreteOutputType) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEDEFAULTMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlDiscreteDefaultMode,
+					 (unsigned char*)&context->saHpiCtrlDiscreteDefaultMode,
 					 sizeof(context->saHpiCtrlDiscreteDefaultMode) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlDiscreteMode,
+					 (unsigned char*)&context->saHpiCtrlDiscreteMode,
 					 sizeof(context->saHpiCtrlDiscreteMode) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEISREADONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlDiscreteIsReadOnly,
+					 (unsigned char*)&context->saHpiCtrlDiscreteIsReadOnly,
 					 sizeof(context->saHpiCtrlDiscreteIsReadOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEISWRITEONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlDiscreteIsWriteOnly,
+					 (unsigned char*)&context->saHpiCtrlDiscreteIsWriteOnly,
 					 sizeof(context->saHpiCtrlDiscreteIsWriteOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEDEFAULTSTATE:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlDiscreteDefaultState,
+					 (unsigned char*)&context->saHpiCtrlDiscreteDefaultState,
 					 sizeof(context->saHpiCtrlDiscreteDefaultState) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETESTATE:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlDiscreteState,
+					 (unsigned char*)&context->saHpiCtrlDiscreteState,
 					 sizeof(context->saHpiCtrlDiscreteState) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETEOEM:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlDiscreteOem,
+					 (unsigned char*)&context->saHpiCtrlDiscreteOem,
 					 sizeof(context->saHpiCtrlDiscreteOem) );
 		break;
 
 	case COLUMN_SAHPICTRLDISCRETERDR:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-					 (char*)&context->saHpiCtrlDiscreteRDR,
+					 (unsigned char*)&context->saHpiCtrlDiscreteRDR,
 					 context->saHpiCtrlDiscreteRDR_len );
 		break;
 

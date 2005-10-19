@@ -1579,105 +1579,105 @@ int saHpiAnnouncementEventLogTable_get_value(
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementEventLogEntryId,
+                         (u_char*)&context->saHpiAnnouncementEventLogEntryId,
                          sizeof(context->saHpiAnnouncementEventLogEntryId) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiAnnouncementEventLogTimestamp,
+                         (u_char*)&context->saHpiAnnouncementEventLogTimestamp,
                          sizeof(context->saHpiAnnouncementEventLogTimestamp) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGADDEDBYUSER:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogAddedByUser,
+                         (u_char*)&context->saHpiAnnouncementEventLogAddedByUser,
                          sizeof(context->saHpiAnnouncementEventLogAddedByUser) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogSeverity,
+                         (u_char*)&context->saHpiAnnouncementEventLogSeverity,
                          sizeof(context->saHpiAnnouncementEventLogSeverity) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogAcknowledged,
+                         (u_char*)&context->saHpiAnnouncementEventLogAcknowledged,
                          sizeof(context->saHpiAnnouncementEventLogAcknowledged) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogStatusCondType,
+                         (u_char*)&context->saHpiAnnouncementEventLogStatusCondType,
                          sizeof(context->saHpiAnnouncementEventLogStatusCondType) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEventLogEntityPath,
+                         (u_char*)&context->saHpiAnnouncementEventLogEntityPath,
                          context->saHpiAnnouncementEventLogEntityPath_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementEventLogSensorNum,
+                         (u_char*)&context->saHpiAnnouncementEventLogSensorNum,
                          sizeof(context->saHpiAnnouncementEventLogSensorNum) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEventLogEventState,
+                         (u_char*)&context->saHpiAnnouncementEventLogEventState,
                          context->saHpiAnnouncementEventLogEventState_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGNAME:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEventLogName,
+                         (u_char*)&context->saHpiAnnouncementEventLogName,
                          context->saHpiAnnouncementEventLogName_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementEventLogMid,
+                         (u_char*)&context->saHpiAnnouncementEventLogMid,
                          sizeof(context->saHpiAnnouncementEventLogMid) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogTextType,
+                         (u_char*)&context->saHpiAnnouncementEventLogTextType,
                          sizeof(context->saHpiAnnouncementEventLogTextType) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogTextLanguage,
+                         (u_char*)&context->saHpiAnnouncementEventLogTextLanguage,
                          sizeof(context->saHpiAnnouncementEventLogTextLanguage) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEventLogText,
+                         (u_char*)&context->saHpiAnnouncementEventLogText,
                          context->saHpiAnnouncementEventLogText_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGDELETE:
             /** RowStatus = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementEventLogDelete,
+                         (u_char*)&context->saHpiAnnouncementEventLogDelete,
                          sizeof(context->saHpiAnnouncementEventLogDelete) );
         break;
     

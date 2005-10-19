@@ -1308,98 +1308,98 @@ int saHpiCtrlOemTable_get_value(
         case COLUMN_SAHPICTRLOEMENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlOemEntryId,
+                         (u_char*)&context->saHpiCtrlOemEntryId,
                          sizeof(context->saHpiCtrlOemEntryId) );
         break;
     
         case COLUMN_SAHPICTRLOEMNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlOemNum,
+                         (u_char*)&context->saHpiCtrlOemNum,
                          sizeof(context->saHpiCtrlOemNum) );
         break;
     
         case COLUMN_SAHPICTRLOEMOUTPUTTYPE:
             /** SaHpiCtrlOutputType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlOemOutputType,
+                         (u_char*)&context->saHpiCtrlOemOutputType,
                          sizeof(context->saHpiCtrlOemOutputType) );
         break;
     
         case COLUMN_SAHPICTRLOEMDEFAULTMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlOemDefaultMode,
+                         (u_char*)&context->saHpiCtrlOemDefaultMode,
                          sizeof(context->saHpiCtrlOemDefaultMode) );
         break;
     
         case COLUMN_SAHPICTRLOEMMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlOemMode,
+                         (u_char*)&context->saHpiCtrlOemMode,
                          sizeof(context->saHpiCtrlOemMode) );
         break;
     
         case COLUMN_SAHPICTRLOEMISREADONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlOemIsReadOnly,
+                         (u_char*)&context->saHpiCtrlOemIsReadOnly,
                          sizeof(context->saHpiCtrlOemIsReadOnly) );
         break;
     
         case COLUMN_SAHPICTRLOEMISWRITEONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiCtrlOemIsWriteOnly,
+                         (u_char*)&context->saHpiCtrlOemIsWriteOnly,
                          sizeof(context->saHpiCtrlOemIsWriteOnly) );
         break;
     
         case COLUMN_SAHPICTRLOEMMANUFACTURERID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlOemManufacturerId,
+                         (u_char*)&context->saHpiCtrlOemManufacturerId,
                          sizeof(context->saHpiCtrlOemManufacturerId) );
         break;
     
         case COLUMN_SAHPICTRLOEMDEFAULTCONFIGDATA:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlOemDefaultConfigData,
+                         (u_char*)&context->saHpiCtrlOemDefaultConfigData,
                          context->saHpiCtrlOemDefaultConfigData_len );
         break;
     
         case COLUMN_SAHPICTRLOEMDEFAULTMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlOemDefaultMId,
+                         (u_char*)&context->saHpiCtrlOemDefaultMId,
                          sizeof(context->saHpiCtrlOemDefaultMId) );
         break;
     
         case COLUMN_SAHPICTRLOEMDEFAULTSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlOemDefaultState,
+                         (u_char*)&context->saHpiCtrlOemDefaultState,
                          context->saHpiCtrlOemDefaultState_len );
         break;
     
         case COLUMN_SAHPICTRLOEMSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiCtrlOemState,
+                         (u_char*)&context->saHpiCtrlOemState,
                          context->saHpiCtrlOemState_len );
         break;
     
         case COLUMN_SAHPICTRLOEMVALUE:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiCtrlOemValue,
+                         (u_char*)&context->saHpiCtrlOemValue,
                          sizeof(context->saHpiCtrlOemValue) );
         break;
     
         case COLUMN_SAHPICTRLOEMRDR:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                         (char*)&context->saHpiCtrlOemRDR,
+                         (u_char*)&context->saHpiCtrlOemRDR,
                          context->saHpiCtrlOemRDR_len );
         break;
     

@@ -439,7 +439,7 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                 alarm.AlarmCond.Type = 
                         row_ctx->saHpiDomainAlarmCondStatusCondType - 1;	
 			
-                rc = oh_encode_entitypath(row_ctx->saHpiDomainAlarmCondEntityPath, 
+                rc = oh_encode_entitypath((gchar*)row_ctx->saHpiDomainAlarmCondEntityPath, 
                                           &alarm.AlarmCond.Entity);
 		/* Domain */			  
                 alarm.AlarmCond.DomainId =
@@ -1993,105 +1993,105 @@ int saHpiDomainAlarmTable_get_value(
         case COLUMN_SAHPIDOMAINALARMID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainAlarmId,
+                         (u_char*)&context->saHpiDomainAlarmId,
                          sizeof(context->saHpiDomainAlarmId) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiDomainAlarmTimestamp,
+                         (u_char*)&context->saHpiDomainAlarmTimestamp,
                          sizeof(context->saHpiDomainAlarmTimestamp) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmSeverity,
+                         (u_char*)&context->saHpiDomainAlarmSeverity,
                          sizeof(context->saHpiDomainAlarmSeverity) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmAcknowledged,
+                         (u_char*)&context->saHpiDomainAlarmAcknowledged,
                          sizeof(context->saHpiDomainAlarmAcknowledged) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmAckBySeverity,
+                         (u_char*)&context->saHpiDomainAlarmAckBySeverity,
                          sizeof(context->saHpiDomainAlarmAckBySeverity) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmCondStatusCondType,
+                         (u_char*)&context->saHpiDomainAlarmCondStatusCondType,
                          sizeof(context->saHpiDomainAlarmCondStatusCondType) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainAlarmCondEntityPath,
+                         (u_char*)&context->saHpiDomainAlarmCondEntityPath,
                          context->saHpiDomainAlarmCondEntityPath_len );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainAlarmCondSensorNum,
+                         (u_char*)&context->saHpiDomainAlarmCondSensorNum,
                          sizeof(context->saHpiDomainAlarmCondSensorNum) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainAlarmCondEventState,
+                         (u_char*)&context->saHpiDomainAlarmCondEventState,
                          context->saHpiDomainAlarmCondEventState_len );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDNAMEVALUE:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainAlarmCondNameValue,
+                         (u_char*)&context->saHpiDomainAlarmCondNameValue,
                          context->saHpiDomainAlarmCondNameValue_len );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiDomainAlarmCondMid,
+                         (u_char*)&context->saHpiDomainAlarmCondMid,
                          sizeof(context->saHpiDomainAlarmCondMid) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmCondTextType,
+                         (u_char*)&context->saHpiDomainAlarmCondTextType,
                          sizeof(context->saHpiDomainAlarmCondTextType) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmCondTextLanguage,
+                         (u_char*)&context->saHpiDomainAlarmCondTextLanguage,
                          sizeof(context->saHpiDomainAlarmCondTextLanguage) );
         break;
     
         case COLUMN_SAHPIDOMAINALARMCONDTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiDomainAlarmCondText,
+                         (u_char*)&context->saHpiDomainAlarmCondText,
                          context->saHpiDomainAlarmCondText_len );
         break;
     
         case COLUMN_SAHPIDOMAINALARMROWSTATUS:
             /** RowStatus = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiDomainAlarmRowStatus,
+                         (u_char*)&context->saHpiDomainAlarmRowStatus,
                          sizeof(context->saHpiDomainAlarmRowStatus) );
         break;
     

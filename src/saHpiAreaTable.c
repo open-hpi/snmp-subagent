@@ -1518,42 +1518,42 @@ int saHpiAreaTable_get_value(
         case COLUMN_SAHPIAREAID:
                 /** SaHpiInstrumentId = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAreaId,
+                                         (u_char*)&context->saHpiAreaId,
                                          sizeof(context->saHpiAreaId) );
                 break;
 
         case COLUMN_SAHPIAREAIDINDEX:
                 /** SaHpiInstrumentId = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAreaIdIndex,
+                                         (u_char*)&context->saHpiAreaIdIndex,
                                          sizeof(context->saHpiAreaIdIndex) );
                 break;
 
         case COLUMN_SAHPIAREATYPE:
                 /** INTEGER = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAreaType,
+                                         (u_char*)&context->saHpiAreaType,
                                          sizeof(context->saHpiAreaType) );
                 break;
 
         case COLUMN_SAHPIAREAISREADONLY:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAreaIsReadOnly,
+                                         (u_char*)&context->saHpiAreaIsReadOnly,
                                          sizeof(context->saHpiAreaIsReadOnly) );
                 break;
 
         case COLUMN_SAHPIAREAROWSTATUS:
                 /** RowStatus = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAreaRowStatus,
+                                         (u_char*)&context->saHpiAreaRowStatus,
                                          sizeof(context->saHpiAreaRowStatus) );
                 break;
 
         case COLUMN_SAHPIAREANUMDATAFIELDS:
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAreaNumDataFields,
+                                         (u_char*)&context->saHpiAreaNumDataFields,
                                          sizeof(context->saHpiAreaNumDataFields) );
                 break;
 

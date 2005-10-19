@@ -404,7 +404,7 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
                         row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
 
                 /* EP */
-                rc = oh_encode_entitypath(row_ctx->saHpiAnnouncementEntityPath, 
+                rc = oh_encode_entitypath((gchar*)row_ctx->saHpiAnnouncementEntityPath, 
                                           &announcement.StatusCond.Entity);
                 if (rc != SA_OK) {
                         DEBUGMSGTL ((AGENT, 
@@ -2335,119 +2335,119 @@ int saHpiAnnouncementTable_get_value(
         case COLUMN_SAHPIANNOUNCEMENTENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementEntryId,
+                         (u_char*)&context->saHpiAnnouncementEntryId,
                          sizeof(context->saHpiAnnouncementEntryId) );
         break;
 
         case COLUMN_SAHPIANNOUNCEMENTANNUNCIATORNUM:
              /** SaHpiInstrumentId = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementAnnunciatorNum,
+                         (u_char*)&context->saHpiAnnouncementAnnunciatorNum,
                          sizeof(context->saHpiAnnouncementAnnunciatorNum) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (char*)&context->saHpiAnnouncementTimestamp,
+                         (u_char*)&context->saHpiAnnouncementTimestamp,
                          sizeof(context->saHpiAnnouncementTimestamp) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTADDEDBYUSER:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementAddedByUser,
+                         (u_char*)&context->saHpiAnnouncementAddedByUser,
                          sizeof(context->saHpiAnnouncementAddedByUser) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementSeverity,
+                         (u_char*)&context->saHpiAnnouncementSeverity,
                          sizeof(context->saHpiAnnouncementSeverity) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTACKNOWLEDGED:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementAcknowledged,
+                         (u_char*)&context->saHpiAnnouncementAcknowledged,
                          sizeof(context->saHpiAnnouncementAcknowledged) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTACKBYSEVERITY:
             /** SaHpiSeverity = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementAckBySeverity,
+                         (u_char*)&context->saHpiAnnouncementAckBySeverity,
                          sizeof(context->saHpiAnnouncementAckBySeverity) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTSTATUSCONDTYPE:
             /** INTEGER = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementStatusCondType,
+                         (u_char*)&context->saHpiAnnouncementStatusCondType,
                          sizeof(context->saHpiAnnouncementStatusCondType) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTENTITYPATH:
             /** SaHpiEntityPath = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEntityPath,
+                         (u_char*)&context->saHpiAnnouncementEntityPath,
                          context->saHpiAnnouncementEntityPath_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTSENSORNUM:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementSensorNum,
+                         (u_char*)&context->saHpiAnnouncementSensorNum,
                          sizeof(context->saHpiAnnouncementSensorNum) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTSTATE:
             /** SaHpiEventState = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementEventState,
+                         (u_char*)&context->saHpiAnnouncementEventState,
                          context->saHpiAnnouncementEventState_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTNAME:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementName,
+                         (u_char*)&context->saHpiAnnouncementName,
                          context->saHpiAnnouncementName_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (char*)&context->saHpiAnnouncementMid,
+                         (u_char*)&context->saHpiAnnouncementMid,
                          sizeof(context->saHpiAnnouncementMid) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementTextType,
+                         (u_char*)&context->saHpiAnnouncementTextType,
                          sizeof(context->saHpiAnnouncementTextType) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementTextLanguage,
+                         (u_char*)&context->saHpiAnnouncementTextLanguage,
                          sizeof(context->saHpiAnnouncementTextLanguage) );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (char*)&context->saHpiAnnouncementText,
+                         (u_char*)&context->saHpiAnnouncementText,
                          context->saHpiAnnouncementText_len );
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTDELETE:
             /** RowStatus = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (char*)&context->saHpiAnnouncementDelete,
+                         (u_char*)&context->saHpiAnnouncementDelete,
                          sizeof(context->saHpiAnnouncementDelete) );
         break;
     

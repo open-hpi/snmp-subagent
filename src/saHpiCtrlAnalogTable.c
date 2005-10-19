@@ -1339,91 +1339,91 @@ int saHpiCtrlAnalogTable_get_value(
 	case COLUMN_SAHPICTRLANALOGENTRYID:
 		/** SaHpiEntryId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlAnalogEntryId,
+					 (u_char*)&context->saHpiCtrlAnalogEntryId,
 					 sizeof(context->saHpiCtrlAnalogEntryId) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGNUM:
 		/** SaHpiInstrumentId = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlAnalogNum,
+					 (u_char*)&context->saHpiCtrlAnalogNum,
 					 sizeof(context->saHpiCtrlAnalogNum) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGOUTPUTTYPE:
 		/** SaHpiCtrlOutputType = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogOutputType,
+					 (u_char*)&context->saHpiCtrlAnalogOutputType,
 					 sizeof(context->saHpiCtrlAnalogOutputType) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGDEFAULTMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogDefaultMode,
+					 (u_char*)&context->saHpiCtrlAnalogDefaultMode,
 					 sizeof(context->saHpiCtrlAnalogDefaultMode) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogMode,
+					 (u_char*)&context->saHpiCtrlAnalogMode,
 					 sizeof(context->saHpiCtrlAnalogMode) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGISREADONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogIsReadOnly,
+					 (u_char*)&context->saHpiCtrlAnalogIsReadOnly,
 					 sizeof(context->saHpiCtrlAnalogIsReadOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGISWRITEONLY:
 		/** TruthValue = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogIsWriteOnly,
+					 (u_char*)&context->saHpiCtrlAnalogIsWriteOnly,
 					 sizeof(context->saHpiCtrlAnalogIsWriteOnly) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGDEFAULTMINSTATE:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogDefaultMinState,
+					 (u_char*)&context->saHpiCtrlAnalogDefaultMinState,
 					 sizeof(context->saHpiCtrlAnalogDefaultMinState) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGDEFAULTMAXSTATE:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogDefaultMaxState,
+					 (u_char*)&context->saHpiCtrlAnalogDefaultMaxState,
 					 sizeof(context->saHpiCtrlAnalogDefaultMaxState) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGDEFAULTSTATE:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogDefaultState,
+					 (u_char*)&context->saHpiCtrlAnalogDefaultState,
 					 sizeof(context->saHpiCtrlAnalogDefaultState) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGSTATE:
 		/** INTEGER = ASN_INTEGER */
 		snmp_set_var_typed_value(var, ASN_INTEGER,
-					 (char*)&context->saHpiCtrlAnalogState,
+					 (u_char*)&context->saHpiCtrlAnalogState,
 					 sizeof(context->saHpiCtrlAnalogState) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGOEM:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
-					 (char*)&context->saHpiCtrlAnalogOem,
+					 (u_char*)&context->saHpiCtrlAnalogOem,
 					 sizeof(context->saHpiCtrlAnalogOem) );
 		break;
 
 	case COLUMN_SAHPICTRLANALOGRDR:
 		/** RowPointer = ASN_OBJECT_ID */
 		snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-					 (char*)&context->saHpiCtrlAnalogRDR,
+					 (u_char*)&context->saHpiCtrlAnalogRDR,
 					 context->saHpiCtrlAnalogRDR_len );
 		break;
 

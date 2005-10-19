@@ -932,7 +932,7 @@ int saHpiAutoInsertTimeoutTable_get_value(
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
             /** SafUnsigned64 = ASN_OPAQUE */
             snmp_set_var_typed_value(var, ASN_OPAQUE,
-                         (char*)&context->saHpiAutoInsertTimeoutForInsert,
+                         (u_char*)&context->saHpiAutoInsertTimeoutForInsert,
                          context->saHpiAutoInsertTimeoutForInsert_len );
         break;
     

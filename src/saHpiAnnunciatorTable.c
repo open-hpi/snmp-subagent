@@ -1186,49 +1186,49 @@ int saHpiAnnunciatorTable_get_value(
         case COLUMN_SAHPIANNUNCIATORNUM:
                 /** SaHpiInstrumentId = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAnnunciatorNum,
+                                         (u_char*)&context->saHpiAnnunciatorNum,
                                          sizeof(context->saHpiAnnunciatorNum) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATORTYPE:
                 /** INTEGER = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAnnunciatorType,
+                                         (u_char*)&context->saHpiAnnunciatorType,
                                          sizeof(context->saHpiAnnunciatorType) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATORMODEREADONLY:
                 /** TruthValue = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAnnunciatorModeReadOnly,
+                                         (u_char*)&context->saHpiAnnunciatorModeReadOnly,
                                          sizeof(context->saHpiAnnunciatorModeReadOnly) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATORMAXCONDITIONS:
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAnnunciatorMaxConditions,
+                                         (u_char*)&context->saHpiAnnunciatorMaxConditions,
                                          sizeof(context->saHpiAnnunciatorMaxConditions) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATORMODE:
                 /** INTEGER = ASN_INTEGER */
                 snmp_set_var_typed_value(var, ASN_INTEGER,
-                                         (char*)&context->saHpiAnnunciatorMode,
+                                         (u_char*)&context->saHpiAnnunciatorMode,
                                          sizeof(context->saHpiAnnunciatorMode) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATOROEM:
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                                         (char*)&context->saHpiAnnunciatorOem,
+                                         (u_char*)&context->saHpiAnnunciatorOem,
                                          sizeof(context->saHpiAnnunciatorOem) );
                 break;
 
         case COLUMN_SAHPIANNUNCIATORRDR:
                 /** RowPointer = ASN_OBJECT_ID */
                 snmp_set_var_typed_value(var, ASN_OBJECT_ID,
-                                         (char*)&context->saHpiAnnunciatorRDR,
+                                         (u_char*)&context->saHpiAnnunciatorRDR,
                                          context->saHpiAnnunciatorRDR_len );
                 break;
 
