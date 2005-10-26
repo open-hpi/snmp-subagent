@@ -19,7 +19,7 @@
 # OH_CHECK_FAIL($LIBNAME,$PACKAGE_SUGGEST,$URL,$EXTRA)
 #
 
-AC_DEFUN(OH_CHECK_FAIL,
+AC_DEFUN([OH_CHECK_FAIL],
     [
     OH_MSG=`echo -e "- $1 not found!\n"`
     if test "x" != "x$4"; then
@@ -41,7 +41,7 @@ $OH_MSG
     ]
 )
 
-AC_DEFUN(OH_CHECK_NETSNMP,
+AC_DEFUN([OH_CHECK_NETSNMP],
     [
     AC_MSG_CHECKING(for net-snmp)
     AC_TRY_LINK(
