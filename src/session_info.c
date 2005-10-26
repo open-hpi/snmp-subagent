@@ -497,21 +497,18 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 	case SAHPI_SENSOR_READING_TYPE_INT64:
 		
 		sprintf((char *)saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorInt64);
-		sprintf((char *)saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);	
 
 		return sizeof(SaHpiInt64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		
 		sprintf((char *)saHpiCurrentSensorStateValue, "%llu", reading->Value.SensorUint64);
-		sprintf((char *)saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
 
 		return sizeof(SaHpiUint64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 
 		sprintf((char *)saHpiCurrentSensorStateValue, "%g", reading->Value.SensorFloat64);
-		sprintf((char *)saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
 		
 		return sizeof(SaHpiFloat64T);
 		break;
