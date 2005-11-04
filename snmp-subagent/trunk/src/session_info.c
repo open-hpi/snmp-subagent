@@ -793,12 +793,12 @@ void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
         if (__BYTE_ORDER == __LITTLE_ENDIAN) {
 	
 		memcpy(&(row_timestamp->low), evt_timestamp, sizeof(long));
-		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));	
+		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long));	
 	}
 	else {
 	
 		memcpy(&(row_timestamp->high), evt_timestamp, sizeof(long));
-		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));
+		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long));
 	}
 	
 }
@@ -828,7 +828,7 @@ int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 	
 		if ( (memcmp(&(row_timestamp->low), evt_timestamp, sizeof(long)) == 0) && 
                      (memcmp(&(row_timestamp->high), 
-		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+		            (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
 			
 			return 0;
 		}
@@ -841,7 +841,7 @@ int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 	
 		if ( (memcmp(&(row_timestamp->high), evt_timestamp, sizeof(long)) == 0) && 
 		     (memcmp(&(row_timestamp->low), 
-		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+		            (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
 			    
 			return 0;
 		}
@@ -893,7 +893,7 @@ void assign_timeout(netsnmp_variable_list * var, unsigned char timeout[])
 
                 	timeout[counter] = (unsigned char)
 	                            (((unsigned long int)
-				     *(unsigned long int *)((int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
+				     *(unsigned long int *)((long int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
 		}		    		
       
 	}
