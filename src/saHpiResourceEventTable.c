@@ -158,7 +158,7 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
 			column, column_len,
 			&res_evt_idx,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
+        //printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
 
 	/* See if Row exists. */
 	res_evt_ctx = NULL;
@@ -254,7 +254,7 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
 			column, column_len,
 			&res_evt_idx,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);
-        printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
+        //printf(" this_child_oid_len [%d]\n", *this_child_oid_len);
 
 	/* See if Row exists. */
 	res_evt_ctx = NULL;
