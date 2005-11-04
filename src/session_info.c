@@ -396,11 +396,11 @@ typedef struct  {
 } sensor_range_flags;
 
 static sensor_range_flags range_flags[] = {
-	{SAHPI_SRF_MIN,"MIN, "},
-	{SAHPI_SRF_MAX, "MAX, "},
-	{SAHPI_SRF_NORMAL_MIN, "NORMAL_MIN, "},
-	{SAHPI_SRF_NORMAL_MAX, "NORMAL_MAX, "},
-	{SAHPI_SRF_NOMINAL,"NOMINAL, "}};
+	{SAHPI_SRF_MIN,(unsigned char *)"MIN, "},
+	{SAHPI_SRF_MAX,(unsigned char *) "MAX, "},
+	{SAHPI_SRF_NORMAL_MIN, (unsigned char *)"NORMAL_MIN, "},
+	{SAHPI_SRF_NORMAL_MAX, (unsigned char *)"NORMAL_MAX, "},
+	{SAHPI_SRF_NOMINAL,(unsigned char *)"NOMINAL, "}};
 #define RANGE_FLAGS_LEN 5
 
 /**
@@ -423,7 +423,7 @@ SaErrorT decode_sensor_range_flags(SaHpiTextBufferT *buffer,
 
 		if ((sensor_range_flags & range_flags[i].flag) == range_flags[i].flag) {
 
-			len = strlen(range_flags[i].str);
+			len = strlen((const char *)range_flags[i].str);
 
 			if (len + buffer->DataLength  > SAHPI_MAX_TEXT_BUFFER_LENGTH)
 				return SA_ERR_HPI_OUT_OF_SPACE;
@@ -496,22 +496,19 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 	switch (reading->Type) {
 	case SAHPI_SENSOR_READING_TYPE_INT64:
 		
-		sprintf(saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorInt64);
-		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);	
+		sprintf((char *)saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorInt64);
 
 		return sizeof(SaHpiInt64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		
-		sprintf(saHpiCurrentSensorStateValue, "%llu", reading->Value.SensorUint64);
-		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
+		sprintf((char *)saHpiCurrentSensorStateValue, "%llu", reading->Value.SensorUint64);
 
 		return sizeof(SaHpiUint64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 
-		sprintf(saHpiCurrentSensorStateValue, "%g", reading->Value.SensorFloat64);
-		sprintf(saHpiCurrentSensorStateValue, "%s", saHpiCurrentSensorStateValue);
+		sprintf((char *)saHpiCurrentSensorStateValue, "%g", reading->Value.SensorFloat64);
 		
 		return sizeof(SaHpiFloat64T);
 		break;
@@ -549,24 +546,24 @@ SaErrorT set_sen_thd_value(SaHpiSensorReadingUnionT *value,
 		if (val_len > sizeof(SaHpiInt64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 		
-		sprintf(val, "%lld", value->SensorInt64);
-		sprintf(val, "%s",   val);				
+		sprintf((char *)val, "%lld", value->SensorInt64);
+		sprintf((char *)val, "%s",   val);				
 		break;
 			
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		if (val_len > sizeof(SaHpiUint64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 							
-		sprintf(val, "%llu", value->SensorUint64);
-		sprintf(val, "%s",   val);	
+		sprintf((char *)val, "%llu", value->SensorUint64);
+		sprintf((char *)val, "%s",   val);	
 		break;
 		
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 		if (val_len > sizeof(SaHpiFloat64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 			
-		sprintf(val, "%g",  value->SensorFloat64);
-		sprintf(val, "%s",  val);					
+		sprintf((char *)val, "%g",  value->SensorFloat64);
+		sprintf((char *)val, "%s",  val);					
 		break;	
 		
 	case SAHPI_SENSOR_READING_TYPE_BUFFER:
@@ -622,11 +619,11 @@ typedef struct {
 } watchdog_exp_flags;
 
 static watchdog_exp_flags watchdog_string[] = {
-  {SAHPI_WATCHDOG_EXP_BIOS_FRB2, "BIOS_FRB2"},
-  {SAHPI_WATCHDOG_EXP_BIOS_POST, "BIOS_POST"},
-  {SAHPI_WATCHDOG_EXP_OS_LOAD,   "OS_LOAD"},
-  {SAHPI_WATCHDOG_EXP_SMS_OS,    "SMS_OS"},
-  {SAHPI_WATCHDOG_EXP_OEM,       "OEM"}
+  {SAHPI_WATCHDOG_EXP_BIOS_FRB2, (unsigned char *)"BIOS_FRB2"},
+  {SAHPI_WATCHDOG_EXP_BIOS_POST, (unsigned char *)"BIOS_POST"},
+  {SAHPI_WATCHDOG_EXP_OS_LOAD,   (unsigned char *)"OS_LOAD"},
+  {SAHPI_WATCHDOG_EXP_SMS_OS,    (unsigned char *)"SMS_OS"},
+  {SAHPI_WATCHDOG_EXP_OEM,       (unsigned char *)"OEM"}
 };
 
 #define MAX_EXP_FLAGS_STRINGS 5
@@ -796,12 +793,12 @@ void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
         if (__BYTE_ORDER == __LITTLE_ENDIAN) {
 	
 		memcpy(&(row_timestamp->low), evt_timestamp, sizeof(long));
-		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));	
+		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long));	
 	}
 	else {
 	
 		memcpy(&(row_timestamp->high), evt_timestamp, sizeof(long));
-		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long));
+		memcpy(&(row_timestamp->low), (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long));
 	}
 	
 }
@@ -831,7 +828,7 @@ int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 	
 		if ( (memcmp(&(row_timestamp->low), evt_timestamp, sizeof(long)) == 0) && 
                      (memcmp(&(row_timestamp->high), 
-		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+		            (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
 			
 			return 0;
 		}
@@ -844,7 +841,7 @@ int compare_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
 	
 		if ( (memcmp(&(row_timestamp->high), evt_timestamp, sizeof(long)) == 0) && 
 		     (memcmp(&(row_timestamp->low), 
-		            (SaHpiTimeT*)((int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
+		            (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long)) == 0)) {
 			    
 			return 0;
 		}
@@ -896,7 +893,7 @@ void assign_timeout(netsnmp_variable_list * var, unsigned char timeout[])
 
                 	timeout[counter] = (unsigned char)
 	                            (((unsigned long int)
-				     *(unsigned long int *)((int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
+				     *(unsigned long int *)((long int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
 		}		    		
       
 	}
