@@ -54,7 +54,7 @@ AC_ARG_ENABLE([client-library],
     [OPENHPILIB="openhpi"])
 
 
-HPI_LIBS=`PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" pkg-config --libs $OPENHPILIB`
+HPI_LIBS=`PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" pkg-config --libs $OPENHPILIB`
 if test "x$HPI_LIBS" = "x"; then
     AC_MSG_ERROR([
 *** OpenHPI pkgconfig file wasn't found
@@ -80,8 +80,8 @@ LIBS=$HPI_LIBS
 AC_CHECK_LIB([$OPENHPILIB], [saHpiSessionOpen], 
     [
         have_hpi=yes
-        HPI_FLAGS=`PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" pkg-config --cflags $OPENHPILIB`
-        HPI_LIBS=`PKG_CONFIG_PATH="/usr/local/lib/pkgconfig" pkg-config --libs $OPENHPILIB`
+        HPI_FLAGS=`PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" pkg-config --cflags $OPENHPILIB`
+        HPI_LIBS=`PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig" pkg-config --libs $OPENHPILIB`
     ],
     [OH_CHECK_FAIL(lib$OPENHPILIB,openhpi-devel)])
     
