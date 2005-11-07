@@ -80,11 +80,11 @@ static GHashTable *dr_table;
 static u_long sensor_enable_change_event_entry_count_total = 0; 
 static u_long sensor_enable_change_event_entry_count = 0; 
 
-static oid saHpiSensorEnableChangeEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
+static oid saHpiSensorEnableChangeEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
 static oid saHpiSensorEnableChangeEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,14 };
 
 
-int handle_saHpiSensorEnableChangeEventLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiSensorEnableChangeEventLifetimeChanges(netsnmp_mib_handler *handler,
                                                        netsnmp_handler_registration *reginfo,
                                                        netsnmp_agent_request_info   *reqinfo,
                                                        netsnmp_request_info         *requests);
@@ -94,7 +94,7 @@ int handle_saHpiSensorEnableChangeEventActiveEntries(netsnmp_mib_handler *handle
                                                   netsnmp_agent_request_info   *reqinfo,
                                                   netsnmp_request_info         *requests);
 						  
-int initialize_table_saHpiSensorEnableChangeEventLifetimeEntries(void);
+int initialize_table_saHpiSensorEnableChangeEventLifetimeChanges(void);
 int initialize_table_saHpiSensorEnableChangeEventActiveEntries(void);
 
 
@@ -570,7 +570,7 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiSensorEnableChangeEventLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventLifetimeChanges(netsnmp_mib_handler *handler,
                                                    netsnmp_handler_registration *reginfo,
                                                    netsnmp_agent_request_info   *reqinfo,
                                                    netsnmp_request_info         *requests)
@@ -580,7 +580,7 @@ handle_saHpiSensorEnableChangeEventLifetimeEntries(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventLifetimeChanges, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -645,16 +645,16 @@ handle_saHpiSensorEnableChangeEventActiveEntries(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiSensorEnableChangeEventLifetimeEntries(void)
+int initialize_table_saHpiSensorEnableChangeEventLifetimeChanges(void)
 {
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventLifetimeChanges, called\n"));
 
         netsnmp_register_scalar(
                                netsnmp_create_handler_registration(
-			                "saHpiSensorEnableChangeEventLifetimeEntries", 
-				        handle_saHpiSensorEnableChangeEventLifetimeEntries,
-                                        saHpiSensorEnableChangeEventLifetimeEntries_oid, 
-				        OID_LENGTH(saHpiSensorEnableChangeEventLifetimeEntries_oid),
+			                "saHpiSensorEnableChangeEventLifetimeChanges", 
+				        handle_saHpiSensorEnableChangeEventLifetimeChanges,
+                                        saHpiSensorEnableChangeEventLifetimeChanges_oid, 
+				        OID_LENGTH(saHpiSensorEnableChangeEventLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -773,7 +773,7 @@ init_saHpiSensorEnableChangeEventTable(void)
 
         initialize_table_saHpiSensorEnableChangeEventTable();
 
-        initialize_table_saHpiSensorEnableChangeEventLifetimeEntries();
+        initialize_table_saHpiSensorEnableChangeEventLifetimeChanges();
         
         initialize_table_saHpiSensorEnableChangeEventActiveEntries();
 	

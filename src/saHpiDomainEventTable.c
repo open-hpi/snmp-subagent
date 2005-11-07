@@ -80,10 +80,10 @@ static GHashTable *dr_table;
 static u_long domain_event_entry_count_total = 0;
 static u_long domain_event_entry_count = 0; 
  
-static oid saHpiDomainEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,7 };
+static oid saHpiDomainEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,7 };
 static oid saHpiDomainEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,8 };
 
-int handle_saHpiDomainEventLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiDomainEventLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
@@ -93,7 +93,7 @@ int handle_saHpiDomainEventActiveEntries(netsnmp_mib_handler *handler,
                                       netsnmp_agent_request_info   *reqinfo,
                                       netsnmp_request_info         *requests);
 
-int initialize_table_saHpiDomainEventLifetimeEntries(void);
+int initialize_table_saHpiDomainEventLifetimeChanges(void);
 int initialize_table_saHpiDomainEventActiveEntries(void);	      
 
 
@@ -290,7 +290,7 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiDomainEventLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiDomainEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -300,7 +300,7 @@ handle_saHpiDomainEventLifetimeEntries(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiDomainEventLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiDomainEventLifetimeChanges, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -366,17 +366,17 @@ handle_saHpiDomainEventActiveEntries(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiDomainEventLifetimeEntries(void)
+int initialize_table_saHpiDomainEventLifetimeChanges(void)
 {
 
         DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainEventActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiDomainEventLifetimeEntries", 
-					handle_saHpiDomainEventLifetimeEntries,
-                                        saHpiDomainEventLifetimeEntries_oid, 
-					OID_LENGTH(saHpiDomainEventLifetimeEntries_oid),
+				        "saHpiDomainEventLifetimeChanges", 
+					handle_saHpiDomainEventLifetimeChanges,
+                                        saHpiDomainEventLifetimeChanges_oid, 
+					OID_LENGTH(saHpiDomainEventLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -481,7 +481,7 @@ init_saHpiDomainEventTable(void)
       
         initialize_table_saHpiDomainEventTable();
 
-        initialize_table_saHpiDomainEventLifetimeEntries();
+        initialize_table_saHpiDomainEventLifetimeChanges();
         initialize_table_saHpiDomainEventActiveEntries();  
 	  
         domain_resource_pair_initialize(&initialized, &dr_table);

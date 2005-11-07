@@ -81,10 +81,10 @@ static GHashTable *dr_table;
 static u_long hotswap_event_log_entry_count_total = 0;
 static u_long hotswap_event_log_entry_count = 0;
 
-static oid saHpiHotSwapEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,15 };
+static oid saHpiHotSwapEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,15 };
 static oid saHpiHotSwapEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 }; 
 
-int handle_saHpiHotSwapEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiHotSwapEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
@@ -94,7 +94,7 @@ int handle_saHpiHotSwapEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);					
 
-int initialize_table_saHpiHotSwapEventLogLifetimeEntries(void);
+int initialize_table_saHpiHotSwapEventLogLifetimeChanges(void);
 int initialize_table_saHpiHotSwapEventLogActiveEntries(void);
 
 SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid, 
@@ -288,7 +288,7 @@ SaErrorT hotswap_event_log_clear(SaHpiSessionIdT session_id,
  * @return:
  */
 int
-handle_saHpiHotSwapEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -298,7 +298,7 @@ handle_saHpiHotSwapEventLogLifetimeEntries(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLogLifetimeChanges, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -363,16 +363,16 @@ handle_saHpiHotSwapEventLogActiveEntries(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiHotSwapEventLogLifetimeEntries(void)
+int initialize_table_saHpiHotSwapEventLogLifetimeChanges(void)
 {
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventLogLifetimeChanges, called\n"));
         
 	netsnmp_register_scalar(
                                netsnmp_create_handler_registration(
-			                "saHpiHotSwapEventLogLifetimeEntries", 
-					handle_saHpiHotSwapEventLogLifetimeEntries,
-                                        saHpiHotSwapEventLogLifetimeEntries_oid, 
-					OID_LENGTH(saHpiHotSwapEventLogLifetimeEntries_oid),
+			                "saHpiHotSwapEventLogLifetimeChanges", 
+					handle_saHpiHotSwapEventLogLifetimeChanges,
+                                        saHpiHotSwapEventLogLifetimeChanges_oid, 
+					OID_LENGTH(saHpiHotSwapEventLogLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));	
         return SNMP_ERR_NOERROR;
 
@@ -483,7 +483,7 @@ init_saHpiHotSwapEventLogTable(void)
 
         initialize_table_saHpiHotSwapEventLogTable();
 
-        initialize_table_saHpiHotSwapEventLogLifetimeEntries();
+        initialize_table_saHpiHotSwapEventLogLifetimeChanges();
         initialize_table_saHpiHotSwapEventLogActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
