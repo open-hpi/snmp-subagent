@@ -38,7 +38,7 @@
 #ifndef _HPI_SUBAGENT_
 #define _HPI_SUBAGENT_
 
-#define SAF_UNSIGNED_64_LEN 12
+#define SAF_UNSIGNED_64_LEN 8
 
 /*
  * global mutex used mainly for event servicing"

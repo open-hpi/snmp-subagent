@@ -20,8 +20,8 @@
  * Yes, there is lots of code here that you might not use. But it is much
  * easier to remove code than to add it!
  */
-#ifndef SAHPICTRLOEMTABLE_H
-#define SAHPICTRLOEMTABLE_H
+#ifndef SAHPICTRLOemTABLE_H
+#define SAHPICTRLOemTABLE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -151,20 +151,20 @@ extern size_t saHpiCtrlOemTable_oid_len;
 /*************************************************************
  * column number definitions for table saHpiCtrlOemTable
  */
-#define COLUMN_SAHPICTRLOEMENTRYID 1
-#define COLUMN_SAHPICTRLOEMNUM 2
-#define COLUMN_SAHPICTRLOEMOUTPUTTYPE 3
-#define COLUMN_SAHPICTRLOEMDEFAULTMODE 4
-#define COLUMN_SAHPICTRLOEMMODE 5
-#define COLUMN_SAHPICTRLOEMISREADONLY 6
-#define COLUMN_SAHPICTRLOEMISWRITEONLY 7
-#define COLUMN_SAHPICTRLOEMMANUFACTURERID 8
-#define COLUMN_SAHPICTRLOEMDEFAULTCONFIGDATA 9
-#define COLUMN_SAHPICTRLOEMDEFAULTMID 10
-#define COLUMN_SAHPICTRLOEMDEFAULTSTATE 11
-#define COLUMN_SAHPICTRLOEMSTATE 12
-#define COLUMN_SAHPICTRLOEMVALUE 13
-#define COLUMN_SAHPICTRLOEMRDR 14
+#define COLUMN_SAHPICTRLOemENTRYID 1
+#define COLUMN_SAHPICTRLOemNUM 2
+#define COLUMN_SAHPICTRLOemOUTPUTTYPE 3
+#define COLUMN_SAHPICTRLOemDEFAULTMODE 4
+#define COLUMN_SAHPICTRLOemMODE 5
+#define COLUMN_SAHPICTRLOemISREADONLY 6
+#define COLUMN_SAHPICTRLOemISWRITEONLY 7
+#define COLUMN_SAHPICTRLOemMANUFACTURERID 8
+#define COLUMN_SAHPICTRLOemDEFAULTCONFIGDATA 9
+#define COLUMN_SAHPICTRLOemDEFAULTMID 10
+#define COLUMN_SAHPICTRLOemDEFAULTSTATE 11
+#define COLUMN_SAHPICTRLOemSTATE 12
+#define COLUMN_SAHPICTRLOemVALUE 13
+#define COLUMN_SAHPICTRLOemRDR 14
 #define saHpiCtrlOemTable_COL_MIN 2
 #define saHpiCtrlOemTable_COL_MAX 14
 
@@ -219,4 +219,4 @@ saHpiCtrlOemTable_context * saHpiCtrlOemTable_get( const char *name, int len );
 };
 #endif
 
-#endif /** SAHPICTRLOEMTABLE_H */
+#endif /** SAHPICTRLOemTABLE_H */
