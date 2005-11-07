@@ -32,6 +32,8 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+typedef struct counter64 subagent64 __attribute__((__aligned__(8)));
+
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiEventSeverity is external */

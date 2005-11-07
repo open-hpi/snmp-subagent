@@ -53,7 +53,7 @@ typedef struct saHpiInventoryTable_context_s {
             long saHpiInventoryPersistent;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-            unsigned long saHpiInventoryOEM;
+            unsigned long saHpiInventoryOem;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiInventoryUpdateCount;
@@ -129,7 +129,7 @@ extern size_t saHpiInventoryTable_oid_len;
  */
 #define COLUMN_SAHPIINVENTORYID 1
 #define COLUMN_SAHPIINVENTORYPERSISTENT 2
-#define COLUMN_SAHPIINVENTORYOEM 3
+#define COLUMN_SAHPIINVENTORYOem 3
 #define COLUMN_SAHPIINVENTORYUPDATECOUNT 4
 #define COLUMN_SAHPIINVENTORYISREADONLY 5
 #define COLUMN_SAHPIINVENTORYNUMAREAS 6

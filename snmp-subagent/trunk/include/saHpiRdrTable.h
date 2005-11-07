@@ -119,12 +119,12 @@ int saHpiRdrTable_get_value(netsnmp_request_info *, netsnmp_index *, netsnmp_tab
 /*************************************************************
  * oid and fucntion declarations scalars
  */
-int handle_saHpiRdrEntryCount( netsnmp_mib_handler *handler, 
+int handle_saHpiRdrActiveEntries( netsnmp_mib_handler *handler, 
 			       netsnmp_handler_registration *reginfo,
 			       netsnmp_agent_request_info   *reqinfo, 
 			       netsnmp_request_info *requests);
 
-int initialize_table_saHpiRdrEntryCount(void);
+int initialize_table_saHpiRdrActiveEntries(void);
 SaErrorT clear_rdr_container(SaHpiDomainIdT domainId, 
                              SaHpiResourceIdT resourceId);
 

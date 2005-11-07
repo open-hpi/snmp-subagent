@@ -165,7 +165,7 @@ extern size_t saHpiDomainAlarmTable_oid_len;
 #define saHpiDomainAlarmDomainId_INDEX 0
 #define saHpiDomainAlarmEntryId_INDEX 1
  
-#define DOMAIN_ALARM_INDEX_NR 3
+#define DOMAIN_ALARM_INDEX_NR 2
 #define COLUMN_SAHPIDOMAINALARMID 1
 #define COLUMN_SAHPIDOMAINALARMTIMESTAMP 2
 #define COLUMN_SAHPIDOMAINALARMSEVERITY 3

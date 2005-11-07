@@ -165,11 +165,11 @@ int set_table_resource_tag (saHpiResourceTable_context *row_ctx);
  * oid and fucntion declarations scalars
  */
 
-int handle_saHpiResourceEntryCount( netsnmp_mib_handler 	*handler,
+int handle_saHpiResourceActiveEntries( netsnmp_mib_handler 	*handler,
 				    netsnmp_handler_registration *reginfo,
 				    netsnmp_agent_request_info   *reqinfo,
 				    netsnmp_request_info         *requests);
-int initialize_table_saHpiResourceEntryCount(void);
+int initialize_table_saHpiResourceActiveEntries(void);
 SaErrorT async_resource_add(SaHpiSessionIdT sessionid, SaHpiEventT *event, 
                          SaHpiRdrT *rdr, SaHpiRptEntryT *rpt_entry);
 
