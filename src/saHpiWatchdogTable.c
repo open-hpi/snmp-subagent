@@ -75,14 +75,14 @@ static int set_table_watchdog_set (saHpiWatchdogTable_context *row_ctx);
 static int set_table_watchdog_reset (saHpiWatchdogTable_context *row_ctx); 
 
 static u_long watchdog_entry_count = 0; 
-static oid saHpiWatchdogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
+static oid saHpiWatchdogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
 
-int handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiWatchdogActiveEntries(netsnmp_mib_handler *handler,
                                    netsnmp_handler_registration *reginfo,
                                    netsnmp_agent_request_info   *reqinfo,
                                    netsnmp_request_info         *requests);
 
-int initialize_table_saHpiWatchdogEntryCount(void);
+int initialize_table_saHpiWatchdogActiveEntries(void);
 
 
 
@@ -562,7 +562,7 @@ static int set_table_watchdog_reset (saHpiWatchdogTable_context *row_ctx)
  * @return:
  */
 int
-handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -572,14 +572,14 @@ handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogActiveEntries, called\n"));
 
         watchdog_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &watchdog_entry_count,
         			        sizeof(watchdog_entry_count));
                 break;
@@ -597,17 +597,17 @@ handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiWatchdogEntryCount(void)
+int initialize_table_saHpiWatchdogActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                netsnmp_create_handler_registration(
-			                "saHpiWatchdogEntryCount", 
-			                handle_saHpiWatchdogEntryCount,
-                                        saHpiWatchdogEntryCount_oid, 
-			                OID_LENGTH(saHpiWatchdogEntryCount_oid),
+			                "saHpiWatchdogActiveEntries", 
+			                handle_saHpiWatchdogActiveEntries,
+                                        saHpiWatchdogActiveEntries_oid, 
+			                OID_LENGTH(saHpiWatchdogActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 			       
 	return SNMP_ERR_NOERROR;
@@ -702,7 +702,7 @@ init_saHpiWatchdogTable(void)
      
         initialize_table_saHpiWatchdogTable();
 
-        initialize_table_saHpiWatchdogEntryCount();
+        initialize_table_saHpiWatchdogActiveEntries();
 }
 
 /************************************************************
@@ -1863,7 +1863,7 @@ int saHpiWatchdogTable_get_value(
                          sizeof(context->saHpiWatchdogTimerReset) );
         break;
     
-        case COLUMN_SAHPIWATCHDOGOEM:
+        case COLUMN_SAHPIWATCHDOGOem:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiWatchdogOem,

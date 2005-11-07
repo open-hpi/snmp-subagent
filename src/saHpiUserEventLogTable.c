@@ -81,21 +81,21 @@ static GHashTable *dr_table;
 static u_long user_event_log_entry_count_total = 0;
 static u_long user_event_log_entry_count = 0;
 
-static oid saHpiUserEvenLogtEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
-static oid saHpiUserEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
+static oid saHpiUserEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
+static oid saHpiUserEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
 
-int handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiUserEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiUserEventLogActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
 
-int initialize_table_saHpiUserEvenLogtEntryCountTotal(void);
-int initialize_table_saHpiUserEvenLogtEntryCount(void);
+int initialize_table_saHpiUserEventLogLifetimeEntries(void);
+int initialize_table_saHpiUserEventLogActiveEntries(void);
 
 
 SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid, 
@@ -414,7 +414,7 @@ int user_event_log_delete (saHpiUserEventLogTable_context *row_ctx)
  * @return:
  */
 int
-handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiUserEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -424,7 +424,7 @@ handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
         
-        DEBUGMSGTL ((AGENT, "handle_saHpiUserEvenLogtEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiUserEvenLogtLifetimeEntries, called\n"));
 
         switch(reqinfo->mode) {
 
@@ -453,7 +453,7 @@ handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
  * @return:
  */
 int
-handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiUserEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -463,14 +463,14 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiUserEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiUserEventLogActiveEntries, called\n"));
 
         user_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &user_event_log_entry_count,
         			        sizeof(user_event_log_entry_count));
                 break;
@@ -488,17 +488,17 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiUserEvenLogtEntryCountTotal(void)
+int initialize_table_saHpiUserEventLogLifetimeEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEvenLogtEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEvenLogtLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiUserEvenLogtEntryCountTotal", 
-				        handle_saHpiUserEvenLogtEntryCountTotal,
-                                        saHpiUserEvenLogtEntryCountTotal_oid,
-			                OID_LENGTH(saHpiUserEvenLogtEntryCountTotal_oid),
+				        "saHpiUserEventLogLifetimeEntries", 
+				        handle_saHpiUserEventLogLifetimeEntries,
+                                        saHpiUserEventLogLifetimeEntries_oid,
+			                OID_LENGTH(saHpiUserEventLogLifetimeEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -509,17 +509,17 @@ int initialize_table_saHpiUserEvenLogtEntryCountTotal(void)
  * 
  * @return: 
  */
-int initialize_table_saHpiUserEvenLogtEntryCount(void)
+int initialize_table_saHpiUserEventLogActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEvenLogtEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiUserEventLogActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiUserEventLogEntryCount", 
-				        handle_saHpiUserEventLogEntryCount,
-                                        saHpiUserEventLogEntryCount_oid, 
-					OID_LENGTH(saHpiUserEventLogEntryCount_oid),
+				        "saHpiUserEventLogActiveEntries", 
+				        handle_saHpiUserEventLogActiveEntries,
+                                        saHpiUserEventLogActiveEntries_oid, 
+					OID_LENGTH(saHpiUserEventLogActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -602,8 +602,8 @@ init_saHpiUserEventLogTable(void)
 		
 	initialize_table_saHpiUserEventLogTable();
 
-        initialize_table_saHpiUserEvenLogtEntryCountTotal();
-        initialize_table_saHpiUserEvenLogtEntryCount();
+        initialize_table_saHpiUserEventLogLifetimeEntries();
+        initialize_table_saHpiUserEventLogActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
 	

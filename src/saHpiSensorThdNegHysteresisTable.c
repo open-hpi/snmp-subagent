@@ -215,6 +215,8 @@ SaErrorT clear_sen_thd_neg_hys(SaHpiDomainIdT domainId,
                 } while (row_idx);
         } 
 
+        
+
         return rv;
 }
 
