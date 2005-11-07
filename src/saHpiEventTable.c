@@ -85,18 +85,18 @@ size_t saHpiEventTable_oid_len = OID_LENGTH(saHpiEventTable_oid);
 /************************************************************/
 static u_long event_entry_count_total = 0;
 static u_long event_entry_count = 0;
-static oid saHpiEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
-static oid saHpiEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
-int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
+static oid saHpiEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
+static oid saHpiEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
+int handle_saHpiEventLifetimeEntries(netsnmp_mib_handler *handler,
                                      netsnmp_handler_registration *reginfo,
                                      netsnmp_agent_request_info   *reqinfo,
                                      netsnmp_request_info         *requests);
-int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
-int initialize_table_saHpiEventEntryCountTotal(void);
-int initialize_table_saHpiEventEntryCount(void);
+int initialize_table_saHpiEventLifetimeEntries(void);
+int initialize_table_saHpiEventActiveEntries(void);
 
 
 
@@ -413,7 +413,7 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 
 
 
-int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiEventLifetimeEntries(netsnmp_mib_handler *handler,
                                      netsnmp_handler_registration *reginfo,
                                      netsnmp_agent_request_info   *reqinfo,
                                      netsnmp_request_info         *requests)
@@ -424,7 +424,7 @@ int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiEventEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiEventLifetimeEntries, called\n"));
     
     switch(reqinfo->mode) {
 
@@ -443,22 +443,22 @@ int handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-int initialize_table_saHpiEventEntryCountTotal(void)
+int initialize_table_saHpiEventLifetimeEntries(void)
 {
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                 netsnmp_create_handler_registration(
-                        "saHpiEventEntryCountTotal", 
-                        handle_saHpiEventEntryCountTotal,
-                        saHpiEventEntryCountTotal_oid, 
-                        OID_LENGTH(saHpiEventEntryCountTotal_oid),
+                        "saHpiEventLifetimeEntries", 
+                        handle_saHpiEventLifetimeEntries,
+                        saHpiEventLifetimeEntries_oid, 
+                        OID_LENGTH(saHpiEventLifetimeEntries_oid),
                         HANDLER_CAN_RONLY ));
 
     return 0;
 }
 
-int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -469,14 +469,14 @@ int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiEventActiveEntries, called\n"));
 
         event_entry_count = CONTAINER_SIZE (cb.container);
     
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &event_entry_count,
                                      sizeof(event_entry_count));
             break;
@@ -490,16 +490,16 @@ int handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 
-int initialize_table_saHpiEventEntryCount(void)
+int initialize_table_saHpiEventActiveEntries(void)
 {
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiEventActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                 netsnmp_create_handler_registration(
-                        "saHpiEventEntryCount", 
-                        handle_saHpiEventEntryCount,
-                        saHpiEventEntryCount_oid, 
-                        OID_LENGTH(saHpiEventEntryCount_oid),
+                        "saHpiEventActiveEntries", 
+                        handle_saHpiEventActiveEntries,
+                        saHpiEventActiveEntries_oid, 
+                        OID_LENGTH(saHpiEventActiveEntries_oid),
                         HANDLER_CAN_RONLY ));
 
         return 0;
@@ -561,9 +561,9 @@ init_saHpiEventTable(void)
 
     initialize_table_saHpiEventTable();
 
-    initialize_table_saHpiEventEntryCountTotal();
+    initialize_table_saHpiEventLifetimeEntries();
 
-    initialize_table_saHpiEventEntryCount();
+    initialize_table_saHpiEventActiveEntries();
 }
 
 /************************************************************

@@ -74,12 +74,12 @@ size_t saHpiDomainInfoTable_oid_len = OID_LENGTH(saHpiDomainInfoTable_oid);
  * oid declarations scalars
  */
 static u_long domain_info_entry_count = 0;
-static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
-int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
+static oid saHpiDomainInfoActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
+int handle_saHpiDomainInfoActiveEntries(netsnmp_mib_handler  *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests);
-int initialize_table_saHpiDomainInfoEntryCount(void);
+int initialize_table_saHpiDomainInfoActiveEntries(void);
 
 
 /*
@@ -329,14 +329,14 @@ int set_table_domain_tag (saHpiDomainInfoTable_context *row_ctx)
 
 
 /*
- * int handle_saHpiDomainInfoEntryCount()
+ * int handle_saHpiDomainInfoActiveEntries()
  */
-int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
+int handle_saHpiDomainInfoActiveEntries(netsnmp_mib_handler  *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-	DEBUGMSGTL ((AGENT, "handle_saHpiDomainInfoEntryCount: Entry Count is %d\n", 
+	DEBUGMSGTL ((AGENT, "handle_saHpiDomainInfoActiveEntries: Entry Count is %d\n", 
 					domain_info_entry_count));  	
 	
     /* We are never called for a GETNEXT if it's registered as a
@@ -351,7 +351,7 @@ int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
         case MODE_GET:        
             snmp_set_var_typed_value(
             		requests->requestvb, 
-            		ASN_COUNTER,
+            		ASN_GAUGE,
                     (u_char *) &domain_info_entry_count,
                     sizeof(domain_info_entry_count) );
             break;
@@ -364,17 +364,17 @@ int handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler  *handler,
 }
 
 /*
- * int initialize_table_saHpiDomainInfoEntryCount(void)
+ * int initialize_table_saHpiDomainInfoActiveEntries(void)
  */
-int initialize_table_saHpiDomainInfoEntryCount(void)
+int initialize_table_saHpiDomainInfoActiveEntries(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainInfoEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainInfoActiveEntries, called\n"));	
 	netsnmp_register_scalar( 
         netsnmp_create_handler_registration(
-        	"saHpiDomainInfoEntryCount", 
-        	handle_saHpiDomainInfoEntryCount,
-            saHpiDomainInfoEntryCount_oid, 
-            OID_LENGTH(saHpiDomainInfoEntryCount_oid),
+        	"saHpiDomainInfoActiveEntries", 
+        	handle_saHpiDomainInfoActiveEntries,
+            saHpiDomainInfoActiveEntries_oid, 
+            OID_LENGTH(saHpiDomainInfoActiveEntries_oid),
             HANDLER_CAN_RONLY) ); 
 	return 0;
 }
@@ -430,7 +430,7 @@ init_saHpiDomainInfoTable(void)
 
     initialize_table_saHpiDomainInfoTable();
     
-    initialize_table_saHpiDomainInfoEntryCount();
+    initialize_table_saHpiDomainInfoActiveEntries();
     
 }
 

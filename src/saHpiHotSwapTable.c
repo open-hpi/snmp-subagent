@@ -73,14 +73,14 @@ size_t saHpiHotSwapTable_oid_len = OID_LENGTH(saHpiHotSwapTable_oid);
  */
  
 static u_long hotswap_entry_count = 0;
-static oid saHpiHotSwapEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,11,2 };
+static oid saHpiHotSwapActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,11,2 };
 
-int handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiHotSwapActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
 				
-int initialize_table_saHpiHotSwapEntryCount(void);
+int initialize_table_saHpiHotSwapActiveEntries(void);
 
 
 /**
@@ -473,7 +473,7 @@ int hot_swap_policy_set (saHpiHotSwapTable_context *row_ctx)
  * @return:
  */
 int
-handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -483,14 +483,14 @@ handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapActiveEntries, called\n"));
 
         hotswap_entry_count = CONTAINER_SIZE (cb.container);       
         
 	switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &hotswap_entry_count,
         			        sizeof(hotswap_entry_count));
                 break;
@@ -509,17 +509,17 @@ handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiHotSwapEntryCount(void)
+int initialize_table_saHpiHotSwapActiveEntries(void)
 {
         
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiHotSwapEntryCount", 
-					handle_saHpiHotSwapEntryCount,
-                                        saHpiHotSwapEntryCount_oid, 
-					OID_LENGTH(saHpiHotSwapEntryCount_oid),
+				        "saHpiHotSwapActiveEntries", 
+					handle_saHpiHotSwapActiveEntries,
+                                        saHpiHotSwapActiveEntries_oid, 
+					OID_LENGTH(saHpiHotSwapActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -600,7 +600,7 @@ init_saHpiHotSwapTable(void)
 
         initialize_table_saHpiHotSwapTable();
 
-        initialize_table_saHpiHotSwapEntryCount();
+        initialize_table_saHpiHotSwapActiveEntries();
 }
 
 /************************************************************
@@ -964,8 +964,8 @@ void saHpiHotSwapTable_set_reserve1( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
             if (rc == SNMP_ERR_NOERROR ) {
                     if (var->val_len > SAF_UNSIGNED_64_LEN) {
                             rc = SNMP_ERR_WRONGLENGTH;
@@ -1054,7 +1054,7 @@ void saHpiHotSwapTable_set_reserve2( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -1164,7 +1164,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
             assign_timeout(var, row_ctx->saHpiHotSwapExtractTimeout);
             row_ctx->saHpiHotSwapExtractTimeout_len = var->val_len;
             row_err = hot_swap_auto_extract_timeout_set (row_ctx);
@@ -1257,7 +1257,7 @@ void saHpiHotSwapTable_set_commit( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1318,7 +1318,7 @@ void saHpiHotSwapTable_set_free( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1390,7 +1390,7 @@ void saHpiHotSwapTable_set_undo( netsnmp_request_group *rg )
         break;
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIHOTSWAPACTIONREQUEST:
@@ -1549,8 +1549,8 @@ int saHpiHotSwapTable_get_value(
         break;
     
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            snmp_set_var_typed_value(var, ASN_OPAQUE,
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiHotSwapExtractTimeout,
                          context->saHpiHotSwapExtractTimeout_len );
         break;

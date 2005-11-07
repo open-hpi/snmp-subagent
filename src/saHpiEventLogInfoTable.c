@@ -152,7 +152,7 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 		assign_timestamp(&event_log_info.UpdateTimestamp, 
 		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
-                /** SaHpiTime = ASN_OPAQUE */
+                /** SaHpiTime = ASN_OCTET_STR */
                 evt_log_info_context->saHpiEventLogInfoTime_len = 
                        sizeof(SaHpiTimeT);
                 memset(evt_log_info_context->saHpiEventLogInfoTime, 
@@ -263,7 +263,7 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 	assign_timestamp(&event_log_info.UpdateTimestamp, 
 	                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
-        /** SaHpiTime = ASN_OPAQUE */
+        /** SaHpiTime = ASN_OCTET_STR */
         evt_log_info_context->saHpiEventLogInfoTime_len = 
                sizeof(SaHpiTimeT);
         memset(evt_log_info_context->saHpiEventLogInfoTime, 
@@ -577,7 +577,7 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 			assign_timestamp(&event_log_info.UpdateTimestamp, 
 			                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
-                	/** SaHpiTime = ASN_OPAQUE */
+                	/** SaHpiTime = ASN_OCTET_STR */
                 	evt_log_info_context->saHpiEventLogInfoTime_len = 
                 	       sizeof(SaHpiTimeT);
                 	memset(evt_log_info_context->saHpiEventLogInfoTime, 
@@ -681,7 +681,7 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 		assign_timestamp(&event_log_info.UpdateTimestamp, 
 		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
 
-	        /** SaHpiTime = ASN_OPAQUE */
+	        /** SaHpiTime = ASN_OCTET_STR */
         	evt_log_info_context->saHpiEventLogInfoTime_len = 
         	       	sizeof(SaHpiTimeT);
 	        memset(evt_log_info_context->saHpiEventLogInfoTime, 
@@ -1142,8 +1142,8 @@ void saHpiEventLogInfoTable_set_reserve1( netsnmp_request_group *rg )
 
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
             if (rc == SNMP_ERR_NOERROR ) {
                     if (var->val_len > SAF_UNSIGNED_64_LEN) {
                             rc = SNMP_ERR_WRONGLENGTH;
@@ -1212,7 +1212,7 @@ void saHpiEventLogInfoTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -1294,7 +1294,7 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
             assign_timeout(var, row_ctx->saHpiEventLogInfoTime);
             row_ctx->saHpiEventLogInfoTime_len = var->val_len;
             row_err = event_log_info_time_set(row_ctx);
@@ -1377,7 +1377,7 @@ void saHpiEventLogInfoTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -1428,7 +1428,7 @@ void saHpiEventLogInfoTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -1491,7 +1491,7 @@ void saHpiEventLogInfoTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIEVENTLOGINFOOVERFLOWRESET:
@@ -1657,8 +1657,8 @@ int saHpiEventLogInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOTIME:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            snmp_set_var_typed_value(var, ASN_OPAQUE,
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiEventLogInfoTime,
                          context->saHpiEventLogInfoTime_len );
         break;
