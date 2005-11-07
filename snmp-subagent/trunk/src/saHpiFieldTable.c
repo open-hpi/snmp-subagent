@@ -81,12 +81,12 @@ static GHashTable *dria_table;
  * oid and fucntion declarations scalars
  */
 static u_long field_entry_count = 0;
-static oid saHpiFieldEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
-int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiFieldActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
+int handle_saHpiFieldActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
-int initialize_table_saHpiFieldEntryCount(void);
+int initialize_table_saHpiFieldActiveEntries(void);
 int set_table_field_update (saHpiFieldTable_context *row_ctx);
 int set_table_field_add (saHpiFieldTable_context *row_ctx);
 int set_table_field_delete (saHpiFieldTable_context *row_ctx);
@@ -757,7 +757,7 @@ int delete_fields(SaHpiSessionIdT  session_id,
  * 
  * @return:
  */
-int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiFieldActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -768,14 +768,14 @@ int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
     
-        DEBUGMSGTL ((AGENT, "handle_saHpiFieldEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiFieldActiveEntries, called\n"));
 
     field_entry_count = CONTAINER_SIZE (cb.container);
 
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &field_entry_count,
                                      sizeof(field_entry_count));
             break;
@@ -793,16 +793,16 @@ int handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiFieldEntryCount(void)
+int initialize_table_saHpiFieldActiveEntries(void)
 {
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiFieldEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiFieldActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                 netsnmp_create_handler_registration(
-                        "saHpiFieldEntryCount", 
-                        handle_saHpiFieldEntryCount,
-                        saHpiFieldEntryCount_oid, 
-                        OID_LENGTH(saHpiFieldEntryCount_oid),
+                        "saHpiFieldActiveEntries", 
+                        handle_saHpiFieldActiveEntries,
+                        saHpiFieldActiveEntries_oid, 
+                        OID_LENGTH(saHpiFieldActiveEntries_oid),
                         HANDLER_CAN_RONLY
         ));
         return 0;
@@ -915,7 +915,7 @@ init_saHpiFieldTable(void)
 
     initialize_table_saHpiFieldTable();
 
-    initialize_table_saHpiFieldEntryCount();
+    initialize_table_saHpiFieldActiveEntries();
 
     domain_resource_idr_initialize(&initialized, &dria_table);
 }

@@ -80,21 +80,21 @@ static GHashTable *dr_table;
 static u_long hotswap_event_entry_count_total = 0;
 static u_long hotswap_event_entry_count = 0;
 
-static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
-static oid saHpiHotSwapEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
+static oid saHpiHotSwapEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
+static oid saHpiHotSwapEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
 
-int handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiHotSwapEventLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 					
-int handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiHotSwapEventActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int initialize_table_saHpiHotSwapEventEntryCountTotal(void);
-int initialize_table_saHpiHotSwapEventEntryCount(void);
+int initialize_table_saHpiHotSwapEventLifetimeEntries(void);
+int initialize_table_saHpiHotSwapEventActiveEntries(void);
 
 
 SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
@@ -314,7 +314,7 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventLifetimeEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -324,7 +324,7 @@ handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventLifetimeEntries, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -356,7 +356,7 @@ handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
  * @return:
  */ 
 int
-handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -366,14 +366,14 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
         
-        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiHotSwapEventActiveEntries, called\n"));
 
         hotswap_event_entry_count = CONTAINER_SIZE (cb.container);
         
 	switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &hotswap_event_entry_count,
         			        sizeof(hotswap_event_entry_count));
                 break;
@@ -391,17 +391,17 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiHotSwapEventEntryCountTotal(void)
+int initialize_table_saHpiHotSwapEventLifetimeEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiHotSwapEventEntryCountTotal", 
-					handle_saHpiHotSwapEventEntryCountTotal,
-                                        saHpiHotSwapEventEntryCountTotal_oid, 
-					OID_LENGTH(saHpiHotSwapEventEntryCountTotal_oid),
+				        "saHpiHotSwapEventLifetimeEntries", 
+					handle_saHpiHotSwapEventLifetimeEntries,
+                                        saHpiHotSwapEventLifetimeEntries_oid, 
+					OID_LENGTH(saHpiHotSwapEventLifetimeEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -411,17 +411,17 @@ int initialize_table_saHpiHotSwapEventEntryCountTotal(void)
  * 
  * @return: 
  */ 
-int initialize_table_saHpiHotSwapEventEntryCount(void)
+int initialize_table_saHpiHotSwapEventActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiHotSwapEventActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiHotSwapEventEntryCount", 
-				        handle_saHpiHotSwapEventEntryCount,
-                                        saHpiHotSwapEventEntryCount_oid, 
-					OID_LENGTH(saHpiHotSwapEventEntryCount_oid),
+				        "saHpiHotSwapEventActiveEntries", 
+				        handle_saHpiHotSwapEventActiveEntries,
+                                        saHpiHotSwapEventActiveEntries_oid, 
+					OID_LENGTH(saHpiHotSwapEventActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -514,8 +514,8 @@ init_saHpiHotSwapEventTable(void)
 
         initialize_table_saHpiHotSwapEventTable();
 
-        initialize_table_saHpiHotSwapEventEntryCountTotal();
-        initialize_table_saHpiHotSwapEventEntryCount();
+        initialize_table_saHpiHotSwapEventLifetimeEntries();
+        initialize_table_saHpiHotSwapEventActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
 }

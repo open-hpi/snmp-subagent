@@ -73,12 +73,12 @@ size_t saHpiInventoryTable_oid_len = OID_LENGTH(saHpiInventoryTable_oid);
  * oid and fucntion declarations scalars
  */
 static u_long inventory_entry_count = 0;
-static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
-int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiInventoryActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
+int handle_saHpiInventoryActiveEntries(netsnmp_mib_handler *handler,
                                     netsnmp_handler_registration *reginfo,
                                     netsnmp_agent_request_info   *reqinfo,
                                     netsnmp_request_info         *requests);
-int initialize_table_saHpiInventoryEntryCount(void);
+int initialize_table_saHpiInventoryActiveEntries(void);
 
 /**
  * 
@@ -174,7 +174,7 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
                 ? MIB_TRUE : MIB_FALSE;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
-        inventory_context->saHpiInventoryOEM =
+        inventory_context->saHpiInventoryOem =
                 rdr_entry->RdrTypeUnion.InventoryRec.Oem;
 
         /*******************/
@@ -331,7 +331,7 @@ int decrement_area_num(SaHpiSessionIdT session_id,
  * 
  * @return:
  */
-int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiInventoryActiveEntries(netsnmp_mib_handler *handler,
                                     netsnmp_handler_registration *reginfo,
                                     netsnmp_agent_request_info   *reqinfo,
                                     netsnmp_request_info         *requests)
@@ -347,7 +347,7 @@ int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &inventory_entry_count,
                                      sizeof(inventory_entry_count));
             break;
@@ -365,17 +365,17 @@ int handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiInventoryEntryCount(void)
+int initialize_table_saHpiInventoryActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiInventoryEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiInventoryActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                 netsnmp_create_handler_registration(
-                        "saHpiInventoryEntryCount", 
-                        handle_saHpiInventoryEntryCount,
-                        saHpiInventoryEntryCount_oid, 
-                        OID_LENGTH(saHpiInventoryEntryCount_oid),
+                        "saHpiInventoryActiveEntries", 
+                        handle_saHpiInventoryActiveEntries,
+                        saHpiInventoryActiveEntries_oid, 
+                        OID_LENGTH(saHpiInventoryActiveEntries_oid),
                         HANDLER_CAN_RONLY ));
         return SNMP_ERR_NOERROR;
 }
@@ -466,7 +466,7 @@ init_saHpiInventoryTable(void)
 
     initialize_table_saHpiInventoryTable();
 
-    initialize_table_saHpiInventoryEntryCount();
+    initialize_table_saHpiInventoryActiveEntries();
 
     /*
      * TODO: perform any startup stuff here, such as
@@ -509,7 +509,7 @@ static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
 
     dst->saHpiInventoryPersistent = src->saHpiInventoryPersistent;
 
-    dst->saHpiInventoryOEM = src->saHpiInventoryOEM;
+    dst->saHpiInventoryOem = src->saHpiInventoryOem;
 
     dst->saHpiInventoryUpdateCount = src->saHpiInventoryUpdateCount;
 
@@ -1201,11 +1201,11 @@ int saHpiInventoryTable_get_value(
                          sizeof(context->saHpiInventoryPersistent) );
         break;
     
-        case COLUMN_SAHPIINVENTORYOEM:
+        case COLUMN_SAHPIINVENTORYOem:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (u_char*)&context->saHpiInventoryOEM,
-                         sizeof(context->saHpiInventoryOEM) );
+                         (u_char*)&context->saHpiInventoryOem,
+                         sizeof(context->saHpiInventoryOem) );
         break;
     
         case COLUMN_SAHPIINVENTORYUPDATECOUNT:

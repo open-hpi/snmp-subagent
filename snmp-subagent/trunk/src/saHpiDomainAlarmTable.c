@@ -82,14 +82,14 @@ static GHashTable *doma_de_table;
 
 static u_long domain_alarm_entry_count = 0;
 
-static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
+static oid saHpiDomainAlarmActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
 
-int  handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
+int  handle_saHpiDomainAlarmActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 					
-int initialize_table_saHpiDomainAlarmEntryCount(void);
+int initialize_table_saHpiDomainAlarmActiveEntries(void);
 
 /**
  * 
@@ -171,11 +171,11 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 		/* assign the number of indices */
 	        domain_alarm_idx.len = DOMAIN_ALARM_INDEX_NR;
 		/** Index saHpiDomainId is external */
-	        domain_alarm_oid[0] = Alarm.AlarmCond.DomainId; //Is this Right??
+	        domain_alarm_oid[0] = Alarm.AlarmCond.DomainId;
 	        /** Index saHpiDomainAlarmId is internal */
                 domain_alarm_oid[1] = Alarm.AlarmId;
-	        /** Index saHpiDomainAlarmSeverity is internal */
-	        domain_alarm_oid[2] = Alarm.Severity + 1;
+	        ///** Index saHpiDomainAlarmSeverity is internal */
+	        //domain_alarm_oid[2] = Alarm.Severity + 1;
 		
 	        domain_alarm_idx.oids = (oid *) & domain_alarm_oid;
 	   
@@ -465,7 +465,7 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                        row_ctx->saHpiDomainAlarmCondNameValue_len);
 
                 /* Mid */
-		//Undefined since user cannot add OEM Alarms.
+		//Undefined since user cannot add Oem Alarms.
                 alarm.AlarmCond.Mid = 0;
 		       		       										  					  							
                 /* SaHpiTextBufferT Stuff */
@@ -644,7 +644,7 @@ int domain_alarm_ack (saHpiDomainAlarmTable_context *row_ctx)
  * @return:
  */
 int 
-handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiDomainAlarmActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -654,14 +654,14 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiDomainAlarmEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiDomainAlarmActiveEntries, called\n"));
 
         domain_alarm_entry_count = CONTAINER_SIZE (cb.container);
 	       
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &domain_alarm_entry_count,
         			        sizeof(domain_alarm_entry_count));
                 break;
@@ -680,17 +680,17 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiDomainAlarmEntryCount(void)
+int initialize_table_saHpiDomainAlarmActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainAlarmEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiDomainAlarmActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiDomainAlarmEntryCount", 
-					handle_saHpiDomainAlarmEntryCount,
-                                        saHpiDomainAlarmEntryCount_oid, 
-					OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
+				        "saHpiDomainAlarmActiveEntries", 
+					handle_saHpiDomainAlarmActiveEntries,
+                                        saHpiDomainAlarmActiveEntries_oid, 
+					OID_LENGTH(saHpiDomainAlarmActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -774,7 +774,7 @@ init_saHpiDomainAlarmTable(void)
 	
         initialize_table_saHpiDomainAlarmTable();
 
-        initialize_table_saHpiDomainAlarmEntryCount();
+        initialize_table_saHpiDomainAlarmActiveEntries();
 	
         domain_alarm_entry_initialize(&doma_initialized, &doma_de_table);
 }
