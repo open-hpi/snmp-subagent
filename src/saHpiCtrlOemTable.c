@@ -79,12 +79,12 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_oem_entry_count = 0;
-static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
-int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiCtrlOemActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
+int handle_saHpiCtrlOemActiveEntries(netsnmp_mib_handler *handler,
 				  netsnmp_handler_registration *reginfo,
 				  netsnmp_agent_request_info   *reqinfo,
 				  netsnmp_request_info         *requests);
-int initialize_table_saHpiCtrlOemEntryCount(void);
+int initialize_table_saHpiCtrlOemActiveEntries(void);
 
 /*************************************************************
  * SaErrorT  populate_ctrl_oem
@@ -148,7 +148,7 @@ SaErrorT populate_ctrl_oem (SaHpiSessionIdT sessionid,
 
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
-	column[1] = COLUMN_SAHPICTRLOEMNUM;
+	column[1] = COLUMN_SAHPICTRLOemNUM;
 	memset(child_oid, 0, MAX_OID_LEN);
 	build_full_oid(saHpiCtrlOemTable_oid, saHpiCtrlOemTable_oid_len,
 		       column, column_len,
@@ -376,9 +376,9 @@ int set_table_ctrl_oem (saHpiCtrlOemTable_context *row_ctx)
 }
 
 /*************************************************************
- * int handle_saHpiCtrlOemEntryCount()
+ * int handle_saHpiCtrlOemActiveEntries()
  */
-int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiCtrlOemActiveEntries(netsnmp_mib_handler *handler,
 				  netsnmp_handler_registration *reginfo,
 				  netsnmp_agent_request_info   *reqinfo,
 				  netsnmp_request_info         *requests)
@@ -390,14 +390,14 @@ int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
        we don't need to loop over a list of requests; we'll only get one. */
 
 
-	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlOemEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlOemActiveEntries, called\n"));
 
         ctrl_oem_entry_count = CONTAINER_SIZE (cb.container);
 
 	switch(reqinfo->mode) {
 	
 	    case MODE_GET:
-		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+		snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
 				     (u_char *) &ctrl_oem_entry_count,
 				     sizeof(ctrl_oem_entry_count));
 		break;
@@ -411,19 +411,19 @@ int handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*************************************************************
- * int initialize_table_saHpiCtrlOemEntryCount()
+ * int initialize_table_saHpiCtrlOemActiveEntries()
  */
-int initialize_table_saHpiCtrlOemEntryCount(void)
+int initialize_table_saHpiCtrlOemActiveEntries(void)
 {
 
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlOemEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlOemActiveEntries, called\n"));
 
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
-			"saHpiCtrlOemEntryCount", 
-			handle_saHpiCtrlOemEntryCount,
-                        saHpiCtrlOemEntryCount_oid, 
-			OID_LENGTH(saHpiCtrlOemEntryCount_oid),
+			"saHpiCtrlOemActiveEntries", 
+			handle_saHpiCtrlOemActiveEntries,
+                        saHpiCtrlOemActiveEntries_oid, 
+			OID_LENGTH(saHpiCtrlOemActiveEntries_oid),
                         HANDLER_CAN_RONLY));
 
     return 0;
@@ -515,7 +515,7 @@ init_saHpiCtrlOemTable(void)
 {
     initialize_table_saHpiCtrlOemTable();
 
-    initialize_table_saHpiCtrlOemEntryCount();
+    initialize_table_saHpiCtrlOemActiveEntries();
 
     domain_resource_pair_initialize(&initialized, &dr_table);
 
@@ -881,13 +881,13 @@ void saHpiCtrlOemTable_set_reserve1( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
 		/** SaHpiCtrlMode = ASN_INTEGER */
 		rc = netsnmp_check_vb_type_and_size(var, ASN_INTEGER,
                                                 sizeof(row_ctx->saHpiCtrlOemMode));
 		break;
 
-	case COLUMN_SAHPICTRLOEMSTATE:
+	case COLUMN_SAHPICTRLOemSTATE:
 		/** SaHpiText = ASN_OCTET_STR */
 		rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);                 
 		if (rc == SNMP_ERR_NOERROR ) {
@@ -897,10 +897,10 @@ void saHpiCtrlOemTable_set_reserve1( netsnmp_request_group *rg )
 		}
 		if (rc == SNMP_ERR_NOERROR)
 			DEBUGMSGTL ((AGENT, 
-			    "COLUMN_SAHPICTRLOEMSTATE NO ERROR: %d\n", rc));
+			    "COLUMN_SAHPICTRLOemSTATE NO ERROR: %d\n", rc));
 		else
 			DEBUGMSGTL ((AGENT, 
-			    "COLUMN_SAHPICTRLOEMSTATE ERROR: %d\n", rc));
+			    "COLUMN_SAHPICTRLOemSTATE ERROR: %d\n", rc));
 		break;
 
         default: /** We shouldn't get here */
@@ -941,21 +941,21 @@ void saHpiCtrlOemTable_set_reserve2( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
 			    /** SaHpiCtrlMode = ASN_INTEGER */
 		if (row_ctx->saHpiCtrlOemIsReadOnly == MIB_TRUE) {
-			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOEMMODE mode is ReadOnly, Failed\n");
-			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOEMMODE mode is ReadOnly, Failed\n"));
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOemMODE mode is ReadOnly, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOemMODE mode is ReadOnly, Failed\n"));
 			rc = SNMP_ERR_READONLY;
 		}  
 		if (oh_lookup_ctrlmode(*var->val.integer - 1) == NULL) {
-			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOEMMODE Invalid Mode, Failed\n");
-			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOEMMODE Invalid Mode, Failed\n"));
+			snmp_log(LOG_ERR, "COLUMN_SAHPICTRLOemMODE Invalid Mode, Failed\n");
+			DEBUGMSGTL ((AGENT, "COLUMN_SAHPICTRLOemMODE Invalid Mode, Failed\n"));
 			rc = SNMP_ERR_BADVALUE;
 		}
 		break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
@@ -1013,13 +1013,13 @@ void saHpiCtrlOemTable_set_action( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             row_ctx->saHpiCtrlOemMode = *var->val.integer;
 	    row_err = set_table_ctrl_oem(row_ctx);
         break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             memcpy(row_ctx->saHpiCtrlOemState,var->val.string,var->val_len);
             row_ctx->saHpiCtrlOemState_len = var->val_len;
@@ -1076,11 +1076,11 @@ void saHpiCtrlOemTable_set_commit( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
         break;
 
@@ -1119,11 +1119,11 @@ void saHpiCtrlOemTable_set_free( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
         break;
 
@@ -1172,11 +1172,11 @@ void saHpiCtrlOemTable_set_undo( netsnmp_request_group *rg )
 
         switch(current->tri->colnum) {
 
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
         break;
 
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
         break;
 
@@ -1305,98 +1305,98 @@ int saHpiCtrlOemTable_get_value(
 
     switch(table_info->colnum) {
 
-        case COLUMN_SAHPICTRLOEMENTRYID:
+        case COLUMN_SAHPICTRLOemENTRYID:
             /** SaHpiEntryId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiCtrlOemEntryId,
                          sizeof(context->saHpiCtrlOemEntryId) );
         break;
     
-        case COLUMN_SAHPICTRLOEMNUM:
+        case COLUMN_SAHPICTRLOemNUM:
             /** SaHpiInstrumentId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiCtrlOemNum,
                          sizeof(context->saHpiCtrlOemNum) );
         break;
     
-        case COLUMN_SAHPICTRLOEMOUTPUTTYPE:
+        case COLUMN_SAHPICTRLOemOUTPUTTYPE:
             /** SaHpiCtrlOutputType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (u_char*)&context->saHpiCtrlOemOutputType,
                          sizeof(context->saHpiCtrlOemOutputType) );
         break;
     
-        case COLUMN_SAHPICTRLOEMDEFAULTMODE:
+        case COLUMN_SAHPICTRLOemDEFAULTMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (u_char*)&context->saHpiCtrlOemDefaultMode,
                          sizeof(context->saHpiCtrlOemDefaultMode) );
         break;
     
-        case COLUMN_SAHPICTRLOEMMODE:
+        case COLUMN_SAHPICTRLOemMODE:
             /** SaHpiCtrlMode = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (u_char*)&context->saHpiCtrlOemMode,
                          sizeof(context->saHpiCtrlOemMode) );
         break;
     
-        case COLUMN_SAHPICTRLOEMISREADONLY:
+        case COLUMN_SAHPICTRLOemISREADONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (u_char*)&context->saHpiCtrlOemIsReadOnly,
                          sizeof(context->saHpiCtrlOemIsReadOnly) );
         break;
     
-        case COLUMN_SAHPICTRLOEMISWRITEONLY:
+        case COLUMN_SAHPICTRLOemISWRITEONLY:
             /** TruthValue = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
                          (u_char*)&context->saHpiCtrlOemIsWriteOnly,
                          sizeof(context->saHpiCtrlOemIsWriteOnly) );
         break;
     
-        case COLUMN_SAHPICTRLOEMMANUFACTURERID:
+        case COLUMN_SAHPICTRLOemMANUFACTURERID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiCtrlOemManufacturerId,
                          sizeof(context->saHpiCtrlOemManufacturerId) );
         break;
     
-        case COLUMN_SAHPICTRLOEMDEFAULTCONFIGDATA:
+        case COLUMN_SAHPICTRLOemDEFAULTCONFIGDATA:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiCtrlOemDefaultConfigData,
                          context->saHpiCtrlOemDefaultConfigData_len );
         break;
     
-        case COLUMN_SAHPICTRLOEMDEFAULTMID:
+        case COLUMN_SAHPICTRLOemDEFAULTMID:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiCtrlOemDefaultMId,
                          sizeof(context->saHpiCtrlOemDefaultMId) );
         break;
     
-        case COLUMN_SAHPICTRLOEMDEFAULTSTATE:
+        case COLUMN_SAHPICTRLOemDEFAULTSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiCtrlOemDefaultState,
                          context->saHpiCtrlOemDefaultState_len );
         break;
     
-        case COLUMN_SAHPICTRLOEMSTATE:
+        case COLUMN_SAHPICTRLOemSTATE:
             /** OCTETSTR = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiCtrlOemState,
                          context->saHpiCtrlOemState_len );
         break;
     
-        case COLUMN_SAHPICTRLOEMVALUE:
+        case COLUMN_SAHPICTRLOemVALUE:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiCtrlOemValue,
                          sizeof(context->saHpiCtrlOemValue) );
         break;
     
-        case COLUMN_SAHPICTRLOEMRDR:
+        case COLUMN_SAHPICTRLOemRDR:
             /** RowPointer = ASN_OBJECT_ID */
             snmp_set_var_typed_value(var, ASN_OBJECT_ID,
                          (u_char*)&context->saHpiCtrlOemRDR,

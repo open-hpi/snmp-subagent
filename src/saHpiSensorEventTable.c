@@ -80,21 +80,21 @@ static GHashTable *dr_table;
 static u_long sensor_event_entry_count_total = 0;
 static u_long sensor_event_entry_count = 0;
 
-static oid saHpiSensorEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 }; 
-static oid saHpiSensorEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
+static oid saHpiSensorEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 }; 
+static oid saHpiSensorEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
      
-int handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiSensorEventLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiSensorEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
 				
-int initialize_table_saHpiSensorEventEntryCountTotal(void);
-int initialize_table_saHpiSensorEventEntryCount(void);
+int initialize_table_saHpiSensorEventLifetimeEntries(void);
+int initialize_table_saHpiSensorEventActiveEntries(void);
 
 
 
@@ -614,7 +614,7 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -624,7 +624,7 @@ handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventActiveEntries, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -654,7 +654,7 @@ handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
  * @return:
  */ 
 int
-handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -664,14 +664,14 @@ handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEventActiveEntries, called\n"));
 
         sensor_event_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &sensor_event_entry_count,
         			        sizeof(sensor_event_entry_count));
                 break;
@@ -689,17 +689,17 @@ handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiSensorEventEntryCountTotal(void)
+int initialize_table_saHpiSensorEventLifetimeEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiSensorEventEntryCountTotal", 
-					handle_saHpiSensorEventEntryCountTotal,
-                                        saHpiSensorEventEntryCountTotal_oid, 
-					OID_LENGTH(saHpiSensorEventEntryCountTotal_oid),
+				        "saHpiSensorEventLifetimeEntries", 
+					handle_saHpiSensorEventLifetimeEntries,
+                                        saHpiSensorEventLifetimeEntries_oid, 
+					OID_LENGTH(saHpiSensorEventLifetimeEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -710,17 +710,17 @@ int initialize_table_saHpiSensorEventEntryCountTotal(void)
  * 
  * @return: 
  */ 
-int initialize_table_saHpiSensorEventEntryCount(void)
+int initialize_table_saHpiSensorEventActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiSensorEventEntryCount", 
-					handle_saHpiSensorEventEntryCount,
-                                        saHpiSensorEventEntryCount_oid, 
-					OID_LENGTH(saHpiSensorEventEntryCount_oid),
+				        "saHpiSensorEventActiveEntries", 
+					handle_saHpiSensorEventActiveEntries,
+                                        saHpiSensorEventActiveEntries_oid, 
+					OID_LENGTH(saHpiSensorEventActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -823,8 +823,8 @@ init_saHpiSensorEventTable(void)
 	
 	initialize_table_saHpiSensorEventTable();
 
-        initialize_table_saHpiSensorEventEntryCountTotal();
-        initialize_table_saHpiSensorEventEntryCount();
+        initialize_table_saHpiSensorEventLifetimeEntries();
+        initialize_table_saHpiSensorEventActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
 }
@@ -1637,7 +1637,7 @@ int saHpiSensorEventTable_get_value(
                          context->saHpiSensorEventCurrentState_len );
         break;
     
-        case COLUMN_SAHPISENSOREVENTOEM:
+        case COLUMN_SAHPISENSOREVENTOem:
             /** UNSIGNED32 = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
                          (u_char*)&context->saHpiSensorEventOem,

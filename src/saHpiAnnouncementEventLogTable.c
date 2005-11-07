@@ -72,14 +72,14 @@ size_t saHpiAnnouncementEventLogTable_oid_len = OID_LENGTH(saHpiAnnouncementEven
  */
 static u_long announcement_event_log_entry_count = 0;
 
-static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
+static oid saHpiAnnouncementEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
 
-int handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiAnnouncementEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int initialize_table_saHpiAnnouncementEventLogEntryCount(void);
+int initialize_table_saHpiAnnouncementEventLogActiveEntries(void);
 
 /**
  * 
@@ -286,7 +286,7 @@ SaErrorT populate_saHpiAnnouncementEventLogTable(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiAnnouncementEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -296,14 +296,14 @@ handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiAnnouncementEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiAnnouncementEventLogActiveEntries, called\n"));
 
         announcement_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			(u_char *) &announcement_event_log_entry_count,
         			sizeof(announcement_event_log_entry_count));
                 break;
@@ -321,17 +321,17 @@ handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiAnnouncementEventLogEntryCount(void)
+int initialize_table_saHpiAnnouncementEventLogActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnouncementEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiAnnouncementEventLogActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiAnnouncementEventLogEntryCount", 
-					handle_saHpiAnnouncementEventLogEntryCount,
-                                        saHpiAnnouncementEventLogEntryCount_oid, 
-			                OID_LENGTH(saHpiAnnouncementEventLogEntryCount_oid),
+				        "saHpiAnnouncementEventLogActiveEntries", 
+					handle_saHpiAnnouncementEventLogActiveEntries,
+                                        saHpiAnnouncementEventLogActiveEntries_oid, 
+			                OID_LENGTH(saHpiAnnouncementEventLogActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -418,7 +418,7 @@ init_saHpiAnnouncementEventLogTable(void)
 	
 	initialize_table_saHpiAnnouncementEventLogTable();
      
-        initialize_table_saHpiAnnouncementEventLogEntryCount();
+        initialize_table_saHpiAnnouncementEventLogActiveEntries();
 }
 
 /************************************************************

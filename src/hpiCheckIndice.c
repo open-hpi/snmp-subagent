@@ -247,9 +247,9 @@ int saHpiDomainAlarmSeverity_check_index(long val)
 }
 
 /*******************************/
-/* saHpiOEMEventTable */
+/* saHpiOemEventTable */
 /******************************/
-int saHpiOEMEventEntryId_check_index(long val)
+int saHpiOemEventEntryId_check_index(long val)
 {
         return 0;
 }
@@ -330,11 +330,11 @@ int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSw
 
 
 /**************************/
-/* saHpiOEMEventTable  */    
+/* saHpiOemEventTable  */    
 /**************************/
-int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventTimestamp)
+int saHpiOemEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOemEventTimestamp)
 {
-	snmp_log(LOG_ERR, "saHpiOEMEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
+	snmp_log(LOG_ERR, "saHpiOemEventTimestamp_check_index OCTET_STR: NEED TO INVESTIGATE A BETTER CHECK!\n" );
 	return 0;
 
 }

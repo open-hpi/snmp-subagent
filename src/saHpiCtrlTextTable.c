@@ -80,12 +80,12 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_text_entry_count = 0;
-static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10};
-int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiCtrlTextActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10};
+int handle_saHpiCtrlTextActiveEntries(netsnmp_mib_handler *handler,
 				   netsnmp_handler_registration *reginfo,
 				   netsnmp_agent_request_info   *reqinfo,
 				   netsnmp_request_info         *requests);
-int initialize_table_saHpiCtrlTextEntryCount(void);
+int initialize_table_saHpiCtrlTextActiveEntries(void);
 
 /*
  * SaErrorT populate_ctrl_text()
@@ -392,9 +392,9 @@ int set_table_ctrl_text (saHpiCtrlTextTable_context *row_ctx)
 }
 
 /*
- * SaErrorT handle_saHpiCtrlTextEntryCount()
+ * SaErrorT handle_saHpiCtrlTextActiveEntries()
  */
-int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiCtrlTextActiveEntries(netsnmp_mib_handler *handler,
 				   netsnmp_handler_registration *reginfo,
 				   netsnmp_agent_request_info   *reqinfo,
 				   netsnmp_request_info         *requests)
@@ -410,7 +410,7 @@ int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 	switch (reqinfo->mode) {
 	
 	case MODE_GET:
-		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+		snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
 					 (u_char *) &ctrl_text_entry_count,
 					 sizeof(ctrl_text_entry_count));
 		break;
@@ -425,17 +425,17 @@ int handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*
- * SaErrorT initialize_table_saHpiCtrlTextEntryCount()
+ * SaErrorT initialize_table_saHpiCtrlTextActiveEntries()
  */
-int initialize_table_saHpiCtrlTextEntryCount(void)
+int initialize_table_saHpiCtrlTextActiveEntries(void)
 {
 
 	netsnmp_register_scalar(
 			       netsnmp_create_handler_registration(
-								  "saHpiCtrlTextEntryCount", 
-								  handle_saHpiCtrlTextEntryCount,
-								  saHpiCtrlTextEntryCount_oid, 
-								  OID_LENGTH(saHpiCtrlTextEntryCount_oid),
+								  "saHpiCtrlTextActiveEntries", 
+								  handle_saHpiCtrlTextActiveEntries,
+								  saHpiCtrlTextActiveEntries_oid, 
+								  OID_LENGTH(saHpiCtrlTextActiveEntries_oid),
 								  HANDLER_CAN_RONLY));
 
 	return 0;
@@ -527,7 +527,7 @@ init_saHpiCtrlTextTable(void)
 {
 	initialize_table_saHpiCtrlTextTable();
 
-	initialize_table_saHpiCtrlTextEntryCount();
+	initialize_table_saHpiCtrlTextActiveEntries();
 
 	domain_resource_pair_initialize(&initialized, &dr_table);
 
@@ -1457,7 +1457,7 @@ int saHpiCtrlTextTable_get_value(
 					 context->saHpiCtrlTextState_len );
 		break;
 
-	case COLUMN_SAHPICTRLTEXTOEM:
+	case COLUMN_SAHPICTRLTEXTOem:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 					 (u_char*)&context->saHpiCtrlTextOem,

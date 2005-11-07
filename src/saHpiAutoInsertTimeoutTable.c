@@ -540,8 +540,8 @@ void saHpiAutoInsertTimeoutTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            rc = netsnmp_check_vb_type(var, ASN_OPAQUE);
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
             if (rc == SNMP_ERR_NOERROR ) {
                     if (var->val_len > SAF_UNSIGNED_64_LEN) {
                             rc = SNMP_ERR_WRONGLENGTH;
@@ -591,7 +591,7 @@ void saHpiAutoInsertTimeoutTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -652,7 +652,7 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
             
 	    assign_timeout(var, row_ctx->saHpiAutoInsertTimeoutForInsert);	    	    	    
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
@@ -716,7 +716,7 @@ void saHpiAutoInsertTimeoutTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         default: /** We shouldn't get here */
@@ -755,7 +755,7 @@ void saHpiAutoInsertTimeoutTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         default: /** We shouldn't get here */
@@ -805,7 +805,7 @@ void saHpiAutoInsertTimeoutTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
+            /** SafUnsigned64 = ASN_OCTET_STR */
         break;
 
         default: /** We shouldn't get here */
@@ -930,8 +930,8 @@ int saHpiAutoInsertTimeoutTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
-            /** SafUnsigned64 = ASN_OPAQUE */
-            snmp_set_var_typed_value(var, ASN_OPAQUE,
+            /** SafUnsigned64 = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiAutoInsertTimeoutForInsert,
                          context->saHpiAutoInsertTimeoutForInsert_len );
         break;
