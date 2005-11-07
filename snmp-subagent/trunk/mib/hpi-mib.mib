@@ -1,14 +1,14 @@
-HPI-MIB DEFINITIONS ::= BEGIN
+HPI-B0201-MIB DEFINITIONS ::= BEGIN
 IMPORTS
         MODULE-IDENTITY, 
         OBJECT-TYPE,
         NOTIFICATION-TYPE,
         Unsigned32,
+        Gauge32,
         Counter32,
         Counter64,
         Integer32               FROM SNMPv2-SMI
         TEXTUAL-CONVENTION,
-        DateAndTime,
         RowPointer,
         RowStatus,
         DisplayString,
@@ -19,7 +19,7 @@ IMPORTS
         hpiD                    FROM SAF-TC-MIB;
 
 hpiB0101 MODULE-IDENTITY
-    LAST-UPDATED "200508181200Z"  -- August 18, 2005
+    LAST-UPDATED "200511041200Z"  -- November 4, 2005
     ORGANIZATION "Service Availability Forum Systems Management WG"
     CONTACT-INFO "
             Service Availability Forum 
@@ -69,12 +69,14 @@ hpiB0101 MODULE-IDENTITY
                         
                 "
         DESCRIPTION
-                "When using this MIB it is strongly recommended to use
-                SNMPv2c or v3 SNMP protocol due to security concerns.
+                "HPI MIB for SAF-HPI B-02-01.
+
+                When using this MIB it is strongly recommended to use
+                the SNMPv3 protocol due to security concerns.
                         
                 Additionally  if fine grain access configuration is
-                desired, for example to manage access to indivdual
-                columnar nodes, the SNMP configuration should use
+                desired, for example to manage access to individual
+                columnar objects, the SNMP configuration should use
                 VACM (View Based Access Control Model - RFC 2275).
                         
                 This MIB defines the HPI instrumentation based on
@@ -89,37 +91,35 @@ hpiB0101 MODULE-IDENTITY
                 SAI-HPI-B.01.01.
                    
                 The MIB views a hardware platform as a collections
-               of physical entities that can be managed individually.
-               A logical collection of entities comprises a
-               management domain.  Each entity has a common set of
-               attributes reflected in the entity table.  Entities
-               may have additional categorical attributes that may
-               exist in one or more of the hotswap table, control
-               table, sensor table, watchdog table, inventory control
-               table and config table.
+                of physical entities that can be managed individually.
+                A logical collection of entities comprises a
+                management domain.  Each entity has a common set of
+                attributes reflected in the entity table.  Entities
+                may have additional categorical attributes that may
+                exist in one or more of the hotswap table, control
+                table, sensor table, watchdog table, inventory control
+                table and config table.
 
-               The hotswap table defines management attributes
-               for an entity that supports hotswap, generally
-               referred to as a FRU.
+                The hotswap table defines management attributes
+                for an entity that supports hotswap, generally
+                referred to as a FRU.
 
-               The controls table defines variables for reading
-               and setting controls associated with an entity.
+                The controls table defines variables for reading
+                and setting controls associated with an entity.
 
-               The sensors table defines variables for reading sensors 
-               associated with an entity as well as controlling event 
-               generation for that sensor.
+                The sensors table defines variables for reading sensors 
+                associated with an entity as well as controlling event 
+                generation for that sensor.
 
-               The watchdog table defines variables for reading
-               watchdog associated with an entitry.
+                The watchdog table defines variables for reading
+                watchdog associated with an entitry.
 
-               The inventory control defines variables for reading
-               inventory resources and changing the settings. 
-                    
-                "
-        REVISION "200501140000Z"
+                The inventory control defines variables for reading
+                inventory resources and changing the settings."
+        REVISION "200511041200Z"
         DESCRIPTION
-                "HPI MIB for SAF-HPI B."
-        ::= { hpiD 1 }
+                "Initial revision of this module."
+        ::= { hpiD 1}
 
 
 hpiAdministration OBJECT IDENTIFIER     ::= { hpiB0101 1 }
@@ -132,7 +132,7 @@ hpiResources OBJECT IDENTIFIER  ::= { hpiB0101 4 }
 
 hpiNotifications OBJECT IDENTIFIER      ::= { hpiB0101 5 }
 
-hpiMIBCompliances OBJECT IDENTIFIER     ::= { hpiB0101 6 }
+hpiConformance OBJECT IDENTIFIER        ::= { hpiB0101 6 }
 
 -- The hotswap table:
 
@@ -244,14 +244,24 @@ SaHpiInstrumentId ::= TEXTUAL-CONVENTION
 SaHpiEntryId ::= TEXTUAL-CONVENTION
         STATUS current
         DESCRIPTION
-                "Textual convention for the entry ID of an record.
+                "Textual convention for the entry ID of a record.
                 This value is used to enumerate the indexes of
-                records. There three different unique values to
-                denote the first, last, and unspecified entry:
+                records that are held by HPI. There are three different 
+                unique values to denote the first, last, and unspecified 
+                entries in HPI:
 
                         SAHPI_FIRST_ENTRY 0x00000000
                         SAHPI_LAST_ENTRY  0xFFFFFFFF
-                        SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY"
+                        SAHPI_ENTRY_UNSPECIFIED SAHPI_FIRST_ENTRY
+                        
+                As a result, we can use SAHPI_FIRST_ENTRY and 
+                SAHPI_ENTRY_UNSPECIFIED to query HPI so that it 
+                will return the first entry in a particular table.  
+                SAHPI_LAST_ENTRY is not a valid entry identifier
+                to query HPI because the value denotes the end 
+                of a table or list.  Please note that these
+                values will not be used to denote actual entries
+                in an SNMP agent implementation."
         REFERENCE
                 "See SAI-HPI-B.01.01 section 8.1"
         SYNTAX Unsigned32
@@ -268,7 +278,7 @@ SaHpiManufacturerId ::= TEXTUAL-CONVENTION
 
                 This is the IANA-assigned private enterprise number
                 for the manufacturer of the resource or FRU, or of
-                the manufacturer defining an OEM control or event
+                the manufacturer defining an Oem control or event
                 type. A list of current IANA-assigned private
                 enterprise numbers may be obtained at
 
@@ -417,9 +427,9 @@ SaHpiTime ::= TEXTUAL-CONVENTION
                Wait for all time if necessary.
 
                 SAHPI_TIMEOUT_BLOCK        -1LL
-		
-	       In all cases, time will be displayed in network-byte
-	       order - big endian."
+                
+               In all cases, time will be displayed in network-byte
+               order - big endian."
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
         SYNTAX Counter64
@@ -1271,34 +1281,34 @@ SaHpiSensorReadingValue ::= TEXTUAL-CONVENTION
                 This value by itself is of string type and needs to be 
                 evaluated in the context of SaHpiSensorReadingType
                 textual convention. 
-		
-		Signed integer values will be displayed using the ASCII 
-		decimal digit format. This means that each digit in the 
-		value will be displayed in its corresponding hexidecimal
-		value. For example, a signed integer value of '-11' will 
-		be displayed using the ASCII decimal notation for the 
-		character '-' and for each numeric character '1'.  The 
-		corresponding result is the hexidecimal string '2D 31 31'.
-		
-		Unsigned integer values will be displayed using the ASCII 
-		decimal digit format. This means that each digit in the 
-		value will be displayed in its corresponding hexidecimal
-		value. For example, an unsigned integer value of '99' will 
-		be displayed using the ASCII decimal notation for each numeric 
-		caharacter '9'.  The corresponding result is the hexidecimal 
-		string '39 39'.		
+                
+                Signed integer values will be displayed using the ASCII 
+                decimal digit format. This means that each digit in the 
+                value will be displayed in its corresponding hexidecimal
+                value. For example, a signed integer value of '-11' will 
+                be displayed using the ASCII decimal notation for the 
+                character '-' and for each numeric character '1'.  The 
+                corresponding result is the hexidecimal string '2D 31 31'.
+                
+                Unsigned integer values will be displayed using the ASCII 
+                decimal digit format. This means that each digit in the 
+                value will be displayed in its corresponding hexidecimal
+                value. For example, an unsigned integer value of '99' will 
+                be displayed using the ASCII decimal notation for each numeric 
+                caharacter '9'.  The corresponding result is the hexidecimal 
+                string '39 39'.         
 
-		Floating point values will be displayed in the 'e'
-		notation, where e = 10^1, as ASCII decimal digits.  
-		For example, the value of .000000007 will be displayed
-		in ASCII decimal as '37 65 2D 39'.
+                Floating point values will be displayed in the 'e'
+                notation, where e = 10^1, as ASCII decimal digits.  
+                For example, the value of .000000007 will be displayed
+                in ASCII decimal as '37 65 2D 39'.
 
-		When reading type is 'buffer' this object will hold arbitrary 
-		data."  
-		
+                When reading type is 'buffer' this object will hold arbitrary 
+                data."  
+                
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 section 8.4."
-		
+                
         SYNTAX OCTET STRING (SIZE (0..255))
 
 
@@ -1380,7 +1390,7 @@ SaHpiCtrlMode ::= TEXTUAL-CONVENTION
                         undefined(0),
                         auto(1),
                         manual(2) }
-			
+                        
 SafUnsigned64 ::= TEXTUAL-CONVENTION
          STATUS current        
      DESCRIPTION "The SafUnsigned64 type represents a non-negative
@@ -1405,7 +1415,7 @@ SafUnsigned64 ::= TEXTUAL-CONVENTION
 
          REFERENCE " Understanding SNMP MIBS, Perkins and McGinnis,
                      pg 51."
-     SYNTAX Opaque (SIZE(4..12))
+     SYNTAX OCTET STRING (SIZE (8))
 
 
 -- *************************************
@@ -1419,7 +1429,7 @@ saHpiHpiVersion OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node provides the version of HPI
+                "This scalar object provides the version of HPI
                  this MIB is based on."
         ::= { hpiAdministration 1 }
 
@@ -1429,17 +1439,17 @@ saHpiAgentVersion OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node provides the version of the
+                "This scalar object provides the version of the
                  HPI-MIB SNMP implementation."
         ::= { hpiAdministration 2 }
 
 
-saHpiSNMPResourceId OBJECT-TYPE
+saHpiSnmpResourceId OBJECT-TYPE
         SYNTAX Unsigned32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node provides the Resource Id of the
+                "This scalar object provides the Resource Id of the
                 domain the HPI-MIB SNMP implementation is running on.
                 This is to help prevent powering down the machine
                 providing the SNMP service."
@@ -1453,7 +1463,7 @@ saHpiDiscover OBJECT-TYPE
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
-                "This columnar node forces the discovery of all
+                "This scalar object forces the discovery of all
                 resources and associated domains by the underlying
                 management service."
         REFERENCE
@@ -1467,8 +1477,8 @@ saHpiDiscover OBJECT-TYPE
 -- **
 -- *************************************
 
-saHpiDomainInfoEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiDomainInfoActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -1545,7 +1555,7 @@ SaHpiDomainInfoEntry ::= SEQUENCE {
 
 saHpiDomainId OBJECT-TYPE
         SYNTAX SaHpiDomainId
-        MAX-ACCESS accessible-for-notify 
+        MAX-ACCESS not-accessible 
         STATUS current
         DESCRIPTION
                 "Domain identifier. The number is unique within
@@ -1613,7 +1623,7 @@ saHpiDomainTag OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Information tag associated with domain.
-                The type of date is specified
+                The type of data is specified
                 by saHpiDomainTagTextType and saHpiDomainTagLanguage."
         ::= { saHpiDomainInfoEntry 6 }
 
@@ -1763,8 +1773,8 @@ saHpiDomainGuid OBJECT-TYPE
 -- **
 -- *************************************
 
-saHpiDomainReferenceEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiDomainReferenceActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -1838,7 +1848,7 @@ saHpiDomainRef OBJECT-TYPE
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "If a Peer or child domain exits this is the DomainID."
+                "If a Peer or child domain exists this is the DomainID."
         ::= { saHpiDomainReferenceEntry 1 }
 
 
@@ -1861,8 +1871,8 @@ saHpiDomainReferenceIsPeer OBJECT-TYPE
 -- **
 -- *************************************
 
-saHpiDomainAlarmEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiDomainAlarmActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -1891,8 +1901,7 @@ saHpiDomainAlarmEntry OBJECT-TYPE
                 "This table is used to store alarm information."
         INDEX {
                 saHpiDomainId,
-                saHpiDomainAlarmId,
-                saHpiDomainAlarmSeverity }
+                saHpiDomainAlarmId }
         ::= { saHpiDomainAlarmTable 1 }
 
 
@@ -1902,7 +1911,7 @@ SaHpiDomainAlarmEntry ::= SEQUENCE {
         saHpiDomainAlarmSeverity           SaHpiSeverity,
         saHpiDomainAlarmAcknowledged       TruthValue,
         saHpiDomainAlarmAckBySeverity      SaHpiSeverity,
-        saHpiDomainAlarmCondStatusCondType INTEGER,
+        saHpiDomainAlarmCondStatusCondType SaHpiStatusCondType,
         saHpiDomainAlarmCondEntityPath     SaHpiEntityPath,
         saHpiDomainAlarmCondSensorNum      Unsigned32,
         saHpiDomainAlarmCondEventState     SaHpiEventState,
@@ -1950,7 +1959,7 @@ saHpiDomainAlarmAcknowledged OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "Use this columnar node to acknowledge a specific Alarm.
+                "Use this columnar object to acknowledge a specific Alarm.
                An HPI SNMP Manager acknowledges an alarm to indicate
                that it is aware of the alarm and to influence
                platform-specific alarm annunciation that may be
@@ -2001,14 +2010,14 @@ saHpiDomainAlarmAcknowledged OBJECT-TYPE
               should be used with this function for clarity.      
                 "
         ::= { saHpiDomainAlarmEntry 4 }
-	
+        
 
 saHpiDomainAlarmAckBySeverity OBJECT-TYPE
         SYNTAX SaHpiSeverity
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "Use this columnar node to acknowledge Alarms based
+                "Use this columnar object to acknowledge Alarms based
               on severity.  An HPI SNMP Manager acknowledges an
               alarm to indicate that it is aware of the alarm 
               and to influence platform-specific alarm annunciation
@@ -2068,12 +2077,7 @@ saHpiDomainAlarmAckBySeverity OBJECT-TYPE
 
 
 saHpiDomainAlarmCondStatusCondType OBJECT-TYPE
-        SYNTAX INTEGER {
-                        undefined(0),
-                        sensor(1),
-                        resource(2),
-                        oem(3),
-                        user(4) }
+        SYNTAX SaHpiStatusCondType
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
@@ -2180,7 +2184,7 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "This columnar node contains the status of the
+                "This columnar object contains the status of the
                 row and is also used to perform add and delete
                 operations.
 
@@ -2240,8 +2244,8 @@ saHpiDomainAlarmRowStatus OBJECT-TYPE
 -- * ***********************************************************************
 -- * **********************************************************************/
 
-saHpiResourceEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiResourceActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -2508,7 +2512,7 @@ saHpiResourceInfoResourceRev OBJECT-TYPE
                 that the HPI SNMP Manager may need in order to interact 
                 correctly with the resource (e.g., recognize a 
                 specific management controller which may have defined 
-                OEM fields in sensors, OEM controls, etc."
+                oem fields in sensors, oem controls, etc."
         REFERENCE
                 "See SAI-HPI-B.01.01 sections 6.3 and 8.21"
         ::= { saHpiResourceEntry 8 }
@@ -2778,7 +2782,7 @@ saHpiResourceIsHistorical OBJECT-TYPE
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "This columnar node, which is part of the index for
+                "This columnar object, which is part of the index for
                  every resource, determines if this resource is
                  historical. Historical meaning not present in the
                  system anymore, but only present in the event and
@@ -2827,8 +2831,8 @@ saHpiAutoInsertTimeoutEntry OBJECT-TYPE
 
 
 SaHpiAutoInsertTimeoutEntry ::= SEQUENCE {
-		saHpiAutoInsertTimeoutForInsert SafUnsigned64 
-		}
+                saHpiAutoInsertTimeoutForInsert SafUnsigned64 
+                }
 
 
 saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
@@ -2841,7 +2845,7 @@ saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
                  the default auto-insertion policy is invoked
                  on a resource within a specific domain.  
 
-                This columnar node accepts a parameter instructing
+                This columnar object accepts a parameter instructing
                 each resource to impose a delay before performing its
                 default hot swap policy for auto-insertion.  The
                 parameter may be set to 
@@ -2879,8 +2883,8 @@ saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
         ::= { saHpiAutoInsertTimeoutEntry 1 }
 
 
-saHpiHotSwapEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiHotSwapActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -2935,14 +2939,14 @@ saHpiHotSwapIndicator OBJECT-TYPE
                  include a hot swap indicator such as a blue LED. This
                  indicator signifies that the FRU is ready for removal. 
 
-                This columnar node allows the HPI SNMP Manager to
+                This columnar object allows the HPI SNMP Manager to
                 retrieve and set the state of this indicator. 
 
                 When retrieving the values, the valid states are either 
                         saHpiHotSwapIndicator == off(1)
                 or 
                         saHpiHotSwapIndicator == on(2).
-                This columnar node will return information, regardless of 
+                This columnar object will return information, regardless of 
                 what hot swap state the resource is in.
 
                 When setting the values,  valid states include
@@ -3028,7 +3032,7 @@ saHpiHotSwapActionRequest OBJECT-TYPE
                  chassis. Physically opening an ejector latch or 
                  pressing a button invokes the extraction process. 
 
-                This columnar node allows the HPI SNMP Manager to
+                This columnar object allows the HPI SNMP Manager to
                 invoke an insertion or extraction process via software.
 
                 Note: Enumerated values are increased by one value
@@ -3126,7 +3130,7 @@ saHpiHotSwapResourceRequest OBJECT-TYPE
 -- ************************************************************************/
 --
 
-saHpiEventEntryCountTotal OBJECT-TYPE
+saHpiEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3136,7 +3140,7 @@ saHpiEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                saHpiEventEntryCountTotal represents the sum of all
+                saHpiEventLifetimeEntries represents the sum of all
                 events of all supported types that have occur in the
                 system.  
 
@@ -3148,8 +3152,8 @@ saHpiEventEntryCountTotal OBJECT-TYPE
         ::= { events 1 }
 
 
-saHpiEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -3190,7 +3194,7 @@ saHpiEventEntry OBJECT-TYPE
                 Each time a new event is surfaced in the HPI system
                 this table increases by a new row and its respective
                 sub-event table too (saHpiResourceEventTable,
-                saHpiOEMEventTable, etc). Futhermore
+                saHpiOemEventTable, etc). Futhermore
                 based on the type of event, an notification is
                 generated as well.
                 "
@@ -3218,7 +3222,7 @@ saHpiEventRowPointer OBJECT-TYPE
                 saHpiSensorEnableChangeTable, 
                 saHpiHotSwapEventTable, 
                 saHpiWatchdogTable, 
-                saHpiSwEventTable, 
+                saHpiSoftwareEventTable, 
                 saHpiOemEventTable, 
                 and saHpiUserEventTable."
         ::= { saHpiEventEntry 1 }
@@ -3275,7 +3279,7 @@ saHpiEventType OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiResourceEventEntryCountTotal OBJECT-TYPE
+saHpiResourceEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3285,17 +3289,17 @@ saHpiResourceEventEntryCountTotal OBJECT-TYPE
                 underlying management system is restarted this count
                 is reset.  Use this node to determine table activity.
 
-                This columnar node represents the subset of events that
+                This scalar object represents the subset of events that
                 are Resource Events."
         ::= { events 4 }
 
 
-saHpiResourceEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiResourceEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Resource Events."
         ::= { events 5 }
 
@@ -3379,7 +3383,7 @@ saHpiResourceEventType OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiDomainEventEntryCountTotal OBJECT-TYPE
+saHpiDomainEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3389,17 +3393,17 @@ saHpiDomainEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Domain events."
         ::= { events 7 }
 
 
-saHpiDomainEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiDomainEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events
+                "This scalar object represents the subset of events
                 that are Domain events."
         ::= { events 8 }
 
@@ -3437,7 +3441,7 @@ saHpiDomainEventEntryId OBJECT-TYPE
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "This columnar node is an index for Domain Events
+                "This columnar object is an index for Domain Events
                   in the table."
         ::= { saHpiDomainEventEntry 1 }
 
@@ -3476,7 +3480,7 @@ saHpiDomainEventType OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEventEntryCountTotal OBJECT-TYPE
+saHpiSensorEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3486,17 +3490,17 @@ saHpiSensorEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Sensor events."
         ::= { events 10 }
 
 
-saHpiSensorEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSensorEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Sensor Events."
         ::= { events 11 }
 
@@ -3715,7 +3719,7 @@ saHpiSensorEventOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use."
+                "Reserved for Oem use."
         ::= { saHpiSensorEventEntry 14 }
 
 
@@ -3736,7 +3740,7 @@ saHpiSensorEventSpecific OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEnableChangeEventEntryCountTotal OBJECT-TYPE
+saHpiSensorEnableChangeEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3746,17 +3750,17 @@ saHpiSensorEnableChangeEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Sensor Enable ChangeEvents."
         ::= { events 13 }
 
 
-saHpiSensorEnableChangeEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSensorEnableChangeEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Sensor Enable ChangeEvents."
         ::= { events 14 }
 
@@ -3902,7 +3906,7 @@ saHpiSensorEnableChangeEventState OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiHotSwapEventEntryCountTotal OBJECT-TYPE
+saHpiHotSwapEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -3912,17 +3916,17 @@ saHpiHotSwapEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are HotSwap Events."
         ::= { events 16 }
 
 
-saHpiHotSwapEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiHotSwapEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are HotSwap Events."
         ::= { events 17 }
 
@@ -4003,7 +4007,7 @@ saHpiHotSwapEventPreviousState OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiWatchdogEventEntryCountTotal OBJECT-TYPE
+saHpiWatchdogEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -4013,17 +4017,17 @@ saHpiWatchdogEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Watchdog Events."
         ::= { events 19 }
 
 
-saHpiWatchdogEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiWatchdogEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Watchdog Events."
         ::= { events 20 }
 
@@ -4135,7 +4139,7 @@ saHpiWatchdogEventUse OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSoftwareEventEntryCountTotal OBJECT-TYPE
+saHpiSoftwareEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -4145,17 +4149,17 @@ saHpiSoftwareEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Software Events."
         ::= { events 22 }
 
 
-saHpiSoftwareEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSoftwareEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Software Events."
         ::= { events 23 }
 
@@ -4280,11 +4284,11 @@ saHpiSoftwareEventText OBJECT-TYPE
 
 -- *********************************
 -- **
--- **     OEM Events
+-- **     Oem Events
 -- **
 -- *********************************
 
-saHpiOEMEventEntryCountTotal OBJECT-TYPE
+saHpiOemEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -4294,23 +4298,23 @@ saHpiOEMEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
-                that are OEM Events."
+                This scalar object represents the subset of events 
+                that are oem Events."
         ::= { events 25 }
 
 
-saHpiOEMEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiOemEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
-                are OEM Events."
+                "This scalar object represents the subset of events that
+                are oem Events."
         ::= { events 26 }
 
 
-saHpiOEMEventTable OBJECT-TYPE
-        SYNTAX SEQUENCE OF SaHpiOEMEventEntry
+saHpiOemEventTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF SaHpiOemEventEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
@@ -4318,39 +4322,39 @@ saHpiOEMEventTable OBJECT-TYPE
         ::= { events 27 }
 
 
-saHpiOEMEventEntry OBJECT-TYPE
-        SYNTAX SaHpiOEMEventEntry
+saHpiOemEventEntry OBJECT-TYPE
+        SYNTAX SaHpiOemEventEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "OEM events."
+                "Oem events."
         INDEX {
                 saHpiDomainId,
                 saHpiResourceId,
                 saHpiEventSeverity,
-                saHpiOEMEventEntryId }
-        ::= { saHpiOEMEventTable 1 }
+                saHpiOemEventEntryId }
+        ::= { saHpiOemEventTable 1 }
 
 
-SaHpiOEMEventEntry ::= SEQUENCE {
-        saHpiOEMEventEntryId         SaHpiEntryId,
-        saHpiOEMEventTimestamp       SaHpiTime,
-        saHpiOEMEventManufacturerIdT SaHpiManufacturerId,
-        saHpiOEMEventTextType        SaHpiTextType,
-        saHpiOEMEventTextLanguage    SaHpiTextLanguage,
-        saHpiOEMEventText            SaHpiText }
+SaHpiOemEventEntry ::= SEQUENCE {
+        saHpiOemEventEntryId         SaHpiEntryId,
+        saHpiOemEventTimestamp       SaHpiTime,
+        saHpiOemEventManufacturerIdT SaHpiManufacturerId,
+        saHpiOemEventTextType        SaHpiTextType,
+        saHpiOemEventTextLanguage    SaHpiTextLanguage,
+        saHpiOemEventText            SaHpiText }
 
 
-saHpiOEMEventEntryId OBJECT-TYPE
+saHpiOemEventEntryId OBJECT-TYPE
         SYNTAX SaHpiEntryId
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
                 "Arbitrary table index."
-        ::= { saHpiOEMEventEntry 1 }
+        ::= { saHpiOemEventEntry 1 }
 
 
-saHpiOEMEventTimestamp OBJECT-TYPE
+saHpiOemEventTimestamp OBJECT-TYPE
         SYNTAX SaHpiTime
         MAX-ACCESS read-only
         STATUS current
@@ -4360,43 +4364,43 @@ saHpiOEMEventTimestamp OBJECT-TYPE
                 available; 
                 Absolute time if greater than TIME_MAX_RELATIVE, Relative
                 time if less than or equal to TIME_MAX_RELATIVE."
-        ::= { saHpiOEMEventEntry 2 }
+        ::= { saHpiOemEventEntry 2 }
 
 
-saHpiOEMEventManufacturerIdT OBJECT-TYPE
+saHpiOemEventManufacturerIdT OBJECT-TYPE
         SYNTAX SaHpiManufacturerId
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventEntry 3 }
+        ::= { saHpiOemEventEntry 3 }
 
 
-saHpiOEMEventTextType OBJECT-TYPE
+saHpiOemEventTextType OBJECT-TYPE
         SYNTAX SaHpiTextType
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventEntry 4 }
+        ::= { saHpiOemEventEntry 4 }
 
 
-saHpiOEMEventTextLanguage OBJECT-TYPE
+saHpiOemEventTextLanguage OBJECT-TYPE
         SYNTAX SaHpiTextLanguage
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventEntry 5 }
+        ::= { saHpiOemEventEntry 5 }
 
 
-saHpiOEMEventText OBJECT-TYPE
+saHpiOemEventText OBJECT-TYPE
         SYNTAX SaHpiText
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventEntry 6 }
+        ::= { saHpiOemEventEntry 6 }
 
 
 -- *********************************
@@ -4405,7 +4409,7 @@ saHpiOEMEventText OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiUserEventEntryCountTotal OBJECT-TYPE
+saHpiUserEventLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -4415,17 +4419,17 @@ saHpiUserEventEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are User Events."
         ::= { events 28 }
 
 
-saHpiUserEventEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiUserEventActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are User Events."
         ::= { events 29 }
 
@@ -4515,7 +4519,7 @@ saHpiUserEventRowStatus OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "This columnar node contains the status of the row and also
+                "This columnar object contains the status of the row and also
                 perform add and delete operations.
 
                 The status column uses four defined values:
@@ -4559,8 +4563,8 @@ saHpiUserEventRowStatus OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiAnnouncementEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiAnnouncementActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -4655,7 +4659,7 @@ SaHpiAnnouncementEntry ::= SEQUENCE {
         saHpiAnnouncementSeverity       SaHpiSeverity,
         saHpiAnnouncementAcknowledged   TruthValue,
         saHpiAnnouncementAckBySeverity  SaHpiSeverity,
-        saHpiAnnouncementStatusCondType INTEGER,
+        saHpiAnnouncementStatusCondType SaHpiStatusCondType,
         saHpiAnnouncementEntityPath     SaHpiEntityPath,
         saHpiAnnouncementSensorNum      Unsigned32,
         saHpiAnnouncementEventState     SaHpiEventState,
@@ -4720,26 +4724,21 @@ saHpiAnnouncementAcknowledged OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "Acknowledged flag.Use this columnar node to 
-		acknowledge a specific Announcement."
+                "Acknowledged flag.Use this columnar object to 
+                acknowledge a specific Announcement."
         ::= { saHpiAnnouncementEntry 6 }
-	
+        
 saHpiAnnouncementAckBySeverity OBJECT-TYPE
         SYNTAX SaHpiSeverity
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "Use this columnar node to acknowledge 
-		all Announcements of a particular severity."
+                "Use this columnar object to acknowledge 
+                all Announcements of a particular severity."
         ::= { saHpiAnnouncementEntry 7 }
 
 saHpiAnnouncementStatusCondType OBJECT-TYPE
-        SYNTAX INTEGER {
-                        undefined(0),
-                        sensor(1),
-                        resource(2),
-                        oem(3),
-                        user(4) }
+        SYNTAX SaHpiStatusCondType
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
@@ -4835,7 +4834,7 @@ saHpiAnnouncementDelete OBJECT-TYPE
                 "This function allows the HPI SNMP Manager to
                 delete a single announcement. Announcements may
                 be deleted individually by specifying a specific
-                index and setting this columnar node to destroy(6)."
+                index and setting this columnar object to destroy(6)."
         ::= { saHpiAnnouncementEntry 17 }
 
 
@@ -4866,7 +4865,7 @@ saHpiEventLogInfoEntry OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Each resource has a Event Log Information
-                record, which contains per resource pertient
+                record, which contains per resource pertinent
                 logging information."
         INDEX {
                 saHpiDomainId,
@@ -5198,7 +5197,7 @@ saHpiEventLogRowPointer OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiResourceEventLogEntryCountTotal OBJECT-TYPE
+saHpiResourceEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5209,17 +5208,17 @@ saHpiResourceEventLogEntryCountTotal OBJECT-TYPE
                 this count is reset.  Use this node to determine
                 table activity.
 
-                This columnar node represents the subset of events that
+                This scalar object represents the subset of events that
                 are Resource Events."
         ::= { eventLog 3 }
 
 
-saHpiResourceEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiResourceEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Resource Events."
         ::= { eventLog 4 }
 
@@ -5306,7 +5305,7 @@ saHpiResourceEventLogType OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiDomainEventLogEntryCountTotal OBJECT-TYPE
+saHpiDomainEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5316,17 +5315,17 @@ saHpiDomainEventLogEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Domain events."
         ::= { eventLog 6 }
 
 
-saHpiDomainEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiDomainEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events
+                "This scalar object represents the subset of events
                 that are Domain events."
         ::= { eventLog 7 }
 
@@ -5361,10 +5360,10 @@ SaHpiDomainEventLogEntry ::= SEQUENCE {
 
 saHpiDomainEventLogEntryId OBJECT-TYPE
         SYNTAX SaHpiEntryId
-        MAX-ACCESS read-only -- ### SMIv2 bug?
+        MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node is an index for Domain Events
+                "This columnar object is an index for Domain Events
                  in the table."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4.1
@@ -5406,7 +5405,7 @@ saHpiDomainEventLogType OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEventLogEntryCountTotal OBJECT-TYPE
+saHpiSensorEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5417,17 +5416,17 @@ saHpiSensorEventLogEntryCountTotal OBJECT-TYPE
                 count is reset.  Use this node to 
                 determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Sensor events."
         ::= { eventLog 9 }
 
 
-saHpiSensorEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSensorEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Sensor Events."
         ::= { eventLog 10 }
 
@@ -5634,7 +5633,7 @@ saHpiSensorEventLogOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use."
+                "Reserved for Oem use."
         ::= { saHpiSensorEventLogEntry 13 }
 
 
@@ -5655,7 +5654,7 @@ saHpiSensorEventLogSpecific OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSensorEnableChangeEventLogEntryCountTotal OBJECT-TYPE
+saHpiSensorEnableChangeEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5665,17 +5664,17 @@ saHpiSensorEnableChangeEventLogEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Sensor Enable ChangeEvents."
         ::= { eventLog 12 }
 
 
-saHpiSensorEnableChangeEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSensorEnableChangeEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Sensor Enable ChangeEvents."
         ::= { eventLog 13 }
 
@@ -5811,7 +5810,7 @@ saHpiSensorEnableChangeEventLogState OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiHotSwapEventLogEntryCountTotal OBJECT-TYPE
+saHpiHotSwapEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5821,17 +5820,17 @@ saHpiHotSwapEventLogEntryCountTotal OBJECT-TYPE
               management system is restarted this count is reset.
               Use this node to determine table activity.
 
-              This columnar node represents the subset of events 
+              This scalar object represents the subset of events 
               that are HotSwap Events."
         ::= { eventLog 15 }
 
 
-saHpiHotSwapEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiHotSwapEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are HotSwap Events."
         ::= { eventLog 16 }
 
@@ -5901,7 +5900,7 @@ saHpiHotSwapEventLogPreviousState OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiWatchdogEventLogEntryCountTotal OBJECT-TYPE
+saHpiWatchdogEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -5912,17 +5911,17 @@ saHpiWatchdogEventLogEntryCountTotal OBJECT-TYPE
                 this count is reset.  Use this node to 
                 determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Watchdog Events."
         ::= { eventLog 18 }
 
 
-saHpiWatchdogEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiWatchdogEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Watchdog Events."
         ::= { eventLog 19 }
 
@@ -6025,7 +6024,7 @@ saHpiWatchdogEventLogUse OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiSoftwareEventLogEntryCountTotal OBJECT-TYPE
+saHpiSoftwareEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -6035,17 +6034,17 @@ saHpiSoftwareEventLogEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are Software Events."
         ::= { eventLog 21 }
 
 
-saHpiSoftwareEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSoftwareEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are Software Events."
         ::= { eventLog 22 }
 
@@ -6160,11 +6159,11 @@ saHpiSoftwareEventLogText OBJECT-TYPE
 
 -- *********************************
 -- **
--- **     OEM Event Log
+-- **     Oem Event Log
 -- **
 -- *********************************
 
-saHpiOEMEventLogEntryCountTotal OBJECT-TYPE
+saHpiOemEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -6174,23 +6173,23 @@ saHpiOEMEventLogEntryCountTotal OBJECT-TYPE
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
 
-                This columnar node represents the subset of events 
-                that are OEM Events."
+                This scalar object represents the subset of events 
+                that are Oem Events."
         ::= { eventLog 24 }
 
 
-saHpiOEMEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiOemEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
-                are OEM Events."
+                "This scalar object represents the subset of events that
+                are Oem Events."
         ::= { eventLog 25 }
 
 
-saHpiOEMEventLogTable OBJECT-TYPE
-        SYNTAX SEQUENCE OF SaHpiOEMEventLogEntry
+saHpiOemEventLogTable OBJECT-TYPE
+        SYNTAX SEQUENCE OF SaHpiOemEventLogEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
@@ -6198,29 +6197,29 @@ saHpiOEMEventLogTable OBJECT-TYPE
         ::= { eventLog 26 }
 
 
-saHpiOEMEventLogEntry OBJECT-TYPE
-        SYNTAX SaHpiOEMEventLogEntry
+saHpiOemEventLogEntry OBJECT-TYPE
+        SYNTAX SaHpiOemEventLogEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "OEM events."
+                "Oem events."
         INDEX {
                 saHpiDomainId,
                 saHpiResourceId,
                 saHpiEventSeverity,
-                saHpiOEMEventEntryId }
-        ::= { saHpiOEMEventLogTable 1 }
+                saHpiOemEventEntryId }
+        ::= { saHpiOemEventLogTable 1 }
 
 
-SaHpiOEMEventLogEntry ::= SEQUENCE {
-        saHpiOEMEventLogTimestamp       SaHpiTime,
-        saHpiOEMEventLogManufacturerIdT SaHpiManufacturerId,
-        saHpiOEMEventLogTextType        SaHpiTextType,
-        saHpiOEMEventLogTextLanguage    SaHpiTextLanguage,
-        saHpiOEMEventLogText            SaHpiText }
+SaHpiOemEventLogEntry ::= SEQUENCE {
+        saHpiOemEventLogTimestamp       SaHpiTime,
+        saHpiOemEventLogManufacturerIdT SaHpiManufacturerId,
+        saHpiOemEventLogTextType        SaHpiTextType,
+        saHpiOemEventLogTextLanguage    SaHpiTextLanguage,
+        saHpiOemEventLogText            SaHpiText }
 
 
-saHpiOEMEventLogTimestamp OBJECT-TYPE
+saHpiOemEventLogTimestamp OBJECT-TYPE
         SYNTAX SaHpiTime
         MAX-ACCESS read-only
         STATUS current
@@ -6230,43 +6229,43 @@ saHpiOEMEventLogTimestamp OBJECT-TYPE
                 available; Absolute time if greater than
                 TIME_MAX_RELATIVE, Relative time if less than or
                 equal to TIME_MAX_RELATIVE."
-        ::= { saHpiOEMEventLogEntry 1 }
+        ::= { saHpiOemEventLogEntry 1 }
 
 
-saHpiOEMEventLogManufacturerIdT OBJECT-TYPE
+saHpiOemEventLogManufacturerIdT OBJECT-TYPE
         SYNTAX SaHpiManufacturerId
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventLogEntry 2 }
+        ::= { saHpiOemEventLogEntry 2 }
 
 
-saHpiOEMEventLogTextType OBJECT-TYPE
+saHpiOemEventLogTextType OBJECT-TYPE
         SYNTAX SaHpiTextType
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventLogEntry 3 }
+        ::= { saHpiOemEventLogEntry 3 }
 
 
-saHpiOEMEventLogTextLanguage OBJECT-TYPE
+saHpiOemEventLogTextLanguage OBJECT-TYPE
         SYNTAX SaHpiTextLanguage
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventLogEntry 4 }
+        ::= { saHpiOemEventLogEntry 4 }
 
 
-saHpiOEMEventLogText OBJECT-TYPE
+saHpiOemEventLogText OBJECT-TYPE
         SYNTAX SaHpiText
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
                 "Refer to the textual convention for more details."
-        ::= { saHpiOEMEventLogEntry 5 }
+        ::= { saHpiOemEventLogEntry 5 }
 
 
 -- *********************************
@@ -6275,7 +6274,7 @@ saHpiOEMEventLogText OBJECT-TYPE
 -- **
 -- *********************************
 
-saHpiUserEvenLogtEntryCountTotal OBJECT-TYPE
+saHpiUserEventLogLifetimeEntries OBJECT-TYPE
         SYNTAX Counter32
         MAX-ACCESS read-only
         STATUS current
@@ -6286,17 +6285,17 @@ saHpiUserEvenLogtEntryCountTotal OBJECT-TYPE
                this count is reset.  Use this node to 
                determine table activity.
 
-                This columnar node represents the subset of events 
+                This scalar object represents the subset of events 
                 that are User Events."
         ::= { eventLog 27 }
 
 
-saHpiUserEventLogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiUserEventLogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the subset of events that
+                "This scalar object represents the subset of events that
                 are User Events."
         ::= { eventLog 28 }
 
@@ -6376,7 +6375,7 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "This columnar node contains the status of the row and also
+                "This columnar object contains the status of the row and also
                 perform add and delete operations.
 
                 The status column uses four defined values:
@@ -6420,8 +6419,8 @@ saHpiUserEventLogRowStatus OBJECT-TYPE
 --  ***********************************************************************
 --  **********************************************************************/
 
-saHpiRdrEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiRdrActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -6456,8 +6455,8 @@ saHpiRdrEntry OBJECT-TYPE
 
 
 SaHpiRdrEntry ::= SEQUENCE {
-        saHpiRdrEntryId      Counter32,
-        saHpiRdrNextEntryId  Counter32,
+        saHpiRdrEntryId      SaHpiEntryId,
+        saHpiRdrNextEntryId  SaHpiEntryId,
         saHpiRdrType         INTEGER,
         saHpiRdrEntityPath   SaHpiEntityPath,
         saHpiRdrIsFru        TruthValue,
@@ -6469,8 +6468,8 @@ SaHpiRdrEntry ::= SEQUENCE {
 
 
 saHpiRdrEntryId OBJECT-TYPE
-        SYNTAX Counter32
-        MAX-ACCESS accessible-for-notify
+        SYNTAX SaHpiEntryId
+        MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
                 "Id of the Resource Data Repository (RDR) entry."
@@ -6478,7 +6477,7 @@ saHpiRdrEntryId OBJECT-TYPE
 
 
 saHpiRdrNextEntryId OBJECT-TYPE
-        SYNTAX Counter32
+        SYNTAX SaHpiEntryId
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -6487,7 +6486,7 @@ saHpiRdrNextEntryId OBJECT-TYPE
                  ResourceId.  
 
                 For example If you know the DomainId and ResourceId
-                use SAHPI_FIRST_ENTRY to retrieve this columnar node.
+                use SAHPI_FIRST_ENTRY to retrieve this columnar object.
                 Now you have the saHpiRdrEntryId for the next RDR owned
                 by the Resource in question.  When the value of
                 saHpiRdrNextEntryId is SAHPI_LAST_ENTRY it means the 
@@ -6599,8 +6598,8 @@ saHpiRdrIdString OBJECT-TYPE
 -- Digital 
 --
 
-saHpiCtrlDigitalEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlDigitalActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -6829,7 +6828,7 @@ saHpiCtrlDigitalOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
 
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
@@ -6849,8 +6848,8 @@ saHpiCtrlDigitalRDR OBJECT-TYPE
 --- Discrete
 ---
 
-saHpiCtrlDiscreteEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlDiscreteActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -7075,7 +7074,7 @@ saHpiCtrlDiscreteOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= { saHpiCtrlDiscreteEntry 10 }
@@ -7094,8 +7093,8 @@ saHpiCtrlDiscreteRDR OBJECT-TYPE
 -- Analog
 --
 
-saHpiCtrlAnalogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlAnalogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -7263,7 +7262,7 @@ saHpiCtrlAnalogDefaultMinState OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This object represents the default minum value of this
+                "This object represents the default minimum value of this
                 analog control."
         REFERENCE
 
@@ -7351,7 +7350,7 @@ saHpiCtrlAnalogOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
 
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
@@ -7371,8 +7370,8 @@ saHpiCtrlAnalogRDR OBJECT-TYPE
 -- Stream
 --
 
-saHpiCtrlStreamEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlStreamActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -7660,7 +7659,7 @@ saHpiCtrlStreamOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
 
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
@@ -7680,8 +7679,8 @@ saHpiCtrlStreamRDR OBJECT-TYPE
 --- Text
 ---
 
-saHpiCtrlTextEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlTextActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -7871,7 +7870,7 @@ saHpiCtrlTextMaxChars OBJECT-TYPE
                 reports the number of characters per line- not the 
                 number of bytes.  saHpiCtrlTextMaxChars must not be
                 larger than the number of characters that can be 
-                placed in a saHpiTextState columnar node."
+                placed in a saHpiTextState columnar object."
         REFERENCE
                 "See section 8.7 and 8.8 from
                  SAI-HPI-B.01.01 specification."
@@ -7925,9 +7924,9 @@ saHpiCtrlTextDefaultLine OBJECT-TYPE
                 of text represented in saHpiCtrlTextDefault object.
 
                 If the line is 255, then saHpiCtrlTextDefault
-                columnar node will containt the entire text of
+                columnar object will containt the entire text of
                 the control, or as much of it as will fit in a single 
-                columnar node. This value will consist of the text
+                columnar object. This value will consist of the text
                 of all the lines concatenated, 
                 using the maximum number of characters for each line
                 (no trimming of trailing blanks). 
@@ -7969,10 +7968,10 @@ saHpiCtrlTextLine OBJECT-TYPE
               saHpiCtrlTextState for usage examples.
 
               If the line number passed in is 255, then
-              saHpiCtrlTextState columnar node will 
+              saHpiCtrlTextState columnar object will 
               containt the entire text of the control,
               or as much of it as will fit in a single 
-              columnar node. This value will consist of
+              columnar object. This value will consist of
               the text of all the lines concatenated, 
               using the maximum number of characters for
               each line (no trimming of trailing blanks). 
@@ -8033,7 +8032,7 @@ saHpiCtrlTextState OBJECT-TYPE
                 on the line. 
                 Thus writing a zero-length string will clear the
                 addressed line. It is also possible to include more
-                characters in the text passed in this columnar node
+                characters in the text passed in this columnar object
                 than will fit on one line; in this case, the control
                 will wrap to the next line (still clearing the 
                 trailing characters on the last line written).
@@ -8105,7 +8104,7 @@ saHpiCtrlTextOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
 
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
@@ -8122,15 +8121,15 @@ saHpiCtrlTextRDR OBJECT-TYPE
 
 
 ---
---- OEM
+--- Oem
 ---
 
-saHpiCtrlOemEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiCtrlOemActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of OEM controls in the system."
+                "The number of Oem controls in the system."
         ::= { hpiControl 12 }
 
 
@@ -8139,7 +8138,7 @@ saHpiCtrlOemTable OBJECT-TYPE
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "A table of OEM controls and its states."
+                "A table of Oem controls and its states."
         ::= { hpiControl 13 }
 
 
@@ -8148,7 +8147,7 @@ saHpiCtrlOemEntry OBJECT-TYPE
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
-                "Definition of the OEM control table."
+                "Definition of the Oem control table."
         INDEX {
                 saHpiDomainId,
                 saHpiResourceId,
@@ -8303,8 +8302,8 @@ saHpiCtrlOemManufacturerId OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This object represents the OEM's manufacturer ID for
-                this OEM control. 
+                "This object represents the Oem's manufacturer ID for
+                this Oem control. 
 
                 Refer to the textual convention for more details."
         REFERENCE
@@ -8318,7 +8317,7 @@ saHpiCtrlOemDefaultConfigData OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This object represents the OEM control
+                "This object represents the Oem control
                   configuration data."
         REFERENCE
                 "See section 8.7 and 8.8 from SAI-HPI-B.01.01
@@ -8331,8 +8330,8 @@ saHpiCtrlOemDefaultMId OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This object represents the OEM's manufacturer ID for
-                this OEM control resource. 
+                "This object represents the Oem's manufacturer ID for
+                this Oem control resource. 
 
                 Refer to the textual convention for more details."
         REFERENCE
@@ -8346,7 +8345,7 @@ saHpiCtrlOemDefaultState OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This represents the OEM control state setting."
+                "This represents the Oem control state setting."
         REFERENCE
                 "See section 8.7 and 8.8 from SAI-HPI-B.01.01
                  specification."
@@ -8358,7 +8357,7 @@ saHpiCtrlOemState OBJECT-TYPE
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
-                "This object allows to write to the OEM control state
+                "This object allows to write to the Oem control state
                 setting.  
                 You may not change the state of the control unless
                 the Mode is set to manual(2).  If a write is attempted
@@ -8403,7 +8402,7 @@ saHpiCtrlOemValue OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         REFERENCE
                 "See section 8.8 from SAI-HPI-B.01.01 specification."
         ::= { saHpiCtrlOemEntry 13 }
@@ -8414,7 +8413,7 @@ saHpiCtrlOemRDR OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Pointer to Resource Table for this OEM control."
+                "Pointer to Resource Table for this Oem control."
         ::= { saHpiCtrlOemEntry 14 }
 
 
@@ -8426,8 +8425,8 @@ saHpiCtrlOemRDR OBJECT-TYPE
 -- * **********************************************************************
 -- * **********************************************************************/
 
-saHpiSensorEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiSensorActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -8537,7 +8536,7 @@ saHpiSensorEventCtrl OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node represents the sensor category
+                "This columnar object represents the sensor category
                 control of events. The possible states are:
 
                 perEvent - Event message control per event,             
@@ -8591,7 +8590,7 @@ saHpiSensorBaseUnits OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node provides the sensor data base units,
+                "This columnar object provides the sensor data base units,
                 (meters, etc.)"
         ::= { saHpiSensorEntry 9 }
 
@@ -8601,11 +8600,11 @@ saHpiSensorModifierUnits OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node provides the sensor data modifier
+                "This columnar object provides the sensor data modifier
                 unit(s).
                 Example unit = second, etc.
                         
-                Also see modifier use columnar node saHpiSensorModifierUse
+                Also see modifier use columnar object saHpiSensorModifierUse
                 for further insight. "
         REFERENCE
                 "SAI-HPI-B.01.01 section 8.5."
@@ -8683,7 +8682,7 @@ saHpiSensorOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use."
+                "Reserved for Oem use."
         ::= { saHpiSensorEntry 15 }
 
 
@@ -9445,7 +9444,7 @@ saHpiSensorThdLowCriticalNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis values
+                "This columnar object flag is set, hysteresis values
                 are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01 sections
@@ -9548,7 +9547,7 @@ saHpiSensorThdLowMajorNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis values
+                "This columnar object flag is set, hysteresis values
                  are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -9645,7 +9644,7 @@ saHpiSensorThdLowMinorNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis values
+                "This columnar object flag is set, hysteresis values
                 are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -9743,7 +9742,7 @@ saHpiSensorThdUpCriticalNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis
+                "This columnar object flag is set, hysteresis
                  values are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -9841,7 +9840,7 @@ saHpiSensorThdUpMajorNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis values are
+                "This columnar object flag is set, hysteresis values are
                  calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -9938,7 +9937,7 @@ saHpiSensorThdUpMinorNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis
+                "This columnar object flag is set, hysteresis
                 values are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -10034,7 +10033,7 @@ saHpiSensorThdPosHysteresisNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node flag is set, hysteresis
+                "This columnar object flag is set, hysteresis
                  values are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -10130,7 +10129,7 @@ saHpiSensorThdNegHysteresisNonLinear OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                " This columnar node flag is set, hysteresis
+                " This columnar object flag is set, hysteresis
                  values are calculated at the nominal sensor value."
         REFERENCE
                 "Object derived from SAF SAI-HPI-B.01.01
@@ -10148,8 +10147,8 @@ saHpiSensorThdNegHysteresisNonLinear OBJECT-TYPE
 -- ************************************************************************
 -- ************************************************************************/
 
-saHpiInventoryEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiInventoryActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -10192,7 +10191,7 @@ saHpiInventoryEntry OBJECT-TYPE
 SaHpiInventoryEntry ::= SEQUENCE {
         saHpiInventoryId          SaHpiInstrumentId,
         saHpiInventoryPersistent  TruthValue,
-        saHpiInventoryOEM         Unsigned32,
+        saHpiInventoryOem         Unsigned32,
         saHpiInventoryUpdateCount Unsigned32,
         saHpiInventoryIsReadOnly  TruthValue,
         saHpiInventoryNumAreas    Unsigned32,
@@ -10221,12 +10220,12 @@ saHpiInventoryPersistent OBJECT-TYPE
         ::= { saHpiInventoryEntry 2 }
 
 
-saHpiInventoryOEM OBJECT-TYPE
+saHpiInventoryOem OBJECT-TYPE
         SYNTAX Unsigned32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "OEM value for the inventory record. This is manufacturer'
+                "Oem value for the inventory record. This is manufacturer'
                 specific value."
         ::= { saHpiInventoryEntry 3 }
 
@@ -10247,7 +10246,7 @@ saHpiInventoryIsReadOnly OBJECT-TYPE
                 "Describes if the IDR is read-only. If 'IsReadOnly is
                 'TRUE' then all 'areas' and 'fields' associated with
                 Inventory Data Repository are also flagged as 'Read Only'
-                in thier repsective columnar nodes tracking this capability.
+                in thier repsective columnar objects tracking this capability.
                         
                 An IDR with read-only elements does not allow additions, 
                 deletetions, or modifications of its elements."
@@ -10283,8 +10282,8 @@ saHpiInventoryRDR OBJECT-TYPE
 -- **
 -- **************************************
 
-saHpiAreaEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiAreaActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -10338,7 +10337,7 @@ SaHpiAreaEntry ::= SEQUENCE {
 
 saHpiAreaId OBJECT-TYPE
         SYNTAX SaHpiInstrumentId
-        MAX-ACCESS accessible-for-notify
+        MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
                 "This is the HPI management user specified AreaId value.
@@ -10357,7 +10356,7 @@ saHpiAreaIdIndex OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This calumnar node is the value generated and utilized by
+                "This columnar object is the value generated and utilized by
                 the underlying system management implementation.  This is 
                 the SAI-HPI-b.01.01 AreaId.
                         
@@ -10394,7 +10393,7 @@ saHpiAreaIsReadOnly OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "This columnar node is informational only. 
+                "This columnar object is informational only. 
                  Describes if an area is read-only.    
                         
                 If it is set to 'FASLE' then a user
@@ -10419,7 +10418,7 @@ saHpiAreaRowStatus OBJECT-TYPE
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
-                "This columnar node contains the status of the row
+                "This columnar object contains the status of the row
                 and also perform add and delete operations.
 
                 The status column uses three defined values:
@@ -10450,7 +10449,7 @@ saHpiAreaRowStatus OBJECT-TYPE
                   AreadId that has not been previously assigned.  The 
                   user specifies AreaId may or maynot be the same value
                   as the under lying HPI system management service.  The 
-                  HPI assigned ID will be reflected in the columnar node
+                  HPI assigned ID will be reflected in the columnar object
                   'saHpiAreaIdIndex'.
                   
 
@@ -10489,8 +10488,8 @@ saHpiAreaNumDataFields OBJECT-TYPE
 -- **
 -- **************************************
 
-saHpiFieldEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiFieldActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -10499,7 +10498,7 @@ saHpiFieldEntryCount OBJECT-TYPE
 
 
 saHpiFieldTable OBJECT-TYPE
-        SYNTAX SEQUENCE OF SaHpiInventoryFieldEntry
+        SYNTAX SEQUENCE OF SaHpiFieldEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
@@ -10508,7 +10507,7 @@ saHpiFieldTable OBJECT-TYPE
 
 
 saHpiFieldEntry OBJECT-TYPE
-        SYNTAX SaHpiInventoryFieldEntry
+        SYNTAX SaHpiFieldEntry
         MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
@@ -10525,7 +10524,7 @@ saHpiFieldEntry OBJECT-TYPE
         ::= { saHpiFieldTable 1 }
 
 
-SaHpiInventoryFieldEntry ::= SEQUENCE {
+SaHpiFieldEntry ::= SEQUENCE {
         saHpiFieldId           SaHpiInstrumentId,
         saHpiFieldIdIndex      SaHpiInstrumentId,
         saHpiFieldType         INTEGER,
@@ -10538,7 +10537,7 @@ SaHpiInventoryFieldEntry ::= SEQUENCE {
 
 saHpiFieldId OBJECT-TYPE
         SYNTAX SaHpiInstrumentId
-        MAX-ACCESS accessible-for-notify
+        MAX-ACCESS not-accessible
         STATUS current
         DESCRIPTION
                 "See TEXTUAL-CONVENTION 'SaHpiInstrumentId'. 
@@ -10682,8 +10681,8 @@ saHpiFieldStatus OBJECT-TYPE
 -- ***********************************************************************/
 --
 
-saHpiWatchdogEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiWatchdogActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -10980,7 +10979,7 @@ saHpiWatchdogOem OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "Reserved for OEM use"
+                "Reserved for Oem use"
         ::= { saHpiWatchdogEntry 12 }
 
 
@@ -11003,8 +11002,8 @@ saHpiWatchdogRDR OBJECT-TYPE
 -- ************************************************************************/
 --
 
-saHpiAnnunciatorEntryCount OBJECT-TYPE
-        SYNTAX Counter32
+saHpiAnnunciatorActiveEntries OBJECT-TYPE
+        SYNTAX Gauge32
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
@@ -11018,7 +11017,7 @@ saHpiAnnunciatorTable OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Table of static Annunciator resource data record
-                information and dynamic control data.  The columnar node 
+                information and dynamic control data.  The columnar object 
                 'saHpiAnnunciatorMode' is in support of SAI-HPI-B.01.01
                sections 7.6.6 and 7.6.7 and is representative
                of the dynamic control data found in this table.  
@@ -11240,9 +11239,11 @@ saHpiAnnunciatorRDR OBJECT-TYPE
 -- ***********************************************************************/
 --
 
+hpiNotificationPrefix OBJECT IDENTIFIER ::= { hpiNotifications 0 }
+
 saHpiSensorNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiSensorEventType,
@@ -11258,12 +11259,12 @@ saHpiSensorNotification NOTIFICATION-TYPE
         REFERENCE
                 "Derived from typedefs in SAI-HPI-B.01.01
                  sections 7.2 and 7.2.1."
-        ::= { hpiNotifications 1 }
+        ::= { hpiNotificationPrefix 1 }
 
 
 saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiSensorEnableChangeEventType,
@@ -11275,24 +11276,24 @@ saHpiSensorEnableChangeNotification NOTIFICATION-TYPE
         REFERENCE
                 "Derived from typedefs in SAI-HPI-B.01.01
                  sections 7.2.9 and 7.2.10."
-        ::= { hpiNotifications 2 }
+        ::= { hpiNotificationPrefix 2 }
 
 
-saHpiResourceNotifications NOTIFICATION-TYPE
+saHpiResourceNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiResourceEventType}
         STATUS current
         DESCRIPTION
                 "Resource failure/restoration event notifications."
-        ::= { hpiNotifications 3 }
+        ::= { hpiNotificationPrefix 3 }
 
 
-saHpiDomainNotifications NOTIFICATION-TYPE
+saHpiDomainNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiDomainEventType}
@@ -11302,12 +11303,12 @@ saHpiDomainNotifications NOTIFICATION-TYPE
                references and the removal of domain references to the DRT."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 4 }
+        ::= { hpiNotificationPrefix 4 }
 
 
 saHpiWatchdogNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiWatchdogEventAction,
@@ -11318,12 +11319,12 @@ saHpiWatchdogNotification NOTIFICATION-TYPE
                 "Watchdog notification."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 5 }
+        ::= { hpiNotificationPrefix 5 }
 
 
 saHpiHotSwapNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiHotSwapEventState,
@@ -11333,12 +11334,12 @@ saHpiHotSwapNotification NOTIFICATION-TYPE
                 "Hot swap notification."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 6 }
+        ::= { hpiNotificationPrefix 6 }
 
 
-saHpiSoftwareNotifications NOTIFICATION-TYPE
+saHpiSoftwareNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiSoftwareEventType,
@@ -11355,28 +11356,28 @@ saHpiSoftwareNotifications NOTIFICATION-TYPE
                 start-up properly, or inconsistencies in persisted data."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 7 }
+        ::= { hpiNotificationPrefix 7 }
 
 
-saHpiOEMNotifications NOTIFICATION-TYPE
+saHpiOemNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
-                saHpiOEMEventTextType,
-                saHpiOEMEventTextLanguage,
-                saHpiOEMEventText}
+                saHpiOemEventTextType,
+                saHpiOemEventTextLanguage,
+                saHpiOemEventText}
         STATUS current
         DESCRIPTION
-                "OEM event notifications."
+                "Oem event notifications."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 8 }
+        ::= { hpiNotificationPrefix 8 }
 
 
-saHpiUserNotifications NOTIFICATION-TYPE
+saHpiUserNotification NOTIFICATION-TYPE
         OBJECTS {
-                saHpiDomainId,
+                saHpiDomainActiveAlarms,
                 saHpiResourceId,
                 saHpiEventSeverity,
                 saHpiUserEventTextType,
@@ -11390,900 +11391,28 @@ saHpiUserNotifications NOTIFICATION-TYPE
                 saHpiEventLogEntryAdd()."
         REFERENCE
                 "SAI-HPI-B.01.01 section 6.4, 6.5, 8.14."
-        ::= { hpiNotifications 9 }
+        ::= { hpiNotificationPrefix 9 }
 
 --
 -- /***********************************************************************
 -- ************************************************************************
 -- *********                                                     **********
--- *********  OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2 **********
+-- *********  Conformance Information (for SMIv2)                **********
 -- *********                                                     **********
 -- ************************************************************************
 -- ***********************************************************************/
 --
--- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----       
---      OBJECT GROUP DECLARATIONS AND COMPLIANCE FOR SMIv2
--- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ---- ----
 
-saHpiDomainInfoGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHpiVersion,
-                saHpiDiscover,
-                saHpiAgentVersion,
-                saHpiDomainId,
-                saHpiDomainInfoEntryCount,
-                saHpiDomainCapabilities,
-                saHpiDomainIsPeer,
-                saHpiDomainTagTextType,
-                saHpiDomainTagTextLanguage,
-                saHpiDomainTag,
-                saHpiDomainReferenceUpdateCount,
-                saHpiDomainReferenceUpdateTimestamp,
-                saHpiDomainResourcePresenceUpdateCount,
-                saHpiDomainResourcePresenceUpdateTimestamp,
-                saHpiDomainAlarmUpdateCount,
-                saHpiDomainAlarmUpdateTimestamp,
-                saHpiDomainActiveAlarms,
-                saHpiDomainCriticalAlarms,
-                saHpiDomainMajorAlarms,
-                saHpiDomainMinorAlarms,
-                saHpiDomainAlarmUserLimit,
-                saHpiDomainAlarmOverflow,
-                saHpiSNMPResourceId,
-                saHpiDomainGuid }
+hpiGroups      OBJECT IDENTIFIER ::= { hpiConformance 1 }
+hpiCompliances OBJECT IDENTIFIER ::= { hpiConformance 2 }
+
+saHpiCompliance MODULE-COMPLIANCE
         STATUS current
         DESCRIPTION
-                "saHpiDomainInfo table."
-        ::= { hpiMIBCompliances 1 }
+                "The compliance statement for SNMP hardware platform
+                entities."
 
-saHpiDomainReferenceGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiDomainReferenceEntryCount,
-                saHpiDomainReferenceIsPeer }
-        STATUS current
-        DESCRIPTION
-                "saHpiDomainReference table."
-        ::= { hpiMIBCompliances 2 }
-
-saHpiDomainAlarmGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiDomainAlarmEntryCount,
-                saHpiDomainAlarmTimestamp,
-                saHpiDomainAlarmSeverity,
-                saHpiDomainAlarmAcknowledged,
-		saHpiDomainAlarmAckBySeverity,
-                saHpiDomainAlarmCondStatusCondType,
-                saHpiDomainAlarmCondEntityPath,
-                saHpiDomainAlarmCondSensorNum,
-                saHpiDomainAlarmCondEventState,
-                saHpiDomainAlarmCondNameValue,
-                saHpiDomainAlarmCondMid,
-                saHpiDomainAlarmCondTextType,
-                saHpiDomainAlarmCondTextLanguage,
-                saHpiDomainAlarmCondText,
-                saHpiDomainAlarmRowStatus }
-        STATUS current
-        DESCRIPTION
-                "saHpiDomainAlarm table."
-        ::= { hpiMIBCompliances 3 }
-
-saHpiResourceGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiResourceEntryCount,
-                saHpiResourceId,
-                saHpiResourceEntityPath,
-                saHpiResourceCapabilities,
-                saHpiResourceHotSwapCapabilities,
-                saHpiResourceSeverity,
-                saHpiResourceFailed,
-                saHpiResourceInfoResourceRev,
-                saHpiResourceInfoSpecificVer,
-                saHpiResourceInfoDeviceSupport,
-                saHpiResourceInfoManufacturerId,
-                saHpiResourceInfoProductId,
-                saHpiResourceInfoFirmwareMajorRev,
-                saHpiResourceInfoFirmwareMinorRev,
-                saHpiResourceInfoAuxFirmwareRev,
-                saHpiResourceInfoGuid,
-                saHpiResourceTagTextType,
-                saHpiResourceTagTextLanguage,
-                saHpiResourceTag,
-                saHpiResourceParmControl,
-                saHpiResourceResetAction,
-                saHpiResourcePowerAction }
-        STATUS current
-        DESCRIPTION
-                "saHpiResource table."
-        ::= { hpiMIBCompliances 4 }
-
-saHpiAutoInsertTimeoutGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiAutoInsertTimeoutForInsert }
-        STATUS current
-        DESCRIPTION
-                "saHpiAutoInsertTimeout table."
-        ::= { hpiMIBCompliances 5 }
-
-saHpiHotSwapGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHotSwapEntryCount,
-                saHpiHotSwapIndicator,
-                saHpiHotSwapState,
-                saHpiHotSwapExtractTimeout,
-                saHpiHotSwapActionRequest,
-                saHpiHotSwapPolicyCancel,
-                saHpiHotSwapResourceRequest }
-        STATUS current
-        DESCRIPTION
-                "saHpiHotSwap table."
-        ::= { hpiMIBCompliances 6 }
-
-saHpiEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEventEntryCountTotal,
-                saHpiEventEntryCount,
-                saHpiEventSeverity,
-                saHpiEventSaHpiTime,
-                saHpiEventType }
-        STATUS current
-        DESCRIPTION
-                "saHpiEvent table."
-        ::= { hpiMIBCompliances 7 }
-
-saHpiResourceEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiResourceEventEntryCountTotal,
-                saHpiResourceEventEntryCount,
-                saHpiResourceEventTimestamp,
-                saHpiResourceEventType }
-        STATUS current
-        DESCRIPTION
-                "saHpiResourceEvent table."
-        ::= { hpiMIBCompliances 8 }
-
-saHpiDomainEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiDomainEventEntryCountTotal,
-                saHpiDomainEventEntryCount,
-                saHpiDomainEventTimestamp,
-                saHpiDomainEventType }
-        STATUS current
-        DESCRIPTION
-                "saHpiDomainEvent table."
-        ::= { hpiMIBCompliances 9 }
-
-saHpiSensorEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorEventEntryCountTotal,
-                saHpiSensorEventEntryCount,
-                saHpiSensorEventTimestamp,
-                saHpiSensorEventType,
-                saHpiSensorEventCategory,
-                saHpiSensorEventAssertion,
-                saHpiSensorEventState,
-                saHpiSensorEventOptionalData,
-                saHpiSensorEventTriggerReadingType,
-                saHpiSensorEventTriggerReading,
-                saHpiSensorEventTriggerThresholdType,
-                saHpiSensorEventTriggerThreshold,
-                saHpiSensorEventPreviousState,
-                saHpiSensorEventCurrentState,
-                saHpiSensorEventOem,
-                saHpiSensorEventSpecific }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorEvent table."
-        ::= { hpiMIBCompliances 10 }
-
-saHpiSensorEnableChangeEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorEnableChangeEventEntryCountTotal,
-                saHpiSensorEnableChangeEventEntryCount,
-                saHpiSensorEnableChangeEventTimestamp,
-                saHpiSensorEnableChangeEventType,
-                saHpiSensorEnableChangeEventCategory,
-                saHpiSensorEnableChangeEventEnabled,
-                saHpiSensorEnableChangeEventEventsEnabled,
-                saHpiSensorEnableChangeEventAssertEvents,
-                saHpiSensorEnableChangeEventDeassertEvents,
-                saHpiSensorEnableChangeEventOptionalData,
-                saHpiSensorEnableChangeEventState }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorEnableChangeEvent table."
-        ::= { hpiMIBCompliances 11 }
-
-saHpiHotSwapEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHotSwapEventEntryCountTotal,
-                saHpiHotSwapEventEntryCount,
-                saHpiHotSwapEventTimestamp,
-                saHpiHotSwapEventState,
-                saHpiHotSwapEventPreviousState }
-        STATUS current
-        DESCRIPTION
-                "saHpiHotSwapEvent table."
-        ::= { hpiMIBCompliances 12 }
-
-saHpiWatchdogEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiWatchdogEventEntryCountTotal,
-                saHpiWatchdogEventEntryCount,
-                saHpiWatchdogEventTimestamp,
-                saHpiWatchdogEventAction,
-                saHpiWatchdogEventPreTimerAction,
-                saHpiWatchdogEventUse }
-        STATUS current
-        DESCRIPTION
-                "saHpiWatchdogEvent table."
-        ::= { hpiMIBCompliances 13 }
-
-saHpiSoftwareEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSoftwareEventEntryCountTotal,
-                saHpiSoftwareEventEntryCount,
-                saHpiSoftwareEventTimestamp,
-                saHpiSoftwareEventManufacturerIdT,
-                saHpiSoftwareEventType,
-                saHpiSoftwareEventTextType,
-                saHpiSoftwareEventTextLanguage,
-                saHpiSoftwareEventText }
-        STATUS current
-        DESCRIPTION
-                "saHpiSoftwareEvent table."
-        ::= { hpiMIBCompliances 14 }
-
-saHpiOEMEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiOEMEventEntryCountTotal,
-                saHpiOEMEventEntryCount,
-                saHpiOEMEventTimestamp,
-                saHpiOEMEventManufacturerIdT,
-                saHpiOEMEventTextType,
-                saHpiOEMEventTextLanguage,
-                saHpiOEMEventText }
-        STATUS current
-        DESCRIPTION
-                "saHpiOEMEvent table."
-        ::= { hpiMIBCompliances 15 }
-
-saHpiUserEventGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiUserEventEntryCountTotal,
-                saHpiUserEventEntryCount,
-                saHpiUserEventTimestamp,
-                saHpiUserEventTextType,
-                saHpiUserEventTextLanguage,
-                saHpiUserEventText,
-                saHpiUserEventRowStatus }
-        STATUS current
-        DESCRIPTION
-                "saHpiUserEvent table."
-        ::= { hpiMIBCompliances 16 }
-
-saHpiAnnouncementGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiAnnouncementEntryCount,
-		saHpiAnnouncementAnnunciatorNum,
-                saHpiAnnouncementTimestamp,
-                saHpiAnnouncementAddedByUser,
-                saHpiAnnouncementSeverity,
-                saHpiAnnouncementAcknowledged,
-		saHpiAnnouncementAckBySeverity,
-                saHpiAnnouncementStatusCondType,
-                saHpiAnnouncementEntityPath,
-                saHpiAnnouncementSensorNum,
-                saHpiAnnouncementEventState,
-                saHpiAnnouncementName,
-                saHpiAnnouncementMid,
-                saHpiAnnouncementTextType,
-                saHpiAnnouncementTextLanguage,
-                saHpiAnnouncementText,
-                saHpiAnnouncementDelete }
-        STATUS current
-        DESCRIPTION
-                "saHpiAnnouncement table."
-        ::= { hpiMIBCompliances 17 }
-
-saHpiEventLogInfoGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEventLogInfoEntries,
-                saHpiEventLogInfoSize,
-                saHpiEventLogInfoUserEventMaxSize,
-                saHpiEventLogInfoUpdateTimestamp,
-                saHpiEventLogInfoTime,
-                saHpiEventLogInfoIsEnabled,
-                saHpiEventLogInfoOverflowFlag,
-                saHpiEventLogInfoOverflowResetable,
-                saHpiEventLogInfoOverflowAction,
-                saHpiEventLogInfoOverflowReset,
-                saHpiEventLogClear,
-		saHpiDomainEventLogEntryId,
-                saHpiEventLogState }
-        STATUS current
-        DESCRIPTION
-                "saHpiEventLogInfo table."
-        ::= { hpiMIBCompliances 18 }
-
-saHpiEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiEventLogType,
-                saHpiEventLogAddedTimestamp,
-                saHpiEventLogRowPointer }
-        STATUS current
-        DESCRIPTION
-                "saHpiEventLog table."
-        ::= { hpiMIBCompliances 19 }
-
-saHpiResourceEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiResourceEventLogEntryCountTotal,
-                saHpiResourceEventLogEntryCount,
-                saHpiResourceEventLogTimestamp,
-                saHpiResourceEventLogType }
-        STATUS current
-        DESCRIPTION
-                "saHpiResourceEventLog table."
-        ::= { hpiMIBCompliances 20 }
-
-saHpiDomainEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiDomainEventLogEntryCountTotal,
-                saHpiDomainEventLogEntryCount,
-                saHpiDomainEventLogTimestamp,
-                saHpiDomainEventLogType }
-        STATUS current
-        DESCRIPTION
-                "saHpiDomainEventLog table."
-        ::= { hpiMIBCompliances 21 }
-
-saHpiSensorEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorEventLogEntryCountTotal,
-                saHpiSensorEventLogEntryCount,
-                saHpiSensorEventLogTimestamp,
-                saHpiSensorEventLogType,
-                saHpiSensorEventLogCategory,
-                saHpiSensorEventLogAssertion,
-                saHpiSensorEventLogState,
-                saHpiSensorEventLogOptionalData,
-                saHpiSensorEventLogTriggerReadingType,
-                saHpiSensorEventLogTriggerReading,
-                saHpiSensorEventLogTriggerThresholdType,
-                saHpiSensorEventLogTriggerThreshold,
-                saHpiSensorEventLogPreviousState,
-                saHpiSensorEventLogCurrentState,
-                saHpiSensorEventLogOem,
-                saHpiSensorEventLogSpecific }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorEventLog table."
-        ::= { hpiMIBCompliances 22 }
-
-saHpiSensorEnableChangeEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorEnableChangeEventLogEntryCountTotal,
-                saHpiSensorEnableChangeEventLogEntryCount,
-                saHpiSensorEnableChangeEventLogTimestamp,
-                saHpiSensorEnableChangeEventLogType,
-                saHpiSensorEnableChangeEventLogCategory,
-                saHpiSensorEnableChangeEventLogEnabled,
-                saHpiSensorEnableChangeEventLogEventsEnabled,
-                saHpiSensorEnableChangeEventLogAssertEvents,
-                saHpiSensorEnableChangeEventLogDeassertEvents,
-                saHpiSensorEnableChangeEventLogOptionalData,
-                saHpiSensorEnableChangeEventLogState }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorEnableChangeEventLog table."
-        ::= { hpiMIBCompliances 23 }
-
-saHpiHotSwapEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiHotSwapEventLogEntryCountTotal,
-                saHpiHotSwapEventLogEntryCount,
-                saHpiHotSwapEventLogTimestamp,
-                saHpiHotSwapEventLogState,
-                saHpiHotSwapEventLogPreviousState }
-        STATUS current
-        DESCRIPTION
-                "saHpiHotSwapEventLog table."
-        ::= { hpiMIBCompliances 24 }
-
-saHpiWatchdogEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiWatchdogEventLogEntryCountTotal,
-                saHpiWatchdogEventLogEntryCount,
-                saHpiWatchdogEventLogTimestamp,
-                saHpiWatchdogEventLogAction,
-                saHpiWatchdogEventLogPreTimerAction,
-                saHpiWatchdogEventLogUse }
-        STATUS current
-        DESCRIPTION
-                "saHpiWatchdogEventLog table."
-        ::= { hpiMIBCompliances 25 }
-
-saHpiSoftwareEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSoftwareEventLogEntryCountTotal,
-                saHpiSoftwareEventLogEntryCount,
-                saHpiSoftwareEventLogTimestamp,
-                saHpiSoftwareEventLogManufacturerIdT,
-                saHpiSoftwareEventLogType,
-                saHpiSoftwareEventLogTextType,
-                saHpiSoftwareEventLogTextLanguage,
-                saHpiSoftwareEventLogText }
-        STATUS current
-        DESCRIPTION
-                "saHpiSoftwareEventLog table."
-        ::= { hpiMIBCompliances 26 }
-
-saHpiOEMEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiOEMEventLogEntryCountTotal,
-                saHpiOEMEventLogEntryCount,
-                saHpiOEMEventLogTimestamp,
-                saHpiOEMEventLogManufacturerIdT,
-                saHpiOEMEventLogTextType,
-                saHpiOEMEventLogTextLanguage,
-                saHpiOEMEventLogText }
-        STATUS current
-        DESCRIPTION
-                "saHpiOEMEventLog table."
-        ::= { hpiMIBCompliances 27 }
-
-saHpiUserEventLogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiUserEvenLogtEntryCountTotal,
-                saHpiUserEventLogEntryCount,
-                saHpiUserEventLogTimestamp,
-                saHpiUserEventLogTextType,
-                saHpiUserEventLogTextLanguage,
-                saHpiUserEventLogText,
-                saHpiUserEventLogRowStatus }
-        STATUS current
-        DESCRIPTION
-                "saHpiUserEventLog table."
-        ::= { hpiMIBCompliances 28 }
-
-saHpiRdrGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiRdrEntryCount,
-                saHpiRdrEntryId,
-                saHpiRdrNextEntryId,
-                saHpiRdrType,
-                saHpiRdrEntityPath,
-                saHpiRdrIsFru,
-                saHpiRdrRowPointer,
-                saHpiRdrRPT,
-                saHpiRdrTextType,
-                saHpiRdrTextLanguage,
-                saHpiRdrIdString }
-        STATUS current
-        DESCRIPTION
-                "saHpiRdr table."
-        ::= { hpiMIBCompliances 29 }
-
-saHpiCtrlDigitalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlDigitalEntryCount,
-                saHpiCtrlDigitalNum,
-                saHpiCtrlDigitalOutputType,
-                saHpiCtrlDigitalDefaultMode,
-                saHpiCtrlDigitalMode,
-                saHpiCtrlDigitalIsReadOnly,
-                saHpiCtrlDigitalIsWriteOnly,
-                saHpiCtrlDigitalDefaultState,
-                saHpiCtrlDigitalState,
-                saHpiCtrlDigitalOem,
-                saHpiCtrlDigitalRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlDigital table."
-        ::= { hpiMIBCompliances 30 }
-
-saHpiCtrlDiscreteGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlDiscreteEntryCount,
-                saHpiCtrlDiscreteNum,
-                saHpiCtrlDiscreteOutputType,
-                saHpiCtrlDiscreteDefaultMode,
-                saHpiCtrlDiscreteMode,
-                saHpiCtrlDiscreteIsReadOnly,
-                saHpiCtrlDiscreteIsWriteOnly,
-                saHpiCtrlDiscreteDefaultState,
-                saHpiCtrlDiscreteState,
-                saHpiCtrlDiscreteOem,
-                saHpiCtrlDiscreteRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlDiscrete table."
-        ::= { hpiMIBCompliances 31 }
-
-saHpiCtrlAnalogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlAnalogEntryCount,
-                saHpiCtrlAnalogNum,
-                saHpiCtrlAnalogOutputType,
-                saHpiCtrlAnalogDefaultMode,
-                saHpiCtrlAnalogMode,
-                saHpiCtrlAnalogIsReadOnly,
-                saHpiCtrlAnalogIsWriteOnly,
-                saHpiCtrlAnalogDefaultMinState,
-                saHpiCtrlAnalogDefaultMaxState,
-                saHpiCtrlAnalogDefaultState,
-                saHpiCtrlAnalogState,
-                saHpiCtrlAnalogOem,
-                saHpiCtrlAnalogRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlAnalog table."
-        ::= { hpiMIBCompliances 32 }
-
-saHpiCtrlStreamGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlStreamEntryCount,
-                saHpiCtrlStreamNum,
-                saHpiCtrlStreamOutputType,
-                saHpiCtrlStreamDefaultMode,
-                saHpiCtrlStreamMode,
-                saHpiCtrlStreamIsReadOnly,
-                saHpiCtrlStreamIsWriteOnly,
-                saHpiCtrlStreamDefaultRepeat,
-                saHpiCtrlStreamDefaultState,
-                saHpiCtrlStreamRepeat,
-                saHpiCtrlStreamState,
-                saHpiCtrlStreamOem,
-                saHpiCtrlStreamRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlStream table."
-        ::= { hpiMIBCompliances 33 }
-
-saHpiCtrlTextGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlTextEntryCount,
-                saHpiCtrlTextNum,
-                saHpiCtrlTextOutputType,
-                saHpiCtrlTextDefaultMode,
-                saHpiCtrlTextMode,
-                saHpiCtrlTextIsReadOnly,
-                saHpiCtrlTextIsWriteOnly,
-                saHpiCtrlTextMaxChars,
-                saHpiCtrlTextMaxLines,
-                saHpiCtrlTextLanguage,
-                saHpiCtrlTextType,
-                saHpiCtrlTextDefaultLine,
-                saHpiCtrlTextDefault,
-                saHpiCtrlTextLine,
-                saHpiCtrlTextState,
-                saHpiCtrlTextOem,
-                saHpiCtrlTextRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlText table."
-        ::= { hpiMIBCompliances 34 }
-
-saHpiCtrlOemGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCtrlOemEntryCount,
-                saHpiCtrlOemNum,
-                saHpiCtrlOemOutputType,
-                saHpiCtrlOemDefaultMode,
-                saHpiCtrlOemMode,
-                saHpiCtrlOemIsReadOnly,
-                saHpiCtrlOemIsWriteOnly,
-                saHpiCtrlOemManufacturerId,
-                saHpiCtrlOemDefaultConfigData,
-                saHpiCtrlOemDefaultMId,
-                saHpiCtrlOemDefaultState,
-                saHpiCtrlOemState,
-                saHpiCtrlOemValue,
-                saHpiCtrlOemRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiCtrlOem table."
-        ::= { hpiMIBCompliances 35 }
-
-saHpiSensorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorEntryCount,
-                saHpiSensorType,
-                saHpiSensorCategory,
-                saHpiSensorEnableCtrl,
-                saHpiSensorEventCtrl,
-                saHpiSensorSupportedEventStates,
-                saHpiSensorIsSupported,
-                saHpiSensorReadingType,
-                saHpiSensorBaseUnits,
-                saHpiSensorModifierUnits,
-                saHpiSensorModifierUse,
-                saHpiSensorPercentage,
-                saHpiSensorRangeFlags,
-                saHpiSensorAccuracyFactor,
-                saHpiSensorOem,
-                saHpiSensorRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensor table."
-        ::= { hpiMIBCompliances 36 }
-
-saHpiCurrentSensorStateGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiCurrentSensorStateDataPresent,
-                saHpiCurrentSensorStateType,
-                saHpiCurrentSensorStateValue,
-                saHpiCurrentSensorStateEventState,
-                saHpiCurrentSensorStateSensorEnable,
-                saHpiCurrentSensorStateEventEnable,
-                saHpiCurrentSensorStateAssertAddEventMask,
-                saHpiCurrentSensorStateAssertRemoveEventMask,
-                saHpiCurrentSensorStateDeassertAddEventMask,
-                saHpiCurrentSensorStateDeassertRemoveEventMask }
-        STATUS current
-        DESCRIPTION
-                "saHpiCurrentSensorState table."
-        ::= { hpiMIBCompliances 37 }
-
-saHpiSensorReadingMaxGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorReadingMaxIsSupported,
-                saHpiSensorReadingMaxType,
-                saHpiSensorReadingMaxValue }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorReadingMax table."
-        ::= { hpiMIBCompliances 38 }
-
-saHpiSensorReadingMinGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorReadingMinIsSupported,
-                saHpiSensorReadingMinType,
-                saHpiSensorReadingMinValue }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorReadingMin table."
-        ::= { hpiMIBCompliances 39 }
-
-saHpiSensorReadingNominalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorReadingNominalIsSupported,
-                saHpiSensorReadingNominalType,
-                saHpiSensorReadingNominalValue }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorReadingNominal table."
-        ::= { hpiMIBCompliances 40 }
-
-saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorReadingNormalMaxIsSupported,
-                saHpiSensorReadingNormalMaxType,
-                saHpiSensorReadingNormalMaxValue }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorReadingNormalMax table."
-        ::= { hpiMIBCompliances 41 }
-
-saHpiSensorReadingNormalMinGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorReadingNormalMinIsSupported,
-                saHpiSensorReadingNormalMinType,
-                saHpiSensorReadingNormalMinValue }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorReadingNormalMin table."
-        ::= { hpiMIBCompliances 42 }
-
-saHpiSensorThdLowCriticalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowCriticalIsReadable,
-                saHpiSensorThdLowCriticalIsWritable,
-                saHpiSensorThdLowCriticalType,
-                saHpiSensorThdLowCriticalValue,
-                saHpiSensorThdLowCriticalNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdLowCritical table."
-        ::= { hpiMIBCompliances 43 }
-
-saHpiSensorThdLowMajorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowMajorIsReadable,
-                saHpiSensorThdLowMajorIsWritable,
-                saHpiSensorThdLowMajorType,
-                saHpiSensorThdLowMajorValue,
-                saHpiSensorThdLowMajorNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdLowMajor table."
-        ::= { hpiMIBCompliances 44 }
-
-saHpiSensorThdLowMinorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdLowMinorIsReadable,
-                saHpiSensorThdLowMinorIsWritable,
-                saHpiSensorThdLowMinorType,
-                saHpiSensorThdLowMinorValue,
-                saHpiSensorThdLowMinorNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdLowMinor table."
-        ::= { hpiMIBCompliances 45 }
-
-saHpiSensorThdUpCriticalGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdUpCriticalIsReadable,
-                saHpiSensorThdUpCriticalIsWritable,
-                saHpiSensorThdUpCriticalType,
-                saHpiSensorThdUpCriticalValue,
-                saHpiSensorThdUpCriticalNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdUpCritical table."
-        ::= { hpiMIBCompliances 46 }
-
-saHpiSensorThdUpMajorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdUpMajorIsReadable,
-                saHpiSensorThdUpMajorIsWritable,
-                saHpiSensorThdUpMajorType,
-                saHpiSensorThdUpMajorValue,
-                saHpiSensorThdUpMajorNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdUpMajor table."
-        ::= { hpiMIBCompliances 47 }
-
-saHpiSensorThdUpMinorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdUpMinorIsReadable,
-                saHpiSensorThdUpMinorIsWritable,
-                saHpiSensorThdUpMinorType,
-                saHpiSensorThdUpMinorValue,
-                saHpiSensorThdUpMinorNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdUpMinor table."
-        ::= { hpiMIBCompliances 48 }
-
-saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdPosHysteresisIsReadable,
-                saHpiSensorThdPosHysteresisIsWritable,
-                saHpiSensorThdPosHysteresisType,
-                saHpiSensorThdPosHysteresisValue,
-                saHpiSensorThdPosHysteresisNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdPosHysteresis table."
-        ::= { hpiMIBCompliances 49 }
-
-saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiSensorThdNegHysteresisIsReadable,
-                saHpiSensorThdNegHysteresisIsWritable,
-                saHpiSensorThdNegHysteresisType,
-                saHpiSensorThdNegHysteresisValue,
-                saHpiSensorThdNegHysteresisNonLinear }
-        STATUS current
-        DESCRIPTION
-                "saHpiSensorThdNegHysteresis table."
-        ::= { hpiMIBCompliances 50 }
-
-saHpiInventoryGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiInventoryEntryCount,
-                saHpiInventoryPersistent,
-                saHpiInventoryOEM,
-                saHpiInventoryUpdateCount,
-                saHpiInventoryIsReadOnly,
-                saHpiInventoryNumAreas,
-                saHpiInventoryRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiInventory table."
-        ::= { hpiMIBCompliances 51 }
-
-saHpiAreaGroup OBJECT-GROUP
-        OBJECTS {
-		saHpiAreaId,
-		saHpiAreaIdIndex,
-                saHpiAreaEntryCount,
-                saHpiAreaType,
-                saHpiAreaIsReadOnly,
-                saHpiAreaRowStatus,
-                saHpiAreaNumDataFields }
-        STATUS current
-        DESCRIPTION
-                "saHpiArea table."
-        ::= { hpiMIBCompliances 52 }
-
-saHpiFieldGroup OBJECT-GROUP
-        OBJECTS {
-		saHpiFieldId,
-		saHpiFieldIdIndex,
-                saHpiFieldEntryCount,
-                saHpiFieldType,
-                saHpiFieldIsReadOnly,
-                saHpiFieldTextType,
-                saHpiFieldTextLanguage,
-                saHpiFieldText,
-                saHpiFieldStatus }
-        STATUS current
-        DESCRIPTION
-                "saHpiField table."
-        ::= { hpiMIBCompliances 53 }
-
-saHpiWatchdogGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiWatchdogEntryCount,
-                saHpiWatchdogLog,
-                saHpiWatchdogRunning,
-                saHpiWatchdogTimerUseState,
-                saHpiWatchdogTimerAction,
-                saHpiWatchdogPretimerInterrupt,
-                saHpiWatchdogPreTimeoutInterval,
-                saHpiWatchdogTimerUseExpFlags,
-                saHpiWatchdogTimerInitialCount,
-                saHpiWatchdogTimerPresentCount,
-                saHpiWatchdogTimerReset,
-                saHpiWatchdogOem,
-                saHpiWatchdogRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiWatchdog table."
-        ::= { hpiMIBCompliances 54 }
-
-saHpiAnnunciatorGroup OBJECT-GROUP
-        OBJECTS {
-                saHpiAnnunciatorEntryCount,
-                saHpiAnnunciatorType,
-                saHpiAnnunciatorModeReadOnly,
-                saHpiAnnunciatorMaxConditions,
-                saHpiAnnunciatorMode,
-                saHpiAnnunciatorOem,
-                saHpiAnnunciatorRDR }
-        STATUS current
-        DESCRIPTION
-                "saHpiAnnunciator table."
-        ::= { hpiMIBCompliances 55 }
-
-saHpiNotificationGroup NOTIFICATION-GROUP
-        NOTIFICATIONS {
-                saHpiSensorNotification,
-                saHpiSensorEnableChangeNotification,
-                saHpiResourceNotifications,
-                saHpiDomainNotifications,
-                saHpiWatchdogNotification,
-                saHpiHotSwapNotification,
-                saHpiSoftwareNotifications,
-                saHpiOEMNotifications,
-                saHpiUserNotifications }
-        STATUS current
-        DESCRIPTION
-                "Notification group."
-        ::= { hpiMIBCompliances 56 }
-
-saHpiAdministrationGroup NOTIFICATION-GROUP
-        NOTIFICATIONS {
-                saHpiHpiVersion,
-                saHpiAgentVersion,
-                saHpiSNMPResourceId,
-                saHpiDiscover }
-        STATUS current
-        DESCRIPTION
-                "Administration group."
-        ::= { hpiMIBCompliances 57 }
-
-
-saHpiMIBCompliance MODULE-COMPLIANCE
-        STATUS current
-        DESCRIPTION
-                "The compliance statement for SMIv2
-                  compliance of platform MIB."
-
-        MODULE 
+        MODULE  -- this module
         MANDATORY-GROUPS {
                         saHpiDomainInfoGroup,
                         saHpiDomainReferenceGroup,
@@ -12299,7 +11428,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                         saHpiHotSwapEventGroup,
                         saHpiWatchdogEventGroup,
                         saHpiSoftwareEventGroup,
-                        saHpiOEMEventGroup,
+                        saHpiOemEventGroup,
                         saHpiUserEventGroup,
                         saHpiAnnouncementGroup,
                         saHpiEventLogInfoGroup,
@@ -12311,7 +11440,7 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                         saHpiHotSwapEventLogGroup,
                         saHpiWatchdogEventLogGroup,
                         saHpiSoftwareEventLogGroup,
-                        saHpiOEMEventLogGroup,
+                        saHpiOemEventLogGroup,
                         saHpiUserEventLogGroup,
                         saHpiRdrGroup,
                         saHpiCtrlDigitalGroup,
@@ -12340,7 +11469,873 @@ saHpiMIBCompliance MODULE-COMPLIANCE
                         saHpiFieldGroup,
                         saHpiWatchdogGroup,
                         saHpiAnnunciatorGroup }
+        ::= { hpiCompliances 1 }
 
-        ::= { hpiMIBCompliances 58 }
+saHpiDomainInfoGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHpiVersion,
+                saHpiDiscover,
+                saHpiAgentVersion,
+                saHpiDomainInfoActiveEntries,
+                saHpiDomainCapabilities,
+                saHpiDomainIsPeer,
+                saHpiDomainTagTextType,
+                saHpiDomainTagTextLanguage,
+                saHpiDomainTag,
+                saHpiDomainReferenceUpdateCount,
+                saHpiDomainReferenceUpdateTimestamp,
+                saHpiDomainResourcePresenceUpdateCount,
+                saHpiDomainResourcePresenceUpdateTimestamp,
+                saHpiDomainAlarmUpdateCount,
+                saHpiDomainAlarmUpdateTimestamp,
+                saHpiDomainActiveAlarms,
+                saHpiDomainCriticalAlarms,
+                saHpiDomainMajorAlarms,
+                saHpiDomainMinorAlarms,
+                saHpiDomainAlarmUserLimit,
+                saHpiDomainAlarmOverflow,
+                saHpiSnmpResourceId,
+                saHpiDomainGuid }
+        STATUS current
+        DESCRIPTION
+                "saHpiDomainInfo table."
+        ::= { hpiGroups 1 }
+
+saHpiDomainReferenceGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiDomainReferenceActiveEntries,
+                saHpiDomainReferenceIsPeer }
+        STATUS current
+        DESCRIPTION
+                "saHpiDomainReference table."
+        ::= { hpiGroups 2 }
+
+saHpiDomainAlarmGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiDomainAlarmActiveEntries,
+                saHpiDomainAlarmTimestamp,
+                saHpiDomainAlarmSeverity,
+                saHpiDomainAlarmAcknowledged,
+                saHpiDomainAlarmAckBySeverity,
+                saHpiDomainAlarmCondStatusCondType,
+                saHpiDomainAlarmCondEntityPath,
+                saHpiDomainAlarmCondSensorNum,
+                saHpiDomainAlarmCondEventState,
+                saHpiDomainAlarmCondNameValue,
+                saHpiDomainAlarmCondMid,
+                saHpiDomainAlarmCondTextType,
+                saHpiDomainAlarmCondTextLanguage,
+                saHpiDomainAlarmCondText,
+                saHpiDomainAlarmRowStatus }
+        STATUS current
+        DESCRIPTION
+                "saHpiDomainAlarm table."
+        ::= { hpiGroups 3 }
+
+saHpiResourceGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiResourceActiveEntries,
+                saHpiResourceId,
+                saHpiResourceEntityPath,
+                saHpiResourceCapabilities,
+                saHpiResourceHotSwapCapabilities,
+                saHpiResourceSeverity,
+                saHpiResourceFailed,
+                saHpiResourceInfoResourceRev,
+                saHpiResourceInfoSpecificVer,
+                saHpiResourceInfoDeviceSupport,
+                saHpiResourceInfoManufacturerId,
+                saHpiResourceInfoProductId,
+                saHpiResourceInfoFirmwareMajorRev,
+                saHpiResourceInfoFirmwareMinorRev,
+                saHpiResourceInfoAuxFirmwareRev,
+                saHpiResourceInfoGuid,
+                saHpiResourceTagTextType,
+                saHpiResourceTagTextLanguage,
+                saHpiResourceTag,
+                saHpiResourceParmControl,
+                saHpiResourceResetAction,
+                saHpiResourcePowerAction }
+        STATUS current
+        DESCRIPTION
+                "saHpiResource table."
+        ::= { hpiGroups 4 }
+
+saHpiAutoInsertTimeoutGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiAutoInsertTimeoutForInsert }
+        STATUS current
+        DESCRIPTION
+                "saHpiAutoInsertTimeout table."
+        ::= { hpiGroups 5 }
+
+saHpiHotSwapGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHotSwapActiveEntries,
+                saHpiHotSwapIndicator,
+                saHpiHotSwapState,
+                saHpiHotSwapExtractTimeout,
+                saHpiHotSwapActionRequest,
+                saHpiHotSwapPolicyCancel,
+                saHpiHotSwapResourceRequest }
+        STATUS current
+        DESCRIPTION
+                "saHpiHotSwap table."
+        ::= { hpiGroups 6 }
+
+saHpiEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiEventLifetimeEntries,
+                saHpiEventActiveEntries,
+                saHpiEventSeverity,
+                saHpiEventSaHpiTime,
+                saHpiEventType }
+        STATUS current
+        DESCRIPTION
+                "saHpiEvent table."
+        ::= { hpiGroups 7 }
+
+saHpiResourceEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiResourceEventLifetimeEntries,
+                saHpiResourceEventActiveEntries,
+                saHpiResourceEventTimestamp,
+                saHpiResourceEventType }
+        STATUS current
+        DESCRIPTION
+                "saHpiResourceEvent table."
+        ::= { hpiGroups 8 }
+
+saHpiDomainEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiDomainEventLifetimeEntries,
+                saHpiDomainEventActiveEntries,
+                saHpiDomainEventTimestamp,
+                saHpiDomainEventType }
+        STATUS current
+        DESCRIPTION
+                "saHpiDomainEvent table."
+        ::= { hpiGroups 9 }
+
+saHpiSensorEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorEventLifetimeEntries,
+                saHpiSensorEventActiveEntries,
+                saHpiSensorEventTimestamp,
+                saHpiSensorEventType,
+                saHpiSensorEventCategory,
+                saHpiSensorEventAssertion,
+                saHpiSensorEventState,
+                saHpiSensorEventOptionalData,
+                saHpiSensorEventTriggerReadingType,
+                saHpiSensorEventTriggerReading,
+                saHpiSensorEventTriggerThresholdType,
+                saHpiSensorEventTriggerThreshold,
+                saHpiSensorEventPreviousState,
+                saHpiSensorEventCurrentState,
+                saHpiSensorEventOem,
+                saHpiSensorEventSpecific }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorEvent table."
+        ::= { hpiGroups 10 }
+
+saHpiSensorEnableChangeEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorEnableChangeEventLifetimeEntries,
+                saHpiSensorEnableChangeEventActiveEntries,
+                saHpiSensorEnableChangeEventTimestamp,
+                saHpiSensorEnableChangeEventType,
+                saHpiSensorEnableChangeEventCategory,
+                saHpiSensorEnableChangeEventEnabled,
+                saHpiSensorEnableChangeEventEventsEnabled,
+                saHpiSensorEnableChangeEventAssertEvents,
+                saHpiSensorEnableChangeEventDeassertEvents,
+                saHpiSensorEnableChangeEventOptionalData,
+                saHpiSensorEnableChangeEventState }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorEnableChangeEvent table."
+        ::= { hpiGroups 11 }
+
+saHpiHotSwapEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHotSwapEventLifetimeEntries,
+                saHpiHotSwapEventActiveEntries,
+                saHpiHotSwapEventTimestamp,
+                saHpiHotSwapEventState,
+                saHpiHotSwapEventPreviousState }
+        STATUS current
+        DESCRIPTION
+                "saHpiHotSwapEvent table."
+        ::= { hpiGroups 12 }
+
+saHpiWatchdogEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiWatchdogEventLifetimeEntries,
+                saHpiWatchdogEventActiveEntries,
+                saHpiWatchdogEventTimestamp,
+                saHpiWatchdogEventAction,
+                saHpiWatchdogEventPreTimerAction,
+                saHpiWatchdogEventUse }
+        STATUS current
+        DESCRIPTION
+                "saHpiWatchdogEvent table."
+        ::= { hpiGroups 13 }
+
+saHpiSoftwareEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSoftwareEventLifetimeEntries,
+                saHpiSoftwareEventActiveEntries,
+                saHpiSoftwareEventTimestamp,
+                saHpiSoftwareEventManufacturerIdT,
+                saHpiSoftwareEventType,
+                saHpiSoftwareEventTextType,
+                saHpiSoftwareEventTextLanguage,
+                saHpiSoftwareEventText }
+        STATUS current
+        DESCRIPTION
+                "saHpiSoftwareEvent table."
+        ::= { hpiGroups 14 }
+
+saHpiOemEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiOemEventLifetimeEntries,
+                saHpiOemEventActiveEntries,
+                saHpiOemEventTimestamp,
+                saHpiOemEventManufacturerIdT,
+                saHpiOemEventTextType,
+                saHpiOemEventTextLanguage,
+                saHpiOemEventText }
+        STATUS current
+        DESCRIPTION
+                "saHpiOemEvent table."
+        ::= { hpiGroups 15 }
+
+saHpiUserEventGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiUserEventLifetimeEntries,
+                saHpiUserEventActiveEntries,
+                saHpiUserEventTimestamp,
+                saHpiUserEventTextType,
+                saHpiUserEventTextLanguage,
+                saHpiUserEventText,
+                saHpiUserEventRowStatus }
+        STATUS current
+        DESCRIPTION
+                "saHpiUserEvent table."
+        ::= { hpiGroups 16 }
+
+saHpiAnnouncementGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiAnnouncementActiveEntries,
+                saHpiAnnouncementAnnunciatorNum,
+                saHpiAnnouncementTimestamp,
+                saHpiAnnouncementAddedByUser,
+                saHpiAnnouncementSeverity,
+                saHpiAnnouncementAcknowledged,
+                saHpiAnnouncementAckBySeverity,
+                saHpiAnnouncementStatusCondType,
+                saHpiAnnouncementEntityPath,
+                saHpiAnnouncementSensorNum,
+                saHpiAnnouncementEventState,
+                saHpiAnnouncementName,
+                saHpiAnnouncementMid,
+                saHpiAnnouncementTextType,
+                saHpiAnnouncementTextLanguage,
+                saHpiAnnouncementText,
+                saHpiAnnouncementDelete }
+        STATUS current
+        DESCRIPTION
+                "saHpiAnnouncement table."
+        ::= { hpiGroups 17 }
+
+saHpiEventLogInfoGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiEventLogInfoEntries,
+                saHpiEventLogInfoSize,
+                saHpiEventLogInfoUserEventMaxSize,
+                saHpiEventLogInfoUpdateTimestamp,
+                saHpiEventLogInfoTime,
+                saHpiEventLogInfoIsEnabled,
+                saHpiEventLogInfoOverflowFlag,
+                saHpiEventLogInfoOverflowResetable,
+                saHpiEventLogInfoOverflowAction,
+                saHpiEventLogInfoOverflowReset,
+                saHpiEventLogClear,
+                saHpiDomainEventLogEntryId,
+                saHpiEventLogState }
+        STATUS current
+        DESCRIPTION
+                "saHpiEventLogInfo table."
+        ::= { hpiGroups 18 }
+
+saHpiEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiEventLogType,
+                saHpiEventLogAddedTimestamp,
+                saHpiEventLogRowPointer }
+        STATUS current
+        DESCRIPTION
+                "saHpiEventLog table."
+        ::= { hpiGroups 19 }
+
+saHpiResourceEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiResourceEventLogLifetimeEntries,
+                saHpiResourceEventLogActiveEntries,
+                saHpiResourceEventLogTimestamp,
+                saHpiResourceEventLogType }
+        STATUS current
+        DESCRIPTION
+                "saHpiResourceEventLog table."
+        ::= { hpiGroups 20 }
+
+saHpiDomainEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiDomainEventLogLifetimeEntries,
+                saHpiDomainEventLogActiveEntries,
+                saHpiDomainEventLogTimestamp,
+                saHpiDomainEventLogType }
+        STATUS current
+        DESCRIPTION
+                "saHpiDomainEventLog table."
+        ::= { hpiGroups 21 }
+
+saHpiSensorEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorEventLogLifetimeEntries,
+                saHpiSensorEventLogActiveEntries,
+                saHpiSensorEventLogTimestamp,
+                saHpiSensorEventLogType,
+                saHpiSensorEventLogCategory,
+                saHpiSensorEventLogAssertion,
+                saHpiSensorEventLogState,
+                saHpiSensorEventLogOptionalData,
+                saHpiSensorEventLogTriggerReadingType,
+                saHpiSensorEventLogTriggerReading,
+                saHpiSensorEventLogTriggerThresholdType,
+                saHpiSensorEventLogTriggerThreshold,
+                saHpiSensorEventLogPreviousState,
+                saHpiSensorEventLogCurrentState,
+                saHpiSensorEventLogOem,
+                saHpiSensorEventLogSpecific }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorEventLog table."
+        ::= { hpiGroups 22 }
+
+saHpiSensorEnableChangeEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorEnableChangeEventLogLifetimeEntries,
+                saHpiSensorEnableChangeEventLogActiveEntries,
+                saHpiSensorEnableChangeEventLogTimestamp,
+                saHpiSensorEnableChangeEventLogType,
+                saHpiSensorEnableChangeEventLogCategory,
+                saHpiSensorEnableChangeEventLogEnabled,
+                saHpiSensorEnableChangeEventLogEventsEnabled,
+                saHpiSensorEnableChangeEventLogAssertEvents,
+                saHpiSensorEnableChangeEventLogDeassertEvents,
+                saHpiSensorEnableChangeEventLogOptionalData,
+                saHpiSensorEnableChangeEventLogState }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorEnableChangeEventLog table."
+        ::= { hpiGroups 23 }
+
+saHpiHotSwapEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHotSwapEventLogLifetimeEntries,
+                saHpiHotSwapEventLogActiveEntries,
+                saHpiHotSwapEventLogTimestamp,
+                saHpiHotSwapEventLogState,
+                saHpiHotSwapEventLogPreviousState }
+        STATUS current
+        DESCRIPTION
+                "saHpiHotSwapEventLog table."
+        ::= { hpiGroups 24 }
+
+saHpiWatchdogEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiWatchdogEventLogLifetimeEntries,
+                saHpiWatchdogEventLogActiveEntries,
+                saHpiWatchdogEventLogTimestamp,
+                saHpiWatchdogEventLogAction,
+                saHpiWatchdogEventLogPreTimerAction,
+                saHpiWatchdogEventLogUse }
+        STATUS current
+        DESCRIPTION
+                "saHpiWatchdogEventLog table."
+        ::= { hpiGroups 25 }
+
+saHpiSoftwareEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSoftwareEventLogLifetimeEntries,
+                saHpiSoftwareEventLogActiveEntries,
+                saHpiSoftwareEventLogTimestamp,
+                saHpiSoftwareEventLogManufacturerIdT,
+                saHpiSoftwareEventLogType,
+                saHpiSoftwareEventLogTextType,
+                saHpiSoftwareEventLogTextLanguage,
+                saHpiSoftwareEventLogText }
+        STATUS current
+        DESCRIPTION
+                "saHpiSoftwareEventLog table."
+        ::= { hpiGroups 26 }
+
+saHpiOemEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiOemEventLogLifetimeEntries,
+                saHpiOemEventLogActiveEntries,
+                saHpiOemEventLogTimestamp,
+                saHpiOemEventLogManufacturerIdT,
+                saHpiOemEventLogTextType,
+                saHpiOemEventLogTextLanguage,
+                saHpiOemEventLogText }
+        STATUS current
+        DESCRIPTION
+                "saHpiOemEventLog table."
+        ::= { hpiGroups 27 }
+
+saHpiUserEventLogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiUserEventLogLifetimeEntries,
+                saHpiUserEventLogActiveEntries,
+                saHpiUserEventLogTimestamp,
+                saHpiUserEventLogTextType,
+                saHpiUserEventLogTextLanguage,
+                saHpiUserEventLogText,
+                saHpiUserEventLogRowStatus }
+        STATUS current
+        DESCRIPTION
+                "saHpiUserEventLog table."
+        ::= { hpiGroups 28 }
+
+saHpiRdrGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiRdrActiveEntries,
+                saHpiRdrNextEntryId,
+                saHpiRdrType,
+                saHpiRdrEntityPath,
+                saHpiRdrIsFru,
+                saHpiRdrRowPointer,
+                saHpiRdrRPT,
+                saHpiRdrTextType,
+                saHpiRdrTextLanguage,
+                saHpiRdrIdString }
+        STATUS current
+        DESCRIPTION
+                "saHpiRdr table."
+        ::= { hpiGroups 29 }
+
+saHpiCtrlDigitalGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlDigitalActiveEntries,
+                saHpiCtrlDigitalNum,
+                saHpiCtrlDigitalOutputType,
+                saHpiCtrlDigitalDefaultMode,
+                saHpiCtrlDigitalMode,
+                saHpiCtrlDigitalIsReadOnly,
+                saHpiCtrlDigitalIsWriteOnly,
+                saHpiCtrlDigitalDefaultState,
+                saHpiCtrlDigitalState,
+                saHpiCtrlDigitalOem,
+                saHpiCtrlDigitalRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlDigital table."
+        ::= { hpiGroups 30 }
+
+saHpiCtrlDiscreteGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlDiscreteActiveEntries,
+                saHpiCtrlDiscreteNum,
+                saHpiCtrlDiscreteOutputType,
+                saHpiCtrlDiscreteDefaultMode,
+                saHpiCtrlDiscreteMode,
+                saHpiCtrlDiscreteIsReadOnly,
+                saHpiCtrlDiscreteIsWriteOnly,
+                saHpiCtrlDiscreteDefaultState,
+                saHpiCtrlDiscreteState,
+                saHpiCtrlDiscreteOem,
+                saHpiCtrlDiscreteRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlDiscrete table."
+        ::= { hpiGroups 31 }
+
+saHpiCtrlAnalogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlAnalogActiveEntries,
+                saHpiCtrlAnalogNum,
+                saHpiCtrlAnalogOutputType,
+                saHpiCtrlAnalogDefaultMode,
+                saHpiCtrlAnalogMode,
+                saHpiCtrlAnalogIsReadOnly,
+                saHpiCtrlAnalogIsWriteOnly,
+                saHpiCtrlAnalogDefaultMinState,
+                saHpiCtrlAnalogDefaultMaxState,
+                saHpiCtrlAnalogDefaultState,
+                saHpiCtrlAnalogState,
+                saHpiCtrlAnalogOem,
+                saHpiCtrlAnalogRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlAnalog table."
+        ::= { hpiGroups 32 }
+
+saHpiCtrlStreamGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlStreamActiveEntries,
+                saHpiCtrlStreamNum,
+                saHpiCtrlStreamOutputType,
+                saHpiCtrlStreamDefaultMode,
+                saHpiCtrlStreamMode,
+                saHpiCtrlStreamIsReadOnly,
+                saHpiCtrlStreamIsWriteOnly,
+                saHpiCtrlStreamDefaultRepeat,
+                saHpiCtrlStreamDefaultState,
+                saHpiCtrlStreamRepeat,
+                saHpiCtrlStreamState,
+                saHpiCtrlStreamOem,
+                saHpiCtrlStreamRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlStream table."
+        ::= { hpiGroups 33 }
+
+saHpiCtrlTextGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlTextActiveEntries,
+                saHpiCtrlTextNum,
+                saHpiCtrlTextOutputType,
+                saHpiCtrlTextDefaultMode,
+                saHpiCtrlTextMode,
+                saHpiCtrlTextIsReadOnly,
+                saHpiCtrlTextIsWriteOnly,
+                saHpiCtrlTextMaxChars,
+                saHpiCtrlTextMaxLines,
+                saHpiCtrlTextLanguage,
+                saHpiCtrlTextType,
+                saHpiCtrlTextDefaultLine,
+                saHpiCtrlTextDefault,
+                saHpiCtrlTextLine,
+                saHpiCtrlTextState,
+                saHpiCtrlTextOem,
+                saHpiCtrlTextRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlText table."
+        ::= { hpiGroups 34 }
+
+saHpiCtrlOemGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCtrlOemActiveEntries,
+                saHpiCtrlOemNum,
+                saHpiCtrlOemOutputType,
+                saHpiCtrlOemDefaultMode,
+                saHpiCtrlOemMode,
+                saHpiCtrlOemIsReadOnly,
+                saHpiCtrlOemIsWriteOnly,
+                saHpiCtrlOemManufacturerId,
+                saHpiCtrlOemDefaultConfigData,
+                saHpiCtrlOemDefaultMId,
+                saHpiCtrlOemDefaultState,
+                saHpiCtrlOemState,
+                saHpiCtrlOemValue,
+                saHpiCtrlOemRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiCtrlOem table."
+        ::= { hpiGroups 35 }
+
+saHpiSensorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorActiveEntries,
+                saHpiSensorType,
+                saHpiSensorCategory,
+                saHpiSensorEnableCtrl,
+                saHpiSensorEventCtrl,
+                saHpiSensorSupportedEventStates,
+                saHpiSensorIsSupported,
+                saHpiSensorReadingType,
+                saHpiSensorBaseUnits,
+                saHpiSensorModifierUnits,
+                saHpiSensorModifierUse,
+                saHpiSensorPercentage,
+                saHpiSensorRangeFlags,
+                saHpiSensorAccuracyFactor,
+                saHpiSensorOem,
+                saHpiSensorRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensor table."
+        ::= { hpiGroups 36 }
+
+saHpiCurrentSensorStateGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiCurrentSensorStateDataPresent,
+                saHpiCurrentSensorStateType,
+                saHpiCurrentSensorStateValue,
+                saHpiCurrentSensorStateEventState,
+                saHpiCurrentSensorStateSensorEnable,
+                saHpiCurrentSensorStateEventEnable,
+                saHpiCurrentSensorStateAssertAddEventMask,
+                saHpiCurrentSensorStateAssertRemoveEventMask,
+                saHpiCurrentSensorStateDeassertAddEventMask,
+                saHpiCurrentSensorStateDeassertRemoveEventMask }
+        STATUS current
+        DESCRIPTION
+                "saHpiCurrentSensorState table."
+        ::= { hpiGroups 37 }
+
+saHpiSensorReadingMaxGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorReadingMaxIsSupported,
+                saHpiSensorReadingMaxType,
+                saHpiSensorReadingMaxValue }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorReadingMax table."
+        ::= { hpiGroups 38 }
+
+saHpiSensorReadingMinGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorReadingMinIsSupported,
+                saHpiSensorReadingMinType,
+                saHpiSensorReadingMinValue }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorReadingMin table."
+        ::= { hpiGroups 39 }
+
+saHpiSensorReadingNominalGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorReadingNominalIsSupported,
+                saHpiSensorReadingNominalType,
+                saHpiSensorReadingNominalValue }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorReadingNominal table."
+        ::= { hpiGroups 40 }
+
+saHpiSensorReadingNormalMaxGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorReadingNormalMaxIsSupported,
+                saHpiSensorReadingNormalMaxType,
+                saHpiSensorReadingNormalMaxValue }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorReadingNormalMax table."
+        ::= { hpiGroups 41 }
+
+saHpiSensorReadingNormalMinGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorReadingNormalMinIsSupported,
+                saHpiSensorReadingNormalMinType,
+                saHpiSensorReadingNormalMinValue }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorReadingNormalMin table."
+        ::= { hpiGroups 42 }
+
+saHpiSensorThdLowCriticalGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdLowCriticalIsReadable,
+                saHpiSensorThdLowCriticalIsWritable,
+                saHpiSensorThdLowCriticalType,
+                saHpiSensorThdLowCriticalValue,
+                saHpiSensorThdLowCriticalNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdLowCritical table."
+        ::= { hpiGroups 43 }
+
+saHpiSensorThdLowMajorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdLowMajorIsReadable,
+                saHpiSensorThdLowMajorIsWritable,
+                saHpiSensorThdLowMajorType,
+                saHpiSensorThdLowMajorValue,
+                saHpiSensorThdLowMajorNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdLowMajor table."
+        ::= { hpiGroups 44 }
+
+saHpiSensorThdLowMinorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdLowMinorIsReadable,
+                saHpiSensorThdLowMinorIsWritable,
+                saHpiSensorThdLowMinorType,
+                saHpiSensorThdLowMinorValue,
+                saHpiSensorThdLowMinorNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdLowMinor table."
+        ::= { hpiGroups 45 }
+
+saHpiSensorThdUpCriticalGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdUpCriticalIsReadable,
+                saHpiSensorThdUpCriticalIsWritable,
+                saHpiSensorThdUpCriticalType,
+                saHpiSensorThdUpCriticalValue,
+                saHpiSensorThdUpCriticalNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdUpCritical table."
+        ::= { hpiGroups 46 }
+
+saHpiSensorThdUpMajorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdUpMajorIsReadable,
+                saHpiSensorThdUpMajorIsWritable,
+                saHpiSensorThdUpMajorType,
+                saHpiSensorThdUpMajorValue,
+                saHpiSensorThdUpMajorNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdUpMajor table."
+        ::= { hpiGroups 47 }
+
+saHpiSensorThdUpMinorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdUpMinorIsReadable,
+                saHpiSensorThdUpMinorIsWritable,
+                saHpiSensorThdUpMinorType,
+                saHpiSensorThdUpMinorValue,
+                saHpiSensorThdUpMinorNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdUpMinor table."
+        ::= { hpiGroups 48 }
+
+saHpiSensorThdPosHysteresisGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdPosHysteresisIsReadable,
+                saHpiSensorThdPosHysteresisIsWritable,
+                saHpiSensorThdPosHysteresisType,
+                saHpiSensorThdPosHysteresisValue,
+                saHpiSensorThdPosHysteresisNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdPosHysteresis table."
+        ::= { hpiGroups 49 }
+
+saHpiSensorThdNegHysteresisGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiSensorThdNegHysteresisIsReadable,
+                saHpiSensorThdNegHysteresisIsWritable,
+                saHpiSensorThdNegHysteresisType,
+                saHpiSensorThdNegHysteresisValue,
+                saHpiSensorThdNegHysteresisNonLinear }
+        STATUS current
+        DESCRIPTION
+                "saHpiSensorThdNegHysteresis table."
+        ::= { hpiGroups 50 }
+
+saHpiInventoryGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiInventoryActiveEntries,
+                saHpiInventoryPersistent,
+                saHpiInventoryOem,
+                saHpiInventoryUpdateCount,
+                saHpiInventoryIsReadOnly,
+                saHpiInventoryNumAreas,
+                saHpiInventoryRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiInventory table."
+        ::= { hpiGroups 51 }
+
+saHpiAreaGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiAreaIdIndex,
+                saHpiAreaActiveEntries,
+                saHpiAreaType,
+                saHpiAreaIsReadOnly,
+                saHpiAreaRowStatus,
+                saHpiAreaNumDataFields }
+        STATUS current
+        DESCRIPTION
+                "saHpiArea table."
+        ::= { hpiGroups 52 }
+
+saHpiFieldGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiFieldIdIndex,
+                saHpiFieldActiveEntries,
+                saHpiFieldType,
+                saHpiFieldIsReadOnly,
+                saHpiFieldTextType,
+                saHpiFieldTextLanguage,
+                saHpiFieldText,
+                saHpiFieldStatus }
+        STATUS current
+        DESCRIPTION
+                "saHpiField table."
+        ::= { hpiGroups 53 }
+
+saHpiWatchdogGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiWatchdogActiveEntries,
+                saHpiWatchdogLog,
+                saHpiWatchdogRunning,
+                saHpiWatchdogTimerUseState,
+                saHpiWatchdogTimerAction,
+                saHpiWatchdogPretimerInterrupt,
+                saHpiWatchdogPreTimeoutInterval,
+                saHpiWatchdogTimerUseExpFlags,
+                saHpiWatchdogTimerInitialCount,
+                saHpiWatchdogTimerPresentCount,
+                saHpiWatchdogTimerReset,
+                saHpiWatchdogOem,
+                saHpiWatchdogRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiWatchdog table."
+        ::= { hpiGroups 54 }
+
+saHpiAnnunciatorGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiAnnunciatorActiveEntries,
+                saHpiAnnunciatorType,
+                saHpiAnnunciatorModeReadOnly,
+                saHpiAnnunciatorMaxConditions,
+                saHpiAnnunciatorMode,
+                saHpiAnnunciatorOem,
+                saHpiAnnunciatorRDR }
+        STATUS current
+        DESCRIPTION
+                "saHpiAnnunciator table."
+        ::= { hpiGroups 55 }
+
+saHpiNotificationGroup NOTIFICATION-GROUP
+        NOTIFICATIONS {
+                saHpiSensorNotification,
+                saHpiSensorEnableChangeNotification,
+                saHpiResourceNotification,
+                saHpiDomainNotification,
+                saHpiWatchdogNotification,
+                saHpiHotSwapNotification,
+                saHpiSoftwareNotification,
+                saHpiOemNotification,
+                saHpiUserNotification }
+        STATUS current
+        DESCRIPTION
+                "Notification group."
+        ::= { hpiGroups 56 }
+
+saHpiAdministrationGroup OBJECT-GROUP
+        OBJECTS {
+                saHpiHpiVersion,
+                saHpiAgentVersion,
+                saHpiSnmpResourceId,
+                saHpiDiscover }
+        STATUS current
+        DESCRIPTION
+                "Administration group."
+        ::= { hpiGroups 57 }
 
 END
