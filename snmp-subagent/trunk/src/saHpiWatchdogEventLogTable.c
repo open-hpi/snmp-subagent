@@ -80,22 +80,22 @@ static GHashTable *dr_table;
 static u_long watchdog_event_log_entry_count_total = 0;
 static u_long watchdog_event_log_entry_count = 0;
 
-static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
-static oid saHpiWatchdogEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 }; 
+static oid saHpiWatchdogEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
+static oid saHpiWatchdogEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 }; 
 
 
-int handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiWatchdogEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiWatchdogEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 					
-int initialize_table_saHpiWatchdogEventLogEntryCountTotal(void);
-int initialize_table_saHpiWatchdogEventLogEntryCount(void); 
+int initialize_table_saHpiWatchdogEventLogLifetimeEntries(void);
+int initialize_table_saHpiWatchdogEventLogActiveEntries(void); 
 
 SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid, 
                                             SaHpiEventLogEntryT *event,
@@ -301,7 +301,7 @@ SaErrorT watchdog_event_log_clear(SaHpiSessionIdT session_id,
  * @return:
  */
 int
-handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -311,7 +311,7 @@ handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogLifetimeEntries, called\n"));
 
         
         switch(reqinfo->mode) {
@@ -341,7 +341,7 @@ handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
  * @return:
  */
 int
-handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -351,14 +351,14 @@ handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiWatchdogEventLogActiveEntries, called\n"));
 
         watchdog_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *) &watchdog_event_log_entry_count,
         			        sizeof(watchdog_event_log_entry_count));
                 break;
@@ -376,17 +376,17 @@ handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiWatchdogEventLogEntryCountTotal(void)
+int initialize_table_saHpiWatchdogEventLogLifetimeEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiWatchdogEventLogEntryCountTotal", 
-					handle_saHpiWatchdogEventLogEntryCountTotal,
-                                        saHpiWatchdogEventLogEntryCountTotal_oid, 
-					OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
+				        "saHpiWatchdogEventLogLifetimeEntries", 
+					handle_saHpiWatchdogEventLogLifetimeEntries,
+                                        saHpiWatchdogEventLogLifetimeEntries_oid, 
+					OID_LENGTH(saHpiWatchdogEventLogLifetimeEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -397,17 +397,17 @@ int initialize_table_saHpiWatchdogEventLogEntryCountTotal(void)
  * 
  * @return: 
  */
-int initialize_table_saHpiWatchdogEventLogEntryCount(void)
+int initialize_table_saHpiWatchdogEventLogActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiWatchdogEventLogActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiWatchdogEventLogEntryCount", 
-					handle_saHpiWatchdogEventLogEntryCount,
-                                        saHpiWatchdogEventLogEntryCount_oid, 
-					OID_LENGTH(saHpiWatchdogEventLogEntryCount_oid),
+				        "saHpiWatchdogEventLogActiveEntries", 
+					handle_saHpiWatchdogEventLogActiveEntries,
+                                        saHpiWatchdogEventLogActiveEntries_oid, 
+					OID_LENGTH(saHpiWatchdogEventLogActiveEntries_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -511,8 +511,8 @@ init_saHpiWatchdogEventLogTable(void)
 
         initialize_table_saHpiWatchdogEventLogTable();
 
-        initialize_table_saHpiWatchdogEventLogEntryCountTotal();
-        initialize_table_saHpiWatchdogEventLogEntryCount();
+        initialize_table_saHpiWatchdogEventLogLifetimeEntries();
+        initialize_table_saHpiWatchdogEventLogActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
 

@@ -623,7 +623,7 @@ static watchdog_exp_flags watchdog_string[] = {
   {SAHPI_WATCHDOG_EXP_BIOS_POST, (unsigned char *)"BIOS_POST"},
   {SAHPI_WATCHDOG_EXP_OS_LOAD,   (unsigned char *)"OS_LOAD"},
   {SAHPI_WATCHDOG_EXP_SMS_OS,    (unsigned char *)"SMS_OS"},
-  {SAHPI_WATCHDOG_EXP_OEM,       (unsigned char *)"OEM"}
+  {SAHPI_WATCHDOG_EXP_OEM,       (unsigned char *)"Oem"}
 };
 
 #define MAX_EXP_FLAGS_STRINGS 5
@@ -793,7 +793,9 @@ void assign_timestamp(SaHpiTimeT *evt_timestamp, struct counter64 *row_timestamp
         if (__BYTE_ORDER == __LITTLE_ENDIAN) {
 	
 		memcpy(&(row_timestamp->low), evt_timestamp, sizeof(long));
+		
 		memcpy(&(row_timestamp->high), (SaHpiTimeT*)((long int)evt_timestamp + sizeof(long)), sizeof(long));	
+
 	}
 	else {
 	
@@ -893,7 +895,8 @@ void assign_timeout(netsnmp_variable_list * var, unsigned char timeout[])
 
                 	timeout[counter] = (unsigned char)
 	                            (((unsigned long int)
-				     *(unsigned long int *)((long int)var->val.integer + sizeof(unsigned long int)) & (BYTE_MASK <<cnt))>>cnt);
+				     *(unsigned long int *)((long int)var->val.integer + sizeof(long int)) & (BYTE_MASK <<cnt))>>cnt);
+
 		}		    		
       
 	}

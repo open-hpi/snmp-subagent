@@ -88,12 +88,12 @@ size_t saHpiSensorTable_oid_len = OID_LENGTH(saHpiSensorTable_oid);
  * oid and fucntion declarations scalars
  */
 static u_long sensor_entry_count = 0;
-static oid saHpiSensorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,9,1 };
-int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiSensorActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,9,1 };
+int handle_saHpiSensorActiveEntries(netsnmp_mib_handler *handler,
 				 netsnmp_handler_registration *reginfo,
 				 netsnmp_agent_request_info   *reqinfo,
 				 netsnmp_request_info         *requests);
-int initialize_table_saHpiSensorEntryCount(void);
+int initialize_table_saHpiSensorActiveEntries(void);
 
 /*
  * SaErrorT populate_sensor()
@@ -174,7 +174,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor row!");
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
-
+	
 	/** SaHpiInstrumentId = ASN_UNSIGNED */
         sensor_context->saHpiSensorNum = 
 		rdr_entry->RdrTypeUnion.SensorRec.Num;
@@ -214,51 +214,57 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	       buffer.Data, buffer.DataLength);
 	sensor_context->saHpiSensorSupportedEventStates_len =
 		buffer.DataLength;
-
-        /** TruthValue = ASN_INTEGER */
+	
+	/** TruthValue = ASN_INTEGER */
         sensor_context->saHpiSensorIsSupported =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported;
-
-        /** SaHpiSensorReadingType = ASN_INTEGER */
-        sensor_context->saHpiSensorReadingType =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
-
-        /** SaHpiSensorUnits = ASN_INTEGER */
-	sensor_context->saHpiSensorBaseUnits = 
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.BaseUnits + 1;
-
-        /** SaHpiSensorUnits = ASN_INTEGER */   
-	sensor_context->saHpiSensorBaseUnits =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUnits + 1;
-
-        /** INTEGER = ASN_INTEGER */
-	sensor_context->saHpiSensorModifierUse =
-		rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUse + 1;
-
-        /** TruthValue = ASN_INTEGER */
-	sensor_context->saHpiSensorPercentage =
-		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Percentage == SAHPI_TRUE)
+		(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported == SAHPI_TRUE) 
 		? MIB_TRUE : MIB_FALSE;
+        
+	if (rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported == SAHPI_TRUE) {
+	
+		/** SaHpiSensorReadingType = ASN_INTEGER */
+        	sensor_context->saHpiSensorReadingType =
+			rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ReadingType + 1;
 
-        /** OCTETSTR = ASN_OCTET_STR */
-	rv = decode_sensor_range_flags(&buffer, 
-	        rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Flags);
-	if (rv != SA_OK) {
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
-		saHpiSensorTable_delete_row( sensor_context );
-		return AGENT_ERR_INTERNAL_ERROR;
+	        /** SaHpiSensorUnits = ASN_INTEGER */
+		sensor_context->saHpiSensorBaseUnits = 
+			rdr_entry->RdrTypeUnion.SensorRec.DataFormat.BaseUnits + 1;
+
+	        /** SaHpiSensorUnits = ASN_INTEGER */   
+		sensor_context->saHpiSensorBaseUnits =
+			rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUnits + 1;
+
+	        /** INTEGER = ASN_INTEGER */
+		sensor_context->saHpiSensorModifierUse =
+			rdr_entry->RdrTypeUnion.SensorRec.DataFormat.ModifierUse + 1;
+
+	        /** TruthValue = ASN_INTEGER */
+		sensor_context->saHpiSensorPercentage =
+			(rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Percentage == SAHPI_TRUE)
+			? MIB_TRUE : MIB_FALSE;
+
+       		/** OCTETSTR = ASN_OCTET_STR */
+		rv = decode_sensor_range_flags(&buffer, 
+	        	rdr_entry->RdrTypeUnion.SensorRec.DataFormat.Range.Flags);
+		if (rv != SA_OK) {
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
+			saHpiSensorTable_delete_row( sensor_context );
+			return AGENT_ERR_INTERNAL_ERROR;
+		}
+		memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
+		sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
+
+       	 	/** Double = ASN_OCTET_STR */
+		memset(sensor_context->saHpiSensorAccuracyFactor, 
+	      		0, sizeof(SaHpiFloat64T));
+		memcpy(sensor_context->saHpiSensorAccuracyFactor, 
+	       		&rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
+	       		sizeof(SaHpiFloat64T));
+		sensor_context->saHpiSensorAccuracyFactor_len = sizeof(SaHpiFloat64T);
+
 	}
-	memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
-	sensor_context->saHpiSensorRangeFlags_len = buffer.DataLength;
-
-        /** Double = ASN_OCTET_STR */
-	memset(sensor_context->saHpiSensorAccuracyFactor, 
-	       0, sizeof(SaHpiFloat64T));
-	memcpy(sensor_context->saHpiSensorAccuracyFactor, 
-	       &rdr_entry->RdrTypeUnion.SensorRec.DataFormat.AccuracyFactor,
-	       sizeof(SaHpiFloat64T));
-	sensor_context->saHpiSensorAccuracyFactor_len = sizeof(SaHpiFloat64T);
+	
 
         /** UNSIGNED32 = ASN_UNSIGNED */
 	sensor_context->saHpiSensorOem =
@@ -274,43 +280,92 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 	       sensor_context->saHpiSensorRDR_len);
 
 	/* populate the range reading tables */
-	rv = populate_sensor_max(sessionid, rdr_entry, rpt_entry);
-	rv = populate_sensor_min(sessionid, rdr_entry, rpt_entry); 
-	rv = populate_sensor_nominal(sessionid, rdr_entry, rpt_entry); 
-	rv = populate_sensor_normal_max(sessionid, rdr_entry, rpt_entry); 
-	rv = populate_sensor_normal_min(sessionid, rdr_entry, rpt_entry); 
-
-	/* populate the threshold reading tables */
-	rv = saHpiSensorThresholdsGet(sessionid,
-				      rpt_entry->ResourceId, 
-				      rdr_entry->RdrTypeUnion.SensorRec.Num,
-				      &sensor_thresholds);
-	if (rv == SA_OK) {
-		rv = populate_sen_thd_low_crit(sessionid, rdr_entry, 
-					       rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_low_major(sessionid, rdr_entry, 
-						rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_low_minor(sessionid, rdr_entry, 
-						rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_up_crit(sessionid, rdr_entry, 
-					      rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_up_major(sessionid, rdr_entry, 
-                                               rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_up_minor(sessionid, rdr_entry, 
-                                               rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_pos_hys(sessionid, rdr_entry, 
-                                               rpt_entry, &sensor_thresholds);
-		rv = populate_sen_thd_neg_hys(sessionid, rdr_entry, 
-                                               rpt_entry, &sensor_thresholds);
-
-	} else {   		
-		snmp_log (LOG_ERR,
-			  "Call to saHpiResourceSeverity failed with return code: %s.\n",
-			  oh_lookup_error(rv));
-		DEBUGMSGTL ((AGENT, 
-		"ERROR: populate_sen_thd_low_crit() saHpiSensorThresholdsGet() ERROR: %s\n",
-			     oh_lookup_error(rv)));
+	
+	
+	if (rdr_entry->RdrTypeUnion.SensorRec.DataFormat.IsSupported == SAHPI_TRUE) {
+		
+		rv = populate_sensor_max(sessionid, rdr_entry, rpt_entry);
+		rv = populate_sensor_min(sessionid, rdr_entry, rpt_entry); 
+		rv = populate_sensor_nominal(sessionid, rdr_entry, rpt_entry); 
+		rv = populate_sensor_normal_max(sessionid, rdr_entry, rpt_entry); 
+		rv = populate_sensor_normal_min(sessionid, rdr_entry, rpt_entry); 
 	}
+	
+	if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.IsAccessible == SAHPI_TRUE) {
+	
+		/* populate the threshold reading tables */
+		rv = saHpiSensorThresholdsGet(sessionid,
+					      rpt_entry->ResourceId, 
+					      rdr_entry->RdrTypeUnion.SensorRec.Num,
+					      &sensor_thresholds);
+		if (rv == SA_OK) {
+	       
+		        //We only populate the table when the reading is supported.
+	        	if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_LOW_CRIT) {
+		
+				rv = populate_sen_thd_low_crit(sessionid, rdr_entry, 
+					       rpt_entry, &sensor_thresholds);
+			}			       
+		
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_LOW_MAJOR) {
+				
+				rv = populate_sen_thd_low_major(sessionid, rdr_entry, 
+						rpt_entry, &sensor_thresholds);
+			}
+							
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_LOW_MINOR) {				
+			
+				rv = populate_sen_thd_low_minor(sessionid, rdr_entry, 
+						rpt_entry, &sensor_thresholds);
+			}
+		
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_UP_CRIT) {				
+	
+				rv = populate_sen_thd_up_crit(sessionid, rdr_entry, 
+					      rpt_entry, &sensor_thresholds);
+			}
+		
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_UP_MAJOR) {					      
+			
+				rv = populate_sen_thd_up_major(sessionid, rdr_entry, 
+                                               rpt_entry, &sensor_thresholds);
+              		}
+		
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_UP_MINOR) {					       
+			
+				rv = populate_sen_thd_up_minor(sessionid, rdr_entry, 
+                                               rpt_entry, &sensor_thresholds);
+			}
+					       
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_UP_HYSTERESIS) {			       
+				
+				rv = populate_sen_thd_pos_hys(sessionid, rdr_entry, 
+                                               rpt_entry, &sensor_thresholds);
+			}		       
+		
+			if (rdr_entry->RdrTypeUnion.SensorRec.ThresholdDefn.ReadThold 
+			                                           & SAHPI_STM_LOW_HYSTERESIS) {			       
+			
+				rv = populate_sen_thd_neg_hys(sessionid, rdr_entry, 
+                                               rpt_entry, &sensor_thresholds);
+			}					       
+
+		} else {   		
+			snmp_log (LOG_ERR,
+			  "Call to saHpiSensorThresholdsGet failed with return code: %s.\n",
+			  oh_lookup_error(rv));
+			DEBUGMSGTL ((AGENT, 
+			"ERROR: populate_sen_thd_low_crit() saHpiSensorThresholdsGet() ERROR: %s\n",
+			     oh_lookup_error(rv)));
+		}
+	}	
 
 	if (new_row == MIB_TRUE) {
                 CONTAINER_INSERT (cb.container, sensor_context);
@@ -466,9 +521,9 @@ SaErrorT async_sensor_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
 }
 
 /*
- * int handle_saHpiSensorEntryCount()
+ * int handle_saHpiSensorActiveEntries()
  */
-int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiSensorActiveEntries(netsnmp_mib_handler *handler,
 				 netsnmp_handler_registration *reginfo,
 				 netsnmp_agent_request_info   *reqinfo,
 				 netsnmp_request_info         *requests)
@@ -479,14 +534,14 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
 
-	DEBUGMSGTL ((AGENT, "handle_saHpiSensorEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "handle_saHpiSensorActiveEntries, called\n"));
 
     sensor_entry_count = CONTAINER_SIZE (cb.container);
     
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &sensor_entry_count,
 				     sizeof(sensor_entry_count));
             break;
@@ -500,19 +555,19 @@ int handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 /*
- * int initialize_table_saHpiSensorEntryCount()
+ * int initialize_table_saHpiSensorActiveEntries()
  */
-int initialize_table_saHpiSensorEntryCount(void)
+int initialize_table_saHpiSensorActiveEntries(void)
 {
 
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorActiveEntries, called\n"));
 
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
-			"saHpiSensorEntryCount", 
-			handle_saHpiSensorEntryCount,
-			saHpiSensorEntryCount_oid, 
-			OID_LENGTH(saHpiSensorEntryCount_oid),
+			"saHpiSensorActiveEntries", 
+			handle_saHpiSensorActiveEntries,
+			saHpiSensorActiveEntries_oid, 
+			OID_LENGTH(saHpiSensorActiveEntries_oid),
 			HANDLER_CAN_RONLY));
 	return 0;
 }
@@ -604,7 +659,7 @@ init_saHpiSensorTable(void)
 
 	initialize_table_saHpiSensorTable();
 
-	initialize_table_saHpiSensorEntryCount();
+	initialize_table_saHpiSensorActiveEntries();
 }
 
 /************************************************************
