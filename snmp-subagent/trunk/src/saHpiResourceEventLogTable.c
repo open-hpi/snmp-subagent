@@ -81,10 +81,10 @@ static GHashTable *dr_table;
 static u_long resource_event_log_entry_count_total = 0;
 static u_long resource_event_log_entry_count = 0;
 
-static oid saHpiResourceEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
+static oid saHpiResourceEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
 static oid saHpiResourceEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,4 }; 
 
-int handle_saHpiResourceEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiResourceEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
@@ -94,7 +94,7 @@ int handle_saHpiResourceEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 					
-int initialize_table_saHpiResourceEventLogLifetimeEntries(void);
+int initialize_table_saHpiResourceEventLogLifetimeChanges(void);
 int initialize_table_saHpiResourceEventLogActiveEntries(void); 
 
 /**
@@ -300,7 +300,7 @@ SaErrorT resource_event_log_clear(SaHpiSessionIdT session_id,
  * @return:
  */
 int
-handle_saHpiResourceEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiResourceEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -310,7 +310,7 @@ handle_saHpiResourceEventLogLifetimeEntries(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
  
-        DEBUGMSGTL ((AGENT, "handle_saHpiResourceEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiResourceEventLogLifetimeChanges, called\n"));
        
         switch(reqinfo->mode) {
 
@@ -374,17 +374,17 @@ handle_saHpiResourceEventLogActiveEntries(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiResourceEventLogLifetimeEntries(void)
+int initialize_table_saHpiResourceEventLogLifetimeChanges(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEventLogLifetimeChanges, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiResourceEventLogLifetimeEntries", 
-				        handle_saHpiResourceEventLogLifetimeEntries,
-                                        saHpiResourceEventLogLifetimeEntries_oid,
-					OID_LENGTH(saHpiResourceEventLogLifetimeEntries_oid),
+				        "saHpiResourceEventLogLifetimeChanges", 
+				        handle_saHpiResourceEventLogLifetimeChanges,
+                                        saHpiResourceEventLogLifetimeChanges_oid,
+					OID_LENGTH(saHpiResourceEventLogLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -498,7 +498,7 @@ init_saHpiResourceEventLogTable(void)
 
         initialize_table_saHpiResourceEventLogTable();
 
-        initialize_table_saHpiResourceEventLogLifetimeEntries();
+        initialize_table_saHpiResourceEventLogLifetimeChanges();
 
         initialize_table_saHpiResourceEventLogActiveEntries();     
 

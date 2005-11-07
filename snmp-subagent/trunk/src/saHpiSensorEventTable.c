@@ -80,10 +80,10 @@ static GHashTable *dr_table;
 static u_long sensor_event_entry_count_total = 0;
 static u_long sensor_event_entry_count = 0;
 
-static oid saHpiSensorEventLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 }; 
+static oid saHpiSensorEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 }; 
 static oid saHpiSensorEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
      
-int handle_saHpiSensorEventLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiSensorEventLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
@@ -93,7 +93,7 @@ int handle_saHpiSensorEventActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests);
 				
-int initialize_table_saHpiSensorEventLifetimeEntries(void);
+int initialize_table_saHpiSensorEventLifetimeChanges(void);
 int initialize_table_saHpiSensorEventActiveEntries(void);
 
 
@@ -614,7 +614,7 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
  * @return:
  */
 int
-handle_saHpiSensorEventLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -689,17 +689,17 @@ handle_saHpiSensorEventActiveEntries(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiSensorEventLifetimeEntries(void)
+int initialize_table_saHpiSensorEventLifetimeChanges(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEventLifetimeChanges, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiSensorEventLifetimeEntries", 
-					handle_saHpiSensorEventLifetimeEntries,
-                                        saHpiSensorEventLifetimeEntries_oid, 
-					OID_LENGTH(saHpiSensorEventLifetimeEntries_oid),
+				        "saHpiSensorEventLifetimeChanges", 
+					handle_saHpiSensorEventLifetimeChanges,
+                                        saHpiSensorEventLifetimeChanges_oid, 
+					OID_LENGTH(saHpiSensorEventLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -823,7 +823,7 @@ init_saHpiSensorEventTable(void)
 	
 	initialize_table_saHpiSensorEventTable();
 
-        initialize_table_saHpiSensorEventLifetimeEntries();
+        initialize_table_saHpiSensorEventLifetimeChanges();
         initialize_table_saHpiSensorEventActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);

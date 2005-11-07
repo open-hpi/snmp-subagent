@@ -78,7 +78,7 @@ static GHashTable *dr_table;
  */
 static u_long sensor_event_log_entry_count_total = 0;
 static u_long sensor_event_log_entry_count = 0; 
-static oid saHpiSensorEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 }; 
+static oid saHpiSensorEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 }; 
 static oid saHpiSensorEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
 
 int handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
@@ -489,8 +489,8 @@ int initialize_table_saHpiSensorEventEntryLogCountTotal(void)
                                netsnmp_create_handler_registration(
 			               "saHpiSensorEventEntryLogCountTotal", 
 				       handle_saHpiSensorEventEntryLogCountTotal,
-                                       saHpiSensorEventLogLifetimeEntries_oid, 
-				       OID_LENGTH(saHpiSensorEventLogLifetimeEntries_oid),
+                                       saHpiSensorEventLogLifetimeChanges_oid, 
+				       OID_LENGTH(saHpiSensorEventLogLifetimeChanges_oid),
                                        HANDLER_CAN_RONLY ));
 				       
         return SNMP_ERR_NOERROR;

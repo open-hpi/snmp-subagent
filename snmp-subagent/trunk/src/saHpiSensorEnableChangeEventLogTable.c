@@ -81,10 +81,10 @@ static u_long sensor_enable_change_event_log_entry_count_total = 0;
 static u_long sensor_enable_change_event_log_entry_count = 0;
 
 
-static oid saHpiSensorEnableChangeEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
+static oid saHpiSensorEnableChangeEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
 static oid saHpiSensorEnableChangeEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
 
-int handle_saHpiSensorEnableChangeEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+int handle_saHpiSensorEnableChangeEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
@@ -94,7 +94,7 @@ int handle_saHpiSensorEnableChangeEventLogActiveEntries(netsnmp_mib_handler *han
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 
-int initialize_table_saHpiSensorEnableChangeEventLogLifetimeEntries(void);
+int initialize_table_saHpiSensorEnableChangeEventLogLifetimeChanges(void);
 int initialize_table_saHpiSensorEnableChangeEventLogActiveEntries(void);
 
 
@@ -424,7 +424,7 @@ SaErrorT sen_en_change_event_log_clear(SaHpiSessionIdT session_id,
  * @return:
  */
 int
-handle_saHpiSensorEnableChangeEventLogLifetimeEntries(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -434,7 +434,7 @@ handle_saHpiSensorEnableChangeEventLogLifetimeEntries(netsnmp_mib_handler *handl
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
         
-        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiSensorEnableChangeEventLogLifetimeChanges, called\n"));
 
         switch(reqinfo->mode) {
 
@@ -499,17 +499,17 @@ handle_saHpiSensorEnableChangeEventLogActiveEntries(netsnmp_mib_handler *handler
  * 
  * @return: 
  */
-int initialize_table_saHpiSensorEnableChangeEventLogLifetimeEntries(void)
+int initialize_table_saHpiSensorEnableChangeEventLogLifetimeChanges(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventLogLifetimeEntries, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEnableChangeEventLogLifetimeChanges, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiSensorEnableChangeEventLogLifetimeEntries", 
-					handle_saHpiSensorEnableChangeEventLogLifetimeEntries,
-                                        saHpiSensorEnableChangeEventLogLifetimeEntries_oid, 
-					OID_LENGTH(saHpiSensorEnableChangeEventLogLifetimeEntries_oid),
+				        "saHpiSensorEnableChangeEventLogLifetimeChanges", 
+					handle_saHpiSensorEnableChangeEventLogLifetimeChanges,
+                                        saHpiSensorEnableChangeEventLogLifetimeChanges_oid, 
+					OID_LENGTH(saHpiSensorEnableChangeEventLogLifetimeChanges_oid),
                                         HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -633,7 +633,7 @@ init_saHpiSensorEnableChangeEventLogTable(void)
 	
 	initialize_table_saHpiSensorEnableChangeEventLogTable();
 
-        initialize_table_saHpiSensorEnableChangeEventLogLifetimeEntries();
+        initialize_table_saHpiSensorEnableChangeEventLogLifetimeChanges();
         initialize_table_saHpiSensorEnableChangeEventLogActiveEntries();
 	
         domain_resource_pair_initialize(&initialized, &dr_table);
