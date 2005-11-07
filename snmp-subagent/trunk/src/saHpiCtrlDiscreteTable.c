@@ -80,12 +80,12 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_discrete_entry_count = 0;
-static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
-int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiCtrlDiscreteActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
+int handle_saHpiCtrlDiscreteActiveEntries(netsnmp_mib_handler *handler,
 				       netsnmp_handler_registration *reginfo,
 				       netsnmp_agent_request_info   *reqinfo,
 				       netsnmp_request_info         *requests);
-int initialize_table_saHpiCtrlDiscreteEntryCount(void);
+int initialize_table_saHpiCtrlDiscreteActiveEntries(void);
 
 
 /*
@@ -381,15 +381,15 @@ int set_table_ctrl_discrete_state (saHpiCtrlDiscreteTable_context *row_ctx)
 
 
 /*
- * int handle_saHpiCtrlDiscreteEntryCount()
+ * int handle_saHpiCtrlDiscreteActiveEntries()
  */
-int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiCtrlDiscreteActiveEntries(netsnmp_mib_handler *handler,
 				       netsnmp_handler_registration *reginfo,
 				       netsnmp_agent_request_info   *reqinfo,
 				       netsnmp_request_info         *requests)
 {
 
-	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDiscreteEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDiscreteActiveEntries, called\n"));	
 	/* We are never called for a GETNEXT if it's registered as a
 	"instance", as it's "magically" handled for us.  */
 
@@ -401,7 +401,7 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
         switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &ctrl_discrete_entry_count,
 				     sizeof(ctrl_discrete_entry_count));
             break;
@@ -416,18 +416,18 @@ int handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*
- * int initialize_table_saHpiCtrlDigitalEntryCount()
+ * int initialize_table_saHpiCtrlDigitalActiveEntries()
  */
-int initialize_table_saHpiCtrlDiscreteEntryCount(void)
+int initialize_table_saHpiCtrlDiscreteActiveEntries(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDiscreteEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDiscreteActiveEntries, called\n"));	
 
 	netsnmp_register_scalar(
 	    netsnmp_create_handler_registration(
-		    "saHpiCtrlDiscreteEntryCount", 
-		    handle_saHpiCtrlDiscreteEntryCount,
-		    saHpiCtrlDiscreteEntryCount_oid, 
-		    OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
+		    "saHpiCtrlDiscreteActiveEntries", 
+		    handle_saHpiCtrlDiscreteActiveEntries,
+		    saHpiCtrlDiscreteActiveEntries_oid, 
+		    OID_LENGTH(saHpiCtrlDiscreteActiveEntries_oid),
 		    HANDLER_CAN_RONLY));
 	return 0;
 }
@@ -521,7 +521,7 @@ init_saHpiCtrlDiscreteTable(void)
 
 	initialize_table_saHpiCtrlDiscreteTable();
 
-	initialize_table_saHpiCtrlDiscreteEntryCount();
+	initialize_table_saHpiCtrlDiscreteActiveEntries();
 
 	domain_resource_pair_initialize(&initialized, &dr_table);
 
@@ -1365,7 +1365,7 @@ int saHpiCtrlDiscreteTable_get_value(
 					 sizeof(context->saHpiCtrlDiscreteState) );
 		break;
 
-	case COLUMN_SAHPICTRLDISCRETEOEM:
+	case COLUMN_SAHPICTRLDISCRETEOem:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 					 (unsigned char*)&context->saHpiCtrlDiscreteOem,

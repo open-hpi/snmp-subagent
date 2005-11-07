@@ -70,7 +70,7 @@ size_t saHpiResourceTable_oid_len = OID_LENGTH(saHpiResourceTable_oid);
 /*************************************************************
  * oid declarations scalars
  */
-static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
+static oid saHpiResourceActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
 static u_long resource_entry_count = 0;
 
 /*************************************************************
@@ -812,16 +812,16 @@ int set_table_resource_tag (saHpiResourceTable_context *row_ctx)
 
 
 /*
- *  int handle_saHpiResourceEntryCount()
+ *  int handle_saHpiResourceActiveEntries()
  */
-int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiResourceActiveEntries(netsnmp_mib_handler *handler,
 				   netsnmp_handler_registration *reginfo,
 				   netsnmp_agent_request_info   *reqinfo,
 				   netsnmp_request_info         *requests)
 {
 
 	DEBUGMSGTL ((AGENT,     
-		     "handle_saHpiResourceEntryCount: Entry Count is %d\n", 
+		     "handle_saHpiResourceActiveEntries: Entry Count is %d\n", 
 		     resource_entry_count));  
 
 	/* We are never called for a GETNEXT if it's registered as a
@@ -835,7 +835,7 @@ int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
 	switch (reqinfo->mode) {
 	
 	case MODE_GET:
-		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+		snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
 					 (u_char *) &resource_entry_count,
 					 sizeof(resource_entry_count));
 		break;
@@ -849,16 +849,16 @@ int handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*
- * int initialize_table_saHpiResourceEntryCount()
+ * int initialize_table_saHpiResourceActiveEntries()
  */
-int initialize_table_saHpiResourceEntryCount(void)
+int initialize_table_saHpiResourceActiveEntries(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceEntryCount, called\n"));     
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiResourceActiveEntries, called\n"));     
 	netsnmp_register_scalar(
-			       netsnmp_create_handler_registration("saHpiResourceEntryCount", 
-								   handle_saHpiResourceEntryCount,
-								   saHpiResourceEntryCount_oid, 
-								   OID_LENGTH(saHpiResourceEntryCount_oid),
+			       netsnmp_create_handler_registration("saHpiResourceActiveEntries", 
+								   handle_saHpiResourceActiveEntries,
+								   saHpiResourceActiveEntries_oid, 
+								   OID_LENGTH(saHpiResourceActiveEntries_oid),
 								   HANDLER_CAN_RONLY) );
 	return 0;
 }
@@ -942,7 +942,7 @@ init_saHpiResourceTable(void)
 
 	initialize_table_saHpiResourceTable();
 
-	initialize_table_saHpiResourceEntryCount();
+	initialize_table_saHpiResourceActiveEntries();
 }
 
 /************************************************************

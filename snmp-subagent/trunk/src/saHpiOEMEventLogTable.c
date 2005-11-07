@@ -59,8 +59,8 @@
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
 
-oid saHpiOEMEventLogTable_oid[] = { saHpiOEMEventLogTable_TABLE_OID };
-size_t saHpiOEMEventLogTable_oid_len = OID_LENGTH(saHpiOEMEventLogTable_oid);
+oid saHpiOemEventLogTable_oid[] = { saHpiOemEventLogTable_TABLE_OID };
+size_t saHpiOemEventLogTable_oid_len = OID_LENGTH(saHpiOemEventLogTable_oid);
 
 
 /************************************************************/
@@ -80,21 +80,21 @@ static GHashTable *dr_table;
 static u_long oem_event_log_entry_count_total = 0;
 static u_long oem_event_log_entry_count = 0;
 
-static oid saHpiOEMEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
-static oid saHpiOEMEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,25 };
+static oid saHpiOemEventLogLifetimeEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
+static oid saHpiOemEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,25 };
 
-int handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+int handle_saHpiOemEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 			  
-int handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiOemEventLogActiveEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests);
 					
-int intialize_table_saHpiOEMEventLogEntryCountTotal(void);
-int intialize_table_saHpiOEMEventLogEntryCount(void);
+int intialize_table_saHpiOemEventLogLifetimeEntries(void);
+int intialize_table_saHpiOemEventLogActiveEntries(void);
 
 SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid, 
                                              SaHpiEventLogEntryT *event,
@@ -103,9 +103,9 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 {
 	SaErrorT rv = SA_OK;
 
-	oid oem_evt_oid[OEM_EVENT_LOG_INDEX_NR];
+	oid oem_evt_oid[Oem_EVENT_LOG_INDEX_NR];
 	netsnmp_index oem_evt_idx;
-	saHpiOEMEventLogTable_context *oem_evt_ctx;
+	saHpiOemEventLogTable_context *oem_evt_ctx;
 
 	oid column[2];
 	int column_len = 2;
@@ -127,14 +127,14 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 
 	/* BUILD oid for new row */
 		/* assign the number of indices */
-	oem_evt_idx.len = OEM_EVENT_LOG_INDEX_NR;
+	oem_evt_idx.len = Oem_EVENT_LOG_INDEX_NR;
 		/** Index saHpiDomainId is external */
 	oem_evt_oid[0] = get_domain_id(sessionid);
 		/** Index saHpiResourceId is external */
 	oem_evt_oid[1] = event->Event.Source;
 		/** Index saHpiEventSeverity is external */
 	oem_evt_oid[2] = event->Event.Severity + 1;
-                /** Index saHpiOEMEventEntryId is external */
+                /** Index saHpiOemEventEntryId is external */
 	dr_pair.domainId_resourceId_arry[0] = get_domain_id(sessionid);
 	dr_pair.domainId_resourceId_arry[1] = event->Event.Source;
 	dr_entry = domain_resource_pair_get(&dr_pair, &dr_table); 
@@ -149,9 +149,9 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 	
 	/* create full oid on This row for parent RowPointer */
 	column[0] = 1;
-	column[1] = COLUMN_SAHPIOEMEVENTLOGTIMESTAMP;
+	column[1] = COLUMN_SAHPIOemEVENTLOGTIMESTAMP;
 	memset(this_child_oid, 0, sizeof(this_child_oid));
-	build_full_oid(saHpiOEMEventLogTable_oid, saHpiOEMEventLogTable_oid_len,
+	build_full_oid(saHpiOemEventLogTable_oid, saHpiOemEventLogTable_oid_len,
 			column, column_len,
 			&oem_evt_idx,
 			this_child_oid, MAX_OID_LEN, this_child_oid_len);	
@@ -163,39 +163,39 @@ SaErrorT populate_saHpiOemEventLogTable(SaHpiSessionIdT sessionid,
 	if (!oem_evt_ctx) { 
 		// New entry. Add it
 		oem_evt_ctx = 
-			saHpiOEMEventLogTable_create_row(&oem_evt_idx);
+			saHpiOemEventLogTable_create_row(&oem_evt_idx);
 	}
 	else {
 		isNewRow = MIB_FALSE;
 	}	
 	
 	if (!oem_evt_ctx) {
-		snmp_log (LOG_ERR, "Not enough memory for an OEM Event Log row!");
+		snmp_log (LOG_ERR, "Not enough memory for an Oem Event Log row!");
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	}
 
 
         /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &oem_evt_ctx->saHpiOEMEventLogTimestamp);
+	assign_timestamp(&event->Timestamp, &oem_evt_ctx->saHpiOemEventLogTimestamp);
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
-        oem_evt_ctx->saHpiOEMEventLogManufacturerIdT = 
+        oem_evt_ctx->saHpiOemEventLogManufacturerIdT = 
                 event->Event.EventDataUnion.OemEvent.MId;
 		
         /** SaHpiTextType = ASN_INTEGER */
-        oem_evt_ctx->saHpiOEMEventLogTextType = 
+        oem_evt_ctx->saHpiOemEventLogTextType = 
                 event->Event.EventDataUnion.OemEvent.OemEventData.DataType + 1;
 		
         /** SaHpiTextLanguage = ASN_INTEGER */
-        oem_evt_ctx->saHpiOEMEventLogTextLanguage = 
+        oem_evt_ctx->saHpiOemEventLogTextLanguage = 
                 event->Event.EventDataUnion.OemEvent.OemEventData.Language + 1;	
 		
         /** SaHpiText = ASN_OCTET_STR */
-        memcpy(oem_evt_ctx->saHpiOEMEventLogText, 
+        memcpy(oem_evt_ctx->saHpiOemEventLogText, 
 	        event->Event.EventDataUnion.OemEvent.OemEventData.Data,
 		event->Event.EventDataUnion.OemEvent.OemEventData.DataLength);
 		
-	oem_evt_ctx->saHpiOEMEventLogText_len = 
+	oem_evt_ctx->saHpiOemEventLogText_len = 
 	        event->Event.EventDataUnion.OemEvent.OemEventData.DataLength;				
 
 	if (isNewRow == MIB_TRUE) {
@@ -222,10 +222,10 @@ SaErrorT oem_event_log_clear(SaHpiSessionIdT session_id,
                              size_t saHpiEventLogRowPointer_len,
 			     int modifyTotal)
 {
-	oid oem_evt_oid[OEM_EVENT_LOG_INDEX_NR];
+	oid oem_evt_oid[Oem_EVENT_LOG_INDEX_NR];
 	netsnmp_index oem_evt_idx;
 	netsnmp_index *oem_index;
-	saHpiOEMEventLogTable_context *oem_evt_ctx;
+	saHpiOemEventLogTable_context *oem_evt_ctx;
 	
 	DR_XREF *dr_entry;
 	SaHpiDomainIdResourceIdArrayT dr_pair;	
@@ -234,24 +234,24 @@ SaErrorT oem_event_log_clear(SaHpiSessionIdT session_id,
 
         DEBUGMSGTL ((AGENT, "oem_event_log_clear, called\n"));
 	DEBUGMSGTL ((AGENT, "Attempting to delete oem el row with the following indexes:\n"));
-        DEBUGMSGTL ((AGENT,"     Domain    [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len]));
-        DEBUGMSGTL ((AGENT,"     Resource  [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1]));
+        DEBUGMSGTL ((AGENT,"     Domain    [%ld]\n", saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len]));
+        DEBUGMSGTL ((AGENT,"     Resource  [%ld]\n", saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 1]));
 	DEBUGMSGTL ((AGENT,"     Severity  [%s]\n",  oh_lookup_severity(
-						saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 2]-1)));
-	DEBUGMSGTL ((AGENT,"     Entry id  [%ld]\n", saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 3]));
+						saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 2]-1)));
+	DEBUGMSGTL ((AGENT,"     Entry id  [%ld]\n", saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 3]));
 
 
 	/* BUILD oid to lookup row */
 		/* assign the number of indices */
-	oem_evt_idx.len = OEM_EVENT_LOG_INDEX_NR;
+	oem_evt_idx.len = Oem_EVENT_LOG_INDEX_NR;
 		/** Index saHpiDomainId is external */
-	oem_evt_oid[0] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len];
+	oem_evt_oid[0] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len];
 		/** Index saHpiResourceId is external */
-	oem_evt_oid[1] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1];
+	oem_evt_oid[1] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 1];
 		/** Index saHpiEventSeverity is external */
-	oem_evt_oid[2] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 2];
-                /** Index saHpiOEMEventEntryId is external */
-	oem_evt_oid[3] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 3];
+	oem_evt_oid[2] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 2];
+                /** Index saHpiOemEventEntryId is external */
+	oem_evt_oid[3] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 3];
 		/* assign the indices to the index */
 	oem_evt_idx.oids = (oid *) & oem_evt_oid;
 	
@@ -265,11 +265,11 @@ SaErrorT oem_event_log_clear(SaHpiSessionIdT session_id,
 		
 		DEBUGMSGTL ((AGENT, "oem_event_log_clear found row to delete\n"));
 		CONTAINER_REMOVE(cb.container, oem_evt_ctx);
-		saHpiOEMEventLogTable_delete_row(oem_evt_ctx);
+		saHpiOemEventLogTable_delete_row(oem_evt_ctx);
 		
 		/* Reset the entry id for this domain/resource pair */
-		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len];
-		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiOEMEventLogTable_oid_len + column_len + 1];
+		dr_pair.domainId_resourceId_arry[0] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len];
+		dr_pair.domainId_resourceId_arry[1] = saHpiEventLogRowPointer[saHpiOemEventLogTable_oid_len + column_len + 1];
 		dr_entry = domain_resoruce_pair_lookup(&dr_pair, &dr_table); 
 		
 		if (dr_entry == NULL) {
@@ -303,7 +303,7 @@ SaErrorT oem_event_log_clear(SaHpiSessionIdT session_id,
  * @return:
  */
 int
-handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiOemEventLogLifetimeEntries(netsnmp_mib_handler *handler,
                                         netsnmp_handler_registration *reginfo,
                                         netsnmp_agent_request_info   *reqinfo,
                                         netsnmp_request_info         *requests)
@@ -313,7 +313,7 @@ handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
         
-        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventLogEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiOemEventLogLifetimeEntries, called\n"));
 
         switch(reqinfo->mode) {
 
@@ -342,7 +342,7 @@ handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
  * @return:
  */ 
 int
-handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiOemEventLogActiveEntries(netsnmp_mib_handler *handler,
                                 netsnmp_handler_registration *reginfo,
                                 netsnmp_agent_request_info   *reqinfo,
                                 netsnmp_request_info         *requests)
@@ -353,14 +353,14 @@ handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
            we don't need to loop over a list of requests; we'll only get one. */
 
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiOEMEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiOemEventLogActiveEntries, called\n"));
 
         oem_event_log_entry_count = CONTAINER_SIZE (cb.container);
         
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
         			        (u_char *)&oem_event_log_entry_count,
         			        sizeof(oem_event_log_entry_count));
                 break;
@@ -378,17 +378,17 @@ handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int intialize_table_saHpiOEMEventLogEntryCountTotal(void)
+int intialize_table_saHpiOemEventLogLifetimeEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOEMEventLogEntryCountTotal, called\n"));
+        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOemEventLogLifetimeEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-				        "saHpiOEMEventLogEntryCountTotal", 
-				         handle_saHpiOEMEventLogEntryCountTotal,
-                                         saHpiOEMEventLogEntryCountTotal_oid, 
-					 OID_LENGTH(saHpiOEMEventLogEntryCountTotal_oid),
+				        "saHpiOemEventLogLifetimeEntries", 
+				         handle_saHpiOemEventLogLifetimeEntries,
+                                         saHpiOemEventLogLifetimeEntries_oid, 
+					 OID_LENGTH(saHpiOemEventLogLifetimeEntries_oid),
                                          HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -398,17 +398,17 @@ int intialize_table_saHpiOEMEventLogEntryCountTotal(void)
  * 
  * @return: 
  */ 
-int intialize_table_saHpiOEMEventLogEntryCount(void)
+int intialize_table_saHpiOemEventLogActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOEMEventLogEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "intialize_table_saHpiOemEventLogActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                 netsnmp_create_handler_registration(
-                                        "saHpiOEMEventLogEntryCount", 
-                                         handle_saHpiOEMEventLogEntryCount,
-                                         saHpiOEMEventLogEntryCount_oid, 
-					 OID_LENGTH(saHpiOEMEventLogEntryCount_oid),
+                                        "saHpiOemEventLogActiveEntries", 
+                                         handle_saHpiOemEventLogActiveEntries,
+                                         saHpiOemEventLogActiveEntries_oid, 
+					 OID_LENGTH(saHpiOemEventLogActiveEntries_oid),
                                          HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -423,29 +423,29 @@ int intialize_table_saHpiOEMEventLogEntryCount(void)
 /************************************************************
  * keep binary tree to find context by name
  */
-static int saHpiOEMEventLogTable_cmp( const void *lhs, const void *rhs );
+static int saHpiOemEventLogTable_cmp( const void *lhs, const void *rhs );
 
 /************************************************************
  * compare two context pointers here. Return -1 if lhs < rhs,
  * 0 if lhs == rhs, and 1 if lhs > rhs.
  */
 static int
-saHpiOEMEventLogTable_cmp( const void *lhs, const void *rhs )
+saHpiOemEventLogTable_cmp( const void *lhs, const void *rhs )
 {
-        saHpiOEMEventLogTable_context *context_l =
-        (saHpiOEMEventLogTable_context *)lhs;
-        saHpiOEMEventLogTable_context *context_r =
-        (saHpiOEMEventLogTable_context *)rhs;
+        saHpiOemEventLogTable_context *context_l =
+        (saHpiOemEventLogTable_context *)lhs;
+        saHpiOemEventLogTable_context *context_r =
+        (saHpiOemEventLogTable_context *)rhs;
 
         /*
          * check primary key, then secondary. Add your own code if
          * there are more than 2 indexes
          */
-        DEBUGMSGTL ((AGENT, "saHpiOEMEventLogTable_cmp, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiOemEventLogTable_cmp, called\n"));
 
         /* check for NULL pointers */
         if (lhs == NULL || rhs == NULL ) {
-                DEBUGMSGTL((AGENT,"saHpiOEMEventLogTable_cmp() NULL pointer ERROR\n" ));
+                DEBUGMSGTL((AGENT,"saHpiOemEventLogTable_cmp() NULL pointer ERROR\n" ));
                 return 0;
         }
         /* CHECK FIRST INDEX,  saHpiDomainId */
@@ -475,7 +475,7 @@ saHpiOEMEventLogTable_cmp( const void *lhs, const void *rhs )
 
                         if ( context_l->index.oids[2] == context_r->index.oids[2]) {
                                 /* If saHpiEventSeverity index is equal sort by forth index */
-                                /* CHECK FORTH INDEX,  saHpiOEMEventEntryId */
+                                /* CHECK FORTH INDEX,  saHpiOemEventEntryId */
                                 if ( context_l->index.oids[3] < context_r->index.oids[3])
                                         return -1;
 
@@ -492,17 +492,17 @@ saHpiOEMEventLogTable_cmp( const void *lhs, const void *rhs )
 }
 
 /************************************************************
- * Initializes the saHpiOEMEventLogTable module
+ * Initializes the saHpiOemEventLogTable module
  */
 void
-init_saHpiOEMEventLogTable(void)
+init_saHpiOemEventLogTable(void)
 {
-        DEBUGMSGTL ((AGENT, "init_saHpiOEMEventLogTable, called\n"));
+        DEBUGMSGTL ((AGENT, "init_saHpiOemEventLogTable, called\n"));
 	
-	initialize_table_saHpiOEMEventLogTable();
+	initialize_table_saHpiOemEventLogTable();
 
-        intialize_table_saHpiOEMEventLogEntryCountTotal();
-        intialize_table_saHpiOEMEventLogEntryCount();     
+        intialize_table_saHpiOemEventLogLifetimeEntries();
+        intialize_table_saHpiOemEventLogActiveEntries();     
 
         domain_resource_pair_initialize(&initialized, &dr_table);
 	   
@@ -511,8 +511,8 @@ init_saHpiOEMEventLogTable(void)
 /************************************************************
  * the *_row_copy routine
  */
-static int saHpiOEMEventLogTable_row_copy(saHpiOEMEventLogTable_context * dst,
-                         saHpiOEMEventLogTable_context * src)
+static int saHpiOemEventLogTable_row_copy(saHpiOemEventLogTable_context * dst,
+                         saHpiOemEventLogTable_context * src)
 {
     if(!dst||!src)
         return 1;
@@ -534,16 +534,16 @@ static int saHpiOEMEventLogTable_row_copy(saHpiOEMEventLogTable_context * dst,
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiOEMEventLogTimestamp = src->saHpiOEMEventLogTimestamp;
+    dst->saHpiOemEventLogTimestamp = src->saHpiOemEventLogTimestamp;
 
-    dst->saHpiOEMEventLogManufacturerIdT = src->saHpiOEMEventLogManufacturerIdT;
+    dst->saHpiOemEventLogManufacturerIdT = src->saHpiOemEventLogManufacturerIdT;
 
-    dst->saHpiOEMEventLogTextType = src->saHpiOEMEventLogTextType;
+    dst->saHpiOemEventLogTextType = src->saHpiOemEventLogTextType;
 
-    dst->saHpiOEMEventLogTextLanguage = src->saHpiOEMEventLogTextLanguage;
+    dst->saHpiOemEventLogTextLanguage = src->saHpiOemEventLogTextLanguage;
 
-    memcpy( dst->saHpiOEMEventLogText, src->saHpiOEMEventLogText, src->saHpiOEMEventLogText_len );
-    dst->saHpiOEMEventLogText_len = src->saHpiOEMEventLogText_len;
+    memcpy( dst->saHpiOemEventLogText, src->saHpiOemEventLogText, src->saHpiOemEventLogText_len );
+    dst->saHpiOemEventLogText_len = src->saHpiOemEventLogText_len;
 
     return 0;
 }
@@ -558,7 +558,7 @@ static int saHpiOEMEventLogTable_row_copy(saHpiOEMEventLogTable_context * dst,
  * context. Then we make sure the indexes for the new row are valid.
  */
 int
-saHpiOEMEventLogTable_extract_index( saHpiOEMEventLogTable_context * ctx, netsnmp_index * hdr )
+saHpiOemEventLogTable_extract_index( saHpiOemEventLogTable_context * ctx, netsnmp_index * hdr )
 {
         /*
          * temporary local storage for extracting oid index
@@ -570,10 +570,10 @@ saHpiOEMEventLogTable_extract_index( saHpiOEMEventLogTable_context * ctx, netsnm
         netsnmp_variable_list var_saHpiDomainId;
         netsnmp_variable_list var_saHpiResourceId;
         netsnmp_variable_list var_saHpiEventSeverity;
-        netsnmp_variable_list var_saHpiOEMEventEntryId;
+        netsnmp_variable_list var_saHpiOemEventEntryId;
         int err;
 
-        DEBUGMSGTL ((AGENT, "saHpiOEMEventLogTable_extract_index, called\n"));
+        DEBUGMSGTL ((AGENT, "saHpiOemEventLogTable_extract_index, called\n"));
 
         /*
          * copy index, if provided
@@ -606,12 +606,12 @@ saHpiOEMEventLogTable_extract_index( saHpiOEMEventLogTable_context * ctx, netsnm
        memset( &var_saHpiEventSeverity, 0x00, sizeof(var_saHpiEventSeverity) );
        var_saHpiEventSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiEventSeverity.next_variable = &var_saHpiOEMEventEntryId;
+       var_saHpiEventSeverity.next_variable = &var_saHpiOemEventEntryId;
 
-       memset( &var_saHpiOEMEventEntryId, 0x00, sizeof(var_saHpiOEMEventEntryId) );
-       var_saHpiOEMEventEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
+       memset( &var_saHpiOemEventEntryId, 0x00, sizeof(var_saHpiOemEventEntryId) );
+       var_saHpiOemEventEntryId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
        /** TODO: link this index to the next, or NULL for the last one */
-       var_saHpiOEMEventEntryId.next_variable = NULL;
+       var_saHpiOemEventEntryId.next_variable = NULL;
 
 
         /*
@@ -628,12 +628,12 @@ saHpiOEMEventLogTable_extract_index( saHpiOEMEventLogTable_context * ctx, netsnm
    
                 /** skipping external index saHpiEventSeverity */
    
-                /** skipping external index saHpiOEMEventEntryId */
+                /** skipping external index saHpiOemEventEntryId */
    
                 err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer);
                 err = saHpiResourceEntryId_check_index(*var_saHpiResourceId.val.integer);
 		err = saHpiEventSeverity_check_index(*var_saHpiEventSeverity.val.integer);
-		err = saHpiOEMEventEntryId_check_index(*var_saHpiOEMEventEntryId.val.integer);  
+		err = saHpiOemEventEntryId_check_index(*var_saHpiOemEventEntryId.val.integer);  
         }
 
         /*
@@ -653,8 +653,8 @@ saHpiOEMEventLogTable_extract_index( saHpiOEMEventLogTable_context * ctx, netsnm
  * return 1 if the row could be ACTIVE
  * return 0 if the row is not ready for the ACTIVE state
  */
-int saHpiOEMEventLogTable_can_activate(saHpiOEMEventLogTable_context *undo_ctx,
-                      saHpiOEMEventLogTable_context *row_ctx,
+int saHpiOemEventLogTable_can_activate(saHpiOemEventLogTable_context *undo_ctx,
+                      saHpiOemEventLogTable_context *row_ctx,
                       netsnmp_request_group * rg)
 {
     /*
@@ -678,8 +678,8 @@ int saHpiOEMEventLogTable_can_activate(saHpiOEMEventLogTable_context *undo_ctx,
  * return 1 if the row can be set to a non-ACTIVE state
  * return 0 if the row must remain in the ACTIVE state
  */
-int saHpiOEMEventLogTable_can_deactivate(saHpiOEMEventLogTable_context *undo_ctx,
-                        saHpiOEMEventLogTable_context *row_ctx,
+int saHpiOemEventLogTable_can_deactivate(saHpiOemEventLogTable_context *undo_ctx,
+                        saHpiOemEventLogTable_context *row_ctx,
                         netsnmp_request_group * rg)
 {
     /*
@@ -695,15 +695,15 @@ int saHpiOEMEventLogTable_can_deactivate(saHpiOEMEventLogTable_context *undo_ctx
  * return 1 if the row can be deleted
  * return 0 if the row cannot be deleted
  */
-int saHpiOEMEventLogTable_can_delete(saHpiOEMEventLogTable_context *undo_ctx,
-                    saHpiOEMEventLogTable_context *row_ctx,
+int saHpiOemEventLogTable_can_delete(saHpiOemEventLogTable_context *undo_ctx,
+                    saHpiOemEventLogTable_context *row_ctx,
                     netsnmp_request_group * rg)
 {
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
      */
-    if(saHpiOEMEventLogTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
+    if(saHpiOemEventLogTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
         return 0;
     
     /*
@@ -712,7 +712,7 @@ int saHpiOEMEventLogTable_can_delete(saHpiOEMEventLogTable_context *undo_ctx,
     return 1;
 }
 
-#ifdef saHpiOEMEventLogTable_ROW_CREATION
+#ifdef saHpiOemEventLogTable_ROW_CREATION
 /************************************************************
  * the *_create_row routine is called by the table handler
  * to create a new row for a given index. If you need more
@@ -723,15 +723,15 @@ int saHpiOEMEventLogTable_can_delete(saHpiOEMEventLogTable_context *undo_ctx,
  * states of set processing. Simple check for a NULL undo_ctx
  * in those states and do detailed creation checking there.
  *
- * returns a newly allocated saHpiOEMEventLogTable_context
+ * returns a newly allocated saHpiOemEventLogTable_context
  *   structure if the specified indexes are not illegal
  * returns NULL for errors or illegal index values.
  */
-saHpiOEMEventLogTable_context *
-saHpiOEMEventLogTable_create_row( netsnmp_index* hdr)
+saHpiOemEventLogTable_context *
+saHpiOemEventLogTable_create_row( netsnmp_index* hdr)
 {
-    saHpiOEMEventLogTable_context * ctx =
-        SNMP_MALLOC_TYPEDEF(saHpiOEMEventLogTable_context);
+    saHpiOemEventLogTable_context * ctx =
+        SNMP_MALLOC_TYPEDEF(saHpiOemEventLogTable_context);
     if(!ctx)
         return NULL;
 
@@ -739,7 +739,7 @@ saHpiOEMEventLogTable_create_row( netsnmp_index* hdr)
     /*
      * TODO: check indexes, if necessary.
      */
-    if(saHpiOEMEventLogTable_extract_index( ctx, hdr )) {
+    if(saHpiOemEventLogTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
         return NULL;
@@ -765,19 +765,19 @@ saHpiOEMEventLogTable_create_row( netsnmp_index* hdr)
 /************************************************************
  * the *_duplicate row routine
  */
-saHpiOEMEventLogTable_context *
-saHpiOEMEventLogTable_duplicate_row( saHpiOEMEventLogTable_context * row_ctx)
+saHpiOemEventLogTable_context *
+saHpiOemEventLogTable_duplicate_row( saHpiOemEventLogTable_context * row_ctx)
 {
-    saHpiOEMEventLogTable_context * dup;
+    saHpiOemEventLogTable_context * dup;
 
     if(!row_ctx)
         return NULL;
 
-    dup = SNMP_MALLOC_TYPEDEF(saHpiOEMEventLogTable_context);
+    dup = SNMP_MALLOC_TYPEDEF(saHpiOemEventLogTable_context);
     if(!dup)
         return NULL;
         
-    if(saHpiOEMEventLogTable_row_copy(dup,row_ctx)) {
+    if(saHpiOemEventLogTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
@@ -788,7 +788,7 @@ saHpiOEMEventLogTable_duplicate_row( saHpiOEMEventLogTable_context * row_ctx)
 /************************************************************
  * the *_delete_row method is called to delete a row.
  */
-netsnmp_index * saHpiOEMEventLogTable_delete_row( saHpiOEMEventLogTable_context * ctx )
+netsnmp_index * saHpiOemEventLogTable_delete_row( saHpiOemEventLogTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
 
@@ -823,12 +823,12 @@ netsnmp_index * saHpiOEMEventLogTable_delete_row( saHpiOEMEventLogTable_context 
  *
  * next state -> SET_RESERVE2 || SET_FREE
  */
-void saHpiOEMEventLogTable_set_reserve1( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_reserve1( netsnmp_request_group *rg )
 {
-//    saHpiOEMEventLogTable_context *row_ctx =
-//            (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx =
-//            (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx =
+//            (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx =
+//            (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_variable_list *var;
     netsnmp_request_group_item *current;
     int rc;
@@ -850,7 +850,7 @@ void saHpiOEMEventLogTable_set_reserve1( netsnmp_request_group *rg )
         default: /** We shouldn't get here */
             rc = SNMP_ERR_GENERR;
             snmp_log(LOG_ERR, "unknown column in "
-                     "saHpiOEMEventLogTable_set_reserve1\n");
+                     "saHpiOemEventLogTable_set_reserve1\n");
         }
 
         if (rc)
@@ -864,10 +864,10 @@ void saHpiOEMEventLogTable_set_reserve1( netsnmp_request_group *rg )
      */
 }
 
-void saHpiOEMEventLogTable_set_reserve2( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_reserve2( netsnmp_request_group *rg )
 {
-//    saHpiOEMEventLogTable_context *row_ctx = (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx = (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx = (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx = (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
     int rc;
@@ -910,11 +910,11 @@ void saHpiOEMEventLogTable_set_reserve2( netsnmp_request_group *rg )
  * In your case, changes should be made to row_ctx. A copy of
  * the original row is in undo_ctx.
  */
-void saHpiOEMEventLogTable_set_action( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_action( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-//    saHpiOEMEventLogTable_context *row_ctx = (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx = (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx = (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx = (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
@@ -967,11 +967,11 @@ void saHpiOEMEventLogTable_set_action( netsnmp_request_group *rg )
  * AFTER calling this routine, the agent will delete the
  * undo_info.
  */
-void saHpiOEMEventLogTable_set_commit( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_commit( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-//    saHpiOEMEventLogTable_context *row_ctx = (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx = (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx = (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx = (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1002,11 +1002,11 @@ void saHpiOEMEventLogTable_set_commit( netsnmp_request_group *rg )
  *
  * AFTER calling this routine, the agent will delete undo_info.
  */
-void saHpiOEMEventLogTable_set_free( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_free( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-//    saHpiOEMEventLogTable_context *row_ctx = (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx = (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx = (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx = (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1048,11 +1048,11 @@ void saHpiOEMEventLogTable_set_free( netsnmp_request_group *rg )
  * Then undo_info will be deleted (or existing row, if row_created
  * == 1).
  */
-void saHpiOEMEventLogTable_set_undo( netsnmp_request_group *rg )
+void saHpiOemEventLogTable_set_undo( netsnmp_request_group *rg )
 {
     netsnmp_variable_list *var;
-//    saHpiOEMEventLogTable_context *row_ctx = (saHpiOEMEventLogTable_context *)rg->existing_row;
-//    saHpiOEMEventLogTable_context *undo_ctx = (saHpiOEMEventLogTable_context *)rg->undo_info;
+//    saHpiOemEventLogTable_context *row_ctx = (saHpiOemEventLogTable_context *)rg->existing_row;
+//    saHpiOemEventLogTable_context *undo_ctx = (saHpiOemEventLogTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
     /*
@@ -1079,15 +1079,15 @@ void saHpiOEMEventLogTable_set_undo( netsnmp_request_group *rg )
 
 /************************************************************
  *
- * Initialize the saHpiOEMEventLogTable table by defining its contents and how it's structured
+ * Initialize the saHpiOemEventLogTable table by defining its contents and how it's structured
  */
 void
-initialize_table_saHpiOEMEventLogTable(void)
+initialize_table_saHpiOemEventLogTable(void)
 {
     netsnmp_table_registration_info *table_info;
 
     if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiOEMEventLogTable_handler called again\n");
+        snmp_log(LOG_ERR, "initialize_table_saHpiOEMEventLogTable.handler called again\n");
         return;
     }
 
@@ -1098,15 +1098,15 @@ initialize_table_saHpiOEMEventLogTable(void)
 
     /* if your table is read only, it's easiest to change the
        HANDLER_CAN_RWRITE definition below to HANDLER_CAN_RONLY */
-    my_handler = netsnmp_create_handler_registration("saHpiOEMEventLogTable",
+    my_handler = netsnmp_create_handler_registration("saHpiOemEventLogTable",
                                              netsnmp_table_array_helper_handler,
-                                             saHpiOEMEventLogTable_oid,
-                                             saHpiOEMEventLogTable_oid_len,
+                                             saHpiOemEventLogTable_oid,
+                                             saHpiOemEventLogTable_oid_len,
                                              HANDLER_CAN_RWRITE);
             
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiOEMEventLogTable_handler\n");
+                 "initialize_table_saHpiOEMEventLogTable.handler\n");
         return; /** mallocs failed */
     }
 
@@ -1127,121 +1127,121 @@ initialize_table_saHpiOEMEventLogTable(void)
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
         /** index: saHpiEventSeverity */
         netsnmp_table_helper_add_index(table_info, ASN_INTEGER);
-        /** index: saHpiOEMEventEntryId */
+        /** index: saHpiOemEventEntryId */
         netsnmp_table_helper_add_index(table_info, ASN_UNSIGNED);
 
-    table_info->min_column = saHpiOEMEventLogTable_COL_MIN;
-    table_info->max_column = saHpiOEMEventLogTable_COL_MAX;
+    table_info->min_column = saHpiOemEventLogTable_COL_MIN;
+    table_info->max_column = saHpiOemEventLogTable_COL_MAX;
 
     /***************************************************
      * registering the table with the master agent
      */
-    cb.get_value = saHpiOEMEventLogTable_get_value;
-    cb.container = netsnmp_container_find("saHpiOEMEventLogTable_primary:"
-                                          "saHpiOEMEventLogTable:"
+    cb.get_value = saHpiOemEventLogTable_get_value;
+    cb.container = netsnmp_container_find("saHpiOemEventLogTable_primary:"
+                                          "saHpiOemEventLogTable:"
                                           "table_container");
-#ifdef saHpiOEMEventLogTable_IDX2
+#ifdef saHpiOemEventLogTable_IDX2
     netsnmp_container_add_index(cb.container,
-                                netsnmp_container_find("saHpiOEMEventLogTable_secondary:"
-                                                       "saHpiOEMEventLogTable:"
+                                netsnmp_container_find("saHpiOemEventLogTable_secondary:"
+                                                       "saHpiOemEventLogTable:"
                                                        "table_container"));
-    cb.container->next->compare = saHpiOEMEventLogTable_cmp;
+    cb.container->next->compare = saHpiOemEventLogTable_cmp;
 #endif
-#ifdef saHpiOEMEventLogTable_SET_HANDLING
+#ifdef saHpiOemEventLogTable_SET_HANDLING
     cb.can_set = 1;
-#ifdef saHpiOEMEventLogTable_ROW_CREATION
-    cb.create_row = (UserRowMethod*)saHpiOEMEventLogTable_create_row;
+#ifdef saHpiOemEventLogTable_ROW_CREATION
+    cb.create_row = (UserRowMethod*)saHpiOemEventLogTable_create_row;
 #endif
-    cb.duplicate_row = (UserRowMethod*)saHpiOEMEventLogTable_duplicate_row;
-    cb.delete_row = (UserRowMethod*)saHpiOEMEventLogTable_delete_row;
-    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiOEMEventLogTable_row_copy;
+    cb.duplicate_row = (UserRowMethod*)saHpiOemEventLogTable_duplicate_row;
+    cb.delete_row = (UserRowMethod*)saHpiOemEventLogTable_delete_row;
+    cb.row_copy = (Netsnmp_User_Row_Operation *)saHpiOemEventLogTable_row_copy;
 
-    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiOEMEventLogTable_can_activate;
-    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiOEMEventLogTable_can_deactivate;
-    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiOEMEventLogTable_can_delete;
+    cb.can_activate = (Netsnmp_User_Row_Action *)saHpiOemEventLogTable_can_activate;
+    cb.can_deactivate = (Netsnmp_User_Row_Action *)saHpiOemEventLogTable_can_deactivate;
+    cb.can_delete = (Netsnmp_User_Row_Action *)saHpiOemEventLogTable_can_delete;
 
-    cb.set_reserve1 = saHpiOEMEventLogTable_set_reserve1;
-    cb.set_reserve2 = saHpiOEMEventLogTable_set_reserve2;
-    cb.set_action = saHpiOEMEventLogTable_set_action;
-    cb.set_commit = saHpiOEMEventLogTable_set_commit;
-    cb.set_free = saHpiOEMEventLogTable_set_free;
-    cb.set_undo = saHpiOEMEventLogTable_set_undo;
+    cb.set_reserve1 = saHpiOemEventLogTable_set_reserve1;
+    cb.set_reserve2 = saHpiOemEventLogTable_set_reserve2;
+    cb.set_action = saHpiOemEventLogTable_set_action;
+    cb.set_commit = saHpiOemEventLogTable_set_commit;
+    cb.set_free = saHpiOemEventLogTable_set_free;
+    cb.set_undo = saHpiOemEventLogTable_set_undo;
 #endif
-    DEBUGMSGTL(("initialize_table_saHpiOEMEventLogTable",
-                "Registering table saHpiOEMEventLogTable "
+    DEBUGMSGTL(("initialize_table_saHpiOemEventLogTable",
+                "Registering table saHpiOemEventLogTable "
                 "as a table array\n"));
     netsnmp_table_container_register(my_handler, table_info, &cb,
                                      cb.container, 1);
 }
 
 /************************************************************
- * saHpiOEMEventLogTable_get_value
+ * saHpiOemEventLogTable_get_value
  *
  * This routine is called for get requests to copy the data
  * from the context to the varbind for the request. If the
  * context has been properly maintained, you don't need to
  * change in code in this fuction.
  */
-int saHpiOEMEventLogTable_get_value(
+int saHpiOemEventLogTable_get_value(
             netsnmp_request_info *request,
             netsnmp_index *item,
             netsnmp_table_request_info *table_info )
 {
     netsnmp_variable_list *var = request->requestvb;
-    saHpiOEMEventLogTable_context *context = (saHpiOEMEventLogTable_context *)item;
+    saHpiOemEventLogTable_context *context = (saHpiOemEventLogTable_context *)item;
 
     switch(table_info->colnum) {
 
-        case COLUMN_SAHPIOEMEVENTLOGTIMESTAMP:
+        case COLUMN_SAHPIOemEVENTLOGTIMESTAMP:
             /** SaHpiTime = ASN_COUNTER64 */
             snmp_set_var_typed_value(var, ASN_COUNTER64,
-                         (u_char*)&context->saHpiOEMEventLogTimestamp,
-                         sizeof(context->saHpiOEMEventLogTimestamp) );
+                         (u_char*)&context->saHpiOemEventLogTimestamp,
+                         sizeof(context->saHpiOemEventLogTimestamp) );
         break;
     
-        case COLUMN_SAHPIOEMEVENTLOGMANUFACTURERIDT:
+        case COLUMN_SAHPIOemEVENTLOGMANUFACTURERIDT:
             /** SaHpiManufacturerId = ASN_UNSIGNED */
             snmp_set_var_typed_value(var, ASN_UNSIGNED,
-                         (u_char*)&context->saHpiOEMEventLogManufacturerIdT,
-                         sizeof(context->saHpiOEMEventLogManufacturerIdT) );
+                         (u_char*)&context->saHpiOemEventLogManufacturerIdT,
+                         sizeof(context->saHpiOemEventLogManufacturerIdT) );
         break;
     
-        case COLUMN_SAHPIOEMEVENTLOGTEXTTYPE:
+        case COLUMN_SAHPIOemEVENTLOGTEXTTYPE:
             /** SaHpiTextType = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (u_char*)&context->saHpiOEMEventLogTextType,
-                         sizeof(context->saHpiOEMEventLogTextType) );
+                         (u_char*)&context->saHpiOemEventLogTextType,
+                         sizeof(context->saHpiOemEventLogTextType) );
         break;
     
-        case COLUMN_SAHPIOEMEVENTLOGTEXTLANGUAGE:
+        case COLUMN_SAHPIOemEVENTLOGTEXTLANGUAGE:
             /** SaHpiTextLanguage = ASN_INTEGER */
             snmp_set_var_typed_value(var, ASN_INTEGER,
-                         (u_char*)&context->saHpiOEMEventLogTextLanguage,
-                         sizeof(context->saHpiOEMEventLogTextLanguage) );
+                         (u_char*)&context->saHpiOemEventLogTextLanguage,
+                         sizeof(context->saHpiOemEventLogTextLanguage) );
         break;
     
-        case COLUMN_SAHPIOEMEVENTLOGTEXT:
+        case COLUMN_SAHPIOemEVENTLOGTEXT:
             /** SaHpiText = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
-                         (u_char*)&context->saHpiOEMEventLogText,
-                         context->saHpiOEMEventLogText_len );
+                         (u_char*)&context->saHpiOemEventLogText,
+                         context->saHpiOemEventLogText_len );
         break;
     
     default: /** We shouldn't get here */
         snmp_log(LOG_ERR, "unknown column in "
-                 "saHpiOEMEventLogTable_get_value\n");
+                 "saHpiOemEventLogTable_get_value\n");
         return SNMP_ERR_GENERR;
     }
     return SNMP_ERR_NOERROR;
 }
 
 /************************************************************
- * saHpiOEMEventLogTable_get_by_idx
+ * saHpiOemEventLogTable_get_by_idx
  */
-const saHpiOEMEventLogTable_context *
-saHpiOEMEventLogTable_get_by_idx(netsnmp_index * hdr)
+const saHpiOemEventLogTable_context *
+saHpiOemEventLogTable_get_by_idx(netsnmp_index * hdr)
 {
-    return (const saHpiOEMEventLogTable_context *)
+    return (const saHpiOemEventLogTable_context *)
         CONTAINER_FIND(cb.container, hdr );
 }
 

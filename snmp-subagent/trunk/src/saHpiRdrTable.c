@@ -81,7 +81,7 @@ size_t saHpiRdrTable_oid_len = OID_LENGTH(saHpiRdrTable_oid);
 /*************************************************************
  *  scalars 
  */
-static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
+static oid saHpiRdrActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
 static u_long rdr_entry_count = 0;
 
 /*
@@ -550,10 +550,10 @@ SaErrorT clear_rdr_container(SaHpiDomainIdT domainId,
 
 
 /*
- * int handle_saHpiRdrEntryCount()
+ * int handle_saHpiRdrActiveEntries()
  */
 int
-handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiRdrActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -564,14 +564,14 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
     /* a instance handler also only hands us one request at a time, so
        we don't need to loop over a list of requests; we'll only get one. */
 
-	DEBUGMSGTL ((AGENT, "handle_saHpiRdrEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "handle_saHpiRdrActiveEntries, called\n"));	
 
     rdr_entry_count = CONTAINER_SIZE (cb.container);
     
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) &rdr_entry_count,
 				     sizeof(rdr_entry_count));
             break;
@@ -585,18 +585,18 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*
- * int initialize_table_saHpiResourceEntryCount()
+ * int initialize_table_saHpiResourceActiveEntries()
  */
-int initialize_table_saHpiRdrEntryCount(void)
+int initialize_table_saHpiRdrActiveEntries(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiRdrEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiRdrActiveEntries, called\n"));	
 
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
-			"saHpiRdrEntryCount", 
-			handle_saHpiRdrEntryCount,
-                        saHpiRdrEntryCount_oid, 
-			OID_LENGTH(saHpiRdrEntryCount_oid),
+			"saHpiRdrActiveEntries", 
+			handle_saHpiRdrActiveEntries,
+                        saHpiRdrActiveEntries_oid, 
+			OID_LENGTH(saHpiRdrActiveEntries_oid),
                         HANDLER_CAN_RONLY ));
 	return 0;
 }
@@ -690,7 +690,7 @@ init_saHpiRdrTable(void)
 	
 	initialize_table_saHpiRdrTable();
 	
-	initialize_table_saHpiRdrEntryCount();
+	initialize_table_saHpiRdrActiveEntries();
 
 }
 
@@ -1412,14 +1412,14 @@ int saHpiRdrTable_get_value(
 	
 	    case COLUMN_SAHPIRDRENTRYID:
 		/** COUNTER = ASN_COUNTER */
-		snmp_set_var_typed_value(var, ASN_COUNTER,
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 			 (unsigned char*)&context->saHpiRdrEntryId,
 			 sizeof(context->saHpiRdrEntryId) );
 	    break;
 	
 	    case COLUMN_SAHPIRDRNEXTENTRYID:
 		/** COUNTER = ASN_COUNTER */
-		snmp_set_var_typed_value(var, ASN_COUNTER,
+		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 			 (unsigned char*)&context->saHpiRdrNextEntryId,
 			 sizeof(context->saHpiRdrNextEntryId) );
 	    break;

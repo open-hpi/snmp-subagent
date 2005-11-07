@@ -80,12 +80,12 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_analog_entry_count = 0;
-static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
-int handle_saHpiCtrlAnalogEntryCount( netsnmp_mib_handler *handler, 
+static oid saHpiCtrlAnalogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
+int handle_saHpiCtrlAnalogActiveEntries( netsnmp_mib_handler *handler, 
 			       netsnmp_handler_registration *reginfo,
 			       netsnmp_agent_request_info   *reqinfo, 
 			       netsnmp_request_info *requests);
-int initialize_table_saHpiCtrlAnalogEntryCount(void);
+int initialize_table_saHpiCtrlAnalogActiveEntries(void);
 
 /*
  * SaErrorT populate_ctrl_analog()
@@ -391,9 +391,9 @@ int set_table_ctrl_analog_state (saHpiCtrlAnalogTable_context *row_ctx)
 }
 
 /*
- * int handle_saHpiCtrlAnalogEntryCount()
+ * int handle_saHpiCtrlAnalogActiveEntries()
  */
-int handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiCtrlAnalogActiveEntries(netsnmp_mib_handler *handler,
 				     netsnmp_handler_registration *reginfo,
 				     netsnmp_agent_request_info   *reqinfo,
 				     netsnmp_request_info         *requests)
@@ -405,14 +405,14 @@ int handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
        we don't need to loop over a list of requests; we'll only get one. */
 
 
- 	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlAnalogEntryCount, called\n"));
+ 	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlAnalogActiveEntries, called\n"));
 
         ctrl_analog_entry_count = CONTAINER_SIZE (cb.container);
 
 	switch(reqinfo->mode) {
 	
 	    case MODE_GET:
-		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+		snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
 					 (u_char *) &ctrl_analog_entry_count,
 					 sizeof(ctrl_analog_entry_count));
 		break;
@@ -427,19 +427,19 @@ int handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
 }
 
 /*
- * int initialize_table_saHpiCtrlAnalogEntryCount(void)
+ * int initialize_table_saHpiCtrlAnalogActiveEntries(void)
  */
-int initialize_table_saHpiCtrlAnalogEntryCount(void)
+int initialize_table_saHpiCtrlAnalogActiveEntries(void)
 {
 
- 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlAnalogEntryCount, called\n"));
+ 	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlAnalogActiveEntries, called\n"));
 
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
-			"saHpiCtrlAnalogEntryCount", 
-			handle_saHpiCtrlAnalogEntryCount,
-                        saHpiCtrlAnalogEntryCount_oid, 
-			OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
+			"saHpiCtrlAnalogActiveEntries", 
+			handle_saHpiCtrlAnalogActiveEntries,
+                        saHpiCtrlAnalogActiveEntries_oid, 
+			OID_LENGTH(saHpiCtrlAnalogActiveEntries_oid),
                         HANDLER_CAN_RONLY));
 	return 0;
 }
@@ -533,7 +533,7 @@ init_saHpiCtrlAnalogTable(void)
 
 	initialize_table_saHpiCtrlAnalogTable();
 
-	initialize_table_saHpiCtrlAnalogEntryCount();
+	initialize_table_saHpiCtrlAnalogActiveEntries();
 
 	domain_resource_pair_initialize(&initialized, &dr_table);
 }
@@ -1413,7 +1413,7 @@ int saHpiCtrlAnalogTable_get_value(
 					 sizeof(context->saHpiCtrlAnalogState) );
 		break;
 
-	case COLUMN_SAHPICTRLANALOGOEM:
+	case COLUMN_SAHPICTRLANALOGOem:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 					 (u_char*)&context->saHpiCtrlAnalogOem,

@@ -80,12 +80,12 @@ static GHashTable *dr_table;
  * oid and fucntion declarations scalars
  */
 static u_long ctrl_digital_entry_count = 0;
-static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
-int handle_saHpiCtrlDigitalEntryCount( netsnmp_mib_handler *handler, 
+static oid saHpiCtrlDigitalActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
+int handle_saHpiCtrlDigitalActiveEntries( netsnmp_mib_handler *handler, 
 			       netsnmp_handler_registration *reginfo,
 			       netsnmp_agent_request_info   *reqinfo, 
 			       netsnmp_request_info *requests);
-int initialize_table_saHpiCtrlDigitalEntryCount(void);
+int initialize_table_saHpiCtrlDigitalActiveEntries(void);
 
 /*
  * populate_ctrl_digital()
@@ -373,9 +373,9 @@ int set_table_ctrl_digital_state (saHpiCtrlDigitalTable_context *row_ctx)
 }
 
 /*
- * int handle_saHpiCtrlDigitalEntryCount()
+ * int handle_saHpiCtrlDigitalActiveEntries()
  */
-int handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
+int handle_saHpiCtrlDigitalActiveEntries(netsnmp_mib_handler *handler,
 				      netsnmp_handler_registration *reginfo,
 				      netsnmp_agent_request_info   *reqinfo,
 				      netsnmp_request_info         *requests)
@@ -386,14 +386,14 @@ int handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
 	/* a instance handler also only hands us one request at a time, so
 	   we don't need to loop over a list of requests; we'll only get one. */
 
-	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDigitalEntryCount, called\n"));
+	DEBUGMSGTL ((AGENT, "handle_saHpiCtrlDigitalActiveEntries, called\n"));
 
         ctrl_digital_entry_count = CONTAINER_SIZE (cb.container);
 	
 	switch(reqinfo->mode) {
 	
 	    case MODE_GET:
-		snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+		snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
 					 (u_char *) &ctrl_digital_entry_count,
 					 sizeof(ctrl_digital_entry_count));
 		break;
@@ -409,18 +409,18 @@ int handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
 
 
 /*
- * int initialize_table_saHpiCtrlDigitalEntryCount()
+ * int initialize_table_saHpiCtrlDigitalActiveEntries()
  */
-int initialize_table_saHpiCtrlDigitalEntryCount(void)
+int initialize_table_saHpiCtrlDigitalActiveEntries(void)
 {
-	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDigitalEntryCount, called\n"));	
+	DEBUGMSGTL ((AGENT, "initialize_table_saHpiCtrlDigitalActiveEntries, called\n"));	
 
 	netsnmp_register_scalar(
 		netsnmp_create_handler_registration(
-			"saHpiCtrlDigitalEntryCount", 
-			handle_saHpiCtrlDigitalEntryCount,
-			saHpiCtrlDigitalEntryCount_oid, 
-			OID_LENGTH(saHpiCtrlDigitalEntryCount_oid),
+			"saHpiCtrlDigitalActiveEntries", 
+			handle_saHpiCtrlDigitalActiveEntries,
+			saHpiCtrlDigitalActiveEntries_oid, 
+			OID_LENGTH(saHpiCtrlDigitalActiveEntries_oid),
 			HANDLER_CAN_RONLY));
 	return 0;
 }
@@ -511,7 +511,7 @@ void init_saHpiCtrlDigitalTable(void)
 
 	initialize_table_saHpiCtrlDigitalTable();  
 
-	initialize_table_saHpiCtrlDigitalEntryCount();
+	initialize_table_saHpiCtrlDigitalActiveEntries();
 
 	domain_resource_pair_initialize(&initialized, &dr_table);
 }
@@ -1378,7 +1378,7 @@ int saHpiCtrlDigitalTable_get_value(
 					 sizeof(context->saHpiCtrlDigitalState) );
 		break;
 
-	case COLUMN_SAHPICTRLDIGITALOEM:
+	case COLUMN_SAHPICTRLDIGITALOem:
 		/** UNSIGNED32 = ASN_UNSIGNED */
 		snmp_set_var_typed_value(var, ASN_UNSIGNED,
 					 (unsigned char*)&context->saHpiCtrlDigitalOem,

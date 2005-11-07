@@ -73,12 +73,12 @@ size_t saHpiAnnunciatorTable_oid_len = OID_LENGTH(saHpiAnnunciatorTable_oid);
  * oid and fucntion declarations scalars
  */
 static u_long annunciator_entry_count = 0;
-static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5};
-int handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
+static oid saHpiAnnunciatorActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5};
+int handle_saHpiAnnunciatorActiveEntries(netsnmp_mib_handler *handler,
                                       netsnmp_handler_registration *reginfo,
                                       netsnmp_agent_request_info   *reqinfo,
                                       netsnmp_request_info         *requests);
-int initialize_table_saHpiAnnunciatorEntryCount(void);
+int initialize_table_saHpiAnnunciatorActiveEntries(void);
 
 /**
  * 
@@ -318,7 +318,7 @@ int set_table_annun_mode (saHpiAnnunciatorTable_context *row_ctx)
  * @return:
  */
 int
-handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiAnnunciatorActiveEntries(netsnmp_mib_handler *handler,
                                   netsnmp_handler_registration *reginfo,
                                   netsnmp_agent_request_info   *reqinfo,
                                   netsnmp_request_info         *requests)
@@ -328,14 +328,14 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
         /* a instance handler also only hands us one request at a time, so
            we don't need to loop over a list of requests; we'll only get one. */
 
-        DEBUGMSGTL ((AGENT, "handle_saHpiAnnunciatorEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "handle_saHpiAnnunciatorActiveEntries, called\n"));
 
 	annunciator_entry_count = CONTAINER_SIZE (cb.container);
 
         switch (reqinfo->mode) {
         
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+                snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                          (u_char *) &annunciator_entry_count,
                                          sizeof(annunciator_entry_count));
                 break;
@@ -354,17 +354,17 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
  * 
  * @return: 
  */
-int initialize_table_saHpiAnnunciatorEntryCount(void)
+int initialize_table_saHpiAnnunciatorActiveEntries(void)
 {
 
-        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorEntryCount, called\n"));
+        DEBUGMSGTL ((AGENT, "initialize_table_saHpiSensorActiveEntries, called\n"));
 
         netsnmp_register_scalar(
                                netsnmp_create_handler_registration(
-                                       "saHpiAnnunciatorEntryCount", 
-                                       handle_saHpiAnnunciatorEntryCount,
-                                       saHpiAnnunciatorEntryCount_oid, 
-                                       OID_LENGTH(saHpiAnnunciatorEntryCount_oid),
+                                       "saHpiAnnunciatorActiveEntries", 
+                                       handle_saHpiAnnunciatorActiveEntries,
+                                       saHpiAnnunciatorActiveEntries_oid, 
+                                       OID_LENGTH(saHpiAnnunciatorActiveEntries_oid),
                                        HANDLER_CAN_RONLY ));
 
         return SNMP_ERR_NOERROR;
@@ -448,7 +448,7 @@ init_saHpiAnnunciatorTable(void)
 
         initialize_table_saHpiAnnunciatorTable();
 
-        initialize_table_saHpiAnnunciatorEntryCount();
+        initialize_table_saHpiAnnunciatorActiveEntries();
 
 }
 
@@ -1218,7 +1218,7 @@ int saHpiAnnunciatorTable_get_value(
                                          sizeof(context->saHpiAnnunciatorMode) );
                 break;
 
-        case COLUMN_SAHPIANNUNCIATOROEM:
+        case COLUMN_SAHPIANNUNCIATOROem:
                 /** UNSIGNED32 = ASN_UNSIGNED */
                 snmp_set_var_typed_value(var, ASN_UNSIGNED,
                                          (u_char*)&context->saHpiAnnunciatorOem,
