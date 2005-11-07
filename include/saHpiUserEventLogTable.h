@@ -39,7 +39,7 @@ extern "C" {
 typedef struct saHpiUserEventLogTable_context_s {
     netsnmp_index index; /** THIS MUST BE FIRST!!! */
 
-    /* flags used to tract data needed to create OEM Event */
+    /* flags used to tract data needed to create Oem Event */
      unsigned char timestamp_set;
      unsigned char text_type_set;
      unsigned char text_language_set;

@@ -154,9 +154,9 @@ int saHpiSensorEnableChangeEventEntryId_check_index(long val);
 int saHpiDomainAlarmSeverity_check_index(long val);
 
 /*******************************/
-/* saHpiOEMEventTable */
+/* saHpiOemEventTable */
 /******************************/
-int saHpiOEMEventEntryId_check_index(long val);
+int saHpiOemEventEntryId_check_index(long val);
 
 /**************************************/
 /**************************************/
@@ -188,9 +188,9 @@ int saHpiEventSaHpiTime_check_index(netsnmp_variable_list *var_saHpiEventSaHpiTi
 int saHpiHotSwapEventTimestamp_check_index(netsnmp_variable_list *var_saHpiHotSwapEventTimestamp);
 
 /**************************/
-/* saHpiOEMEventTable  */    
+/* saHpiOemEventTable  */    
 /**************************/
-int saHpiOEMEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOEMEventTimestamp);
+int saHpiOemEventTimestamp_check_index(netsnmp_variable_list *var_saHpiOemEventTimestamp);
 
 /**************************/
 /* saHpiRdrTable  */    
