@@ -432,7 +432,7 @@ SaHpiTime ::= TEXTUAL-CONVENTION
                order - big endian."
         REFERENCE
                 "Derived from SAI-HPI-B.01.01 spec, pg 164-165."
-        SYNTAX Counter64
+        SYNTAX OCTET STRING (SIZE (8))
 
 
 SaHpiSeverity ::= TEXTUAL-CONVENTION
@@ -1391,32 +1391,6 @@ SaHpiCtrlMode ::= TEXTUAL-CONVENTION
                         auto(1),
                         manual(2) }
                         
-SafUnsigned64 ::= TEXTUAL-CONVENTION
-         STATUS current        
-     DESCRIPTION "The SafUnsigned64 type represents a non-negative
-                integer, which may increase or decrease, but shall
-                never exceed a maximum value, nor fall below a
-                minimum value. The maximum value can not be greater
-                than 2^64-1 (18446744073709551615 decimal), and the
-                minimum value can not be smaller than 0.  The value
-                of a SafUnsigned64 has its maximum value whenever the
-                information being modeled is greater than or equal to
-                its maximum value, and has its minimum value whenever
-                the information being modeled is smaller than or
-                equal to its minimum value.  If the information being
-                modeled subsequently decreases below
-                (increases above) the maximum (minimum) value, the
-                SafUnsigned64 also decreases (increases).
-                
-                This textual convention represents a limited and
-                short-term solution, and may be deprecated as a
-                long term solution is defined and deployed to
-                replace it."
-
-         REFERENCE " Understanding SNMP MIBS, Perkins and McGinnis,
-                     pg 51."
-     SYNTAX OCTET STRING (SIZE (8))
-
 
 -- *************************************
 -- **
@@ -2831,12 +2805,12 @@ saHpiAutoInsertTimeoutEntry OBJECT-TYPE
 
 
 SaHpiAutoInsertTimeoutEntry ::= SEQUENCE {
-                saHpiAutoInsertTimeoutForInsert SafUnsigned64 
+                saHpiAutoInsertTimeoutForInsert SaHpiTime 
                 }
 
 
 saHpiAutoInsertTimeoutForInsert OBJECT-TYPE
-        SYNTAX SafUnsigned64
+        SYNTAX SaHpiTime
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
@@ -2921,7 +2895,7 @@ saHpiHotSwapEntry OBJECT-TYPE
 SaHpiHotSwapEntry ::= SEQUENCE {
         saHpiHotSwapIndicator       INTEGER,
         saHpiHotSwapState           SaHpiHotSwapState,
-        saHpiHotSwapExtractTimeout  SafUnsigned64,
+        saHpiHotSwapExtractTimeout  SaHpiTime,
         saHpiHotSwapActionRequest   INTEGER,
         saHpiHotSwapPolicyCancel    INTEGER,
         saHpiHotSwapResourceRequest INTEGER }
@@ -2977,7 +2951,7 @@ saHpiHotSwapState OBJECT-TYPE
 
 
 saHpiHotSwapExtractTimeout OBJECT-TYPE
-        SYNTAX SafUnsigned64
+        SYNTAX SaHpiTime
         MAX-ACCESS read-write
         STATUS current
         DESCRIPTION
@@ -4878,7 +4852,7 @@ SaHpiEventLogInfoEntry ::= SEQUENCE {
         saHpiEventLogInfoSize              Unsigned32,
         saHpiEventLogInfoUserEventMaxSize  Unsigned32,
         saHpiEventLogInfoUpdateTimestamp   SaHpiTime,
-        saHpiEventLogInfoTime              SafUnsigned64,
+        saHpiEventLogInfoTime              SaHpiTime,
         saHpiEventLogInfoIsEnabled         TruthValue,
         saHpiEventLogInfoOverflowFlag      TruthValue,
         saHpiEventLogInfoOverflowResetable TruthValue,
@@ -4934,7 +4908,7 @@ saHpiEventLogInfoUpdateTimestamp OBJECT-TYPE
 
 
 saHpiEventLogInfoTime OBJECT-TYPE
-        SYNTAX SafUnsigned64
+        SYNTAX SaHpiTime
         MAX-ACCESS read-create
         STATUS current
         DESCRIPTION
