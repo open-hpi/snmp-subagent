@@ -1160,7 +1160,7 @@ void saHpiUserEventTable_set_reserve1( netsnmp_request_group *rg )
 
 void saHpiUserEventTable_set_reserve2( netsnmp_request_group *rg )
 {
-//    saHpiUserEventTable_context *row_ctx = (saHpiUserEventTable_context *)rg->existing_row;
+    saHpiUserEventTable_context *row_ctx = (saHpiUserEventTable_context *)rg->existing_row;
 //    saHpiUserEventTable_context *undo_ctx = (saHpiUserEventTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
     netsnmp_variable_list *var;
