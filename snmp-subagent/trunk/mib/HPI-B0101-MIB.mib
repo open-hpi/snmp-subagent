@@ -3109,16 +3109,16 @@ saHpiEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
-                over the lifetime of the table. If the underlying
-                management system is restarted this count is reset. 
-                Use this node to determine table activity.
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
 
-                saHpiEventLifetimeChanges represents the sum of all
+                'saHpiEventLifetimeChanges' represents the sum of all
                 events of all supported types that have occur in the
                 system.  
-
-                Note saHpiDomainEventCountTotal represents the subset
+				  
+                Note saHpiDomainEventLifetimeChanges represents the subset
                 of events that are Domain events.  The same relationship
                 exists for ResourceEvent, SensorEvent,
                 SensorEnableChangeEvent, HotSwapEvent, WatchdogEvent,
@@ -3258,7 +3258,12 @@ saHpiResourceEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+		
+		The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted this count
                 is reset.  Use this node to determine table activity.
@@ -3362,7 +3367,12 @@ saHpiDomainEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+		
+		The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -3459,7 +3469,12 @@ saHpiSensorEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -3719,7 +3734,12 @@ saHpiSensorEnableChangeEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+		
+		The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -3885,10 +3905,15 @@ saHpiHotSwapEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
-               Use this node to determine table activity.
+                Use this node to determine table activity.
 
                 This scalar object represents the subset of events 
                 that are HotSwap Events."
@@ -3986,7 +4011,12 @@ saHpiWatchdogEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -4118,7 +4148,12 @@ saHpiSoftwareEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -4267,7 +4302,12 @@ saHpiOemEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -4388,7 +4428,12 @@ saHpiUserEventLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -5176,7 +5221,12 @@ saHpiResourceEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table.
                 If the underlying management system is restarted
                 this count is reset.  Use this node to determine
@@ -5284,7 +5334,12 @@ saHpiDomainEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -5384,7 +5439,12 @@ saHpiSensorEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted this
                 count is reset.  Use this node to 
@@ -5633,7 +5693,12 @@ saHpiSensorEnableChangeEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -5789,13 +5854,18 @@ saHpiHotSwapEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
-              over the lifetime of the table. If the underlying
-              management system is restarted this count is reset.
-              Use this node to determine table activity.
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
+                over the lifetime of the table. If the underlying
+                management system is restarted this count is reset.
+                Use this node to determine table activity.
 
-              This scalar object represents the subset of events 
-              that are HotSwap Events."
+                This scalar object represents the subset of events 
+                that are HotSwap Events."
         ::= { eventLog 15 }
 
 
@@ -5879,7 +5949,12 @@ saHpiWatchdogEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted
                 this count is reset.  Use this node to 
@@ -6003,7 +6078,12 @@ saHpiSoftwareEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -6142,7 +6222,12 @@ saHpiOemEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -6253,11 +6338,16 @@ saHpiUserEventLogLifetimeChanges OBJECT-TYPE
         MAX-ACCESS read-only
         STATUS current
         DESCRIPTION
-                "The number of events registered in this table
-               over the lifetime of the table.
-               If the underlying management system is restarted
-               this count is reset.  Use this node to 
-               determine table activity.
+                "Use this value to determine table activity.  It is incremented 
+		each time an event is registered in this table.  It is also 
+		incremented whenever an event is removed or the entire table
+		is cleared.
+			
+                The number of events registered in this table
+                over the lifetime of the table.
+                If the underlying management system is restarted
+                this count is reset.  Use this node to 
+                determine table activity.
 
                 This scalar object represents the subset of events 
                 that are User Events."
