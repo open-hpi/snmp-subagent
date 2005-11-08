@@ -1224,16 +1224,11 @@ void saHpiUserEventTable_set_reserve2( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIUSEREVENTROWSTATUS:
             /** RowStatus = ASN_INTEGER */
-                    /*
-                     * TODO: routine to check valid values
-                     *
-                     * EXAMPLE:
-                     *
-                    * if ( *var->val.integer != XXX ) {
-                *    rc = SNMP_ERR_INCONSISTENTVALUE;
-                *    rc = SNMP_ERR_BADVALUE;
-                * }
-                */
+                if (*var->val.integer == SNMP_ROW_DESTROY) {
+                        if (row_ctx->saHpiUserEventRowStatus != SNMP_ROW_CREATEANDWAIT) {
+                                rc = SNMP_ERR_BADVALUE;
+                        } 
+                }
         break;
 
         default: /** We shouldn't get here */
@@ -1323,10 +1318,10 @@ void saHpiUserEventTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIUSEREVENTROWSTATUS:
             /** RowStatus = ASN_INTEGER */
                 if (*var->val.integer == SNMP_ROW_DESTROY) {
-                        if (row_ctx->saHpiUserEventRowStatus == SNMP_ROW_ACTIVE) {
+                        if (row_ctx->saHpiUserEventRowStatus == SNMP_ROW_CREATEANDWAIT) {
                                 row_err = user_event_delete (row_ctx);
-                        }
-                        rg->row_deleted = 1;
+                                rg->row_deleted = 1;
+                        } 
                 }
             row_ctx->saHpiUserEventRowStatus = *var->val.integer;
         break;
