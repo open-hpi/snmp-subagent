@@ -33,6 +33,7 @@ extern "C" {
 #include <net-snmp/agent/table_array.h>
 
 #include <oh_utils.h> /* For OH_MAX_TEXT_BUFFER_LENGTH */
+#include <hpiSubagent.h>
 
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
@@ -65,9 +66,9 @@ typedef struct saHpiAnnouncementTable_context_s {
         /** SaHpiInstrumentId = ASN_UNSIGNED */
             unsigned long saHpiAnnouncementAnnunciatorNum;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            struct counter64 saHpiAnnouncementTimestamp;
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiAnnouncementTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiAnnouncementTimestamp_len;
 
         /** TruthValue = ASN_INTEGER */
             long saHpiAnnouncementAddedByUser;

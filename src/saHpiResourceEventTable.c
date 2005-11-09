@@ -178,9 +178,9 @@ SaErrorT populate_saHpiResourceEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &res_evt_ctx->saHpiResourceEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, res_evt_ctx->saHpiResourceEventTimestamp);
+        res_evt_ctx->saHpiResourceEventTimestamp_len = sizeof(SaHpiTimeT);
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = 
                 event->EventDataUnion.ResourceEvent.ResourceEventType + 1;
@@ -274,9 +274,10 @@ SaErrorT async_resource_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         res_evt_ctx->saHpiResourceEventEntryId = res_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &res_evt_ctx->saHpiResourceEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, res_evt_ctx->saHpiResourceEventTimestamp);
+        res_evt_ctx->saHpiResourceEventTimestamp_len = sizeof(SaHpiTimeT);
+	
         /** INTEGER = ASN_INTEGER */
         res_evt_ctx->saHpiResourceEventType = 
                 event->EventDataUnion.ResourceEvent.ResourceEventType + 1;
@@ -527,8 +528,12 @@ static int saHpiResourceEventTable_row_copy(saHpiResourceEventTable_context * ds
     /** TODO: add code for external index(s)! */
     dst->saHpiResourceEventEntryId = src->saHpiResourceEventEntryId;
 
-    dst->saHpiResourceEventTimestamp = src->saHpiResourceEventTimestamp;
-
+    memcpy(dst->saHpiResourceEventTimestamp, 
+           src->saHpiResourceEventTimestamp,
+	   src->saHpiResourceEventTimestamp_len);
+    
+    dst->saHpiResourceEventTimestamp_len = src->saHpiResourceEventTimestamp_len;
+    
     dst->saHpiResourceEventType = src->saHpiResourceEventType;
 
     return 0;
@@ -1211,8 +1216,8 @@ int saHpiResourceEventTable_get_value(
         break;
     
         case COLUMN_SAHPIRESOURCEEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiResourceEventTimestamp,
                          sizeof(context->saHpiResourceEventTimestamp) );
         break;

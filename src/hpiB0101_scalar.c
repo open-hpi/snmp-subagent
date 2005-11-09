@@ -25,89 +25,89 @@
 void
 init_hpiB0101(void)
 {
-//    static oid saHpiSensorEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
-//    static oid saHpiCtrlDigitalEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
-//    static oid saHpiCtrlOemEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
-//    static oid saHpiCtrlTextEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
+//    static oid saHpiSensorEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,9 };
+//    static oid saHpiCtrlDigitalActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,1 };
+//    static oid saHpiCtrlOemActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,12 };
+//    static oid saHpiCtrlTextActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,10 };
     static oid saHpiHpiVersion_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,1 };
-//    static oid saHpiUserEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,28 };
-//    static oid saHpiAnnunciatorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5 };
-//    static oid saHpiResourceEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,5 };
-//    static oid saHpiSoftwareEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,23 };
-//    static oid saHpiSensorEnableChangeEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,14 };
-//    static oid saHpiHotSwapEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,15 };
-//    static oid saHpiDomainReferenceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,3 };
-//    static oid saHpiWatchdogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
-//    static oid saHpiDomainEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,7 };
-//    static oid saHpiOEMEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,25 };
-//    static oid saHpiHotSwapEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,11,2 };
-//    static oid saHpiResourceEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,4 };
+//    static oid saHpiUserEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,28 };
+//    static oid saHpiAnnunciatorActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,5 };
+//    static oid saHpiResourceEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,5 };
+//    static oid saHpiSoftwareEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,23 };
+//    static oid saHpiSensorEnableChangeEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,14 };
+//    static oid saHpiHotSwapEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,15 };
+//    static oid saHpiDomainReferenceActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,3 };
+//    static oid saHpiWatchdogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,3 };
+//    static oid saHpiDomainEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,7 };
+//    static oid saHpiOemEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,25 };
+//    static oid saHpiHotSwapActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,11,2 };
+//    static oid saHpiResourceEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,4 };
     static oid saHpiAgentVersion_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,2 };
     static oid saHpiSNMPResourceId_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,3 };
-//    static oid saHpiDomainEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,8 };
-//    static oid saHpiSoftwareEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,21 };
-//    static oid saHpiWatchdogEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 };
-//    static oid saHpiHotSwapEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
-//    static oid saHpiAnnouncementEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,31 };
-//    static oid saHpiFieldEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
-//    static oid saHpiSensorEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,9,1 };
-//    static oid saHpiSensorEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
-//    static oid saHpiSoftwareEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,22 };
-//    static oid saHpiHotSwapEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 };
-//    static oid saHpiRdrEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
-//    static oid saHpiDomainInfoEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
-//    static oid saHpiDomainEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
-//    static oid saHpiWatchdogEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,20 };
-//    static oid saHpiResourceEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,4 };
-//    static oid saHpiAreaEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,3 };
-//    static oid saHpiDomainEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
-//    static oid saHpiOEMEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
+//    static oid saHpiDomainEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,8 };
+//    static oid saHpiSoftwareEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,21 };
+//    static oid saHpiWatchdogEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,19 };
+//    static oid saHpiHotSwapEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,17 };
+//    static oid saHpiAnnouncementActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,31 };
+//    static oid saHpiFieldActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,5 };
+//    static oid saHpiSensorActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,9,1 };
+//    static oid saHpiSensorEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,11 };
+//    static oid saHpiSoftwareEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,22 };
+//    static oid saHpiHotSwapEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,16 };
+//    static oid saHpiRdrActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,1 };
+//    static oid saHpiDomainInfoActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,1 };
+//    static oid saHpiDomainEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,6 };
+//    static oid saHpiWatchdogEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,20 };
+//    static oid saHpiResourceEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,4 };
+//    static oid saHpiAreaActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,3 };
+//    static oid saHpiDomainEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,7 };
+//    static oid saHpiOemEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,24 };
 //    static oid saHpiDiscover_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,4 };
-//    static oid saHpiInventoryEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
-//    static oid saHpiWatchdogEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
-//    static oid saHpiResourceEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
-//    static oid saHpiOEMEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
-//    static oid saHpiResourceEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
-//    static oid saHpiEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
-//    static oid saHpiSensorEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 };
-//    static oid saHpiCtrlDiscreteEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
-//    static oid saHpiDomainAlarmEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
-//    static oid saHpiWatchdogEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,19 };
-//    static oid saHpiSensorEnableChangeEventLogEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
-//    static oid saHpiSensorEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
-//    static oid saHpiSensorEnableChangeEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
-//    static oid saHpiOEMEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
-//    static oid saHpiUserEventEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,29 };
-//    static oid saHpiCtrlAnalogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
-//    static oid saHpiUserEvenLogtEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
-//    static oid saHpiUserEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
-//    static oid saHpiAnnouncementEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
-//    static oid saHpiSoftwareEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,22 };
-//    static oid saHpiSensorEnableChangeEventLogEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
-//    static oid saHpiCtrlStreamEntryCount_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,8 };
-//    static oid saHpiEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
-//    static oid saHpiHotSwapEventEntryCountTotal_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
+//    static oid saHpiInventoryActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,8,1 };
+//    static oid saHpiWatchdogEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,18 };
+//    static oid saHpiResourceEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,3 };
+//    static oid saHpiOemEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,25 };
+//    static oid saHpiResourceActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,7 };
+//    static oid saHpiEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,2 };
+//    static oid saHpiSensorEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,10 };
+//    static oid saHpiCtrlDiscreteActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,3 };
+//    static oid saHpiDomainAlarmActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,5 };
+//    static oid saHpiWatchdogEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,19 };
+//    static oid saHpiSensorEnableChangeEventLogLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,12 };
+//    static oid saHpiSensorEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,10 };
+//    static oid saHpiSensorEnableChangeEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,13 };
+//    static oid saHpiOemEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,26 };
+//    static oid saHpiUserEventActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,29 };
+//    static oid saHpiCtrlAnalogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,6 };
+//    static oid saHpiUserEvenLogtLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,27 };
+//    static oid saHpiUserEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,28 };
+//    static oid saHpiAnnouncementEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,30 };
+//    static oid saHpiSoftwareEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,22 };
+//    static oid saHpiSensorEnableChangeEventLogActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,2,13 };
+//    static oid saHpiCtrlStreamActiveEntries_oid[] = { 1,3,6,1,4,1,18568,2,1,1,4,7,8 };
+//    static oid saHpiEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,1 };
+//    static oid saHpiHotSwapEventLifetimeChanges_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,16 };
 
   DEBUGMSGTL(("hpiB0101", "Initializing\n"));
 
 //    netsnmp_register_scalar(
 //        netsnmp_create_handler_registration("saHpiSensorEventEntryLogCountTotal", handle_saHpiSensorEventEntryLogCountTotal,
-//                               saHpiSensorEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventLogEntryCountTotal_oid),
+//                               saHpiSensorEventLogLifetimeChanges_oid, OID_LENGTH(saHpiSensorEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //       ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlDigitalEntryCount", handle_saHpiCtrlDigitalEntryCount,
-//                               saHpiCtrlDigitalEntryCount_oid, OID_LENGTH(saHpiCtrlDigitalEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlDigitalActiveEntries", handle_saHpiCtrlDigitalActiveEntries,
+//                               saHpiCtrlDigitalActiveEntries_oid, OID_LENGTH(saHpiCtrlDigitalActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlOemEntryCount", handle_saHpiCtrlOemEntryCount,
-//                               saHpiCtrlOemEntryCount_oid, OID_LENGTH(saHpiCtrlOemEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlOemActiveEntries", handle_saHpiCtrlOemActiveEntries,
+//                               saHpiCtrlOemActiveEntries_oid, OID_LENGTH(saHpiCtrlOemActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlTextEntryCount", handle_saHpiCtrlTextEntryCount,
-//                               saHpiCtrlTextEntryCount_oid, OID_LENGTH(saHpiCtrlTextEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlTextActiveEntries", handle_saHpiCtrlTextActiveEntries,
+//                               saHpiCtrlTextActiveEntries_oid, OID_LENGTH(saHpiCtrlTextActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
     netsnmp_register_scalar(
@@ -116,63 +116,63 @@ init_hpiB0101(void)
                                HANDLER_CAN_RONLY
         ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiUserEventEntryCountTotal", handle_saHpiUserEventEntryCountTotal,
-//                               saHpiUserEventEntryCountTotal_oid, OID_LENGTH(saHpiUserEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiUserEventLifetimeChanges", handle_saHpiUserEventLifetimeChanges,
+//                               saHpiUserEventLifetimeChanges_oid, OID_LENGTH(saHpiUserEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //       ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiAnnunciatorEntryCount", handle_saHpiAnnunciatorEntryCount,
-//                               saHpiAnnunciatorEntryCount_oid, OID_LENGTH(saHpiAnnunciatorEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiAnnunciatorActiveEntries", handle_saHpiAnnunciatorActiveEntries,
+//                               saHpiAnnunciatorActiveEntries_oid, OID_LENGTH(saHpiAnnunciatorActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiResourceEventEntryCount", handle_saHpiResourceEventEntryCount,
-//                               saHpiResourceEventEntryCount_oid, OID_LENGTH(saHpiResourceEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiResourceEventActiveEntries", handle_saHpiResourceEventActiveEntries,
+//                               saHpiResourceEventActiveEntries_oid, OID_LENGTH(saHpiResourceEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //   netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSoftwareEventEntryCount", handle_saHpiSoftwareEventEntryCount,
-//                               saHpiSoftwareEventEntryCount_oid, OID_LENGTH(saHpiSoftwareEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSoftwareEventActiveEntries", handle_saHpiSoftwareEventActiveEntries,
+//                               saHpiSoftwareEventActiveEntries_oid, OID_LENGTH(saHpiSoftwareEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventEntryCount", handle_saHpiSensorEnableChangeEventEntryCount,
-//                               saHpiSensorEnableChangeEventEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventActiveEntries", handle_saHpiSensorEnableChangeEventActiveEntries,
+//                               saHpiSensorEnableChangeEventActiveEntries_oid, OID_LENGTH(saHpiSensorEnableChangeEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiHotSwapEventLogEntryCountTotal", handle_saHpiHotSwapEventLogEntryCountTotal,
-//                               saHpiHotSwapEventLogEntryCountTotal_oid, OID_LENGTH(saHpiHotSwapEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiHotSwapEventLogLifetimeChanges", handle_saHpiHotSwapEventLogLifetimeChanges,
+//                               saHpiHotSwapEventLogLifetimeChanges_oid, OID_LENGTH(saHpiHotSwapEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainReferenceEntryCount", handle_saHpiDomainReferenceEntryCount,
-//                               saHpiDomainReferenceEntryCount_oid, OID_LENGTH(saHpiDomainReferenceEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiDomainReferenceActiveEntries", handle_saHpiDomainReferenceActiveEntries,
+//                               saHpiDomainReferenceActiveEntries_oid, OID_LENGTH(saHpiDomainReferenceActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiWatchdogEntryCount", handle_saHpiWatchdogEntryCount,
-//                               saHpiWatchdogEntryCount_oid, OID_LENGTH(saHpiWatchdogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiWatchdogActiveEntries", handle_saHpiWatchdogActiveEntries,
+//                               saHpiWatchdogActiveEntries_oid, OID_LENGTH(saHpiWatchdogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainEventEntryCountTotal", handle_saHpiDomainEventEntryCountTotal,
-//                               saHpiDomainEventEntryCountTotal_oid, OID_LENGTH(saHpiDomainEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiDomainEventLifetimeChanges", handle_saHpiDomainEventLifetimeChanges,
+//                               saHpiDomainEventLifetimeChanges_oid, OID_LENGTH(saHpiDomainEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiOEMEventLogEntryCount", handle_saHpiOEMEventLogEntryCount,
-//                               saHpiOEMEventLogEntryCount_oid, OID_LENGTH(saHpiOEMEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiOemEventLogActiveEntries", handle_saHpiOemEventLogActiveEntries,
+//                               saHpiOemEventLogActiveEntries_oid, OID_LENGTH(saHpiOemEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiHotSwapEntryCount", handle_saHpiHotSwapEntryCount,
-//                               saHpiHotSwapEntryCount_oid, OID_LENGTH(saHpiHotSwapEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiHotSwapActiveEntries", handle_saHpiHotSwapActiveEntries,
+//                               saHpiHotSwapActiveEntries_oid, OID_LENGTH(saHpiHotSwapActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiResourceEventLogEntryCount", handle_saHpiResourceEventLogEntryCount,
-//                               saHpiResourceEventLogEntryCount_oid, OID_LENGTH(saHpiResourceEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiResourceEventLogActiveEntries", handle_saHpiResourceEventLogActiveEntries,
+//                               saHpiResourceEventLogActiveEntries_oid, OID_LENGTH(saHpiResourceEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
     netsnmp_register_scalar(
@@ -186,93 +186,93 @@ init_hpiB0101(void)
                                HANDLER_CAN_RONLY
         ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainEventEntryCount", handle_saHpiDomainEventEntryCount,
-//                               saHpiDomainEventEntryCount_oid, OID_LENGTH(saHpiDomainEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiDomainEventActiveEntries", handle_saHpiDomainEventActiveEntries,
+//                               saHpiDomainEventActiveEntries_oid, OID_LENGTH(saHpiDomainEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCountTotal", handle_saHpiSoftwareEventLogEntryCountTotal,
-//                               saHpiSoftwareEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiSoftwareEventLogLifetimeChanges", handle_saHpiSoftwareEventLogLifetimeChanges,
+//                               saHpiSoftwareEventLogLifetimeChanges_oid, OID_LENGTH(saHpiSoftwareEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCount", handle_saHpiWatchdogEventLogEntryCount,
-//                               saHpiWatchdogEventLogEntryCount_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiWatchdogEventLogActiveEntries", handle_saHpiWatchdogEventLogActiveEntries,
+//                               saHpiWatchdogEventLogActiveEntries_oid, OID_LENGTH(saHpiWatchdogEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCount", handle_saHpiHotSwapEventEntryCount,
-//                               saHpiHotSwapEventEntryCount_oid, OID_LENGTH(saHpiHotSwapEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiHotSwapEventActiveEntries", handle_saHpiHotSwapEventActiveEntries,
+//                               saHpiHotSwapEventActiveEntries_oid, OID_LENGTH(saHpiHotSwapEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiAnnouncementEntryCount", handle_saHpiAnnouncementEntryCount,
-//                               saHpiAnnouncementEntryCount_oid, OID_LENGTH(saHpiAnnouncementEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiAnnouncementActiveEntries", handle_saHpiAnnouncementActiveEntries,
+//                               saHpiAnnouncementActiveEntries_oid, OID_LENGTH(saHpiAnnouncementActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiFieldEntryCount", handle_saHpiFieldEntryCount,
-//                               saHpiFieldEntryCount_oid, OID_LENGTH(saHpiFieldEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiFieldActiveEntries", handle_saHpiFieldActiveEntries,
+//                               saHpiFieldActiveEntries_oid, OID_LENGTH(saHpiFieldActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEntryCount", handle_saHpiSensorEntryCount,
-//                               saHpiSensorEntryCount_oid, OID_LENGTH(saHpiSensorEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSensorActiveEntries", handle_saHpiSensorActiveEntries,
+//                               saHpiSensorActiveEntries_oid, OID_LENGTH(saHpiSensorActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEventEntryCount", handle_saHpiSensorEventEntryCount,
-//                               saHpiSensorEventEntryCount_oid, OID_LENGTH(saHpiSensorEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEventActiveEntries", handle_saHpiSensorEventActiveEntries,
+//                               saHpiSensorEventActiveEntries_oid, OID_LENGTH(saHpiSensorEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSoftwareEventEntryCountTotal", handle_saHpiSoftwareEventEntryCountTotal,
-//                               saHpiSoftwareEventEntryCountTotal_oid, OID_LENGTH(saHpiSoftwareEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiSoftwareEventLifetimeChanges", handle_saHpiSoftwareEventLifetimeChanges,
+//                               saHpiSoftwareEventLifetimeChanges_oid, OID_LENGTH(saHpiSoftwareEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiHotSwapEventLogEntryCount", handle_saHpiHotSwapEventLogEntryCount,
-//                               saHpiHotSwapEventLogEntryCount_oid, OID_LENGTH(saHpiHotSwapEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiHotSwapEventLogActiveEntries", handle_saHpiHotSwapEventLogActiveEntries,
+//                               saHpiHotSwapEventLogActiveEntries_oid, OID_LENGTH(saHpiHotSwapEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiRdrEntryCount", handle_saHpiRdrEntryCount,
-//                               saHpiRdrEntryCount_oid, OID_LENGTH(saHpiRdrEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiRdrActiveEntries", handle_saHpiRdrActiveEntries,
+//                               saHpiRdrActiveEntries_oid, OID_LENGTH(saHpiRdrActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainInfoEntryCount", handle_saHpiDomainInfoEntryCount,
-//                               saHpiDomainInfoEntryCount_oid, OID_LENGTH(saHpiDomainInfoEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiDomainInfoActiveEntries", handle_saHpiDomainInfoActiveEntries,
+//                               saHpiDomainInfoActiveEntries_oid, OID_LENGTH(saHpiDomainInfoActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainEventLogEntryCountTotal", handle_saHpiDomainEventLogEntryCountTotal,
-//                               saHpiDomainEventLogEntryCountTotal_oid, OID_LENGTH(saHpiDomainEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiDomainEventLogLifetimeChanges", handle_saHpiDomainEventLogLifetimeChanges,
+//                               saHpiDomainEventLogLifetimeChanges_oid, OID_LENGTH(saHpiDomainEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCount", handle_saHpiWatchdogEventEntryCount,
-//                               saHpiWatchdogEventEntryCount_oid, OID_LENGTH(saHpiWatchdogEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiWatchdogEventActiveEntries", handle_saHpiWatchdogEventActiveEntries,
+//                               saHpiWatchdogEventActiveEntries_oid, OID_LENGTH(saHpiWatchdogEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiResourceEventEntryCountTotal", handle_saHpiResourceEventEntryCountTotal,
-//                               saHpiResourceEventEntryCountTotal_oid, OID_LENGTH(saHpiResourceEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiResourceEventLifetimeChanges", handle_saHpiResourceEventLifetimeChanges,
+//                               saHpiResourceEventLifetimeChanges_oid, OID_LENGTH(saHpiResourceEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiAreaEntryCount", handle_saHpiAreaEntryCount,
-//                               saHpiAreaEntryCount_oid, OID_LENGTH(saHpiAreaEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiAreaActiveEntries", handle_saHpiAreaActiveEntries,
+//                               saHpiAreaActiveEntries_oid, OID_LENGTH(saHpiAreaActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainEventLogEntryCount", handle_saHpiDomainEventLogEntryCount,
-//                               saHpiDomainEventLogEntryCount_oid, OID_LENGTH(saHpiDomainEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiDomainEventLogActiveEntries", handle_saHpiDomainEventLogActiveEntries,
+//                               saHpiDomainEventLogActiveEntries_oid, OID_LENGTH(saHpiDomainEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiOEMEventLogEntryCountTotal", handle_saHpiOEMEventLogEntryCountTotal,
-//                               saHpiOEMEventLogEntryCountTotal_oid, OID_LENGTH(saHpiOEMEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiOemEventLogLifetimeChanges", handle_saHpiOemEventLogLifetimeChanges,
+//                               saHpiOemEventLogLifetimeChanges_oid, OID_LENGTH(saHpiOemEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
@@ -281,123 +281,123 @@ init_hpiB0101(void)
 //                               HANDLER_CAN_RWRITE
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiInventoryEntryCount", handle_saHpiInventoryEntryCount,
-//                               saHpiInventoryEntryCount_oid, OID_LENGTH(saHpiInventoryEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiInventoryActiveEntries", handle_saHpiInventoryActiveEntries,
+//                               saHpiInventoryActiveEntries_oid, OID_LENGTH(saHpiInventoryActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiWatchdogEventLogEntryCountTotal", handle_saHpiWatchdogEventLogEntryCountTotal,
-//                               saHpiWatchdogEventLogEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiWatchdogEventLogLifetimeChanges", handle_saHpiWatchdogEventLogLifetimeChanges,
+//                               saHpiWatchdogEventLogLifetimeChanges_oid, OID_LENGTH(saHpiWatchdogEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiResourceEventLogEntryCountTotal", handle_saHpiResourceEventLogEntryCountTotal,
-//                               saHpiResourceEventLogEntryCountTotal_oid, OID_LENGTH(saHpiResourceEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiResourceEventLogLifetimeChanges", handle_saHpiResourceEventLogLifetimeChanges,
+//                               saHpiResourceEventLogLifetimeChanges_oid, OID_LENGTH(saHpiResourceEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //   netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiOEMEventEntryCountTotal", handle_saHpiOEMEventEntryCountTotal,
-//                               saHpiOEMEventEntryCountTotal_oid, OID_LENGTH(saHpiOEMEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiOemEventLifetimeChanges", handle_saHpiOemEventLifetimeChanges,
+//                               saHpiOemEventLifetimeChanges_oid, OID_LENGTH(saHpiOemEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiResourceEntryCount", handle_saHpiResourceEntryCount,
-//                               saHpiResourceEntryCount_oid, OID_LENGTH(saHpiResourceEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiResourceActiveEntries", handle_saHpiResourceActiveEntries,
+//                               saHpiResourceActiveEntries_oid, OID_LENGTH(saHpiResourceActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiEventEntryCount", handle_saHpiEventEntryCount,
-//                               saHpiEventEntryCount_oid, OID_LENGTH(saHpiEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiEventActiveEntries", handle_saHpiEventActiveEntries,
+//                               saHpiEventActiveEntries_oid, OID_LENGTH(saHpiEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEventEntryCountTotal", handle_saHpiSensorEventEntryCountTotal,
-//                               saHpiSensorEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEventLifetimeChanges", handle_saHpiSensorEventLifetimeChanges,
+//                               saHpiSensorEventLifetimeChanges_oid, OID_LENGTH(saHpiSensorEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlDiscreteEntryCount", handle_saHpiCtrlDiscreteEntryCount,
-//                               saHpiCtrlDiscreteEntryCount_oid, OID_LENGTH(saHpiCtrlDiscreteEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlDiscreteActiveEntries", handle_saHpiCtrlDiscreteActiveEntries,
+//                               saHpiCtrlDiscreteActiveEntries_oid, OID_LENGTH(saHpiCtrlDiscreteActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiDomainAlarmEntryCount", handle_saHpiDomainAlarmEntryCount,
-//                               saHpiDomainAlarmEntryCount_oid, OID_LENGTH(saHpiDomainAlarmEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiDomainAlarmActiveEntries", handle_saHpiDomainAlarmActiveEntries,
+//                               saHpiDomainAlarmActiveEntries_oid, OID_LENGTH(saHpiDomainAlarmActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiWatchdogEventEntryCountTotal", handle_saHpiWatchdogEventEntryCountTotal,
-//                               saHpiWatchdogEventEntryCountTotal_oid, OID_LENGTH(saHpiWatchdogEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiWatchdogEventLifetimeChanges", handle_saHpiWatchdogEventLifetimeChanges,
+//                               saHpiWatchdogEventLifetimeChanges_oid, OID_LENGTH(saHpiWatchdogEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCountTotal", handle_saHpiSensorEnableChangeEventLogEntryCountTotal,
-//                               saHpiSensorEnableChangeEventLogEntryCountTotal_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogLifetimeChanges", handle_saHpiSensorEnableChangeEventLogLifetimeChanges,
+//                               saHpiSensorEnableChangeEventLogLifetimeChanges_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEventLogEntryCount", handle_saHpiSensorEventLogEntryCount,
-//                               saHpiSensorEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEventLogActiveEntries", handle_saHpiSensorEventLogActiveEntries,
+//                               saHpiSensorEventLogActiveEntries_oid, OID_LENGTH(saHpiSensorEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //   netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventEntryCountTotal", handle_saHpiSensorEnableChangeEventEntryCountTotal,
-//                               saHpiSensorEnableChangeEventEntryCountTotal_oid, OID_LENGTH(saHpiSensorEnableChangeEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLifetimeChanges", handle_saHpiSensorEnableChangeEventLifetimeChanges,
+//                               saHpiSensorEnableChangeEventLifetimeChanges_oid, OID_LENGTH(saHpiSensorEnableChangeEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiOEMEventEntryCount", handle_saHpiOEMEventEntryCount,
-//                               saHpiOEMEventEntryCount_oid, OID_LENGTH(saHpiOEMEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiOemEventActiveEntries", handle_saHpiOemEventActiveEntries,
+//                               saHpiOemEventActiveEntries_oid, OID_LENGTH(saHpiOemEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiUserEventEntryCount", handle_saHpiUserEventEntryCount,
-//                               saHpiUserEventEntryCount_oid, OID_LENGTH(saHpiUserEventEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiUserEventActiveEntries", handle_saHpiUserEventActiveEntries,
+//                               saHpiUserEventActiveEntries_oid, OID_LENGTH(saHpiUserEventActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlAnalogEntryCount", handle_saHpiCtrlAnalogEntryCount,
-//                               saHpiCtrlAnalogEntryCount_oid, OID_LENGTH(saHpiCtrlAnalogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlAnalogActiveEntries", handle_saHpiCtrlAnalogActiveEntries,
+//                               saHpiCtrlAnalogActiveEntries_oid, OID_LENGTH(saHpiCtrlAnalogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiUserEvenLogtEntryCountTotal", handle_saHpiUserEvenLogtEntryCountTotal,
-//                               saHpiUserEvenLogtEntryCountTotal_oid, OID_LENGTH(saHpiUserEvenLogtEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiUserEvenLogtLifetimeChanges", handle_saHpiUserEvenLogtLifetimeChanges,
+//                               saHpiUserEvenLogtLifetimeChanges_oid, OID_LENGTH(saHpiUserEvenLogtLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiUserEventLogEntryCount", handle_saHpiUserEventLogEntryCount,
-//                               saHpiUserEventLogEntryCount_oid, OID_LENGTH(saHpiUserEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiUserEventLogActiveEntries", handle_saHpiUserEventLogActiveEntries,
+//                               saHpiUserEventLogActiveEntries_oid, OID_LENGTH(saHpiUserEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiAnnouncementEventLogEntryCount", handle_saHpiAnnouncementEventLogEntryCount,
-//                               saHpiAnnouncementEventLogEntryCount_oid, OID_LENGTH(saHpiAnnouncementEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiAnnouncementEventLogActiveEntries", handle_saHpiAnnouncementEventLogActiveEntries,
+//                               saHpiAnnouncementEventLogActiveEntries_oid, OID_LENGTH(saHpiAnnouncementEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSoftwareEventLogEntryCount", handle_saHpiSoftwareEventLogEntryCount,
-//                               saHpiSoftwareEventLogEntryCount_oid, OID_LENGTH(saHpiSoftwareEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSoftwareEventLogActiveEntries", handle_saHpiSoftwareEventLogActiveEntries,
+//                               saHpiSoftwareEventLogActiveEntries_oid, OID_LENGTH(saHpiSoftwareEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogEntryCount", handle_saHpiSensorEnableChangeEventLogEntryCount,
-//                               saHpiSensorEnableChangeEventLogEntryCount_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiSensorEnableChangeEventLogActiveEntries", handle_saHpiSensorEnableChangeEventLogActiveEntries,
+//                               saHpiSensorEnableChangeEventLogActiveEntries_oid, OID_LENGTH(saHpiSensorEnableChangeEventLogActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiCtrlStreamEntryCount", handle_saHpiCtrlStreamEntryCount,
-//                               saHpiCtrlStreamEntryCount_oid, OID_LENGTH(saHpiCtrlStreamEntryCount_oid),
+//        netsnmp_create_handler_registration("saHpiCtrlStreamActiveEntries", handle_saHpiCtrlStreamActiveEntries,
+//                               saHpiCtrlStreamActiveEntries_oid, OID_LENGTH(saHpiCtrlStreamActiveEntries_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiEventEntryCountTotal", handle_saHpiEventEntryCountTotal,
-//                               saHpiEventEntryCountTotal_oid, OID_LENGTH(saHpiEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiEventLifetimeChanges", handle_saHpiEventLifetimeChanges,
+//                               saHpiEventLifetimeChanges_oid, OID_LENGTH(saHpiEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 //    netsnmp_register_scalar(
-//        netsnmp_create_handler_registration("saHpiHotSwapEventEntryCountTotal", handle_saHpiHotSwapEventEntryCountTotal,
-//                               saHpiHotSwapEventEntryCountTotal_oid, OID_LENGTH(saHpiHotSwapEventEntryCountTotal_oid),
+//        netsnmp_create_handler_registration("saHpiHotSwapEventLifetimeChanges", handle_saHpiHotSwapEventLifetimeChanges,
+//                               saHpiHotSwapEventLifetimeChanges_oid, OID_LENGTH(saHpiHotSwapEventLifetimeChanges_oid),
 //                               HANDLER_CAN_RONLY
 //        ));
 }
@@ -417,7 +417,7 @@ handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -433,7 +433,7 @@ handle_saHpiSensorEventEntryLogCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiCtrlDigitalActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -447,7 +447,7 @@ handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -462,7 +462,7 @@ handle_saHpiCtrlDigitalEntryCount(netsnmp_mib_handler *handler,
 }
 
 int
-handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiCtrlOemActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -476,7 +476,7 @@ handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -491,7 +491,7 @@ handle_saHpiCtrlOemEntryCount(netsnmp_mib_handler *handler,
 }
 
 int
-handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiCtrlTextActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -505,7 +505,7 @@ handle_saHpiCtrlTextEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -549,7 +549,7 @@ handle_saHpiHpiVersion(netsnmp_mib_handler *handler,
 }
 #if 0
 int
-handle_saHpiUserEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiUserEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -563,7 +563,7 @@ handle_saHpiUserEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -579,7 +579,7 @@ handle_saHpiUserEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiAnnunciatorActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -593,7 +593,7 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -609,7 +609,7 @@ handle_saHpiAnnunciatorEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiResourceEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiResourceEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -623,7 +623,7 @@ handle_saHpiResourceEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -639,7 +639,7 @@ handle_saHpiResourceEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSoftwareEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSoftwareEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -653,7 +653,7 @@ handle_saHpiSoftwareEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -669,7 +669,7 @@ handle_saHpiSoftwareEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -683,7 +683,7 @@ handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -699,7 +699,7 @@ handle_saHpiSensorEnableChangeEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiHotSwapEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -713,7 +713,7 @@ handle_saHpiHotSwapEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -729,7 +729,7 @@ handle_saHpiHotSwapEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiDomainReferenceActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -743,7 +743,7 @@ handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -759,7 +759,7 @@ handle_saHpiDomainReferenceEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -773,7 +773,7 @@ handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -789,7 +789,7 @@ handle_saHpiWatchdogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiDomainEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiDomainEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -803,7 +803,7 @@ handle_saHpiDomainEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -819,7 +819,7 @@ handle_saHpiDomainEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiOemEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -833,7 +833,7 @@ handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -849,7 +849,7 @@ handle_saHpiOEMEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -863,7 +863,7 @@ handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -879,7 +879,7 @@ handle_saHpiHotSwapEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiResourceEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiResourceEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -893,7 +893,7 @@ handle_saHpiResourceEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -965,7 +965,7 @@ handle_saHpiSNMPResourceId(netsnmp_mib_handler *handler,
 }
 #if 0
 int
-handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiDomainEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -979,7 +979,7 @@ handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -995,7 +995,7 @@ handle_saHpiDomainEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSoftwareEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiSoftwareEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1009,7 +1009,7 @@ handle_saHpiSoftwareEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1025,7 +1025,7 @@ handle_saHpiSoftwareEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1039,7 +1039,7 @@ handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1055,7 +1055,7 @@ handle_saHpiWatchdogEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1069,7 +1069,7 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1085,7 +1085,7 @@ handle_saHpiHotSwapEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiAnnouncementActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1099,7 +1099,7 @@ handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1115,7 +1115,7 @@ handle_saHpiAnnouncementEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiFieldActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1129,7 +1129,7 @@ handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1144,7 +1144,7 @@ handle_saHpiFieldEntryCount(netsnmp_mib_handler *handler,
 } 
 
 int
-handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1158,7 +1158,7 @@ handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1174,7 +1174,7 @@ handle_saHpiSensorEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1188,7 +1188,7 @@ handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1204,7 +1204,7 @@ handle_saHpiSensorEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSoftwareEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiSoftwareEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1218,7 +1218,7 @@ handle_saHpiSoftwareEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1234,7 +1234,7 @@ handle_saHpiSoftwareEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiHotSwapEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1248,7 +1248,7 @@ handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1264,7 +1264,7 @@ handle_saHpiHotSwapEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiRdrActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1278,7 +1278,7 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1293,7 +1293,7 @@ handle_saHpiRdrEntryCount(netsnmp_mib_handler *handler,
 }
 #endif
 int
-handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiDomainInfoActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1307,7 +1307,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1322,7 +1322,7 @@ handle_saHpiDomainInfoEntryCount(netsnmp_mib_handler *handler,
 }
 #if 0
 int
-handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiDomainEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1336,37 +1336,7 @@ handle_saHpiDomainEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) /* XXX: a pointer to the scalar's data */,
-                                     /* XXX: the length of the data in bytes */);
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-#endif
-#if 0
-int
-handle_saHpiWatchdogEventEntryCount(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
-{
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1382,7 +1352,7 @@ handle_saHpiWatchdogEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiResourceEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1396,7 +1366,7 @@ handle_saHpiResourceEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1412,7 +1382,7 @@ handle_saHpiResourceEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiResourceEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1426,7 +1396,7 @@ handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1442,7 +1412,7 @@ handle_saHpiAreaEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiAreaActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1456,7 +1426,7 @@ handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1472,7 +1442,7 @@ handle_saHpiDomainEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiDomainEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1486,7 +1456,37 @@ handle_saHpiOEMEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                                     (u_char *) /* XXX: a pointer to the scalar's data */,
+                                     /* XXX: the length of the data in bytes */);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+#endif
+#if 0
+int
+handle_saHpiOemEventLogLifetimeChanges(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1577,7 +1577,7 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 }
 #if 0
 int
-handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiInventoryActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1591,7 +1591,7 @@ handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1607,7 +1607,7 @@ handle_saHpiInventoryEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1621,7 +1621,7 @@ handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1637,7 +1637,7 @@ handle_saHpiWatchdogEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiResourceEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1651,7 +1651,7 @@ handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1667,7 +1667,7 @@ handle_saHpiResourceEventLogEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiOemEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1681,7 +1681,7 @@ handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1697,7 +1697,7 @@ handle_saHpiOEMEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiResourceActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1711,7 +1711,7 @@ handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1725,7 +1725,7 @@ handle_saHpiResourceEntryCount(netsnmp_mib_handler *handler,
     return SNMP_ERR_NOERROR;
 }
 int
-handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1739,37 +1739,7 @@ handle_saHpiEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) /* XXX: a pointer to the scalar's data */,
-                                     /* XXX: the length of the data in bytes */);
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-#endif
-#if 0
-int
-handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
-{
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1785,7 +1755,7 @@ handle_saHpiSensorEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1799,7 +1769,7 @@ handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1815,7 +1785,7 @@ handle_saHpiCtrlDiscreteEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiCtrlDiscreteActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1829,7 +1799,7 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1845,7 +1815,7 @@ handle_saHpiDomainAlarmEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiWatchdogEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiDomainAlarmActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1859,7 +1829,7 @@ handle_saHpiWatchdogEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1875,7 +1845,7 @@ handle_saHpiWatchdogEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiWatchdogEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1889,7 +1859,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handl
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1905,7 +1875,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCountTotal(netsnmp_mib_handler *handl
 #endif
 #if 0
 int
-handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventLogLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1919,7 +1889,7 @@ handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1935,7 +1905,7 @@ handle_saHpiSensorEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiSensorEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1949,7 +1919,7 @@ handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1965,7 +1935,7 @@ handle_saHpiSensorEnableChangeEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -1979,7 +1949,7 @@ handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -1995,7 +1965,7 @@ handle_saHpiOEMEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiOemEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2009,7 +1979,7 @@ handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2025,7 +1995,7 @@ handle_saHpiUserEventEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiUserEventActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2039,7 +2009,7 @@ handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2055,7 +2025,7 @@ handle_saHpiCtrlAnalogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiCtrlAnalogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2069,7 +2039,7 @@ handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2085,7 +2055,7 @@ handle_saHpiUserEvenLogtEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiUserEvenLogtLifetimeChanges(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2099,65 +2069,7 @@ handle_saHpiUserEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) /* XXX: a pointer to the scalar's data */,
-                                     /* XXX: the length of the data in bytes */);
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-#endif
-int
-handle_saHpiAnnouncementEventLogEntryCount(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
-{
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) /* XXX: a pointer to the scalar's data */,
-                                     /* XXX: the length of the data in bytes */);
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-#if 0
-int
-handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
-{
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2173,7 +2085,7 @@ handle_saHpiSoftwareEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiUserEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2187,7 +2099,65 @@ handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                                     (u_char *) /* XXX: a pointer to the scalar's data */,
+                                     /* XXX: the length of the data in bytes */);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+#endif
+int
+handle_saHpiAnnouncementEventLogActiveEntries(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                                     (u_char *) /* XXX: a pointer to the scalar's data */,
+                                     /* XXX: the length of the data in bytes */);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+#if 0
+int
+handle_saHpiSoftwareEventLogActiveEntries(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2203,7 +2173,7 @@ handle_saHpiSensorEnableChangeEventLogEntryCount(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
+handle_saHpiSensorEnableChangeEventLogActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2217,35 +2187,7 @@ handle_saHpiCtrlStreamEntryCount(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
-                                     (u_char *) /* XXX: a pointer to the scalar's data */,
-                                     /* XXX: the length of the data in bytes */);
-            break;
-
-
-        default:
-            /* we should never get here, so this is a really bad error */
-            return SNMP_ERR_GENERR;
-    }
-
-    return SNMP_ERR_NOERROR;
-}
-int
-handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
-                          netsnmp_handler_registration *reginfo,
-                          netsnmp_agent_request_info   *reqinfo,
-                          netsnmp_request_info         *requests)
-{
-    /* We are never called for a GETNEXT if it's registered as a
-       "instance", as it's "magically" handled for us.  */
-
-    /* a instance handler also only hands us one request at a time, so
-       we don't need to loop over a list of requests; we'll only get one. */
-    
-    switch(reqinfo->mode) {
-
-        case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;
@@ -2261,7 +2203,7 @@ handle_saHpiEventEntryCountTotal(netsnmp_mib_handler *handler,
 #endif
 #if 0
 int
-handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
+handle_saHpiCtrlStreamActiveEntries(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
@@ -2275,7 +2217,65 @@ handle_saHpiHotSwapEventEntryCountTotal(netsnmp_mib_handler *handler,
     switch(reqinfo->mode) {
 
         case MODE_GET:
-            snmp_set_var_typed_value(requests->requestvb, ASN_COUNTER,
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                                     (u_char *) /* XXX: a pointer to the scalar's data */,
+                                     /* XXX: the length of the data in bytes */);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+int
+handle_saHpiEventLifetimeChanges(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
+                                     (u_char *) /* XXX: a pointer to the scalar's data */,
+                                     /* XXX: the length of the data in bytes */);
+            break;
+
+
+        default:
+            /* we should never get here, so this is a really bad error */
+            return SNMP_ERR_GENERR;
+    }
+
+    return SNMP_ERR_NOERROR;
+}
+#endif
+#if 0
+int
+handle_saHpiHotSwapEventLifetimeChanges(netsnmp_mib_handler *handler,
+                          netsnmp_handler_registration *reginfo,
+                          netsnmp_agent_request_info   *reqinfo,
+                          netsnmp_request_info         *requests)
+{
+    /* We are never called for a GETNEXT if it's registered as a
+       "instance", as it's "magically" handled for us.  */
+
+    /* a instance handler also only hands us one request at a time, so
+       we don't need to loop over a list of requests; we'll only get one. */
+    
+    switch(reqinfo->mode) {
+
+        case MODE_GET:
+            snmp_set_var_typed_value(requests->requestvb, ASN_GAUGE,
                                      (u_char *) /* XXX: a pointer to the scalar's data */,
                                      /* XXX: the length of the data in bytes */);
             break;

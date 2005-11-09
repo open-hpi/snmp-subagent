@@ -264,7 +264,7 @@ main (int argc, char **argv)
 		struct oh_event *event8= (struct oh_event *)g_malloc0(sizeof(struct oh_event));			
 							
 		SaErrorT rc1;
-	  	char OEMString[] = "MY OEM EVENT";
+	  	char OemString[] = "MY Oem EVENT";
 	  	char SWString[] = "MY SW EVENT";			  	
 	  	/* change this if you want to be a SNMP master agent */
 	  	
@@ -410,7 +410,7 @@ main (int argc, char **argv)
 	init_saHpiResourceEventTable();
 	init_saHpiDomainEventTable();
 	init_saHpiSensorEventTable();
-	init_saHpiOEMEventTable();
+	init_saHpiOemEventTable();
 	init_saHpiHotSwapEventTable();
 	init_saHpiWatchdogEventTable();		
 	init_saHpiSoftwareEventTable();
@@ -425,7 +425,7 @@ main (int argc, char **argv)
 	init_saHpiHotSwapEventLogTable();
 	init_saHpiWatchdogEventLogTable();
 	init_saHpiSoftwareEventLogTable();
-	init_saHpiOEMEventLogTable();
+	init_saHpiOemEventLogTable();
 	init_saHpiUserEventLogTable();
 	init_saHpiSensorEnableChangeEventLogTable();
 	init_saHpiDomainEventLogTable();
@@ -579,7 +579,7 @@ main (int argc, char **argv)
 		event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.DataType = SAHPI_TL_TYPE_BCDPLUS;
 		event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.Language = SAHPI_LANG_ENGLISH;
 		event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.DataLength = 12;
-		memcpy(event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.Data, &OEMString[0],
+		memcpy(event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.Data, &OemString[0],
 		       event4->u.hpi_event.event.EventDataUnion.OemEvent.OemEventData.DataLength);
 		
 		rc1 = sim_inject_event(state, event4);

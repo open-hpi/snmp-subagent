@@ -197,9 +197,10 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
                 /** SaHpiEntryId = ASN_UNSIGNED */
                 domain_alarm_ctx->saHpiDomainAlarmId = Alarm.AlarmId;
 	
-                /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&Alarm.Timestamp, &domain_alarm_ctx->saHpiDomainAlarmTimestamp);
-	
+                /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(Alarm.Timestamp, domain_alarm_ctx->saHpiDomainAlarmTimestamp);
+	        domain_alarm_ctx->saHpiDomainAlarmTimestamp_len = sizeof(SaHpiTimeT);
+		
                 /** TruthValue = ASN_INTEGER */
 	        domain_alarm_ctx->saHpiDomainAlarmAcknowledged = 
                         (Alarm.Acknowledged == SAHPI_TRUE)
@@ -423,9 +424,7 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
                 /* EntryId */
                 alarm.AlarmId = row_ctx->saHpiDomainAlarmId;
 
-                /* Timestamp */
-		assign_timestamp((SaHpiTimeT *)&row_ctx->saHpiDomainAlarmTimestamp, (struct counter64 *)&alarm.Timestamp);
-
+                
 		/* Severity */
 		alarm.Severity =
 			row_ctx->saHpiDomainAlarmSeverity;
@@ -516,7 +515,8 @@ int domain_alarm_add (saHpiDomainAlarmTable_context *row_ctx)
 		
 		row_ctx->saHpiDomainAlarmId =  alarm.AlarmId;
 		
-		assign_timestamp(&alarm.Timestamp, &row_ctx->saHpiDomainAlarmTimestamp);
+		hpitime_to_snmptime(alarm.Timestamp, row_ctx->saHpiDomainAlarmTimestamp);
+		row_ctx->saHpiDomainAlarmTimestamp_len = sizeof(SaHpiTimeT);
 		
 		row_ctx->saHpiDomainAlarmRowStatus = SAHPIDOMAINALARMROWSTATUS_ACTIVE;
 		
@@ -807,7 +807,11 @@ static int saHpiDomainAlarmTable_row_copy(saHpiDomainAlarmTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiDomainAlarmId = src->saHpiDomainAlarmId;
 
-    dst->saHpiDomainAlarmTimestamp = src->saHpiDomainAlarmTimestamp;
+    memcpy( dst->saHpiDomainAlarmTimestamp, 
+            src->saHpiDomainAlarmTimestamp, 
+	    src->saHpiDomainAlarmTimestamp_len );
+	    
+    dst->saHpiDomainAlarmTimestamp_len = src->saHpiDomainAlarmTimestamp_len;
 
     dst->saHpiDomainAlarmSeverity = src->saHpiDomainAlarmSeverity;
 
@@ -1617,7 +1621,7 @@ void saHpiDomainAlarmTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
@@ -1708,7 +1712,7 @@ void saHpiDomainAlarmTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
@@ -1810,7 +1814,7 @@ void saHpiDomainAlarmTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIDOMAINALARMSEVERITY:
@@ -1998,8 +2002,8 @@ int saHpiDomainAlarmTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINALARMTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiDomainAlarmTimestamp,
                          sizeof(context->saHpiDomainAlarmTimestamp) );
         break;

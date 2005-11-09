@@ -168,9 +168,9 @@ SaErrorT populate_saHpiSensorEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         sensor_evt_ctx->saHpiSensorEventEntryId = sensor_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &sensor_evt_ctx->saHpiSensorEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, sensor_evt_ctx->saHpiSensorEventTimestamp);
+        sensor_evt_ctx->saHpiSensorEventTimestamp_len = sizeof(SaHpiTimeT);
         /** INTEGER = ASN_INTEGER */
         sensor_evt_ctx->saHpiSensorEventType = event->EventType + 1;
         
@@ -422,9 +422,9 @@ SaErrorT async_sensor_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         sensor_evt_ctx->saHpiSensorEventEntryId = sensor_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &sensor_evt_ctx->saHpiSensorEventTimestamp);
-	
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, sensor_evt_ctx->saHpiSensorEventTimestamp);
+	sensor_evt_ctx->saHpiSensorEventTimestamp_len = sizeof(SaHpiTimeT);
         /** INTEGER = ASN_INTEGER */
         sensor_evt_ctx->saHpiSensorEventType = event->EventType + 1;
         
@@ -857,7 +857,11 @@ static int saHpiSensorEventTable_row_copy(saHpiSensorEventTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiSensorEventEntryId = src->saHpiSensorEventEntryId;
 
-    dst->saHpiSensorEventTimestamp = src->saHpiSensorEventTimestamp;
+    memcpy( dst->saHpiSensorEventTimestamp, 
+            src->saHpiSensorEventTimestamp,
+	    src->saHpiSensorEventTimestamp_len);
+
+    dst->saHpiSensorEventTimestamp_len = src->saHpiSensorEventTimestamp_len;
 
     dst->saHpiSensorEventType = src->saHpiSensorEventType;
 
@@ -1554,8 +1558,8 @@ int saHpiSensorEventTable_get_value(
         break;
     
         case COLUMN_SAHPISENSOREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiSensorEventTimestamp,
                          sizeof(context->saHpiSensorEventTimestamp) );
         break;

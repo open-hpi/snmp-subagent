@@ -51,9 +51,9 @@ typedef struct saHpiEventTable_context_s {
         /** SaHpiSeverity = ASN_INTEGER */
             long saHpiEventSeverity;
 
-        /** SaHpiTime = ASN_COUNTER64 */
+        /** SaHpiTime = ASN_OCTET_STR */
     /** TODO: Is this type correct? */
-            struct counter64 saHpiEventSaHpiTime;
+            unsigned char saHpiEventSaHpiTime;
 
         /** INTEGER = ASN_INTEGER */
             long saHpiEventType;

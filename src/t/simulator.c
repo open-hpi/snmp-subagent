@@ -47,7 +47,7 @@ char topmenu[]="\nPlease select an event type to inject:\n\n"
 	       "5. HOTSWAP \n"
 	       "6. WATCHDOG \n"
 	       "7. SOFTWARE \n"
-	       "8. OEM \n"
+	       "8. Oem \n"
 	       "9. USER \n\n"
 	       "...or select q to quit:  ";
 
@@ -952,7 +952,7 @@ int main(int argc, char **argv)
 			inject_software_event(handler_name);
 			break;
 			
-		case OEM:
+		case Oem:
 			inject_oem_event(handler_name);
 			break;
 			

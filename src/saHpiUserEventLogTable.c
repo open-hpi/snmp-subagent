@@ -177,8 +177,9 @@ SaErrorT populate_saHpiUserEventLogTable(SaHpiSessionIdT sessionid,
 	}
 
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &user_evt_ctx->saHpiUserEventLogTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, user_evt_ctx->saHpiUserEventLogTimestamp);
+	user_evt_ctx->saHpiUserEventLogTimestamp_len = sizeof(SaHpiTimeT);
 		
         /** SaHpiTextType = ASN_INTEGER */
         user_evt_ctx->saHpiUserEventLogTextType = 
@@ -363,7 +364,8 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
 
                 row_ctx->saHpiUserEventLogRowStatus = SAHPIUSEREVENTLOGROWSTATUS_ACTIVE;
 		
-		assign_timestamp(&event.Timestamp, &row_ctx->saHpiUserEventLogTimestamp);
+		hpitime_to_snmptime(event.Timestamp, row_ctx->saHpiUserEventLogTimestamp);
+		row_ctx->saHpiUserEventLogTimestamp_len = sizeof(SaHpiTimeT);
 		
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
 
@@ -635,7 +637,8 @@ static int saHpiUserEventLogTable_row_copy(saHpiUserEventLogTable_context * dst,
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiUserEventLogTimestamp = src->saHpiUserEventLogTimestamp;
+    memcpy( dst->saHpiUserEventLogTimestamp, src->saHpiUserEventLogTimestamp, src->saHpiUserEventLogTimestamp_len );
+    dst->saHpiUserEventLogTimestamp_len = src->saHpiUserEventLogTimestamp_len;
 
     dst->saHpiUserEventLogTextType = src->saHpiUserEventLogTextType;
 
@@ -946,8 +949,8 @@ void saHpiUserEventLogTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
                                                 sizeof(row_ctx->saHpiUserEventLogTimestamp));
 
             /* check rowstatus is in correct state, createANDwait */
@@ -1099,7 +1102,7 @@ void saHpiUserEventLogTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -1197,8 +1200,9 @@ void saHpiUserEventLogTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-	    assign_timestamp((SaHpiTimeT *)&*var->val.integer, &row_ctx->saHpiUserEventLogTimestamp);
+            /** SaHpiTime = ASN_OCTET_STR */
+	    hpitime_to_snmptime((SaHpiTimeT)*var->val.integer, row_ctx->saHpiUserEventLogTimestamp);
+	    row_ctx->saHpiUserEventLogTimestamp_len = sizeof(SaHpiTimeT);
             row_ctx->timestamp_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventLogRowStatus == SNMP_ROW_CREATEANDWAIT) {
                     row_err = user_event_log_add (row_ctx);
@@ -1302,7 +1306,7 @@ void saHpiUserEventLogTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
@@ -1357,7 +1361,7 @@ void saHpiUserEventLogTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
@@ -1423,7 +1427,7 @@ void saHpiUserEventLogTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTLOGTEXTTYPE:
@@ -1569,8 +1573,8 @@ int saHpiUserEventLogTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIUSEREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiUserEventLogTimestamp,
                          sizeof(context->saHpiUserEventLogTimestamp) );
         break;

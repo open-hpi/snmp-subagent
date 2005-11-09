@@ -162,25 +162,30 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	domain_info_context->saHpiDomainReferenceUpdateCount =
 		domain_info.DrtUpdateCount;
 
-	/** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&domain_info.DrtUpdateTimestamp, 
-	                 &domain_info_context->saHpiDomainReferenceUpdateTimestamp);
+	/** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(domain_info.DrtUpdateTimestamp, 
+	                 domain_info_context->saHpiDomainReferenceUpdateTimestamp);
+        domain_info_context->saHpiDomainReferenceUpdateTimestamp_len = sizeof(SaHpiTimeT);			 
     	
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainResourcePresenceUpdateCount =
 		domain_info.RptUpdateCount;
     	
-	/** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&domain_info.RptUpdateTimestamp, 
-	                 &domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp);;
-
+	/** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(domain_info.RptUpdateTimestamp, 
+	                 domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp);
+			 
+        domain_info_context->saHpiDomainResourcePresenceUpdateTimestamp_len = sizeof(SaHpiTimeT);
+	
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainAlarmUpdateCount =
 		domain_info.DatUpdateCount;
 
-	/** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&domain_info.DatUpdateTimestamp, 
-	                 &domain_info_context->saHpiDomainAlarmUpdateTimestamp);
+	/** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(domain_info.DatUpdateTimestamp, 
+	                 domain_info_context->saHpiDomainAlarmUpdateTimestamp);
+			 
+	domain_info_context->saHpiDomainAlarmUpdateTimestamp_len = sizeof(SaHpiTimeT);		 
 
 	/** UNSIGNED32 = ASN_UNSIGNED */
 	domain_info_context->saHpiDomainActiveAlarms =
@@ -476,15 +481,20 @@ static int saHpiDomainInfoTable_row_copy(saHpiDomainInfoTable_context * dst,
 
     dst->saHpiDomainReferenceUpdateCount = src->saHpiDomainReferenceUpdateCount;
 
-    dst->saHpiDomainReferenceUpdateTimestamp = src->saHpiDomainReferenceUpdateTimestamp;
+    memcpy( dst->saHpiDomainReferenceUpdateTimestamp, 
+            src->saHpiDomainReferenceUpdateTimestamp, 
+	    src->saHpiDomainReferenceUpdateTimestamp_len );
+    dst->saHpiDomainReferenceUpdateTimestamp_len = src->saHpiDomainReferenceUpdateTimestamp_len;
 
     dst->saHpiDomainResourcePresenceUpdateCount = src->saHpiDomainResourcePresenceUpdateCount;
 
-    dst->saHpiDomainResourcePresenceUpdateTimestamp = src->saHpiDomainResourcePresenceUpdateTimestamp;
+    memcpy( dst->saHpiDomainResourcePresenceUpdateTimestamp, src->saHpiDomainResourcePresenceUpdateTimestamp, src->saHpiDomainResourcePresenceUpdateTimestamp_len );
+    dst->saHpiDomainResourcePresenceUpdateTimestamp_len = src->saHpiDomainResourcePresenceUpdateTimestamp_len;
 
     dst->saHpiDomainAlarmUpdateCount = src->saHpiDomainAlarmUpdateCount;
 
-    dst->saHpiDomainAlarmUpdateTimestamp = src->saHpiDomainAlarmUpdateTimestamp;
+    memcpy( dst->saHpiDomainAlarmUpdateTimestamp, src->saHpiDomainAlarmUpdateTimestamp, src->saHpiDomainAlarmUpdateTimestamp_len );
+    dst->saHpiDomainAlarmUpdateTimestamp_len = src->saHpiDomainAlarmUpdateTimestamp_len;
 
     dst->saHpiDomainActiveAlarms = src->saHpiDomainActiveAlarms;
 
@@ -1270,8 +1280,8 @@ int saHpiDomainInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINREFERENCEUPDATETIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (unsigned char*)&context->saHpiDomainReferenceUpdateTimestamp,
                          sizeof(context->saHpiDomainReferenceUpdateTimestamp) );
         break;
@@ -1284,8 +1294,8 @@ int saHpiDomainInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINRESOURCEPRESENCEUPDATETIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (unsigned char*)&context->saHpiDomainResourcePresenceUpdateTimestamp,
                          sizeof(context->saHpiDomainResourcePresenceUpdateTimestamp) );
         break;
@@ -1298,8 +1308,8 @@ int saHpiDomainInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINALARMUPDATETIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (unsigned char*)&context->saHpiDomainAlarmUpdateTimestamp,
                          sizeof(context->saHpiDomainAlarmUpdateTimestamp) );
         break;

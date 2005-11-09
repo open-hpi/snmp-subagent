@@ -177,9 +177,9 @@ SaErrorT populate_saHpiWatchdogEventLogTable(SaHpiSessionIdT sessionid,
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	}
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventLogTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, watchdog_evt_ctx->saHpiWatchdogEventLogTimestamp);
+        watchdog_evt_ctx->saHpiWatchdogEventLogTimestamp_len = sizeof(SaHpiTimeT);
         /** INTEGER = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventLogAction = 
                event->Event.EventDataUnion.WatchdogEvent.WatchdogAction + 1;
@@ -544,8 +544,12 @@ static int saHpiWatchdogEventLogTable_row_copy(saHpiWatchdogEventLogTable_contex
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiWatchdogEventLogTimestamp = src->saHpiWatchdogEventLogTimestamp;
-
+    memcpy( dst->saHpiWatchdogEventLogTimestamp, 
+            src->saHpiWatchdogEventLogTimestamp,
+	    src->saHpiWatchdogEventLogTimestamp_len);
+	    
+    dst->saHpiWatchdogEventLogTimestamp_len = src->saHpiWatchdogEventLogTimestamp_len;
+    
     dst->saHpiWatchdogEventLogAction = src->saHpiWatchdogEventLogAction;
 
     dst->saHpiWatchdogEventLogPreTimerAction = src->saHpiWatchdogEventLogPreTimerAction;
@@ -1212,8 +1216,8 @@ int saHpiWatchdogEventLogTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIWATCHDOGEVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiWatchdogEventLogTimestamp,
                          sizeof(context->saHpiWatchdogEventLogTimestamp) );
         break;

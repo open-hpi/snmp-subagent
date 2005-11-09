@@ -225,9 +225,9 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                 announcement_ctx->saHpiAnnouncementAnnunciatorNum = 
                         rdr_entry->RdrTypeUnion.AnnunciatorRec.AnnunciatorNum;
 	 	
-                /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&announcement.Timestamp, &announcement_ctx->saHpiAnnouncementTimestamp);
- 
+                /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(announcement.Timestamp, announcement_ctx->saHpiAnnouncementTimestamp);
+                announcement_ctx->saHpiAnnouncementTimestamp_len = sizeof(SaHpiTimeT);
                 /** TruthValue = ASN_INTEGER */
                 announcement_ctx->saHpiAnnouncementAddedByUser = 
                         (announcement.AddedByUser == SAHPI_TRUE) 
@@ -478,8 +478,9 @@ int announcement_add (saHpiAnnouncementTable_context *row_ctx)
                 }
 		
 		/* Timestamp */
-		assign_timestamp(&announcement.Timestamp, &row_ctx->saHpiAnnouncementTimestamp);
-
+		hpitime_to_snmptime(announcement.Timestamp, row_ctx->saHpiAnnouncementTimestamp);
+                row_ctx->saHpiAnnouncementTimestamp_len = sizeof(SaHpiTimeT);
+		
                 dre_tuple.key_tuple_array[0] = 
                         row_ctx->index.oids[saHpiAnnouncementDomainId_INDEX];
                 dre_tuple.key_tuple_array[1] = 
@@ -1002,7 +1003,11 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
 
     dst->saHpiAnnouncementAnnunciatorNum = src->saHpiAnnouncementAnnunciatorNum;
 
-    dst->saHpiAnnouncementTimestamp = src->saHpiAnnouncementTimestamp;
+    memcpy( dst->saHpiAnnouncementTimestamp, 
+            src->saHpiAnnouncementTimestamp, 
+	    src->saHpiAnnouncementTimestamp_len );
+	     
+    dst->saHpiAnnouncementTimestamp_len = src->saHpiAnnouncementTimestamp_len;	     
 
     dst->saHpiAnnouncementAddedByUser = src->saHpiAnnouncementAddedByUser;
 
@@ -2347,8 +2352,8 @@ int saHpiAnnouncementTable_get_value(
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiAnnouncementTimestamp,
                          sizeof(context->saHpiAnnouncementTimestamp) );
         break;

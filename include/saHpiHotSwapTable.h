@@ -34,6 +34,7 @@ extern "C" {
 
 #include <hpiSubagent.h>
 
+#include <hpiSubagent.h>
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiResourceIsHistorical is external */

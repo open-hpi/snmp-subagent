@@ -127,9 +127,11 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 	}
 
         auto_insert_context->saHpiAutoInsertTimeoutForInsert_len = sizeof(SaHpiTimeoutT);
-        memcpy(auto_insert_context->saHpiAutoInsertTimeoutForInsert, 
-               &timeout, 
-               auto_insert_context->saHpiAutoInsertTimeoutForInsert_len);		        
+        
+	hpitime_to_snmptime(timeout, auto_insert_context->saHpiAutoInsertTimeoutForInsert);
+	//memcpy(auto_insert_context->saHpiAutoInsertTimeoutForInsert, 
+               //&timeout, 
+              // auto_insert_context->saHpiAutoInsertTimeoutForInsert_len);		        
 
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, auto_insert_context);
@@ -158,21 +160,19 @@ int auto_insert_timeout_set(saHpiAutoInsertTimeoutTable_context *row_ctx)
         if (row_ctx->saHpiAutoInsertTimeoutForInsert_len > sizeof(SaHpiTimeoutT)) 
                 return SNMP_ERR_TOOBIG;
         
-        memcpy(&timeout, 
-               row_ctx->saHpiAutoInsertTimeoutForInsert, 
-               sizeof(SaHpiTimeoutT));
+        timeout = snmptime_to_hpitime(row_ctx->saHpiAutoInsertTimeoutForInsert);
 
         rc = saHpiAutoInsertTimeoutSet(session_id, timeout);
 
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
 			  "Call to auto_insert_timeout_set"
-                          " failed to set timeout [%d] rc: %s.\n",
+                          " failed to set timeout [%lld] rc: %s.\n",
                           timeout, 
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
 			   "Call to auto_insert_timeout_set"
-                           " failed to set timeout [%d] rc: %s.\n",
+                           " failed to set timeout [%lld] rc: %s.\n",
                            timeout, 
 			   oh_lookup_error(rc)));
 		return get_snmp_error(rc);
@@ -542,8 +542,9 @@ void saHpiAutoInsertTimeoutTable_set_reserve1( netsnmp_request_group *rg )
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
             /** SafUnsigned64 = ASN_OCTET_STR */
             rc = netsnmp_check_vb_type(var, ASN_OCTET_STR);
+	    
             if (rc == SNMP_ERR_NOERROR ) {
-                    if (var->val_len > SAF_UNSIGNED_64_LEN) {
+                    if (var->val_len > 16) {
                             rc = SNMP_ERR_WRONGLENGTH;
                             DEBUGMSGTL ((AGENT, 
                             "COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT"
@@ -639,8 +640,6 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
 //    unsigned char buff[sizeof(SaHpiTimeT)]; //For timeout
     int            row_err = 0;
     
-    
-	    printf("7\n");    
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -654,8 +653,12 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
         case COLUMN_SAHPIAUTOINSERTTIMEOUTFORINSERT:
             /** SafUnsigned64 = ASN_OCTET_STR */
             
-	    assign_timeout(var, row_ctx->saHpiAutoInsertTimeoutForInsert);	    	    	    
+	    memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert, var->val.string, var->val_len);	    	    	    
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
+	    
+	    printf("FIRST BYTE IS AT %ld\n", (long int)&(row_ctx->saHpiAutoInsertTimeoutForInsert[0]));
+	    printf("SECOND BYTE IS AT %ld\n",(long int) &row_ctx->saHpiAutoInsertTimeoutForInsert[1]);
+	    printf("TIMEOUT is %x\n", row_ctx->saHpiAutoInsertTimeoutForInsert[0]);
 	    
   	    row_err = auto_insert_timeout_set(row_ctx);
 

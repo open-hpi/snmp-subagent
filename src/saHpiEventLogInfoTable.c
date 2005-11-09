@@ -148,18 +148,18 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                 evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
                         event_log_info.UserEventMaxSize;
 
-                /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&event_log_info.UpdateTimestamp, 
-		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+                /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(event_log_info.UpdateTimestamp, 
+		                 evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);		
+				 
+		evt_log_info_context->saHpiEventLogInfoUpdateTimestamp_len = sizeof(SaHpiTimeT);		 
 
                 /** SaHpiTime = ASN_OCTET_STR */
                 evt_log_info_context->saHpiEventLogInfoTime_len = 
                        sizeof(SaHpiTimeT);
                 memset(evt_log_info_context->saHpiEventLogInfoTime, 
-                       0, SAF_UNSIGNED_64_LEN);
-                memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
-                       &event_log_info.CurrentTime,
-                       sizeof(SaHpiTimeT));
+                       0,  sizeof(SaHpiTimeT));
+                hpitime_to_snmptime(event_log_info.CurrentTime, evt_log_info_context->saHpiEventLogInfoTime); ;
 
                 /** TruthValue = ASN_INTEGER */
                 evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -259,18 +259,18 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
         evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
                 event_log_info.UserEventMaxSize;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event_log_info.UpdateTimestamp, 
-	                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event_log_info.UpdateTimestamp, 
+	                 evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+			 
+        evt_log_info_context->saHpiEventLogInfoUpdateTimestamp_len = sizeof(SaHpiTimeT);			 
 
         /** SaHpiTime = ASN_OCTET_STR */
         evt_log_info_context->saHpiEventLogInfoTime_len = 
                sizeof(SaHpiTimeT);
         memset(evt_log_info_context->saHpiEventLogInfoTime, 
-               0, SAF_UNSIGNED_64_LEN);
-        memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
-               &event_log_info.CurrentTime,
-               sizeof(SaHpiTimeT));
+               0, sizeof(SaHpiTimeT));
+        hpitime_to_snmptime(event_log_info.CurrentTime, evt_log_info_context->saHpiEventLogInfoTime);
 
         /** TruthValue = ASN_INTEGER */
         evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -360,7 +360,7 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
 	SaErrorT                rc = SA_OK;
 	SaHpiSessionIdT         session_id;
 	SaHpiResourceIdT        resource_id;
-        SaHpiTimeoutT           timeout;
+        SaHpiTimeT              time;
 
         DEBUGMSGTL ((AGENT, "event_log_info_time_set, called\n"));
 
@@ -373,22 +373,20 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
         if (row_ctx->saHpiEventLogInfoTime_len > sizeof(SaHpiTimeoutT)) 
                 return SNMP_ERR_TOOBIG;
         
-        memcpy(&timeout, 
-               row_ctx->saHpiEventLogInfoTime, 
-               sizeof(SaHpiTimeoutT));
+        time = snmptime_to_hpitime(row_ctx->saHpiEventLogInfoTime);
 
-       rc = saHpiEventLogTimeSet(session_id, resource_id, timeout);
+        rc = saHpiEventLogTimeSet(session_id, resource_id, time);
 
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
 			  "Call to event_log_info_time_set"
                           " failed to set timeout [%d] rc: %s.\n",
-                          timeout, 
+                          time, 
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
 			   "Call to event_log_info_time_set"
                            " failed to set timeout [%d] rc: %s.\n",
-                           timeout, 
+                           time, 
 			   oh_lookup_error(rc)));
 		return get_snmp_error(rc);
 	} 
@@ -560,8 +558,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 		}	
 			
 	
-		if ((isNewRow == MIB_TRUE) || (compare_timestamp(&event_log_info.UpdateTimestamp,
-		                              &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {	
+		if ((isNewRow == MIB_TRUE) || (compare_timestamp(event_log_info.UpdateTimestamp,
+		                              evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {	
                 	
 			/** UNSIGNED32 = ASN_UNSIGNED */
                 	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
@@ -573,18 +571,19 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
                 	evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
                         event_log_info.UserEventMaxSize;
 
-                	/** SaHpiTime = ASN_COUNTER64 */
-			assign_timestamp(&event_log_info.UpdateTimestamp, 
-			                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
-
                 	/** SaHpiTime = ASN_OCTET_STR */
+			hpitime_to_snmptime(event_log_info.UpdateTimestamp, 
+			                 evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+
+                	evt_log_info_context->saHpiEventLogInfoUpdateTimestamp_len = sizeof(SaHpiTimeT);
+			
+			/** SaHpiTime = ASN_OCTET_STR */
                 	evt_log_info_context->saHpiEventLogInfoTime_len = 
                 	       sizeof(SaHpiTimeT);
                 	memset(evt_log_info_context->saHpiEventLogInfoTime, 
-                 	      0, SAF_UNSIGNED_64_LEN);
-                	memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
-                  	     &event_log_info.CurrentTime,
-                   	    sizeof(SaHpiTimeT));
+                 	      0, sizeof(SaHpiTimeT));
+			      
+                	hpitime_to_snmptime(event_log_info.CurrentTime, evt_log_info_context->saHpiEventLogInfoTime); 
 
                 	/** TruthValue = ASN_INTEGER */
                 	evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -665,8 +664,8 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
 		isNewRow = MIB_FALSE;
 	}	
 	
-	if ((isNewRow == MIB_TRUE) || (compare_timestamp(&event_log_info.UpdateTimestamp,
-		                        &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {
+	if ((isNewRow == MIB_TRUE) || (compare_timestamp(event_log_info.UpdateTimestamp,
+		                        evt_log_info_context->saHpiEventLogInfoUpdateTimestamp) != 0)) {
 	        /** UNSIGNED32 = ASN_UNSIGNED */
         	evt_log_info_context->saHpiEventLogInfoEntries = event_log_info.Entries;
 
@@ -677,18 +676,18 @@ SaErrorT event_log_info_update (SaHpiSessionIdT sessionid)
         	evt_log_info_context->saHpiEventLogInfoUserEventMaxSize = 
                 	event_log_info.UserEventMaxSize;
 
-	        /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&event_log_info.UpdateTimestamp, 
-		                 &evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+	        /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(event_log_info.UpdateTimestamp, 
+		                 evt_log_info_context->saHpiEventLogInfoUpdateTimestamp);
+				 
+		evt_log_info_context->saHpiEventLogInfoUpdateTimestamp_len = sizeof(SaHpiTimeT);		 
 
 	        /** SaHpiTime = ASN_OCTET_STR */
         	evt_log_info_context->saHpiEventLogInfoTime_len = 
         	       	sizeof(SaHpiTimeT);
 	        memset(evt_log_info_context->saHpiEventLogInfoTime, 
-        	       0, SAF_UNSIGNED_64_LEN);
-	        memcpy(evt_log_info_context->saHpiEventLogInfoTime, 
-        	       &event_log_info.CurrentTime,
-	               sizeof(SaHpiTimeT));
+        	       0, sizeof(SaHpiTimeT));
+	        hpitime_to_snmptime(event_log_info.CurrentTime, evt_log_info_context->saHpiEventLogInfoTime);;
 
 	        /** TruthValue = ASN_INTEGER */
         	evt_log_info_context->saHpiEventLogInfoIsEnabled =
@@ -834,7 +833,8 @@ static int saHpiEventLogInfoTable_row_copy(saHpiEventLogInfoTable_context * dst,
 
     dst->saHpiEventLogInfoUserEventMaxSize = src->saHpiEventLogInfoUserEventMaxSize;
 
-    dst->saHpiEventLogInfoUpdateTimestamp = src->saHpiEventLogInfoUpdateTimestamp;
+    memcpy( dst->saHpiEventLogInfoUpdateTimestamp, src->saHpiEventLogInfoUpdateTimestamp, src->saHpiEventLogInfoUpdateTimestamp_len );
+    dst->saHpiEventLogInfoUpdateTimestamp_len = src->saHpiEventLogInfoUpdateTimestamp_len;;
 
     memcpy( dst->saHpiEventLogInfoTime, src->saHpiEventLogInfoTime, 
             src->saHpiEventLogInfoTime_len );
@@ -1650,8 +1650,8 @@ int saHpiEventLogInfoTable_get_value(
         break;
     
         case COLUMN_SAHPIEVENTLOGINFOUPDATETIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiEventLogInfoUpdateTimestamp,
                          sizeof(context->saHpiEventLogInfoUpdateTimestamp) );
         break;

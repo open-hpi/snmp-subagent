@@ -174,10 +174,11 @@ SaErrorT populate_saHpiHotSwapEventLogTable(SaHpiSessionIdT sessionid,
 		rv = AGENT_ERR_INTERNAL_ERROR;
 	}
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &hotswap_evt_ctx->saHpiHotSwapEventLogTimestamp);
-
-        /** SaHpiHotSwapState = ASN_INTEGER */
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, hotswap_evt_ctx->saHpiHotSwapEventLogTimestamp);
+        hotswap_evt_ctx->saHpiHotSwapEventLogTimestamp_len = sizeof(SaHpiTimeT);
+        
+	/** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventLogState = 
                event->Event.EventDataUnion.HotSwapEvent.HotSwapState + 1;
 
@@ -516,7 +517,11 @@ static int saHpiHotSwapEventLogTable_row_copy(saHpiHotSwapEventLogTable_context 
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiHotSwapEventLogTimestamp = src->saHpiHotSwapEventLogTimestamp;
+    memcpy( dst->saHpiHotSwapEventLogTimestamp,
+            src->saHpiHotSwapEventLogTimestamp,
+	    src->saHpiHotSwapEventLogTimestamp_len);
+	    
+    dst->saHpiHotSwapEventLogTimestamp_len = src->saHpiHotSwapEventLogTimestamp_len;	    
 
     dst->saHpiHotSwapEventLogState = src->saHpiHotSwapEventLogState;
 
@@ -1170,8 +1175,8 @@ int saHpiHotSwapEventLogTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPIHOTSWAPEVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiHotSwapEventLogTimestamp,
                          sizeof(context->saHpiHotSwapEventLogTimestamp) );
         break;

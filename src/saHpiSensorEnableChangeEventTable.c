@@ -169,9 +169,9 @@ SaErrorT populate_saHpiSensorEnableChangeEventTable(SaHpiSessionIdT sessionid,
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventEntryId = 
 	                                        sensor_enable_change_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp);
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiSensorType = ASN_INTEGER */
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventType = 
 	                                        event->EventType + 1;
@@ -406,9 +406,9 @@ SaErrorT async_sensor_enable_change_event_add(SaHpiSessionIdT sessionid,
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventEntryId = 
 	                                        sensor_enable_change_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp);
+        sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiSensorType = ASN_INTEGER */
         sensor_enable_change_evt_ctx->saHpiSensorEnableChangeEventType = 
 	                                        event->EventType + 1;
@@ -809,7 +809,11 @@ static int saHpiSensorEnableChangeEventTable_row_copy(saHpiSensorEnableChangeEve
     /** TODO: add code for external index(s)! */
     dst->saHpiSensorEnableChangeEventEntryId = src->saHpiSensorEnableChangeEventEntryId;
 
-    dst->saHpiSensorEnableChangeEventTimestamp = src->saHpiSensorEnableChangeEventTimestamp;
+    memcpy( dst->saHpiSensorEnableChangeEventTimestamp,
+            src->saHpiSensorEnableChangeEventTimestamp,
+	    src->saHpiSensorEnableChangeEventTimestamp_len);
+
+    dst->saHpiSensorEnableChangeEventTimestamp_len = src->saHpiSensorEnableChangeEventTimestamp_len;
 
     dst->saHpiSensorEnableChangeEventType = src->saHpiSensorEnableChangeEventType;
 
@@ -1494,8 +1498,8 @@ int saHpiSensorEnableChangeEventTable_get_value(
         break;
     
         case COLUMN_SAHPISENSORENABLECHANGEEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiSensorEnableChangeEventTimestamp,
                          sizeof(context->saHpiSensorEnableChangeEventTimestamp) );
         break;

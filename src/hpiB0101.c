@@ -316,16 +316,16 @@ send_saHpiUserNotifications_trap( void )
     return SNMP_ERR_NOERROR;
 }
 int
-send_saHpiOEMNotifications_trap( void )
+send_saHpiOemNotifications_trap( void )
 {
     netsnmp_variable_list  *var_list = NULL;
-    oid saHpiOEMNotifications_oid[] = { 1,3,6,1,4,1,18568,2,1,1,5,8 };
+    oid saHpiOemNotifications_oid[] = { 1,3,6,1,4,1,18568,2,1,1,5,8 };
     oid saHpiDomainId_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,2,1,1, /* insert index here */ };
     oid saHpiResourceId_oid[] = { 1,3,6,1,4,1,18568,2,1,1,2,8,1,1, /* insert index here */ };
     oid saHpiEventSeverity_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,3,1,3, /* insert index here */ };
-    oid saHpiOEMEventTextType_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,4, /* insert index here */ };
-    oid saHpiOEMEventTextLanguage_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,5, /* insert index here */ };
-    oid saHpiOEMEventText_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,6, /* insert index here */ };
+    oid saHpiOemEventTextType_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,4, /* insert index here */ };
+    oid saHpiOemEventTextLanguage_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,5, /* insert index here */ };
+    oid saHpiOemEventText_oid[] = { 1,3,6,1,4,1,18568,2,1,1,3,1,27,1,6, /* insert index here */ };
 
     /*
      * Set the snmpTrapOid.0 value
@@ -333,7 +333,7 @@ send_saHpiOEMNotifications_trap( void )
     snmp_varlist_add_variable(&var_list,
         snmptrap_oid, OID_LENGTH(snmptrap_oid),
         ASN_OBJECT_ID,
-        saHpiOEMNotifications_oid, sizeof(saHpiOEMNotifications_oid));
+        saHpiOemNotifications_oid, sizeof(saHpiOemNotifications_oid));
     
     /*
      * Add any objects from the trap definition
@@ -354,19 +354,19 @@ send_saHpiOEMNotifications_trap( void )
         /* Set an appropriate value for saHpiEventSeverity */
         NULL, 0);
     snmp_varlist_add_variable(&var_list,
-        saHpiOEMEventTextType_oid, OID_LENGTH(saHpiOEMEventTextType_oid),
+        saHpiOemEventTextType_oid, OID_LENGTH(saHpiOemEventTextType_oid),
         ASN_INTEGER,
-        /* Set an appropriate value for saHpiOEMEventTextType */
+        /* Set an appropriate value for saHpiOemEventTextType */
         NULL, 0);
     snmp_varlist_add_variable(&var_list,
-        saHpiOEMEventTextLanguage_oid, OID_LENGTH(saHpiOEMEventTextLanguage_oid),
+        saHpiOemEventTextLanguage_oid, OID_LENGTH(saHpiOemEventTextLanguage_oid),
         ASN_INTEGER,
-        /* Set an appropriate value for saHpiOEMEventTextLanguage */
+        /* Set an appropriate value for saHpiOemEventTextLanguage */
         NULL, 0);
     snmp_varlist_add_variable(&var_list,
-        saHpiOEMEventText_oid, OID_LENGTH(saHpiOEMEventText_oid),
+        saHpiOemEventText_oid, OID_LENGTH(saHpiOemEventText_oid),
         ASN_OCTET_STR,
-        /* Set an appropriate value for saHpiOEMEventText */
+        /* Set an appropriate value for saHpiOemEventText */
         NULL, 0);
 
     /*

@@ -55,11 +55,11 @@ typedef struct saHpiEventLogInfoTable_context_s {
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiEventLogInfoUserEventMaxSize;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            struct counter64 saHpiEventLogInfoUpdateTimestamp;
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiEventLogInfoUpdateTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiEventLogInfoUpdateTimestamp_len;
 
-        /** SafUnsigned64 = ASN_OPAQUE */
+        /** SaHpiTime = ASN_OCTET_STR */
             unsigned char saHpiEventLogInfoTime[SAF_UNSIGNED_64_LEN];   
             long saHpiEventLogInfoTime_len;
 
