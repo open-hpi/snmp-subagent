@@ -32,6 +32,7 @@ extern "C" {
 #include <net-snmp/library/container.h>
 #include <net-snmp/agent/table_array.h>
 
+#include <hpiSubagent.h>
         /** Index saHpiDomainId is external */
         /** Index saHpiResourceId is external */
         /** Index saHpiEventSeverity is external */
@@ -49,9 +50,9 @@ typedef struct saHpiOemEventTable_context_s {
         /** SaHpiEntryId = ASN_UNSIGNED */
             unsigned long saHpiOemEventEntryId;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-    /** TODO: Is this type correct? */
-            struct counter64 saHpiOemEventTimestamp;
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiOemEventTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiOemEventTimestamp_len;
 
         /** SaHpiManufacturerId = ASN_UNSIGNED */
             unsigned long saHpiOemEventManufacturerIdT;

@@ -164,8 +164,9 @@ SaErrorT populate_saHpiOemEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOemEventEntryId = oem_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &oem_evt_ctx->saHpiOemEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, oem_evt_ctx->saHpiOemEventTimestamp);
+	oem_evt_ctx->saHpiOemEventTimestamp_len = sizeof(SaHpiTimeT);
 	
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOemEventManufacturerIdT = 
@@ -285,8 +286,9 @@ SaErrorT async_oem_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOemEventEntryId = oem_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &oem_evt_ctx->saHpiOemEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, oem_evt_ctx->saHpiOemEventTimestamp);
+	oem_evt_ctx->saHpiOemEventTimestamp_len = sizeof(SaHpiTimeT);
 	
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         oem_evt_ctx->saHpiOemEventManufacturerIdT = 
@@ -573,8 +575,12 @@ static int saHpiOemEventTable_row_copy(saHpiOemEventTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiOemEventEntryId = src->saHpiOemEventEntryId;
 
-    dst->saHpiOemEventTimestamp = src->saHpiOemEventTimestamp;
-
+    memcpy( dst->saHpiOemEventTimestamp,
+            src->saHpiOemEventTimestamp,
+	    src->saHpiOemEventTimestamp_len);
+    
+    dst->saHpiOemEventTimestamp_len = src->saHpiOemEventTimestamp_len;
+    
     dst->saHpiOemEventManufacturerIdT = src->saHpiOemEventManufacturerIdT;
 
     dst->saHpiOemEventTextType = src->saHpiOemEventTextType;
@@ -1239,8 +1245,8 @@ int saHpiOemEventTable_get_value(
         break;
     
         case COLUMN_SAHPIOemEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiOemEventTimestamp,
                          sizeof(context->saHpiOemEventTimestamp) );
         break;

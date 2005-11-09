@@ -174,9 +174,10 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         domain_evt_ctx->saHpiDomainEventLogEntryId = domain_evt_oid[1];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventLogTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, domain_evt_ctx->saHpiDomainEventLogTimestamp);
+        domain_evt_ctx->saHpiDomainEventLogTimestamp_len = sizeof(SaHpiTimeT);
+	
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventLogType = 
 	                event->Event.EventDataUnion.DomainEvent.Type + 1;
@@ -510,7 +511,11 @@ static int saHpiDomainEventLogTable_row_copy(saHpiDomainEventLogTable_context * 
     /** TODO: add code for external index(s)! */
     dst->saHpiDomainEventLogEntryId = src->saHpiDomainEventLogEntryId;
 
-    dst->saHpiDomainEventLogTimestamp = src->saHpiDomainEventLogTimestamp;
+    memcpy( dst->saHpiDomainEventLogTimestamp,
+            src->saHpiDomainEventLogTimestamp,
+	    src->saHpiDomainEventLogTimestamp_len);
+	    
+    dst->saHpiDomainEventLogTimestamp_len = src->saHpiDomainEventLogTimestamp_len;
 
     dst->saHpiDomainEventLogType = src->saHpiDomainEventLogType;
 
@@ -1160,8 +1165,8 @@ int saHpiDomainEventLogTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINEVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiDomainEventLogTimestamp,
                          sizeof(context->saHpiDomainEventLogTimestamp) );
         break;

@@ -163,8 +163,9 @@ SaErrorT populate_saHpiHotSwapEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         hotswap_evt_ctx->saHpiHotSwapEventEntryId = hotswap_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
+	hotswap_evt_ctx->saHpiHotSwapEventTimestamp_len = sizeof(SaHpiTimeT);
 
         /** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventState = 
@@ -273,8 +274,9 @@ SaErrorT async_hotswap_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         hotswap_evt_ctx->saHpiHotSwapEventEntryId = hotswap_evt_oid[3];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, hotswap_evt_ctx->saHpiHotSwapEventTimestamp);
+	hotswap_evt_ctx->saHpiHotSwapEventTimestamp_len = sizeof(SaHpiTimeT);
 
         /** SaHpiHotSwapState = ASN_INTEGER */
         hotswap_evt_ctx->saHpiHotSwapEventState = 
@@ -548,7 +550,11 @@ static int saHpiHotSwapEventTable_row_copy(saHpiHotSwapEventTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiHotSwapEventEntryId = src->saHpiHotSwapEventEntryId;
 
-    dst->saHpiHotSwapEventTimestamp = src->saHpiHotSwapEventTimestamp;
+    memcpy( dst->saHpiHotSwapEventTimestamp,
+            src->saHpiHotSwapEventTimestamp,
+	    src->saHpiHotSwapEventTimestamp_len);
+	    
+    dst->saHpiHotSwapEventTimestamp_len = src->saHpiHotSwapEventTimestamp_len;
 
     dst->saHpiHotSwapEventState = src->saHpiHotSwapEventState;
 
@@ -1204,8 +1210,8 @@ int saHpiHotSwapEventTable_get_value(
         break;
     
         case COLUMN_SAHPIHOTSWAPEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiHotSwapEventTimestamp,
                          sizeof(context->saHpiHotSwapEventTimestamp) );
         break;

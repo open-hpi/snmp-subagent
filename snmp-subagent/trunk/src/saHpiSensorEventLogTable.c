@@ -188,9 +188,9 @@ SaErrorT populate_saHpiSensorEventLogTable(SaHpiSessionIdT sessionid,
 	}
 
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &sen_evt_ctx->saHpiSensorEventLogTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, sen_evt_ctx->saHpiSensorEventLogTimestamp);
+        sen_evt_ctx->saHpiSensorEventLogTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiSensorType = ASN_INTEGER */
         sen_evt_ctx->saHpiSensorEventLogType = event->Event.EventType + 1;
 
@@ -644,8 +644,12 @@ static int saHpiSensorEventLogTable_row_copy(saHpiSensorEventLogTable_context * 
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiSensorEventLogTimestamp = src->saHpiSensorEventLogTimestamp;
-
+    memcpy( dst->saHpiSensorEventLogTimestamp,
+            src->saHpiSensorEventLogTimestamp,
+	    src->saHpiSensorEventLogTimestamp_len);
+    
+    dst->saHpiSensorEventLogTimestamp_len = src->saHpiSensorEventLogTimestamp_len;
+    
     dst->saHpiSensorEventLogType = src->saHpiSensorEventLogType;
 
     dst->saHpiSensorEventLogCategory = src->saHpiSensorEventLogCategory;
@@ -1330,8 +1334,8 @@ int saHpiSensorEventLogTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPISENSOREVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiSensorEventLogTimestamp,
                          sizeof(context->saHpiSensorEventLogTimestamp) );
         break;

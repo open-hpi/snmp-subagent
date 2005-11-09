@@ -19,7 +19,7 @@
  
  /*
 
-    1. use the EntryCount to calcuclate number of GETBULKS
+    1. use the ActiveEntries to calcuclate number of GETBULKS
     2. validate the count caluele the OID has changed to the next oid 
 	    if not restart GOTO 1
 	    if yes GETBULK until end.
@@ -55,7 +55,7 @@ Konrad Rzeszutek:    pdu = snmp_pdu_create (SNMP_MSG_GETBULK);
 
 #define SA_HPI_ENTRY 			"HPI-MIB::saHpiEntry"
 //#define SA_HPI_ENTRY_COUNT      	".1.3.6.1.3.90.1.1.0"
-#define SA_HPI_ENTRY_COUNT      	"HPI-MIB::saHpiEntryCount.0"
+#define SA_HPI_ENTRY_COUNT      	"HPI-MIB::saHpiActiveEntries.0"
 #define SA_HPI_RDR_COUNT      	".1.3.6.1.3.90.3.1.0"
 //#define SA_HPI_RDR_COUNT      		"HPI-MIB::saHpiRdrCount.0"
 
@@ -545,7 +545,7 @@ main (int argc, char **argv){
     }
 
 
-    /* Get the saHpiEntryCount */
+    /* Get the saHpiActiveEntries */
     snmp_get(ss, SA_HPI_ENTRY_COUNT, &value);
     /* Get the saHpiEntries, these are the resources */
     get_sahpi_table_entries(ss, "HPI-MIB::saHpiEntry", &value, value.integer);

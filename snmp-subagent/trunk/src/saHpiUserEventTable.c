@@ -172,10 +172,10 @@ SaErrorT populate_saHpiUserEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp,
-			 &user_evt_ctx->saHpiUserEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp,
+			 user_evt_ctx->saHpiUserEventTimestamp);
+        user_evt_ctx->saHpiUserEventTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiTextType = ASN_INTEGER */
         user_evt_ctx->saHpiUserEventTextType = 
 	                event->EventDataUnion.UserEvent.UserEventData.DataType + 1;
@@ -269,8 +269,8 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                            ( (user_evt_ctx->saHpiUserEventTextType - 1) == 
                               event->EventDataUnion.UserEvent.UserEventData.DataType) &&
 
-                           (compare_timestamp(&event->Timestamp, 
-			                      &user_evt_ctx->saHpiUserEventTimestamp) == 0)  &&
+                           (compare_timestamp(event->Timestamp, 
+			                      user_evt_ctx->saHpiUserEventTimestamp) == 0)  &&
 
                            ( (user_evt_ctx->index.oids[saHpiEventSeverity_event_INDEX] - 1) == 
                              event->Severity) &&
@@ -345,9 +345,10 @@ SaErrorT async_user_event_add(SaHpiSessionIdT sessionid,
                                /** SaHpiEntryId = ASN_UNSIGNED */
                         user_evt_ctx->saHpiUserEventEntryId = user_evt_oid[2];
         
-                        /** SaHpiTime = ASN_COUNTER64 */
-			assign_timestamp(&event->Timestamp, &user_evt_ctx->saHpiUserEventTimestamp);
-        
+                        /** SaHpiTime = ASN_OCTET_STR */
+			hpitime_to_snmptime(event->Timestamp, user_evt_ctx->saHpiUserEventTimestamp);
+                        user_evt_ctx->saHpiUserEventTimestamp_len = sizeof(SaHpiTimeT);
+			
                         /** SaHpiTextType = ASN_INTEGER */
                         user_evt_ctx->saHpiUserEventTextType = 
         	                event->EventDataUnion.UserEvent.UserEventData.DataType + 1;
@@ -444,8 +445,10 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
                         return get_snmp_error(rc);
                 }
 		
-		assign_timestamp(&event.Timestamp,
-			         &row_ctx->saHpiUserEventTimestamp);			 
+		hpitime_to_snmptime(event.Timestamp,
+			            row_ctx->saHpiUserEventTimestamp);
+				 
+		row_ctx->saHpiUserEventTimestamp_len = sizeof(SaHpiTimeT);		 			 
 						 	
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
         }   
@@ -702,7 +705,8 @@ static int saHpiUserEventTable_row_copy(saHpiUserEventTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiUserEventEntryId = src->saHpiUserEventEntryId;
 
-    dst->saHpiUserEventTimestamp = src->saHpiUserEventTimestamp;
+    memcpy( dst->saHpiUserEventTimestamp, src->saHpiUserEventTimestamp, src->saHpiUserEventTimestamp_len );
+    dst->saHpiUserEventTimestamp_len = src->saHpiUserEventTimestamp_len;
 
     dst->saHpiUserEventTextType = src->saHpiUserEventTextType;
 
@@ -1027,8 +1031,8 @@ void saHpiUserEventTable_set_reserve1( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            rc = netsnmp_check_vb_type_and_size(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            rc = netsnmp_check_vb_type_and_size(var, ASN_OCTET_STR,
                                                 sizeof(row_ctx->saHpiUserEventTimestamp));
 
             /* check rowstatus is in correct state, createANDwait */
@@ -1182,7 +1186,7 @@ void saHpiUserEventTable_set_reserve2( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
                     /*
                      * TODO: routine to check valid values
                      *
@@ -1278,9 +1282,10 @@ void saHpiUserEventTable_set_action( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-	    assign_timestamp((SaHpiTimeT *)&*var->val.integer,
-	    			&row_ctx->saHpiUserEventTimestamp );
+            /** SaHpiTime = ASN_OCTET_STR */
+	    hpitime_to_snmptime((SaHpiTimeT)*var->val.integer,
+	    			row_ctx->saHpiUserEventTimestamp );
+            row_ctx->saHpiUserEventTimestamp_len = sizeof(SaHpiTimeT);				
             row_ctx->timestamp_set = MIB_TRUE;
             if (row_ctx->saHpiUserEventRowStatus == SNMP_ROW_CREATEANDWAIT) {
                     user_event_add (row_ctx);
@@ -1384,7 +1389,7 @@ void saHpiUserEventTable_set_commit( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTTEXTTYPE:
@@ -1441,7 +1446,7 @@ void saHpiUserEventTable_set_free( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTTEXTTYPE:
@@ -1509,7 +1514,7 @@ void saHpiUserEventTable_set_undo( netsnmp_request_group *rg )
         switch(current->tri->colnum) {
 
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
+            /** SaHpiTime = ASN_OCTET_STR */
         break;
 
         case COLUMN_SAHPIUSEREVENTTEXTTYPE:
@@ -1665,8 +1670,8 @@ int saHpiUserEventTable_get_value(
         break;
     
         case COLUMN_SAHPIUSEREVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiUserEventTimestamp,
                          sizeof(context->saHpiUserEventTimestamp) );
         break;

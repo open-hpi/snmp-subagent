@@ -23,7 +23,7 @@ int send_saHpiSensorNotification_trap(void);
 int send_saHpiWatchdogNotification_trap(void);
 int send_saHpiSensorEnableChangeNotification_trap(void);
 int send_saHpiUserNotifications_trap(void);
-int send_saHpiOEMNotifications_trap(void);
+int send_saHpiOemNotifications_trap(void);
 int send_saHpiSoftwareNotifications_trap(void);
 int send_saHpiResourceNotifications_trap(void);
 int send_saHpiHotSwapNotification_trap(void);

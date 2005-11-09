@@ -166,9 +166,9 @@ SaErrorT populate_saHpiWatchdogEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         watchdog_evt_ctx->saHpiWatchdogEventEntryId = watchdog_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
+        watchdog_evt_ctx->saHpiWatchdogEventTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiWatchdogEventAction = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventAction = 
 	        event->EventDataUnion.WatchdogEvent.WatchdogAction + 1;
@@ -283,9 +283,9 @@ SaErrorT async_watchdog_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         watchdog_evt_ctx->saHpiWatchdogEventEntryId = watchdog_evt_oid[4];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, watchdog_evt_ctx->saHpiWatchdogEventTimestamp);
+        watchdog_evt_ctx->saHpiWatchdogEventTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiWatchdogEventAction = ASN_INTEGER */
         watchdog_evt_ctx->saHpiWatchdogEventAction = 
 	        event->EventDataUnion.WatchdogEvent.WatchdogAction + 1;
@@ -575,8 +575,12 @@ static int saHpiWatchdogEventTable_row_copy(saHpiWatchdogEventTable_context * ds
     /** TODO: add code for external index(s)! */
     dst->saHpiWatchdogEventEntryId = src->saHpiWatchdogEventEntryId;
 
-    dst->saHpiWatchdogEventTimestamp = src->saHpiWatchdogEventTimestamp;
-
+    memcpy( dst->saHpiWatchdogEventTimestamp,
+            src->saHpiWatchdogEventTimestamp,
+	    src->saHpiWatchdogEventTimestamp_len);
+    
+    dst->saHpiWatchdogEventTimestamp_len = src->saHpiWatchdogEventTimestamp_len;
+    
     dst->saHpiWatchdogEventAction = src->saHpiWatchdogEventAction;
 
     dst->saHpiWatchdogEventPreTimerAction = src->saHpiWatchdogEventPreTimerAction;
@@ -1247,8 +1251,8 @@ int saHpiWatchdogEventTable_get_value(
         break;
     
         case COLUMN_SAHPIWATCHDOGEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiWatchdogEventTimestamp,
                          sizeof(context->saHpiWatchdogEventTimestamp) );
         break;

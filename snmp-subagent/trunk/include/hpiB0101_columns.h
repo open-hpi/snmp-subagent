@@ -28,7 +28,7 @@
        #define COLUMN_SAHPICTRLDIGITALISWRITEONLY		7
        #define COLUMN_SAHPICTRLDIGITALDEFAULTSTATE		8
        #define COLUMN_SAHPICTRLDIGITALSTATE		9
-       #define COLUMN_SAHPICTRLDIGITALOEM		10
+       #define COLUMN_SAHPICTRLDIGITALOem		10
        #define COLUMN_SAHPICTRLDIGITALRDR		11
 
 /* column number definitions for table saHpiDomainEventLogTable */
@@ -90,7 +90,7 @@
        #define COLUMN_SAHPICTRLDISCRETEISWRITEONLY		7
        #define COLUMN_SAHPICTRLDISCRETEDEFAULTSTATE		8
        #define COLUMN_SAHPICTRLDISCRETESTATE		9
-       #define COLUMN_SAHPICTRLDISCRETEOEM		10
+       #define COLUMN_SAHPICTRLDISCRETEOem		10
        #define COLUMN_SAHPICTRLDISCRETERDR		11
 
 /* column number definitions for table saHpiSensorReadingMinTable */
@@ -98,12 +98,12 @@
        #define COLUMN_SAHPISENSORREADINGMINTYPE		2
        #define COLUMN_SAHPISENSORREADINGMINVALUE		3
 
-/* column number definitions for table saHpiOEMEventLogTable */
-       #define COLUMN_SAHPIOEMEVENTLOGTIMESTAMP		1
-       #define COLUMN_SAHPIOEMEVENTLOGMANUFACTURERIDT		2
-       #define COLUMN_SAHPIOEMEVENTLOGTEXTTYPE		3
-       #define COLUMN_SAHPIOEMEVENTLOGTEXTLANGUAGE		4
-       #define COLUMN_SAHPIOEMEVENTLOGTEXT		5
+/* column number definitions for table saHpiOemEventLogTable */
+       #define COLUMN_SAHPIOemEVENTLOGTIMESTAMP		1
+       #define COLUMN_SAHPIOemEVENTLOGMANUFACTURERIDT		2
+       #define COLUMN_SAHPIOemEVENTLOGTEXTTYPE		3
+       #define COLUMN_SAHPIOemEVENTLOGTEXTLANGUAGE		4
+       #define COLUMN_SAHPIOemEVENTLOGTEXT		5
 
 /* column number definitions for table saHpiSensorThdUpMinorTable */
        #define COLUMN_SAHPISENSORTHDUPMINORISREADABLE		1
@@ -132,7 +132,7 @@
        #define COLUMN_SAHPISENSOREVENTTRIGGERTHRESHOLD		11
        #define COLUMN_SAHPISENSOREVENTPREVIOUSSTATE		12
        #define COLUMN_SAHPISENSOREVENTCURRENTSTATE		13
-       #define COLUMN_SAHPISENSOREVENTOEM		14
+       #define COLUMN_SAHPISENSOREVENTOem		14
        #define COLUMN_SAHPISENSOREVENTSPECIFIC		15
 
 /* column number definitions for table saHpiSensorThdPosHysteresisTable */
@@ -182,7 +182,7 @@
        #define COLUMN_SAHPICTRLSTREAMDEFAULTSTATE		9
        #define COLUMN_SAHPICTRLSTREAMREPEAT		10
        #define COLUMN_SAHPICTRLSTREAMSTATE		11
-       #define COLUMN_SAHPICTRLSTREAMOEM		12
+       #define COLUMN_SAHPICTRLSTREAMOem		12
        #define COLUMN_SAHPICTRLSTREAMRDR		13
 
 /* column number definitions for table saHpiCtrlTextTable */
@@ -201,7 +201,7 @@
        #define COLUMN_SAHPICTRLTEXTDEFAULT		13
        #define COLUMN_SAHPICTRLTEXTLINE		14
        #define COLUMN_SAHPICTRLTEXTSTATE		15
-       #define COLUMN_SAHPICTRLTEXTOEM		16
+       #define COLUMN_SAHPICTRLTEXTOem		16
        #define COLUMN_SAHPICTRLTEXTRDR		17
 
 /* column number definitions for table saHpiAutoInsertTimeoutTable */
@@ -228,7 +228,7 @@
        #define COLUMN_SAHPIANNUNCIATORMODEREADONLY		3
        #define COLUMN_SAHPIANNUNCIATORMAXCONDITIONS		4
        #define COLUMN_SAHPIANNUNCIATORMODE		5
-       #define COLUMN_SAHPIANNUNCIATOROEM		6
+       #define COLUMN_SAHPIANNUNCIATOROem		6
        #define COLUMN_SAHPIANNUNCIATORRDR		7
 
 /* column number definitions for table saHpiSensorReadingMaxTable */
@@ -279,7 +279,7 @@
        #define COLUMN_SAHPISENSORPERCENTAGE		12
        #define COLUMN_SAHPISENSORRANGEFLAGS		13
        #define COLUMN_SAHPISENSORACCURACYFACTOR		14
-       #define COLUMN_SAHPISENSOROEM		15
+       #define COLUMN_SAHPISENSOROem		15
        #define COLUMN_SAHPISENSORRDR		16
 
 /* column number definitions for table saHpiRdrTable */
@@ -359,7 +359,7 @@
 /* column number definitions for table saHpiInventoryTable */
        #define COLUMN_SAHPIINVENTORYID		1
        #define COLUMN_SAHPIINVENTORYPERSISTENT		2
-       #define COLUMN_SAHPIINVENTORYOEM		3
+       #define COLUMN_SAHPIINVENTORYOem		3
        #define COLUMN_SAHPIINVENTORYUPDATECOUNT		4
        #define COLUMN_SAHPIINVENTORYISREADONLY		5
        #define COLUMN_SAHPIINVENTORYNUMAREAS		6
@@ -377,7 +377,7 @@
        #define COLUMN_SAHPIWATCHDOGTIMERINITIALCOUNT		9
        #define COLUMN_SAHPIWATCHDOGTIMERPRESENTCOUNT		10
        #define COLUMN_SAHPIWATCHDOGTIMERRESET		11
-       #define COLUMN_SAHPIWATCHDOGOEM		12
+       #define COLUMN_SAHPIWATCHDOGOem		12
        #define COLUMN_SAHPIWATCHDOGRDR		13
 
 /* column number definitions for table saHpiDomainReferenceTable */
@@ -396,16 +396,16 @@
        #define COLUMN_SAHPICTRLANALOGDEFAULTMAXSTATE		9
        #define COLUMN_SAHPICTRLANALOGDEFAULTSTATE		10
        #define COLUMN_SAHPICTRLANALOGSTATE		11
-       #define COLUMN_SAHPICTRLANALOGOEM		12
+       #define COLUMN_SAHPICTRLANALOGOem		12
        #define COLUMN_SAHPICTRLANALOGRDR		13
 
-/* column number definitions for table saHpiOEMEventTable */
-       #define COLUMN_SAHPIOEMEVENTENTRYID		1
-       #define COLUMN_SAHPIOEMEVENTTIMESTAMP		2
-       #define COLUMN_SAHPIOEMEVENTMANUFACTURERIDT		3
-       #define COLUMN_SAHPIOEMEVENTTEXTTYPE		4
-       #define COLUMN_SAHPIOEMEVENTTEXTLANGUAGE		5
-       #define COLUMN_SAHPIOEMEVENTTEXT		6
+/* column number definitions for table saHpiOemEventTable */
+       #define COLUMN_SAHPIOemEVENTENTRYID		1
+       #define COLUMN_SAHPIOemEVENTTIMESTAMP		2
+       #define COLUMN_SAHPIOemEVENTMANUFACTURERIDT		3
+       #define COLUMN_SAHPIOemEVENTTEXTTYPE		4
+       #define COLUMN_SAHPIOemEVENTTEXTLANGUAGE		5
+       #define COLUMN_SAHPIOemEVENTTEXT		6
 
 /* column number definitions for table saHpiEventLogTable */
        #define COLUMN_SAHPIEVENTLOGINDEX		1
@@ -426,7 +426,7 @@
        #define COLUMN_SAHPISENSOREVENTLOGTRIGGERTHRESHOLD		10
        #define COLUMN_SAHPISENSOREVENTLOGPREVIOUSSTATE		11
        #define COLUMN_SAHPISENSOREVENTLOGCURRENTSTATE		12
-       #define COLUMN_SAHPISENSOREVENTLOGOEM		13
+       #define COLUMN_SAHPISENSOREVENTLOGOem		13
        #define COLUMN_SAHPISENSOREVENTLOGSPECIFIC		14
 
 /* column number definitions for table saHpiHotSwapTable */
@@ -539,20 +539,20 @@
        #define COLUMN_SAHPISENSORTHDLOWMINORNONLINEAR		5
 
 /* column number definitions for table saHpiCtrlOemTable */
-       #define COLUMN_SAHPICTRLOEMENTRYID		1
-       #define COLUMN_SAHPICTRLOEMNUM		2
-       #define COLUMN_SAHPICTRLOEMOUTPUTTYPE		3
-       #define COLUMN_SAHPICTRLOEMDEFAULTMODE		4
-       #define COLUMN_SAHPICTRLOEMMODE		5
-       #define COLUMN_SAHPICTRLOEMISREADONLY		6
-       #define COLUMN_SAHPICTRLOEMISWRITEONLY		7
-       #define COLUMN_SAHPICTRLOEMMANUFACTURERID		8
-       #define COLUMN_SAHPICTRLOEMDEFAULTCONFIGDATA		9
-       #define COLUMN_SAHPICTRLOEMDEFAULTMID		10
-       #define COLUMN_SAHPICTRLOEMDEFAULTSTATE		11
-       #define COLUMN_SAHPICTRLOEMSTATE		12
-       #define COLUMN_SAHPICTRLOEMVALUE		13
-       #define COLUMN_SAHPICTRLOEMRDR		14
+       #define COLUMN_SAHPICTRLOemENTRYID		1
+       #define COLUMN_SAHPICTRLOemNUM		2
+       #define COLUMN_SAHPICTRLOemOUTPUTTYPE		3
+       #define COLUMN_SAHPICTRLOemDEFAULTMODE		4
+       #define COLUMN_SAHPICTRLOemMODE		5
+       #define COLUMN_SAHPICTRLOemISREADONLY		6
+       #define COLUMN_SAHPICTRLOemISWRITEONLY		7
+       #define COLUMN_SAHPICTRLOemMANUFACTURERID		8
+       #define COLUMN_SAHPICTRLOemDEFAULTCONFIGDATA		9
+       #define COLUMN_SAHPICTRLOemDEFAULTMID		10
+       #define COLUMN_SAHPICTRLOemDEFAULTSTATE		11
+       #define COLUMN_SAHPICTRLOemSTATE		12
+       #define COLUMN_SAHPICTRLOemVALUE		13
+       #define COLUMN_SAHPICTRLOemRDR		14
 
 /* column number definitions for table saHpiSensorReadingNormalMinTable */
        #define COLUMN_SAHPISENSORREADINGNORMALMINISSUPPORTED		1

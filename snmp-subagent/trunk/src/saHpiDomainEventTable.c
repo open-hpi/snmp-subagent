@@ -162,8 +162,9 @@ SaErrorT populate_saHpiDomainEventTable(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         domain_evt_ctx->saHpiDomainEventEntryId = domain_evt_oid[2];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, domain_evt_ctx->saHpiDomainEventTimestamp);
+	domain_evt_ctx->saHpiDomainEventTimestamp_len = sizeof(SaHpiTimeT);
 
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = 
@@ -254,8 +255,9 @@ SaErrorT async_domain_event_add(SaHpiSessionIdT sessionid,
         /** SaHpiEntryId = ASN_UNSIGNED */
         domain_evt_ctx->saHpiDomainEventEntryId = domain_evt_oid[2];
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &domain_evt_ctx->saHpiDomainEventTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, domain_evt_ctx->saHpiDomainEventTimestamp);
+	domain_evt_ctx->saHpiDomainEventTimestamp_len = sizeof(SaHpiTimeT);
 
         /** INTEGER = ASN_INTEGER */
         domain_evt_ctx->saHpiDomainEventType = 
@@ -517,7 +519,11 @@ static int saHpiDomainEventTable_row_copy(saHpiDomainEventTable_context * dst,
     /** TODO: add code for external index(s)! */
     dst->saHpiDomainEventEntryId = src->saHpiDomainEventEntryId;
 
-    dst->saHpiDomainEventTimestamp = src->saHpiDomainEventTimestamp;
+    memcpy(dst->saHpiDomainEventTimestamp,
+           src->saHpiDomainEventTimestamp,
+	   src->saHpiDomainEventTimestamp_len);
+
+    dst->saHpiDomainEventTimestamp_len = src->saHpiDomainEventTimestamp_len;
 
     dst->saHpiDomainEventType = src->saHpiDomainEventType;
 
@@ -1169,8 +1175,8 @@ int saHpiDomainEventTable_get_value(
         break;
     
         case COLUMN_SAHPIDOMAINEVENTTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiDomainEventTimestamp,
                          sizeof(context->saHpiDomainEventTimestamp) );
         break;

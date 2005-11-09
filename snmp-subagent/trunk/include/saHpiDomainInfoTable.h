@@ -33,6 +33,7 @@ extern "C" {
 #include <net-snmp/agent/table_array.h>
 
 #include <SaHpi.h>
+#include <hpiSubagent.h>
 
 /* Number of table Indexes */
 #define DOMAIN_INFO_INDEX_NR 1        
@@ -66,20 +67,23 @@ typedef struct saHpiDomainInfoTable_context_s {
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainReferenceUpdateCount;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-            struct counter64 saHpiDomainReferenceUpdateTimestamp;
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiDomainReferenceUpdateTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiDomainReferenceUpdateTimestamp_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainResourcePresenceUpdateCount;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-            struct counter64 saHpiDomainResourcePresenceUpdateTimestamp;
-
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiDomainResourcePresenceUpdateTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiDomainResourcePresenceUpdateTimestamp_len;
+	    
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainAlarmUpdateCount;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-            struct counter64 saHpiDomainAlarmUpdateTimestamp;
+        /** SaHpiTime = ASN_OCTET_STR */
+            unsigned char saHpiDomainAlarmUpdateTimestamp[SAF_UNSIGNED_64_LEN];
+            long saHpiDomainAlarmUpdateTimestamp_len;
 
         /** UNSIGNED32 = ASN_UNSIGNED */
             unsigned long saHpiDomainActiveAlarms;

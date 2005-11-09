@@ -241,8 +241,8 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 /** SaHpiSeverity = ASN_INTEGER */
                 event_context->saHpiEventSeverity = event.Severity + 1;
 
-                /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&event.Timestamp, &event_context->saHpiEventSaHpiTime);
+                /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(event.Timestamp, &event_context->saHpiEventSaHpiTime);
 
                 /** INTEGER = ASN_INTEGER */
                 event_context->saHpiEventType = event.EventType + 1;
@@ -397,8 +397,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
         /** SaHpiSeverity = ASN_INTEGER */
         event_context->saHpiEventSeverity = event->Severity + 1;
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &event_context->saHpiEventSaHpiTime);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, &event_context->saHpiEventSaHpiTime);
 
         /** INTEGER = ASN_INTEGER */
         event_context->saHpiEventType = event->EventType + 1;
@@ -1235,8 +1235,8 @@ int saHpiEventTable_get_value(
         break;
     
         case COLUMN_SAHPIEVENTSAHPITIME:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiEventSaHpiTime,
                          sizeof(context->saHpiEventSaHpiTime) );
         break;

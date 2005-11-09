@@ -158,7 +158,7 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 		hotswap_ctx->saHpiHotSwapState = hs_state + 1; 
 	}
 	
-        /** SaHpiTime = ASN_COUNTER64 */                     
+        /** SaHpiTime = ASN_OCTET_STR */                     
 	if ( SA_OK == saHpiAutoExtractTimeoutGet(sessionid,
 			                rpt_entry->ResourceId,
 					&extract_timeout) ) {
@@ -255,7 +255,7 @@ SaErrorT async_hotswap_add(SaHpiSessionIdT sessionid,
         hotswap_ctx->saHpiHotSwapState = 
                 event->EventDataUnion.HotSwapEvent.HotSwapState + 1; 
 	
-        /** SaHpiTime = ASN_COUNTER64 */                     
+        /** SaHpiTime = ASN_OCTET_STR */                     
 	if ( SA_OK == saHpiAutoExtractTimeoutGet(sessionid,
 			                rpt_entry->ResourceId,
 					&extract_timeout) ) {
@@ -406,21 +406,19 @@ int hot_swap_auto_extract_timeout_set (saHpiHotSwapTable_context *row_ctx)
         if (row_ctx->saHpiHotSwapExtractTimeout_len > sizeof(SaHpiTimeoutT)) 
                 return SNMP_ERR_TOOBIG;
         
-        memcpy(&timeout, 
-               row_ctx->saHpiHotSwapExtractTimeout, 
-               sizeof(SaHpiTimeoutT));
+        timeout = snmptime_to_hpitime (row_ctx->saHpiHotSwapExtractTimeout);
 
-       rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
+        rc = saHpiAutoExtractTimeoutSet(session_id, resource_id, timeout);
 
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
 			  "Call to hot_swap_extract_timeout_set"
-                          " failed to set timeout [%d] rc: %s.\n",
+                          " failed to set timeout [%lld] rc: %s.\n",
                           timeout, 
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
 			   "Call to hot_swap_extract_timeout_set"
-                           " failed to set timeout [%d] rc: %s.\n",
+                           " failed to set timeout [%lld] rc: %s.\n",
                            timeout, 
 			   oh_lookup_error(rc)));
 		return get_snmp_error(rc);
@@ -1165,7 +1163,7 @@ void saHpiHotSwapTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIHOTSWAPEXTRACTTIMEOUT:
             /** SafUnsigned64 = ASN_OCTET_STR */
-            assign_timeout(var, row_ctx->saHpiHotSwapExtractTimeout);
+            memcpy(row_ctx->saHpiHotSwapExtractTimeout, var->val.string, var->val_len );
             row_ctx->saHpiHotSwapExtractTimeout_len = var->val_len;
             row_err = hot_swap_auto_extract_timeout_set (row_ctx);
         break;

@@ -175,9 +175,9 @@ SaErrorT populate_saHpiSoftwareEventLogTable(SaHpiSessionIdT sessionid,
 	}
 
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &software_evt_ctx->saHpiSoftwareEventLogTimestamp);
-
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, software_evt_ctx->saHpiSoftwareEventLogTimestamp);
+        software_evt_ctx->saHpiSoftwareEventLogTimestamp_len = sizeof(SaHpiTimeT);
         /** SaHpiManufacturerId = ASN_UNSIGNED */
         software_evt_ctx->saHpiSoftwareEventLogManufacturerIdT = 
                 event->Event.EventDataUnion.HpiSwEvent.MId;
@@ -539,8 +539,12 @@ static int saHpiSoftwareEventLogTable_row_copy(saHpiSoftwareEventLogTable_contex
      * copy components into the context structure
      */
     /** TODO: add code for external index(s)! */
-    dst->saHpiSoftwareEventLogTimestamp = src->saHpiSoftwareEventLogTimestamp;
+    memcpy( dst->saHpiSoftwareEventLogTimestamp, 
+            src->saHpiSoftwareEventLogTimestamp,
+	    src->saHpiSoftwareEventLogTimestamp_len);
 
+    dst->saHpiSoftwareEventLogTimestamp_len = src->saHpiSoftwareEventLogTimestamp_len;
+ 
     dst->saHpiSoftwareEventLogManufacturerIdT = src->saHpiSoftwareEventLogManufacturerIdT;
 
     dst->saHpiSoftwareEventLogType = src->saHpiSoftwareEventLogType;
@@ -1200,8 +1204,8 @@ int saHpiSoftwareEventLogTable_get_value(
     switch(table_info->colnum) {
 
         case COLUMN_SAHPISOFTWAREEVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiSoftwareEventLogTimestamp,
                          sizeof(context->saHpiSoftwareEventLogTimestamp) );
         break;

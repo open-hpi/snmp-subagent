@@ -274,10 +274,11 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 	evt_log_context->saHpiEventLogType = 
                 	        event_log_entry.Event.EventType + 1; 
 
-                	/** SaHpiTime = ASN_COUNTER64 */
-			assign_timestamp(&event_log_entry.Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);			                	
-
-                	/** RowPointer = ASN_OBJECT_ID */
+                	/** SaHpiTime = ASN_OCTET_STR */
+			hpitime_to_snmptime(event_log_entry.Timestamp, evt_log_context->saHpiEventLogAddedTimestamp);			                	
+                        evt_log_context->saHpiEventLogAddedTimestamp_len = sizeof(SaHpiTimeT);
+                	
+			/** RowPointer = ASN_OBJECT_ID */
                 	evt_log_context->saHpiEventLogRowPointer_len = 
                         	child_oid_len * sizeof (oid);
                 	memcpy (evt_log_context->saHpiEventLogRowPointer, 
@@ -445,9 +446,10 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
         		evt_log_context->saHpiEventLogType = 
                 		event_log_entry.Event.EventType + 1; 
 
-	        	/** SaHpiTime = ASN_COUNTER64 */
-			assign_timestamp(&event_log_entry.Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);
-
+	        	/** SaHpiTime = ASN_OCTET_STR */
+			hpitime_to_snmptime(event_log_entry.Timestamp, evt_log_context->saHpiEventLogAddedTimestamp);
+                        evt_log_context->saHpiEventLogAddedTimestamp_len = sizeof(SaHpiTimeT);
+			
 	        	/** RowPointer = ASN_OBJECT_ID */
         		evt_log_context->saHpiEventLogRowPointer_len = 
                 		child_oid_len * sizeof (oid);
@@ -534,8 +536,9 @@ int event_log_add(SaHpiSessionIdT session_id,
         evt_log_context->saHpiEventLogType = 
                 event->EventType + 1; 
 
-        /** SaHpiTime = ASN_COUNTER64 */
-	assign_timestamp(&event->Timestamp, &evt_log_context->saHpiEventLogAddedTimestamp);
+        /** SaHpiTime = ASN_OCTET_STR */
+	hpitime_to_snmptime(event->Timestamp, evt_log_context->saHpiEventLogAddedTimestamp);
+	evt_log_context->saHpiEventLogAddedTimestamp_len = sizeof(SaHpiTimeT);
 
         /** RowPointer = ASN_OBJECT_ID */
         evt_log_context->saHpiEventLogRowPointer_len = 
@@ -812,7 +815,11 @@ static int saHpiEventLogTable_row_copy(saHpiEventLogTable_context * dst,
 
     dst->saHpiEventLogType = src->saHpiEventLogType;
 
-    dst->saHpiEventLogAddedTimestamp = src->saHpiEventLogAddedTimestamp;
+    memcpy( dst->saHpiEventLogAddedTimestamp,
+            src->saHpiEventLogAddedTimestamp,
+	    src->saHpiEventLogAddedTimestamp_len);
+	    
+    dst->saHpiEventLogAddedTimestamp_len = src->saHpiEventLogAddedTimestamp_len;	    
 
     memcpy( dst->saHpiEventLogRowPointer, 
             src->saHpiEventLogRowPointer,  
@@ -1467,8 +1474,8 @@ int saHpiEventLogTable_get_value(
         break;
     
         case COLUMN_SAHPIEVENTLOGADDEDTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiEventLogAddedTimestamp,
                          sizeof(context->saHpiEventLogAddedTimestamp) );
         break;

@@ -179,8 +179,9 @@ SaErrorT populate_saHpiAnnouncementEventLogTable(SaHpiSessionIdT sessionid,
 	        /** SaHpiEntryId = ASN_UNSIGNED */
                 announcement_ctx->saHpiAnnouncementEventLogEntryId = announcement.EntryId;
 	 	
-                /** SaHpiTime = ASN_COUNTER64 */
-		assign_timestamp(&announcement.Timestamp, &announcement_ctx->saHpiAnnouncementEventLogTimestamp);
+                /** SaHpiTime = ASN_OCTET_STR */
+		hpitime_to_snmptime(announcement.Timestamp, announcement_ctx->saHpiAnnouncementEventLogTimestamp);
+		announcement_ctx->saHpiAnnouncementEventLogTimestamp_len = sizeof(SaHpiTimeT);
  
                 /** TruthValue = ASN_INTEGER */
                 announcement_ctx->saHpiAnnouncementEventLogAddedByUser = announcement.AddedByUser;
@@ -449,7 +450,11 @@ static int saHpiAnnouncementEventLogTable_row_copy(saHpiAnnouncementEventLogTabl
     /** TODO: add code for external index(s)! */
     dst->saHpiAnnouncementEventLogEntryId = src->saHpiAnnouncementEventLogEntryId;
 
-    dst->saHpiAnnouncementEventLogTimestamp = src->saHpiAnnouncementEventLogTimestamp;
+    memcpy(dst->saHpiAnnouncementEventLogTimestamp,
+           src->saHpiAnnouncementEventLogTimestamp,
+	   src->saHpiAnnouncementEventLogTimestamp_len);
+	   
+    dst->saHpiAnnouncementEventLogTimestamp_len = src->saHpiAnnouncementEventLogTimestamp_len;   
 
     dst->saHpiAnnouncementEventLogAddedByUser = src->saHpiAnnouncementEventLogAddedByUser;
 
@@ -1584,8 +1589,8 @@ int saHpiAnnouncementEventLogTable_get_value(
         break;
     
         case COLUMN_SAHPIANNOUNCEMENTEVENTLOGTIMESTAMP:
-            /** SaHpiTime = ASN_COUNTER64 */
-            snmp_set_var_typed_value(var, ASN_COUNTER64,
+            /** SaHpiTime = ASN_OCTET_STR */
+            snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiAnnouncementEventLogTimestamp,
                          sizeof(context->saHpiAnnouncementEventLogTimestamp) );
         break;
