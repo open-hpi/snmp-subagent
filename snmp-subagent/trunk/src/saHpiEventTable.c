@@ -56,7 +56,7 @@
 #include <saHpiResourceTable.h>
 #include <saHpiResourceEventTable.h>
 #include <saHpiDomainEventTable.h>
-#include <saHpiOEMEventTable.h>
+#include <saHpiOemEventTable.h>
 #include <saHpiHotSwapEventTable.h>
 #include <saHpiHotSwapTable.h>
 #include <saHpiWatchdogEventTable.h>

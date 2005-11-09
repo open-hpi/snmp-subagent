@@ -69,7 +69,7 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiResourceEventLogTable.c \
 			saHpiSensorEventLogTable.c \
 			saHpiSensorEventTable.c \
-			saHpiOEMEventTable.c \
+			saHpiOemEventTable.c \
 			saHpiHotSwapEventTable.c \
 			saHpiWatchdogEventTable.c \
 			saHpiSoftwareEventTable.c \
@@ -78,7 +78,7 @@ hpiSubagent_SOURCES	= alarm.c \
                         saHpiHotSwapEventLogTable.c \
                         saHpiWatchdogEventLogTable.c \
 			saHpiSoftwareEventLogTable.c \
-			saHpiOEMEventLogTable.c \
+			saHpiOemEventLogTable.c \
 			saHpiUserEventLogTable.c \
 			saHpiSensorEnableChangeEventLogTable.c \
 			saHpiDomainEventLogTable.c \
