@@ -58,7 +58,7 @@
 #include <saHpiHotSwapEventLogTable.h>
 #include <saHpiWatchdogEventLogTable.h>
 #include <saHpiSoftwareEventLogTable.h>
-#include <saHpiOEMEventLogTable.h>
+#include <saHpiOemEventLogTable.h>
 #include <saHpiSensorEnableChangeEventLogTable.h>
 #include <saHpiDomainEventLogTable.h>
 #include <saHpiUserEventLogTable.h>

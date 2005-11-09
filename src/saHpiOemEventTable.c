@@ -50,7 +50,7 @@
 #include <net-snmp/library/snmp_assert.h>
 
 #include <SaHpi.h>
-#include "saHpiOEMEventTable.h"
+#include "saHpiOemEventTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
 #include <session_info.h>
@@ -1132,7 +1132,7 @@ initialize_table_saHpiOemEventTable(void)
     netsnmp_table_registration_info *table_info;
 
     if(my_handler) {
-        snmp_log(LOG_ERR, "initialize_table_saHpiOEMEventTable.handler called again\n");
+        snmp_log(LOG_ERR, "initialize_table_saHpiOemEventTable.handler called again\n");
         return;
     }
 
@@ -1151,7 +1151,7 @@ initialize_table_saHpiOemEventTable(void)
             
     if (!my_handler || !table_info) {
         snmp_log(LOG_ERR, "malloc failed in "
-                 "initialize_table_saHpiOEMEventTable.handler\n");
+                 "initialize_table_saHpiOemEventTable.handler\n");
         return; /** mallocs failed */
     }
 

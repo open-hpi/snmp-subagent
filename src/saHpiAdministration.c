@@ -74,7 +74,7 @@
 #include <saHpiHotSwapEventTable.h>
 #include <saHpiWatchdogEventTable.h>
 #include <saHpiSoftwareEventTable.h>
-#include <saHpiOEMEventTable.h>
+#include <saHpiOemEventTable.h>
 #include <saHpiUserEventTable.h>
 #include <saHpiAnnouncementTable.h>
 
@@ -87,7 +87,7 @@
 #include <saHpiHotSwapEventLogTable.h>
 #include <saHpiWatchdogEventLogTable.h>
 #include <saHpiSoftwareEventLogTable.h>
-#include <saHpiOEMEventLogTable.h>
+#include <saHpiOemEventLogTable.h>
 #include <saHpiUserEventLogTable.h>
 #include <saHpiAnnouncementEventLogTable.h>
 #include <session_info.h>
