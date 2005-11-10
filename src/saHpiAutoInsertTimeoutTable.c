@@ -161,7 +161,7 @@ int auto_insert_timeout_set(saHpiAutoInsertTimeoutTable_context *row_ctx)
                 return SNMP_ERR_TOOBIG;
         
         timeout = snmptime_to_hpitime(row_ctx->saHpiAutoInsertTimeoutForInsert);
-
+	
         rc = saHpiAutoInsertTimeoutSet(session_id, timeout);
 
 	if (rc != SA_OK) {
@@ -655,11 +655,7 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
             
 	    memcpy(row_ctx->saHpiAutoInsertTimeoutForInsert, var->val.string, var->val_len);	    	    	    
             row_ctx->saHpiAutoInsertTimeoutForInsert_len = var->val_len;
-	    
-	    printf("FIRST BYTE IS AT %ld\n", (long int)&(row_ctx->saHpiAutoInsertTimeoutForInsert[0]));
-	    printf("SECOND BYTE IS AT %ld\n",(long int) &row_ctx->saHpiAutoInsertTimeoutForInsert[1]);
-	    printf("TIMEOUT is %x\n", row_ctx->saHpiAutoInsertTimeoutForInsert[0]);
-	    
+	    	    
   	    row_err = auto_insert_timeout_set(row_ctx);
 
         break;
