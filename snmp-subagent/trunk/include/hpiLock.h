@@ -25,10 +25,14 @@ extern "C" {
 #include <stdlib.h>
 #include <glib.h>
 
-extern GStaticRecMutex thread_mutex;
-extern int lockcount;
+typedef struct {
+      GStaticRecMutex thread_mutex;
+      int lockcount;
+}hpi_lock_type;
 
-void subagent_lock(GStaticRecMutex * thread_mutex, int * lockcount);
-void subagent_unlock(GStaticRecMutex * thread_mutex, int * lockcount);
+extern hpi_lock_type hpi_lock_data;      
+
+void subagent_lock( hpi_lock_type * hpi_lock_data);
+void subagent_unlock( hpi_lock_type * hpi_lock_data);
 
 #endif

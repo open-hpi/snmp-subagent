@@ -19,36 +19,44 @@
 #include <hpiSubagent.h>
 #include <net-snmp/library/snmp_debug.h>
 
-GStaticRecMutex thread_mutex = G_STATIC_REC_MUTEX_INIT;;
-int lockcount = 0;
+hpi_lock_type hpi_lock_data = {
+        .thread_mutex = G_STATIC_REC_MUTEX_INIT,
+        .lockcount = 0
+};
 
-void subagent_lock(GStaticRecMutex * thread_mutex, int * lockcount)                                                                           
+
+void subagent_lock( hpi_lock_type * hpi_lock_data)                                                                           
 {                                                                                        
-        if (!g_static_rec_mutex_trylock(thread_mutex)) {                                    
+        
+	if (!g_static_rec_mutex_trylock(&hpi_lock_data->thread_mutex)) {                                    
                 
-		DEBUGMSGTL ((AGENT, "Going to block for a lock now. lockcount %d\n", *lockcount));                                      
+		DEBUGMSGTL ((AGENT, "Going to block for a lock now. %p - lockcount %d\n", 
+		                                                   g_thread_self(), hpi_lock_data->lockcount));
+								   
+		g_static_rec_mutex_lock(&hpi_lock_data->thread_mutex);
                 
-		g_static_rec_mutex_lock(thread_mutex);                                      
+		hpi_lock_data->lockcount++;
                 
-		*lockcount++;                                                             
-                
-		DEBUGMSGTL ((AGENT,"Got the lock after blocking, lockcount %d\n", *lockcount));
+		DEBUGMSGTL ((AGENT,"Got the lock after blocking, %p - lockcount %d\n", 
+		                                                   g_thread_self(), hpi_lock_data->lockcount));
 		
-        } else {                                                                            
+        } else {  
                 
-		*lockcount++;                                                             
+		hpi_lock_data->lockcount++; 
                 
-		DEBUGMSGTL ((AGENT,"Got the lock because no one had it. lockcount %d\n", *lockcount));                             
+		DEBUGMSGTL ((AGENT,"Got the lock because no one had it. %p - lockcount %d\n", 
+		                                                   g_thread_self(), hpi_lock_data->lockcount)); 
         }                                                                                   
 }
 
-void subagent_unlock(GStaticRecMutex * thread_mutex, int * lockcount)                                                      \
+void subagent_unlock( hpi_lock_type * hpi_lock_data)
 {
-        									
-	*lockcount--;						      
+        						
+	hpi_lock_data->lockcount--;
         
-	g_static_rec_mutex_unlock(thread_mutex);				
+	g_static_rec_mutex_unlock(&hpi_lock_data->thread_mutex);
         
-	DEBUGMSGTL ((AGENT,"Released the lock, lockcount %d\n", *lockcount));	
+	DEBUGMSGTL ((AGENT,"Released the lock, %p - lockcount %d\n", 
+	                           g_thread_self(), hpi_lock_data->lockcount));
         
 }
