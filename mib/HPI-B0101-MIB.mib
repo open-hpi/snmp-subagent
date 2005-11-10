@@ -11538,8 +11538,8 @@ saHpiCompliance MODULE-COMPLIANCE
                         saHpiAreaGroup,
                         saHpiFieldGroup,
                         saHpiWatchdogGroup,
-                        saHpiAnnunciatorGroup
-			saHpiNotificationGroup
+                        saHpiAnnunciatorGroup,
+			saHpiNotificationGroup,
 			saHpiAdministrationGroup }
         ::= { hpiCompliances 1 }
 
