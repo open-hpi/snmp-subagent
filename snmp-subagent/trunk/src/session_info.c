@@ -169,31 +169,31 @@ int get_snmp_error(SaErrorT val)
 		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_TIMEOUT:
-		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_OUT_OF_SPACE:
-		return SNMP_ERR_TOOBIG;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_OUT_OF_MEMORY:
-		return SNMP_ERR_TOOBIG;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_INVALID_PARAMS:
-		return SNMP_ERR_INCONSISTENTVALUE;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_INVALID_DATA:
 		return SNMP_ERR_WRONGVALUE;
 		break;
 	case SA_ERR_HPI_NOT_PRESENT:
-		return SNMP_ERR_NOSUCHNAME;
+		return SNMP_ERR_INCONSISTENTNAME;
 		break;
 	case SA_ERR_HPI_NO_RESPONSE:
-		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_DUPLICATE:
-		return SNMP_ERR_INCONSISTENTNAME;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_INVALID_SESSION:
-		return SNMP_ERR_INCONSISTENTNAME;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_INVALID_DOMAIN:
 		return SNMP_ERR_INCONSISTENTNAME;
@@ -202,16 +202,16 @@ int get_snmp_error(SaErrorT val)
 		return SNMP_ERR_INCONSISTENTNAME;
 		break;
 	case SA_ERR_HPI_INVALID_REQUEST:
-		return SNMP_ERR_BADVALUE;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_ENTITY_NOT_PRESENT:
-		return SNMP_ERR_RESOURCEUNAVAILABLE;
+		return SNMP_ERR_INCONSISTENTNAME;
 		break;
 	case SA_ERR_HPI_READ_ONLY:
-		return SNMP_ERR_READONLY;
+		return SNMP_ERR_NOTWRITABLE;
 		break;
 	case SA_ERR_HPI_CAPABILITY:
-		return SNMP_ERR_NOACCESS;
+		return SNMP_ERR_GENERR;
 		break;
 	case SA_ERR_HPI_UNKNOWN:
 		return SNMP_ERR_GENERR;
