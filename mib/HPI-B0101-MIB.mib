@@ -6,7 +6,6 @@ IMPORTS
         Unsigned32,
         Gauge32,
         Counter32,
-        Counter64,
         Integer32               FROM SNMPv2-SMI
         TEXTUAL-CONVENTION,
         RowPointer,
