@@ -6849,44 +6849,43 @@ saHpiCtrlDigitalState OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "This object represents the current digital state of
-                 the control.  Write to this object to change the
-                 digital state.  
+                the control.  Write to this object to change the
+                digital state.  
 
-                 You may not change the state of the control unless
-                 the Mode is set to manual(2).  If a write is
-                 attempted when the mode is set to auto(1) SNMP
-                 will return a notWriteable error code.
+                You may not change the state of the control unless
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue.
 
-                 Refer to the textual convention for more details on the
-                 enumerations.
+                Refer to the textual convention for more details on the
+                enumerations.
 
-                 Note that the SNMP errors that are returned are
+                Note that the SNMP errors that are returned are
                 mapped to the HPI errors that could be returned
                 (errors above the value 6 are SNMPv2 or v3 protocol
                 and are converted to genErr(1) for v1 protocol).
 
-                    SA_ERR_HPI_ERROR                genErr(5)
-                    SA_ERR_HPI_UNSUPPORTED_API      genErr(5)
-                    SA_ERR_HPI_BUSY                 genErr(5)
-                    SA_ERR_HPI_INTERNAL_ERROR       genErr(5)
-                    SA_ERR_HPI_INVALID_CMD          genErr(5)
-                    SA_ERR_HPI_TIMEOUT              resourceUnavailable(13)
-                    SA_ERR_HPI_OUT_OF_SPACE         tooBig(1)
-                    SA_ERR_HPI_OUT_OF_MEMORY        tooBig(1)
-                    SA_ERR_HPI_INVALID_PARAMS       inconsistentValue(12)
-                    SA_ERR_HPI_INVALID_DATA         wrongValue(10)
-                    SA_ERR_HPI_NOT_PRESENT          noSuchName(2)   
-                    SA_ERR_HPI_NO_RESPONSE          resourceUnavailable(13)
-                    SA_ERR_HPI_DUPLICATE            inconsistentName(18)
-                    SA_ERR_HPI_INVALID_SESSION      inconsistentName(18)
-                    SA_ERR_HPI_INVALID_DOMAIN       inconsistentName(18)
-                    SA_ERR_HPI_INVALID_RESOURCE     inconsistentName(18)    
-                    SA_ERR_HPI_INVALID_REQUEST      badValue(3)
-                    SA_ERR_HPI_ENTITY_NOT_PRESENT   resourceUnavailable(13) 
-                    SA_ERR_HPI_READ_ONLY            readOnly(4)
-                    SA_ERR_HPI_CAPABILITY           noAccess(6)
-                    SA_ERR_HPI_UNKNOWN              genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and
                   8.8 from SAI-HPI-B.01.01 specification."
@@ -7102,37 +7101,37 @@ saHpiCtrlDiscreteState OBJECT-TYPE
                 the control.  Write to this object to change the values
                 of the state.
                     
-                You may not change the state of the control unless the
-                Mode is set to manual(2).  If a write is attempted when
-                the mode is set to auto(1) SNMP will return a notWriteable
-                error code.
+                You may not change the state of the control unless
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue.
 
             Note that the SNMP errors that are returned are mapped to the
             HPI errors that could be returned (errors above the value 6
             are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
             protocol).
 
-                    SA_ERR_HPI_ERROR                genErr(5)
-                    SA_ERR_HPI_UNSUPPORTED_API      genErr(5)
-                    SA_ERR_HPI_BUSY                 genErr(5)
-                    SA_ERR_HPI_INTERNAL_ERROR       genErr(5)
-                    SA_ERR_HPI_INVALID_CMD          genErr(5)
-                    SA_ERR_HPI_TIMEOUT              resourceUnavailable(13)
-                    SA_ERR_HPI_OUT_OF_SPACE         tooBig(1)
-                    SA_ERR_HPI_OUT_OF_MEMORY        tooBig(1)
-                    SA_ERR_HPI_INVALID_PARAMS       inconsistentValue(12)
-                    SA_ERR_HPI_INVALID_DATA         wrongValue(10)
-                    SA_ERR_HPI_NOT_PRESENT          noSuchName(2)   
-                    SA_ERR_HPI_NO_RESPONSE          resourceUnavailable(13)
-                    SA_ERR_HPI_DUPLICATE            inconsistentName(18)
-                    SA_ERR_HPI_INVALID_SESSION      inconsistentName(18)
-                    SA_ERR_HPI_INVALID_DOMAIN       inconsistentName(18)
-                    SA_ERR_HPI_INVALID_RESOURCE     inconsistentName(18)    
-                    SA_ERR_HPI_INVALID_REQUEST      badValue(3)
-                    SA_ERR_HPI_ENTITY_NOT_PRESET    resourceUnavailable(13) 
-                    SA_ERR_HPI_READ_ONLY            readOnly(4)
-                    SA_ERR_HPI_CAPABILITY           noAccess(6)
-                    SA_ERR_HPI_UNKNOWN              genErr(5)"
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7379,36 +7378,36 @@ saHpiCtrlAnalogState OBJECT-TYPE
                 the state.
                     
                 You may not change the state of the control unless
-                the Mode is set to manual(2).  If a write is attempted
-                when the mode is set to auto(1) SNMP will return
-                a notWriteable error code.
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue.
 
              Note that the SNMP errors that are returned are mapped to the
              HPI errors that could be returned (errors above the value 6
              are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
              protocol).
 
-                    SA_ERR_HPI_ERROR                genErr(5)
-                    SA_ERR_HPI_UNSUPPORTED_API      genErr(5)
-                    SA_ERR_HPI_BUSY                 genErr(5)
-                    SA_ERR_HPI_INTERNAL_ERROR       genErr(5)
-                    SA_ERR_HPI_INVALID_CMD          genErr(5)
-                    SA_ERR_HPI_TIMEOUT              resourceUnavailable(13)
-                    SA_ERR_HPI_OUT_OF_SPACE         tooBig(1)
-                    SA_ERR_HPI_OUT_OF_MEMORY        tooBig(1)
-                    SA_ERR_HPI_INVALID_PARAMS       inconsistentValue(12)
-                    SA_ERR_HPI_INVALID_DATA         wrongValue(10)
-                    SA_ERR_HPI_NOT_PRESENT          noSuchName(2)   
-                    SA_ERR_HPI_NO_RESPONSE          resourceUnavailable(13)
-                    SA_ERR_HPI_DUPLICATE            inconsistentName(18)
-                    SA_ERR_HPI_INVALID_SESSION      inconsistentName(18)
-                    SA_ERR_HPI_INVALID_DOMAIN       inconsistentName(18)
-                    SA_ERR_HPI_INVALID_RESOURCE     inconsistentName(18)    
-                    SA_ERR_HPI_INVALID_REQUEST      badValue(3)
-                    SA_ERR_HPI_ENTITY_NOT_PRESENT   resourceUnavailable(13) 
-                    SA_ERR_HPI_READ_ONLY            readOnly(4)
-                    SA_ERR_HPI_CAPABILITY           noAccess(6)
-                    SA_ERR_HPI_UNKNOWN              genErr(5)"
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7639,38 +7638,37 @@ saHpiCtrlStreamRepeat OBJECT-TYPE
                  stream control.  Write to this object to change the
                  repeat value of the stream data.
                         
-                You may not change the state of the control unless the
-                Mode is set to manual(2).  If a write is attempted
-                when the mode is set to auto(1) SNMP will return a
-                notWriteable error code. 
+                You may not change the state of the control unless
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue. 
 
                 Note that the SNMP errors that are returned are mapped
                 to the HPI errors that could be returned (errors above
                 the value 6 are SNMPv2 or v3 protocol and are
                 converted to genErr(1) for v1 protocol).
 
-                SA_ERR_HPI_ERROR                        genErr(5)
-                SA_ERR_HPI_UNSUPPORTED_API              genErr(5)
-                SA_ERR_HPI_BUSY                         genErr(5)
-                SA_ERR_HPI_INTERNAL_ERROR               genErr(5)
-                SA_ERR_HPI_INVALID_CMD                  genErr(5)
-                SA_ERR_HPI_TIMEOUT         resourceUnavailable(13)
-                SA_ERR_HPI_OUT_OF_SPACE                 tooBig(1)
-                SA_ERR_HPI_OUT_OF_MEMORY                tooBig(1)
-                SA_ERR_HPI_INVALID_PARAMS    inconsistentValue(12)
-                SA_ERR_HPI_INVALID_DATA             wrongValue(10)
-                SA_ERR_HPI_NOT_PRESENT                noSuchName(2)   
-                SA_ERR_HPI_NO_RESPONSE      resourceUnavailable(13)
-                SA_ERR_HPI_DUPLICATE           inconsistentName(18)
-                SA_ERR_HPI_INVALID_SESSION     inconsistentName(18)
-                SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-                SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)    
-                SA_ERR_HPI_INVALID_REQUEST              badValue(3)
-                SA_ERR_HPI_ENTITY_NOT_PRESENT  resourceUnavailable(13) 
-                SA_ERR_HPI_READ_ONLY                   readOnly(4)
-                SA_ERR_HPI_CAPABILITY                  noAccess(6)
-                SA_ERR_HPI_UNKNOWN                       genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION  *  genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7686,38 +7684,37 @@ saHpiCtrlStreamState OBJECT-TYPE
                 control.  Write to this object to change the state of
                the stream control.
                     
-               You may not change the state of the control unless the
-               Mode is set to manual(2).  If a write is attempted when
-               the mode is set to auto(1) SNMP will return a
-               notWriteable error code.
-
+                You may not change the state of the control unless
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue.
+		
               Note that the SNMP errors that are returned are mapped to the
               HPI errors that could be returned (errors above the value 6
               are SNMPv2 or v3 protocol and are converted to genErr(1)
              for v1 protocol).
 
-                    SA_ERR_HPI_ERROR               genErr(5)
-                    SA_ERR_HPI_UNSUPPORTED_API     genErr(5)
-                    SA_ERR_HPI_BUSY                genErr(5)
-                    SA_ERR_HPI_INTERNAL_ERROR      genErr(5)
-                    SA_ERR_HPI_INVALID_CMD         genErr(5)
-                    SA_ERR_HPI_TIMEOUT             resourceUnavailable(13)
-                    SA_ERR_HPI_OUT_OF_SPACE        tooBig(1)
-                    SA_ERR_HPI_OUT_OF_MEMORY       tooBig(1)
-                    SA_ERR_HPI_INVALID_PARAMS      inconsistentValue(12)
-                    SA_ERR_HPI_INVALID_DATA        wrongValue(10)
-                    SA_ERR_HPI_NOT_PRESENT         noSuchName(2)   
-                    SA_ERR_HPI_NO_RESPONSE         resourceUnavailable(13)
-                    SA_ERR_HPI_DUPLICATE           inconsistentName(18)
-                    SA_ERR_HPI_INVALID_SESSION     inconsistentName(18)
-                    SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-                    SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)    
-                    SA_ERR_HPI_INVALID_REQUEST     badValue(3)
-                    SA_ERR_HPI_ENTITY_NOT_PRESENT  resourceUnavailable(13) 
-                    SA_ERR_HPI_READ_ONLY           readOnly(4)
-                    SA_ERR_HPI_CAPABILITY          noAccess(6)
-                    SA_ERR_HPI_UNKNOWN             genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"       
         REFERENCE
                 "See section 7.3.2, 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -8059,28 +8056,27 @@ saHpiCtrlTextLine OBJECT-TYPE
               are SNMPv2 or v3 protocol and are converted to
               genErr(1) for v1 protocol).
 
-                SA_ERR_HPI_ERROR                        genErr(5)
-                SA_ERR_HPI_UNSUPPORTED_API              genErr(5)
-                SA_ERR_HPI_BUSY                         genErr(5)
-                SA_ERR_HPI_INTERNAL_ERROR               genErr(5)
-                SA_ERR_HPI_INVALID_CMD                  genErr(5)
-                SA_ERR_HPI_TIMEOUT        resourceUnavailable(13)
-                SA_ERR_HPI_OUT_OF_SPACE                 tooBig(1)
-                SA_ERR_HPI_OUT_OF_MEMORY                tooBig(1)
-                SA_ERR_HPI_INVALID_PARAMS   inconsistentValue(12)
-                SA_ERR_HPI_INVALID_DATA            wrongValue(10)
-                SA_ERR_HPI_NOT_PRESENT              noSuchName(2)   
-                SA_ERR_HPI_NO_RESPONSE    resourceUnavailable(13)
-                SA_ERR_HPI_DUPLICATE         inconsistentName(18)
-                SA_ERR_HPI_INVALID_SESSIO     inconsistentName(18)
-                SA_ERR_HPI_INVALID_DOMAIN     inconsistentName(18)
-                SA_ERR_HPI_INVALID_RESOURCE   inconsistentName(18)    
-                SA_ERR_HPI_INVALID_REQUEST            badValue(3)
-                SA_ERR_HPI_ENTITY_NOT_PRESENT   resourceUnavailable(13) 
-                SA_ERR_HPI_READ_ONLY                 readOnly(4)
-                SA_ERR_HPI_CAPABILITY                noAccess(6)
-                SA_ERR_HPI_UNKNOWN                     genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -8140,28 +8136,28 @@ saHpiCtrlTextState OBJECT-TYPE
               are SNMPv2 or v3 protocol and are converted to genErr(1)
               for v1 protocol).
 
-                SA_ERR_HPI_ERROR                  genErr(5)
-                SA_ERR_HPI_UNSUPPORTED_API        genErr(5)
-                SA_ERR_HPI_BUSY                   genErr(5)
-                SA_ERR_HPI_INTERNAL_ERROR         genErr(5)
-                SA_ERR_HPI_INVALID_CMD            genErr(5)
-                SA_ERR_HPI_TIMEOUT                resourceUnavailable(13)
-                SA_ERR_HPI_OUT_OF_SPACE           tooBig(1)
-                SA_ERR_HPI_OUT_OF_MEMORY          tooBig(1)
-                SA_ERR_HPI_INVALID_PARAMS         inconsistentValue(12)
-                SA_ERR_HPI_INVALID_DATA           wrongValue(10)
-                SA_ERR_HPI_NOT_PRESENT            noSuchName(2)   
-                SA_ERR_HPI_NO_RESPONSE            resourceUnavailable(13)
-                SA_ERR_HPI_DUPLICATE              inconsistentName(18)
-                SA_ERR_HPI_INVALID_SESSION        inconsistentName(18)
-                SA_ERR_HPI_INVALID_DOMAIN         inconsistentName(18)
-                SA_ERR_HPI_INVALID_RESOURCE       inconsistentName(18)    
-                SA_ERR_HPI_INVALID_REQUEST       badValue(3)
-                SA_ERR_HPI_ENTITY_NOT_PRESENT   resourceUnavailable(13) 
-                SA_ERR_HPI_READ_ONLY            readOnly(4)
-                SA_ERR_HPI_CAPABILITY            noAccess(6)
-                SA_ERR_HPI_UNKNOWN               genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"       
+		
         REFERENCE
 
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
@@ -8428,39 +8424,40 @@ saHpiCtrlOemState OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "This object allows to write to the Oem control state
-                setting.  
+                setting.
+		  
                 You may not change the state of the control unless
-                the Mode is set to manual(2).  If a write is attempted
-                when the mode is set to auto(1) SNMP will return a
-                notWriteable error code.
+                the Mode is set to manual(2).  If a write is
+                attempted when the mode is set to auto(1), SNMP
+                will return an error-status of inconsistentValue.
 
                 Note that the SNMP errors that are returned are mapped
                to the HPI errors that could be returned (errors above
                the value 6 are SNMPv2 or v3 protocol and are converted
                to genErr(1) for v1 protocol).
 
-                SA_ERR_HPI_ERROR                      genErr(5)
-                SA_ERR_HPI_UNSUPPORTED_API            genErr(5)
-                SA_ERR_HPI_BUSY                       genErr(5)
-                SA_ERR_HPI_INTERNAL_ERROR             genErr(5)
-                SA_ERR_HPI_INVALID_CMD                genErr(5)
-                SA_ERR_HPI_TIMEOUT        resourceUnavailable(13)
-                SA_ERR_HPI_OUT_OF_SPACE                 tooBig(1)
-                SA_ERR_HPI_OUT_OF_MEMORY                tooBig(1)
-                SA_ERR_HPI_INVALID_PARAMS   inconsistentValue(12)
-                SA_ERR_HPI_INVALID_DATA            wrongValue(10)
-                SA_ERR_HPI_NOT_PRESENT              noSuchName(2)   
-                SA_ERR_HPI_NO_RESPONSE     resourceUnavailable(13)
-                SA_ERR_HPI_DUPLICATE           inconsistentName(18)
-                SA_ERR_HPI_INVALID_SESSION     inconsistentName(18)
-                SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-                SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)    
-                SA_ERR_HPI_INVALID_REQUEST              badValue(3)
-                SA_ERR_HPI_ENTITY_NOT_PRESENT   resourceUnavailable(13) 
-                SA_ERR_HPI_READ_ONLY                    readOnly(4)
-                SA_ERR_HPI_CAPABILITY                   noAccess(6)
-                SA_ERR_HPI_UNKNOWN                        genErr(5)       
-                "
+		SA_ERR_HPI_ERROR               genErr(5)           
+		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+		SA_ERR_HPI_BUSY                genErr(5)           
+		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+		SA_ERR_HPI_INVALID_CMD         genErr(5)           
+		SA_ERR_HPI_TIMEOUT             genErr(5)           
+		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+		SA_ERR_HPI_DUPLICATE           genErr(5)           
+		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+		SA_ERR_HPI_READ_ONLY           notWritable(9)      
+		SA_ERR_HPI_CAPABILITY          genErr(5)           
+		SA_ERR_HPI_UNKNOWN             genErr(5)"       
+                
         REFERENCE
                 "See section 8.7 and 8.8 from
                 SAI-HPI-B.01.01 specification."
