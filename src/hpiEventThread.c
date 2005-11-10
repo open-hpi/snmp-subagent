@@ -38,7 +38,6 @@
 
 
 GThread *event_thread = NULL;
-GMutex *thread_mutex = NULL;
 GError *event_thread_error = NULL;
 static gboolean run_threaded;
 int rediscover;
@@ -86,7 +85,6 @@ static gpointer event_thread_loop(gpointer data)
                 counter++;
 
                 /* serialize access */
-                g_mutex_lock(thread_mutex);
 
 		if (rv == SA_OK) { // NEW
 		
@@ -149,7 +147,6 @@ static gpointer event_thread_loop(gpointer data)
               		update_announcements(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
 			counter = 0;
 		}
-                g_mutex_unlock(thread_mutex);
 
         }
         g_thread_exit(0);
@@ -167,7 +164,6 @@ int start_event_thread(SaHpiSessionIdT *sessionid)
                 DEBUGMSGTL ((AGENT, "Already supporting threads"));
         }
 
-        thread_mutex = g_mutex_new();
         event_thread = g_thread_create(event_thread_loop,
                                        (gpointer)sessionid, 
                                        FALSE, 

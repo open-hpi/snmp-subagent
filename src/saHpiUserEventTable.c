@@ -401,11 +401,7 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
         SaHpiEventT     event;
 
         DEBUGMSGTL ((AGENT, "user_event_add() called\n"));
-	
-	if (get_run_threaded() == TRUE) {
-        	g_mutex_lock(thread_mutex);
-	}	
-
+		
           if ((row_ctx->text_type_set     == MIB_TRUE) &&
               (row_ctx->text_language_set == MIB_TRUE) &&
               (row_ctx->text_set          == MIB_TRUE)) {
@@ -452,10 +448,7 @@ int user_event_add (saHpiUserEventTable_context *row_ctx)
 						 	
                 row_ctx->saHpiEventAdd_called = MIB_TRUE;
         }   
-	       
-	if (get_run_threaded() == TRUE) {
-        	g_mutex_unlock(thread_mutex);
-	}	
+	       	
 
         return SNMP_ERR_NOERROR; 
 }
