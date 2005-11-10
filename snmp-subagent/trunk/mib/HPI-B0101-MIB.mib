@@ -4546,7 +4546,7 @@ saHpiUserEventRowStatus OBJECT-TYPE
                 - `active(1)', which indicates that the conceptual row is
                   available for use by the managed device;
 
-                - `createAndGo(4)', which is supplied by a management
+                - `createAndWait(5)', which is supplied by a management
                   station wishing to create a new instance of a
                   conceptual row (but not make it available for use by
                   the managed device). This function is used to add a 
