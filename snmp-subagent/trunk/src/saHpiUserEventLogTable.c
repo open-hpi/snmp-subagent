@@ -314,8 +314,6 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
 
         DEBUGMSGTL ((AGENT, "user_event_log_add() called\n"));
 
-        g_mutex_lock(thread_mutex);
-
           if ((row_ctx->text_type_set     == MIB_TRUE) &&
               (row_ctx->text_language_set == MIB_TRUE) &&
               (row_ctx->text_set          == MIB_TRUE)) {
@@ -387,7 +385,6 @@ int user_event_log_add (saHpiUserEventLogTable_context *row_ctx)
 
         }  
 
-        g_mutex_unlock(thread_mutex);
 
         return SNMP_ERR_NOERROR; 
 }

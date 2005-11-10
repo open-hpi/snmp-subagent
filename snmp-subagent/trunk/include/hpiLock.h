@@ -12,18 +12,23 @@
  *   David Judkovics  <djudkovi@us.ibm.com>
  *   Daniel de Araujo <ddearauj@us.ibm.com>
  *
- *					  
+ *
  */
 
+#ifndef HPILOCK_H
+#define HPILOCK_H
 
-#ifndef _HPI_EVENT_THREAD_
-#define _HPI_EVENT_THREAD_
+#ifdef __cplusplus
+extern "C" {
+#endif
+ 
+#include <stdlib.h>
+#include <glib.h>
 
-int start_event_thread(SaHpiSessionIdT *sessionid);
-gboolean get_run_threaded(void);
-void set_run_threaded(gboolean val);
+extern GStaticRecMutex thread_mutex;
+extern int lockcount;
 
-extern int rediscover;
+void subagent_lock(GStaticRecMutex * thread_mutex, int * lockcount);
+void subagent_unlock(GStaticRecMutex * thread_mutex, int * lockcount);
 
-#endif /*_HPI_EVENT_THREAD_*/
-
+#endif

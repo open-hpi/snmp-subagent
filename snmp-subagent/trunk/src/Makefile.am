@@ -87,7 +87,8 @@ hpiSubagent_SOURCES	= alarm.c \
 			saHpiAutoInsertTimeoutTable.c \
 			saHpiAnnouncementTable.c \
 			saHpiAnnouncementEventLogTable.c \
-			saHpiAdministration.c								
+			saHpiAdministration.c \
+			hpiLock.c								
 				
 
 
