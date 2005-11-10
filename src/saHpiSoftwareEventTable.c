@@ -845,6 +845,8 @@ netsnmp_index * saHpiSoftwareEventTable_delete_row( saHpiSoftwareEventTable_cont
      */
     free( ctx );
 
+    software_event_entry_count_total++;
+
     return NULL;
 }
 

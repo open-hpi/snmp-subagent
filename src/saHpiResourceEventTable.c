@@ -810,6 +810,8 @@ netsnmp_index * saHpiResourceEventTable_delete_row( saHpiResourceEventTable_cont
      */
     free( ctx );
 
+    resource_event_entry_count_total++;
+
     return NULL;
 }
 

@@ -71,8 +71,6 @@ static     netsnmp_table_array_callbacks cb;
 oid saHpiEventLogTable_oid[] = { saHpiEventLogTable_TABLE_OID };
 size_t saHpiEventLogTable_oid_len = OID_LENGTH(saHpiEventLogTable_oid);
 
-
-
 /************************************************************/
 /************************************************************/
 /************************************************************/

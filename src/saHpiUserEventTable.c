@@ -983,6 +983,8 @@ netsnmp_index * saHpiUserEventTable_delete_row( saHpiUserEventTable_context * ct
      */
     free( ctx );
 
+    user_event_entry_count_total++;
+
     return NULL;
 }
 

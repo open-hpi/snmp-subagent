@@ -777,6 +777,8 @@ netsnmp_index * saHpiDomainEventTable_delete_row( saHpiDomainEventTable_context 
      */
     free( ctx );
 
+    domain_event_entry_count_total++;
+
     return NULL;
 }
 

@@ -825,6 +825,8 @@ netsnmp_index * saHpiWatchdogEventLogTable_delete_row( saHpiWatchdogEventLogTabl
      */
     free( ctx );
 
+    watchdog_event_log_entry_count_total++;
+
     return NULL;
 }
 

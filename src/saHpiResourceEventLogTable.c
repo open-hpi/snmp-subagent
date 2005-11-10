@@ -809,7 +809,9 @@ netsnmp_index * saHpiResourceEventLogTable_delete_row( saHpiResourceEventLogTabl
      * release header
      */
     free( ctx );
-
+    
+    resource_event_log_entry_count_total++;
+    
     return NULL;
 }
 
