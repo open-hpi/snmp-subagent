@@ -822,6 +822,8 @@ netsnmp_index * saHpiEventTable_delete_row( saHpiEventTable_context * ctx )
      */
     free( ctx );
 
+    event_entry_count_total++;
+
     return NULL;
 }
 

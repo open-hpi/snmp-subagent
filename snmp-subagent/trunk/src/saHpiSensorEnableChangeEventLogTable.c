@@ -964,6 +964,8 @@ netsnmp_index * saHpiSensorEnableChangeEventLogTable_delete_row( saHpiSensorEnab
      */
     free( ctx );
 
+    sensor_enable_change_event_log_entry_count_total++;
+
     return NULL;
 }
 

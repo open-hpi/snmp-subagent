@@ -809,6 +809,8 @@ netsnmp_index * saHpiOemEventLogTable_delete_row( saHpiOemEventLogTable_context 
      */
     free( ctx );
 
+    oem_event_log_entry_count_total++;
+
     return NULL;
 }
 

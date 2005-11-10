@@ -785,6 +785,8 @@ netsnmp_index * saHpiHotSwapEventLogTable_delete_row( saHpiHotSwapEventLogTable_
      */
     free( ctx );
 
+    hotswap_event_log_entry_count_total++;
+
     return NULL;
 }
 

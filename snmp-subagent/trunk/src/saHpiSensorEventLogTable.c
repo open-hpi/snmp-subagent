@@ -948,6 +948,8 @@ netsnmp_index * saHpiSensorEventLogTable_delete_row( saHpiSensorEventLogTable_co
      */
     free( ctx );
 
+    sensor_event_log_entry_count_total++;
+
     return NULL;
 }
 

@@ -769,6 +769,8 @@ netsnmp_index * saHpiDomainEventLogTable_delete_row( saHpiDomainEventLogTable_co
      * release header
      */
     free( ctx );
+    
+    domain_event_log_entry_count_total++;
 
     return NULL;
 }
