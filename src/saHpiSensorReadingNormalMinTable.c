@@ -307,6 +307,7 @@ static int saHpiSensorReadingNormalMinTable_row_copy(saHpiSensorReadingNormalMin
 		return 1;
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_row_copy, called\n"));
+        subagent_lock(&hpi_lock_data);
 
 	/*
 	 * copy index, if provided
@@ -316,6 +317,7 @@ static int saHpiSensorReadingNormalMinTable_row_copy(saHpiSensorReadingNormalMin
 	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
 			    src->index.len * sizeof(oid) )) {
 		dst->index.oids = NULL;
+                subagent_unlock(&hpi_lock_data);
 		return 1;
 	}
 	dst->index.len = src->index.len;
@@ -332,6 +334,7 @@ static int saHpiSensorReadingNormalMinTable_row_copy(saHpiSensorReadingNormalMin
 	memcpy( dst->saHpiSensorReadingNormalMinValue, src->saHpiSensorReadingNormalMinValue, src->saHpiSensorReadingNormalMinValue_len );
 	dst->saHpiSensorReadingNormalMinValue_len = src->saHpiSensorReadingNormalMinValue_len;
 
+        subagent_unlock(&hpi_lock_data);
 	return 0;
 }
 
@@ -361,6 +364,7 @@ saHpiSensorReadingNormalMinTable_extract_index( saHpiSensorReadingNormalMinTable
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_extract_index, called\n"));
 
+        subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -538,12 +542,14 @@ saHpiSensorReadingNormalMinTable_create_row( netsnmp_index* hdr)
 	if (!ctx)
 		return NULL;
 
+        subagent_lock(&hpi_lock_data);
 	/*
 	 * TODO: check indexes, if necessary.
 	 */
 	if (saHpiSensorReadingNormalMinTable_extract_index( ctx, hdr )) {
 		free(ctx->index.oids);
 		free(ctx);
+                subagent_unlock(&hpi_lock_data);
 		return NULL;
 	}
 
@@ -559,6 +565,7 @@ saHpiSensorReadingNormalMinTable_create_row( netsnmp_index* hdr)
 	/**
 	*/
 
+        subagent_unlock(&hpi_lock_data);
 	return ctx;
 }
 
@@ -575,15 +582,19 @@ saHpiSensorReadingNormalMinTable_duplicate_row( saHpiSensorReadingNormalMinTable
 	if (!row_ctx)
 		return NULL;
 
+        subagent_lock(&hpi_lock_data);
 	dup = SNMP_MALLOC_TYPEDEF(saHpiSensorReadingNormalMinTable_context);
-	if (!dup)
+	if (!dup){
+                subagent_unlock(&hpi_lock_data);
 		return NULL;
+        }
 
 	if (saHpiSensorReadingNormalMinTable_row_copy(dup,row_ctx)) {
 		free(dup);
 		dup = NULL;
 	}
 
+        subagent_unlock(&hpi_lock_data);
 	return dup;
 }
 
@@ -595,6 +606,7 @@ netsnmp_index * saHpiSensorReadingNormalMinTable_delete_row( saHpiSensorReadingN
 	/* netsnmp_mutex_destroy(ctx->lock); */
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorReadingNormalMinTable_delete_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
 	if (ctx->index.oids)
 		free(ctx->index.oids);
@@ -608,6 +620,7 @@ netsnmp_index * saHpiSensorReadingNormalMinTable_delete_row( saHpiSensorReadingN
 	 */
 	free( ctx );
 
+        subagent_unlock(&hpi_lock_data);
 	return NULL;
 }
 
