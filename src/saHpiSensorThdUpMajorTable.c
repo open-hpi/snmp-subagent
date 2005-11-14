@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -98,7 +99,9 @@ SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
-        /* BUILD oid for new row */
+        
+	subagent_lock(&hpi_lock_data);
+	/* BUILD oid for new row */
         /* assign the number of indices */
         sen_thd_up_major_idx.len = SEN_THD_UP_MAJOR_IDX_NR;
         /** Index saHpiDomainId is external */
@@ -124,7 +127,8 @@ SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid,
         }
         if (!sen_thd_up_major_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a ThdUpMajor row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         /** TruthValue = ASN_INTEGER */
@@ -164,7 +168,9 @@ SaErrorT populate_sen_thd_up_major(SaHpiSessionIdT sessionid,
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, sen_thd_up_major_ctx);
 
-        return rv;
+        
+	subagent_unlock(&hpi_lock_data);
+	return rv;
 }
 
 /**

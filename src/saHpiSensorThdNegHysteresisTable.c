@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -97,7 +98,8 @@ SaErrorT populate_sen_thd_neg_hys(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
-        /* BUILD oid for new row */
+        subagent_lock(&hpi_lock_data);
+	/* BUILD oid for new row */
         /* assign the number of indices */
         sen_thd_neg_hys_idx.len = SEN_THD_NEG_HYS_IDX_NR;
         /** Index saHpiDomainId is external */
@@ -123,7 +125,8 @@ SaErrorT populate_sen_thd_neg_hys(SaHpiSessionIdT sessionid,
         }
         if (!sen_thd_neg_hys_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a ThdNegHys row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         /** TruthValue = ASN_INTEGER */
@@ -163,7 +166,9 @@ SaErrorT populate_sen_thd_neg_hys(SaHpiSessionIdT sessionid,
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, sen_thd_neg_hys_ctx);
 
-        return rv;
+        subagent_unlock(&hpi_lock_data);
+	
+	return rv;
 }
 
 /**

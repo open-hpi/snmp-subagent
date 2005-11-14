@@ -72,6 +72,7 @@
 #include <saHpiRdrTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -133,6 +134,8 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
+
+	subagent_lock(&hpi_lock_data);
 	/* BUILD oid for new row */
 	/* assign the number of indices */
 	sensor_index.len = SENSOR_INDEX_NR;
@@ -172,6 +175,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 
 	if (!sensor_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Sensor row!");
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	
@@ -206,6 +210,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_sensor() oh_decode_eventstate() ERRORED out\n"));
 		saHpiSensorTable_delete_row( sensor_context );
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	memset(sensor_context->saHpiSensorSupportedEventStates, 0, 
@@ -250,6 +255,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 			DEBUGMSGTL ((AGENT, 
 			"ERROR: populate_sensor() decode_sensor_range_flags() ERROR'd out\n"));
 			saHpiSensorTable_delete_row( sensor_context );
+			subagent_unlock(&hpi_lock_data);
 			return AGENT_ERR_INTERNAL_ERROR;
 		}
 		memcpy(sensor_context->saHpiSensorRangeFlags, buffer.Data, buffer.DataLength);
@@ -375,6 +381,7 @@ SaErrorT populate_sensor(SaHpiSessionIdT sessionid,
 
 	sensor_entry_count = CONTAINER_SIZE (cb.container);
 
+	subagent_unlock(&hpi_lock_data);
 	return rv;
 } 
 

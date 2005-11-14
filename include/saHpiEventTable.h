@@ -33,6 +33,7 @@ extern "C" {
 #include <net-snmp/agent/table_array.h>
 
 #include <SaHpi.h>
+#include <hpiSubagent.h>
 
         /** Index saHpiEventRowPointer is internal */
 
@@ -53,7 +54,9 @@ typedef struct saHpiEventTable_context_s {
 
         /** SaHpiTime = ASN_OCTET_STR */
     /** TODO: Is this type correct? */
-            unsigned char saHpiEventSaHpiTime;
+            unsigned char saHpiEventSaHpiTime[SAF_UNSIGNED_64_LEN];
+	    long saHpiEventSaHpiTime_len;
+	    
 
         /** INTEGER = ASN_INTEGER */
             long saHpiEventType;

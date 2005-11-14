@@ -15,6 +15,7 @@
  *
  */
 
+#include <unistd.h>
 #include <hpiLock.h>
 #include <hpiSubagent.h>
 #include <net-snmp/library/snmp_debug.h>
@@ -30,14 +31,14 @@ void subagent_lock( hpi_lock_type * hpi_lock_data)
         
 	if (!g_static_rec_mutex_trylock(&hpi_lock_data->thread_mutex)) {                                    
                 
-		DEBUGMSGTL ((AGENT, "Going to block for a lock now. %p - lockcount %d\n", 
+		DEBUGMSGTL ((AGENT, "********Going to block for a lock now. %p - lockcount %d\n", 
 		                                                   g_thread_self(), hpi_lock_data->lockcount));
 								   
 		g_static_rec_mutex_lock(&hpi_lock_data->thread_mutex);
                 
 		hpi_lock_data->lockcount++;
                 
-		DEBUGMSGTL ((AGENT,"Got the lock after blocking, %p - lockcount %d\n", 
+		DEBUGMSGTL ((AGENT,"*********Got the lock after blocking, %p - lockcount %d\n", 
 		                                                   g_thread_self(), hpi_lock_data->lockcount));
 		
         } else {  
@@ -52,6 +53,8 @@ void subagent_lock( hpi_lock_type * hpi_lock_data)
 void subagent_unlock( hpi_lock_type * hpi_lock_data)
 {
         						
+	//sleep(1);
+	
 	hpi_lock_data->lockcount--;
         
 	g_static_rec_mutex_unlock(&hpi_lock_data->thread_mutex);

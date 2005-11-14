@@ -57,6 +57,7 @@
 #include <session_info.h>
 
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -106,13 +107,17 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
 			     "ERROR: populate_current_sensor_state() passed NULL rdr_entry pointer\n"));
+
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
 			     "ERROR: populate_current_sensor_state() passed NULL rdr_entry pointer\n"));
+
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
+
+        subagent_lock(&hpi_lock_data);
 
 	/* BUILD oid for new row */
 	/* assign the number of indices */
@@ -138,6 +143,9 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 	}
 	if (!current_sensor_state_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Ctrl Text row!");
+		
+		subagent_unlock(&hpi_lock_data);
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -170,6 +178,9 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 				     "ERROR: populate_current_sensor_state() "
                                      "oh_decode_eventstate() ERRORED out\n"));
 			saHpiCurrentSensorStateTable_delete_row( current_sensor_state_context );
+			
+			subagent_unlock(&hpi_lock_data);
+			
 			return AGENT_ERR_INTERNAL_ERROR;
 		}
 	}
@@ -265,6 +276,8 @@ SaErrorT populate_current_sensor_state(SaHpiSessionIdT sessionid,
 
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, current_sensor_state_context);
+
+        subagent_unlock(&hpi_lock_data);
 
 	return rv;
 }  

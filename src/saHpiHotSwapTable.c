@@ -56,6 +56,7 @@
 #include <session_info.h>
 #include <oh_utils.h>
 #include <saHpiAutoInsertTimeoutTable.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -115,6 +116,8 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
+	subagent_lock(&hpi_lock_data);
+
         /* BUILD oid for new row */
         /* assign the number of indices */
         hotswap_idx.len = HOTSWAP_INDEX_NR;
@@ -139,7 +142,9 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
         }
         if (!hotswap_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a HotSwap row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                
+		subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         /** INTEGER = ASN_INTEGER */	
@@ -185,7 +190,9 @@ SaErrorT populate_hotswap(SaHpiSessionIdT sessionid,
 
         populate_saHpiAutoInsertTimeoutTable(sessionid);
 
-        return rv;	
+	subagent_unlock(&hpi_lock_data);
+
+	return rv;	
 }
 
 

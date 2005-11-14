@@ -71,6 +71,7 @@
 #include <saHpiSensorTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -123,6 +124,8 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
         printf(" ***************************************\n");
         printf(" ***************************************\n");
         printf(" EVENT TABLES \n");
+
+        subagent_lock(&hpi_lock_data);
 
         rv = saHpiEventGet (sessionid, 
                             SAHPI_TIMEOUT_IMMEDIATE, 
@@ -227,7 +230,8 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 }
                 if (!event_context) {
                         snmp_log (LOG_ERR, "Not enough memory for a Event row!");
-                        return AGENT_ERR_INTERNAL_ERROR;
+                        subagent_unlock(&hpi_lock_data);
+			return AGENT_ERR_INTERNAL_ERROR;
                 }
 
 
@@ -242,8 +246,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                 event_context->saHpiEventSeverity = event.Severity + 1;
 
                 /** SaHpiTime = ASN_OCTET_STR */
-		hpitime_to_snmptime(event.Timestamp, &event_context->saHpiEventSaHpiTime);
-
+		hpitime_to_snmptime(event.Timestamp, event_context->saHpiEventSaHpiTime);
+		event_context->saHpiEventSaHpiTime_len = sizeof(SaHpiTimeT);
+		
                 /** INTEGER = ASN_INTEGER */
                 event_context->saHpiEventType = event.EventType + 1;
 
@@ -271,7 +276,9 @@ SaErrorT populate_saHpiEventTable(SaHpiSessionIdT sessionid)
                                     &event_queue_status);
         }
 
-        return rv;
+        subagent_unlock(&hpi_lock_data);
+        
+	return rv;
 }
 
 
@@ -398,7 +405,8 @@ SaErrorT async_event_add(SaHpiSessionIdT sessionid, SaHpiEventT *event,
         event_context->saHpiEventSeverity = event->Severity + 1;
 
         /** SaHpiTime = ASN_OCTET_STR */
-	hpitime_to_snmptime(event->Timestamp, &event_context->saHpiEventSaHpiTime);
+	hpitime_to_snmptime(event->Timestamp, event_context->saHpiEventSaHpiTime);
+	event_context->saHpiEventSaHpiTime_len = sizeof(SaHpiTimeT);
 
         /** INTEGER = ASN_INTEGER */
         event_context->saHpiEventType = event->EventType + 1;
@@ -599,7 +607,11 @@ static int saHpiEventTable_row_copy(saHpiEventTable_context * dst,
 
     dst->saHpiEventSeverity = src->saHpiEventSeverity;
 
-    dst->saHpiEventSaHpiTime = src->saHpiEventSaHpiTime;
+    memcpy (dst->saHpiEventSaHpiTime, 
+            src->saHpiEventSaHpiTime,
+	    src->saHpiEventSaHpiTime_len);
+	    
+    dst->saHpiEventSaHpiTime_len = src->saHpiEventSaHpiTime_len;
 
     dst->saHpiEventType = src->saHpiEventType;
 
@@ -1240,7 +1252,7 @@ int saHpiEventTable_get_value(
             /** SaHpiTime = ASN_OCTET_STR */
             snmp_set_var_typed_value(var, ASN_OCTET_STR,
                          (u_char*)&context->saHpiEventSaHpiTime,
-                         sizeof(context->saHpiEventSaHpiTime) );
+                         context->saHpiEventSaHpiTime_len );
         break;
     
         case COLUMN_SAHPIEVENTTYPE:

@@ -58,6 +58,7 @@
 #include <session_info.h>
 #include <hash_utils.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -136,6 +137,8 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
+	subagent_lock(&hpi_lock_data);
+
         field_id = SAHPI_FIRST_ENTRY;
         do {
 
@@ -169,6 +172,7 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
                 if (dria_entry == NULL) {
                         DEBUGMSGTL ((AGENT, 
                                      "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
+			subagent_unlock(&hpi_lock_data);
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
                 subagent_field_id = dria_entry->entry_id++;
@@ -203,6 +207,7 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
                 }
                 if (!field_context) {
                         snmp_log (LOG_ERR, "Not enough memory for a Area row!");
+			subagent_unlock(&hpi_lock_data);
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
 
@@ -243,11 +248,13 @@ SaErrorT populate_field (SaHpiSessionIdT session_id,
         /** RowStatus = ASN_INTEGER */
             field_context->saHpiFieldStatus = SNMP_ROW_ACTIVE;
 
-                CONTAINER_INSERT (cb.container, field_context);
+            CONTAINER_INSERT (cb.container, field_context);
 
         } while (field_id !=  SAHPI_LAST_ENTRY );
 
         field_entry_count = CONTAINER_SIZE (cb.container);
+
+        subagent_unlock(&hpi_lock_data);
 
         return rv;
 }

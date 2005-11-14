@@ -60,6 +60,7 @@
 #include <saHpiDomainAlarmTable.h>
 
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -96,12 +97,16 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiResourceTable() Called\n"));
 
+	
+	subagent_lock(&hpi_lock_data);
 	/* Get the DomainInfo structur,  This is how we get theDomainId for this Session */
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, 
 			     "populate_saHpiResourceTable: saHpiDomainInfoGet() Failed: rv = %d\n",
 			     rv));
+		
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -318,6 +323,8 @@ int populate_saHpiResourceTable(SaHpiSessionIdT sessionid)
 	resource_entry_count = CONTAINER_SIZE (cb.container);
 
 	DEBUGMSGTL ((AGENT, "resource_entry_count = %d\n", resource_entry_count));
+
+        subagent_unlock(&hpi_lock_data);
 
 	return rv;              
 }

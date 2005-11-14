@@ -93,12 +93,15 @@
 #include <session_info.h>
 #include <hpiEventThread.h>
 #include <alarm.h>
+#include <hpiLock.h>
 
 /*************************************************************
  * oid and function declarations scalars
  */
+
+extern int rediscover_count;
  
-static int administration_discover = MIB_FALSE;
+int administration_discover = MIB_FALSE;
 static oid saHpiDiscover_oid[] = { 1,3,6,1,4,1,18568,2,1,1,1,4 };
 
 int handle_saHpiDiscover(netsnmp_mib_handler *handler,
@@ -157,13 +160,15 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
 	case MODE_SET_ACTION:
 		DEBUGMSGTL ((AGENT, "set_action, called\n"));
 		if (*requests->requestvb->val.integer == MIB_TRUE) {
-			administration_discover = MIB_FALSE;
-			if (get_run_threaded() == TRUE) {
-              		        rediscover = SAHPI_TRUE;
-			}
-			else {
-			        do_rediscover = TRUE;
-			}		
+			
+			subagent_lock(&hpi_lock_data);
+			
+			administration_discover = MIB_TRUE;
+			
+			rediscover_count++;
+			
+			subagent_unlock(&hpi_lock_data);
+	
 		}	
 		break;
 	case MODE_SET_COMMIT:
@@ -223,6 +228,10 @@ init_saHpiAdministration(void)
 void repopulate_tables(SaHpiSessionIdT session_id)
 {
 
+	DEBUGMSGTL ((AGENT, "$$$$$$$$$$$$$$$$$$$$$$$$$$\n"));
+	DEBUGMSGTL ((AGENT, "repopulate_tables, called\n"));
+	DEBUGMSGTL ((AGENT, "$$$$$$$$$$$$$$$$$$$$$$$$$$\n"));
+	
 	populate_saHpiDomainInfoTable(session_id);
 
 	populate_saHpiDomainAlarmTable(session_id);

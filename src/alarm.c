@@ -29,9 +29,10 @@
 #include <session_info.h>
 #include <hpiEventThread.h>
 #include <saHpiAdministration.h>
+#include <hpiLock.h>
 
 extern int alarm_interval;
-int do_rediscover;
+extern int rediscover_count;
 
 int
 init_alarm ()
@@ -46,8 +47,10 @@ init_alarm ()
         {
                 rc = AGENT_ERR_MEMORY_FAULT;
         }
-
-        do_rediscover = FALSE;
+	
+	subagent_lock(&hpi_lock_data);
+	rediscover_count = 0;
+	subagent_unlock(&hpi_lock_data);
 
         DEBUGMSGTL ((AGENT, "init_alarm: Exit\n"));
         return rc;
@@ -130,13 +133,17 @@ do_alarm (unsigned int clientreg, void *clientarg)
 	
 
 	// Now check for updates to the event logs
-	rv = event_log_info_update(sessionid);	
-
-	if (do_rediscover == SAHPI_TRUE)
-	{
-	     repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
-	     do_rediscover = SAHPI_FALSE;
-	}     
+	rv = event_log_info_update(sessionid);	  
+	
+	
+	while (rediscover_count > 0) {
+			
+		repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
+		subagent_lock(&hpi_lock_data);
+		rediscover_count--;
+		subagent_unlock(&hpi_lock_data);
+		
+	}
 
         DEBUGMSGTL ((AGENT, "do_alarm: Exit\n"));
 }

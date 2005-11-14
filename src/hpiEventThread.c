@@ -35,12 +35,14 @@
 #include <saHpiEventLogInfoTable.h>
 #include <saHpiAnnouncementTable.h>
 #include <saHpiAdministration.h>
+#include <hpiLock.h>
 
 
 GThread *event_thread = NULL;
 GError *event_thread_error = NULL;
 static gboolean run_threaded;
-int rediscover;
+int rediscover_count;
+extern int administration_discover;
 
 SaHpiTimeoutT timeout = 2000000000;
 
@@ -136,12 +138,17 @@ static gpointer event_thread_loop(gpointer data)
 		// Now check for updates to the event logs
 		rv = event_log_info_update(sessionid);
 		
-		if (rediscover == SAHPI_TRUE)
-		{
-		     repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
-		     rediscover = SAHPI_FALSE;
-		}     
+		while (rediscover_count > 0) {
+			
+			repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
+			subagent_lock(&hpi_lock_data);
+			rediscover_count--;
+			administration_discover = MIB_FALSE;
+			subagent_unlock(&hpi_lock_data);
+			
 		
+		}
+
 		
 		if (counter == 30) { //check for new announcements every minute.
               		update_announcements(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
@@ -169,7 +176,10 @@ int start_event_thread(SaHpiSessionIdT *sessionid)
                                        FALSE, 
                                        &event_thread_error);
         
-	rediscover = SAHPI_FALSE;
+	
+	subagent_lock(&hpi_lock_data);
+	rediscover_count = 0;
+	subagent_unlock(&hpi_lock_data);
  				       
 				       
         if (event_thread == NULL) {

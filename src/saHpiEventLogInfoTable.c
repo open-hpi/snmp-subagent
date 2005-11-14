@@ -59,6 +59,7 @@
 #include <saHpiEventLogTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -92,6 +93,9 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 	DEBUGMSGTL ((AGENT, "populate_saHpiEventLogInfo\n"));
 
         EntryId = SAHPI_FIRST_ENTRY;
+
+        subagent_lock(&hpi_lock_data);	
+	
         do {
                 rv = saHpiRptEntryGet(sessionid, EntryId, &EntryId, &rpt_entry);
 
@@ -222,7 +226,9 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
                                    &event_log_info);
         if (rv != SA_OK) {
                 DEBUGMSGTL ((AGENT, "getting Domain Event Log Failed: rv = %d\n",rv));
-                return AGENT_ERR_INTERNAL_ERROR;
+                
+		subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         evt_log_info_index.len = EVENT_LOG_INFO_INDEX_NR;
@@ -246,7 +252,9 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
         if (!evt_log_info_context) {
                 DEBUGMSGTL ((AGENT, "Not enough memory for a EventLogInfo row!"));
                 snmp_log (LOG_ERR, "Not enough memory for a EventLogInfo row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                
+		subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         } 
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -306,6 +314,8 @@ SaErrorT populate_saHpiEventLogInfo (SaHpiSessionIdT sessionid)
 	}
 	
 	populate_saHpiEventLog(sessionid, SAHPI_UNSPECIFIED_RESOURCE_ID);
+	
+	subagent_unlock(&hpi_lock_data);
 	
 	return rv;
 

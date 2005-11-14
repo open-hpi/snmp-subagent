@@ -69,6 +69,7 @@
 #include <session_info.h>
 
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -145,7 +146,10 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
         purge that row.  INventory RDR's will require multiple hops.
         */
 
-        rv = clear_rdr_container(resource_oid[0], rpt_entry->ResourceId);
+        
+	subagent_lock(&hpi_lock_data);
+	
+	rv = clear_rdr_container(resource_oid[0], rpt_entry->ResourceId);
         rv = clear_ctrl_digital(resource_oid[0], rpt_entry->ResourceId);
         rv = clear_ctrl_discrete(resource_oid[0], rpt_entry->ResourceId);
         rv = clear_ctrl_analog(resource_oid[0], rpt_entry->ResourceId);
@@ -490,6 +494,8 @@ int populate_saHpiRdrTable(SaHpiSessionIdT sessionid,
 	
 	DEBUGMSGTL ((AGENT, "populate_saHpiRdrTable: rdr_entry_count = %d\n", rdr_entry_count));
 		
+	
+	subagent_unlock(&hpi_lock_data);
 	return rv;
 
 } 

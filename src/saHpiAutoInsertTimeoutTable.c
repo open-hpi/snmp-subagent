@@ -56,6 +56,7 @@
 #include <session_info.h>
 #include <oh_utils.h>
 #include <limits.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -88,12 +89,18 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 	saHpiAutoInsertTimeoutTable_context *auto_insert_context;
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiAutoInsertTimeoutTable: called\n"));
+
+
+        subagent_lock(&hpi_lock_data);	
 	
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {	
 		DEBUGMSGTL ((AGENT, 
 		"populate_saHpiAutoInsertTimeoutTable: saHpiDomainInfoGet Failed: rv = %d\n",
 		rv));
+		
+		subagent_unlock(&hpi_lock_data);
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	
@@ -114,7 +121,10 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 	}
 	if (!auto_insert_context) {
 	        snmp_log (LOG_ERR, "Not enough memory for an Auto Insert Timeout row!");
-	        return AGENT_ERR_INTERNAL_ERROR;
+	        
+		subagent_unlock(&hpi_lock_data);
+		
+		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	
 	rv = saHpiAutoInsertTimeoutGet(sessionid, &timeout);
@@ -123,6 +133,9 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 		DEBUGMSGTL ((AGENT, 
 		"populate_saHpiAutoInsertTimeoutTable: saHpiAutoInsertTimeoutGet Failed: rv = %d\n",
 		rv));
+		
+		subagent_unlock(&hpi_lock_data);
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -135,6 +148,8 @@ SaErrorT populate_saHpiAutoInsertTimeoutTable(SaHpiSessionIdT sessionid)
 
         if (new_row == MIB_TRUE) 
                 CONTAINER_INSERT (cb.container, auto_insert_context);
+	
+	subagent_unlock(&hpi_lock_data);
 	
 	return SA_OK;
 }	

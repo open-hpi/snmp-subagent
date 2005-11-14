@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -97,6 +98,8 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
+
+	subagent_lock(&hpi_lock_data);
 	/* BUILD oid for new row */
 	/* assign the number of indices */
 	sensor_max_index.len = SENSOR_READING_MAX_INDEX_NR;
@@ -123,6 +126,7 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 	}
 	if (!sensor_max_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a Max row!");
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -144,6 +148,8 @@ SaErrorT populate_sensor_max(SaHpiSessionIdT sessionid,
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, sensor_max_context);
 
+	
+	subagent_unlock(&hpi_lock_data);
 	return rv;
 }
 
