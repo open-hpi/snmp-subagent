@@ -895,6 +895,8 @@ void saHpiDomainEventLogTable_set_action( netsnmp_request_group *rg )
 
     int            row_err = 0;
 
+    subagent_lock(&hpi_lock_data);
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -917,8 +919,10 @@ void saHpiDomainEventLogTable_set_action( netsnmp_request_group *rg )
     if(row_err) {
         netsnmp_request_set_error((netsnmp_request_info*)rg->rg_void,
                                        row_err);
-        return;
     }
+
+    subagent_unlock(&hpi_lock_data);
+    return;
 
     /*
      * TODO: if you have dependencies on other tables, this would be
