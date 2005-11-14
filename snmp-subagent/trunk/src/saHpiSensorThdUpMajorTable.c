@@ -381,6 +381,7 @@ static int saHpiSensorThdUpMajorTable_row_copy(saHpiSensorThdUpMajorTable_contex
         if (!dst||!src)
                 return 1;
 
+        subagent_lock(&hpi_lock_data);
         /*
          * copy index, if provided
          */
@@ -389,6 +390,7 @@ static int saHpiSensorThdUpMajorTable_row_copy(saHpiSensorThdUpMajorTable_contex
         if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                             src->index.len * sizeof(oid) )) {
                 dst->index.oids = NULL;
+                subagent_unlock(&hpi_lock_data);
                 return 1;
         }
         dst->index.len = src->index.len;
@@ -409,6 +411,7 @@ static int saHpiSensorThdUpMajorTable_row_copy(saHpiSensorThdUpMajorTable_contex
 
         dst->saHpiSensorThdUpMajorNonLinear = src->saHpiSensorThdUpMajorNonLinear;
 
+        subagent_unlock(&hpi_lock_data);
         return 0;
 }
 
@@ -437,6 +440,7 @@ saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * c
         int err;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_extract_index, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         /*
          * copy index, if provided
@@ -445,6 +449,7 @@ saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * c
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
+                        subagent_unlock(&hpi_lock_data);
                         return -1;
                 }
                 ctx->index.len = hdr->len;
@@ -507,6 +512,7 @@ saHpiSensorThdUpMajorTable_extract_index( saHpiSensorThdUpMajorTable_context * c
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
+        subagent_unlock(&hpi_lock_data);
         return err;
 }
 
@@ -609,12 +615,14 @@ saHpiSensorThdUpMajorTable_create_row( netsnmp_index* hdr)
         if (!ctx)
                 return NULL;
 
+        subagent_lock(&hpi_lock_data);
         /*
          * TODO: check indexes, if necessary.
          */
         if (saHpiSensorThdUpMajorTable_extract_index( ctx, hdr )) {
                 free(ctx->index.oids);
                 free(ctx);
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
         }
 
@@ -631,6 +639,7 @@ saHpiSensorThdUpMajorTable_create_row( netsnmp_index* hdr)
          ctx->saHpiSensorThdUpMajorValue = 0;
         */
 
+        subagent_unlock(&hpi_lock_data);
         return ctx;
 }
 
@@ -647,15 +656,19 @@ saHpiSensorThdUpMajorTable_duplicate_row( saHpiSensorThdUpMajorTable_context * r
         if (!row_ctx)
                 return NULL;
 
+        subagent_lock(&hpi_lock_data);
         dup = SNMP_MALLOC_TYPEDEF(saHpiSensorThdUpMajorTable_context);
-        if (!dup)
+        if (!dup) {
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
+        }
 
         if (saHpiSensorThdUpMajorTable_row_copy(dup,row_ctx)) {
                 free(dup);
                 dup = NULL;
         }
 
+        subagent_unlock(&hpi_lock_data);
         return dup;
 }
 
@@ -667,6 +680,7 @@ netsnmp_index * saHpiSensorThdUpMajorTable_delete_row( saHpiSensorThdUpMajorTabl
         /* netsnmp_mutex_destroy(ctx->lock); */
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdUpMajorTable_delete_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         if (ctx->index.oids)
                 free(ctx->index.oids);
@@ -680,6 +694,7 @@ netsnmp_index * saHpiSensorThdUpMajorTable_delete_row( saHpiSensorThdUpMajorTabl
          */
         free( ctx );
 
+        subagent_unlock(&hpi_lock_data);
         return NULL;
 }
 
