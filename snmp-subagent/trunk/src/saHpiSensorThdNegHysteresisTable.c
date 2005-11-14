@@ -370,6 +370,8 @@ static int saHpiSensorThdNegHysteresisTable_row_copy(saHpiSensorThdNegHysteresis
         if (!dst||!src)
                 return 1;
 
+        subagent_lock(&hpi_lock_data);
+
         /*
          * copy index, if provided
          */
@@ -378,6 +380,7 @@ static int saHpiSensorThdNegHysteresisTable_row_copy(saHpiSensorThdNegHysteresis
         if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                             src->index.len * sizeof(oid) )) {
                 dst->index.oids = NULL;
+                subagent_unlock(&hpi_lock_data);
                 return 1;
         }
         dst->index.len = src->index.len;
@@ -398,6 +401,7 @@ static int saHpiSensorThdNegHysteresisTable_row_copy(saHpiSensorThdNegHysteresis
 
         dst->saHpiSensorThdNegHysteresisNonLinear = src->saHpiSensorThdNegHysteresisNonLinear;
 
+        subagent_unlock(&hpi_lock_data);
         return 0;
 }
 
@@ -426,6 +430,7 @@ saHpiSensorThdNegHysteresisTable_extract_index( saHpiSensorThdNegHysteresisTable
         int err;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdNegHysteresisTable_extract_index, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         /*
          * copy index, if provided
@@ -434,6 +439,7 @@ saHpiSensorThdNegHysteresisTable_extract_index( saHpiSensorThdNegHysteresisTable
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
+                        subagent_unlock(&hpi_lock_data);
                         return -1;
                 }
                 ctx->index.len = hdr->len;
@@ -498,6 +504,7 @@ saHpiSensorThdNegHysteresisTable_extract_index( saHpiSensorThdNegHysteresisTable
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
+        subagent_unlock(&hpi_lock_data);
         return err;
 }
 
@@ -600,12 +607,14 @@ saHpiSensorThdNegHysteresisTable_create_row( netsnmp_index* hdr)
         if (!ctx)
                 return NULL;
 
+        subagent_lock(&hpi_lock_data);
         /*
          * TODO: check indexes, if necessary.
          */
         if (saHpiSensorThdNegHysteresisTable_extract_index( ctx, hdr )) {
                 free(ctx->index.oids);
                 free(ctx);
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
         }
 
@@ -622,6 +631,7 @@ saHpiSensorThdNegHysteresisTable_create_row( netsnmp_index* hdr)
          ctx->saHpiSensorThdNegHysteresisValue = 0;
         */
 
+        subagent_unlock(&hpi_lock_data);
         return ctx;
 }
 
@@ -638,15 +648,19 @@ saHpiSensorThdNegHysteresisTable_duplicate_row( saHpiSensorThdNegHysteresisTable
         if (!row_ctx)
                 return NULL;
 
+        subagent_lock(&hpi_lock_data);
         dup = SNMP_MALLOC_TYPEDEF(saHpiSensorThdNegHysteresisTable_context);
-        if (!dup)
+        if (!dup) {
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
+        }
 
         if (saHpiSensorThdNegHysteresisTable_row_copy(dup,row_ctx)) {
                 free(dup);
                 dup = NULL;
         }
 
+        subagent_unlock(&hpi_lock_data);
         return dup;
 }
 
@@ -658,6 +672,7 @@ netsnmp_index * saHpiSensorThdNegHysteresisTable_delete_row( saHpiSensorThdNegHy
         /* netsnmp_mutex_destroy(ctx->lock); */
 
         DEBUGMSGTL ((AGENT, "saHpiSensorThdNegHysteresisTable_delete_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         if (ctx->index.oids)
                 free(ctx->index.oids);
@@ -671,6 +686,7 @@ netsnmp_index * saHpiSensorThdNegHysteresisTable_delete_row( saHpiSensorThdNegHy
          */
         free( ctx );
 
+        subagent_unlock(&hpi_lock_data);
         return NULL;
 }
 
