@@ -797,6 +797,7 @@ static int saHpiSensorEnableChangeEventTable_row_copy(saHpiSensorEnableChangeEve
     if(!dst||!src)
         return 1;
         
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -805,6 +806,7 @@ static int saHpiSensorEnableChangeEventTable_row_copy(saHpiSensorEnableChangeEve
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
+        subagent_unlock(&hpi_lock_data);
         return 1;
     }
     dst->index.len = src->index.len;
@@ -842,6 +844,7 @@ static int saHpiSensorEnableChangeEventTable_row_copy(saHpiSensorEnableChangeEve
     memcpy( dst->saHpiSensorEnableChangeEventState, src->saHpiSensorEnableChangeEventState, src->saHpiSensorEnableChangeEventState_len );
     dst->saHpiSensorEnableChangeEventState_len = src->saHpiSensorEnableChangeEventState_len;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -872,6 +875,7 @@ saHpiSensorEnableChangeEventTable_extract_index( saHpiSensorEnableChangeEventTab
         int err;
 
         DEBUGMSGTL ((AGENT, "saHpiSensorEnableChangeEventTable_extract_index, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         /*
          * copy index, if provided
@@ -881,6 +885,7 @@ saHpiSensorEnableChangeEventTable_extract_index( saHpiSensorEnableChangeEventTab
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
                         return -1;
+                        subagent_unlock(&hpi_lock_data);
                 }
                 ctx->index.len = hdr->len;
         }
@@ -947,6 +952,7 @@ saHpiSensorEnableChangeEventTable_extract_index( saHpiSensorEnableChangeEventTab
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
+        subagent_unlock(&hpi_lock_data);
         return err;
 }
 
@@ -1040,6 +1046,7 @@ saHpiSensorEnableChangeEventTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
         
     /*
      * TODO: check indexes, if necessary.
@@ -1047,6 +1054,7 @@ saHpiSensorEnableChangeEventTable_create_row( netsnmp_index* hdr)
     if(saHpiSensorEnableChangeEventTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
+        subagent_unlock(&hpi_lock_data);
         return NULL;
     }
 
@@ -1063,6 +1071,7 @@ saHpiSensorEnableChangeEventTable_create_row( netsnmp_index* hdr)
     */
     sensor_enable_change_event_entry_count_total++;
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -1077,15 +1086,20 @@ saHpiSensorEnableChangeEventTable_duplicate_row( saHpiSensorEnableChangeEventTab
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+
     dup = SNMP_MALLOC_TYPEDEF(saHpiSensorEnableChangeEventTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+            subagent_unlock(&hpi_lock_data);
+            return NULL;
+    }
         
     if(saHpiSensorEnableChangeEventTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -1095,6 +1109,8 @@ saHpiSensorEnableChangeEventTable_duplicate_row( saHpiSensorEnableChangeEventTab
 netsnmp_index * saHpiSensorEnableChangeEventTable_delete_row( saHpiSensorEnableChangeEventTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        subagent_lock(&hpi_lock_data);
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -1110,6 +1126,7 @@ netsnmp_index * saHpiSensorEnableChangeEventTable_delete_row( saHpiSensorEnableC
 
     sensor_enable_change_event_entry_count_total++;
 
+    subagent_unlock(&hpi_lock_data);
     return NULL;
 }
 
