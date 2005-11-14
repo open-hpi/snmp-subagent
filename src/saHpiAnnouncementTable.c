@@ -1005,12 +1005,16 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
     /*
      * copy index, if provided
      */
+     
+    subagent_lock(&hpi_lock_data); 
+     
     if(dst->index.oids)
         free(dst->index.oids);
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -1060,6 +1064,8 @@ static int saHpiAnnouncementTable_row_copy(saHpiAnnouncementTable_context * dst,
     dst->saHpiAnnouncementText_len = src->saHpiAnnouncementText_len;
 
     dst->saHpiAnnouncementDelete = src->saHpiAnnouncementDelete;
+ 
+    subagent_unlock(&hpi_lock_data);
 
     return 0;
 }
@@ -1090,14 +1096,18 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
 
         DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_extract_index, called\n"));
 
-        /*
+        subagent_lock(&hpi_lock_data);
+	
+	/*
          * copy index, if provided
          */
         if (hdr) {
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
-                        return -1;
+                        
+			subagent_unlock(&hpi_lock_data);
+			return -1;
                 }
                 ctx->index.len = hdr->len;
         }
@@ -1149,7 +1159,9 @@ saHpiAnnouncementTable_extract_index( saHpiAnnouncementTable_context * ctx, nets
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
-        return err;
+        subagent_unlock(&hpi_lock_data);
+	
+	return err;
 }
 
 /************************************************************
@@ -1246,6 +1258,9 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
 
         DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_create_row, called\n"));
 
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiAnnouncementTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAnnouncementTable_context);
     if(!ctx)
@@ -1257,7 +1272,8 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
     if(saHpiAnnouncementTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -1299,6 +1315,7 @@ saHpiAnnouncementTable_create_row( netsnmp_index* hdr)
     ctx->sahpi_announcement_text =  MIB_FALSE;
 
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -1316,15 +1333,21 @@ saHpiAnnouncementTable_duplicate_row( saHpiAnnouncementTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiAnnouncementTable_context);
-    if(!dup)
+    if(!dup) {
+    	subagent_unlock(&hpi_lock_data);
         return NULL;
+    }	
         
     if(saHpiAnnouncementTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
+    
     return dup;
 }
 
@@ -1337,6 +1360,9 @@ netsnmp_index * saHpiAnnouncementTable_delete_row( saHpiAnnouncementTable_contex
 
         DEBUGMSGTL ((AGENT, "saHpiAnnouncementTable_delete_row, called\n"));
 
+    subagent_lock(&hpi_lock_data);
+    
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -1349,6 +1375,8 @@ netsnmp_index * saHpiAnnouncementTable_delete_row( saHpiAnnouncementTable_contex
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 

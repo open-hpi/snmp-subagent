@@ -540,6 +540,8 @@ static int saHpiCtrlOemTable_row_copy(saHpiCtrlOemTable_context * dst,
     if(!dst||!src)
         return 1;
         
+    
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -548,7 +550,8 @@ static int saHpiCtrlOemTable_row_copy(saHpiCtrlOemTable_context * dst,
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -589,6 +592,7 @@ static int saHpiCtrlOemTable_row_copy(saHpiCtrlOemTable_context * dst,
     memcpy( dst->saHpiCtrlOemRDR, src->saHpiCtrlOemRDR, src->saHpiCtrlOemRDR_len );
     dst->saHpiCtrlOemRDR_len = src->saHpiCtrlOemRDR_len;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -617,6 +621,8 @@ saHpiCtrlOemTable_extract_index( saHpiCtrlOemTable_context * ctx, netsnmp_index 
     netsnmp_variable_list var_saHpiCtrlOemEntryId;
     int err;
 
+    subagent_lock(&hpi_lock_data);
+    
     /*
      * copy index, if provided
      */
@@ -624,7 +630,8 @@ saHpiCtrlOemTable_extract_index( saHpiCtrlOemTable_context * ctx, netsnmp_index 
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
-            return -1;
+            subagent_unlock(&hpi_lock_data);
+	    return -1;
         }
         ctx->index.len = hdr->len;
     }
@@ -687,6 +694,8 @@ saHpiCtrlOemTable_extract_index( saHpiCtrlOemTable_context * ctx, netsnmp_index 
      */
     snmp_reset_var_buffers( &var_saHpiDomainId );
 
+    
+    subagent_unlock(&hpi_lock_data);
     return err;
 }
 
@@ -775,18 +784,24 @@ int saHpiCtrlOemTable_can_delete(saHpiCtrlOemTable_context *undo_ctx,
 saHpiCtrlOemTable_context *
 saHpiCtrlOemTable_create_row( netsnmp_index* hdr)
 {
+    
+    
+	subagent_lock(&hpi_lock_data);
+    
     saHpiCtrlOemTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiCtrlOemTable_context);
-    if(!ctx)
-        return NULL;
-        
+    if(!ctx) {
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
+    }    
     /*
      * TODO: check indexes, if necessary.
      */
     if(saHpiCtrlOemTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -803,6 +818,7 @@ saHpiCtrlOemTable_create_row( netsnmp_index* hdr)
      ctx->saHpiCtrlOemState = 0;
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -817,15 +833,20 @@ saHpiCtrlOemTable_duplicate_row( saHpiCtrlOemTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlOemTable_context);
-    if(!dup)
-        return NULL;
-        
+    if(!dup) {
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
+     }   
     if(saHpiCtrlOemTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -836,6 +857,8 @@ netsnmp_index * saHpiCtrlOemTable_delete_row( saHpiCtrlOemTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
 
+    subagent_lock(&hpi_lock_data);
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -847,7 +870,9 @@ netsnmp_index * saHpiCtrlOemTable_delete_row( saHpiCtrlOemTable_context * ctx )
      * release header
      */
     free( ctx );
-
+ 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 

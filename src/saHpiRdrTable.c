@@ -1030,6 +1030,8 @@ netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
 
 	DEBUGMSGTL ((AGENT, "saHpiRdrTable_delete_row, called\n"));
 
+  
+   subagent_lock(&hpi_lock_data);  
   /* netsnmp_mutex_destroy(ctx->lock); */
 
     if(ctx->index.oids)
@@ -1043,6 +1045,8 @@ netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
      * release header
      */
     free( ctx );
+
+	subagent_unlock(&hpi_lock_data);
 
     return NULL;
 }

@@ -474,7 +474,9 @@ static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
         if (!dst||!src)
                 return 1;
 
-        /*
+        
+	subagent_lock(&hpi_lock_data);
+	/*
          * copy index, if provided
          */
         if (dst->index.oids)
@@ -482,7 +484,8 @@ static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
         if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                             src->index.len * sizeof(oid) )) {
                 dst->index.oids = NULL;
-                return 1;
+                subagent_unlock(&hpi_lock_data);
+		return 1;
         }
         dst->index.len = src->index.len;
 
@@ -506,7 +509,8 @@ static int saHpiAnnunciatorTable_row_copy(saHpiAnnunciatorTable_context * dst,
         memcpy( dst->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR, src->saHpiAnnunciatorRDR_len );
         dst->saHpiAnnunciatorRDR_len = src->saHpiAnnunciatorRDR_len;
 
-        return 0;
+        subagent_unlock(&hpi_lock_data);
+	return 0;
 }
 
 /**
@@ -534,14 +538,18 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_extract_index, called\n"));
 
-        /*
+        
+	subagent_lock(&hpi_lock_data);
+	
+	/*
          * copy index, if provided
          */
         if (hdr) {
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
-                        return -1;
+                        subagent_unlock(&hpi_lock_data);
+			return -1;
                 }
                 ctx->index.len = hdr->len;
         }
@@ -593,7 +601,9 @@ saHpiAnnunciatorTable_extract_index( saHpiAnnunciatorTable_context * ctx, netsnm
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
-        return err;
+        subagent_unlock(&hpi_lock_data);
+	
+	return err;
 }
 
 /************************************************************
@@ -685,21 +695,28 @@ int saHpiAnnunciatorTable_can_delete(saHpiAnnunciatorTable_context *undo_ctx,
 saHpiAnnunciatorTable_context *
 saHpiAnnunciatorTable_create_row( netsnmp_index* hdr)
 {
-        saHpiAnnunciatorTable_context * ctx =
+        
+	subagent_lock(&hpi_lock_data);
+
+	saHpiAnnunciatorTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_create_row, called\n"));
 
-        if (!ctx)
-                return NULL;
+        if (!ctx) {
+                subagent_unlock(&hpi_lock_data);
+	        return NULL;
+	}	
 
         /*
          * TODO: check indexes, if necessary.
          */
-        if (saHpiAnnunciatorTable_extract_index( ctx, hdr )) {
+	
+	if (saHpiAnnunciatorTable_extract_index( ctx, hdr )) {
                 free(ctx->index.oids);
                 free(ctx);
-                return NULL;
+                subagent_unlock(&hpi_lock_data);
+		return NULL;
         }
 
         /* netsnmp_mutex_init(ctx->lock);
@@ -715,7 +732,9 @@ saHpiAnnunciatorTable_create_row( netsnmp_index* hdr)
          ctx->saHpiAnnunciatorMode = 0;
         */
 
-        return ctx;
+        
+	subagent_unlock(&hpi_lock_data);
+	return ctx;
 }
 
 /************************************************************
@@ -731,16 +750,22 @@ saHpiAnnunciatorTable_duplicate_row( saHpiAnnunciatorTable_context * row_ctx)
         if (!row_ctx)
                 return NULL;
 
-        dup = SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
-        if (!dup)
+        subagent_lock(&hpi_lock_data);
+	
+	dup = SNMP_MALLOC_TYPEDEF(saHpiAnnunciatorTable_context);
+        if (!dup) {
+		subagent_unlock(&hpi_lock_data);
                 return NULL;
+	}	
 
         if (saHpiAnnunciatorTable_row_copy(dup,row_ctx)) {
                 free(dup);
                 dup = NULL;
         }
 
-        return dup;
+        subagent_unlock(&hpi_lock_data);
+	
+	return dup;
 }
 
 /************************************************************
@@ -752,7 +777,10 @@ netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context 
 
         DEBUGMSGTL ((AGENT, "saHpiAnnunciatorTable_delete_row, called\n"));
 
-        if (ctx->index.oids)
+        
+	subagent_lock(&hpi_lock_data);
+	
+	if (ctx->index.oids)
                 free(ctx->index.oids);
 
         /*
@@ -764,7 +792,9 @@ netsnmp_index * saHpiAnnunciatorTable_delete_row( saHpiAnnunciatorTable_context 
          */
         free( ctx );
 
-        return NULL;
+	subagent_unlock(&hpi_lock_data);
+	
+	return NULL;
 }
 
 

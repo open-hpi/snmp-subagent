@@ -796,12 +796,15 @@ static int saHpiDomainAlarmTable_row_copy(saHpiDomainAlarmTable_context * dst,
     /*
      * copy index, if provided
      */
+    subagent_lock(&hpi_lock_data);
+   
     if(dst->index.oids)
         free(dst->index.oids);
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -848,6 +851,7 @@ static int saHpiDomainAlarmTable_row_copy(saHpiDomainAlarmTable_context * dst,
 
     dst->saHpiDomainAlarmRowStatus = src->saHpiDomainAlarmRowStatus;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -877,14 +881,17 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
 
         DEBUGMSGTL ((AGENT, "saHpiDomainAlarmTable_extract_index, called\n"));
 
-        /*
+        
+	subagent_lock(&hpi_lock_data);
+	/*
          * copy index, if provided
          */
         if (hdr) {
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
-                        return -1;
+                        subagent_unlock(&hpi_lock_data);
+			return -1;
                 }
                 ctx->index.len = hdr->len;
         }
@@ -936,7 +943,9 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
-        return err;
+        subagent_unlock(&hpi_lock_data);
+	
+	return err;
 }
 
 /************************************************************
@@ -1025,10 +1034,15 @@ int saHpiDomainAlarmTable_can_delete(saHpiDomainAlarmTable_context *undo_ctx,
 saHpiDomainAlarmTable_context *
 saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
 {
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiDomainAlarmTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiDomainAlarmTable_context);
-    if(!ctx)
+    if(!ctx) {
+    	subagent_unlock(&hpi_lock_data);
         return NULL;
+    }	
         
     /*
      * TODO: check indexes, if necessary.
@@ -1036,7 +1050,8 @@ saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
     if(saHpiDomainAlarmTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -1074,6 +1089,7 @@ saHpiDomainAlarmTable_create_row( netsnmp_index* hdr)
     ctx->sahpi_domain_alarm_text_language_set    = MIB_FALSE;
     ctx->sahpi_domain_alarm_text                 = MIB_FALSE;
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 #endif
@@ -1089,15 +1105,20 @@ saHpiDomainAlarmTable_duplicate_row( saHpiDomainAlarmTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiDomainAlarmTable_context);
-    if(!dup)
+    if(!dup) {
+    	subagent_unlock(&hpi_lock_data);
         return NULL;
+     }	
         
     if(saHpiDomainAlarmTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -1108,6 +1129,8 @@ netsnmp_index * saHpiDomainAlarmTable_delete_row( saHpiDomainAlarmTable_context 
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
 
+    subagent_lock(&hpi_lock_data);
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -1120,6 +1143,8 @@ netsnmp_index * saHpiDomainAlarmTable_delete_row( saHpiDomainAlarmTable_context 
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 

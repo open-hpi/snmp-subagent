@@ -552,6 +552,8 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
 	if (!dst||!src)
 		return 1;
 
+	subagent_lock(&hpi_lock_data);
+	
 	/*
 	 * copy index, if provided
 	 */
@@ -560,6 +562,7 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
 	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
 			    src->index.len * sizeof(oid) )) {
 		dst->index.oids = NULL;
+		subagent_unlock(&hpi_lock_data);
 		return 1;
 	}
 	dst->index.len = src->index.len;
@@ -606,6 +609,9 @@ static int saHpiCtrlTextTable_row_copy(saHpiCtrlTextTable_context * dst,
 	memcpy( dst->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR, src->saHpiCtrlTextRDR_len );
 	dst->saHpiCtrlTextRDR_len = src->saHpiCtrlTextRDR_len;
 
+	
+	
+	subagent_unlock(&hpi_lock_data);
 	return 0;
 }
 
@@ -633,6 +639,8 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
 	netsnmp_variable_list var_saHpiCtrlTextEntryId;
 	int err;
 
+	
+	subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -640,6 +648,7 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
 		netsnmp_assert(ctx->index.oids == NULL);
 		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
 				    hdr->len * sizeof(oid) )) {
+			subagent_unlock(&hpi_lock_data);
 			return -1;
 		}
 		ctx->index.len = hdr->len;
@@ -704,6 +713,8 @@ saHpiCtrlTextTable_extract_index( saHpiCtrlTextTable_context * ctx, netsnmp_inde
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
 
+	
+	subagent_unlock(&hpi_lock_data);
 	return err;
 }
 
@@ -792,17 +803,22 @@ int saHpiCtrlTextTable_can_delete(saHpiCtrlTextTable_context *undo_ctx,
 saHpiCtrlTextTable_context *
 saHpiCtrlTextTable_create_row( netsnmp_index* hdr)
 {
+	
+	subagent_lock(&hpi_lock_data);
+	
 	saHpiCtrlTextTable_context * ctx =
 	SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
-	if (!ctx)
+	if (!ctx) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
-
+	}
 	/*
 	 * TODO: check indexes, if necessary.
 	 */
 	if (saHpiCtrlTextTable_extract_index( ctx, hdr )) {
 		free(ctx->index.oids);
 		free(ctx);
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
 	}
 
@@ -821,6 +837,7 @@ saHpiCtrlTextTable_create_row( netsnmp_index* hdr)
 	 ctx->saHpiCtrlTextState = 0;
 	*/
 
+	subagent_unlock(&hpi_lock_data);
 	return ctx;
 }
 
@@ -835,15 +852,20 @@ saHpiCtrlTextTable_duplicate_row( saHpiCtrlTextTable_context * row_ctx)
 	if (!row_ctx)
 		return NULL;
 
+	
+	subagent_lock(&hpi_lock_data);
 	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlTextTable_context);
-	if (!dup)
+	if (!dup) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
-
+	}
+	
 	if (saHpiCtrlTextTable_row_copy(dup,row_ctx)) {
 		free(dup);
 		dup = NULL;
 	}
 
+	subagent_unlock(&hpi_lock_data);
 	return dup;
 }
 
@@ -854,6 +876,8 @@ netsnmp_index * saHpiCtrlTextTable_delete_row( saHpiCtrlTextTable_context * ctx 
 {
 	/* netsnmp_mutex_destroy(ctx->lock); */
 
+	subagent_lock(&hpi_lock_data);
+	
 	if (ctx->index.oids)
 		free(ctx->index.oids);
 
@@ -866,6 +890,7 @@ netsnmp_index * saHpiCtrlTextTable_delete_row( saHpiCtrlTextTable_context * ctx 
 	 */
 	free( ctx );
 
+	subagent_unlock(&hpi_lock_data);
 	return NULL;
 }
 

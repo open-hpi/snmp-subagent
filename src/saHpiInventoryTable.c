@@ -497,6 +497,7 @@ static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
     if(!dst||!src)
         return 1;
         
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -505,7 +506,8 @@ static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -529,6 +531,7 @@ static int saHpiInventoryTable_row_copy(saHpiInventoryTable_context * dst,
     memcpy( src->saHpiInventoryRDR, dst->saHpiInventoryRDR, src->saHpiInventoryRDR_len );
     dst->saHpiInventoryRDR_len = src->saHpiInventoryRDR_len;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -558,6 +561,8 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
 
     DEBUGMSGTL ((AGENT, "saHpiInventoryTable_extract_index, called\n"));
 
+    
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -565,7 +570,8 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
-            return -1;
+            subagent_unlock(&hpi_lock_data);
+	    return -1;
         }
         ctx->index.len = hdr->len;
     }
@@ -629,6 +635,7 @@ saHpiInventoryTable_extract_index( saHpiInventoryTable_context * ctx, netsnmp_in
      */
     snmp_reset_var_buffers( &var_saHpiDomainId );
 
+    subagent_unlock(&hpi_lock_data);
     return err;
 }
 
@@ -720,13 +727,17 @@ int saHpiInventoryTable_can_delete(saHpiInventoryTable_context *undo_ctx,
 saHpiInventoryTable_context *
 saHpiInventoryTable_create_row( netsnmp_index* hdr)
 {
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiInventoryTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiInventoryTable_context);
 
     DEBUGMSGTL ((AGENT, "saHpiInventoryTable_create_row, called\n"));
 
-    if(!ctx)
-        return NULL;
+    if(!ctx) {
+    	subagent_unlock(&hpi_lock_data);
+        return NULL; }
         
     /*
      * TODO: check indexes, if necessary.
@@ -734,7 +745,8 @@ saHpiInventoryTable_create_row( netsnmp_index* hdr)
     if(saHpiInventoryTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -749,6 +761,7 @@ saHpiInventoryTable_create_row( netsnmp_index* hdr)
     /**
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -765,15 +778,19 @@ saHpiInventoryTable_duplicate_row( saHpiInventoryTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiInventoryTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+    	subagent_unlock(&hpi_lock_data);
+        return NULL; }
         
     if(saHpiInventoryTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -786,6 +803,8 @@ netsnmp_index * saHpiInventoryTable_delete_row( saHpiInventoryTable_context * ct
 
         DEBUGMSGTL ((AGENT, "saHpiInventoryTable_delete_row, called\n"));
 
+    subagent_lock(&hpi_lock_data);
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -798,6 +817,8 @@ netsnmp_index * saHpiInventoryTable_delete_row( saHpiInventoryTable_context * ct
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 

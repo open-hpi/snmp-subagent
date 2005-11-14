@@ -372,6 +372,7 @@ saHpiSensorReadingNormalMinTable_extract_index( saHpiSensorReadingNormalMinTable
 		netsnmp_assert(ctx->index.oids == NULL);
 		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
 				    hdr->len * sizeof(oid) )) {
+			subagent_unlock(&hpi_lock_data);
 			return -1;
 		}
 		ctx->index.len = hdr->len;
@@ -436,6 +437,7 @@ saHpiSensorReadingNormalMinTable_extract_index( saHpiSensorReadingNormalMinTable
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
 
+	subagent_unlock(&hpi_lock_data);
 	return err;
 }
 
