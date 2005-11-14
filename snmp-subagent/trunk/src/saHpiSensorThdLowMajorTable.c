@@ -819,6 +819,7 @@ void saHpiSensorThdLowMajorTable_set_action( netsnmp_request_group *rg )
 	netsnmp_request_group_item *current;
 
 	int            row_err = 0;
+        subagent_lock(&hpi_lock_data);
 
 	DEBUGMSGTL ((AGENT, "saHpiSensorThdLowMajorTable_set_action, called\n"));
 
@@ -851,10 +852,8 @@ void saHpiSensorThdLowMajorTable_set_action( netsnmp_request_group *rg )
 		return;
 	}
 
-	/*
-	 * TODO: if you have dependencies on other tables, this would be
-	 * a good place to check those, too.
-	 */
+        subagent_unlock(&hpi_lock_data);
+        return;
 }
 
 /************************************************************

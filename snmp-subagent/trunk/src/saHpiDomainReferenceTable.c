@@ -53,6 +53,7 @@
 #include "saHpiDomainReferenceTable.h"
 #include <hpiSubagent.h>
 #include <hpiCheckIndice.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -715,6 +716,8 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
 
 //    int            row_err = 0;
 
+    subagent_lock(&hpi_lock_data);
+
     /*
      * TODO: loop through columns, copy varbind values
      * to context structure for the row.
@@ -729,11 +732,9 @@ void saHpiDomainReferenceTable_set_action( netsnmp_request_group *rg )
             netsnmp_assert(0); /** why wasn't this caught in reserve1? */
         }
     }
+    subagent_unlock(&hpi_lock_data);
+    return;
 
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
 }
 
 /************************************************************

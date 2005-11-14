@@ -652,8 +652,9 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
 //    saHpiAutoInsertTimeoutTable_context *undo_ctx = (saHpiAutoInsertTimeoutTable_context *)rg->undo_info;
     netsnmp_request_group_item *current;
 
-//    unsigned char buff[sizeof(SaHpiTimeT)]; //For timeout
     int            row_err = 0;
+
+    subagent_lock(&hpi_lock_data);
     
     /*
      * TODO: loop through columns, copy varbind values
@@ -687,8 +688,11 @@ void saHpiAutoInsertTimeoutTable_set_action( netsnmp_request_group *rg )
     if(row_err) {
         netsnmp_request_set_error((netsnmp_request_info*)rg->rg_void,
                                        row_err);
-        return;
     }
+
+    subagent_unlock(&hpi_lock_data);
+
+    return;
 
     /*
      * TODO: if you have dependencies on other tables, this would be

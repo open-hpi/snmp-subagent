@@ -950,6 +950,7 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
     netsnmp_request_group_item *current;
 
     int            row_err = 0;
+    subagent_lock(&hpi_lock_data);
 
     /*
      * TODO: loop through columns, copy varbind values
@@ -966,36 +967,13 @@ void saHpiEventTable_set_action( netsnmp_request_group *rg )
         }
     }
 
-#if 0
-    /*
-     * done with all the columns. Could check row related
-     * requirements here.
-     */
-#ifndef saHpiEventTable_CAN_MODIFY_ACTIVE_ROW
-    if( undo_ctx && RS_IS_ACTIVE(undo_ctx->saHpiDomainAlarmRowStatus) &&
-        row_ctx && RS_IS_ACTIVE(row_ctx->saHpiDomainAlarmRowStatus) ) {
-            row_err = 1;
-    }
-#endif
-
-    /*
-     * check activation/deactivation
-     */
-    row_err = netsnmp_table_array_check_row_status(&cb, rg,
-                                  row_ctx ? &row_ctx->saHpiDomainAlarmRowStatus : NULL,
-                                  undo_ctx ? &undo_ctx->saHpiDomainAlarmRowStatus : NULL);
-#endif
-
     if(row_err) {
         netsnmp_request_set_error((netsnmp_request_info*)rg->rg_void,
                                        row_err);
-        return;
     }
+    subagent_unlock(&hpi_lock_data);
+    return;
 
-    /*
-     * TODO: if you have dependencies on other tables, this would be
-     * a good place to check those, too.
-     */
 }
 
 /************************************************************
