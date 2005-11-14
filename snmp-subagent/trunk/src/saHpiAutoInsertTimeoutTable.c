@@ -262,6 +262,8 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
     if(!dst||!src)
         return 1;
         
+    
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -270,7 +272,8 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -282,6 +285,7 @@ static int saHpiAutoInsertTimeoutTable_row_copy(saHpiAutoInsertTimeoutTable_cont
     memcpy( dst->saHpiAutoInsertTimeoutForInsert, src->saHpiAutoInsertTimeoutForInsert, src->saHpiAutoInsertTimeoutForInsert_len );
     dst->saHpiAutoInsertTimeoutForInsert_len = src->saHpiAutoInsertTimeoutForInsert_len;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -306,14 +310,17 @@ saHpiAutoInsertTimeoutTable_extract_index( saHpiAutoInsertTimeoutTable_context *
         netsnmp_variable_list var_saHpiDomainId;
         int err;
 
-        /*
+        
+	subagent_lock(&hpi_lock_data);
+	/*
         * copy index, if provided
         */
         if(hdr) {
                 netsnmp_assert(ctx->index.oids == NULL);
                 if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                   hdr->len * sizeof(oid) )) {
-                        return -1;
+                        subagent_unlock(&hpi_lock_data);
+			return -1;
                 }
                 ctx->index.len = hdr->len;
         }
@@ -351,7 +358,8 @@ saHpiAutoInsertTimeoutTable_extract_index( saHpiAutoInsertTimeoutTable_context *
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
-        return err;
+        subagent_unlock(&hpi_lock_data);
+	return err;
 }
 
 /************************************************************
@@ -439,18 +447,24 @@ int saHpiAutoInsertTimeoutTable_can_delete(saHpiAutoInsertTimeoutTable_context *
 saHpiAutoInsertTimeoutTable_context *
 saHpiAutoInsertTimeoutTable_create_row( netsnmp_index* hdr)
 {
+    
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiAutoInsertTimeoutTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiAutoInsertTimeoutTable_context);
-    if(!ctx)
-        return NULL;
-        
+    if(!ctx){
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
+     }   
     /*
      * TODO: check indexes, if necessary.
      */
     if(saHpiAutoInsertTimeoutTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -466,6 +480,7 @@ saHpiAutoInsertTimeoutTable_create_row( netsnmp_index* hdr)
      ctx->saHpiAutoInsertTimeoutForInsert = 0;
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -480,15 +495,20 @@ saHpiAutoInsertTimeoutTable_duplicate_row( saHpiAutoInsertTimeoutTable_context *
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiAutoInsertTimeoutTable_context);
-    if(!dup)
-        return NULL;
-        
+    if(!dup) {
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
+    }    
+    
     if(saHpiAutoInsertTimeoutTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -499,6 +519,8 @@ netsnmp_index * saHpiAutoInsertTimeoutTable_delete_row( saHpiAutoInsertTimeoutTa
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
 
+    subagent_lock(&hpi_lock_data);
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -511,6 +533,8 @@ netsnmp_index * saHpiAutoInsertTimeoutTable_delete_row( saHpiAutoInsertTimeoutTa
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 

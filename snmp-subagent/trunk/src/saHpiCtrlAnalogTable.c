@@ -560,6 +560,8 @@ static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 	if (!dst||!src)
 		return 1;
 
+	
+	subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -568,6 +570,7 @@ static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
 			    src->index.len * sizeof(oid) )) {
 		dst->index.oids = NULL;
+		subagent_unlock(&hpi_lock_data);
 		return 1;
 	}
 	dst->index.len = src->index.len;
@@ -604,6 +607,7 @@ static int saHpiCtrlAnalogTable_row_copy(saHpiCtrlAnalogTable_context * dst,
 	memcpy( dst->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR, src->saHpiCtrlAnalogRDR_len );
 	dst->saHpiCtrlAnalogRDR_len = src->saHpiCtrlAnalogRDR_len;
 
+	subagent_unlock(&hpi_lock_data);
 	return 0;
 }
 
@@ -634,6 +638,8 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_extract_index, called\n"));
 
+	
+	subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -641,6 +647,7 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
 		netsnmp_assert(ctx->index.oids == NULL);
 		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
 				    hdr->len * sizeof(oid) )) {
+			subagent_unlock(&hpi_lock_data);
 			return -1;
 		}
 		ctx->index.len = hdr->len;
@@ -704,6 +711,8 @@ saHpiCtrlAnalogTable_extract_index( saHpiCtrlAnalogTable_context * ctx, netsnmp_
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
 
+	
+	subagent_unlock(&hpi_lock_data);
 	return err;
 }
 
@@ -801,17 +810,22 @@ saHpiCtrlAnalogTable_create_row( netsnmp_index* hdr)
 
  	DEBUGMSGTL ((AGENT, "saHpiCtrlAnalogTable_create_row, called\n"));
 
+	
+	subagent_lock(&hpi_lock_data);
+	
 	saHpiCtrlAnalogTable_context * ctx =
 	SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
-	if (!ctx)
+	if (!ctx) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
-
+         }
 	/*
 	 * TODO: check indexes, if necessary.
 	 */
 	if (saHpiCtrlAnalogTable_extract_index( ctx, hdr )) {
 		free(ctx->index.oids);
 		free(ctx);
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
 	}
 
@@ -829,6 +843,7 @@ saHpiCtrlAnalogTable_create_row( netsnmp_index* hdr)
 	 ctx->saHpiCtrlAnalogState = 0;
 	*/
 
+	subagent_unlock(&hpi_lock_data);
 	return ctx;
 }
 
@@ -845,15 +860,19 @@ saHpiCtrlAnalogTable_duplicate_row( saHpiCtrlAnalogTable_context * row_ctx)
 	if (!row_ctx)
 		return NULL;
 
+	subagent_lock(&hpi_lock_data);
+	
 	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlAnalogTable_context);
-	if (!dup)
+	if (!dup) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
-
+	}
 	if (saHpiCtrlAnalogTable_row_copy(dup,row_ctx)) {
 		free(dup);
 		dup = NULL;
 	}
 
+	subagent_unlock(&hpi_lock_data);
 	return dup;
 }
 
@@ -867,6 +886,8 @@ netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * 
 
 	/* netsnmp_mutex_destroy(ctx->lock); */
 
+	subagent_lock(&hpi_lock_data);
+	
 	if (ctx->index.oids)
 		free(ctx->index.oids);
 
@@ -879,6 +900,8 @@ netsnmp_index * saHpiCtrlAnalogTable_delete_row( saHpiCtrlAnalogTable_context * 
 	 */
 	free( ctx );
 
+	subagent_unlock(&hpi_lock_data);
+	
 	return NULL;
 }
 

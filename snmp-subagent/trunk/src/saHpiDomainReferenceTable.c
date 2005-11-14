@@ -107,11 +107,14 @@ int initialize_table_saHpiDomainReferenceActiveEntries(void);
 
 	DEBUGMSGTL ((AGENT, "poplulate_saHpiDomainReferenceTable: called\n"));
 	
+	subagent_lock(&hpi_lock_data);
+	
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {	
 		DEBUGMSGTL ((AGENT, 
 		"poplulate_saHpiDomainReferenceTable: saHpiDomainInfoGet Failed: rv = %d\n",
 		rv));
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}		
 	
@@ -127,6 +130,7 @@ int initialize_table_saHpiDomainReferenceActiveEntries(void);
 			DEBUGMSGTL ((AGENT, 
 			"poplulate_saHpiDomainReferenceTable: saHpiDEntryGet Failed: rv = %d\n",
 			rv));
+			subagent_unlock(&hpi_lock_data);
 			return AGENT_ERR_INTERNAL_ERROR;
 		}
 		
@@ -146,6 +150,7 @@ int initialize_table_saHpiDomainReferenceActiveEntries(void);
 		}
 		if (!domain_reference_context) {
 			snmp_log (LOG_ERR, "Not enough memory for a DomainReference row!");
+			subagent_unlock(&hpi_lock_data);
 			return AGENT_ERR_INTERNAL_ERROR;
 		}		
 		
@@ -162,6 +167,7 @@ int initialize_table_saHpiDomainReferenceActiveEntries(void);
 	
 	domain_reference_entry_count = CONTAINER_SIZE (cb.container);
 	
+	subagent_unlock(&hpi_lock_data);
 	return rv;
 }
 
@@ -337,6 +343,8 @@ static int saHpiDomainReferenceTable_row_copy(saHpiDomainReferenceTable_context 
     if(!dst||!src)
         return 1;
         
+    subagent_lock(&hpi_lock_data);
+    
     /*
      * copy index, if provided
      */
@@ -345,7 +353,8 @@ static int saHpiDomainReferenceTable_row_copy(saHpiDomainReferenceTable_context 
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -358,6 +367,7 @@ static int saHpiDomainReferenceTable_row_copy(saHpiDomainReferenceTable_context 
 
     dst->saHpiDomainReferenceIsPeer = src->saHpiDomainReferenceIsPeer;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -383,6 +393,8 @@ saHpiDomainReferenceTable_extract_index(
     netsnmp_variable_list var_saHpiDomainRef;
     int err;
 
+    subagent_lock(&hpi_lock_data);
+    
     /*
      * copy index, if provided
      */
@@ -390,7 +402,8 @@ saHpiDomainReferenceTable_extract_index(
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
-            return -1;
+            subagent_unlock(&hpi_lock_data);
+	    return -1;
         }
         ctx->index.len = hdr->len;
     }
@@ -442,6 +455,7 @@ saHpiDomainReferenceTable_extract_index(
      */
     snmp_reset_var_buffers( &var_saHpiDomainId );
 
+    subagent_unlock(&hpi_lock_data);
     return err;
 }
 
@@ -530,10 +544,14 @@ int saHpiDomainReferenceTable_can_delete(saHpiDomainReferenceTable_context *undo
 saHpiDomainReferenceTable_context *
 saHpiDomainReferenceTable_create_row( netsnmp_index* hdr)
 {
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiDomainReferenceTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiDomainReferenceTable_context);
-    if(!ctx)
-        return NULL;
+    if(!ctx) {
+    	subagent_unlock(&hpi_lock_data);
+        return NULL;}
         
     /*
      * TODO: check indexes, if necessary.
@@ -541,7 +559,8 @@ saHpiDomainReferenceTable_create_row( netsnmp_index* hdr)
     if(saHpiDomainReferenceTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -556,6 +575,7 @@ saHpiDomainReferenceTable_create_row( netsnmp_index* hdr)
     /**
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -570,15 +590,19 @@ saHpiDomainReferenceTable_duplicate_row( saHpiDomainReferenceTable_context * row
     if(!row_ctx)
         return NULL;
 
+    
+    subagent_lock(&hpi_lock_data);
     dup = SNMP_MALLOC_TYPEDEF(saHpiDomainReferenceTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+   	 subagent_unlock(&hpi_lock_data);
+        return NULL; }
         
     if(saHpiDomainReferenceTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -589,6 +613,8 @@ netsnmp_index * saHpiDomainReferenceTable_delete_row( saHpiDomainReferenceTable_
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
 
+    
+    subagent_lock(&hpi_lock_data);
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -601,6 +627,7 @@ netsnmp_index * saHpiDomainReferenceTable_delete_row( saHpiDomainReferenceTable_
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
     return NULL;
 }
 

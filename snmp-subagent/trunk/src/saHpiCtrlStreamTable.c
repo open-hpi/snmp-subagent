@@ -536,6 +536,7 @@ static int saHpiCtrlStreamTable_row_copy(saHpiCtrlStreamTable_context * dst,
 	if (!dst||!src)
 		return 1;
 
+	subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -544,6 +545,7 @@ static int saHpiCtrlStreamTable_row_copy(saHpiCtrlStreamTable_context * dst,
 	if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
 			    src->index.len * sizeof(oid) )) {
 		dst->index.oids = NULL;
+		subagent_unlock(&hpi_lock_data);
 		return 1;
 	}
 	dst->index.len = src->index.len;
@@ -583,6 +585,7 @@ static int saHpiCtrlStreamTable_row_copy(saHpiCtrlStreamTable_context * dst,
 	memcpy( dst->saHpiCtrlStreamRDR, src->saHpiCtrlStreamRDR, src->saHpiCtrlStreamRDR_len );
 	dst->saHpiCtrlStreamRDR_len = src->saHpiCtrlStreamRDR_len;
 
+	subagent_unlock(&hpi_lock_data);
 	return 0;
 }
 
@@ -612,6 +615,8 @@ saHpiCtrlStreamTable_extract_index( saHpiCtrlStreamTable_context * ctx, netsnmp_
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_extract_index, called\n"));
 
+	
+	subagent_lock(&hpi_lock_data);
 	/*
 	 * copy index, if provided
 	 */
@@ -619,6 +624,7 @@ saHpiCtrlStreamTable_extract_index( saHpiCtrlStreamTable_context * ctx, netsnmp_
 		netsnmp_assert(ctx->index.oids == NULL);
 		if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
 				    hdr->len * sizeof(oid) )) {
+			subagent_unlock(&hpi_lock_data);
 			return -1;
 		}
 		ctx->index.len = hdr->len;
@@ -682,6 +688,8 @@ saHpiCtrlStreamTable_extract_index( saHpiCtrlStreamTable_context * ctx, netsnmp_
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
 
+	subagent_unlock(&hpi_lock_data);
+	
 	return err;
 }
 
@@ -775,13 +783,18 @@ int saHpiCtrlStreamTable_can_delete(saHpiCtrlStreamTable_context *undo_ctx,
 saHpiCtrlStreamTable_context *
 saHpiCtrlStreamTable_create_row( netsnmp_index* hdr)
 {
+	
+	subagent_lock(&hpi_lock_data);
+	
 	saHpiCtrlStreamTable_context * ctx =
 	SNMP_MALLOC_TYPEDEF(saHpiCtrlStreamTable_context);
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_create_row, called\n"));
 
-	if (!ctx)
+	if (!ctx) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
+	}	
 
 	/*
 	 * TODO: check indexes, if necessary.
@@ -789,6 +802,7 @@ saHpiCtrlStreamTable_create_row( netsnmp_index* hdr)
 	if (saHpiCtrlStreamTable_extract_index( ctx, hdr )) {
 		free(ctx->index.oids);
 		free(ctx);
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
 	}
 
@@ -807,6 +821,8 @@ saHpiCtrlStreamTable_create_row( netsnmp_index* hdr)
 	 ctx->saHpiCtrlStreamState = 0;
 	*/
 
+	
+	subagent_unlock(&hpi_lock_data);
 	return ctx;
 }
 
@@ -823,15 +839,20 @@ saHpiCtrlStreamTable_duplicate_row( saHpiCtrlStreamTable_context * row_ctx)
 	if (!row_ctx)
 		return NULL;
 
+	subagent_lock(&hpi_lock_data);
+	
 	dup = SNMP_MALLOC_TYPEDEF(saHpiCtrlStreamTable_context);
-	if (!dup)
+	if (!dup) {
+		subagent_unlock(&hpi_lock_data);
 		return NULL;
+	}	
 
 	if (saHpiCtrlStreamTable_row_copy(dup,row_ctx)) {
 		free(dup);
 		dup = NULL;
 	}
 
+	subagent_unlock(&hpi_lock_data);
 	return dup;
 }
 
@@ -844,6 +865,8 @@ netsnmp_index * saHpiCtrlStreamTable_delete_row( saHpiCtrlStreamTable_context * 
 
 	DEBUGMSGTL ((AGENT, "saHpiCtrlStreamTable_delete_row, called\n"));
 
+	subagent_lock(&hpi_lock_data);
+	
 	if (ctx->index.oids)
 		free(ctx->index.oids);
 
@@ -856,6 +879,8 @@ netsnmp_index * saHpiCtrlStreamTable_delete_row( saHpiCtrlStreamTable_context * 
 	 */
 	free( ctx );
 
+	subagent_unlock(&hpi_lock_data);
+	
 	return NULL;
 }
 

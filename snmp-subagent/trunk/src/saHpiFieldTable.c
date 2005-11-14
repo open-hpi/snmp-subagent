@@ -938,6 +938,8 @@ static int saHpiFieldTable_row_copy(saHpiFieldTable_context * dst,
 
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_row_copy, called\n"));
         
+   
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -946,7 +948,8 @@ static int saHpiFieldTable_row_copy(saHpiFieldTable_context * dst,
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
-        return 1;
+        subagent_unlock(&hpi_lock_data);
+	return 1;
     }
     dst->index.len = src->index.len;
     
@@ -972,6 +975,8 @@ static int saHpiFieldTable_row_copy(saHpiFieldTable_context * dst,
 
     dst->saHpiFieldStatus = src->saHpiFieldStatus;
 
+    
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -1003,6 +1008,8 @@ saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hd
 
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_extract_index, called\n"));
 
+    
+    subagent_lock(&hpi_lock_data);
     /*
      * copy index, if provided
      */
@@ -1010,7 +1017,8 @@ saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hd
         netsnmp_assert(ctx->index.oids == NULL);
         if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                            hdr->len * sizeof(oid) )) {
-            return -1;
+            subagent_unlock(&hpi_lock_data);
+	    return -1;
         }
         ctx->index.len = hdr->len;
     }
@@ -1086,6 +1094,7 @@ saHpiFieldTable_extract_index( saHpiFieldTable_context * ctx, netsnmp_index * hd
      */
     snmp_reset_var_buffers( &var_saHpiDomainId );
 
+    subagent_unlock(&hpi_lock_data);
     return err;
 }
 
@@ -1178,10 +1187,14 @@ int saHpiFieldTable_can_delete(saHpiFieldTable_context *undo_ctx,
 saHpiFieldTable_context *
 saHpiFieldTable_create_row( netsnmp_index* hdr)
 {
+    
+    subagent_lock(&hpi_lock_data);
+    
     saHpiFieldTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiFieldTable_context);
-    if(!ctx)
-        return NULL;
+    if(!ctx) {
+        subagent_unlock(&hpi_lock_data);
+        return NULL; }
         
     DEBUGMSGTL ((AGENT, "saHpiFieldTable_create_row, called\n"));
 
@@ -1191,7 +1204,8 @@ saHpiFieldTable_create_row( netsnmp_index* hdr)
     if(saHpiFieldTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
-        return NULL;
+        subagent_unlock(&hpi_lock_data);
+	return NULL;
     }
 
     /* netsnmp_mutex_init(ctx->lock);
@@ -1211,6 +1225,7 @@ saHpiFieldTable_create_row( netsnmp_index* hdr)
      ctx->saHpiFieldStatus = 0;
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -1227,15 +1242,19 @@ saHpiFieldTable_duplicate_row( saHpiFieldTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+    
     dup = SNMP_MALLOC_TYPEDEF(saHpiFieldTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+    	subagent_unlock(&hpi_lock_data);
+        return NULL; }
         
     if(saHpiFieldTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -1248,6 +1267,8 @@ netsnmp_index * saHpiFieldTable_delete_row( saHpiFieldTable_context * ctx )
 
         DEBUGMSGTL ((AGENT, "saHpiFieldTable_delete_row, called\n"));
 
+    subagent_lock(&hpi_lock_data);
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -1260,6 +1281,8 @@ netsnmp_index * saHpiFieldTable_delete_row( saHpiFieldTable_context * ctx )
      */
     free( ctx );
 
+    subagent_unlock(&hpi_lock_data);
+    
     return NULL;
 }
 
