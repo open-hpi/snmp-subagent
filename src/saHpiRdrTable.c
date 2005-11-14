@@ -712,6 +712,8 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 	if(!dst||!src)
 	    return 1;
 	    
+        subagent_lock(&hpi_lock_data);
+
 	/*
 	 * copy index, if provided
 	 */
@@ -720,6 +722,7 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 	if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
 			       src->index.len * sizeof(oid) )) {
 	    dst->index.oids = NULL;
+            subagent_unlock(&hpi_lock_data);
 	    return 1;
 	}
 	dst->index.len = src->index.len;
@@ -753,6 +756,7 @@ static int saHpiRdrTable_row_copy(saHpiRdrTable_context * dst,
 	memcpy( dst->saHpiRdrIdString, src->saHpiRdrIdString, src->saHpiRdrIdString_len );
 	dst->saHpiRdrIdString_len = src->saHpiRdrIdString_len;
 	
+        subagent_unlock(&hpi_lock_data);
 	return 0;
 }
 /**
@@ -767,6 +771,7 @@ int
 saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
 {
 	DEBUGMSGTL ((AGENT, "saHpiRdrTable_extract_index, called\n"));
+        subagent_lock(&hpi_lock_data);
 	
 	/*
 	 * temporary local storage for extracting oid index
@@ -788,7 +793,8 @@ saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
 	    netsnmp_assert(ctx->index.oids == NULL);
 	    if(snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
 			       hdr->len * sizeof(oid) )) {
-		return -1;
+                    subagent_unlock(&hpi_lock_data);
+		    return -1;
 	    }
 	    ctx->index.len = hdr->len;
 	}
@@ -847,6 +853,7 @@ saHpiRdrTable_extract_index( saHpiRdrTable_context * ctx, netsnmp_index * hdr )
 	 */
 	snmp_reset_var_buffers( &var_saHpiDomainId );
 
+        subagent_unlock(&hpi_lock_data);
 	return err;
 }
 
@@ -911,17 +918,21 @@ int saHpiRdrTable_can_delete(saHpiRdrTable_context *undo_ctx,
                     netsnmp_request_group * rg)
 {
 	DEBUGMSGTL ((AGENT, "saHpiRdrTable_can_delete, called\n"));
+        subagent_lock(&hpi_lock_data);
 
     /*
      * probably shouldn't delete a row that we can't
      * deactivate.
      */
-    if(saHpiRdrTable_can_deactivate(undo_ctx,row_ctx,rg) != 1)
-        return 0;
+    if(saHpiRdrTable_can_deactivate(undo_ctx,row_ctx,rg) != 1) {
+            subagent_unlock(&hpi_lock_data);
+            return 0;
+    }
     
     /*
      * TODO: check for other deletion requirements here
      */
+    subagent_unlock(&hpi_lock_data);
     return 1;
 }
 
@@ -944,11 +955,15 @@ saHpiRdrTable_create_row( netsnmp_index* hdr)
 {
 
 	DEBUGMSGTL ((AGENT, "saHpiRdrTable_create_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
     saHpiRdrTable_context * ctx =
         SNMP_MALLOC_TYPEDEF(saHpiRdrTable_context);
-    if(!ctx)
-        return NULL;
+
+    if(!ctx) {
+            subagent_unlock(&hpi_lock_data);
+            return NULL;
+    }
         
     /*
      * TODO: check indexes, if necessary.
@@ -956,6 +971,7 @@ saHpiRdrTable_create_row( netsnmp_index* hdr)
     if(saHpiRdrTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
+        subagent_unlock(&hpi_lock_data);
         return NULL;
     }
 
@@ -971,6 +987,7 @@ saHpiRdrTable_create_row( netsnmp_index* hdr)
     /**
     */
 
+    subagent_unlock(&hpi_lock_data);
     return ctx;
 }
 
@@ -988,15 +1005,20 @@ saHpiRdrTable_duplicate_row( saHpiRdrTable_context * row_ctx)
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);  
+
     dup = SNMP_MALLOC_TYPEDEF(saHpiRdrTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+            subagent_unlock(&hpi_lock_data);
+            return NULL;
+    }
         
     if(saHpiRdrTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
