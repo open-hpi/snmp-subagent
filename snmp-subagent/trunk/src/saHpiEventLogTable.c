@@ -64,6 +64,7 @@
 #include <saHpiUserEventLogTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -115,7 +116,10 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
 	
 	printf("event_log_clear: done \n");
 
+        subagent_lock(&hpi_lock_data);
+
 	event_entry_id = SAHPI_OLDEST_ENTRY;
+	
 	if (resourceid != SAHPI_UNSPECIFIED_RESOURCE_ID) { 
 
        		
@@ -240,7 +244,8 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
                 	if (dr_entry == NULL) {
                         	DEBUGMSGTL ((AGENT, 
                         	"ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
-                        	return AGENT_ERR_INTERNAL_ERROR;
+                        	subagent_unlock(&hpi_lock_data);
+				return AGENT_ERR_INTERNAL_ERROR;
                 	}						
 			evt_log_oid[2] = dr_entry->entry_id++;
                 	/* assign the indices to the index */
@@ -316,11 +321,15 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
 
         		if (rv == SA_ERR_HPI_NOT_PRESENT) {
                 		DEBUGMSGTL ((AGENT, "Domain Event Log Empty\n"));
-                		return AGENT_ERR_NOERROR;
+                		
+				subagent_unlock(&hpi_lock_data);
+				return AGENT_ERR_NOERROR;
         		}
         		if (rv != SA_OK) {
                		 	DEBUGMSGTL ((AGENT, "getting Domain Event Log Failed: rv = %d\n",rv));
-                		return AGENT_ERR_INTERNAL_ERROR;
+                		
+				subagent_unlock(&hpi_lock_data);
+				return AGENT_ERR_INTERNAL_ERROR;
         		}
 					    
                 	switch (event_log_entry.Event.EventType) {
@@ -412,7 +421,9 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
         		if (dr_entry == NULL) {
                	 		DEBUGMSGTL ((AGENT, 
                 		"ERROR: populate_saHpEventLogTable() domain_resource_pair_get returned NULL\n"));
-                		return AGENT_ERR_INTERNAL_ERROR;
+                		
+				subagent_unlock(&hpi_lock_data);
+				return AGENT_ERR_INTERNAL_ERROR;
         		}
         		evt_log_oid[2] = dr_entry->entry_id++;			
 			
@@ -464,6 +475,7 @@ SaErrorT populate_saHpiEventLog (SaHpiSessionIdT sessionid, SaHpiResourceIdT res
 		} while (event_entry_id != SAHPI_NO_MORE_ENTRIES);
 	} 
 	
+	subagent_unlock(&hpi_lock_data);
 	return rv;
 
 }

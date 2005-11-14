@@ -340,6 +340,8 @@ main (int argc, char **argv)
 	DEBUGMSGTL ((AGENT, "saHpiDiscover Success!\n"));	
 
 	/* Initialize subagent tables */		
+	init_saHpiAdministration();
+	
 	init_saHpiDomainInfoTable(); 
 	init_saHpiDomainAlarmTable();
 	init_saHpiDomainReferenceTable();
@@ -403,7 +405,7 @@ main (int argc, char **argv)
 	init_saHpiAnnouncementTable();
 	init_saHpiAnnouncementEventLogTable();
 	
-	init_saHpiAdministration();
+	
 
 
 	if (send_traps_on_startup == AGENT_TRUE)

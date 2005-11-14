@@ -57,6 +57,7 @@
 #include <saHpiAreaTable.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -126,6 +127,8 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
+	subagent_lock(&hpi_lock_data);
+
         /* BUILD oid for new row */
         /* assign the number of indices */
         inventory_index.len = INVENTORY_INDEX_NR;
@@ -161,7 +164,9 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
         }
         if (!inventory_context) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                
+		subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         /** SaHpiInstrumentId = ASN_UNSIGNED */
@@ -187,7 +192,9 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
                 DEBUGMSGTL ((AGENT, 
                              "ERROR: populate_inventory() saHpiIdrInfoGet() ERRORED out\n"));
                 saHpiInventoryTable_delete_row( inventory_context );
-                return AGENT_ERR_INTERNAL_ERROR;
+                
+		subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         } 
 
         /** UNSIGNED32 = ASN_UNSIGNED */
@@ -221,7 +228,9 @@ SaErrorT populate_inventory (SaHpiSessionIdT sessionid,
 
         inventory_entry_count = CONTAINER_SIZE (cb.container);
 
-        return rv;
+        subagent_unlock(&hpi_lock_data);
+	
+	return rv;
 } 
 
 /**

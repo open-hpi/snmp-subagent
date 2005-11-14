@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -133,7 +134,9 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
-        /* BUILD oid for new row */
+        
+	subagent_lock(&hpi_lock_data);
+	/* BUILD oid for new row */
         /* assign the number of indices */
         watchdog_idx.len = WATCHDOG_INDEX_NR;
         /** Index saHpiDomainId is external */
@@ -168,7 +171,8 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
         }
         if (!watchdog_ctx) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
-                return AGENT_ERR_INTERNAL_ERROR;
+                subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
         rv = saHpiWatchdogTimerGet (sessionid,
@@ -176,7 +180,8 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
                                     rdr_entry->RdrTypeUnion.WatchdogRec.WatchdogNum,
                                     &watchdog);
         if (rv != SA_OK) {
-                return AGENT_ERR_INTERNAL_ERROR;
+                subagent_unlock(&hpi_lock_data);
+		return AGENT_ERR_INTERNAL_ERROR;
         }
 
 
@@ -243,7 +248,9 @@ SaErrorT populate_watchdog(SaHpiSessionIdT sessionid,
 
         watchdog_entry_count = CONTAINER_SIZE (cb.container);
 
-        return rv;
+        subagent_unlock(&hpi_lock_data);
+	
+	return rv;
 }
 
 /**

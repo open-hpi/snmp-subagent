@@ -57,6 +57,7 @@
 #include <oh_utils.h>
 
 #include <hpiDomainAlarmMapping.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -126,6 +127,8 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	/* Get all the severities */
 	Severity = SAHPI_ALL_SEVERITIES;
 	
+        subagent_lock(&hpi_lock_data);
+	
 	rv = saHpiAlarmGetNext( sessionid,
 		                Severity,
                                 SAHPI_FALSE, //Get ALL Alarms
@@ -135,10 +138,14 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 		DEBUGMSGTL ((AGENT, 
 		"populate_saHpiDomainAlarmTable: saHpiDomainAlarmGetNext Failed: rv = %d\n",
 		rv));
+		
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	else if (rv == SA_ERR_HPI_NOT_PRESENT) {
-	        return SA_OK; //first call returned nothing
+	        
+		subagent_unlock(&hpi_lock_data);
+		return SA_OK; //first call returned nothing
 	}
 	
 	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
@@ -158,7 +165,9 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
                         DEBUGMSGTL ((AGENT, 
                                      "ERROR: populate_saHpiDomainAlarmTable() "
                                      "domain_alarm_entry_get returned NULL\n"));
-                        return AGENT_ERR_INTERNAL_ERROR;
+                        
+			subagent_unlock(&hpi_lock_data);
+			return AGENT_ERR_INTERNAL_ERROR;
                 }
                 /* here is where the mapped id is the same as the key value     */
                 /* remember when the user creates an announcement the user      */
@@ -191,7 +200,9 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
 	        }
 	        if (!domain_alarm_ctx) {
 		        snmp_log (LOG_ERR, "Not enough memory for a Domain Alarm row!");
-		        return AGENT_ERR_INTERNAL_ERROR;
+		        
+			subagent_unlock(&hpi_lock_data);
+			return AGENT_ERR_INTERNAL_ERROR;
 	        }
 
                 /** SaHpiEntryId = ASN_UNSIGNED */
@@ -285,6 +296,8 @@ SaErrorT populate_saHpiDomainAlarmTable(SaHpiSessionIdT sessionid)
         }	
 	
 	domain_alarm_entry_count = CONTAINER_SIZE (cb.container);
+
+        subagent_unlock(&hpi_lock_data);
 
         return SA_OK;   								    
 }
@@ -746,18 +759,9 @@ saHpiDomainAlarmTable_cmp( const void *lhs, const void *rhs )
                 if ( context_l->index.oids[1] > context_r->index.oids[1])
                         return 1;
 
-                if ( context_l->index.oids[1] == context_r->index.oids[1]) {
-                        /* If saHpiResourceEntryId index is equal sort by third index */
-                        /* CHECK THIRD INDEX,  saHpiDomainAlarmSeverity */
-                        if ( context_l->index.oids[2] < context_r->index.oids[2])
-                                return -1;
+                if ( context_l->index.oids[1] == context_r->index.oids[1]) 
+                        return 0;
 
-                        if ( context_l->index.oids[2] > context_r->index.oids[2])
-                                return 1;
-
-                        if ( context_l->index.oids[2] == context_r->index.oids[2])
-                                return 0;
-                }
         }
 
         return 0;
@@ -867,7 +871,7 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
         /** TODO: add storage for external index(s)! */
         netsnmp_variable_list var_saHpiDomainId;
         netsnmp_variable_list var_saHpiDomainAlarmId;
-        netsnmp_variable_list var_saHpiDomainAlarmSeverity;
+
         int err;
 
         DEBUGMSGTL ((AGENT, "saHpiDomainAlarmTable_extract_index, called\n"));
@@ -898,12 +902,12 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
         memset( &var_saHpiDomainAlarmId, 0x00, sizeof(var_saHpiDomainAlarmId) );
         var_saHpiDomainAlarmId.type = ASN_UNSIGNED; /* type hint for parse_oid_indexes */
         /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiDomainAlarmId.next_variable = &var_saHpiDomainAlarmSeverity;
+        var_saHpiDomainAlarmId.next_variable = NULL;
 
-        memset( &var_saHpiDomainAlarmSeverity, 0x00, sizeof(var_saHpiDomainAlarmSeverity) );
-        var_saHpiDomainAlarmSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
+        //memset( &var_saHpiDomainAlarmSeverity, 0x00, sizeof(var_saHpiDomainAlarmSeverity) );
+        //var_saHpiDomainAlarmSeverity.type = ASN_INTEGER; /* type hint for parse_oid_indexes */
         /** TODO: link this index to the next, or NULL for the last one */
-        var_saHpiDomainAlarmSeverity.next_variable = NULL;
+        //var_saHpiDomainAlarmSeverity.next_variable = NULL;
 
 
 
@@ -919,11 +923,11 @@ saHpiDomainAlarmTable_extract_index( saHpiDomainAlarmTable_context * ctx, netsnm
    
                 ctx->saHpiDomainAlarmId = *var_saHpiDomainAlarmId.val.integer;
    
-                ctx->saHpiDomainAlarmSeverity = *var_saHpiDomainAlarmSeverity.val.integer;
+                //ctx->saHpiDomainAlarmSeverity = *var_saHpiDomainAlarmSeverity.val.integer;
    
                 err = saHpiDomainId_check_index(*var_saHpiDomainId.val.integer); 
 		err = saHpiDomainAlarmId_check_index(*var_saHpiDomainAlarmId.val.integer);
-		err = saHpiDomainAlarmSeverity_check_index(*var_saHpiDomainAlarmSeverity.val.integer);
+		//err = saHpiDomainAlarmSeverity_check_index(*var_saHpiDomainAlarmSeverity.val.integer);
         }
 
         /*

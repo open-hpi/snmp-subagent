@@ -57,6 +57,7 @@
 #include <session_info.h>
 
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -117,13 +118,17 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	if (!rdr_entry) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+
 		return AGENT_ERR_INTERNAL_ERROR;
 	}    
 	if (!rpt_entry) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_ctrl_analog() passed NULL rdr_entry pointer\n"));
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
+
+        subagent_lock(&hpi_lock_data);
 
 	/* BUILD oid for new row */
 		/* assign the number of indices */
@@ -141,6 +146,9 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
 	if (dr_entry == NULL) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_ctrl_analog() domain_resource_pair_get returned NULL\n"));
+		
+		subagent_unlock(&hpi_lock_data);
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	ctrl_analog_oid[3] = dr_entry->entry_id++;
@@ -236,6 +244,8 @@ SaErrorT populate_ctrl_analog(SaHpiSessionIdT sessionid,
                  CONTAINER_INSERT (cb.container, ctrl_analog_context);
 		
 	ctrl_analog_entry_count = CONTAINER_SIZE (cb.container);
+
+        subagent_unlock(&hpi_lock_data);
 
 	return rv;
 }

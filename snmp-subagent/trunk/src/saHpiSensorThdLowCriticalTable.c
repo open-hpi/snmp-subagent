@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -97,6 +98,8 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
+
+        subagent_lock(&hpi_lock_data);
 	/* BUILD oid for new row */
 	/* assign the number of indices */
 	sen_thd_low_crit_idx.len = SEN_THD_LOW_CRIT_IDX_NR;
@@ -123,6 +126,7 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	}
 	if (!sen_thd_low_crit_ctx) {
 		snmp_log (LOG_ERR, "Not enough memory for a ThdLowCrit row!");
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 
@@ -163,6 +167,8 @@ SaErrorT populate_sen_thd_low_crit(SaHpiSessionIdT sessionid,
 	if (new_row == MIB_TRUE)
                 CONTAINER_INSERT (cb.container, sen_thd_low_crit_ctx);
 
+	subagent_unlock(&hpi_lock_data);
+	
 	return rv;
 }
 

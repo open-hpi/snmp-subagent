@@ -59,6 +59,7 @@
 #include <session_info.h>
 #include <hash_utils.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 
 static     netsnmp_handler_registration *my_handler = NULL;
@@ -128,16 +129,21 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
         if (!rdr_entry) {
                 DEBUGMSGTL ((AGENT, 
                              "ERROR: populate_area() passed NULL rdr_entry pointer\n"));
+			     		 
                 return AGENT_ERR_INTERNAL_ERROR;
         }
         if (!rpt_entry) {
                 DEBUGMSGTL ((AGENT, 
                              "ERROR: populate_area() passed NULL rdr_entry pointer\n"));
+			     			     
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
 
         area_id = SAHPI_FIRST_ENTRY;
+	
+	subagent_lock(&hpi_lock_data);
+	
         do {
                 rv = saHpiIdrAreaHeaderGet(sessionid, 
                                            rpt_entry->ResourceId, 
@@ -166,6 +172,9 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                 if (dri_entry == NULL) {
                         DEBUGMSGTL ((AGENT, 
                                      "ERROR: populate_area() domain_resource_idr_get returned NULL\n"));
+				     
+		  	subagent_unlock(&hpi_lock_data);
+			
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
                 subagent_area_id = dri_entry->entry_id++;
@@ -197,6 +206,9 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
                 }
                 if (!area_context) {
                         snmp_log (LOG_ERR, "Not enough memory for a Area row!");
+			
+			subagent_unlock(&hpi_lock_data);
+			
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
 
@@ -228,7 +240,9 @@ SaErrorT populate_area (SaHpiSessionIdT sessionid,
 
         area_entry_count = CONTAINER_SIZE (cb.container);
 
-        return rv;
+        subagent_unlock(&hpi_lock_data);
+        
+	return rv;
 }
 
 /**

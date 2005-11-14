@@ -57,6 +57,7 @@
 #include <session_info.h>
 #include <oh_utils.h>
 #include <saHpiAnnouncementTable.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -127,6 +128,8 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
+        subagent_lock(&hpi_lock_data);
+
         /* BUILD oid for new row */
         /* assign the number of indices */
         annunciator_index.len = ANNUNCIATOR_INDEX_NR;
@@ -160,6 +163,9 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
         }
         if (!annunciator_context) {
                 snmp_log (LOG_ERR, "Not enough memory for a Annunciator row!");
+		
+		subagent_unlock(&hpi_lock_data);
+		
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
@@ -190,6 +196,9 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                 DEBUGMSGTL ((AGENT, 
                              "ERROR: populate_annunciator() saHpiAnnunciatorModeGet() ERRORED out\n"));
                 saHpiAnnunciatorTable_delete_row( annunciator_context );
+		
+		subagent_unlock(&hpi_lock_data);
+		
                 return AGENT_ERR_INTERNAL_ERROR;
         }
 
@@ -211,8 +220,10 @@ SaErrorT populate_annunciator(SaHpiSessionIdT sessionid,
                 CONTAINER_INSERT (cb.container, annunciator_context);
 
         annunciator_entry_count = CONTAINER_SIZE (cb.container);
-	
+
 	rc = populate_saHpiAnnouncementTable(sessionid, rdr_entry, rpt_entry);
+	
+	subagent_unlock(&hpi_lock_data);
 			      
         DEBUGMSGTL ((AGENT, "populate_annunciator: populate_saHpiAnnouncementTable returned %d\n", rc));			      
 

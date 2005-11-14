@@ -57,6 +57,7 @@
 #include <oh_utils.h>
 
 #include <hpiAnnunciatorMapping.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -141,6 +142,9 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                              "ERROR: populate_saHpiAnnouncementTable() passed NULL rpt_entry pointer\n"));
                 return AGENT_ERR_INTERNAL_ERROR;
         }
+
+        
+	subagent_lock(&hpi_lock_data);
 		
         rv = saHpiAnnunciatorGetNext(sessionid, 
 	                         rpt_entry->ResourceId,
@@ -153,11 +157,18 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 		DEBUGMSGTL ((AGENT, 
 		"populate_saHpiAnnouncementTable: saHpiAnnunciatorGetNext Failed: rv = %d\n",
 		rv));
+		
+		subagent_unlock(&hpi_lock_data);
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	else if (rv == SA_ERR_HPI_NOT_PRESENT) {
-	        return SA_OK; //first call returned nothing
+          	
+		subagent_unlock(&hpi_lock_data);
+	        
+		return SA_OK; //first call returned nothing
 	}
+	
 	
 	while ((rv != SA_ERR_HPI_NOT_PRESENT) && (rv == SA_OK)) {
 
@@ -177,6 +188,9 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
                         DEBUGMSGTL ((AGENT, 
                                      "ERROR: populate_saHpiAnnouncementTable() "
                                      "domain_resource_entry_get returned NULL\n"));
+				     
+			subagent_unlock(&hpi_lock_data);
+				     
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
                 /* here is where the mapped id is the same as the key value     */
@@ -214,6 +228,9 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 		
                 if (!announcement_ctx) {
                         snmp_log (LOG_ERR, "Not enough memory for an Announcement row!");
+			
+			subagent_unlock(&hpi_lock_data);
+			
                         return AGENT_ERR_INTERNAL_ERROR;
                 }
 	 
@@ -337,6 +354,8 @@ SaErrorT populate_saHpiAnnouncementTable(SaHpiSessionIdT sessionid,
 	}
 	
 	announcement_entry_count = CONTAINER_SIZE (cb.container);
+
+        subagent_unlock(&hpi_lock_data);
 		       
         return SA_OK; 		       
 

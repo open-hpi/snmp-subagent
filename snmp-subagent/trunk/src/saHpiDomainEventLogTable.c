@@ -55,6 +55,7 @@
 #include <hpiCheckIndice.h>
 #include <session_info.h>
 #include <oh_utils.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -121,8 +122,11 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 	if (!event) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_saHpiDomainEventLogTable() passed NULL event pointer\n"));
+		
 		return AGENT_ERR_INTERNAL_ERROR;
 	}    
+	
+	subagent_lock(&hpi_lock_data);
 	
 	/* BUILD oid for new row */
 		/* assign the number of indices */
@@ -136,6 +140,8 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 	if (dr_entry == NULL) {
 		DEBUGMSGTL ((AGENT, 
 		"ERROR: populate_saHpiDomainEventLogTable() domain_resource_pair_get returned NULL\n"));
+		
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	domain_evt_oid[1] = dr_entry->entry_id++;
@@ -187,6 +193,8 @@ SaErrorT populate_saHpiDomainEventLogTable(SaHpiSessionIdT sessionid,
 		CONTAINER_INSERT (cb.container, domain_evt_ctx);
 		domain_event_log_entry_count = CONTAINER_SIZE (cb.container);		
 	}
+	
+	subagent_unlock(&hpi_lock_data);
 	
         return SA_OK;
 }  

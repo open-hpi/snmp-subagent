@@ -58,6 +58,7 @@
 #include <SaHpi.h>
 #include <oh_utils.h>
 #include <session_info.h>
+#include <hpiLock.h>
 
 static     netsnmp_handler_registration *my_handler = NULL;
 static     netsnmp_table_array_callbacks cb;
@@ -97,9 +98,13 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 
 	DEBUGMSGTL ((AGENT, "populate_saHpiDomainInfoTable\n"));
 
+        subagent_lock(&hpi_lock_data);
+
 	rv = saHpiDomainInfoGet(sessionid, &domain_info);
 	if (rv != SA_OK) {
 		DEBUGMSGTL ((AGENT, "saHpiDomainInfoGet Failed: rv = %d\n",rv));
+		
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}
 	
@@ -119,6 +124,8 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
 	}
 	if (!domain_info_context) {
 		snmp_log (LOG_ERR, "Not enough memory for a DomainInfo row!");
+		
+		subagent_unlock(&hpi_lock_data);
 		return AGENT_ERR_INTERNAL_ERROR;
 	}	
 
@@ -222,6 +229,8 @@ int populate_saHpiDomainInfoTable(SaHpiSessionIdT sessionid)
                 CONTAINER_INSERT (cb.container, domain_info_context);
 	
 	domain_info_entry_count = CONTAINER_SIZE (cb.container);
+	
+	subagent_unlock(&hpi_lock_data);
 		
 	return rv;
 }
