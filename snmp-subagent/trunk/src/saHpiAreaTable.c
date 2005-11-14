@@ -666,6 +666,7 @@ static int saHpiAreaTable_row_copy(saHpiAreaTable_context * dst,
                 return 1;
 
         DEBUGMSGTL ((AGENT, "saHpiAreaTable_row_copy, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         /*
          * copy index, if provided
@@ -675,6 +676,7 @@ static int saHpiAreaTable_row_copy(saHpiAreaTable_context * dst,
         if (snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                             src->index.len * sizeof(oid) )) {
                 dst->index.oids = NULL;
+                subagent_unlock(&hpi_lock_data);
                 return 1;
         }
         dst->index.len = src->index.len;
@@ -696,6 +698,7 @@ static int saHpiAreaTable_row_copy(saHpiAreaTable_context * dst,
 
         dst->saHpiAreaNumDataFields = src->saHpiAreaNumDataFields;
 
+        subagent_unlock(&hpi_lock_data);
         return 0;
 }
 
@@ -725,6 +728,7 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
         int err;
 
         DEBUGMSGTL ((AGENT, "saHpiAreaTable_extract_index, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         /*
          * copy index, if provided
@@ -733,6 +737,7 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
+                        subagent_unlock(&hpi_lock_data);
                         return -1;
                 }
                 ctx->index.len = hdr->len;
@@ -800,6 +805,7 @@ saHpiAreaTable_extract_index( saHpiAreaTable_context * ctx, netsnmp_index * hdr 
          * parsing may have allocated memory. free it.
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
+        subagent_unlock(&hpi_lock_data);
 
         return err;
 }
@@ -900,9 +906,12 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
         SNMP_MALLOC_TYPEDEF(saHpiAreaTable_context);
 
         DEBUGMSGTL ((AGENT, "saHpiAreaTable_create_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
-        if (!ctx)
+        if (!ctx) {
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
+        }
 
         /*
          * TODO: check indexes, if necessary.
@@ -910,6 +919,7 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
         if (saHpiAreaTable_extract_index( ctx, hdr )) {
                 free(ctx->index.oids);
                 free(ctx);
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
         }
 
@@ -927,6 +937,7 @@ saHpiAreaTable_create_row( netsnmp_index* hdr)
          ctx->saHpiAreaRowStatus = 0;
         */
 
+        subagent_unlock(&hpi_lock_data);
         return ctx;
 }
 
@@ -937,21 +948,27 @@ saHpiAreaTable_context *
 saHpiAreaTable_duplicate_row( saHpiAreaTable_context * row_ctx)
 {
         DEBUGMSGTL ((AGENT, "saHpiAreaTable_duplicate_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         saHpiAreaTable_context * dup;
 
-        if (!row_ctx)
+        if (!row_ctx) {
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
+        }
 
         dup = SNMP_MALLOC_TYPEDEF(saHpiAreaTable_context);
-        if (!dup)
+        if (!dup) {
+                subagent_unlock(&hpi_lock_data);
                 return NULL;
+        }
 
         if (saHpiAreaTable_row_copy(dup,row_ctx)) {
                 free(dup);
                 dup = NULL;
         }
 
+        subagent_unlock(&hpi_lock_data);
         return dup;
 }
 
@@ -963,6 +980,7 @@ netsnmp_index * saHpiAreaTable_delete_row( saHpiAreaTable_context * ctx )
         /* netsnmp_mutex_destroy(ctx->lock); */
 
         DEBUGMSGTL ((AGENT, "saHpiAreaTable_delete_row, called\n"));
+        subagent_lock(&hpi_lock_data);
 
         if (ctx->index.oids)
                 free(ctx->index.oids);
@@ -975,6 +993,7 @@ netsnmp_index * saHpiAreaTable_delete_row( saHpiAreaTable_context * ctx )
          * release header
          */
         free( ctx );
+        subagent_unlock(&hpi_lock_data);
 
         return NULL;
 }
