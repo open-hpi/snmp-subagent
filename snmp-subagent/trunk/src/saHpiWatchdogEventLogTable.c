@@ -533,6 +533,8 @@ static int saHpiWatchdogEventLogTable_row_copy(saHpiWatchdogEventLogTable_contex
     if(!dst||!src)
         return 1;
         
+    subagent_lock(&hpi_lock_data);
+
     /*
      * copy index, if provided
      */
@@ -541,6 +543,7 @@ static int saHpiWatchdogEventLogTable_row_copy(saHpiWatchdogEventLogTable_contex
     if(snmp_clone_mem( (void*)&dst->index.oids, src->index.oids,
                            src->index.len * sizeof(oid) )) {
         dst->index.oids = NULL;
+        subagent_unlock(&hpi_lock_data);
         return 1;
     }
     dst->index.len = src->index.len;
@@ -562,6 +565,7 @@ static int saHpiWatchdogEventLogTable_row_copy(saHpiWatchdogEventLogTable_contex
 
     dst->saHpiWatchdogEventLogUse = src->saHpiWatchdogEventLogUse;
 
+    subagent_unlock(&hpi_lock_data);
     return 0;
 }
 
@@ -594,6 +598,8 @@ saHpiWatchdogEventLogTable_extract_index( saHpiWatchdogEventLogTable_context * c
 
         DEBUGMSGTL ((AGENT, "saHpiWatchdogEventLogTable_extract_index, called\n"));
 
+        subagent_lock(&hpi_lock_data);
+
         /*
          * copy index, if provided
          */
@@ -601,6 +607,7 @@ saHpiWatchdogEventLogTable_extract_index( saHpiWatchdogEventLogTable_context * c
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
+                        subagent_unlock(&hpi_lock_data);
                         return -1;
                 }
                 ctx->index.len = hdr->len;
@@ -668,6 +675,7 @@ saHpiWatchdogEventLogTable_extract_index( saHpiWatchdogEventLogTable_context * c
          */
         snmp_reset_var_buffers( &var_saHpiDomainId );
 
+        subagent_unlock(&hpi_lock_data);
         return err;
 }
 
@@ -762,6 +770,7 @@ saHpiWatchdogEventLogTable_create_row( netsnmp_index* hdr)
     if(!ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
         
     /*
      * TODO: check indexes, if necessary.
@@ -769,6 +778,7 @@ saHpiWatchdogEventLogTable_create_row( netsnmp_index* hdr)
     if(saHpiWatchdogEventLogTable_extract_index( ctx, hdr )) {
         free(ctx->index.oids);
         free(ctx);
+        subagent_unlock(&hpi_lock_data);
         return NULL;
     }
 
@@ -785,6 +795,8 @@ saHpiWatchdogEventLogTable_create_row( netsnmp_index* hdr)
     */
     watchdog_event_log_entry_count_total++;
 
+    subagent_unlock(&hpi_lock_data);
+
     return ctx;
 }
 #endif
@@ -800,15 +812,21 @@ saHpiWatchdogEventLogTable_duplicate_row( saHpiWatchdogEventLogTable_context * r
     if(!row_ctx)
         return NULL;
 
+    subagent_lock(&hpi_lock_data);
+
     dup = SNMP_MALLOC_TYPEDEF(saHpiWatchdogEventLogTable_context);
-    if(!dup)
-        return NULL;
+    if(!dup) {
+            subagent_unlock(&hpi_lock_data);
+            return NULL;
+    }
+
         
     if(saHpiWatchdogEventLogTable_row_copy(dup,row_ctx)) {
         free(dup);
         dup = NULL;
     }
 
+    subagent_unlock(&hpi_lock_data);
     return dup;
 }
 
@@ -818,6 +836,8 @@ saHpiWatchdogEventLogTable_duplicate_row( saHpiWatchdogEventLogTable_context * r
 netsnmp_index * saHpiWatchdogEventLogTable_delete_row( saHpiWatchdogEventLogTable_context * ctx )
 {
   /* netsnmp_mutex_destroy(ctx->lock); */
+
+        subagent_lock(&hpi_lock_data);
 
     if(ctx->index.oids)
         free(ctx->index.oids);
@@ -833,6 +853,7 @@ netsnmp_index * saHpiWatchdogEventLogTable_delete_row( saHpiWatchdogEventLogTabl
 
     watchdog_event_log_entry_count_total++;
 
+    subagent_unlock(&hpi_lock_data);
     return NULL;
 }
 

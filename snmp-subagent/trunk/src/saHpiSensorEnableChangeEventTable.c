@@ -884,8 +884,8 @@ saHpiSensorEnableChangeEventTable_extract_index( saHpiSensorEnableChangeEventTab
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
-                        return -1;
                         subagent_unlock(&hpi_lock_data);
+                        return -1;
                 }
                 ctx->index.len = hdr->len;
         }
