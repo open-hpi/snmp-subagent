@@ -1,0 +1,1 @@
+snmpd -c /root/snmpd.conf -C -L -V -f -D
