@@ -79,7 +79,10 @@ do_alarm (unsigned int clientreg, void *clientarg)
 	
 	
 	while(rv == SA_OK) {
-                DEBUGMSGTL ((AGENT, "sessionid [%d]\n", get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID)));
+               
+	        subagent_lock(&hpi_lock_data);
+	       
+	        DEBUGMSGTL ((AGENT, "sessionid [%d]\n", get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID)));
                 DEBUGMSGTL ((AGENT, "Polling mechanism found an event\n"));
                 snmp_log (LOG_INFO, "Polling mechanism found an event \n");
 
@@ -120,6 +123,9 @@ do_alarm (unsigned int clientreg, void *clientarg)
                 default:
                         break;
                 }
+		
+		
+		subagent_unlock(&hpi_lock_data);
 		
 		rv = saHpiEventGet (sessionid,
                             SAHPI_TIMEOUT_IMMEDIATE,
