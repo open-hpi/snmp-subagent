@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+export LD_LIBRARY_PATH=/usr/local/lib/openhpi;
+export OPENHPI_THREADED=YES; 
+snmpd -c /root/snmpd.conf -C -L -V -f -Dagentx;

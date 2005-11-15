@@ -1034,6 +1034,8 @@ netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
    subagent_lock(&hpi_lock_data);  
   /* netsnmp_mutex_destroy(ctx->lock); */
 
+        subagent_lock(&hpi_lock_data);  
+
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -1046,7 +1048,7 @@ netsnmp_index * saHpiRdrTable_delete_row( saHpiRdrTable_context * ctx )
      */
     free( ctx );
 
-	subagent_unlock(&hpi_lock_data);
+        subagent_unlock(&hpi_lock_data);
 
     return NULL;
 }
