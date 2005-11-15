@@ -83,20 +83,20 @@ RUNNING
 
    After these step you should have no trouble browsing the HPI MIB:
 
-   $snmpwalk -v2c -c public localhost HPI:MIB hpiB0101
-   HPI-MIB::saHpiRdrIsFru.1.2.false.131076 2
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.65541 HPI-MIB::saHpiCtrlDigitalNum.4294967295.1.false.0
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.65543 HPI-MIB::saHpiCtrlDigitalNum.4294967295.1.false.1
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.131073 HPI-MIB::saHpiSensorNum.4294967295.1.false.1
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.131075 HPI-MIB::saHpiSensorNum.4294967295.1.false.3
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.196614 HPI-MIB::saHpiInventoryPersistent.4294967295.1.false.6
-   HPI-MIB::saHpiRdrRowPointer.1.1.false.196616 HPI-MIB::saHpiInventoryPersistent.4294967295.1.false.8
-   HPI-MIB::saHpiRdrRowPointer.1.2.false.131074 HPI-MIB::saHpiSensorNum.4294967295.2.false.2
-   HPI-MIB::saHpiRdrRowPointer.1.2.false.131076 HPI-MIB::saHpiSensorNum.4294967295.2.false.4
-   HPI-MIB::saHpiRdrRPT.1.1.false.65541 HPI-MIB::saHpiResourceId.1.1.false
-   HPI-MIB::saHpiRdrRPT.1.1.false.65543 HPI-MIB::saHpiResourceId.1.1.false
-   HPI-MIB::saHpiRdrRPT.1.1.false.131073 HPI-MIB::saHpiResourceId.1.1.false
-   HPI-MIB::saHpiRdrRPT.1.1.false.131075 HPI-MIB::saHpiResourceId.1.1.false
+   $snmpwalk -v2c -c public localhost HPI-B0101-MIB::hpiB0101
+
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisIsWritable.1.1.false.11 = INTEGER: false(2)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisIsWritable.1.1.false.12 = INTEGER: false(2)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisIsWritable.1.1.false.13 = INTEGER: false(2)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.6 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.7 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.8 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.9 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.10 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.11 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.12 = INTEGER: float64(3)
+HPI-B0101-MIB::saHpiSensorThdNegHysteresisType.1.1.false.13 = INTEGER: float64(3)
+
    .....
 
 6). If you want to receive traps make sure you are running a SNMP trap daemon
