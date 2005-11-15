@@ -1,0 +1,84 @@
+
+0) install net-snmp package. Make sure its version 5.x, not 4.x
+1)Login as root.
+2). Put the attached 'snmpd.conf' in /root
+3). Run the SNMP daemon:
+		./start_daemon
+
+			or
+
+		 snmpd -c /root/snmpd.conf -L -V -f
+
+  (-L print all messages to stderr,
+   -V dump SNMP transactions
+   -f Don't fork)
+
+4). In a different terminal run my subagent (as root)
+		./start_subagent
+
+			or
+
+		 ./hpiSubagent.
+		 You should see a whole bunch of debug messages, like:
+
+Starting $Id$
+hpiSubagent: Hpi Version 131329 Implemented.
+ threaded.c:168:oh_threaded_init: Attempting to init event
+ threaded.c:170:oh_threaded_init: Initializing thread support
+ threaded.c:53:oh_event_init: Setting up event processing queue
+ threaded.c:56:oh_event_init: Set up processing queue
+ config.c:645:oh_load_config: Done processing conf file.
+Number of parse errors:0
+ init.c:84:oh_initialize: Initialized UID.
+ init.c:88:oh_initialize: Initialized handler table
+ init.c:92:oh_initialize: Initialized domain table
+ init.c:102:oh_initialize: Created first domain
+
+
+Just ignore them.
+
+5). Copy the 'HPI-B0101-MIB.mib' file in /usr/share/snmp/mibs
+6). set environment variable:
+		 export MIBS=all
+
+		 (you need this to make the 'snmpwalk' command aware to load ALL the mibs - 
+not just the default ones)
+
+7). "walk" the hpi tree:
+
+		 'snmpwalk -v2c -c public localhost HPI-B0101-MIB::hpiB0101'
+
+
+8). To get a specific value:
+		 'snmpget -v2c -c public localhost HPI-B0101-MIB::saHpiRdrEntityPath.2.0.sensorRdr'
+		 You will get:
+HPI-B0101-MIB::saHpiRdrEntityPath.2.0.sensorRdr = STRING: "{POWER_SUPPLY,1}"
+
+9). To set (write) to a specfic value:
+
+		 'snmpset -v2c -c public localhost HPI-B0101-MIB::saHpiEventDelete.0.1.0 = 6'
+
+		 You will get:
+
+HPI-B0101-MIB::saHpiEventDelete.0.1.0 = INTEGER: destroy(6)
+
+		 and if you walk the 'events' tree you will see one less row:
+		 'snmpwalk -v2c -c public localhost events'
+
+10). Better SNMP applications - mbrowse. - shows you the tree of the MIB. Look 
+in experimental, then 90. Make sure you have 'MIBS=ALL' defined before 
+starting application. I'm attaching the src code.
+
+
+Examples:
+
+snmpset:
+snmpset -v2c -c public localhost HPI-B0101-MIB::saHpiDomainTag.1 s H
+
+snmpget:
+snmpget -v2c -c public localhost HPI-B0101-MIB::saHpiDomainInfoEntryCount.0
+HPI-B0101-MIB::saHpiDomainInfoEntryCount.0 1
+
+snmpwalk:
+snmpwalk -v2c -c public localhost HPI-B0101-MIB::saHpiDomainInfoTable
+
