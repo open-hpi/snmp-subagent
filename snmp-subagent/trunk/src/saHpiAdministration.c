@@ -143,9 +143,11 @@ handle_saHpiDiscover(netsnmp_mib_handler *handler,
         switch(reqinfo->mode) {
 
         case MODE_GET:
-                snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
+                subagent_lock(&hpi_lock_data);
+	        snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
         			        (u_char *) &administration_discover,
         			        sizeof(administration_discover));
+		subagent_unlock(&hpi_lock_data);			
                 break;
 
         case MODE_SET_RESERVE1:

@@ -75,7 +75,8 @@ static gpointer event_thread_loop(gpointer data)
 	
 		memset(&event, 0, sizeof(event));
                 DEBUGMSGTL ((AGENT, "event_thread_loop started ---- sessionid [%d]\n", sessionid));
-                rv = saHpiEventGet (get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
+                    
+		rv = saHpiEventGet (get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID),
                                     timeout,
                                     &event,
                                     &rdr,
@@ -84,7 +85,9 @@ static gpointer event_thread_loop(gpointer data)
 
                 DEBUGMSGTL ((AGENT, "rv [%s]\n", oh_lookup_error(rv)));
 
-                counter++;
+                subagent_lock(&hpi_lock_data);
+		
+		counter++;
 
                 /* serialize access */
 
@@ -94,6 +97,8 @@ static gpointer event_thread_loop(gpointer data)
                                      oh_lookup_eventtype(event.EventType)));
                	 	oh_print_event(&event, 0);
                 	
+			
+			
 			switch (event.EventType) {
                 		case SAHPI_ET_RESOURCE:
                         		DEBUGMSGTL ((AGENT, "SAHPI_ET_RESOURCE, [%s]\n",
@@ -131,31 +136,38 @@ static gpointer event_thread_loop(gpointer data)
 
                 	rv = async_event_add(sessionid, &event, &rdr, &rpt_entry);
 						
-
+			
 		} // NEW
                 /* serialize access */
 		
 		// Now check for updates to the event logs
+		
 		rv = event_log_info_update(sessionid);
+		
 		
 		while (rediscover_count > 0) {
 			
 			repopulate_tables(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
-			subagent_lock(&hpi_lock_data);
+			
 			rediscover_count--;
 			administration_discover = MIB_FALSE;
-			subagent_unlock(&hpi_lock_data);
+			
 			
 		
 		}
 
 		
 		if (counter == 30) { //check for new announcements every minute.
-              		update_announcements(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
+              		
+			update_announcements(get_session_id(SAHPI_UNSPECIFIED_DOMAIN_ID));
 			counter = 0;
+			
 		}
 
-        }
+        
+		subagent_unlock(&hpi_lock_data);
+	
+	}
         g_thread_exit(0);
         return data;
 }
