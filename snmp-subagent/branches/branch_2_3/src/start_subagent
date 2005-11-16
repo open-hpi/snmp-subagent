@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-export LD_LIBRARY_PATH=/usr/local/lib/openhpi;
-export OPENHPI_THREADED=YES; 
-./hpiSubagent;
