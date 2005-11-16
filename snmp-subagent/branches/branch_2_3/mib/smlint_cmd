@@ -1,0 +1,1 @@
+smilint -p /usr/share/snmp/mibs/SNMPv2-SMI.txt -p /usr/share/snmp/mibs/SNMPv2-TC.txt -p /usr/share/snmp/mibs/SNMPv2-CONF.txt -p /usr/share/snmp/mibs/SAF-TC-MIB.mib hpi-mib.mib
