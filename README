@@ -57,10 +57,12 @@ RUNNING
    "master  agentx"
 
 3. Start the NetSNMP daemon. (usually /etc/init.d/snmpd on various Linux distros).
+	note: see 'howto' file for further detail.
 
 4. Start the hpiSubagent. (either use the runtime script: /etc/init.d/openhpi-subagent,
    or just run it from the terminal).  You should see something similar in the
    syslog log file - /var/log/messages:
+	note: see 'howto' file for further detail.
 
    ...
    Feb  6 10:53:37 konrad hpiSubagent[9890]: Not sending events during startup.
@@ -75,11 +77,11 @@ RUNNING
    $export MIBS=ALL
   
    And set the MIBDIRS enviroment variable to point to the the directory where the 
-   OpenHPI MIB file is located (usr/share/doc/openhpi-subagent-0.2/mib) or
+   OpenHPI MIB file is located (openhpi-subagent/mibs) or
    copy the MIB file in to the NetSNMP MIB default directory (usually 
    /usr/share/snmp/mibs). To set the MIBDIRS, refer to 'man snmpcmd' or:
 
-   $export MIBDIRS=+/usr/share/doc/openhpi-subagent-0.2/mibs
+   $export MIBDIRS=+~/openhpi-subagent/mib
 
    After these step you should have no trouble browsing the HPI MIB:
 
@@ -138,14 +140,11 @@ Also visit SAForum's website at http://www.saforum.org
 ---------------------------------------------------------
 BUGS
 ---------------------------------------------------------
-Branch 2.0.4 of openhpi does not completely discover all
-Inventory Area's.
+See 'Openhpi' project' located on SourceForge for the 
+latest bug list.  
 
-Presently compilation results in 'warnings'.
+Presently only single domain/session(s) is supported.
 
-The conversion of some enumerations to string representations
-results in the truncation of the strings.  This is not the
-case when using openhpi 'HEAD'.
 
 ---------------------------------------------------------
 DEFINES
