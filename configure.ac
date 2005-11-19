@@ -142,7 +142,6 @@ CC_WARNINGS="-Wall -Wmissing-prototypes \
 	-Werror \
 #	-fprofile-arcs -ftest-coverage \
 	-Wcast-qual -Wcast-align "
-#	-Werror"
 
 CFLAGS="$CFLAGS $GLIB_CFLAGS $SNMPFLAGS $HPI_FLAGS $HPIUTILS_FLAGS $CC_WARNINGS"
 if test "x$THREAD_SAFE" = "xyes" ; then
