@@ -585,8 +585,9 @@ saHpiResourceEventTable_extract_index( saHpiResourceEventTable_context * ctx, ne
                 netsnmp_assert(ctx->index.oids == NULL);
                 if (snmp_clone_mem( (void*)&ctx->index.oids, hdr->oids,
                                     hdr->len * sizeof(oid) )) {
-                        return -1;
                         subagent_unlock(&hpi_lock_data);
+			return -1;
+                        
                 }
                 ctx->index.len = hdr->len;
         }
@@ -822,6 +823,9 @@ netsnmp_index * saHpiResourceEventTable_delete_row( saHpiResourceEventTable_cont
 
         DEBUGMSGTL ((AGENT, "saHpiResourceEventTable_delete_row, called\n"));
 
+    subagent_lock(&hpi_lock_data);
+    
+    
     if(ctx->index.oids)
         free(ctx->index.oids);
 
@@ -836,6 +840,8 @@ netsnmp_index * saHpiResourceEventTable_delete_row( saHpiResourceEventTable_cont
 
     resource_event_entry_count_total++;
 
+    
+    subagent_unlock(&hpi_lock_data);
     return NULL;
 }
 
