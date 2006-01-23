@@ -390,7 +390,7 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
 	if (rc != SA_OK) {
 		snmp_log (LOG_ERR,
 			  "Call to event_log_info_time_set"
-                          " failed to set timeout [%d] rc: %s.\n",
+                          " failed to set timeout [%lld] rc: %s.\n",
                           time, 
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,

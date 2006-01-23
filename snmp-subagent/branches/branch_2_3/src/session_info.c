@@ -496,19 +496,19 @@ int set_sensor_reading_value(SaHpiSensorReadingT *reading,
 	switch (reading->Type) {
 	case SAHPI_SENSOR_READING_TYPE_INT64:
 		
-		sprintf((char *)saHpiCurrentSensorStateValue, "%lld", reading->Value.SensorInt64);
+		snprintf((char *)saHpiCurrentSensorStateValue, sizeof(saHpiCurrentSensorStateValue), "%lld", reading->Value.SensorInt64);
 
 		return sizeof(SaHpiInt64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		
-		sprintf((char *)saHpiCurrentSensorStateValue, "%llu", reading->Value.SensorUint64);
+		snprintf((char *)saHpiCurrentSensorStateValue, sizeof(saHpiCurrentSensorStateValue), "%llu", reading->Value.SensorUint64);
 
 		return sizeof(SaHpiUint64T);
 		break;
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 
-		sprintf((char *)saHpiCurrentSensorStateValue, "%g", reading->Value.SensorFloat64);
+		snprintf((char *)saHpiCurrentSensorStateValue, sizeof(saHpiCurrentSensorStateValue), "%g", reading->Value.SensorFloat64);
 		
 		return sizeof(SaHpiFloat64T);
 		break;
@@ -546,24 +546,24 @@ SaErrorT set_sen_thd_value(SaHpiSensorReadingUnionT *value,
 		if (val_len > sizeof(SaHpiInt64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 		
-		sprintf((char *)val, "%lld", value->SensorInt64);
-		sprintf((char *)val, "%s",   val);				
+		snprintf((char *)val, sizeof(val), "%lld", value->SensorInt64);
+		snprintf((char *)val, sizeof(val), "%s",   val);				
 		break;
 			
 	case SAHPI_SENSOR_READING_TYPE_UINT64:
 		if (val_len > sizeof(SaHpiUint64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 							
-		sprintf((char *)val, "%llu", value->SensorUint64);
-		sprintf((char *)val, "%s",   val);	
+		snprintf((char *)val, sizeof(val), "%llu", value->SensorUint64);
+		snprintf((char *)val, sizeof(val), "%s",   val);	
 		break;
 		
 	case SAHPI_SENSOR_READING_TYPE_FLOAT64:
 		if (val_len > sizeof(SaHpiFloat64T)) 
 			return SA_ERR_HPI_INVALID_DATA;
 			
-		sprintf((char *)val, "%g",  value->SensorFloat64);
-		sprintf((char *)val, "%s",  val);					
+		snprintf((char *)val, sizeof(val), "%g",  value->SensorFloat64);
+		snprintf((char *)val, sizeof(val), "%s",  val);					
 		break;	
 		
 	case SAHPI_SENSOR_READING_TYPE_BUFFER:
