@@ -54,7 +54,7 @@ AC_DEFUN([OH_CHECK_NETSNMP],
     ],
     [
         have_netsnmp=yes
-        SNMPFLAGS=`net-snmp-config --cflags`
+	SNMPFLAGS=`net-snmp-config --cflags | sed -e 's/-Wdeclaration-after-statement//g'`	
         SNMPALIBS=`net-snmp-config --agent-libs`
 	SNMPVERSIONOK=`net-snmp-config --version | awk -F\. '{ \
 			if ( $[1] >= 5 ) { \
