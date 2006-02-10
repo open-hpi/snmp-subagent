@@ -395,7 +395,7 @@ int event_log_info_time_set (saHpiEventLogInfoTable_context *row_ctx)
 			  oh_lookup_error(rc));
 		DEBUGMSGTL ((AGENT,
 			   "Call to event_log_info_time_set"
-                           " failed to set timeout [%d] rc: %s.\n",
+                           " failed to set timeout [%lld] rc: %s.\n",
                            time, 
 			   oh_lookup_error(rc)));
 		return get_snmp_error(rc);
@@ -1332,7 +1332,8 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
             /** SafUnsigned64 = ASN_OCTET_STR */
-            assign_timeout(var, row_ctx->saHpiEventLogInfoTime);
+     
+            memcpy(row_ctx->saHpiEventLogInfoTime, var->val.string, var->val_len);
             row_ctx->saHpiEventLogInfoTime_len = var->val_len;
             row_err = event_log_info_time_set(row_ctx);
 
