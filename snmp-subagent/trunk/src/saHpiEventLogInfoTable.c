@@ -1332,7 +1332,7 @@ void saHpiEventLogInfoTable_set_action( netsnmp_request_group *rg )
 
         case COLUMN_SAHPIEVENTLOGINFOTIME:
             /** SafUnsigned64 = ASN_OCTET_STR */
-            assign_timeout(var, row_ctx->saHpiEventLogInfoTime);
+            memcpy(row_ctx->saHpiEventLogInfoTime, var->val.string, var->val_len);
             row_ctx->saHpiEventLogInfoTime_len = var->val_len;
             row_err = event_log_info_time_set(row_ctx);
 
