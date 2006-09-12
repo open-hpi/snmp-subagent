@@ -1,0 +1,83 @@
+SAF-TC-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+        MODULE-IDENTITY  FROM SNMPv2-SMI;
+
+safTCMIB MODULE-IDENTITY
+         LAST-UPDATED "200511081200Z"
+         ORGANIZATION "Service Availability Forum "
+         CONTACT-INFO  "
+
+         Service Availability Forum 
+     Systems Management Working Group
+
+     5440 SW Westgate Drive, Suite 217
+     Portland, OR 97221
+     Phone: (503) 291-2576
+     Fax: (503) 297-1090
+
+         e-mail: snmp@saforum.org
+                "
+             
+          DESCRIPTION " 
+         Definition of Textual Conventions for 
+         Service Availability Forum (TM)
+         specified SNMP MIBS Copyright(c) 2004, 2005
+         Service Availability Forum (TM)  
+         All Rights reserved
+         VERSION 8.3 Nov 08, 2005
+
+         These textual conventions are subject to modification by
+         the Service Availability Forum (TM) as related SAF
+         specifications require.
+                "
+         REVISION "200511081200Z"
+	 DESCRIPTION " Consolidated Release Version 8.3."
+
+          ::= { 1 3 6 1 4 1 18568 1 10 }
+
+-- **********************************************************
+--  SAF ENTERPRISE NAMESPACE TAXONOMY
+-- **********************************************************
+-- Decimal      Name                    Description          
+-- **********************************************************
+-- 0            reserved                reserved             
+-- 1            experimental            experimental MIB
+-- 2            draft                   SAF draft MIB
+-- 3            published               SAF published MIB
+-- **********************************************************
+org             OBJECT IDENTIFIER ::= { iso 3 }
+dod             OBJECT IDENTIFIER ::= { org 6 }
+internet        OBJECT IDENTIFIER ::= { dod 1 }
+private         OBJECT IDENTIFIER ::= { internet 4 }
+enterprises     OBJECT IDENTIFIER ::= { private 1 }
+saforum         OBJECT IDENTIFIER ::= { enterprises 18568 }
+
+experimental    OBJECT IDENTIFIER ::= { saforum 1 }
+draft           OBJECT IDENTIFIER ::= { saforum 2 }
+published       OBJECT IDENTIFIER ::= { saforum 3 }
+-- *********************************************************
+-- SubGroup Assignments : Experimental
+-- *********************************************************
+hpiE            OBJECT IDENTIFIER ::= { experimental 1 }
+aisE            OBJECT IDENTIFIER ::= { experimental 2 }
+applicationE    OBJECT IDENTIFIER ::= { experimental 3 }
+-- *********************************************************
+-- SubGroup Assignments : Draft
+-- *********************************************************
+hpiD            OBJECT IDENTIFIER ::= { draft 1 }
+aisD            OBJECT IDENTIFIER ::= { draft 2 }
+applicationD    OBJECT IDENTIFIER ::= { draft 3 }
+-- *********************************************************
+-- SubGroup Assignments : Published
+-- *********************************************************
+hpi             OBJECT IDENTIFIER ::= { published 1 }
+ais             OBJECT IDENTIFIER ::= { published 2 }
+application     OBJECT IDENTIFIER ::= { published 3 }
+
+-- *********************************************************
+-- SAF DEFINED Application Experimental Assignments
+-- *********************************************************
+openhpi         OBJECT IDENTIFIER ::= { hpiE 1 } 
+
+END
