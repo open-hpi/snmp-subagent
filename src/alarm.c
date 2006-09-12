@@ -90,7 +90,7 @@ do_alarm (unsigned int clientreg, void *clientarg)
                 snmp_log (LOG_INFO, "returned from saHpiEventGet\n");
                 DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
                              oh_lookup_eventtype(event.EventType)));
-                oh_print_event(&event, 0);
+                oh_print_event(&event, 0, 0);
 
                 switch (event.EventType) {
                 case SAHPI_ET_RESOURCE:

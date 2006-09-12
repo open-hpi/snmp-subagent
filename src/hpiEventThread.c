@@ -95,7 +95,7 @@ static gpointer event_thread_loop(gpointer data)
 		
 		 	DEBUGMSGTL ((AGENT, "Event Type [%s]\n", 
                                      oh_lookup_eventtype(event.EventType)));
-               	 	oh_print_event(&event, 0);
+               	 	oh_print_event(&event, 0, 0);
                 	
 			
 			
