@@ -18,7 +18,7 @@ IMPORTS
         hpiD                    FROM SAF-TC-MIB;
 
 hpiB0101 MODULE-IDENTITY
-    LAST-UPDATED "200511041200Z"  -- November 4, 2005
+    LAST-UPDATED "200511101200Z"  -- November 10, 2005
     ORGANIZATION "Service Availability Forum Systems Management WG"
     CONTACT-INFO "
             Service Availability Forum 
@@ -68,7 +68,7 @@ hpiB0101 MODULE-IDENTITY
                         
                 "
         DESCRIPTION
-                "HPI MIB for SAF-HPI B-02-01.
+                "HPI MIB for SAF-HPI B-01-01.
 
                 When using this MIB it is strongly recommended to use
                 the SNMPv3 protocol due to security concerns.
@@ -115,7 +115,7 @@ hpiB0101 MODULE-IDENTITY
 
                 The inventory control defines variables for reading
                 inventory resources and changing the settings."
-        REVISION "200511041200Z"
+        REVISION "200511101200Z"
         DESCRIPTION
                 "Initial revision of this module."
         ::= { hpiD 1}
@@ -3109,14 +3109,14 @@ saHpiEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
+                each time an event is registered in this table.  It is also 
+               incremented whenever an event is removed or the entire table
+               is cleared.
 
                 'saHpiEventLifetimeChanges' represents the sum of all
                 events of all supported types that have occur in the
                 system.  
-				  
+      
                 Note saHpiDomainEventLifetimeChanges represents the subset
                 of events that are Domain events.  The same relationship
                 exists for ResourceEvent, SensorEvent,
@@ -3258,11 +3258,11 @@ saHpiResourceEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-		
-		The number of events registered in this table
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+  
+                The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted this count
                 is reset.  Use this node to determine table activity.
@@ -3367,11 +3367,11 @@ saHpiDomainEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-		
-		The number of events registered in this table
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+  
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
                 Use this node to determine table activity.
@@ -3469,10 +3469,10 @@ saHpiSensorEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -3734,11 +3734,11 @@ saHpiSensorEnableChangeEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-		
-		The number of events registered in this table
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+  
+                The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
                 Use this node to determine table activity.
@@ -3905,10 +3905,10 @@ saHpiHotSwapEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -4011,10 +4011,10 @@ saHpiWatchdogEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
@@ -4148,10 +4148,10 @@ saHpiSoftwareEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -4302,10 +4302,10 @@ saHpiOemEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+               each time an event is registered in this table.  It is also 
+               incremented whenever an event is removed or the entire table
+               is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -4428,10 +4428,10 @@ saHpiUserEventLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
@@ -4553,14 +4553,14 @@ saHpiUserEventRowStatus OBJECT-TYPE
                   to the Domain Alarm Table; The effect of creating a new 
                   row will also be reflected in the DAT - with a new 
                   row there.
-		  
+    
                 - `destroy(6)', which is supplied by a management station
                   wishing to delete all of the instances associated with
                   an existing conceptual row. This function allows the 
                   HPI MIB User to delete an User Event. Note a deletion of 
-		  a row that is already in the 'active(1)' state is prohibited.
-		  HPI does not support deleting existing events.  A row can only
-		  be deleted if its RowStatus value is 'createAndGo(4)'.
+                  a row that is already in the 'active(1)' state is prohibited.
+                  HPI does not support deleting existing events.  A row can only
+                  be deleted if its RowStatus value is 'createAndGo(4)'.
                   
                   Developers Note:
                   
@@ -4866,7 +4866,6 @@ saHpiAnnouncementDelete OBJECT-TYPE
 --/************************************************************************
 -- * **********************************************************************
 -- * ********** ********** ********** Event Log ********** **********
--- * **********
 -- * **********************************************************************
 -- * **********************************************************************/
 -- *********************************
@@ -5228,10 +5227,10 @@ saHpiResourceEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+               incremented whenever an event is removed or the entire table
+               is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table.
                 If the underlying management system is restarted
@@ -5341,10 +5340,10 @@ saHpiDomainEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
@@ -5446,10 +5445,10 @@ saHpiSensorEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted this
@@ -5700,10 +5699,10 @@ saHpiSensorEnableChangeEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                 each time an event is registered in this table.  It is also 
+                 incremented whenever an event is removed or the entire table
+                 is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -5861,10 +5860,10 @@ saHpiHotSwapEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -5956,10 +5955,10 @@ saHpiWatchdogEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the
                 underlying management system is restarted
@@ -6085,10 +6084,10 @@ saHpiSoftwareEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset.
@@ -6229,10 +6228,10 @@ saHpiOemEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table. If the underlying
                 management system is restarted this count is reset. 
@@ -6345,10 +6344,10 @@ saHpiUserEventLogLifetimeChanges OBJECT-TYPE
         STATUS current
         DESCRIPTION
                 "Use this value to determine table activity.  It is incremented 
-		each time an event is registered in this table.  It is also 
-		incremented whenever an event is removed or the entire table
-		is cleared.
-			
+                each time an event is registered in this table.  It is also 
+                incremented whenever an event is removed or the entire table
+                is cleared.
+   
                 The number of events registered in this table
                 over the lifetime of the table.
                 If the underlying management system is restarted
@@ -6865,27 +6864,27 @@ saHpiCtrlDigitalState OBJECT-TYPE
                 (errors above the value 6 are SNMPv2 or v3 protocol
                 and are converted to genErr(1) for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"
+                  SA_ERR_HPI_ERROR               genErr(5)           
+                  SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                  SA_ERR_HPI_BUSY                genErr(5)           
+                  SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                  SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                  SA_ERR_HPI_TIMEOUT             genErr(5)           
+                  SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                  SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                  SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                  SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                  SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                  SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                  SA_ERR_HPI_DUPLICATE           genErr(5)           
+                  SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                  SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                  SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                  SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                  SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                  SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                  SA_ERR_HPI_CAPABILITY          genErr(5)           
+                  SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and
                   8.8 from SAI-HPI-B.01.01 specification."
@@ -7111,27 +7110,27 @@ saHpiCtrlDiscreteState OBJECT-TYPE
             are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
             protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"
+                 SA_ERR_HPI_ERROR               genErr(5)           
+                 SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                 SA_ERR_HPI_BUSY                genErr(5)           
+                 SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                 SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                 SA_ERR_HPI_TIMEOUT             genErr(5)           
+                 SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                 SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                 SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                 SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                 SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                 SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                 SA_ERR_HPI_DUPLICATE           genErr(5)           
+                 SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                 SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                 SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                 SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                 SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                 SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                 SA_ERR_HPI_CAPABILITY          genErr(5)           
+                 SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7387,27 +7386,27 @@ saHpiCtrlAnalogState OBJECT-TYPE
              are SNMPv2 or v3 protocol and are converted to genErr(1) for v1
              protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"
+                SA_ERR_HPI_ERROR               genErr(5)           
+                SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                SA_ERR_HPI_BUSY                genErr(5)           
+                SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                SA_ERR_HPI_TIMEOUT             genErr(5)           
+                SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                SA_ERR_HPI_DUPLICATE           genErr(5)           
+                SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                SA_ERR_HPI_CAPABILITY          genErr(5)           
+                SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7648,27 +7647,27 @@ saHpiCtrlStreamRepeat OBJECT-TYPE
                 the value 6 are SNMPv2 or v3 protocol and are
                 converted to genErr(1) for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION  *  genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"
+                 SA_ERR_HPI_ERROR               genErr(5)           
+                 SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                 SA_ERR_HPI_BUSY                genErr(5)           
+                 SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                 SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                 SA_ERR_HPI_TIMEOUT             genErr(5)           
+                 SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                 SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                 SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                 SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                 SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                 SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                 SA_ERR_HPI_DUPLICATE           genErr(5)           
+                 SA_ERR_HPI_INVALID_SESSION  *  genErr(5)           
+                 SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                 SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                 SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                 SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                 SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                 SA_ERR_HPI_CAPABILITY          genErr(5)           
+                 SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7688,33 +7687,33 @@ saHpiCtrlStreamState OBJECT-TYPE
                 the Mode is set to manual(2).  If a write is
                 attempted when the mode is set to auto(1), SNMP
                 will return an error-status of inconsistentValue.
-		
+  
               Note that the SNMP errors that are returned are mapped to the
               HPI errors that could be returned (errors above the value 6
               are SNMPv2 or v3 protocol and are converted to genErr(1)
-             for v1 protocol).
+              for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"       
+                SA_ERR_HPI_ERROR               genErr(5)           
+                SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                SA_ERR_HPI_BUSY                genErr(5)           
+                SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                SA_ERR_HPI_TIMEOUT             genErr(5)           
+                SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                SA_ERR_HPI_DUPLICATE           genErr(5)           
+                SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                SA_ERR_HPI_CAPABILITY          genErr(5)           
+                SA_ERR_HPI_UNKNOWN             genErr(5)"       
         REFERENCE
                 "See section 7.3.2, 7.3.3, 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -7856,7 +7855,7 @@ saHpiCtrlTextDefaultMode OBJECT-TYPE
                 controls do not allow the mode to be 
                 changed.  These static-mode controls are indicated
                 with the saHpiCtrlReadOnly flag set as part of the
-               default control mode.
+                default control mode.
                         
                When the mode is set to auto(1), the state input is 
                ignored. Ignored state inputs are not checked by the
@@ -8056,27 +8055,27 @@ saHpiCtrlTextLine OBJECT-TYPE
               are SNMPv2 or v3 protocol and are converted to
               genErr(1) for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"
+                 SA_ERR_HPI_ERROR               genErr(5)           
+                 SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                 SA_ERR_HPI_BUSY                genErr(5)           
+                 SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                 SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                 SA_ERR_HPI_TIMEOUT             genErr(5)           
+                 SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                 SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                 SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                 SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                 SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                 SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                 SA_ERR_HPI_DUPLICATE           genErr(5)           
+                 SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                 SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                 SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                 SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                 SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                 SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                 SA_ERR_HPI_CAPABILITY          genErr(5)           
+                 SA_ERR_HPI_UNKNOWN             genErr(5)"
         REFERENCE
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
                  from SAI-HPI-B.01.01 specification."
@@ -8136,28 +8135,28 @@ saHpiCtrlTextState OBJECT-TYPE
               are SNMPv2 or v3 protocol and are converted to genErr(1)
               for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"       
-		
+                 SA_ERR_HPI_ERROR               genErr(5)           
+                 SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                 SA_ERR_HPI_BUSY                genErr(5)           
+                 SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                 SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                 SA_ERR_HPI_TIMEOUT             genErr(5)           
+                 SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                 SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                 SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                 SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                 SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                 SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                 SA_ERR_HPI_DUPLICATE           genErr(5)           
+                 SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                 SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                 SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                 SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                 SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                 SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                 SA_ERR_HPI_CAPABILITY          genErr(5)           
+                 SA_ERR_HPI_UNKNOWN             genErr(5)"       
+  
         REFERENCE
 
                 "See section 7.3.2, 7.3.3. 8.7 and 8.8
@@ -8425,7 +8424,7 @@ saHpiCtrlOemState OBJECT-TYPE
         DESCRIPTION
                 "This object allows to write to the Oem control state
                 setting.
-		  
+    
                 You may not change the state of the control unless
                 the Mode is set to manual(2).  If a write is
                 attempted when the mode is set to auto(1), SNMP
@@ -8436,27 +8435,27 @@ saHpiCtrlOemState OBJECT-TYPE
                the value 6 are SNMPv2 or v3 protocol and are converted
                to genErr(1) for v1 protocol).
 
-		SA_ERR_HPI_ERROR               genErr(5)           
-		SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
-		SA_ERR_HPI_BUSY                genErr(5)           
-		SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
-		SA_ERR_HPI_INVALID_CMD         genErr(5)           
-		SA_ERR_HPI_TIMEOUT             genErr(5)           
-		SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
-		SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
-		SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
-		SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
-		SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
-		SA_ERR_HPI_NO_RESPONSE         genErr(5)           
-		SA_ERR_HPI_DUPLICATE           genErr(5)           
-		SA_ERR_HPI_INVALID_SESSION     genErr(5)           
-		SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
-		SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
-		SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
-		SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
-		SA_ERR_HPI_READ_ONLY           notWritable(9)      
-		SA_ERR_HPI_CAPABILITY          genErr(5)           
-		SA_ERR_HPI_UNKNOWN             genErr(5)"       
+                 SA_ERR_HPI_ERROR               genErr(5)           
+                 SA_ERR_HPI_UNSUPPORTED_API     genErr(5)           
+                 SA_ERR_HPI_BUSY                genErr(5)           
+                 SA_ERR_HPI_INTERNAL_ERROR      genErr(5)           
+                 SA_ERR_HPI_INVALID_CMD         genErr(5)           
+                 SA_ERR_HPI_TIMEOUT             genErr(5)           
+                 SA_ERR_HPI_OUT_OF_SPACE        genErr(5)           
+                 SA_ERR_HPI_OUT_OF_MEMORY       genErr(5)           
+                 SA_ERR_HPI_INVALID_PARAMS      genErr(5)           
+                 SA_ERR_HPI_INVALID_DATA        wrongValue(10)      
+                 SA_ERR_HPI_NOT_PRESENT         inconsistentName(18)
+                 SA_ERR_HPI_NO_RESPONSE         genErr(5)           
+                 SA_ERR_HPI_DUPLICATE           genErr(5)           
+                 SA_ERR_HPI_INVALID_SESSION     genErr(5)           
+                 SA_ERR_HPI_INVALID_DOMAIN      inconsistentName(18)
+                 SA_ERR_HPI_INVALID_RESOURCE    inconsistentName(18)
+                 SA_ERR_HPI_INVALID_REQUEST     genErr(5)           
+                 SA_ERR_HPI_ENTITY_NOT_PRESENT  inconsistentName(18)
+                 SA_ERR_HPI_READ_ONLY           notWritable(9)      
+                 SA_ERR_HPI_CAPABILITY          genErr(5)           
+                 SA_ERR_HPI_UNKNOWN             genErr(5)"       
                 
         REFERENCE
                 "See section 8.7 and 8.8 from
@@ -11536,8 +11535,8 @@ saHpiCompliance MODULE-COMPLIANCE
                         saHpiFieldGroup,
                         saHpiWatchdogGroup,
                         saHpiAnnunciatorGroup,
-			saHpiNotificationGroup,
-			saHpiAdministrationGroup }
+                        saHpiNotificationGroup,
+                        saHpiAdministrationGroup }
         ::= { hpiCompliances 1 }
 
 saHpiDomainInfoGroup OBJECT-GROUP
