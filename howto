@@ -37,24 +37,25 @@ Number of parse errors:0
 
 Just ignore them.
 
-5). Copy the 'HPI-B0101-MIB.mib' file in /usr/share/snmp/mibs
-6). set environment variable:
+5). Copy the 'SAI-HPI-SNMP-MIB-B.01.01.mib' file in /usr/share/snmp/mibs
+6). Copy the 'SAF-TC-MIB.mib' file in /usr/share/snmp/mibs
+7). set environment variable:
 		 export MIBS=all
 
 		 (you need this to make the 'snmpwalk' command aware to load ALL the mibs - 
 not just the default ones)
 
-7). "walk" the hpi tree:
+8). "walk" the hpi tree:
 
 		 'snmpwalk -v2c -c public localhost HPI-B0101-MIB::hpiB0101'
 
 
-8). To get a specific value:
+9). To get a specific value:
 		 'snmpget -v2c -c public localhost HPI-B0101-MIB::saHpiRdrEntityPath.2.0.sensorRdr'
 		 You will get:
 HPI-B0101-MIB::saHpiRdrEntityPath.2.0.sensorRdr = STRING: "{POWER_SUPPLY,1}"
 
-9). To set (write) to a specfic value:
+10). To set (write) to a specfic value:
 
 		 'snmpset -v2c -c public localhost HPI-B0101-MIB::saHpiEventDelete.0.1.0 = 6'
 
@@ -65,7 +66,7 @@ HPI-B0101-MIB::saHpiEventDelete.0.1.0 = INTEGER: destroy(6)
 		 and if you walk the 'events' tree you will see one less row:
 		 'snmpwalk -v2c -c public localhost events'
 
-10). Better SNMP applications - mbrowse. - shows you the tree of the MIB. Look 
+11). Better SNMP applications - mbrowse. - shows you the tree of the MIB. Look 
 in experimental, then 90. Make sure you have 'MIBS=ALL' defined before 
 starting application. I'm attaching the src code.
 
