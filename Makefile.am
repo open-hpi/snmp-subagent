@@ -51,6 +51,9 @@ SUBDIRS			= src docs
 
 DIST_SUBDIRS = src docs
 
+datadir = $(shell net-snmp-config --prefix)/share/snmp/mibs
+dist_data_DATA = mib/SAI-HPI-SNMP-MIB-B.01.01.mib mib/SAF-TC-MIB.mib
+
 DISTCHECK_CONFIGURE_FLAGS = --with-initdir=prefix
 
 ALLSOURCES = $(shell \
